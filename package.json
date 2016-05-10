@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "$$ANGULAR_VERSION$$",
+  "version": "2.0.0-build.9fbafba",
   "description": "",
   "main": "index.js",
   "jsnext:main": "esm/index.js",
