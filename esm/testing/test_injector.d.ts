@@ -51,9 +51,6 @@ export declare function resetBaseTestProviders(): void;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @param {Array} tokens
- * @param {Function} fn
- * @return {Function}
  */
 export declare function inject(tokens: any[], fn: Function): Function;
 export declare class InjectSetupWrapper {
@@ -81,8 +78,5 @@ export declare function withProviders(providers: () => any): InjectSetupWrapper;
  * })
  * ```
  *
- * @param {Array} tokens
- * @param {Function} fn
- * @return {Function}
  */
 export declare function injectAsync(tokens: any[], fn: Function): Function;

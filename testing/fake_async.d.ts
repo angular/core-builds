@@ -32,7 +32,6 @@ export declare function clearPendingTimers(): void;
  *
  * {@example testing/ts/fake_async.ts region='basic'}
  *
- * @param {number} millis Number of millisecond, defaults to 0
  */
 export declare function tick(millis?: number): void;
 /**

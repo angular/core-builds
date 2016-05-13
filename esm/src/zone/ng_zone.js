@@ -74,10 +74,6 @@ export { NgZoneError } from './ng_zone_impl';
  * ```
  */
 export class NgZone {
-    /**
-     * @param {bool} enableLongStackTrace whether to enable long stack trace. They should only be
-     *               enabled in development mode as they significantly impact perf.
-     */
     constructor({ enableLongStackTrace = false }) {
         this._hasPendingMicrotasks = false;
         this._hasPendingMacrotasks = false;

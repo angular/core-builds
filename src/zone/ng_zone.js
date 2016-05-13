@@ -76,10 +76,6 @@ exports.NgZoneError = ng_zone_impl_2.NgZoneError;
  * ```
  */
 var NgZone = (function () {
-    /**
-     * @param {bool} enableLongStackTrace whether to enable long stack trace. They should only be
-     *               enabled in development mode as they significantly impact perf.
-     */
     function NgZone(_a) {
         var _this = this;
         var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;

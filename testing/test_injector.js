@@ -115,9 +115,6 @@ exports.resetBaseTestProviders = resetBaseTestProviders;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @param {Array} tokens
- * @param {Function} fn
- * @return {Function}
  */
 function inject(tokens, fn) {
     var testInjector = getTestInjector();
@@ -184,9 +181,6 @@ exports.withProviders = withProviders;
  * })
  * ```
  *
- * @param {Array} tokens
- * @param {Function} fn
- * @return {Function}
  */
 function injectAsync(tokens, fn) {
     return async_1.async(inject(tokens, fn));

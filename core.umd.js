@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-c2c6073
+ * @license AngularJS v2.0.0-bac1a6e
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6705,10 +6705,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```
      */
     var NgZone = (function () {
-        /**
-         * @param {bool} enableLongStackTrace whether to enable long stack trace. They should only be
-         *               enabled in development mode as they significantly impact perf.
-         */
         function NgZone(_a) {
             var _this = this;
             var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
