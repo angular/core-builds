@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "2.0.0-db82906",
+  "version": "2.0.0-a01a54c",
   "description": "",
   "main": "index.js",
   "jsnext:main": "esm/index.js",
@@ -10,5 +10,9 @@
   "peerDependencies": {
     "rxjs": "5.0.0-beta.6",
     "zone.js": "^0.6.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/angular/angular.git"
   }
 }
