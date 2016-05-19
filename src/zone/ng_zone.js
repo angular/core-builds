@@ -188,6 +188,14 @@ var NgZone = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(NgZone.prototype, "isStable", {
+        /**
+         * Whether there are no outstanding microtasks or microtasks.
+         */
+        get: function () { return this._isStable; },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(NgZone.prototype, "hasPendingMicrotasks", {
         /**
          * Whether there are any outstanding microtasks.

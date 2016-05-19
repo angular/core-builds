@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-3019140
+ * @license AngularJS v2.0.0-390046d
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -6814,6 +6814,14 @@ var __extends = (this && this.__extends) || function (d, b) {
              * Notify that an error has been delivered.
              */
             get: function () { return this._onErrorEvents; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgZone.prototype, "isStable", {
+            /**
+             * Whether there are no outstanding microtasks or microtasks.
+             */
+            get: function () { return this._isStable; },
             enumerable: true,
             configurable: true
         });

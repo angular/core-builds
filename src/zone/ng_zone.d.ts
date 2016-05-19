@@ -115,6 +115,10 @@ export declare class NgZone {
      */
     onError: EventEmitter<any>;
     /**
+     * Whether there are no outstanding microtasks or microtasks.
+     */
+    isStable: boolean;
+    /**
      * Whether there are any outstanding microtasks.
      */
     hasPendingMicrotasks: boolean;

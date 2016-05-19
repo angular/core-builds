@@ -168,6 +168,10 @@ export class NgZone {
      */
     get onError() { return this._onErrorEvents; }
     /**
+     * Whether there are no outstanding microtasks or microtasks.
+     */
+    get isStable() { return this._isStable; }
+    /**
      * Whether there are any outstanding microtasks.
      */
     get hasPendingMicrotasks() { return this._hasPendingMicrotasks; }
