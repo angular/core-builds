@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-68f9aaf
+ * @license AngularJS v2.0.0-165357b
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2020,9 +2020,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         LifecycleHooks[LifecycleHooks["AfterViewInit"] = 6] = "AfterViewInit";
         LifecycleHooks[LifecycleHooks["AfterViewChecked"] = 7] = "AfterViewChecked";
     })(LifecycleHooks || (LifecycleHooks = {}));
-    /**
-     * @internal
-     */
     var LIFECYCLE_HOOKS_VALUES = [
         LifecycleHooks.OnInit,
         LifecycleHooks.OnDestroy,
@@ -3663,8 +3660,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Directive({selector: '[ngModel]'})
      * class NgModelStatus {
      *   constructor(public control:NgModel) {}
-     *   @HostBinding('[class.valid]') get valid { return this.control.valid; }
-     *   @HostBinding('[class.invalid]') get invalid { return this.control.invalid; }
+     *   @HostBinding('class.valid') get valid() { return this.control.valid; }
+     *   @HostBinding('class.invalid') get invalid() { return this.control.invalid; }
      * }
      *
      * @Component({
@@ -6514,7 +6511,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         function EventEmitter(isAsync) {
             if (isAsync === void 0) { isAsync = true; }
             _super.call(this);
-            this._isAsync = isAsync;
+            this.__isAsync = isAsync;
         }
         EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
         /**
@@ -6526,27 +6523,27 @@ var __extends = (this && this.__extends) || function (d, b) {
             var errorFn = function (err) { return null; };
             var completeFn = function () { return null; };
             if (generatorOrNext && typeof generatorOrNext === 'object') {
-                schedulerFn = this._isAsync ? function (value) { setTimeout(function () { return generatorOrNext.next(value); }); } :
+                schedulerFn = this.__isAsync ? function (value) { setTimeout(function () { return generatorOrNext.next(value); }); } :
                     function (value) { generatorOrNext.next(value); };
                 if (generatorOrNext.error) {
-                    errorFn = this._isAsync ? function (err) { setTimeout(function () { return generatorOrNext.error(err); }); } :
+                    errorFn = this.__isAsync ? function (err) { setTimeout(function () { return generatorOrNext.error(err); }); } :
                         function (err) { generatorOrNext.error(err); };
                 }
                 if (generatorOrNext.complete) {
-                    completeFn = this._isAsync ? function () { setTimeout(function () { return generatorOrNext.complete(); }); } :
+                    completeFn = this.__isAsync ? function () { setTimeout(function () { return generatorOrNext.complete(); }); } :
                         function () { generatorOrNext.complete(); };
                 }
             }
             else {
-                schedulerFn = this._isAsync ? function (value) { setTimeout(function () { return generatorOrNext(value); }); } :
+                schedulerFn = this.__isAsync ? function (value) { setTimeout(function () { return generatorOrNext(value); }); } :
                     function (value) { generatorOrNext(value); };
                 if (error) {
                     errorFn =
-                        this._isAsync ? function (err) { setTimeout(function () { return error(err); }); } : function (err) { error(err); };
+                        this.__isAsync ? function (err) { setTimeout(function () { return error(err); }); } : function (err) { error(err); };
                 }
                 if (complete) {
                     completeFn =
-                        this._isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
+                        this.__isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
                 }
             }
             return _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);

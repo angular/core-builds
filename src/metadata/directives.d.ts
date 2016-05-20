@@ -883,8 +883,6 @@ export declare class ComponentMetadata extends DirectiveMetadata {
  */
 export declare class PipeMetadata extends InjectableMetadata {
     name: string;
-    /** @internal */
-    _pure: boolean;
     constructor({name, pure}: {
         name: string;
         pure?: boolean;

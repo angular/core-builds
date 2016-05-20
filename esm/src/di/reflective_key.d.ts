@@ -33,11 +33,3 @@ export declare class ReflectiveKey {
      */
     static readonly numberOfKeys: number;
 }
-/**
- * @internal
- */
-export declare class KeyRegistry {
-    private _allKeys;
-    get(token: Object): ReflectiveKey;
-    readonly numberOfKeys: number;
-}

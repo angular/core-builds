@@ -1,5 +1,5 @@
 import { SanitizationService } from '../security';
-import { RootRenderer, RenderComponentType, Renderer } from '../render/api';
+import { RootRenderer, RenderComponentType } from '../render/api';
 import { ViewEncapsulation } from '../metadata/view';
 export declare class ViewUtils {
     private _renderer;
@@ -11,8 +11,6 @@ export declare class ViewUtils {
      * Used by the generated code
      */
     createRenderComponentType(templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>): RenderComponentType;
-    /** @internal */
-    renderComponent(renderComponentType: RenderComponentType): Renderer;
 }
 export declare function flattenNestedViewRenderNodes(nodes: any[]): any[];
 export declare function ensureSlotCount(projectableNodes: any[][], expectedSlotCount: number): any[][];

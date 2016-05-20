@@ -136,8 +136,6 @@ export declare class Provider {
      * Used in conjunction with `useFactory`.
      */
     dependencies: Object[];
-    /** @internal */
-    _multi: boolean;
     constructor(token: any, {useClass, useValue, useExisting, useFactory, deps, multi}: {
         useClass?: Type;
         useValue?: any;

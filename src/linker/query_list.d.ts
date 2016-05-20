@@ -52,12 +52,6 @@ export declare class QueryList<T> {
      */
     toArray(): T[];
     toString(): string;
-    /**
-     * @internal
-     */
-    reset(res: Array<T | any[]>): void;
-    /** @internal */
-    notifyOnChanges(): void;
     /** internal */
     setDirty(): void;
     /** internal */

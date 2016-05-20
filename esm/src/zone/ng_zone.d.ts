@@ -78,18 +78,6 @@ export declare class NgZone {
     private _zoneImpl;
     private _hasPendingMicrotasks;
     private _hasPendingMacrotasks;
-    /** @internal */
-    private _isStable;
-    /** @internal */
-    private _nesting;
-    /** @internal */
-    private _onUnstable;
-    /** @internal */
-    private _onMicrotaskEmpty;
-    /** @internal */
-    private _onStable;
-    /** @internal */
-    private _onErrorEvents;
     constructor({enableLongStackTrace}: {
         enableLongStackTrace?: boolean;
     });

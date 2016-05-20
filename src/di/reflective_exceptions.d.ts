@@ -5,14 +5,6 @@ import { ReflectiveInjector } from './reflective_injector';
  * Base class for all errors arising from misconfigured providers.
  */
 export declare class AbstractProviderError extends BaseException {
-    /** @internal */
-    message: string;
-    /** @internal */
-    keys: ReflectiveKey[];
-    /** @internal */
-    injectors: ReflectiveInjector[];
-    /** @internal */
-    constructResolvingMessage: Function;
     constructor(injector: ReflectiveInjector, key: ReflectiveKey, constructResolvingMessage: Function);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
     context: any;
@@ -80,10 +72,6 @@ export declare class CyclicDependencyError extends AbstractProviderError {
  * ```
  */
 export declare class InstantiationError extends WrappedException {
-    /** @internal */
-    keys: ReflectiveKey[];
-    /** @internal */
-    injectors: ReflectiveInjector[];
     constructor(injector: ReflectiveInjector, originalException: any, originalStack: any, key: ReflectiveKey);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
     wrapperMessage: string;

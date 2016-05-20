@@ -6,27 +6,10 @@ import { NgZone } from '../zone/ng_zone';
  */
 export declare class Testability {
     private _ngZone;
-    /** @internal */
-    _pendingCount: number;
-    /** @internal */
-    _isZoneStable: boolean;
-    /**
-     * Whether any work was done since the last 'whenStable' callback. This is
-     * useful to detect if this could have potentially destabilized another
-     * component while it is stabilizing.
-     * @internal
-     */
-    _didWork: boolean;
-    /** @internal */
-    _callbacks: Function[];
     constructor(_ngZone: NgZone);
-    /** @internal */
-    _watchAngularEvents(): void;
     increasePendingRequestCount(): number;
     decreasePendingRequestCount(): number;
     isStable(): boolean;
-    /** @internal */
-    _runCallbacksIfReady(): void;
     whenStable(callback: Function): void;
     getPendingRequestCount(): number;
     findBindings(using: any, provider: string, exactMatch: boolean): any[];
@@ -36,8 +19,6 @@ export declare class Testability {
  * A global registry of {@link Testability} instances for specific elements.
  */
 export declare class TestabilityRegistry {
-    /** @internal */
-    _applications: Map<any, Testability>;
     constructor();
     registerApplication(token: any, testability: Testability): void;
     getTestability(elem: any): Testability;

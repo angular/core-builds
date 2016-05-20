@@ -1,7 +1,6 @@
 import { Provider } from './provider';
 import { ResolvedReflectiveProvider } from './reflective_provider';
 import { Type } from '../../src/facade/lang';
-import { ReflectiveKey } from './reflective_key';
 import { Injector } from './injector';
 export interface ReflectiveProtoInjectorStrategy {
     getProviderAtIndex(index: number): ResolvedReflectiveProvider;
@@ -41,8 +40,6 @@ export declare class ReflectiveProtoInjectorDynamicStrategy implements Reflectiv
 }
 export declare class ReflectiveProtoInjector {
     static fromResolvedProviders(providers: ResolvedReflectiveProvider[]): ReflectiveProtoInjector;
-    /** @internal */
-    _strategy: ReflectiveProtoInjectorStrategy;
     numberOfProviders: number;
     constructor(providers: ResolvedReflectiveProvider[]);
     getProviderAtIndex(index: number): ResolvedReflectiveProvider;
@@ -227,10 +224,6 @@ export declare abstract class ReflectiveInjector implements Injector {
      */
     readonly parent: Injector;
     /**
-     * @internal
-     */
-    debugContext(): any;
-    /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
@@ -341,45 +334,21 @@ export declare abstract class ReflectiveInjector implements Injector {
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
     private _debugContext;
     private _strategy;
-    /** @internal */
-    _constructionCounter: number;
-    /** @internal */
-    _proto: any;
-    /** @internal */
-    _parent: Injector;
     /**
      * Private
      */
     constructor(_proto: any, _parent?: Injector, _debugContext?: Function);
-    /**
-     * @internal
-     */
-    debugContext(): any;
     get(token: any, notFoundValue?: any): any;
     getAt(index: number): any;
     readonly parent: Injector;
-    /**
-     * @internal
-     * Internal. Do not use.
-     * We return `any` not to export the InjectorStrategy type.
-     */
-    readonly internalStrategy: any;
     resolveAndCreateChild(providers: Array<Type | Provider | any[]>): ReflectiveInjector;
     createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
     resolveAndInstantiate(provider: Type | Provider): any;
     instantiateResolved(provider: ResolvedReflectiveProvider): any;
-    /** @internal */
-    _new(provider: ResolvedReflectiveProvider): any;
     private _instantiateProvider(provider);
     private _instantiate(provider, ResolvedReflectiveFactory);
     private _getByReflectiveDependency(provider, dep);
     private _getByKey(key, lowerBoundVisibility, upperBoundVisibility, notFoundValue);
-    /** @internal */
-    _throwOrNull(key: ReflectiveKey, notFoundValue: any): any;
-    /** @internal */
-    _getByKeySelf(key: ReflectiveKey, notFoundValue: any): any;
-    /** @internal */
-    _getByKeyDefault(key: ReflectiveKey, notFoundValue: any, lowerBoundVisibility: Object): any;
     readonly displayName: string;
     toString(): string;
 }

@@ -10,9 +10,6 @@
     LifecycleHooks[LifecycleHooks["AfterViewChecked"] = 7] = "AfterViewChecked";
 })(exports.LifecycleHooks || (exports.LifecycleHooks = {}));
 var LifecycleHooks = exports.LifecycleHooks;
-/**
- * @internal
- */
 exports.LIFECYCLE_HOOKS_VALUES = [
     LifecycleHooks.OnInit,
     LifecycleHooks.OnDestroy,

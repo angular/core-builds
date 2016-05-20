@@ -8,10 +8,6 @@ export declare class NgZoneError {
 }
 export declare class NgZoneImpl {
     static isInAngularZone(): boolean;
-    /** @internal */
-    private outer;
-    /** @internal */
-    private inner;
     private onEnter;
     private onLeave;
     private setMicrotask;

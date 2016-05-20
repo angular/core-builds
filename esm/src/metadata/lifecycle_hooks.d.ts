@@ -9,9 +9,6 @@ export declare enum LifecycleHooks {
     AfterViewInit = 6,
     AfterViewChecked = 7,
 }
-/**
- * @internal
- */
 export declare var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
 /**
  * Lifecycle hooks are guaranteed to be called in the following order:

@@ -9,9 +9,6 @@ export var LifecycleHooks;
     LifecycleHooks[LifecycleHooks["AfterViewInit"] = 6] = "AfterViewInit";
     LifecycleHooks[LifecycleHooks["AfterViewChecked"] = 7] = "AfterViewChecked";
 })(LifecycleHooks || (LifecycleHooks = {}));
-/**
- * @internal
- */
 export var LIFECYCLE_HOOKS_VALUES = [
     LifecycleHooks.OnInit,
     LifecycleHooks.OnDestroy,

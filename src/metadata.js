@@ -947,8 +947,8 @@ exports.Output = decorators_1.makePropDecorator(directives_2.OutputMetadata);
  * @Directive({selector: '[ngModel]'})
  * class NgModelStatus {
  *   constructor(public control:NgModel) {}
- *   @HostBinding('[class.valid]') get valid { return this.control.valid; }
- *   @HostBinding('[class.invalid]') get invalid { return this.control.invalid; }
+ *   @HostBinding('class.valid') get valid() { return this.control.valid; }
+ *   @HostBinding('class.invalid') get invalid() { return this.control.invalid; }
  * }
  *
  * @Component({

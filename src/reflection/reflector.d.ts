@@ -24,16 +24,6 @@ export declare class ReflectionInfo {
  * to power dependency injection and compilation.
  */
 export declare class Reflector extends ReflectorReader {
-    /** @internal */
-    _injectableInfo: Map<any, ReflectionInfo>;
-    /** @internal */
-    _getters: Map<string, (obj: any) => any>;
-    /** @internal */
-    _setters: Map<string, (obj: any, value: any) => void>;
-    /** @internal */
-    _methods: Map<string, (obj: any, args: any[]) => any>;
-    /** @internal */
-    _usedKeys: Set<any>;
     reflectionCapabilities: PlatformReflectionCapabilities;
     constructor(reflectionCapabilities: PlatformReflectionCapabilities);
     updateCapabilities(caps: PlatformReflectionCapabilities): void;
@@ -71,9 +61,5 @@ export declare class Reflector extends ReflectorReader {
     getter(name: string): GetterFn;
     setter(name: string): SetterFn;
     method(name: string): MethodFn;
-    /** @internal */
-    _getReflectionInfo(typeOrFunc: any): ReflectionInfo;
-    /** @internal */
-    _containsReflectionInfo(typeOrFunc: any): boolean;
     importUri(type: any): string;
 }

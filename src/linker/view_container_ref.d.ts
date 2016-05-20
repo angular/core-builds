@@ -1,5 +1,4 @@
 import { Injector } from '../di/injector';
-import { WtfScopeFn } from '../profile/profile';
 import { AppElement } from './element';
 import { ElementRef } from './element_ref';
 import { TemplateRef } from './template_ref';
@@ -100,18 +99,10 @@ export declare class ViewContainerRef_ implements ViewContainerRef {
     injector: Injector;
     parentInjector: Injector;
     createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, index?: number): EmbeddedViewRef<C>;
-    /** @internal */
-    _createComponentInContainerScope: WtfScopeFn;
     createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][]): ComponentRef<C>;
-    /** @internal */
-    _insertScope: WtfScopeFn;
     insert(viewRef: ViewRef, index?: number): ViewRef;
     indexOf(viewRef: ViewRef): number;
-    /** @internal */
-    _removeScope: WtfScopeFn;
     remove(index?: number): void;
-    /** @internal */
-    _detachScope: WtfScopeFn;
     detach(index?: number): ViewRef;
     clear(): void;
 }

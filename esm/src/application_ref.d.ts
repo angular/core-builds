@@ -2,7 +2,6 @@ import { NgZone } from './zone/ng_zone';
 import { Type } from '../src/facade/lang';
 import { Injector } from './di';
 import { ComponentRef, ComponentFactory } from './linker/component_factory';
-import { WtfScopeFn } from './profile/profile';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 /**
  * Create an Angular zone.
@@ -63,10 +62,6 @@ export declare abstract class PlatformRef {
 }
 export declare class PlatformRef_ extends PlatformRef {
     private _injector;
-    /** @internal */
-    _applications: ApplicationRef[];
-    /** @internal */
-    _disposeListeners: Function[];
     private _disposed;
     constructor(_injector: Injector);
     registerDisposeListener(dispose: () => void): void;
@@ -74,8 +69,6 @@ export declare class PlatformRef_ extends PlatformRef {
     readonly disposed: boolean;
     addApplication(appRef: ApplicationRef): void;
     dispose(): void;
-    /** @internal */
-    _applicationDisposed(app: ApplicationRef): void;
 }
 /**
  * A reference to an Angular application running on a page.
@@ -147,22 +140,6 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _platform;
     private _zone;
     private _injector;
-    /** @internal */
-    static _tickScope: WtfScopeFn;
-    /** @internal */
-    private _bootstrapListeners;
-    /** @internal */
-    private _disposeListeners;
-    /** @internal */
-    private _rootComponents;
-    /** @internal */
-    private _rootComponentTypes;
-    /** @internal */
-    private _changeDetectorRefs;
-    /** @internal */
-    private _runningTick;
-    /** @internal */
-    private _enforceNoNewChanges;
     private _exceptionHandler;
     private _asyncInitDonePromise;
     private _asyncInitDone;
@@ -174,31 +151,9 @@ export declare class ApplicationRef_ extends ApplicationRef {
     waitForAsyncInitializers(): Promise<any>;
     run(callback: Function): any;
     bootstrap<C>(componentFactory: ComponentFactory<C>): ComponentRef<C>;
-    /** @internal */
-    _loadComponent(componentRef: ComponentRef<any>): void;
-    /** @internal */
-    _unloadComponent(componentRef: ComponentRef<any>): void;
     readonly injector: Injector;
     readonly zone: NgZone;
     tick(): void;
     dispose(): void;
     readonly componentTypes: Type[];
 }
-/**
- * @internal
- */
-export declare const PLATFORM_CORE_PROVIDERS: (typeof PlatformRef_ | {
-    provide: typeof PlatformRef;
-    useExisting: typeof PlatformRef_;
-})[];
-/**
- * @internal
- */
-export declare const APPLICATION_CORE_PROVIDERS: ({
-    provide: typeof NgZone;
-    useFactory: () => NgZone;
-    deps: any[];
-} | typeof ApplicationRef_ | {
-    provide: typeof ApplicationRef;
-    useExisting: typeof ApplicationRef_;
-})[];
