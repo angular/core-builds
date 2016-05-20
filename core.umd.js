@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-5a9eda7
+ * @license AngularJS v2.0.0-efe4633
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -30,6 +30,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function scheduleMicroTask(fn) {
         Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
     }
+    var IS_DART = false;
     // Need to declare a new variable for global here since TypeScript
     // exports the original value of the symbol.
     var global$1 = globalScope;
@@ -9536,7 +9537,9 @@ var __extends = (this && this.__extends) || function (d, b) {
                 _this._loadComponent(compRef);
                 var c = _this._injector.get(Console);
                 if (assertionsEnabled()) {
-                    c.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
+                    var prodDescription = IS_DART ? "Production mode is disabled in Dart." :
+                        "Call enableProdMode() to enable the production mode.";
+                    c.log("Angular 2 is running in the development mode. " + prodDescription);
                 }
                 return compRef;
             });

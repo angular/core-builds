@@ -321,7 +321,9 @@ var ApplicationRef_ = (function (_super) {
             _this._loadComponent(compRef);
             var c = _this._injector.get(console_1.Console);
             if (lang_1.assertionsEnabled()) {
-                c.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
+                var prodDescription = lang_1.IS_DART ? "Production mode is disabled in Dart." :
+                    "Call enableProdMode() to enable the production mode.";
+                c.log("Angular 2 is running in the development mode. " + prodDescription);
             }
             return compRef;
         });
