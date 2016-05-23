@@ -177,8 +177,7 @@ exports.InstantiationError = InstantiationError;
 var InvalidProviderError = (function (_super) {
     __extends(InvalidProviderError, _super);
     function InvalidProviderError(provider) {
-        _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " +
-            provider.toString());
+        _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
     }
     return InvalidProviderError;
 }(exceptions_1.BaseException));
