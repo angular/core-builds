@@ -381,7 +381,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
  * @ts2dart_const
  */
 export class DirectiveMetadata extends InjectableMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, bindings, providers, exportAs, queries } = {}) {
+    constructor({ selector, inputs, outputs, properties, events, host, providers, exportAs, queries } = {}) {
         super();
         this.selector = selector;
         this._inputs = inputs;
@@ -392,7 +392,6 @@ export class DirectiveMetadata extends InjectableMetadata {
         this.exportAs = exportAs;
         this.queries = queries;
         this._providers = providers;
-        this._bindings = bindings;
     }
     /**
      * Enumerates the set of data-bound input properties for a directive
@@ -512,7 +511,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      *
      * @Directive({
      *   selector: 'greet',
-     *   bindings: [
+     *   providers: [
      *     Greeter
      *   ]
      * })
@@ -526,11 +525,8 @@ export class DirectiveMetadata extends InjectableMetadata {
      * ```
      */
     get providers() {
-        return isPresent(this._bindings) && this._bindings.length > 0 ? this._bindings :
-            this._providers;
+        return this._providers;
     }
-    /** @deprecated */
-    get bindings() { return this.providers; }
 }
 /**
  * Declare reusable UI building blocks for an application.
@@ -560,7 +556,7 @@ export class DirectiveMetadata extends InjectableMetadata {
  * @ts2dart_const
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, bindings, providers, viewBindings, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, directives, pipes, encapsulation } = {}) {
+    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, directives, pipes, encapsulation } = {}) {
         super({
             selector: selector,
             inputs: inputs,
@@ -569,13 +565,11 @@ export class ComponentMetadata extends DirectiveMetadata {
             events: events,
             host: host,
             exportAs: exportAs,
-            bindings: bindings,
             providers: providers,
             queries: queries
         });
         this.changeDetection = changeDetection;
         this._viewProviders = viewProviders;
-        this._viewBindings = viewBindings;
         this.templateUrl = templateUrl;
         this.template = template;
         this.styleUrls = styleUrls;
@@ -624,10 +618,8 @@ export class ComponentMetadata extends DirectiveMetadata {
      * ```
      */
     get viewProviders() {
-        return isPresent(this._viewBindings) && this._viewBindings.length > 0 ? this._viewBindings :
-            this._viewProviders;
+        return this._viewProviders;
     }
-    get viewBindings() { return this.viewProviders; }
 }
 /**
  * Declare reusable pipe function.

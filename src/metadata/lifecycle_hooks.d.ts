@@ -9,6 +9,13 @@ export declare enum LifecycleHooks {
     AfterViewInit = 6,
     AfterViewChecked = 7,
 }
+/**
+ * A `changes` object whose keys are property names and
+ * values are instances of {@link SimpleChange}. See {@link OnChanges}
+ */
+export interface SimpleChanges {
+    [propName: string]: SimpleChange;
+}
 export declare var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
 /**
  * Lifecycle hooks are guaranteed to be called in the following order:
@@ -40,7 +47,7 @@ export declare var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
  * class MyComponent implements OnChanges {
  *   @Input() myProp: any;
  *
- *   ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+ *   ngOnChanges(changes: SimpleChanges) {
  *     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
  *   }
  * }
@@ -60,9 +67,7 @@ export declare var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
  * ```
  */
 export declare abstract class OnChanges {
-    abstract ngOnChanges(changes: {
-        [key: string]: SimpleChange;
-    }): any;
+    abstract ngOnChanges(changes: SimpleChanges): any;
 }
 /**
  * Implement this interface to execute custom initialization logic after your directive's

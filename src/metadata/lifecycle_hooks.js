@@ -50,7 +50,7 @@ exports.LIFECYCLE_HOOKS_VALUES = [
  * class MyComponent implements OnChanges {
  *   @Input() myProp: any;
  *
- *   ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+ *   ngOnChanges(changes: SimpleChanges) {
  *     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
  *   }
  * }

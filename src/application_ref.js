@@ -53,7 +53,7 @@ exports.createPlatform = createPlatform;
 function assertPlatform(requiredToken) {
     var platform = getPlatform();
     if (lang_1.isBlank(platform)) {
-        throw new exceptions_1.BaseException('Not platform exists!');
+        throw new exceptions_1.BaseException('No platform exists!');
     }
     if (lang_1.isPresent(platform) && lang_1.isBlank(platform.injector.get(requiredToken, null))) {
         throw new exceptions_1.BaseException('A platform with a different configuration has been created. Please destroy it first.');
@@ -79,9 +79,9 @@ function getPlatform() {
 exports.getPlatform = getPlatform;
 /**
  * Shortcut for ApplicationRef.bootstrap.
- * Requires a platform the be created first.
+ * Requires a platform to be created first.
  */
-function coreBootstrap(injector, componentFactory) {
+function coreBootstrap(componentFactory, injector) {
     var appRef = injector.get(ApplicationRef);
     return appRef.bootstrap(componentFactory);
 }
@@ -89,9 +89,9 @@ exports.coreBootstrap = coreBootstrap;
 /**
  * Resolves the componentFactory for the given component,
  * waits for asynchronous initializers and bootstraps the component.
- * Requires a platform the be created first.
+ * Requires a platform to be created first.
  */
-function coreLoadAndBootstrap(injector, componentType) {
+function coreLoadAndBootstrap(componentType, injector) {
     var appRef = injector.get(ApplicationRef);
     return appRef.run(function () {
         var componentResolver = injector.get(component_resolver_1.ComponentResolver);

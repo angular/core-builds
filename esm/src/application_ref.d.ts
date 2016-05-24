@@ -27,15 +27,15 @@ export declare function disposePlatform(): void;
 export declare function getPlatform(): PlatformRef;
 /**
  * Shortcut for ApplicationRef.bootstrap.
- * Requires a platform the be created first.
+ * Requires a platform to be created first.
  */
-export declare function coreBootstrap<C>(injector: Injector, componentFactory: ComponentFactory<C>): ComponentRef<C>;
+export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, injector: Injector): ComponentRef<C>;
 /**
  * Resolves the componentFactory for the given component,
  * waits for asynchronous initializers and bootstraps the component.
- * Requires a platform the be created first.
+ * Requires a platform to be created first.
  */
-export declare function coreLoadAndBootstrap(injector: Injector, componentType: Type): Promise<ComponentRef<any>>;
+export declare function coreLoadAndBootstrap(componentType: Type, injector: Injector): Promise<ComponentRef<any>>;
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common

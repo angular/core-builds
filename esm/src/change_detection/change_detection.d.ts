@@ -9,6 +9,7 @@ export { KeyValueDiffers, KeyValueDiffer, KeyValueDifferFactory } from './differ
 export { DefaultIterableDiffer } from './differs/default_iterable_differ';
 export { PipeTransform } from './pipe_transform';
 export { WrappedValue, ValueUnwrapper, SimpleChange, devModeEqual, looseIdentical, uninitialized } from './change_detection_util';
+export { SimpleChanges } from '../metadata/lifecycle_hooks';
 /**
  * Structural diffing for `Object`s and `Map`s.
  */

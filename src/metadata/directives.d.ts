@@ -641,7 +641,7 @@ export declare class DirectiveMetadata extends InjectableMetadata {
      *
      * @Directive({
      *   selector: 'greet',
-     *   bindings: [
+     *   providers: [
      *     Greeter
      *   ]
      * })
@@ -655,10 +655,7 @@ export declare class DirectiveMetadata extends InjectableMetadata {
      * ```
      */
     providers: any[];
-    /** @deprecated */
-    bindings: any[];
     private _providers;
-    private _bindings;
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
      *
@@ -718,7 +715,7 @@ export declare class DirectiveMetadata extends InjectableMetadata {
     queries: {
         [key: string]: any;
     };
-    constructor({selector, inputs, outputs, properties, events, host, bindings, providers, exportAs, queries}?: {
+    constructor({selector, inputs, outputs, properties, events, host, providers, exportAs, queries}?: {
         selector?: string;
         inputs?: string[];
         outputs?: string[];
@@ -728,7 +725,6 @@ export declare class DirectiveMetadata extends InjectableMetadata {
             [key: string]: string;
         };
         providers?: any[];
-        /** @deprecated */ bindings?: any[];
         exportAs?: string;
         queries?: {
             [key: string]: any;
@@ -812,9 +808,7 @@ export declare class ComponentMetadata extends DirectiveMetadata {
      * ```
      */
     viewProviders: any[];
-    viewBindings: any[];
     private _viewProviders;
-    private _viewBindings;
     /**
      * The module id of the module that contains the component.
      * Needed to be able to resolve relative urls for templates and styles.
@@ -841,7 +835,7 @@ export declare class ComponentMetadata extends DirectiveMetadata {
     directives: Array<Type | any[]>;
     pipes: Array<Type | any[]>;
     encapsulation: ViewEncapsulation;
-    constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, bindings, providers, viewBindings, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, directives, pipes, encapsulation}?: {
+    constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, directives, pipes, encapsulation}?: {
         selector?: string;
         inputs?: string[];
         outputs?: string[];
@@ -850,11 +844,9 @@ export declare class ComponentMetadata extends DirectiveMetadata {
         host?: {
             [key: string]: string;
         };
-        /** @deprecated */ bindings?: any[];
         providers?: any[];
         exportAs?: string;
         moduleId?: string;
-        /** @deprecated */ viewBindings?: any[];
         viewProviders?: any[];
         queries?: {
             [key: string]: any;
