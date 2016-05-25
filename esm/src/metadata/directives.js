@@ -444,6 +444,11 @@ export class DirectiveMetadata extends InjectableMetadata {
         return isPresent(this._properties) && this._properties.length > 0 ? this._properties :
             this._inputs;
     }
+    /**
+     * Use `inputs` instead
+     *
+     * @deprecated
+     */
     get properties() { return this.inputs; }
     /**
      * Enumerates the set of event-bound output properties.
@@ -493,6 +498,11 @@ export class DirectiveMetadata extends InjectableMetadata {
     get outputs() {
         return isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
     }
+    /**
+     * Use `outputs` instead
+     *
+     * @deprecated
+     */
     get events() { return this.outputs; }
     /**
      * Defines the set of injectable objects that are visible to a Directive and its light DOM

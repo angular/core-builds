@@ -463,6 +463,11 @@ export declare class DirectiveMetadata extends InjectableMetadata {
      *
      */
     inputs: string[];
+    /**
+     * Use `inputs` instead
+     *
+     * @deprecated
+     */
     properties: string[];
     private _inputs;
     private _properties;
@@ -512,6 +517,11 @@ export declare class DirectiveMetadata extends InjectableMetadata {
      *
      */
     outputs: string[];
+    /**
+     * Use `outputs` instead
+     *
+     * @deprecated
+     */
     events: string[];
     private _outputs;
     private _events;
@@ -719,8 +729,8 @@ export declare class DirectiveMetadata extends InjectableMetadata {
         selector?: string;
         inputs?: string[];
         outputs?: string[];
-        properties?: string[];
-        events?: string[];
+        /** @deprecated */ properties?: string[];
+        /** @deprecated */ events?: string[];
         host?: {
             [key: string]: string;
         };
@@ -839,8 +849,8 @@ export declare class ComponentMetadata extends DirectiveMetadata {
         selector?: string;
         inputs?: string[];
         outputs?: string[];
-        properties?: string[];
-        events?: string[];
+        /** @deprecated */ properties?: string[];
+        /** @deprecated */ events?: string[];
         host?: {
             [key: string]: string;
         };

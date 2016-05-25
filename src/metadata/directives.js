@@ -457,6 +457,11 @@ var DirectiveMetadata = (function (_super) {
         configurable: true
     });
     Object.defineProperty(DirectiveMetadata.prototype, "properties", {
+        /**
+         * Use `inputs` instead
+         *
+         * @deprecated
+         */
         get: function () { return this.inputs; },
         enumerable: true,
         configurable: true
@@ -514,6 +519,11 @@ var DirectiveMetadata = (function (_super) {
         configurable: true
     });
     Object.defineProperty(DirectiveMetadata.prototype, "events", {
+        /**
+         * Use `outputs` instead
+         *
+         * @deprecated
+         */
         get: function () { return this.outputs; },
         enumerable: true,
         configurable: true

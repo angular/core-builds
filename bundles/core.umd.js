@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-60a2ba8
+ * @license AngularJS v2.0.0-32b3743
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1510,6 +1510,11 @@ var __extends = (this && this.__extends) || function (d, b) {
             configurable: true
         });
         Object.defineProperty(DirectiveMetadata.prototype, "properties", {
+            /**
+             * Use `inputs` instead
+             *
+             * @deprecated
+             */
             get: function () { return this.inputs; },
             enumerable: true,
             configurable: true
@@ -1567,6 +1572,11 @@ var __extends = (this && this.__extends) || function (d, b) {
             configurable: true
         });
         Object.defineProperty(DirectiveMetadata.prototype, "events", {
+            /**
+             * Use `outputs` instead
+             *
+             * @deprecated
+             */
             get: function () { return this.outputs; },
             enumerable: true,
             configurable: true
