@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-a38c9a1
+ * @license AngularJS v2.0.0-60a2ba8
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -3331,11 +3331,20 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * class SomeDir {
      *   @ContentChild(ChildDirective) contentChild;
+     *   @ContentChild('container_ref') containerChild
      *
      *   ngAfterContentInit() {
      *     // contentChild is set
+     *     // containerChild is set
      *   }
      * }
+     * ```
+     *
+     * ```html
+     * <container #container_ref>
+     *   <item>a</item>
+     *   <item>b</item>
+     * </container>
      * ```
      */
     var ContentChild = makePropDecorator(ContentChildMetadata);

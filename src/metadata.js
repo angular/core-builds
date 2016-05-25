@@ -634,11 +634,20 @@ exports.ContentChildren = decorators_1.makePropDecorator(di_2.ContentChildrenMet
  * })
  * class SomeDir {
  *   @ContentChild(ChildDirective) contentChild;
+ *   @ContentChild('container_ref') containerChild
  *
  *   ngAfterContentInit() {
  *     // contentChild is set
+ *     // containerChild is set
  *   }
  * }
+ * ```
+ *
+ * ```html
+ * <container #container_ref>
+ *   <item>a</item>
+ *   <item>b</item>
+ * </container>
  * ```
  */
 exports.ContentChild = decorators_1.makePropDecorator(di_2.ContentChildMetadata);

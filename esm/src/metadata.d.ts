@@ -1014,11 +1014,20 @@ export declare var ContentChildren: ContentChildrenMetadataFactory;
  * })
  * class SomeDir {
  *   @ContentChild(ChildDirective) contentChild;
+ *   @ContentChild('container_ref') containerChild
  *
  *   ngAfterContentInit() {
  *     // contentChild is set
+ *     // containerChild is set
  *   }
  * }
+ * ```
+ *
+ * ```html
+ * <container #container_ref>
+ *   <item>a</item>
+ *   <item>b</item>
+ * </container>
  * ```
  */
 export declare var ContentChild: ContentChildMetadataFactory;
