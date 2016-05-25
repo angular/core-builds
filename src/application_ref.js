@@ -394,9 +394,6 @@ var ApplicationRef_ = (function (_super) {
     return ApplicationRef_;
 }(ApplicationRef));
 exports.ApplicationRef_ = ApplicationRef_;
-/**
- * @internal
- */
 exports.PLATFORM_CORE_PROVIDERS = 
 /*@ts2dart_const*/ [
     PlatformRef_,

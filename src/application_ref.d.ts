@@ -157,3 +157,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     dispose(): void;
     componentTypes: Type[];
 }
+export declare const PLATFORM_CORE_PROVIDERS: (typeof PlatformRef_ | {
+    provide: typeof PlatformRef;
+    useExisting: typeof PlatformRef_;
+})[];

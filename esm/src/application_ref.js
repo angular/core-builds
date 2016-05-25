@@ -324,9 +324,6 @@ ApplicationRef_.ctorParameters = [
     { type: NgZone, },
     { type: Injector, },
 ];
-/**
- * @internal
- */
 export const PLATFORM_CORE_PROVIDERS = 
 /*@ts2dart_const*/ [
     PlatformRef_,

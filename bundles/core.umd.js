@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-32b3743
+ * @license AngularJS v2.0.0-e26e4f9
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9614,9 +9614,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         { type: NgZone, },
         { type: Injector, },
     ];
-    /**
-     * @internal
-     */
     var PLATFORM_CORE_PROVIDERS = 
     /*@ts2dart_const*/ [
         PlatformRef_,
