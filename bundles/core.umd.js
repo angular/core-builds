@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-982fad0
+ * @license AngularJS v2.0.0-7a2ce7f
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10748,6 +10748,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         DebugDomRenderer.prototype.setElementClass = function (renderElement, className, isAdd) {
             this._delegate.setElementClass(renderElement, className, isAdd);
+        };
+        DebugDomRenderer.prototype.setElementStyles = function (renderElement, styles) {
+            this._delegate.setElementStyles(renderElement, styles);
         };
         DebugDomRenderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
             this._delegate.setElementStyle(renderElement, styleName, styleValue);

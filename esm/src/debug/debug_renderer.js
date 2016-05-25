@@ -101,6 +101,9 @@ export class DebugDomRenderer {
     setElementClass(renderElement, className, isAdd) {
         this._delegate.setElementClass(renderElement, className, isAdd);
     }
+    setElementStyles(renderElement, styles) {
+        this._delegate.setElementStyles(renderElement, styles);
+    }
     setElementStyle(renderElement, styleName, styleValue) {
         this._delegate.setElementStyle(renderElement, styleName, styleValue);
     }

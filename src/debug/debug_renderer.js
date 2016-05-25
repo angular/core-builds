@@ -104,6 +104,9 @@ var DebugDomRenderer = (function () {
     DebugDomRenderer.prototype.setElementClass = function (renderElement, className, isAdd) {
         this._delegate.setElementClass(renderElement, className, isAdd);
     };
+    DebugDomRenderer.prototype.setElementStyles = function (renderElement, styles) {
+        this._delegate.setElementStyles(renderElement, styles);
+    };
     DebugDomRenderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
         this._delegate.setElementStyle(renderElement, styleName, styleValue);
     };
