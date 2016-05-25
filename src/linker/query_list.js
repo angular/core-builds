@@ -25,6 +25,7 @@ var async_1 = require('../../src/facade/async');
  *   }
  * }
  * ```
+ * @deprecated
  */
 var QueryList = (function () {
     function QueryList() {

@@ -1,5 +1,8 @@
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { AppView } from './view';
+/**
+ * @stable
+ */
 export declare abstract class ViewRef {
     destroyed: boolean;
     abstract onDestroy(callback: Function): any;
@@ -56,6 +59,7 @@ export declare abstract class ViewRef {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
+ * @experimental
  */
 export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     context: C;

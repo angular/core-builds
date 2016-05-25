@@ -8,6 +8,7 @@ let __unused; // avoid unused import when Type union types are erased
 /**
  * A default set of providers which should be included in any Angular
  * application, regardless of the platform it runs onto.
+ * @stable
  */
 export const APPLICATION_COMMON_PROVIDERS = 
 /*@ts2dart_const*/ [

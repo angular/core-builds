@@ -74,6 +74,7 @@ exports.NgZoneError = ng_zone_impl_2.NgZoneError;
  *   }
  * }
  * ```
+ * @experimental
  */
 var NgZone = (function () {
     function NgZone(_a) {

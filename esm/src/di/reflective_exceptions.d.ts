@@ -3,6 +3,7 @@ import { ReflectiveKey } from './reflective_key';
 import { ReflectiveInjector } from './reflective_injector';
 /**
  * Base class for all errors arising from misconfigured providers.
+ * @stable
  */
 export declare class AbstractProviderError extends BaseException {
     constructor(injector: ReflectiveInjector, key: ReflectiveKey, constructResolvingMessage: Function);
@@ -22,6 +23,7 @@ export declare class AbstractProviderError extends BaseException {
  *
  * expect(() => Injector.resolveAndCreate([A])).toThrowError();
  * ```
+ * @stable
  */
 export declare class NoProviderError extends AbstractProviderError {
     constructor(injector: ReflectiveInjector, key: ReflectiveKey);
@@ -41,6 +43,7 @@ export declare class NoProviderError extends AbstractProviderError {
  * ```
  *
  * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
+ * @stable
  */
 export declare class CyclicDependencyError extends AbstractProviderError {
     constructor(injector: ReflectiveInjector, key: ReflectiveKey);
@@ -70,6 +73,7 @@ export declare class CyclicDependencyError extends AbstractProviderError {
  *   expect(e.originalStack).toBeDefined();
  * }
  * ```
+ * @stable
  */
 export declare class InstantiationError extends WrappedException {
     constructor(injector: ReflectiveInjector, originalException: any, originalStack: any, key: ReflectiveKey);
@@ -87,6 +91,7 @@ export declare class InstantiationError extends WrappedException {
  * ```typescript
  * expect(() => Injector.resolveAndCreate(["not a type"])).toThrowError();
  * ```
+ * @stable
  */
 export declare class InvalidProviderError extends BaseException {
     constructor(provider: any);
@@ -118,6 +123,7 @@ export declare class InvalidProviderError extends BaseException {
  *
  * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
  * ```
+ * @stable
  */
 export declare class NoAnnotationError extends BaseException {
     constructor(typeOrFunc: any, params: any[][]);
@@ -135,6 +141,7 @@ export declare class NoAnnotationError extends BaseException {
  *
  * expect(() => injector.getAt(100)).toThrowError();
  * ```
+ * @stable
  */
 export declare class OutOfBoundsError extends BaseException {
     constructor(index: any);

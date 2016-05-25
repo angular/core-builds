@@ -34,6 +34,7 @@ export class ResolvedReflectiveProvider_ {
 }
 /**
  * An internal resolved representation of a factory function created by resolving {@link Provider}.
+ * @experimental
  */
 export class ResolvedReflectiveFactory {
     constructor(

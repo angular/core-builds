@@ -5,6 +5,7 @@ import { Provider, SkipSelfMetadata, OptionalMetadata } from '../../di';
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * @ts2dart_const
+ * @stable
  */
 export class IterableDiffers {
     /*@ts2dart_const*/

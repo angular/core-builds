@@ -1,4 +1,7 @@
 import { Renderer, RootRenderer, RenderComponentType, RenderDebugInfo } from '../render/api';
+import { AnimationKeyframe } from '../animation/animation_keyframe';
+import { AnimationStyles } from '../animation/animation_styles';
+import { AnimationPlayer } from '../animation/animation_player';
 export declare class DebugDomRootRenderer implements RootRenderer {
     private _delegate;
     constructor(_delegate: RootRenderer);
@@ -28,4 +31,5 @@ export declare class DebugDomRenderer implements Renderer {
     setElementStyle(renderElement: any, styleName: string, styleValue: string): void;
     invokeElementMethod(renderElement: any, methodName: string, args: any[]): void;
     setText(renderNode: any, text: string): void;
+    animate(element: any, startingStyles: AnimationStyles, keyframes: AnimationKeyframe[], duration: number, delay: number, easing: string): AnimationPlayer;
 }

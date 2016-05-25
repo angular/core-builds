@@ -385,6 +385,7 @@ var constants_1 = require('../change_detection/constants');
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
  * @ts2dart_const
+ * @stable
  */
 var DirectiveMetadata = (function (_super) {
     __extends(DirectiveMetadata, _super);
@@ -594,11 +595,12 @@ exports.DirectiveMetadata = DirectiveMetadata;
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
  * @ts2dart_const
+ * @stable
  */
 var ComponentMetadata = (function (_super) {
     __extends(ComponentMetadata, _super);
     function ComponentMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation;
         _super.call(this, {
             selector: selector,
             inputs: inputs,
@@ -620,6 +622,7 @@ var ComponentMetadata = (function (_super) {
         this.pipes = pipes;
         this.encapsulation = encapsulation;
         this.moduleId = moduleId;
+        this.animations = animations;
     }
     Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
         /**
@@ -680,6 +683,7 @@ exports.ComponentMetadata = ComponentMetadata;
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
  * @ts2dart_const
+ * @stable
  */
 var PipeMetadata = (function (_super) {
     __extends(PipeMetadata, _super);
@@ -738,6 +742,7 @@ exports.PipeMetadata = PipeMetadata;
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 var InputMetadata = (function () {
     function InputMetadata(
@@ -791,6 +796,7 @@ exports.InputMetadata = InputMetadata;
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 var OutputMetadata = (function () {
     function OutputMetadata(bindingPropertyName) {
@@ -834,6 +840,7 @@ exports.OutputMetadata = OutputMetadata;
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 var HostBindingMetadata = (function () {
     function HostBindingMetadata(hostPropertyName) {
@@ -876,6 +883,7 @@ exports.HostBindingMetadata = HostBindingMetadata;
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 var HostListenerMetadata = (function () {
     function HostListenerMetadata(eventName, args) {

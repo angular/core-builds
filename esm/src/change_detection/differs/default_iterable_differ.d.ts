@@ -5,6 +5,9 @@ export declare class DefaultIterableDifferFactory implements IterableDifferFacto
     supports(obj: Object): boolean;
     create(cdRef: ChangeDetectorRef, trackByFn?: TrackByFn): DefaultIterableDiffer;
 }
+/**
+ * @stable
+ */
 export declare class DefaultIterableDiffer implements IterableDiffer {
     private _trackByFn;
     private _length;
@@ -37,6 +40,9 @@ export declare class DefaultIterableDiffer implements IterableDiffer {
     readonly isDirty: boolean;
     toString(): string;
 }
+/**
+ * @stable
+ */
 export declare class CollectionChangeRecord {
     item: any;
     trackById: any;

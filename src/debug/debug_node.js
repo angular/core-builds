@@ -15,6 +15,9 @@ var EventListener = (function () {
     return EventListener;
 }());
 exports.EventListener = EventListener;
+/**
+ * @experimental
+ */
 var DebugNode = (function () {
     function DebugNode(nativeNode, parent, _debugInfo) {
         this._debugInfo = _debugInfo;
@@ -72,6 +75,9 @@ var DebugNode = (function () {
     return DebugNode;
 }());
 exports.DebugNode = DebugNode;
+/**
+ * @experimental
+ */
 var DebugElement = (function (_super) {
     __extends(DebugElement, _super);
     function DebugElement(nativeNode, parent, _debugInfo) {
@@ -147,6 +153,9 @@ var DebugElement = (function (_super) {
     return DebugElement;
 }(DebugNode));
 exports.DebugElement = DebugElement;
+/**
+ * @experimental
+ */
 function asNativeElements(debugEls) {
     return debugEls.map(function (el) { return el.nativeElement; });
 }
@@ -175,6 +184,9 @@ function _queryNodeChildren(parentNode, predicate, matches) {
 }
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
 var _nativeNodeToDebugNode = new Map();
+/**
+ * @experimental
+ */
 function getDebugNode(nativeNode) {
     return _nativeNodeToDebugNode.get(nativeNode);
 }

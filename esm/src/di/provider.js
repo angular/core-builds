@@ -15,6 +15,7 @@ import { BaseException } from '../../src/facade/exceptions';
  * expect(injector.get("message")).toEqual('Hello');
  * ```
  * @ts2dart_const
+ * @deprecated
  */
 export class Provider {
     constructor(token, { useClass, useValue, useExisting, useFactory, deps, multi }) {
@@ -109,6 +110,7 @@ export function bind(token) {
 }
 /**
  * Helper class for the {@link bind} function.
+ * @deprecated
  */
 export class ProviderBuilder {
     constructor(token) {
@@ -229,6 +231,7 @@ export class ProviderBuilder {
  * See {@link Provider} for more details.
  *
  * <!-- TODO: improve the docs -->
+ * @deprecated
  */
 export function provide(token, { useClass, useValue, useExisting, useFactory, deps, multi }) {
     return new Provider(token, {

@@ -83,7 +83,7 @@ var AppElement = (function () {
         if (view.type === view_type_1.ViewType.COMPONENT) {
             throw new exceptions_1.BaseException("Component views can't be moved!");
         }
-        view.renderer.detachView(view.flatRootNodes);
+        view.detach();
         view.removeFromContentChildren(this);
         return view;
     };

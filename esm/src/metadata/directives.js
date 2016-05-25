@@ -379,6 +379,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
  * @ts2dart_const
+ * @stable
  */
 export class DirectiveMetadata extends InjectableMetadata {
     constructor({ selector, inputs, outputs, properties, events, host, providers, exportAs, queries } = {}) {
@@ -564,9 +565,10 @@ export class DirectiveMetadata extends InjectableMetadata {
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
  * @ts2dart_const
+ * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, directives, pipes, encapsulation } = {}) {
+    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation } = {}) {
         super({
             selector: selector,
             inputs: inputs,
@@ -588,6 +590,7 @@ export class ComponentMetadata extends DirectiveMetadata {
         this.pipes = pipes;
         this.encapsulation = encapsulation;
         this.moduleId = moduleId;
+        this.animations = animations;
     }
     /**
      * Defines the set of injectable objects that are visible to its view DOM children.
@@ -642,6 +645,7 @@ export class ComponentMetadata extends DirectiveMetadata {
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
  * @ts2dart_const
+ * @stable
  */
 export class PipeMetadata extends InjectableMetadata {
     constructor({ name, pure }) {
@@ -692,6 +696,7 @@ export class PipeMetadata extends InjectableMetadata {
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 export class InputMetadata {
     constructor(
@@ -743,6 +748,7 @@ export class InputMetadata {
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 export class OutputMetadata {
     constructor(bindingPropertyName) {
@@ -784,6 +790,7 @@ export class OutputMetadata {
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 export class HostBindingMetadata {
     constructor(hostPropertyName) {
@@ -824,6 +831,7 @@ export class HostBindingMetadata {
  * bootstrap(App);
  * ```
  * @ts2dart_const
+ * @stable
  */
 export class HostListenerMetadata {
     constructor(eventName, args) {

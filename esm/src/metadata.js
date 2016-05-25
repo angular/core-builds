@@ -33,6 +33,7 @@ import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/dec
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
+ * @stable
  */
 export var Component = makeDecorator(ComponentMetadata, (fn) => fn.View = View);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
@@ -413,6 +414,7 @@ export var Component = makeDecorator(ComponentMetadata, (fn) => fn.View = View);
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
+ * @stable
  */
 export var Directive = makeDecorator(DirectiveMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewMetadata.
@@ -444,6 +446,7 @@ export var Directive = makeDecorator(DirectiveMetadata);
  *   }
  * }
  * ```
+ * @deprecated
  */
 var View = makeDecorator(ViewMetadata, (fn) => fn.View = View);
 /**
@@ -462,6 +465,7 @@ var View = makeDecorator(ViewMetadata, (fn) => fn.View = View);
  * A decorator can inject string literal `text` like so:
  *
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
+ * @stable
  */
 export var Attribute = makeParamDecorator(AttributeMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from QueryMetadata.
@@ -571,6 +575,7 @@ export var Attribute = makeParamDecorator(AttributeMetadata);
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
+ * @deprecated
  */
 export var Query = makeParamDecorator(QueryMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
@@ -593,6 +598,7 @@ export var Query = makeParamDecorator(QueryMetadata);
  *   }
  * }
  * ```
+ * @stable
  */
 export var ContentChildren = makePropDecorator(ContentChildrenMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildMetadata.
@@ -624,6 +630,7 @@ export var ContentChildren = makePropDecorator(ContentChildrenMetadata);
  *   <item>b</item>
  * </container>
  * ```
+ * @stable
  */
 export var ContentChild = makePropDecorator(ContentChildMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildrenMetadata.
@@ -705,6 +712,7 @@ export var ContentChild = makePropDecorator(ContentChildMetadata);
  * ```
  *
  * See also: [ViewChildrenMetadata]
+ * @stable
  */
 export var ViewChildren = makePropDecorator(ViewChildrenMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildMetadata.
@@ -777,6 +785,7 @@ export var ViewChildren = makePropDecorator(ViewChildrenMetadata);
  * }
  * ```
  * See also: [ViewChildMetadata]
+ * @stable
  */
 export var ViewChild = makePropDecorator(ViewChildMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewQueryMetadata.
@@ -814,6 +823,7 @@ export var ViewChild = makePropDecorator(ViewChildMetadata);
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
+ * @deprecated
  */
 export var ViewQuery = makeParamDecorator(ViewQueryMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
@@ -823,6 +833,7 @@ export var ViewQuery = makeParamDecorator(ViewQueryMetadata);
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
+ * @stable
  */
 export var Pipe = makeDecorator(PipeMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from InputMetadata.
@@ -866,6 +877,7 @@ export var Pipe = makeDecorator(PipeMetadata);
  *
  * bootstrap(App);
  * ```
+ * @stable
  */
 export var Input = makePropDecorator(InputMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from OutputMetadata.
@@ -909,6 +921,7 @@ export var Input = makePropDecorator(InputMetadata);
  * }
  * bootstrap(App);
  * ```
+ * @stable
  */
 export var Output = makePropDecorator(OutputMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from HostBindingMetadata.
@@ -946,6 +959,7 @@ export var Output = makePropDecorator(OutputMetadata);
  *
  * bootstrap(App);
  * ```
+ * @stable
  */
 export var HostBinding = makePropDecorator(HostBindingMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from HostListenerMetadata.
@@ -982,6 +996,7 @@ export var HostBinding = makePropDecorator(HostBindingMetadata);
  *
  * bootstrap(App);
  * ```
+ * @stable
  */
 export var HostListener = makePropDecorator(HostListenerMetadata);
 //# sourceMappingURL=metadata.js.map

@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * @stable
+ */
 (function (LifecycleHooks) {
     LifecycleHooks[LifecycleHooks["OnInit"] = 0] = "OnInit";
     LifecycleHooks[LifecycleHooks["OnDestroy"] = 1] = "OnDestroy";
@@ -68,6 +71,7 @@ exports.LIFECYCLE_HOOKS_VALUES = [
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 var OnChanges = (function () {
     function OnChanges() {
@@ -115,6 +119,7 @@ exports.OnChanges = OnChanges;
  *
  * bootstrap(App).catch(err => console.error(err));
  *  ```
+ * @stable
  */
 var OnInit = (function () {
     function OnInit() {
@@ -186,6 +191,7 @@ exports.OnInit = OnInit;
  *   list = [];
  * }
  * ```
+ * @stable
  */
 var DoCheck = (function () {
     function DoCheck() {
@@ -281,6 +287,7 @@ exports.DoCheck = DoCheck;
  * Invoking `{{ 10000 | countdown }}` would cause the value to be decremented by 50,
  * every 50ms, until it reaches 0.
  *
+ * @stable
  */
 var OnDestroy = (function () {
     function OnDestroy() {
@@ -338,6 +345,7 @@ exports.OnDestroy = OnDestroy;
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 var AfterContentInit = (function () {
     function AfterContentInit() {
@@ -390,6 +398,7 @@ exports.AfterContentInit = AfterContentInit;
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 var AfterContentChecked = (function () {
     function AfterContentChecked() {
@@ -441,6 +450,7 @@ exports.AfterContentChecked = AfterContentChecked;
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 var AfterViewInit = (function () {
     function AfterViewInit() {
@@ -495,6 +505,7 @@ exports.AfterViewInit = AfterViewInit;
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 var AfterViewChecked = (function () {
     function AfterViewChecked() {

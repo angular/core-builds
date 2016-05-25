@@ -325,6 +325,9 @@ var DefaultKeyValueDiffer = (function () {
     return DefaultKeyValueDiffer;
 }());
 exports.DefaultKeyValueDiffer = DefaultKeyValueDiffer;
+/**
+ * @stable
+ */
 var KeyValueChangeRecord = (function () {
     function KeyValueChangeRecord(key) {
         this.key = key;

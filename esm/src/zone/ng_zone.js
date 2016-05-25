@@ -72,6 +72,7 @@ export { NgZoneError } from './ng_zone_impl';
  *   }
  * }
  * ```
+ * @experimental
  */
 export class NgZone {
     constructor({ enableLongStackTrace = false }) {

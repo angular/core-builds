@@ -22,6 +22,7 @@ import { Observable } from '../../src/facade/async';
  *   }
  * }
  * ```
+ * @deprecated
  */
 export declare class QueryList<T> {
     private _dirty;

@@ -130,6 +130,7 @@ var _NoopGetTestability = (function () {
 }());
 /**
  * Set the {@link GetTestability} implementation used by the Angular testing framework.
+ * @experimental
  */
 function setTestabilityGetter(getter) {
     _testabilityGetter = getter;

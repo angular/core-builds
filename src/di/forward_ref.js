@@ -10,6 +10,7 @@ var lang_1 = require('../../src/facade/lang');
  *
  * ### Example
  * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+ * @experimental
  */
 function forwardRef(forwardRefFn) {
     forwardRefFn.__forward_ref__ = forwardRef;
@@ -31,6 +32,7 @@ exports.forwardRef = forwardRef;
  * ```
  *
  * See: {@link forwardRef}
+ * @experimental
  */
 function resolveForwardRef(type) {
     if (lang_1.isFunction(type) && type.hasOwnProperty('__forward_ref__') &&

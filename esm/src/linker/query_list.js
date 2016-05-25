@@ -24,6 +24,7 @@ import { EventEmitter } from '../../src/facade/async';
  *   }
  * }
  * ```
+ * @deprecated
  */
 export class QueryList {
     constructor() {

@@ -20,6 +20,7 @@
  * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
  * error messages.
  * @ts2dart_const
+ * @stable
  */
 var OpaqueToken = (function () {
     function OpaqueToken(_desc) {

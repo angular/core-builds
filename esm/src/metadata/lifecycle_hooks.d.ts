@@ -1,4 +1,7 @@
 import { SimpleChange } from '../change_detection/change_detection_util';
+/**
+ * @stable
+ */
 export declare enum LifecycleHooks {
     OnInit = 0,
     OnDestroy = 1,
@@ -12,6 +15,7 @@ export declare enum LifecycleHooks {
 /**
  * A `changes` object whose keys are property names and
  * values are instances of {@link SimpleChange}. See {@link OnChanges}
+ * @stable
  */
 export interface SimpleChanges {
     [propName: string]: SimpleChange;
@@ -65,6 +69,7 @@ export declare var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export declare abstract class OnChanges {
     abstract ngOnChanges(changes: SimpleChanges): any;
@@ -109,6 +114,7 @@ export declare abstract class OnChanges {
  *
  * bootstrap(App).catch(err => console.error(err));
  *  ```
+ * @stable
  */
 export declare abstract class OnInit {
     abstract ngOnInit(): any;
@@ -177,6 +183,7 @@ export declare abstract class OnInit {
  *   list = [];
  * }
  * ```
+ * @stable
  */
 export declare abstract class DoCheck {
     abstract ngDoCheck(): any;
@@ -269,6 +276,7 @@ export declare abstract class DoCheck {
  * Invoking `{{ 10000 | countdown }}` would cause the value to be decremented by 50,
  * every 50ms, until it reaches 0.
  *
+ * @stable
  */
 export declare abstract class OnDestroy {
     abstract ngOnDestroy(): any;
@@ -323,6 +331,7 @@ export declare abstract class OnDestroy {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export declare abstract class AfterContentInit {
     abstract ngAfterContentInit(): any;
@@ -372,6 +381,7 @@ export declare abstract class AfterContentInit {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export declare abstract class AfterContentChecked {
     abstract ngAfterContentChecked(): any;
@@ -420,6 +430,7 @@ export declare abstract class AfterContentChecked {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export declare abstract class AfterViewInit {
     abstract ngAfterViewInit(): any;
@@ -471,6 +482,7 @@ export declare abstract class AfterViewInit {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export declare abstract class AfterViewChecked {
     abstract ngAfterViewChecked(): any;

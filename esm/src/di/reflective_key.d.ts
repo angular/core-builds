@@ -12,6 +12,7 @@
  * `Key` should not be created directly. {@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
+ * @experimental
  */
 export declare class ReflectiveKey {
     token: Object;

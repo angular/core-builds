@@ -10,6 +10,7 @@ import { Injector } from '../di/injector';
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
  * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
  * method.
+ * @stable
  */
 export declare abstract class ComponentRef<C> {
     /**

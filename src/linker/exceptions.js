@@ -37,6 +37,7 @@ var exceptions_1 = require('../../src/facade/exceptions');
  *   }
  * }
  * ```
+ * @stable
  */
 var ExpressionChangedAfterItHasBeenCheckedException = (function (_super) {
     __extends(ExpressionChangedAfterItHasBeenCheckedException, _super);
@@ -52,6 +53,7 @@ exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfter
  *
  * This error wraps the original exception to attach additional contextual information that can
  * be useful for debugging.
+ * @stable
  */
 var ViewWrappedException = (function (_super) {
     __extends(ViewWrappedException, _super);
@@ -67,6 +69,7 @@ exports.ViewWrappedException = ViewWrappedException;
  * This error indicates a bug in the framework.
  *
  * This is an internal Angular error.
+ * @stable
  */
 var ViewDestroyedException = (function (_super) {
     __extends(ViewDestroyedException, _super);

@@ -408,6 +408,7 @@ var ReflectiveInjector = (function () {
      * var injector = ReflectiveInjector.fromResolvedProviders(providers);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
+     * @experimental
      */
     ReflectiveInjector.fromResolvedProviders = function (providers, parent) {
         if (parent === void 0) { parent = null; }

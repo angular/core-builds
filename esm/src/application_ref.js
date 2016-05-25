@@ -11,6 +11,7 @@ import { Console } from './console';
 import { wtfLeave, wtfCreateScope } from './profile/profile';
 /**
  * Create an Angular zone.
+ * @experimental
  */
 export function createNgZone() {
     return new NgZone({ enableLongStackTrace: assertionsEnabled() });
@@ -20,6 +21,7 @@ var _inPlatformCreate = false;
 /**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
+ * @experimental
  */
 export function createPlatform(injector) {
     if (_inPlatformCreate) {
@@ -41,6 +43,7 @@ export function createPlatform(injector) {
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
+ * @experimental
  */
 export function assertPlatform(requiredToken) {
     var platform = getPlatform();
@@ -54,6 +57,7 @@ export function assertPlatform(requiredToken) {
 }
 /**
  * Dispose the existing platform.
+ * @experimental
  */
 export function disposePlatform() {
     if (isPresent(_platform) && !_platform.disposed) {
@@ -62,6 +66,7 @@ export function disposePlatform() {
 }
 /**
  * Returns the current platform.
+ * @experimental
  */
 export function getPlatform() {
     return isPresent(_platform) && !_platform.disposed ? _platform : null;
@@ -69,6 +74,7 @@ export function getPlatform() {
 /**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
+ * @experimental
  */
 export function coreBootstrap(componentFactory, injector) {
     var appRef = injector.get(ApplicationRef);
@@ -78,6 +84,7 @@ export function coreBootstrap(componentFactory, injector) {
  * Resolves the componentFactory for the given component,
  * waits for asynchronous initializers and bootstraps the component.
  * Requires a platform to be created first.
+ * @experimental
  */
 export function coreLoadAndBootstrap(componentType, injector) {
     var appRef = injector.get(ApplicationRef);
@@ -95,6 +102,7 @@ export function coreLoadAndBootstrap(componentType, injector) {
  *
  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
  * explicitly by calling {@link createPlatform}().
+ * @stable
  */
 export class PlatformRef {
     /**
@@ -143,6 +151,7 @@ PlatformRef_.ctorParameters = [
  * A reference to an Angular application running on a page.
  *
  * For more about Angular applications, see the documentation for {@link bootstrap}.
+ * @stable
  */
 export class ApplicationRef {
     /**

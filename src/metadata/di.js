@@ -24,6 +24,7 @@ var forward_ref_1 = require('../di/forward_ref');
  *
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
  * @ts2dart_const
+ * @stable
  */
 var AttributeMetadata = (function (_super) {
     __extends(AttributeMetadata, _super);
@@ -154,6 +155,7 @@ exports.AttributeMetadata = AttributeMetadata;
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
  * @ts2dart_const
+ * @deprecated
  */
 var QueryMetadata = (function (_super) {
     __extends(QueryMetadata, _super);
@@ -223,6 +225,7 @@ exports.QueryMetadata = QueryMetadata;
  * }
  * ```
  * @ts2dart_const
+ * @stable
  */
 var ContentChildrenMetadata = (function (_super) {
     __extends(ContentChildrenMetadata, _super);
@@ -254,6 +257,7 @@ exports.ContentChildrenMetadata = ContentChildrenMetadata;
  * }
  * ```
  * @ts2dart_const
+ * @stable
  */
 var ContentChildMetadata = (function (_super) {
     __extends(ContentChildMetadata, _super);
@@ -299,6 +303,7 @@ exports.ContentChildMetadata = ContentChildMetadata;
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
  * @ts2dart_const
+ * @deprecated
  */
 var ViewQueryMetadata = (function (_super) {
     __extends(ViewQueryMetadata, _super);
@@ -395,6 +400,7 @@ exports.ViewQueryMetadata = ViewQueryMetadata;
  * }
  * ```
  * @ts2dart_const
+ * @stable
  */
 var ViewChildrenMetadata = (function (_super) {
     __extends(ViewChildrenMetadata, _super);
@@ -475,6 +481,7 @@ exports.ViewChildrenMetadata = ViewChildrenMetadata;
  * }
  * ```
  * @ts2dart_const
+ * @stable
  */
 var ViewChildMetadata = (function (_super) {
     __extends(ViewChildMetadata, _super);

@@ -19,6 +19,17 @@ import * as decorators from './src/util/decorators';
 import * as debug from './src/debug/debug_renderer';
 import * as provider_util from './src/di/provider_util';
 import * as console from './src/console';
+import * as reflection from './src/reflection/reflection';
+import { NoOpAnimationPlayer as NoOpAnimationPlayer_, AnimationPlayer as AnimationPlayer_ } from './src/animation/animation_player';
+import { NoOpAnimationDriver as NoOpAnimationDriver_, AnimationDriver as AnimationDriver_ } from './src/animation/animation_driver';
+import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './src/animation/animation_sequence_player';
+import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
+import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
+import { AnimationStyleUtil as AnimationStyleUtil_ } from './src/animation/animation_style_util';
+import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
+import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
+import { MockAnimationPlayer as MockAnimationPlayer_ } from './testing/animation/mock_animation_player';
+import { MockAnimationDriver as MockAnimationDriver_ } from './testing/animation/mock_animation_driver';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorState: constants.ChangeDetectorState,
@@ -67,5 +78,21 @@ export var __core_private__ = {
     pureProxy10: view_utils.pureProxy10,
     castByValue: view_utils.castByValue,
     Console: console.Console,
+    reflector: reflection.reflector,
+    Reflector: reflection.Reflector,
+    NoOpAnimationPlayer: NoOpAnimationPlayer_,
+    AnimationPlayer: AnimationPlayer_,
+    NoOpAnimationDriver: NoOpAnimationDriver_,
+    AnimationDriver: AnimationDriver_,
+    AnimationSequencePlayer: AnimationSequencePlayer_,
+    AnimationGroupPlayer: AnimationGroupPlayer_,
+    AnimationKeyframe: AnimationKeyframe_,
+    AnimationStyleUtil: AnimationStyleUtil_,
+    AnimationStyles: AnimationStyles_,
+    MockAnimationPlayer: MockAnimationPlayer_,
+    MockAnimationDriver: MockAnimationDriver_,
+    ANY_STATE: ANY_STATE_,
+    EMPTY_STATE: EMPTY_STATE_,
+    FILL_STYLE_FLAG: FILL_STYLE_FLAG_
 };
 //# sourceMappingURL=private_export.js.map

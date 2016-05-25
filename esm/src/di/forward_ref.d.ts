@@ -19,6 +19,7 @@ export interface ForwardRefFn {
  *
  * ### Example
  * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+ * @experimental
  */
 export declare function forwardRef(forwardRefFn: ForwardRefFn): Type;
 /**
@@ -35,5 +36,6 @@ export declare function forwardRef(forwardRefFn: ForwardRefFn): Type;
  * ```
  *
  * See: {@link forwardRef}
+ * @experimental
  */
 export declare function resolveForwardRef(type: any): any;

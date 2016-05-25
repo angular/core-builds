@@ -43,6 +43,7 @@ var ResolvedReflectiveProvider_ = (function () {
 exports.ResolvedReflectiveProvider_ = ResolvedReflectiveProvider_;
 /**
  * An internal resolved representation of a factory function created by resolving {@link Provider}.
+ * @experimental
  */
 var ResolvedReflectiveFactory = (function () {
     function ResolvedReflectiveFactory(

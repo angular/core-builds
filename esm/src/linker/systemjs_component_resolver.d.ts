@@ -3,6 +3,7 @@ import { Type } from '../../src/facade/lang';
 import { ComponentFactory } from './component_factory';
 /**
  * Component resolver that can load components lazily
+ * @experimental
  */
 export declare class SystemJsComponentResolver implements ComponentResolver {
     private _resolver;

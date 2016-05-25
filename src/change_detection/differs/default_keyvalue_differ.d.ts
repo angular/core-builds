@@ -26,6 +26,9 @@ export declare class DefaultKeyValueDiffer implements KeyValueDiffer {
     check(map: Map<any, any>): boolean;
     toString(): string;
 }
+/**
+ * @stable
+ */
 export declare class KeyValueChangeRecord {
     key: any;
     previousValue: any;

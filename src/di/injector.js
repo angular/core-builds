@@ -2,6 +2,9 @@
 var exceptions_1 = require('../../src/facade/exceptions');
 var _THROW_IF_NOT_FOUND = new Object();
 exports.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+/**
+ * @stable
+ */
 var Injector = (function () {
     function Injector() {
     }

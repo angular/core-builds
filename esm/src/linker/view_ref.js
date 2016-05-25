@@ -1,5 +1,8 @@
 import { unimplemented } from '../../src/facade/exceptions';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
+/**
+ * @stable
+ */
 export class ViewRef {
     get destroyed() { return unimplemented(); }
 }
@@ -55,6 +58,7 @@ export class ViewRef {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
+ * @experimental
  */
 export class EmbeddedViewRef extends ViewRef {
     get context() { return unimplemented(); }

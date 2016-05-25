@@ -315,6 +315,9 @@ export class DefaultKeyValueDiffer {
         }
     }
 }
+/**
+ * @stable
+ */
 export class KeyValueChangeRecord {
     constructor(key) {
         this.key = key;

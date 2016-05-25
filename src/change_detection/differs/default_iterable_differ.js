@@ -14,6 +14,9 @@ var DefaultIterableDifferFactory = (function () {
 }());
 exports.DefaultIterableDifferFactory = DefaultIterableDifferFactory;
 var trackByIdentity = function (index, item) { return item; };
+/**
+ * @stable
+ */
 var DefaultIterableDiffer = (function () {
     function DefaultIterableDiffer(_trackByFn) {
         this._trackByFn = _trackByFn;
@@ -489,6 +492,9 @@ var DefaultIterableDiffer = (function () {
     return DefaultIterableDiffer;
 }());
 exports.DefaultIterableDiffer = DefaultIterableDiffer;
+/**
+ * @stable
+ */
 var CollectionChangeRecord = (function () {
     function CollectionChangeRecord(item, trackById) {
         this.item = item;

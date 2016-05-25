@@ -20,6 +20,17 @@ var decorators = require('./src/util/decorators');
 var debug = require('./src/debug/debug_renderer');
 var provider_util = require('./src/di/provider_util');
 var console = require('./src/console');
+var reflection = require('./src/reflection/reflection');
+var animation_player_1 = require('./src/animation/animation_player');
+var animation_driver_1 = require('./src/animation/animation_driver');
+var animation_sequence_player_1 = require('./src/animation/animation_sequence_player');
+var animation_group_player_1 = require('./src/animation/animation_group_player');
+var animation_keyframe_1 = require('./src/animation/animation_keyframe');
+var animation_style_util_1 = require('./src/animation/animation_style_util');
+var animation_styles_1 = require('./src/animation/animation_styles');
+var animation_constants_1 = require('./src/animation/animation_constants');
+var mock_animation_player_1 = require('./testing/animation/mock_animation_player');
+var mock_animation_driver_1 = require('./testing/animation/mock_animation_driver');
 exports.__core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorState: constants.ChangeDetectorState,
@@ -68,5 +79,21 @@ exports.__core_private__ = {
     pureProxy10: view_utils.pureProxy10,
     castByValue: view_utils.castByValue,
     Console: console.Console,
+    reflector: reflection.reflector,
+    Reflector: reflection.Reflector,
+    NoOpAnimationPlayer: animation_player_1.NoOpAnimationPlayer,
+    AnimationPlayer: animation_player_1.AnimationPlayer,
+    NoOpAnimationDriver: animation_driver_1.NoOpAnimationDriver,
+    AnimationDriver: animation_driver_1.AnimationDriver,
+    AnimationSequencePlayer: animation_sequence_player_1.AnimationSequencePlayer,
+    AnimationGroupPlayer: animation_group_player_1.AnimationGroupPlayer,
+    AnimationKeyframe: animation_keyframe_1.AnimationKeyframe,
+    AnimationStyleUtil: animation_style_util_1.AnimationStyleUtil,
+    AnimationStyles: animation_styles_1.AnimationStyles,
+    MockAnimationPlayer: mock_animation_player_1.MockAnimationPlayer,
+    MockAnimationDriver: mock_animation_driver_1.MockAnimationDriver,
+    ANY_STATE: animation_constants_1.ANY_STATE,
+    EMPTY_STATE: animation_constants_1.EMPTY_STATE,
+    FILL_STYLE_FLAG: animation_constants_1.FILL_STYLE_FLAG
 };
 //# sourceMappingURL=private_export.js.map

@@ -10,6 +10,7 @@ function _reflector() {
 var __unused; // prevent missing use Dart warning.
 /**
  * A default set of providers which should be included in any Angular platform.
+ * @experimental
  */
 exports.PLATFORM_COMMON_PROVIDERS = [
     application_ref_1.PLATFORM_CORE_PROVIDERS,

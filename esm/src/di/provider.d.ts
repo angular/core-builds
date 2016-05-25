@@ -14,6 +14,7 @@ import { Type } from '../../src/facade/lang';
  * expect(injector.get("message")).toEqual('Hello');
  * ```
  * @ts2dart_const
+ * @deprecated
  */
 export declare class Provider {
     /**
@@ -222,6 +223,7 @@ export declare class Binding extends Provider {
 export declare function bind(token: any): ProviderBuilder;
 /**
  * Helper class for the {@link bind} function.
+ * @deprecated
  */
 export declare class ProviderBuilder {
     token: any;
@@ -326,6 +328,7 @@ export declare class ProviderBuilder {
  * See {@link Provider} for more details.
  *
  * <!-- TODO: improve the docs -->
+ * @deprecated
  */
 export declare function provide(token: any, {useClass, useValue, useExisting, useFactory, deps, multi}: {
     useClass?: Type;

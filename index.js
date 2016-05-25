@@ -38,7 +38,6 @@ __export(require('./src/change_detection'));
 __export(require('./src/platform_directives_and_pipes'));
 __export(require('./src/platform_common_providers'));
 __export(require('./src/application_common_providers'));
-__export(require('./src/reflection/reflection'));
 var profile_1 = require('./src/profile/profile');
 exports.wtfCreateScope = profile_1.wtfCreateScope;
 exports.wtfLeave = profile_1.wtfLeave;
@@ -54,4 +53,7 @@ exports.ExceptionHandler = exceptions_1.ExceptionHandler;
 exports.WrappedException = exceptions_1.WrappedException;
 exports.BaseException = exceptions_1.BaseException;
 __export(require('./private_export'));
+__export(require('./src/animation/metadata'));
+var animation_player_1 = require('./src/animation/animation_player');
+exports.AnimationPlayer = animation_player_1.AnimationPlayer;
 //# sourceMappingURL=index.js.map

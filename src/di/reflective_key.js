@@ -16,6 +16,7 @@ var forward_ref_1 = require('./forward_ref');
  * `Key` should not be created directly. {@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
+ * @experimental
  */
 var ReflectiveKey = (function () {
     /**

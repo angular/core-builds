@@ -22,6 +22,7 @@ import { OpaqueToken } from './di';
  *
  * bootstrap(MyComponent, [provide(PLATFORM_DIRECTIVES, {useValue: [OtherDirective], multi:true})]);
  * ```
+ * @stable
  */
 export const PLATFORM_DIRECTIVES = 
 /*@ts2dart_const*/ new OpaqueToken("Platform Directives");
@@ -47,6 +48,7 @@ export const PLATFORM_DIRECTIVES =
  *
  * bootstrap(MyComponent, [provide(PLATFORM_PIPES, {useValue: [OtherPipe], multi:true})]);
  * ```
+ * @stable
  */
 export const PLATFORM_PIPES = new OpaqueToken("Platform Pipes");
 //# sourceMappingURL=platform_directives_and_pipes.js.map

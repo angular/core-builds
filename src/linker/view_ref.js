@@ -6,6 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var exceptions_1 = require('../../src/facade/exceptions');
 var constants_1 = require('../change_detection/constants');
+/**
+ * @stable
+ */
 var ViewRef = (function () {
     function ViewRef() {
     }
@@ -69,6 +72,7 @@ exports.ViewRef = ViewRef;
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
+ * @experimental
  */
 var EmbeddedViewRef = (function (_super) {
     __extends(EmbeddedViewRef, _super);

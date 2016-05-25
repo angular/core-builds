@@ -24,6 +24,7 @@ export var ChangeDetectorState;
 /**
  * Describes within the change detector which strategy will be used the next time change
  * detection is triggered.
+ * @stable
  */
 export var ChangeDetectionStrategy;
 (function (ChangeDetectionStrategy) {

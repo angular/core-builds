@@ -3,6 +3,7 @@ import { NgZone } from '../zone/ng_zone';
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular
  * application on the page will have an instance of Testability.
+ * @experimental
  */
 export declare class Testability {
     private _ngZone;
@@ -17,6 +18,7 @@ export declare class Testability {
 }
 /**
  * A global registry of {@link Testability} instances for specific elements.
+ * @experimental
  */
 export declare class TestabilityRegistry {
     constructor();
@@ -36,5 +38,6 @@ export interface GetTestability {
 }
 /**
  * Set the {@link GetTestability} implementation used by the Angular testing framework.
+ * @experimental
  */
 export declare function setTestabilityGetter(getter: GetTestability): void;

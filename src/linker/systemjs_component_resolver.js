@@ -2,6 +2,7 @@
 var lang_1 = require('../../src/facade/lang');
 /**
  * Component resolver that can load components lazily
+ * @experimental
  */
 var SystemJsComponentResolver = (function () {
     function SystemJsComponentResolver(_resolver) {

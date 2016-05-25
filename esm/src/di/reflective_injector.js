@@ -394,6 +394,7 @@ export class ReflectiveInjector {
      * var injector = ReflectiveInjector.fromResolvedProviders(providers);
      * expect(injector.get(Car) instanceof Car).toBe(true);
      * ```
+     * @experimental
      */
     static fromResolvedProviders(providers, parent = null) {
         return new ReflectiveInjector_(ReflectiveProtoInjector.fromResolvedProviders(providers), parent);

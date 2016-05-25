@@ -114,6 +114,9 @@ var DebugDomRenderer = (function () {
         this._delegate.invokeElementMethod(renderElement, methodName, args);
     };
     DebugDomRenderer.prototype.setText = function (renderNode, text) { this._delegate.setText(renderNode, text); };
+    DebugDomRenderer.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing) {
+        return this._delegate.animate(element, startingStyles, keyframes, duration, delay, easing);
+    };
     return DebugDomRenderer;
 }());
 exports.DebugDomRenderer = DebugDomRenderer;

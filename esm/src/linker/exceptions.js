@@ -31,6 +31,7 @@ import { BaseException, WrappedException } from '../../src/facade/exceptions';
  *   }
  * }
  * ```
+ * @stable
  */
 export class ExpressionChangedAfterItHasBeenCheckedException extends BaseException {
     constructor(oldValue, currValue, context) {
@@ -43,6 +44,7 @@ export class ExpressionChangedAfterItHasBeenCheckedException extends BaseExcepti
  *
  * This error wraps the original exception to attach additional contextual information that can
  * be useful for debugging.
+ * @stable
  */
 export class ViewWrappedException extends WrappedException {
     constructor(originalException, originalStack, context) {
@@ -55,6 +57,7 @@ export class ViewWrappedException extends WrappedException {
  * This error indicates a bug in the framework.
  *
  * This is an internal Angular error.
+ * @stable
  */
 export class ViewDestroyedException extends BaseException {
     constructor(details) {

@@ -23,6 +23,7 @@ var di_1 = require('./di');
  *
  * bootstrap(MyComponent, [provide(PLATFORM_DIRECTIVES, {useValue: [OtherDirective], multi:true})]);
  * ```
+ * @stable
  */
 exports.PLATFORM_DIRECTIVES = 
 /*@ts2dart_const*/ new di_1.OpaqueToken("Platform Directives");
@@ -48,6 +49,7 @@ exports.PLATFORM_DIRECTIVES =
  *
  * bootstrap(MyComponent, [provide(PLATFORM_PIPES, {useValue: [OtherPipe], multi:true})]);
  * ```
+ * @stable
  */
 exports.PLATFORM_PIPES = new di_1.OpaqueToken("Platform Pipes");
 //# sourceMappingURL=platform_directives_and_pipes.js.map

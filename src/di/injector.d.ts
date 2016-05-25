@@ -1,4 +1,7 @@
 export declare const THROW_IF_NOT_FOUND: Object;
+/**
+ * @stable
+ */
 export declare abstract class Injector {
     static THROW_IF_NOT_FOUND: Object;
     /**

@@ -1,3 +1,6 @@
+/**
+ * @stable
+ */
 export var LifecycleHooks;
 (function (LifecycleHooks) {
     LifecycleHooks[LifecycleHooks["OnInit"] = 0] = "OnInit";
@@ -67,6 +70,7 @@ export var LIFECYCLE_HOOKS_VALUES = [
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export class OnChanges {
 }
@@ -110,6 +114,7 @@ export class OnChanges {
  *
  * bootstrap(App).catch(err => console.error(err));
  *  ```
+ * @stable
  */
 export class OnInit {
 }
@@ -177,6 +182,7 @@ export class OnInit {
  *   list = [];
  * }
  * ```
+ * @stable
  */
 export class DoCheck {
 }
@@ -268,6 +274,7 @@ export class DoCheck {
  * Invoking `{{ 10000 | countdown }}` would cause the value to be decremented by 50,
  * every 50ms, until it reaches 0.
  *
+ * @stable
  */
 export class OnDestroy {
 }
@@ -321,6 +328,7 @@ export class OnDestroy {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export class AfterContentInit {
 }
@@ -369,6 +377,7 @@ export class AfterContentInit {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export class AfterContentChecked {
 }
@@ -416,6 +425,7 @@ export class AfterContentChecked {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export class AfterViewInit {
 }
@@ -466,6 +476,7 @@ export class AfterViewInit {
  *
  * bootstrap(App).catch(err => console.error(err));
  * ```
+ * @stable
  */
 export class AfterViewChecked {
 }

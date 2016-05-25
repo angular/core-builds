@@ -119,6 +119,7 @@ class _NoopGetTestability {
 }
 /**
  * Set the {@link GetTestability} implementation used by the Angular testing framework.
+ * @experimental
  */
 export function setTestabilityGetter(getter) {
     _testabilityGetter = getter;

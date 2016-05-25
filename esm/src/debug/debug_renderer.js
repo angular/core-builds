@@ -111,5 +111,8 @@ export class DebugDomRenderer {
         this._delegate.invokeElementMethod(renderElement, methodName, args);
     }
     setText(renderNode, text) { this._delegate.setText(renderNode, text); }
+    animate(element, startingStyles, keyframes, duration, delay, easing) {
+        return this._delegate.animate(element, startingStyles, keyframes, duration, delay, easing);
+    }
 }
 //# sourceMappingURL=debug_renderer.js.map

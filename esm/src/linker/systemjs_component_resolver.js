@@ -1,6 +1,7 @@
 import { isString, global } from '../../src/facade/lang';
 /**
  * Component resolver that can load components lazily
+ * @experimental
  */
 export class SystemJsComponentResolver {
     constructor(_resolver) {

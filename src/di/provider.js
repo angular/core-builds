@@ -21,6 +21,7 @@ var exceptions_1 = require('../../src/facade/exceptions');
  * expect(injector.get("message")).toEqual('Hello');
  * ```
  * @ts2dart_const
+ * @deprecated
  */
 var Provider = (function () {
     function Provider(token, _a) {
@@ -143,6 +144,7 @@ function bind(token) {
 exports.bind = bind;
 /**
  * Helper class for the {@link bind} function.
+ * @deprecated
  */
 var ProviderBuilder = (function () {
     function ProviderBuilder(token) {
@@ -265,6 +267,7 @@ exports.ProviderBuilder = ProviderBuilder;
  * See {@link Provider} for more details.
  *
  * <!-- TODO: improve the docs -->
+ * @deprecated
  */
 function provide(token, _a) {
     var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;

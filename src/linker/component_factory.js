@@ -13,6 +13,7 @@ var view_utils_1 = require('./view_utils');
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
  * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
  * method.
+ * @stable
  */
 var ComponentRef = (function () {
     function ComponentRef() {
@@ -115,8 +116,11 @@ var ComponentRef_ = (function (_super) {
     return ComponentRef_;
 }(ComponentRef));
 exports.ComponentRef_ = ComponentRef_;
+/**
+ * @experimental
+ * @ts2dart_const
+ */
 var EMPTY_CONTEXT = new Object();
-/*@ts2dart_const*/
 var ComponentFactory = (function () {
     function ComponentFactory(selector, _viewFactory, _componentType) {
         this.selector = selector;

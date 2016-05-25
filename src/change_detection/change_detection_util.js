@@ -34,6 +34,7 @@ exports.devModeEqual = devModeEqual;
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
+ * @stable
  */
 var WrappedValue = (function () {
     function WrappedValue(wrapped) {
@@ -63,6 +64,7 @@ var ValueUnwrapper = (function () {
 exports.ValueUnwrapper = ValueUnwrapper;
 /**
  * Represents a basic change from a previous to a new value.
+ * @stable
  */
 var SimpleChange = (function () {
     function SimpleChange(previousValue, currentValue) {

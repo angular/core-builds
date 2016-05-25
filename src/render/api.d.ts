@@ -1,5 +1,11 @@
 import { ViewEncapsulation } from '../metadata/view';
 import { Injector } from '../di/injector';
+import { AnimationKeyframe } from '../../src/animation/animation_keyframe';
+import { AnimationPlayer } from '../../src/animation/animation_player';
+import { AnimationStyles } from '../../src/animation/animation_styles';
+/**
+ * @experimental
+ */
 export declare class RenderComponentType {
     id: string;
     templateUrl: string;
@@ -18,6 +24,9 @@ export declare abstract class RenderDebugInfo {
     context: any;
     source: string;
 }
+/**
+ * @experimental
+ */
 export declare abstract class Renderer {
     abstract selectRootElement(selectorOrNode: string | any, debugInfo: RenderDebugInfo): any;
     abstract createElement(parentElement: any, name: string, debugInfo: RenderDebugInfo): any;
@@ -43,6 +52,7 @@ export declare abstract class Renderer {
     abstract setElementStyle(renderElement: any, styleName: string, styleValue: string): any;
     abstract invokeElementMethod(renderElement: any, methodName: string, args: any[]): any;
     abstract setText(renderNode: any, text: string): any;
+    abstract animate(element: any, startingStyles: AnimationStyles, keyframes: AnimationKeyframe[], duration: number, delay: number, easing: string): AnimationPlayer;
 }
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
@@ -55,6 +65,7 @@ export declare abstract class Renderer {
  * If you are implementing a custom renderer, you must implement this interface.
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+ * @experimental
  */
 export declare abstract class RootRenderer {
     abstract renderComponent(componentType: RenderComponentType): Renderer;

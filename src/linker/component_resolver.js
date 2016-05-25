@@ -13,6 +13,7 @@ var decorators_1 = require('../di/decorators');
 /**
  * Low-level service for loading {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
+ * @experimental
  */
 var ComponentResolver = (function () {
     function ComponentResolver() {

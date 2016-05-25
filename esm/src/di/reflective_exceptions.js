@@ -26,6 +26,7 @@ function constructResolvingPath(keys) {
 }
 /**
  * Base class for all errors arising from misconfigured providers.
+ * @stable
  */
 export class AbstractProviderError extends BaseException {
     constructor(injector, key, constructResolvingMessage) {
@@ -55,6 +56,7 @@ export class AbstractProviderError extends BaseException {
  *
  * expect(() => Injector.resolveAndCreate([A])).toThrowError();
  * ```
+ * @stable
  */
 export class NoProviderError extends AbstractProviderError {
     constructor(injector, key) {
@@ -79,6 +81,7 @@ export class NoProviderError extends AbstractProviderError {
  * ```
  *
  * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
+ * @stable
  */
 export class CyclicDependencyError extends AbstractProviderError {
     constructor(injector, key) {
@@ -112,6 +115,7 @@ export class CyclicDependencyError extends AbstractProviderError {
  *   expect(e.originalStack).toBeDefined();
  * }
  * ```
+ * @stable
  */
 export class InstantiationError extends WrappedException {
     constructor(injector, originalException, originalStack, key) {
@@ -139,6 +143,7 @@ export class InstantiationError extends WrappedException {
  * ```typescript
  * expect(() => Injector.resolveAndCreate(["not a type"])).toThrowError();
  * ```
+ * @stable
  */
 export class InvalidProviderError extends BaseException {
     constructor(provider) {
@@ -172,6 +177,7 @@ export class InvalidProviderError extends BaseException {
  *
  * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
  * ```
+ * @stable
  */
 export class NoAnnotationError extends BaseException {
     constructor(typeOrFunc, params) {
@@ -206,6 +212,7 @@ export class NoAnnotationError extends BaseException {
  *
  * expect(() => injector.getAt(100)).toThrowError();
  * ```
+ * @stable
  */
 export class OutOfBoundsError extends BaseException {
     constructor(index) {

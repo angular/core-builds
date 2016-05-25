@@ -11,6 +11,9 @@ export class DefaultIterableDifferFactory {
     }
 }
 var trackByIdentity = (index, item) => item;
+/**
+ * @stable
+ */
 export class DefaultIterableDiffer {
     constructor(_trackByFn) {
         this._trackByFn = _trackByFn;
@@ -471,6 +474,9 @@ export class DefaultIterableDiffer {
             identityChanges.join(', ') + "\n";
     }
 }
+/**
+ * @stable
+ */
 export class CollectionChangeRecord {
     constructor(item, trackById) {
         this.item = item;

@@ -70,6 +70,7 @@ export { NgZoneError } from './ng_zone_impl';
  *   }
  * }
  * ```
+ * @experimental
  */
 export declare class NgZone {
     static isInAngularZone(): boolean;

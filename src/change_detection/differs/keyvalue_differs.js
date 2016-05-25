@@ -6,6 +6,7 @@ var di_1 = require('../../di');
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  * @ts2dart_const
+ * @stable
  */
 var KeyValueDiffers = (function () {
     /*@ts2dart_const*/
