@@ -1,4 +1,4 @@
-import { stringify, isString } from '../../src/facade/lang';
+import { stringify, isString, StringWrapper } from '../../src/facade/lang';
 import { DependencyMetadata } from '../di/metadata';
 import { resolveForwardRef } from '../di/forward_ref';
 /**
@@ -168,7 +168,7 @@ export class QueryMetadata extends DependencyMetadata {
      * returns a list of variable bindings this is querying for.
      * Only applicable if this is a variable bindings query.
      */
-    get varBindings() { return this.selector.split(','); }
+    get varBindings() { return StringWrapper.split(this.selector, /\s*,\s*/g); }
     toString() { return `@Query(${stringify(this.selector)})`; }
 }
 // TODO: add an example after ContentChildren and ViewChildren are in master

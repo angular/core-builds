@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-85ce184
+ * @license AngularJS v2.0.0-0cb93a4
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -767,7 +767,7 @@ var __extends = (this && this.__extends) || function (d, b) {
              * returns a list of variable bindings this is querying for.
              * Only applicable if this is a variable bindings query.
              */
-            get: function () { return this.selector.split(','); },
+            get: function () { return StringWrapper.split(this.selector, /\s*,\s*/g); },
             enumerable: true,
             configurable: true
         });

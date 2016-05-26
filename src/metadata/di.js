@@ -196,7 +196,7 @@ var QueryMetadata = (function (_super) {
          * returns a list of variable bindings this is querying for.
          * Only applicable if this is a variable bindings query.
          */
-        get: function () { return this.selector.split(','); },
+        get: function () { return lang_1.StringWrapper.split(this.selector, /\s*,\s*/g); },
         enumerable: true,
         configurable: true
     });
