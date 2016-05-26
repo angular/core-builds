@@ -43,7 +43,7 @@ exports.ViewRef = ViewRef;
  * </ul>
  * ```
  *
- * We have two {@link TemplateRef}s:
+ * ... we have two {@link TemplateRef}s:
  *
  * Outer {@link TemplateRef}:
  * ```
