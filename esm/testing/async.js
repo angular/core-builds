@@ -14,13 +14,11 @@
  * ```
  */
 export function async(fn) {
-    return () => {
-        return new Promise((finishCallback, failCallback) => {
-            var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];
-            var testZoneSpec = new AsyncTestZoneSpec(finishCallback, failCallback, 'test');
-            var testZone = Zone.current.fork(testZoneSpec);
-            return testZone.run(fn);
-        });
-    };
+    return () => new Promise((finishCallback, failCallback) => {
+        var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];
+        var testZoneSpec = new AsyncTestZoneSpec(finishCallback, failCallback, 'test');
+        var testZone = Zone.current.fork(testZoneSpec);
+        return testZone.run(fn);
+    });
 }
 //# sourceMappingURL=async.js.map
