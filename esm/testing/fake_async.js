@@ -69,14 +69,6 @@ export function tick(millis = 0) {
     _getFakeAsyncZoneSpec().tick(millis);
 }
 /**
- * Discard all remaining periodic tasks.
- */
-export function discardPeriodicTasks() {
-    let zoneSpec = _getFakeAsyncZoneSpec();
-    let pendingTimers = zoneSpec.pendingPeriodicTimers;
-    zoneSpec.pendingPeriodicTimers.length = 0;
-}
-/**
  * Flush any pending microtasks.
  */
 export function flushMicrotasks() {

@@ -78,15 +78,6 @@ function tick(millis) {
 }
 exports.tick = tick;
 /**
- * Discard all remaining periodic tasks.
- */
-function discardPeriodicTasks() {
-    var zoneSpec = _getFakeAsyncZoneSpec();
-    var pendingTimers = zoneSpec.pendingPeriodicTimers;
-    zoneSpec.pendingPeriodicTimers.length = 0;
-}
-exports.discardPeriodicTasks = discardPeriodicTasks;
-/**
  * Flush any pending microtasks.
  */
 function flushMicrotasks() {
