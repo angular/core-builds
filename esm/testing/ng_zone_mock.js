@@ -3,7 +3,6 @@ import { EventEmitter, ObservableWrapper } from '../src/facade/async';
 export class MockNgZone extends NgZone {
     constructor() {
         super({ enableLongStackTrace: false });
-        /** @internal */
         this._mockOnStable = new EventEmitter(false);
     }
     get onStable() { return this._mockOnStable; }

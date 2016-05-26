@@ -10,7 +10,6 @@ var MockNgZone = (function (_super) {
     __extends(MockNgZone, _super);
     function MockNgZone() {
         _super.call(this, { enableLongStackTrace: false });
-        /** @internal */
         this._mockOnStable = new async_1.EventEmitter(false);
     }
     Object.defineProperty(MockNgZone.prototype, "onStable", {
