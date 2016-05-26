@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-72707d8
+ * @license AngularJS v2.0.0-c39e046
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10054,7 +10054,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * </ul>
      * ```
      *
-     * ... we have two {@link TemplateRef}s:
+     * We have two {@link TemplateRef}s:
      *
      * Outer {@link TemplateRef}:
      * ```
