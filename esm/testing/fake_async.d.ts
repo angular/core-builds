@@ -35,6 +35,10 @@ export declare function clearPendingTimers(): void;
  */
 export declare function tick(millis?: number): void;
 /**
+ * Discard all remaining periodic tasks.
+ */
+export declare function discardPeriodicTasks(): void;
+/**
  * Flush any pending microtasks.
  */
 export declare function flushMicrotasks(): void;
