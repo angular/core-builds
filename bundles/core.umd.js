@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-fa2ce81
+ * @license AngularJS v2.0.0-b7b5678
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2210,22 +2210,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         return OnInit;
     }());
     /**
-     * Implement this interface to override the default change detection algorithm for your directive.
+     * Implement this interface to supplement the default change detection algorithm in your directive.
      *
-     * `ngDoCheck` gets called to check the changes in the directives instead of the default algorithm.
+     * `ngDoCheck` gets called to check the changes in the directives in addition to the default algorithm.
      *
      * The default change detection algorithm looks for differences by comparing bound-property values
-     * by reference across change detection runs. When `DoCheck` is implemented, the default algorithm
-     * is disabled and `ngDoCheck` is responsible for checking for changes.
+     * by reference across change detection runs.
      *
-     * Implementing this interface allows improving performance by using insights about the component,
-     * its implementation and data types of its properties.
+     * Note that a directive typically should not use both `DoCheck` and {@link OnChanges} to respond to
+     * changes on the same input. `ngOnChanges` will continue to be called when the default change detector
+     * detects changes, so it is usually unnecessary to respond to changes on the same input in both hooks.
+     * Reaction to the changes have to be handled from within the `ngDoCheck` callback.
      *
-     * Note that a directive should not implement both `DoCheck` and {@link OnChanges} at the same time.
-     * `ngOnChanges` would not be called when a directive implements `DoCheck`. Reaction to the changes
-     * have to be handled from within the `ngDoCheck` callback.
-     *
-     * Use {@link KeyValueDiffers} and {@link IterableDiffers} to add your custom check mechanisms.
+     * You can use {@link KeyValueDiffers} and {@link IterableDiffers} to help add your custom check mechanisms.
      *
      * ### Example ([live demo](http://plnkr.co/edit/QpnIlF0CR2i5bcYbHEUJ?p=preview))
      *
