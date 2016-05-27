@@ -10,6 +10,7 @@ export class NoOpAnimationPlayer {
         this.parentPlayer = null;
         scheduleMicroTask(() => this._onFinish());
     }
+    /** @internal */
     _onFinish() {
         this._subscriptions.forEach(entry => { entry(); });
         this._subscriptions = [];

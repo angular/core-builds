@@ -20,6 +20,7 @@ var NoOpAnimationPlayer = (function () {
         this.parentPlayer = null;
         lang_1.scheduleMicroTask(function () { return _this._onFinish(); });
     }
+    /** @internal */
     NoOpAnimationPlayer.prototype._onFinish = function () {
         this._subscriptions.forEach(function (entry) { entry(); });
         this._subscriptions = [];

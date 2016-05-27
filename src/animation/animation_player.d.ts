@@ -14,7 +14,6 @@ export declare class NoOpAnimationPlayer implements AnimationPlayer {
     private _subscriptions;
     parentPlayer: AnimationPlayer;
     constructor();
-    _onFinish(): void;
     onDone(fn: Function): void;
     play(): void;
     pause(): void;

@@ -1,6 +1,5 @@
-import { isPresent } from '../facade/lang';
+import { isPresent, scheduleMicroTask } from '../facade/lang';
 import { NoOpAnimationPlayer } from './animation_player';
-import { scheduleMicroTask } from '../facade/lang';
 export class AnimationSequencePlayer {
     constructor(_players) {
         this._players = _players;

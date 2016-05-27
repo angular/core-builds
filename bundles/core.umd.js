@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-307d105
+ * @license AngularJS v2.0.0-ec198b0
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -11166,6 +11166,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.parentPlayer = null;
             scheduleMicroTask(function () { return _this._onFinish(); });
         }
+        /** @internal */
         NoOpAnimationPlayer.prototype._onFinish = function () {
             this._subscriptions.forEach(function (entry) { entry(); });
             this._subscriptions = [];

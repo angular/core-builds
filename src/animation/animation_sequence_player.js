@@ -1,7 +1,6 @@
 "use strict";
 var lang_1 = require('../facade/lang');
 var animation_player_1 = require('./animation_player');
-var lang_2 = require('../facade/lang');
 var AnimationSequencePlayer = (function () {
     function AnimationSequencePlayer(_players) {
         var _this = this;
@@ -21,7 +20,7 @@ var AnimationSequencePlayer = (function () {
             return;
         if (this._players.length == 0) {
             this._activePlayer = new animation_player_1.NoOpAnimationPlayer();
-            lang_2.scheduleMicroTask(function () { return _this._onFinish(); });
+            lang_1.scheduleMicroTask(function () { return _this._onFinish(); });
         }
         else if (this._currentIndex >= this._players.length) {
             this._activePlayer = new animation_player_1.NoOpAnimationPlayer();
