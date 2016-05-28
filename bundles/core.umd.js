@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v2.0.0-040b101
+ * @license AngularJS v0.0.0-PLACEHOLDER
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9793,9 +9793,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         /*@ts2dart_const*/ (
         /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
     ];
-    /**
-     * @internal
-     */
     var APPLICATION_CORE_PROVIDERS = [
         /* @ts2dart_Provider */ { provide: NgZone, useFactory: createNgZone, deps: [] },
         ApplicationRef_,

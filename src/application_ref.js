@@ -409,9 +409,6 @@ exports.PLATFORM_CORE_PROVIDERS =
     /*@ts2dart_const*/ (
     /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
 ];
-/**
- * @internal
- */
 exports.APPLICATION_CORE_PROVIDERS = [
     /* @ts2dart_Provider */ { provide: ng_zone_1.NgZone, useFactory: createNgZone, deps: [] },
     ApplicationRef_,

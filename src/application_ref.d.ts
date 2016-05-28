@@ -170,3 +170,11 @@ export declare const PLATFORM_CORE_PROVIDERS: (typeof PlatformRef_ | {
     provide: typeof PlatformRef;
     useExisting: typeof PlatformRef_;
 })[];
+export declare const APPLICATION_CORE_PROVIDERS: ({
+    provide: typeof NgZone;
+    useFactory: () => NgZone;
+    deps: any[];
+} | typeof ApplicationRef_ | {
+    provide: typeof ApplicationRef;
+    useExisting: typeof ApplicationRef_;
+})[];
