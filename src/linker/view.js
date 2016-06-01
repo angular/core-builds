@@ -231,8 +231,7 @@ var AppView = (function () {
     AppView.prototype.dirtyParentQueriesInternal = function () { };
     AppView.prototype.detectChanges = function (throwOnChange) {
         var s = _scope_check(this.clazz);
-        if (this.cdMode === change_detection_1.ChangeDetectionStrategy.Detached ||
-            this.cdMode === change_detection_1.ChangeDetectionStrategy.Checked ||
+        if (this.cdMode === change_detection_1.ChangeDetectionStrategy.Checked ||
             this.cdState === change_detection_1.ChangeDetectorState.Errored)
             return;
         if (this.destroyed) {
@@ -253,12 +252,18 @@ var AppView = (function () {
     };
     AppView.prototype.detectContentChildrenChanges = function (throwOnChange) {
         for (var i = 0; i < this.contentChildren.length; ++i) {
-            this.contentChildren[i].detectChanges(throwOnChange);
+            var child = this.contentChildren[i];
+            if (child.cdMode === change_detection_1.ChangeDetectionStrategy.Detached)
+                continue;
+            child.detectChanges(throwOnChange);
         }
     };
     AppView.prototype.detectViewChildrenChanges = function (throwOnChange) {
         for (var i = 0; i < this.viewChildren.length; ++i) {
-            this.viewChildren[i].detectChanges(throwOnChange);
+            var child = this.viewChildren[i];
+            if (child.cdMode === change_detection_1.ChangeDetectionStrategy.Detached)
+                continue;
+            child.detectChanges(throwOnChange);
         }
     };
     AppView.prototype.addToContentChildren = function (renderAppElement) {
