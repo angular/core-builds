@@ -29,8 +29,6 @@ var animation_keyframe_1 = require('./src/animation/animation_keyframe');
 var animation_style_util_1 = require('./src/animation/animation_style_util');
 var animation_styles_1 = require('./src/animation/animation_styles');
 var animation_constants_1 = require('./src/animation/animation_constants');
-var mock_animation_player_1 = require('./testing/animation/mock_animation_player');
-var mock_animation_driver_1 = require('./testing/animation/mock_animation_driver');
 exports.__core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorState: constants.ChangeDetectorState,
@@ -90,8 +88,6 @@ exports.__core_private__ = {
     AnimationKeyframe: animation_keyframe_1.AnimationKeyframe,
     AnimationStyleUtil: animation_style_util_1.AnimationStyleUtil,
     AnimationStyles: animation_styles_1.AnimationStyles,
-    MockAnimationPlayer: mock_animation_player_1.MockAnimationPlayer,
-    MockAnimationDriver: mock_animation_driver_1.MockAnimationDriver,
     ANY_STATE: animation_constants_1.ANY_STATE,
     EMPTY_STATE: animation_constants_1.EMPTY_STATE,
     FILL_STYLE_FLAG: animation_constants_1.FILL_STYLE_FLAG

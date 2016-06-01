@@ -11534,76 +11534,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationStyles;
     }());
-    var MockAnimationPlayer = (function () {
-        function MockAnimationPlayer() {
-            this._subscriptions = [];
-            this._finished = false;
-            this._destroyed = false;
-            this.parentPlayer = null;
-            this.log = [];
-        }
-        MockAnimationPlayer.prototype._onfinish = function () {
-            if (!this._finished) {
-                this._finished = true;
-                this.log.push('finish');
-                this._subscriptions.forEach(function (entry) { entry(); });
-                this._subscriptions = [];
-                if (!isPresent(this.parentPlayer)) {
-                    this.destroy();
-                }
-            }
-        };
-        MockAnimationPlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
-        MockAnimationPlayer.prototype.play = function () { this.log.push('play'); };
-        MockAnimationPlayer.prototype.pause = function () { this.log.push('pause'); };
-        MockAnimationPlayer.prototype.restart = function () { this.log.push('restart'); };
-        MockAnimationPlayer.prototype.finish = function () { this._onfinish(); };
-        MockAnimationPlayer.prototype.reset = function () { this.log.push('reset'); };
-        MockAnimationPlayer.prototype.destroy = function () {
-            if (!this._destroyed) {
-                this._destroyed = true;
-                this.finish();
-                this.log.push('destroy');
-            }
-        };
-        MockAnimationPlayer.prototype.setPosition = function (p) { };
-        MockAnimationPlayer.prototype.getPosition = function () { return 0; };
-        return MockAnimationPlayer;
-    }());
-    var MockAnimationDriver = (function (_super) {
-        __extends(MockAnimationDriver, _super);
-        function MockAnimationDriver() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
-            }
-            _super.apply(this, args);
-            this.log = [];
-        }
-        MockAnimationDriver.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing) {
-            var player = new MockAnimationPlayer();
-            this.log.push({
-                'element': element,
-                'startingStyles': _serializeStyles(startingStyles),
-                'keyframes': keyframes,
-                'keyframeLookup': _serializeKeyframes(keyframes),
-                'duration': duration,
-                'delay': delay,
-                'easing': easing,
-                'player': player
-            });
-            return player;
-        };
-        return MockAnimationDriver;
-    }(AnimationDriver));
-    function _serializeKeyframes(keyframes) {
-        return keyframes.map(function (keyframe) { return [keyframe.offset, _serializeStyles(keyframe.styles)]; });
-    }
-    function _serializeStyles(styles) {
-        var flatStyles = {};
-        styles.styles.forEach(function (entry) { return StringMapWrapper.forEach(entry, function (val, prop) { flatStyles[prop] = val; }); });
-        return flatStyles;
-    }
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorState: ChangeDetectorState,
@@ -11663,8 +11593,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         AnimationKeyframe: AnimationKeyframe,
         AnimationStyleUtil: AnimationStyleUtil,
         AnimationStyles: AnimationStyles,
-        MockAnimationPlayer: MockAnimationPlayer,
-        MockAnimationDriver: MockAnimationDriver,
         ANY_STATE: ANY_STATE,
         EMPTY_STATE: EMPTY_STATE,
         FILL_STYLE_FLAG: FILL_STYLE_FLAG

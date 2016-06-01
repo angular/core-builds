@@ -28,8 +28,6 @@ import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animati
 import { AnimationStyleUtil as AnimationStyleUtil_ } from './src/animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
 import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
-import { MockAnimationPlayer as MockAnimationPlayer_ } from './testing/animation/mock_animation_player';
-import { MockAnimationDriver as MockAnimationDriver_ } from './testing/animation/mock_animation_driver';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorState: constants.ChangeDetectorState,
@@ -89,8 +87,6 @@ export var __core_private__ = {
     AnimationKeyframe: AnimationKeyframe_,
     AnimationStyleUtil: AnimationStyleUtil_,
     AnimationStyles: AnimationStyles_,
-    MockAnimationPlayer: MockAnimationPlayer_,
-    MockAnimationDriver: MockAnimationDriver_,
     ANY_STATE: ANY_STATE_,
     EMPTY_STATE: EMPTY_STATE_,
     FILL_STYLE_FLAG: FILL_STYLE_FLAG_

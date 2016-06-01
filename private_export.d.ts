@@ -30,8 +30,6 @@ import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animati
 import { AnimationStyleUtil as AnimationStyleUtil_ } from './src/animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
 import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
-import { MockAnimationPlayer as MockAnimationPlayer_ } from './testing/animation/mock_animation_player';
-import { MockAnimationDriver as MockAnimationDriver_ } from './testing/animation/mock_animation_driver';
 export declare namespace __core_private_types__ {
     var isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
     type ChangeDetectorState = constants.ChangeDetectorState;
@@ -117,10 +115,6 @@ export declare namespace __core_private_types__ {
     var ANY_STATE: typeof ANY_STATE_;
     var EMPTY_STATE: typeof EMPTY_STATE_;
     var FILL_STYLE_FLAG: typeof FILL_STYLE_FLAG_;
-    type MockAnimationPlayer = MockAnimationPlayer_;
-    var MockAnimationPlayer: typeof MockAnimationPlayer_;
-    type MockAnimationDriver = MockAnimationDriver_;
-    var MockAnimationDriver: typeof MockAnimationDriver_;
 }
 export declare var __core_private__: {
     isDefaultChangeDetectionStrategy: (changeDetectionStrategy: constants.ChangeDetectionStrategy) => boolean;
@@ -181,8 +175,6 @@ export declare var __core_private__: {
     AnimationKeyframe: typeof AnimationKeyframe_;
     AnimationStyleUtil: typeof AnimationStyleUtil_;
     AnimationStyles: typeof AnimationStyles_;
-    MockAnimationPlayer: typeof MockAnimationPlayer_;
-    MockAnimationDriver: typeof MockAnimationDriver_;
     ANY_STATE: string;
     EMPTY_STATE: string;
     FILL_STYLE_FLAG: string;
