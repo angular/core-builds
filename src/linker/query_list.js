@@ -20,12 +20,10 @@ var async_1 = require('../../src/facade/async');
  * ```typescript
  * @Component({...})
  * class Container {
- *   constructor(@Query(Item) items: QueryList<Item>) {
- *     items.changes.subscribe(_ => console.log(items.length));
- *   }
+ *   @ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * @deprecated
+ * @stable
  */
 var QueryList = (function () {
     function QueryList() {
