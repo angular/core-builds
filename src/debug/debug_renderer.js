@@ -1,6 +1,7 @@
 "use strict";
 var lang_1 = require('../../src/facade/lang');
 var debug_node_1 = require('./debug_node');
+var collection_1 = require('../../src/facade/collection');
 var DebugDomRootRenderer = (function () {
     function DebugDomRootRenderer(_delegate) {
         this._delegate = _delegate;
@@ -102,12 +103,27 @@ var DebugDomRenderer = (function () {
         this._delegate.setBindingDebugInfo(renderElement, propertyName, propertyValue);
     };
     DebugDomRenderer.prototype.setElementClass = function (renderElement, className, isAdd) {
+        var debugEl = debug_node_1.getDebugNode(renderElement);
+        if (lang_1.isPresent(debugEl) && debugEl instanceof debug_node_1.DebugElement) {
+            debugEl.classes[className] = isAdd;
+        }
         this._delegate.setElementClass(renderElement, className, isAdd);
     };
     DebugDomRenderer.prototype.setElementStyles = function (renderElement, styles) {
+        var debugEl = debug_node_1.getDebugNode(renderElement);
+        if (lang_1.isPresent(debugEl) && debugEl instanceof debug_node_1.DebugElement) {
+            var elStyles = debugEl.styles;
+            collection_1.StringMapWrapper.forEach(styles, function (value, prop) {
+                elStyles[prop] = value;
+            });
+        }
         this._delegate.setElementStyles(renderElement, styles);
     };
     DebugDomRenderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
+        var debugEl = debug_node_1.getDebugNode(renderElement);
+        if (lang_1.isPresent(debugEl) && debugEl instanceof debug_node_1.DebugElement) {
+            debugEl.styles[styleName] = styleValue;
+        }
         this._delegate.setElementStyle(renderElement, styleName, styleValue);
     };
     DebugDomRenderer.prototype.invokeElementMethod = function (renderElement, methodName, args) {

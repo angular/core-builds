@@ -27,8 +27,8 @@ import { NoOpAnimationDriver as NoOpAnimationDriver_, AnimationDriver as Animati
 import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './src/animation/animation_sequence_player';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
-import { AnimationStyleUtil as AnimationStyleUtil_ } from './src/animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
+import * as animationUtils from './src/animation/animation_style_util';
 import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 export declare namespace __core_private_types__ {
     var isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
@@ -108,8 +108,11 @@ export declare namespace __core_private_types__ {
     var AnimationGroupPlayer: typeof AnimationGroupPlayer_;
     type AnimationKeyframe = AnimationKeyframe_;
     var AnimationKeyframe: typeof AnimationKeyframe_;
-    type AnimationStyleUtil = AnimationStyleUtil_;
-    var AnimationStyleUtil: typeof AnimationStyleUtil_;
+    var balanceAnimationStyles: typeof animationUtils.balanceAnimationStyles;
+    var balanceAnimationKeyframes: typeof animationUtils.balanceAnimationKeyframes;
+    var flattenStyles: typeof animationUtils.flattenStyles;
+    var clearStyles: typeof animationUtils.clearStyles;
+    var collectAndResolveStyles: typeof animationUtils.collectAndResolveStyles;
     type AnimationStyles = AnimationStyles_;
     var AnimationStyles: typeof AnimationStyles_;
     var ANY_STATE: typeof ANY_STATE_;
@@ -173,7 +176,31 @@ export declare var __core_private__: {
     AnimationSequencePlayer: typeof AnimationSequencePlayer_;
     AnimationGroupPlayer: typeof AnimationGroupPlayer_;
     AnimationKeyframe: typeof AnimationKeyframe_;
-    AnimationStyleUtil: typeof AnimationStyleUtil_;
+    balanceAnimationStyles: (previousStyles: {
+        [key: string]: string | number;
+    }, newStyles: {
+        [key: string]: string | number;
+    }, nullValue?: any) => {
+        [key: string]: string;
+    };
+    balanceAnimationKeyframes: (collectedStyles: {
+        [key: string]: string | number;
+    }, finalStateStyles: {
+        [key: string]: string | number;
+    }, keyframes: any[]) => any[];
+    flattenStyles: (styles: {
+        [key: string]: string | number;
+    }[]) => {};
+    clearStyles: (styles: {
+        [key: string]: string | number;
+    }) => {
+        [key: string]: string;
+    };
+    collectAndResolveStyles: (collection: {
+        [key: string]: string | number;
+    }, styles: {
+        [key: string]: string | number;
+    }[]) => {}[];
     AnimationStyles: typeof AnimationStyles_;
     ANY_STATE: string;
     EMPTY_STATE: string;

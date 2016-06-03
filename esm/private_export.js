@@ -25,8 +25,8 @@ import { NoOpAnimationDriver as NoOpAnimationDriver_, AnimationDriver as Animati
 import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './src/animation/animation_sequence_player';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
-import { AnimationStyleUtil as AnimationStyleUtil_ } from './src/animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
+import * as animationUtils from './src/animation/animation_style_util';
 import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
@@ -85,7 +85,11 @@ export var __core_private__ = {
     AnimationSequencePlayer: AnimationSequencePlayer_,
     AnimationGroupPlayer: AnimationGroupPlayer_,
     AnimationKeyframe: AnimationKeyframe_,
-    AnimationStyleUtil: AnimationStyleUtil_,
+    balanceAnimationStyles: animationUtils.balanceAnimationStyles,
+    balanceAnimationKeyframes: animationUtils.balanceAnimationKeyframes,
+    flattenStyles: animationUtils.flattenStyles,
+    clearStyles: animationUtils.clearStyles,
+    collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: AnimationStyles_,
     ANY_STATE: ANY_STATE_,
     EMPTY_STATE: EMPTY_STATE_,

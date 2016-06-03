@@ -49,6 +49,8 @@ export class DebugElement extends DebugNode {
         super(nativeNode, parent, _debugInfo);
         this.properties = {};
         this.attributes = {};
+        this.classes = {};
+        this.styles = {};
         this.childNodes = [];
         this.nativeElement = nativeNode;
     }

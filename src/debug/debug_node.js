@@ -84,6 +84,8 @@ var DebugElement = (function (_super) {
         _super.call(this, nativeNode, parent, _debugInfo);
         this.properties = {};
         this.attributes = {};
+        this.classes = {};
+        this.styles = {};
         this.childNodes = [];
         this.nativeElement = nativeNode;
     }

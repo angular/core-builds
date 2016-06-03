@@ -41,6 +41,12 @@ export declare class DebugElement extends DebugNode {
     attributes: {
         [key: string]: string;
     };
+    classes: {
+        [key: string]: boolean;
+    };
+    styles: {
+        [key: string]: string;
+    };
     childNodes: DebugNode[];
     nativeElement: any;
     constructor(nativeNode: any, parent: any, _debugInfo: RenderDebugInfo);

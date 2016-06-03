@@ -26,8 +26,8 @@ var animation_driver_1 = require('./src/animation/animation_driver');
 var animation_sequence_player_1 = require('./src/animation/animation_sequence_player');
 var animation_group_player_1 = require('./src/animation/animation_group_player');
 var animation_keyframe_1 = require('./src/animation/animation_keyframe');
-var animation_style_util_1 = require('./src/animation/animation_style_util');
 var animation_styles_1 = require('./src/animation/animation_styles');
+var animationUtils = require('./src/animation/animation_style_util');
 var animation_constants_1 = require('./src/animation/animation_constants');
 exports.__core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
@@ -86,7 +86,11 @@ exports.__core_private__ = {
     AnimationSequencePlayer: animation_sequence_player_1.AnimationSequencePlayer,
     AnimationGroupPlayer: animation_group_player_1.AnimationGroupPlayer,
     AnimationKeyframe: animation_keyframe_1.AnimationKeyframe,
-    AnimationStyleUtil: animation_style_util_1.AnimationStyleUtil,
+    balanceAnimationStyles: animationUtils.balanceAnimationStyles,
+    balanceAnimationKeyframes: animationUtils.balanceAnimationKeyframes,
+    flattenStyles: animationUtils.flattenStyles,
+    clearStyles: animationUtils.clearStyles,
+    collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: animation_styles_1.AnimationStyles,
     ANY_STATE: animation_constants_1.ANY_STATE,
     EMPTY_STATE: animation_constants_1.EMPTY_STATE,

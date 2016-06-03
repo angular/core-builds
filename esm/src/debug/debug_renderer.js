@@ -1,5 +1,6 @@
 import { isPresent } from '../../src/facade/lang';
 import { DebugNode, DebugElement, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
+import { StringMapWrapper } from '../../src/facade/collection';
 export class DebugDomRootRenderer {
     constructor(_delegate) {
         this._delegate = _delegate;
@@ -99,12 +100,27 @@ export class DebugDomRenderer {
         this._delegate.setBindingDebugInfo(renderElement, propertyName, propertyValue);
     }
     setElementClass(renderElement, className, isAdd) {
+        var debugEl = getDebugNode(renderElement);
+        if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+            debugEl.classes[className] = isAdd;
+        }
         this._delegate.setElementClass(renderElement, className, isAdd);
     }
     setElementStyles(renderElement, styles) {
+        var debugEl = getDebugNode(renderElement);
+        if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+            var elStyles = debugEl.styles;
+            StringMapWrapper.forEach(styles, (value, prop) => {
+                elStyles[prop] = value;
+            });
+        }
         this._delegate.setElementStyles(renderElement, styles);
     }
     setElementStyle(renderElement, styleName, styleValue) {
+        var debugEl = getDebugNode(renderElement);
+        if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+            debugEl.styles[styleName] = styleValue;
+        }
         this._delegate.setElementStyle(renderElement, styleName, styleValue);
     }
     invokeElementMethod(renderElement, methodName, args) {

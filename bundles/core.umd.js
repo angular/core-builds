@@ -10208,6 +10208,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             _super.call(this, nativeNode, parent, _debugInfo);
             this.properties = {};
             this.attributes = {};
+            this.classes = {};
+            this.styles = {};
             this.childNodes = [];
             this.nativeElement = nativeNode;
         }
@@ -11131,12 +11133,27 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._delegate.setBindingDebugInfo(renderElement, propertyName, propertyValue);
         };
         DebugDomRenderer.prototype.setElementClass = function (renderElement, className, isAdd) {
+            var debugEl = getDebugNode(renderElement);
+            if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+                debugEl.classes[className] = isAdd;
+            }
             this._delegate.setElementClass(renderElement, className, isAdd);
         };
         DebugDomRenderer.prototype.setElementStyles = function (renderElement, styles) {
+            var debugEl = getDebugNode(renderElement);
+            if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+                var elStyles = debugEl.styles;
+                StringMapWrapper.forEach(styles, function (value, prop) {
+                    elStyles[prop] = value;
+                });
+            }
             this._delegate.setElementStyles(renderElement, styles);
         };
         DebugDomRenderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
+            var debugEl = getDebugNode(renderElement);
+            if (isPresent(debugEl) && debugEl instanceof DebugElement) {
+                debugEl.styles[styleName] = styleValue;
+            }
             this._delegate.setElementStyle(renderElement, styleName, styleValue);
         };
         DebugDomRenderer.prototype.invokeElementMethod = function (renderElement, methodName, args) {
@@ -11275,6 +11292,12 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.styles = styles;
         }
         return AnimationKeyframe;
+    }());
+    var AnimationStyles = (function () {
+        function AnimationStyles(styles) {
+            this.styles = styles;
+        }
+        return AnimationStyles;
     }());
     var AUTO_STYLE = "*";
     var AnimationEntryMetadata = (function () {
@@ -11438,105 +11461,94 @@ var __extends = (this && this.__extends) || function (d, b) {
     var FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
     var ANY_STATE = '*';
     var EMPTY_STATE = 'void';
-    var AnimationStyleUtil = (function () {
-        function AnimationStyleUtil() {
+    function balanceAnimationStyles(previousStyles, newStyles, nullValue) {
+        if (nullValue === void 0) { nullValue = null; }
+        var finalStyles = {};
+        StringMapWrapper.forEach(newStyles, function (value, prop) {
+            finalStyles[prop] = value.toString();
+        });
+        StringMapWrapper.forEach(previousStyles, function (value, prop) {
+            if (!isPresent(finalStyles[prop])) {
+                finalStyles[prop] = nullValue;
+            }
+        });
+        return finalStyles;
+    }
+    function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes) {
+        var limit = keyframes.length - 1;
+        var firstKeyframe = keyframes[0];
+        // phase 1: copy all the styles from the first keyframe into the lookup map
+        var flatenedFirstKeyframeStyles = flattenStyles(firstKeyframe.styles.styles);
+        var extraFirstKeyframeStyles = {};
+        var hasExtraFirstStyles = false;
+        StringMapWrapper.forEach(collectedStyles, function (value, prop) {
+            // if the style is already defined in the first keyframe then
+            // we do not replace it.
+            if (!flatenedFirstKeyframeStyles[prop]) {
+                flatenedFirstKeyframeStyles[prop] = value;
+                extraFirstKeyframeStyles[prop] = value;
+                hasExtraFirstStyles = true;
+            }
+        });
+        var keyframeCollectedStyles = StringMapWrapper.merge({}, flatenedFirstKeyframeStyles);
+        // phase 2: normalize the final keyframe
+        var finalKeyframe = keyframes[limit];
+        ListWrapper.insert(finalKeyframe.styles.styles, 0, finalStateStyles);
+        var flatenedFinalKeyframeStyles = flattenStyles(finalKeyframe.styles.styles);
+        var extraFinalKeyframeStyles = {};
+        var hasExtraFinalStyles = false;
+        StringMapWrapper.forEach(keyframeCollectedStyles, function (value, prop) {
+            if (!isPresent(flatenedFinalKeyframeStyles[prop])) {
+                extraFinalKeyframeStyles[prop] = AUTO_STYLE;
+                hasExtraFinalStyles = true;
+            }
+        });
+        if (hasExtraFinalStyles) {
+            finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
         }
-        AnimationStyleUtil.balanceStyles = function (previousStyles, newStyles, nullValue) {
-            if (nullValue === void 0) { nullValue = null; }
-            var finalStyles = {};
-            StringMapWrapper.forEach(newStyles, function (value, prop) {
+        StringMapWrapper.forEach(flatenedFinalKeyframeStyles, function (value, prop) {
+            if (!isPresent(flatenedFirstKeyframeStyles[prop])) {
+                extraFirstKeyframeStyles[prop] = AUTO_STYLE;
+                hasExtraFirstStyles = true;
+            }
+        });
+        if (hasExtraFirstStyles) {
+            firstKeyframe.styles.styles.push(extraFirstKeyframeStyles);
+        }
+        return keyframes;
+    }
+    function clearStyles(styles) {
+        var finalStyles = {};
+        StringMapWrapper.keys(styles).forEach(function (key) {
+            finalStyles[key] = null;
+        });
+        return finalStyles;
+    }
+    function collectAndResolveStyles(collection, styles) {
+        return styles.map(function (entry) {
+            var stylesObj = {};
+            StringMapWrapper.forEach(entry, function (value, prop) {
+                if (value == FILL_STYLE_FLAG) {
+                    value = collection[prop];
+                    if (!isPresent(value)) {
+                        value = AUTO_STYLE;
+                    }
+                }
+                collection[prop] = value;
+                stylesObj[prop] = value;
+            });
+            return stylesObj;
+        });
+    }
+    function flattenStyles(styles) {
+        var finalStyles = {};
+        styles.forEach(function (entry) {
+            StringMapWrapper.forEach(entry, function (value, prop) {
                 finalStyles[prop] = value;
             });
-            StringMapWrapper.forEach(previousStyles, function (value, prop) {
-                if (!isPresent(finalStyles[prop])) {
-                    finalStyles[prop] = nullValue;
-                }
-            });
-            return finalStyles;
-        };
-        AnimationStyleUtil.balanceKeyframes = function (collectedStyles, finalStateStyles, keyframes) {
-            var limit = keyframes.length - 1;
-            var firstKeyframe = keyframes[0];
-            // phase 1: copy all the styles from the first keyframe into the lookup map
-            var flatenedFirstKeyframeStyles = AnimationStyleUtil.flattenStyles(firstKeyframe.styles.styles);
-            var extraFirstKeyframeStyles = {};
-            var hasExtraFirstStyles = false;
-            StringMapWrapper.forEach(collectedStyles, function (value, prop) {
-                // if the style is already defined in the first keyframe then
-                // we do not replace it.
-                if (!flatenedFirstKeyframeStyles[prop]) {
-                    flatenedFirstKeyframeStyles[prop] = value;
-                    extraFirstKeyframeStyles[prop] = value;
-                    hasExtraFirstStyles = true;
-                }
-            });
-            var keyframeCollectedStyles = StringMapWrapper.merge({}, flatenedFirstKeyframeStyles);
-            // phase 2: normalize the final keyframe
-            var finalKeyframe = keyframes[limit];
-            ListWrapper.insert(finalKeyframe.styles.styles, 0, finalStateStyles);
-            var flatenedFinalKeyframeStyles = AnimationStyleUtil.flattenStyles(finalKeyframe.styles.styles);
-            var extraFinalKeyframeStyles = {};
-            var hasExtraFinalStyles = false;
-            StringMapWrapper.forEach(keyframeCollectedStyles, function (value, prop) {
-                if (!isPresent(flatenedFinalKeyframeStyles[prop])) {
-                    extraFinalKeyframeStyles[prop] = AUTO_STYLE;
-                    hasExtraFinalStyles = true;
-                }
-            });
-            if (hasExtraFinalStyles) {
-                finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
-            }
-            StringMapWrapper.forEach(flatenedFinalKeyframeStyles, function (value, prop) {
-                if (!isPresent(flatenedFirstKeyframeStyles[prop])) {
-                    extraFirstKeyframeStyles[prop] = AUTO_STYLE;
-                    hasExtraFirstStyles = true;
-                }
-            });
-            if (hasExtraFirstStyles) {
-                firstKeyframe.styles.styles.push(extraFirstKeyframeStyles);
-            }
-            return keyframes;
-        };
-        AnimationStyleUtil.clearStyles = function (styles) {
-            var finalStyles = {};
-            StringMapWrapper.keys(styles).forEach(function (key) {
-                finalStyles[key] = null;
-            });
-            return finalStyles;
-        };
-        AnimationStyleUtil.collectAndResolveStyles = function (collection, styles) {
-            return styles.map(function (entry) {
-                var stylesObj = {};
-                StringMapWrapper.forEach(entry, function (value, prop) {
-                    if (value == FILL_STYLE_FLAG) {
-                        value = collection[prop];
-                        if (!isPresent(value)) {
-                            value = AUTO_STYLE;
-                        }
-                    }
-                    collection[prop] = value;
-                    stylesObj[prop] = value;
-                });
-                return stylesObj;
-            });
-        };
-        AnimationStyleUtil.flattenStyles = function (styles) {
-            var finalStyles = {};
-            styles.forEach(function (entry) {
-                StringMapWrapper.forEach(entry, function (value, prop) {
-                    finalStyles[prop] = value;
-                });
-            });
-            return finalStyles;
-        };
-        return AnimationStyleUtil;
-    }());
-    var AnimationStyles = (function () {
-        function AnimationStyles(styles) {
-            this.styles = styles;
-        }
-        return AnimationStyles;
-    }());
+        });
+        return finalStyles;
+    }
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorState: ChangeDetectorState,
@@ -11594,7 +11606,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         AnimationSequencePlayer: AnimationSequencePlayer,
         AnimationGroupPlayer: AnimationGroupPlayer,
         AnimationKeyframe: AnimationKeyframe,
-        AnimationStyleUtil: AnimationStyleUtil,
+        balanceAnimationStyles: balanceAnimationStyles,
+        balanceAnimationKeyframes: balanceAnimationKeyframes,
+        flattenStyles: flattenStyles,
+        clearStyles: clearStyles,
+        collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
         ANY_STATE: ANY_STATE,
         EMPTY_STATE: EMPTY_STATE,
