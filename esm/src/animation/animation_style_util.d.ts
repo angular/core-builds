@@ -20,6 +20,9 @@ export declare function collectAndResolveStyles(collection: {
 }, styles: {
     [key: string]: string | number;
 }[]): {}[];
+export declare function renderStyles(element: any, renderer: any, styles: {
+    [key: string]: string | number;
+}): void;
 export declare function flattenStyles(styles: {
     [key: string]: string | number;
 }[]): {};

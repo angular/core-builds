@@ -11139,16 +11139,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             }
             this._delegate.setElementClass(renderElement, className, isAdd);
         };
-        DebugDomRenderer.prototype.setElementStyles = function (renderElement, styles) {
-            var debugEl = getDebugNode(renderElement);
-            if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-                var elStyles = debugEl.styles;
-                StringMapWrapper.forEach(styles, function (value, prop) {
-                    elStyles[prop] = value;
-                });
-            }
-            this._delegate.setElementStyles(renderElement, styles);
-        };
         DebugDomRenderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
             var debugEl = getDebugNode(renderElement);
             if (isPresent(debugEl) && debugEl instanceof DebugElement) {
@@ -11540,6 +11530,11 @@ var __extends = (this && this.__extends) || function (d, b) {
             return stylesObj;
         });
     }
+    function renderStyles(element, renderer, styles) {
+        StringMapWrapper.forEach(styles, function (value, prop) {
+            renderer.setElementStyle(element, prop, value);
+        });
+    }
     function flattenStyles(styles) {
         var finalStyles = {};
         styles.forEach(function (entry) {
@@ -11610,6 +11605,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         balanceAnimationKeyframes: balanceAnimationKeyframes,
         flattenStyles: flattenStyles,
         clearStyles: clearStyles,
+        renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
         ANY_STATE: ANY_STATE,

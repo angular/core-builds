@@ -46,9 +46,6 @@ export declare abstract class Renderer {
      */
     abstract setBindingDebugInfo(renderElement: any, propertyName: string, propertyValue: string): void;
     abstract setElementClass(renderElement: any, className: string, isAdd: boolean): any;
-    abstract setElementStyles(renderElement: any, styles: {
-        [key: string]: string;
-    }): any;
     abstract setElementStyle(renderElement: any, styleName: string, styleValue: string): any;
     abstract invokeElementMethod(renderElement: any, methodName: string, args?: any[]): any;
     abstract setText(renderNode: any, text: string): any;

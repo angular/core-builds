@@ -112,6 +112,7 @@ export declare namespace __core_private_types__ {
     var balanceAnimationKeyframes: typeof animationUtils.balanceAnimationKeyframes;
     var flattenStyles: typeof animationUtils.flattenStyles;
     var clearStyles: typeof animationUtils.clearStyles;
+    var renderStyles: typeof animationUtils.renderStyles;
     var collectAndResolveStyles: typeof animationUtils.collectAndResolveStyles;
     type AnimationStyles = AnimationStyles_;
     var AnimationStyles: typeof AnimationStyles_;
@@ -196,6 +197,9 @@ export declare var __core_private__: {
     }) => {
         [key: string]: string;
     };
+    renderStyles: (element: any, renderer: any, styles: {
+        [key: string]: string | number;
+    }) => void;
     collectAndResolveStyles: (collection: {
         [key: string]: string | number;
     }, styles: {

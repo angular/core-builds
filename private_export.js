@@ -90,6 +90,7 @@ exports.__core_private__ = {
     balanceAnimationKeyframes: animationUtils.balanceAnimationKeyframes,
     flattenStyles: animationUtils.flattenStyles,
     clearStyles: animationUtils.clearStyles,
+    renderStyles: animationUtils.renderStyles,
     collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: animation_styles_1.AnimationStyles,
     ANY_STATE: animation_constants_1.ANY_STATE,

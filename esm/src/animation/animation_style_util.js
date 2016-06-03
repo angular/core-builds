@@ -80,6 +80,11 @@ export function collectAndResolveStyles(collection, styles) {
         return stylesObj;
     });
 }
+export function renderStyles(element, renderer, styles) {
+    StringMapWrapper.forEach(styles, (value, prop) => {
+        renderer.setElementStyle(element, prop, value);
+    });
+}
 export function flattenStyles(styles) {
     var finalStyles = {};
     styles.forEach(entry => {

@@ -1,6 +1,5 @@
 import { isPresent } from '../facade/lang';
 import { DebugNode, DebugElement, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
-import { StringMapWrapper } from '../../src/facade/collection';
 export class DebugDomRootRenderer {
     constructor(_delegate) {
         this._delegate = _delegate;
@@ -105,16 +104,6 @@ export class DebugDomRenderer {
             debugEl.classes[className] = isAdd;
         }
         this._delegate.setElementClass(renderElement, className, isAdd);
-    }
-    setElementStyles(renderElement, styles) {
-        var debugEl = getDebugNode(renderElement);
-        if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-            var elStyles = debugEl.styles;
-            StringMapWrapper.forEach(styles, (value, prop) => {
-                elStyles[prop] = value;
-            });
-        }
-        this._delegate.setElementStyles(renderElement, styles);
     }
     setElementStyle(renderElement, styleName, styleValue) {
         var debugEl = getDebugNode(renderElement);

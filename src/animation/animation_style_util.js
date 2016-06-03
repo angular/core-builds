@@ -86,6 +86,12 @@ function collectAndResolveStyles(collection, styles) {
     });
 }
 exports.collectAndResolveStyles = collectAndResolveStyles;
+function renderStyles(element, renderer, styles) {
+    collection_1.StringMapWrapper.forEach(styles, function (value, prop) {
+        renderer.setElementStyle(element, prop, value);
+    });
+}
+exports.renderStyles = renderStyles;
 function flattenStyles(styles) {
     var finalStyles = {};
     styles.forEach(function (entry) {
