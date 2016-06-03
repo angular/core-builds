@@ -36,7 +36,7 @@ export declare class DebugNode {
 export declare class DebugElement extends DebugNode {
     name: string;
     properties: {
-        [key: string]: string;
+        [key: string]: any;
     };
     attributes: {
         [key: string]: string;
