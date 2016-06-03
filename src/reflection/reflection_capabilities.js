@@ -1,5 +1,5 @@
 "use strict";
-var lang_1 = require('../../src/facade/lang');
+var lang_1 = require('../facade/lang');
 var ReflectionCapabilities = (function () {
     function ReflectionCapabilities(reflect) {
         this._reflect = lang_1.isPresent(reflect) ? reflect : lang_1.global.Reflect;

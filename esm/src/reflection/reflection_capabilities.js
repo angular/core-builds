@@ -1,4 +1,4 @@
-import { Type, isPresent, isFunction, global, stringify } from '../../src/facade/lang';
+import { Type, isPresent, isFunction, global, stringify } from '../facade/lang';
 export class ReflectionCapabilities {
     constructor(reflect) {
         this._reflect = isPresent(reflect) ? reflect : global.Reflect;

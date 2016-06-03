@@ -1,4 +1,4 @@
-import { unimplemented } from '../../src/facade/exceptions';
+import { unimplemented } from '../facade/exceptions';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 /**
  * @stable

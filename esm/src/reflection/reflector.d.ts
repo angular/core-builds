@@ -1,4 +1,4 @@
-import { Type } from '../../src/facade/lang';
+import { Type } from '../facade/lang';
 import { SetterFn, GetterFn, MethodFn } from './types';
 import { ReflectorReader } from './reflector_reader';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';

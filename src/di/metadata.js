@@ -1,5 +1,5 @@
 "use strict";
-var lang_1 = require('../../src/facade/lang');
+var lang_1 = require('../facade/lang');
 /**
  * A parameter metadata that specifies a dependency.
  *
@@ -17,7 +17,7 @@ var lang_1 = require('../../src/facade/lang');
  * }
  *
  * var injector = Injector.resolveAndCreate([
- *  provide("MyEngine", {useClass: Engine}),
+ *  {provide: "MyEngine", useClass: Engine},
  *  Car
  * ]);
  *

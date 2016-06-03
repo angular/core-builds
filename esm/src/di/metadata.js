@@ -1,4 +1,4 @@
-import { stringify } from '../../src/facade/lang';
+import { stringify } from '../facade/lang';
 /**
  * A parameter metadata that specifies a dependency.
  *
@@ -16,7 +16,7 @@ import { stringify } from '../../src/facade/lang';
  * }
  *
  * var injector = Injector.resolveAndCreate([
- *  provide("MyEngine", {useClass: Engine}),
+ *  {provide: "MyEngine", useClass: Engine},
  *  Car
  * ]);
  *

@@ -292,7 +292,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      *
      * var injector = Injector.resolveAndCreate([
-     *  provide("MyEngine", {useClass: Engine}),
+     *  {provide: "MyEngine", useClass: Engine},
      *  Car
      * ]);
      *
@@ -4278,7 +4278,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      *
-     * bootstrap(MyApp, [provide(ExceptionHandler, {useClass: MyExceptionHandler})])
+     * bootstrap(MyApp, {provide: ExceptionHandler, useClass: MyExceptionHandler}])
      *
      * ```
      * @stable
@@ -4460,7 +4460,7 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * ```typescript
          * var injector = ReflectiveInjector.resolveAndCreate([
-         *   provide("validToken", {useValue: "Value"})
+         *   {provide: "validToken", useValue: "Value"}
          * ]);
          * expect(injector.get("validToken")).toEqual("Value");
          * expect(() => injector.get("invalidToken")).toThrowError();
@@ -4984,8 +4984,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```typescript
      * var injector = Injector.resolveAndCreate([
-     *   provide("one", {useFactory: (two) => "two", deps: [[new Inject("two")]]}),
-     *   provide("two", {useFactory: (one) => "one", deps: [[new Inject("one")]]})
+     *   {provide: "one", useFactory: (two) => "two", deps: [[new Inject("two")]]},
+     *   {provide: "two", useFactory: (one) => "one", deps: [[new Inject("one")]]}
      * ]);
      *
      * expect(() => injector.get("one")).toThrowError();
@@ -5329,11 +5329,11 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * var injectorClass = Injector.resolveAndCreate([
          *   Car,
-         *   provide(Vehicle, {useClass: Car})
+         *   {provide: Vehicle, useClass: Car}
          * ]);
          * var injectorAlias = Injector.resolveAndCreate([
          *   Car,
-         *   provide(Vehicle, {useExisting: Car})
+         *   {provide: Vehicle, useExisting: Car}
          * ]);
          *
          * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
@@ -5356,7 +5356,7 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * ```typescript
          * var injector = Injector.resolveAndCreate([
-         *   provide('message', {useValue: 'Hello'})
+         *   {provide: 'message', useValue: 'Hello'}
          * ]);
          *
          * expect(injector.get('message')).toEqual('Hello');
@@ -5381,11 +5381,11 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * var injectorAlias = Injector.resolveAndCreate([
          *   Car,
-         *   provide(Vehicle, {useExisting: Car})
+         *   {provide: Vehicle, useExisting: Car}
          * ]);
          * var injectorClass = Injector.resolveAndCreate([
          *   Car,
-         *   provide(Vehicle, {useClass: Car})
+         *   {provide: Vehicle, useClass: Car})
          * ]);
          *
          * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
@@ -5408,8 +5408,8 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * ```typescript
          * var injector = Injector.resolveAndCreate([
-         *   provide(Number, {useFactory: () => { return 1+2; }}),
-         *   provide(String, {useFactory: (v) => { return "Value: " + v; }, deps: [Number]})
+         *   {provide: Number, useFactory: () => { return 1+2; }},
+         *   {provide: String, useFactory: (v) => { return "Value: " + v; }, deps: [Number]}
          * ]);
          *
          * expect(injector.get(Number)).toEqual(3);
@@ -6489,7 +6489,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var t = new OpaqueToken("value");
      *
      * var injector = Injector.resolveAndCreate([
-     *   provide(t, {useValue: "bindingValue"})
+     *   {provide: t, useValue: "bindingValue"}
      * ]);
      *
      * expect(injector.get(t)).toEqual("bindingValue");
@@ -10341,7 +10341,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   ...
      * }
      *
-     * bootstrap(MyComponent, [provide(PLATFORM_DIRECTIVES, {useValue: [OtherDirective], multi:true})]);
+     * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective], multi:true}]);
      * ```
      * @stable
      */
@@ -10367,7 +10367,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   ...
      * }
      *
-     * bootstrap(MyComponent, [provide(PLATFORM_PIPES, {useValue: [OtherPipe], multi:true})]);
+     * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
      * ```
      * @stable
      */

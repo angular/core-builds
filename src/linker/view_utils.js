@@ -1,8 +1,8 @@
 "use strict";
 var security_1 = require('../security');
-var lang_1 = require('../../src/facade/lang');
-var collection_1 = require('../../src/facade/collection');
-var exceptions_1 = require('../../src/facade/exceptions');
+var lang_1 = require('../facade/lang');
+var collection_1 = require('../facade/collection');
+var exceptions_1 = require('../facade/exceptions');
 var element_1 = require('./element');
 var exceptions_2 = require('./exceptions');
 var change_detection_1 = require('../change_detection/change_detection');

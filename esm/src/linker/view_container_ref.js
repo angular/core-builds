@@ -1,6 +1,6 @@
-import { ListWrapper } from '../../src/facade/collection';
-import { unimplemented } from '../../src/facade/exceptions';
-import { isPresent } from '../../src/facade/lang';
+import { ListWrapper } from '../facade/collection';
+import { unimplemented } from '../facade/exceptions';
+import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 /**
  * Represents a container where one or more Views can be attached.

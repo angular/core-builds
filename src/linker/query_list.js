@@ -1,7 +1,7 @@
 "use strict";
-var collection_1 = require('../../src/facade/collection');
-var lang_1 = require('../../src/facade/lang');
-var async_1 = require('../../src/facade/async');
+var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
+var async_1 = require('../facade/async');
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.

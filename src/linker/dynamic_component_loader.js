@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var component_resolver_1 = require('./component_resolver');
-var lang_1 = require('../../src/facade/lang');
+var lang_1 = require('../facade/lang');
 var reflective_injector_1 = require('../di/reflective_injector');
 var decorators_1 = require('../di/decorators');
 /**

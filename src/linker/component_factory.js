@@ -4,8 +4,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var lang_1 = require('../../src/facade/lang');
-var exceptions_1 = require('../../src/facade/exceptions');
+var lang_1 = require('../facade/lang');
+var exceptions_1 = require('../facade/exceptions');
 var view_utils_1 = require('./view_utils');
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.

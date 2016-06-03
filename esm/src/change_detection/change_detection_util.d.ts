@@ -1,4 +1,4 @@
-export { looseIdentical } from '../../src/facade/lang';
+export { looseIdentical } from '../facade/lang';
 export declare var uninitialized: Object;
 export declare function devModeEqual(a: any, b: any): boolean;
 /**

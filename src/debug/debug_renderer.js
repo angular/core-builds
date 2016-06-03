@@ -1,5 +1,5 @@
 "use strict";
-var lang_1 = require('../../src/facade/lang');
+var lang_1 = require('../facade/lang');
 var debug_node_1 = require('./debug_node');
 var collection_1 = require('../../src/facade/collection');
 var DebugDomRootRenderer = (function () {

@@ -1,4 +1,4 @@
-import { Type } from '../../src/facade/lang';
+import { Type } from '../facade/lang';
 import { ComponentFactory } from './component_factory';
 /**
  * Low-level service for loading {@link ComponentFactory}s, which

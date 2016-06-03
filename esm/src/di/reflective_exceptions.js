@@ -1,6 +1,6 @@
-import { ListWrapper } from '../../src/facade/collection';
-import { stringify, isBlank } from '../../src/facade/lang';
-import { BaseException, WrappedException } from '../../src/facade/exceptions';
+import { ListWrapper } from '../facade/collection';
+import { stringify, isBlank } from '../facade/lang';
+import { BaseException, WrappedException } from '../facade/exceptions';
 function findFirstClosedCycle(keys) {
     var res = [];
     for (var i = 0; i < keys.length; ++i) {
@@ -73,8 +73,8 @@ export class NoProviderError extends AbstractProviderError {
  *
  * ```typescript
  * var injector = Injector.resolveAndCreate([
- *   provide("one", {useFactory: (two) => "two", deps: [[new Inject("two")]]}),
- *   provide("two", {useFactory: (one) => "one", deps: [[new Inject("one")]]})
+ *   {provide: "one", useFactory: (two) => "two", deps: [[new Inject("two")]]},
+ *   {provide: "two", useFactory: (one) => "one", deps: [[new Inject("one")]]}
  * ]);
  *
  * expect(() => injector.get("one")).toThrowError();

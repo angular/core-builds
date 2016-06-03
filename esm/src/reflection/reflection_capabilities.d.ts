@@ -1,4 +1,4 @@
-import { Type, ConcreteType } from '../../src/facade/lang';
+import { Type, ConcreteType } from '../facade/lang';
 import { GetterFn, SetterFn, MethodFn } from './types';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 export declare class ReflectionCapabilities implements PlatformReflectionCapabilities {

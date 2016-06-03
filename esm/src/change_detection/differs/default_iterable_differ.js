@@ -1,6 +1,6 @@
-import { BaseException } from '../../../src/facade/exceptions';
-import { isListLikeIterable, iterateListLike } from '../../../src/facade/collection';
-import { isBlank, isPresent, stringify, getMapKey, looseIdentical, isArray } from '../../../src/facade/lang';
+import { BaseException } from '../../facade/exceptions';
+import { isListLikeIterable, iterateListLike } from '../../facade/collection';
+import { isBlank, isPresent, stringify, getMapKey, looseIdentical, isArray } from '../../facade/lang';
 /* @ts2dart_const */
 export class DefaultIterableDifferFactory {
     constructor() {

@@ -1,4 +1,4 @@
-import { ConcreteType, Type } from '../../src/facade/lang';
+import { ConcreteType, Type } from '../facade/lang';
 /**
  * Declares the interface to be used with {@link Class}.
  */

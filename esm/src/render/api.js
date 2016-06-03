@@ -1,4 +1,4 @@
-import { unimplemented } from '../../src/facade/exceptions';
+import { unimplemented } from '../facade/exceptions';
 /**
  * @experimental
  */

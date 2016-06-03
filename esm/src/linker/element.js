@@ -1,6 +1,6 @@
-import { isPresent } from '../../src/facade/lang';
-import { ListWrapper } from '../../src/facade/collection';
-import { BaseException } from '../../src/facade/exceptions';
+import { isPresent } from '../facade/lang';
+import { ListWrapper } from '../facade/collection';
+import { BaseException } from '../facade/exceptions';
 import { ViewType } from './view_type';
 import { ElementRef } from './element_ref';
 import { ViewContainerRef_ } from './view_container_ref';

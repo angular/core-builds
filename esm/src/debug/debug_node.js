@@ -1,5 +1,5 @@
-import { isPresent } from '../../src/facade/lang';
-import { ListWrapper, MapWrapper } from '../../src/facade/collection';
+import { isPresent } from '../facade/lang';
+import { ListWrapper, MapWrapper } from '../facade/collection';
 export class EventListener {
     constructor(name, callback) {
         this.name = name;

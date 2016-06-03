@@ -1,4 +1,4 @@
-import { isPresent } from '../../src/facade/lang';
+import { isPresent } from '../facade/lang';
 import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 /**

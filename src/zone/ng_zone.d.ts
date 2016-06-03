@@ -1,4 +1,4 @@
-import { EventEmitter } from '../../src/facade/async';
+import { EventEmitter } from '../facade/async';
 export { NgZoneError } from './ng_zone_impl';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.

@@ -1,4 +1,4 @@
-import { Type } from '../../src/facade/lang';
+import { Type } from '../facade/lang';
 import { ElementRef } from './element_ref';
 import { ViewRef } from './view_ref';
 import { AppElement } from './element';

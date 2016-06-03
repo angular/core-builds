@@ -1,5 +1,5 @@
-import { isPresent, isBlank } from '../../src/facade/lang';
-import { StringMapWrapper } from '../../src/facade/collection';
+import { isPresent, isBlank } from '../facade/lang';
+import { StringMapWrapper } from '../facade/collection';
 import { ViewType } from './view_type';
 /* @ts2dart_const */
 export class StaticNodeDebugInfo {

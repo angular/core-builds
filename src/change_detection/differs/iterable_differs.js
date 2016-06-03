@@ -1,7 +1,7 @@
 "use strict";
-var lang_1 = require('../../../src/facade/lang');
-var exceptions_1 = require('../../../src/facade/exceptions');
-var collection_1 = require('../../../src/facade/collection');
+var lang_1 = require('../../facade/lang');
+var exceptions_1 = require('../../facade/exceptions');
+var collection_1 = require('../../facade/collection');
 var di_1 = require('../../di');
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.

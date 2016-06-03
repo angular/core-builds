@@ -1,7 +1,7 @@
 "use strict";
-var lang_1 = require('../../src/facade/lang');
-var collection_1 = require('../../src/facade/collection');
-var lang_2 = require('../../src/facade/lang');
+var lang_1 = require('../facade/lang');
+var collection_1 = require('../facade/collection');
+var lang_2 = require('../facade/lang');
 exports.looseIdentical = lang_2.looseIdentical;
 exports.uninitialized = new Object();
 function devModeEqual(a, b) {

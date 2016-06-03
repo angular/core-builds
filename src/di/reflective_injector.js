@@ -1,8 +1,8 @@
 "use strict";
-var collection_1 = require('../../src/facade/collection');
+var collection_1 = require('../facade/collection');
 var reflective_provider_1 = require('./reflective_provider');
 var reflective_exceptions_1 = require('./reflective_exceptions');
-var exceptions_1 = require('../../src/facade/exceptions');
+var exceptions_1 = require('../facade/exceptions');
 var reflective_key_1 = require('./reflective_key');
 var metadata_1 = require('./metadata');
 var injector_1 = require('./injector');

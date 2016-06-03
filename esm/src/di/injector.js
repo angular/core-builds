@@ -1,4 +1,4 @@
-import { unimplemented } from '../../src/facade/exceptions';
+import { unimplemented } from '../facade/exceptions';
 const _THROW_IF_NOT_FOUND = new Object();
 export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 /**
@@ -16,7 +16,7 @@ export class Injector {
      *
      * ```typescript
      * var injector = ReflectiveInjector.resolveAndCreate([
-     *   provide("validToken", {useValue: "Value"})
+     *   {provide: "validToken", useValue: "Value"}
      * ]);
      * expect(injector.get("validToken")).toEqual("Value");
      * expect(() => injector.get("invalidToken")).toThrowError();

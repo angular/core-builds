@@ -1,9 +1,9 @@
 "use strict";
-var collection_1 = require('../../src/facade/collection');
-var lang_1 = require('../../src/facade/lang');
-var exceptions_1 = require('../../src/facade/exceptions');
+var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
+var exceptions_1 = require('../facade/exceptions');
 var ng_zone_1 = require('../zone/ng_zone');
-var async_1 = require('../../src/facade/async');
+var async_1 = require('../facade/async');
 var decorators_1 = require('../di/decorators');
 var Testability = (function () {
     function Testability(_ngZone) {

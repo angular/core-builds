@@ -1,7 +1,7 @@
 "use strict";
-var collection_1 = require('../../../src/facade/collection');
-var lang_1 = require('../../../src/facade/lang');
-var exceptions_1 = require('../../../src/facade/exceptions');
+var collection_1 = require('../../facade/collection');
+var lang_1 = require('../../facade/lang');
+var exceptions_1 = require('../../facade/exceptions');
 /* @ts2dart_const */
 var DefaultKeyValueDifferFactory = (function () {
     function DefaultKeyValueDifferFactory() {

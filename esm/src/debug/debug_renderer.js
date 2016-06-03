@@ -1,4 +1,4 @@
-import { isPresent } from '../../src/facade/lang';
+import { isPresent } from '../facade/lang';
 import { DebugNode, DebugElement, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
 import { StringMapWrapper } from '../../src/facade/collection';
 export class DebugDomRootRenderer {

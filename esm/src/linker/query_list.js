@@ -1,6 +1,6 @@
-import { ListWrapper } from '../../src/facade/collection';
-import { getSymbolIterator } from '../../src/facade/lang';
-import { EventEmitter } from '../../src/facade/async';
+import { ListWrapper } from '../facade/collection';
+import { getSymbolIterator } from '../facade/lang';
+import { EventEmitter } from '../facade/async';
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.

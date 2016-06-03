@@ -1,5 +1,5 @@
-import { normalizeBool, isType, isBlank, isFunction, stringify } from '../../src/facade/lang';
-import { BaseException } from '../../src/facade/exceptions';
+import { normalizeBool, isType, isBlank, isFunction, stringify } from '../facade/lang';
+import { BaseException } from '../facade/exceptions';
 /**
  * Describes how the {@link Injector} should instantiate a given token.
  *
@@ -131,11 +131,11 @@ export class ProviderBuilder {
      *
      * var injectorClass = Injector.resolveAndCreate([
      *   Car,
-     *   provide(Vehicle, {useClass: Car})
+     *   {provide: Vehicle, useClass: Car}
      * ]);
      * var injectorAlias = Injector.resolveAndCreate([
      *   Car,
-     *   provide(Vehicle, {useExisting: Car})
+     *   {provide: Vehicle, useExisting: Car}
      * ]);
      *
      * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
@@ -158,7 +158,7 @@ export class ProviderBuilder {
      *
      * ```typescript
      * var injector = Injector.resolveAndCreate([
-     *   provide('message', {useValue: 'Hello'})
+     *   {provide: 'message', useValue: 'Hello'}
      * ]);
      *
      * expect(injector.get('message')).toEqual('Hello');
@@ -183,11 +183,11 @@ export class ProviderBuilder {
      *
      * var injectorAlias = Injector.resolveAndCreate([
      *   Car,
-     *   provide(Vehicle, {useExisting: Car})
+     *   {provide: Vehicle, useExisting: Car}
      * ]);
      * var injectorClass = Injector.resolveAndCreate([
      *   Car,
-     *   provide(Vehicle, {useClass: Car})
+     *   {provide: Vehicle, useClass: Car})
      * ]);
      *
      * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
@@ -210,8 +210,8 @@ export class ProviderBuilder {
      *
      * ```typescript
      * var injector = Injector.resolveAndCreate([
-     *   provide(Number, {useFactory: () => { return 1+2; }}),
-     *   provide(String, {useFactory: (v) => { return "Value: " + v; }, deps: [Number]})
+     *   {provide: Number, useFactory: () => { return 1+2; }},
+     *   {provide: String, useFactory: (v) => { return "Value: " + v; }, deps: [Number]}
      * ]);
      *
      * expect(injector.get(Number)).toEqual(3);

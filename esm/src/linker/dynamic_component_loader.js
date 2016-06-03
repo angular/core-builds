@@ -1,5 +1,5 @@
 import { ComponentResolver } from './component_resolver';
-import { isPresent } from '../../src/facade/lang';
+import { isPresent } from '../facade/lang';
 import { ReflectiveInjector } from '../di/reflective_injector';
 import { Injectable } from '../di/decorators';
 /**

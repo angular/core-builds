@@ -1,4 +1,4 @@
-import { Observable } from '../../src/facade/async';
+import { Observable } from '../facade/async';
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.

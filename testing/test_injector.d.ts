@@ -5,9 +5,9 @@ export declare class TestInjector {
     private _injector;
     private _providers;
     reset(): void;
-    platformProviders: Array<Type | Provider | any[]>;
-    applicationProviders: Array<Type | Provider | any[]>;
-    addProviders(providers: Array<Type | Provider | any[]>): void;
+    platformProviders: Array<Type | Provider | any[] | any>;
+    applicationProviders: Array<Type | Provider | any[] | any>;
+    addProviders(providers: Array<Type | Provider | any[] | any>): void;
     createInjector(): ReflectiveInjector;
     get(token: any): any;
     execute(tokens: any[], fn: Function): any;

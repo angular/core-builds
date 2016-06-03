@@ -1,4 +1,4 @@
-import { Type } from '../../src/facade/lang';
+import { Type } from '../facade/lang';
 import { ReflectiveKey } from './reflective_key';
 import { Provider } from './provider';
 /**

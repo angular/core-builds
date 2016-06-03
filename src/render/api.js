@@ -1,5 +1,5 @@
 "use strict";
-var exceptions_1 = require('../../src/facade/exceptions');
+var exceptions_1 = require('../facade/exceptions');
 /**
  * @experimental
  */

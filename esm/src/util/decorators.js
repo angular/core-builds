@@ -1,4 +1,4 @@
-import { global, isFunction, stringify } from '../../src/facade/lang';
+import { global, isFunction, stringify } from '../facade/lang';
 var _nextClassId = 0;
 function extractAnnotation(annotation) {
     if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {

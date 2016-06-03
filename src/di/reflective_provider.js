@@ -1,6 +1,6 @@
 "use strict";
-var lang_1 = require('../../src/facade/lang');
-var collection_1 = require('../../src/facade/collection');
+var lang_1 = require('../facade/lang');
+var collection_1 = require('../facade/collection');
 var reflection_1 = require('../reflection/reflection');
 var reflective_key_1 = require('./reflective_key');
 var metadata_1 = require('./metadata');

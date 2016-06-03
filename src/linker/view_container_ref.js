@@ -1,7 +1,7 @@
 "use strict";
-var collection_1 = require('../../src/facade/collection');
-var exceptions_1 = require('../../src/facade/exceptions');
-var lang_1 = require('../../src/facade/lang');
+var collection_1 = require('../facade/collection');
+var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
 var profile_1 = require('../profile/profile');
 /**
  * Represents a container where one or more Views can be attached.
