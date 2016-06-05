@@ -57,7 +57,7 @@ export declare var xdescribe: Function;
  *
  * {@example testing/ts/testing.ts region='beforeEachProviders'}
  */
-export declare function beforeEachProviders(fn: any): void;
+export declare function beforeEachProviders(fn: () => Array<any>): void;
 /**
  * Wrapper around Jasmine beforeEach function.
  *
