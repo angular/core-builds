@@ -29,7 +29,7 @@ import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/a
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
 import * as animationUtils from './src/animation/animation_style_util';
-import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
+import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 export declare namespace __core_private_types__ {
     var isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
     type ChangeDetectorState = constants.ChangeDetectorState;
@@ -117,6 +117,7 @@ export declare namespace __core_private_types__ {
     type AnimationStyles = AnimationStyles_;
     var AnimationStyles: typeof AnimationStyles_;
     var ANY_STATE: typeof ANY_STATE_;
+    var DEFAULT_STATE: typeof DEFAULT_STATE_;
     var EMPTY_STATE: typeof EMPTY_STATE_;
     var FILL_STYLE_FLAG: typeof FILL_STYLE_FLAG_;
 }
@@ -207,6 +208,7 @@ export declare var __core_private__: {
     }[]) => {}[];
     AnimationStyles: typeof AnimationStyles_;
     ANY_STATE: string;
+    DEFAULT_STATE: string;
     EMPTY_STATE: string;
     FILL_STYLE_FLAG: string;
 };

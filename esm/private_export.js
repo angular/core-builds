@@ -27,7 +27,7 @@ import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/a
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
 import { AnimationStyles as AnimationStyles_ } from './src/animation/animation_styles';
 import * as animationUtils from './src/animation/animation_style_util';
-import { ANY_STATE as ANY_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
+import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorState: constants.ChangeDetectorState,
@@ -93,6 +93,7 @@ export var __core_private__ = {
     collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: AnimationStyles_,
     ANY_STATE: ANY_STATE_,
+    DEFAULT_STATE: DEFAULT_STATE_,
     EMPTY_STATE: EMPTY_STATE_,
     FILL_STYLE_FLAG: FILL_STYLE_FLAG_
 };

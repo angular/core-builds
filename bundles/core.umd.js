@@ -11629,6 +11629,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      * of the application anymore (e.g. when an `ngIf` evaluates to false then the state of the associated element
      * is void).
      *
+     * #### The `*` (default) state
+     *
+     * The `*` state (when styled) is a fallback state that will be used if
+     * the state that is being animated is not declared within the trigger.
      *
      * ### Usage
      *
@@ -11843,6 +11847,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     var FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
     var ANY_STATE = '*';
+    var DEFAULT_STATE = '*';
     var EMPTY_STATE = 'void';
     function balanceAnimationStyles(previousStyles, newStyles, nullValue) {
         if (nullValue === void 0) { nullValue = null; }
@@ -12002,6 +12007,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
         ANY_STATE: ANY_STATE,
+        DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,
         FILL_STYLE_FLAG: FILL_STYLE_FLAG
     };

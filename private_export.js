@@ -94,6 +94,7 @@ exports.__core_private__ = {
     collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: animation_styles_1.AnimationStyles,
     ANY_STATE: animation_constants_1.ANY_STATE,
+    DEFAULT_STATE: animation_constants_1.DEFAULT_STATE,
     EMPTY_STATE: animation_constants_1.EMPTY_STATE,
     FILL_STYLE_FLAG: animation_constants_1.FILL_STYLE_FLAG
 };
