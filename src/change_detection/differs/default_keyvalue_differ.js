@@ -83,7 +83,7 @@ var DefaultKeyValueDiffer = (function () {
         var lastOldSeqRecord = null;
         var lastNewSeqRecord = null;
         var seqChanged = false;
-        this._forEach(map, function (value, key) {
+        this._forEach(map, function (value /** TODO #9100 */, key /** TODO #9100 */) {
             var newSeqRecord;
             if (oldSeqRecord !== null && key === oldSeqRecord.key) {
                 newSeqRecord = oldSeqRecord;
@@ -314,7 +314,7 @@ var DefaultKeyValueDiffer = (function () {
             "removals: " + removals.join(', ') + "\n";
     };
     /** @internal */
-    DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
+    DefaultKeyValueDiffer.prototype._forEach = function (obj /** TODO #9100 */, fn) {
         if (obj instanceof Map) {
             obj.forEach(fn);
         }

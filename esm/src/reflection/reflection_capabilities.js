@@ -53,7 +53,7 @@ export class ReflectionCapabilities {
         throw new Error(`Cannot create a factory for '${stringify(t)}' because its constructor has more than 20 arguments`);
     }
     /** @internal */
-    _zipTypesAndAnnotations(paramTypes, paramAnnotations) {
+    _zipTypesAndAnnotations(paramTypes /** TODO #9100 */, paramAnnotations /** TODO #9100 */) {
         var result;
         if (typeof paramTypes === 'undefined') {
             result = new Array(paramAnnotations.length);
@@ -88,8 +88,8 @@ export class ReflectionCapabilities {
         // API of tsickle for lowering decorators to properties on the class.
         if (isPresent(typeOrFunc.ctorParameters)) {
             let ctorParameters = typeOrFunc.ctorParameters;
-            let paramTypes = ctorParameters.map(ctorParam => ctorParam && ctorParam.type);
-            let paramAnnotations = ctorParameters.map(ctorParam => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
+            let paramTypes = ctorParameters.map((ctorParam /** TODO #9100 */) => ctorParam && ctorParam.type);
+            let paramAnnotations = ctorParameters.map((ctorParam /** TODO #9100 */) => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
             return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
         }
         // API for metadata created by invoking the decorators.

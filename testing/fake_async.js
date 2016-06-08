@@ -24,7 +24,7 @@ function fakeAsync(fn) {
     var fakeAsyncTestZoneSpec = new _FakeAsyncTestZoneSpecType();
     var fakeAsyncZone = Zone.current.fork(fakeAsyncTestZoneSpec);
     return function () {
-        var args = [];
+        var args = []; /** TODO #9100 */
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i - 0] = arguments[_i];
         }

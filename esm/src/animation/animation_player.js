@@ -24,7 +24,7 @@ export class NoOpAnimationPlayer {
     }
     destroy() { }
     reset() { }
-    setPosition(p) { }
+    setPosition(p /** TODO #9100 */) { }
     getPosition() { return 0; }
 }
 //# sourceMappingURL=animation_player.js.map

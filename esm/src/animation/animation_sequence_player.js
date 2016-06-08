@@ -60,7 +60,7 @@ export class AnimationSequencePlayer {
         this._onFinish();
         this._players.forEach(player => player.destroy());
     }
-    setPosition(p) {
+    setPosition(p /** TODO #9100 */) {
         this._players[0].setPosition(p);
     }
     getPosition() {

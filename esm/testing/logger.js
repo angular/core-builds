@@ -3,8 +3,8 @@ export class Log {
     constructor() {
         this.logItems = [];
     }
-    add(value) { this.logItems.push(value); }
-    fn(value) {
+    add(value /** TODO #9100 */) { this.logItems.push(value); }
+    fn(value /** TODO #9100 */) {
         return (a1 = null, a2 = null, a3 = null, a4 = null, a5 = null) => {
             this.logItems.push(value);
         };

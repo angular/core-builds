@@ -63,7 +63,7 @@ var AnimationSequencePlayer = (function () {
         this._onFinish();
         this._players.forEach(function (player) { return player.destroy(); });
     };
-    AnimationSequencePlayer.prototype.setPosition = function (p) {
+    AnimationSequencePlayer.prototype.setPosition = function (p /** TODO #9100 */) {
         this._players[0].setPosition(p);
     };
     AnimationSequencePlayer.prototype.getPosition = function () {

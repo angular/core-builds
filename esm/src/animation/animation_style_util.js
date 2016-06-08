@@ -4,10 +4,10 @@ import { AUTO_STYLE } from './metadata';
 import { FILL_STYLE_FLAG } from './animation_constants';
 export function balanceAnimationStyles(previousStyles, newStyles, nullValue = null) {
     var finalStyles = {};
-    StringMapWrapper.forEach(newStyles, (value, prop) => {
+    StringMapWrapper.forEach(newStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         finalStyles[prop] = value.toString();
     });
-    StringMapWrapper.forEach(previousStyles, (value, prop) => {
+    StringMapWrapper.forEach(previousStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         if (!isPresent(finalStyles[prop])) {
             finalStyles[prop] = nullValue;
         }
@@ -21,7 +21,7 @@ export function balanceAnimationKeyframes(collectedStyles, finalStateStyles, key
     var flatenedFirstKeyframeStyles = flattenStyles(firstKeyframe.styles.styles);
     var extraFirstKeyframeStyles = {};
     var hasExtraFirstStyles = false;
-    StringMapWrapper.forEach(collectedStyles, (value, prop) => {
+    StringMapWrapper.forEach(collectedStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         // if the style is already defined in the first keyframe then
         // we do not replace it.
         if (!flatenedFirstKeyframeStyles[prop]) {
@@ -37,7 +37,7 @@ export function balanceAnimationKeyframes(collectedStyles, finalStateStyles, key
     var flatenedFinalKeyframeStyles = flattenStyles(finalKeyframe.styles.styles);
     var extraFinalKeyframeStyles = {};
     var hasExtraFinalStyles = false;
-    StringMapWrapper.forEach(keyframeCollectedStyles, (value, prop) => {
+    StringMapWrapper.forEach(keyframeCollectedStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         if (!isPresent(flatenedFinalKeyframeStyles[prop])) {
             extraFinalKeyframeStyles[prop] = AUTO_STYLE;
             hasExtraFinalStyles = true;
@@ -46,7 +46,7 @@ export function balanceAnimationKeyframes(collectedStyles, finalStateStyles, key
     if (hasExtraFinalStyles) {
         finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
     }
-    StringMapWrapper.forEach(flatenedFinalKeyframeStyles, (value, prop) => {
+    StringMapWrapper.forEach(flatenedFinalKeyframeStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         if (!isPresent(flatenedFirstKeyframeStyles[prop])) {
             extraFirstKeyframeStyles[prop] = AUTO_STYLE;
             hasExtraFirstStyles = true;
@@ -67,7 +67,7 @@ export function clearStyles(styles) {
 export function collectAndResolveStyles(collection, styles) {
     return styles.map(entry => {
         var stylesObj = {};
-        StringMapWrapper.forEach(entry, (value, prop) => {
+        StringMapWrapper.forEach(entry, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
             if (value == FILL_STYLE_FLAG) {
                 value = collection[prop];
                 if (!isPresent(value)) {
@@ -81,14 +81,14 @@ export function collectAndResolveStyles(collection, styles) {
     });
 }
 export function renderStyles(element, renderer, styles) {
-    StringMapWrapper.forEach(styles, (value, prop) => {
+    StringMapWrapper.forEach(styles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
         renderer.setElementStyle(element, prop, value);
     });
 }
 export function flattenStyles(styles) {
     var finalStyles = {};
     styles.forEach(entry => {
-        StringMapWrapper.forEach(entry, (value, prop) => {
+        StringMapWrapper.forEach(entry, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
             finalStyles[prop] = value;
         });
     });

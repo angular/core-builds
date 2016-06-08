@@ -95,7 +95,7 @@ var DebugContext = (function () {
             var staticNodeInfo = this._staticNodeInfo;
             if (lang_1.isPresent(staticNodeInfo)) {
                 var refs = staticNodeInfo.refTokens;
-                collection_1.StringMapWrapper.forEach(refs, function (refToken, refName) {
+                collection_1.StringMapWrapper.forEach(refs, function (refToken /** TODO #9100 */, refName /** TODO #9100 */) {
                     var varValue;
                     if (lang_1.isBlank(refToken)) {
                         varValue = lang_1.isPresent(_this._view.allNodes) ? _this._view.allNodes[_this._nodeIndex] : null;

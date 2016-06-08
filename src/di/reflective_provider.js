@@ -73,7 +73,7 @@ function resolveReflectiveFactory(provider) {
         resolvedDeps = _dependenciesFor(useClass);
     }
     else if (lang_1.isPresent(provider.useExisting)) {
-        factoryFn = function (aliasInstance) { return aliasInstance; };
+        factoryFn = function (aliasInstance /** TODO #9100 */) { return aliasInstance; };
         resolvedDeps = [ReflectiveDependency.fromKey(reflective_key_1.ReflectiveKey.get(provider.useExisting))];
     }
     else if (lang_1.isPresent(provider.useFactory)) {
@@ -184,7 +184,7 @@ function _dependenciesFor(typeOrFunc) {
     }
     return params.map(function (p) { return _extractToken(typeOrFunc, p, params); });
 }
-function _extractToken(typeOrFunc, metadata /*any[] | any*/, params) {
+function _extractToken(typeOrFunc /** TODO #9100 */, metadata /** TODO #9100 */ /*any[] | any*/, params) {
     var depProps = [];
     var token = null;
     var optional = false;
@@ -233,7 +233,7 @@ function _extractToken(typeOrFunc, metadata /*any[] | any*/, params) {
         throw new reflective_exceptions_1.NoAnnotationError(typeOrFunc, params);
     }
 }
-function _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps) {
+function _createDependency(token /** TODO #9100 */, optional /** TODO #9100 */, lowerBoundVisibility /** TODO #9100 */, upperBoundVisibility /** TODO #9100 */, depProps /** TODO #9100 */) {
     return new ReflectiveDependency(reflective_key_1.ReflectiveKey.get(token), optional, lowerBoundVisibility, upperBoundVisibility, depProps);
 }
 //# sourceMappingURL=reflective_provider.js.map

@@ -9,7 +9,7 @@ export class SystemJsComponentResolver {
     }
     resolveComponent(componentType) {
         if (isString(componentType)) {
-            return global.System.import(componentType).then(module => this._resolver.resolveComponent(module.default));
+            return global.System.import(componentType).then((module /** TODO #9100 */) => this._resolver.resolveComponent(module.default));
         }
         else {
             return this._resolver.resolveComponent(componentType);

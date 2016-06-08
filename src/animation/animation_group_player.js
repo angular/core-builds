@@ -47,7 +47,7 @@ var AnimationGroupPlayer = (function () {
         this._players.forEach(function (player) { return player.destroy(); });
     };
     AnimationGroupPlayer.prototype.reset = function () { this._players.forEach(function (player) { return player.reset(); }); };
-    AnimationGroupPlayer.prototype.setPosition = function (p) {
+    AnimationGroupPlayer.prototype.setPosition = function (p /** TODO #9100 */) {
         this._players.forEach(function (player) {
             player.setPosition(p);
         });

@@ -34,7 +34,7 @@ var NoOpAnimationPlayer = (function () {
     };
     NoOpAnimationPlayer.prototype.destroy = function () { };
     NoOpAnimationPlayer.prototype.reset = function () { };
-    NoOpAnimationPlayer.prototype.setPosition = function (p) { };
+    NoOpAnimationPlayer.prototype.setPosition = function (p /** TODO #9100 */) { };
     NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
     return NoOpAnimationPlayer;
 }());

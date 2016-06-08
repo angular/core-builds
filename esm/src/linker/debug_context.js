@@ -58,7 +58,7 @@ export class DebugContext {
         var staticNodeInfo = this._staticNodeInfo;
         if (isPresent(staticNodeInfo)) {
             var refs = staticNodeInfo.refTokens;
-            StringMapWrapper.forEach(refs, (refToken, refName) => {
+            StringMapWrapper.forEach(refs, (refToken /** TODO #9100 */, refName /** TODO #9100 */) => {
                 var varValue;
                 if (isBlank(refToken)) {
                     varValue = isPresent(this._view.allNodes) ? this._view.allNodes[this._nodeIndex] : null;

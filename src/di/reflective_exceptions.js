@@ -138,7 +138,7 @@ exports.CyclicDependencyError = CyclicDependencyError;
  */
 var InstantiationError = (function (_super) {
     __extends(InstantiationError, _super);
-    function InstantiationError(injector, originalException, originalStack, key) {
+    function InstantiationError(injector, originalException /** TODO #9100 */, originalStack /** TODO #9100 */, key) {
         _super.call(this, "DI Exception", originalException, originalStack, null);
         this.keys = [key];
         this.injectors = [injector];
@@ -181,7 +181,7 @@ exports.InstantiationError = InstantiationError;
  */
 var InvalidProviderError = (function (_super) {
     __extends(InvalidProviderError, _super);
-    function InvalidProviderError(provider) {
+    function InvalidProviderError(provider /** TODO #9100 */) {
         _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
     }
     return InvalidProviderError;
@@ -218,10 +218,10 @@ exports.InvalidProviderError = InvalidProviderError;
  */
 var NoAnnotationError = (function (_super) {
     __extends(NoAnnotationError, _super);
-    function NoAnnotationError(typeOrFunc, params) {
+    function NoAnnotationError(typeOrFunc /** TODO #9100 */, params) {
         _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
     }
-    NoAnnotationError._genMessage = function (typeOrFunc, params) {
+    NoAnnotationError._genMessage = function (typeOrFunc /** TODO #9100 */, params) {
         var signature = [];
         for (var i = 0, ii = params.length; i < ii; i++) {
             var parameter = params[i];
@@ -256,7 +256,7 @@ exports.NoAnnotationError = NoAnnotationError;
  */
 var OutOfBoundsError = (function (_super) {
     __extends(OutOfBoundsError, _super);
-    function OutOfBoundsError(index) {
+    function OutOfBoundsError(index /** TODO #9100 */) {
         _super.call(this, "Index " + index + " is out-of-bounds.");
     }
     return OutOfBoundsError;
@@ -277,7 +277,7 @@ exports.OutOfBoundsError = OutOfBoundsError;
  */
 var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
     __extends(MixingMultiProvidersWithRegularProvidersError, _super);
-    function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
+    function MixingMultiProvidersWithRegularProvidersError(provider1 /** TODO #9100 */, provider2 /** TODO #9100 */) {
         _super.call(this, "Cannot mix multi providers and regular providers, got: " + provider1.toString() + " " +
             provider2.toString());
     }

@@ -132,7 +132,7 @@ var DefaultIterableDiffer = (function () {
         }
         else {
             index = 0;
-            collection_1.iterateListLike(collection, function (item) {
+            collection_1.iterateListLike(collection, function (item /** TODO #9100 */) {
                 itemTrackBy = _this._trackByFn(index, item);
                 if (record === null || !lang_1.looseIdentical(record.trackById, itemTrackBy)) {
                     record = _this._mismatch(record, item, itemTrackBy, index);
@@ -473,17 +473,17 @@ var DefaultIterableDiffer = (function () {
     };
     DefaultIterableDiffer.prototype.toString = function () {
         var list = [];
-        this.forEachItem(function (record) { return list.push(record); });
+        this.forEachItem(function (record /** TODO #9100 */) { return list.push(record); });
         var previous = [];
-        this.forEachPreviousItem(function (record) { return previous.push(record); });
+        this.forEachPreviousItem(function (record /** TODO #9100 */) { return previous.push(record); });
         var additions = [];
-        this.forEachAddedItem(function (record) { return additions.push(record); });
+        this.forEachAddedItem(function (record /** TODO #9100 */) { return additions.push(record); });
         var moves = [];
-        this.forEachMovedItem(function (record) { return moves.push(record); });
+        this.forEachMovedItem(function (record /** TODO #9100 */) { return moves.push(record); });
         var removals = [];
-        this.forEachRemovedItem(function (record) { return removals.push(record); });
+        this.forEachRemovedItem(function (record /** TODO #9100 */) { return removals.push(record); });
         var identityChanges = [];
-        this.forEachIdentityChange(function (record) { return identityChanges.push(record); });
+        this.forEachIdentityChange(function (record /** TODO #9100 */) { return identityChanges.push(record); });
         return "collection: " + list.join(', ') + "\n" + "previous: " + previous.join(', ') + "\n" +
             "additions: " + additions.join(', ') + "\n" + "moves: " + moves.join(', ') + "\n" +
             "removals: " + removals.join(', ') + "\n" + "identityChanges: " +

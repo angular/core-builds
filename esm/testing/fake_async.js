@@ -22,7 +22,7 @@ export function fakeAsync(fn) {
     }
     let fakeAsyncTestZoneSpec = new _FakeAsyncTestZoneSpecType();
     let fakeAsyncZone = Zone.current.fork(fakeAsyncTestZoneSpec);
-    return function (...args) {
+    return function (...args /** TODO #9100 */) {
         let res = fakeAsyncZone.run(() => {
             let res = fn(...args);
             flushMicrotasks();

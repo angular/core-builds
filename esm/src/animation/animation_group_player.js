@@ -45,7 +45,7 @@ export class AnimationGroupPlayer {
         this._players.forEach(player => player.destroy());
     }
     reset() { this._players.forEach(player => player.reset()); }
-    setPosition(p) {
+    setPosition(p /** TODO #9100 */) {
         this._players.forEach(player => {
             player.setPosition(p);
         });

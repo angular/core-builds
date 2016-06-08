@@ -4,8 +4,8 @@ var Log = (function () {
     function Log() {
         this.logItems = [];
     }
-    Log.prototype.add = function (value) { this.logItems.push(value); };
-    Log.prototype.fn = function (value) {
+    Log.prototype.add = function (value /** TODO #9100 */) { this.logItems.push(value); };
+    Log.prototype.fn = function (value /** TODO #9100 */) {
         var _this = this;
         return function (a1, a2, a3, a4, a5) {
             if (a1 === void 0) { a1 = null; }

@@ -21,7 +21,7 @@ var ActiveAnimationPlayersMap = (function () {
     };
     ActiveAnimationPlayersMap.prototype.findAllPlayersByElement = function (element) {
         var players = [];
-        collection_1.StringMapWrapper.forEach(this._map.get(element), function (player) { return players.push(player); });
+        collection_1.StringMapWrapper.forEach(this._map.get(element), function (player /** TODO #9100 */) { return players.push(player); });
         return players;
     };
     ActiveAnimationPlayersMap.prototype.set = function (element, animationName, player) {

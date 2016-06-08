@@ -75,7 +75,7 @@ export class DefaultKeyValueDiffer {
         var lastOldSeqRecord = null;
         var lastNewSeqRecord = null;
         var seqChanged = false;
-        this._forEach(map, (value, key) => {
+        this._forEach(map, (value /** TODO #9100 */, key /** TODO #9100 */) => {
             var newSeqRecord;
             if (oldSeqRecord !== null && key === oldSeqRecord.key) {
                 newSeqRecord = oldSeqRecord;
@@ -306,7 +306,7 @@ export class DefaultKeyValueDiffer {
             "removals: " + removals.join(', ') + "\n";
     }
     /** @internal */
-    _forEach(obj, fn) {
+    _forEach(obj /** TODO #9100 */, fn) {
         if (obj instanceof Map) {
             obj.forEach(fn);
         }
