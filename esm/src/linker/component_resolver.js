@@ -28,6 +28,7 @@ export class ReflectorComponentResolver extends ComponentResolver {
     }
     clearCache() { }
 }
+/** @nocollapse */
 ReflectorComponentResolver.decorators = [
     { type: Injectable },
 ];

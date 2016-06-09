@@ -27,9 +27,11 @@ export class ViewUtils {
         return this._renderer.renderComponent(renderComponentType);
     }
 }
+/** @nocollapse */
 ViewUtils.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 ViewUtils.ctorParameters = [
     { type: RootRenderer, },
     { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },

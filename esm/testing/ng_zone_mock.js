@@ -10,8 +10,10 @@ export class MockNgZone extends NgZone {
     runOutsideAngular(fn) { return fn(); }
     simulateZoneExit() { ObservableWrapper.callNext(this.onStable, null); }
 }
+/** @nocollapse */
 MockNgZone.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 MockNgZone.ctorParameters = [];
 //# sourceMappingURL=ng_zone_mock.js.map

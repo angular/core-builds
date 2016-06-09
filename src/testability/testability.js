@@ -86,9 +86,11 @@ var Testability = (function () {
         // TODO(juliemr): implement.
         return [];
     };
+    /** @nocollapse */
     Testability.decorators = [
         { type: decorators_1.Injectable },
     ];
+    /** @nocollapse */
     Testability.ctorParameters = [
         { type: ng_zone_1.NgZone, },
     ];
@@ -111,9 +113,11 @@ var TestabilityRegistry = (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
+    /** @nocollapse */
     TestabilityRegistry.decorators = [
         { type: decorators_1.Injectable },
     ];
+    /** @nocollapse */
     TestabilityRegistry.ctorParameters = [];
     return TestabilityRegistry;
 }());

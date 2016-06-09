@@ -12,8 +12,10 @@ export class Log {
     clear() { this.logItems = []; }
     result() { return this.logItems.join("; "); }
 }
+/** @nocollapse */
 Log.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 Log.ctorParameters = [];
 //# sourceMappingURL=logger.js.map

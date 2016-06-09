@@ -7130,9 +7130,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return Testability;
     }());
+    /** @nocollapse */
     Testability.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     Testability.ctorParameters = [
         { type: NgZone, },
     ];
@@ -7154,9 +7156,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return TestabilityRegistry;
     }());
+    /** @nocollapse */
     TestabilityRegistry.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     TestabilityRegistry.ctorParameters = [];
     /* @ts2dart_const */
     var _NoopGetTestability = (function () {
@@ -8941,9 +8945,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ViewUtils;
     }());
+    /** @nocollapse */
     ViewUtils.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     ViewUtils.ctorParameters = [
         { type: RootRenderer, },
         { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
@@ -9393,6 +9399,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         ReflectorComponentResolver.prototype.clearCache = function () { };
         return ReflectorComponentResolver;
     }(ComponentResolver));
+    /** @nocollapse */
     ReflectorComponentResolver.decorators = [
         { type: Injectable },
     ];
@@ -9407,6 +9414,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         Console.prototype.warn = function (message) { _warnImpl(message); };
         return Console;
     }());
+    /** @nocollapse */
     Console.decorators = [
         { type: Injectable },
     ];
@@ -9563,9 +9571,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         PlatformRef_.prototype._applicationDisposed = function (app) { ListWrapper.remove(this._applications, app); };
         return PlatformRef_;
     }(PlatformRef));
+    /** @nocollapse */
     PlatformRef_.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     PlatformRef_.ctorParameters = [
         { type: Injector, },
     ];
@@ -9779,9 +9789,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     }(ApplicationRef));
     /** @internal */
     ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+    /** @nocollapse */
     ApplicationRef_.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     ApplicationRef_.ctorParameters = [
         { type: PlatformRef_, },
         { type: NgZone, },
@@ -9946,9 +9958,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return DynamicComponentLoader_;
     }(DynamicComponentLoader));
+    /** @nocollapse */
     DynamicComponentLoader_.decorators = [
         { type: Injectable },
     ];
+    /** @nocollapse */
     DynamicComponentLoader_.ctorParameters = [
         { type: ComponentResolver, },
     ];

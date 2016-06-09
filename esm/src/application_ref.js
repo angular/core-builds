@@ -141,9 +141,11 @@ export class PlatformRef_ extends PlatformRef {
     /** @internal */
     _applicationDisposed(app) { ListWrapper.remove(this._applications, app); }
 }
+/** @nocollapse */
 PlatformRef_.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 PlatformRef_.ctorParameters = [
     { type: Injector, },
 ];
@@ -325,9 +327,11 @@ export class ApplicationRef_ extends ApplicationRef {
 }
 /** @internal */
 ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+/** @nocollapse */
 ApplicationRef_.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 ApplicationRef_.ctorParameters = [
     { type: PlatformRef_, },
     { type: NgZone, },

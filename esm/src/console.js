@@ -8,6 +8,7 @@ export class Console {
     // Note: for reporting errors use `DOM.logError()` as it is platform specific
     warn(message) { _warnImpl(message); }
 }
+/** @nocollapse */
 Console.decorators = [
     { type: Injectable },
 ];

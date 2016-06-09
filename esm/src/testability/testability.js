@@ -84,9 +84,11 @@ export class Testability {
         return [];
     }
 }
+/** @nocollapse */
 Testability.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 Testability.ctorParameters = [
     { type: NgZone, },
 ];
@@ -106,9 +108,11 @@ export class TestabilityRegistry {
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     }
 }
+/** @nocollapse */
 TestabilityRegistry.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 TestabilityRegistry.ctorParameters = [];
 /* @ts2dart_const */
 class _NoopGetTestability {

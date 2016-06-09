@@ -27,9 +27,11 @@ var ViewUtils = (function () {
     ViewUtils.prototype.renderComponent = function (renderComponentType) {
         return this._renderer.renderComponent(renderComponentType);
     };
+    /** @nocollapse */
     ViewUtils.decorators = [
         { type: decorators_1.Injectable },
     ];
+    /** @nocollapse */
     ViewUtils.ctorParameters = [
         { type: api_1.RootRenderer, },
         { type: undefined, decorators: [{ type: decorators_1.Inject, args: [application_tokens_1.APP_ID,] },] },

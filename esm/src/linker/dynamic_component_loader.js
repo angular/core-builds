@@ -33,9 +33,11 @@ export class DynamicComponentLoader_ extends DynamicComponentLoader {
         });
     }
 }
+/** @nocollapse */
 DynamicComponentLoader_.decorators = [
     { type: Injectable },
 ];
+/** @nocollapse */
 DynamicComponentLoader_.ctorParameters = [
     { type: ComponentResolver, },
 ];

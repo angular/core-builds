@@ -45,9 +45,11 @@ var DynamicComponentLoader_ = (function (_super) {
             return location.createComponent(componentFactory, location.length, childInjector, projectableNodes);
         });
     };
+    /** @nocollapse */
     DynamicComponentLoader_.decorators = [
         { type: decorators_1.Injectable },
     ];
+    /** @nocollapse */
     DynamicComponentLoader_.ctorParameters = [
         { type: component_resolver_1.ComponentResolver, },
     ];
