@@ -18,8 +18,7 @@ export declare abstract class DynamicComponentLoader {
      *
      * If needed, the component's selector can be overridden via `overrideSelector`.
      *
-     * You can optionally provide `injector` and this {@link Injector} will be used to instantiate the
-     * Component.
+     * A provided {@link Injector} will be used to instantiate the Component.
      *
      * To be notified when this Component instance is destroyed, you can also optionally provide
      * `onDispose` callback.
