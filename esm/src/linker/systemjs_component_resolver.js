@@ -1,4 +1,5 @@
 import { global, isString } from '../facade/lang';
+const _SEPARATOR = '#';
 /**
  * Component resolver that can load components lazily
  * @experimental
@@ -9,13 +10,34 @@ export class SystemJsComponentResolver {
     }
     resolveComponent(componentType) {
         if (isString(componentType)) {
+            let [module, component] = componentType.split(_SEPARATOR);
+            if (component === void (0)) {
+                // Use the default export when no component is specified
+                component = 'default';
+            }
             return global
-                .System.import(componentType)
-                .then((module /** TODO #9100 */) => this._resolver.resolveComponent(module.default));
+                .System.import(module)
+                .then((module) => this._resolver.resolveComponent(module[component]));
         }
-        else {
-            return this._resolver.resolveComponent(componentType);
+        return this._resolver.resolveComponent(componentType);
+    }
+    clearCache() { }
+}
+const FACTORY_MODULE_SUFFIX = '.ngfactory';
+const FACTORY_CLASS_SUFFIX = 'NgFactory';
+/**
+ * Component resolver that can load component factories lazily
+ * @experimental
+ */
+export class SystemJsCmpFactoryResolver {
+    resolveComponent(componentType) {
+        if (isString(componentType)) {
+            let [module, factory] = componentType.split(_SEPARATOR);
+            return global
+                .System.import(module + FACTORY_MODULE_SUFFIX)
+                .then((module) => module[factory + FACTORY_CLASS_SUFFIX]);
         }
+        return Promise.resolve(null);
     }
     clearCache() { }
 }

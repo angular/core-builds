@@ -9946,6 +9946,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return QueryList;
     }());
+    var _SEPARATOR = '#';
     /**
      * Component resolver that can load components lazily
      * @experimental
@@ -9957,16 +9958,40 @@ var __extends = (this && this.__extends) || function (d, b) {
         SystemJsComponentResolver.prototype.resolveComponent = function (componentType) {
             var _this = this;
             if (isString(componentType)) {
+                var _a = componentType.split(_SEPARATOR), module = _a[0], component_1 = _a[1];
+                if (component_1 === void (0)) {
+                    // Use the default export when no component is specified
+                    component_1 = 'default';
+                }
                 return global$1
-                    .System.import(componentType)
-                    .then(function (module /** TODO #9100 */) { return _this._resolver.resolveComponent(module.default); });
+                    .System.import(module)
+                    .then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
             }
-            else {
-                return this._resolver.resolveComponent(componentType);
-            }
+            return this._resolver.resolveComponent(componentType);
         };
         SystemJsComponentResolver.prototype.clearCache = function () { };
         return SystemJsComponentResolver;
+    }());
+    var FACTORY_MODULE_SUFFIX = '.ngfactory';
+    var FACTORY_CLASS_SUFFIX = 'NgFactory';
+    /**
+     * Component resolver that can load component factories lazily
+     * @experimental
+     */
+    var SystemJsCmpFactoryResolver = (function () {
+        function SystemJsCmpFactoryResolver() {
+        }
+        SystemJsCmpFactoryResolver.prototype.resolveComponent = function (componentType) {
+            if (isString(componentType)) {
+                var _a = componentType.split(_SEPARATOR), module = _a[0], factory_1 = _a[1];
+                return global$1
+                    .System.import(module + FACTORY_MODULE_SUFFIX)
+                    .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX]; });
+            }
+            return Promise.resolve(null);
+        };
+        SystemJsCmpFactoryResolver.prototype.clearCache = function () { };
+        return SystemJsCmpFactoryResolver;
     }());
     var EMPTY_CONTEXT$1 = new Object();
     /**
@@ -12159,6 +12184,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
     exports.QueryList = QueryList;
+    exports.SystemJsCmpFactoryResolver = SystemJsCmpFactoryResolver;
     exports.SystemJsComponentResolver = SystemJsComponentResolver;
     exports.TemplateRef = TemplateRef;
     exports.ViewContainerRef = ViewContainerRef;

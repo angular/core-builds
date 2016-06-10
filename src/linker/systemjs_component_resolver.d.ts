@@ -11,3 +11,11 @@ export declare class SystemJsComponentResolver implements ComponentResolver {
     resolveComponent(componentType: string | Type): Promise<ComponentFactory<any>>;
     clearCache(): void;
 }
+/**
+ * Component resolver that can load component factories lazily
+ * @experimental
+ */
+export declare class SystemJsCmpFactoryResolver implements ComponentResolver {
+    resolveComponent(componentType: string | Type): Promise<ComponentFactory<any>>;
+    clearCache(): void;
+}

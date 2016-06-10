@@ -14,6 +14,7 @@ exports.ExpressionChangedAfterItHasBeenCheckedException = exceptions_1.Expressio
 var query_list_1 = require('./linker/query_list');
 exports.QueryList = query_list_1.QueryList;
 var systemjs_component_resolver_1 = require('./linker/systemjs_component_resolver');
+exports.SystemJsCmpFactoryResolver = systemjs_component_resolver_1.SystemJsCmpFactoryResolver;
 exports.SystemJsComponentResolver = systemjs_component_resolver_1.SystemJsComponentResolver;
 var template_ref_1 = require('./linker/template_ref');
 exports.TemplateRef = template_ref_1.TemplateRef;

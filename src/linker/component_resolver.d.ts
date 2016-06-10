@@ -7,7 +7,7 @@ import { ComponentFactory } from './component_factory';
  */
 export declare abstract class ComponentResolver {
     abstract resolveComponent(component: Type | string): Promise<ComponentFactory<any>>;
-    abstract clearCache(): any;
+    abstract clearCache(): void;
 }
 export declare class ReflectorComponentResolver extends ComponentResolver {
     resolveComponent(component: Type | string): Promise<ComponentFactory<any>>;
