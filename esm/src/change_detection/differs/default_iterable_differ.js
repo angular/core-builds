@@ -1,6 +1,6 @@
-import { BaseException } from '../../facade/exceptions';
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
-import { isBlank, isPresent, stringify, getMapKey, looseIdentical, isArray } from '../../facade/lang';
+import { BaseException } from '../../facade/exceptions';
+import { getMapKey, isArray, isBlank, isPresent, looseIdentical, stringify } from '../../facade/lang';
 /* @ts2dart_const */
 export class DefaultIterableDifferFactory {
     constructor() {
@@ -468,10 +468,12 @@ export class DefaultIterableDiffer {
         this.forEachRemovedItem((record /** TODO #9100 */) => removals.push(record));
         var identityChanges = [];
         this.forEachIdentityChange((record /** TODO #9100 */) => identityChanges.push(record));
-        return "collection: " + list.join(', ') + "\n" + "previous: " + previous.join(', ') + "\n" +
-            "additions: " + additions.join(', ') + "\n" + "moves: " + moves.join(', ') + "\n" +
-            "removals: " + removals.join(', ') + "\n" + "identityChanges: " +
-            identityChanges.join(', ') + "\n";
+        return 'collection: ' + list.join(', ') + '\n' +
+            'previous: ' + previous.join(', ') + '\n' +
+            'additions: ' + additions.join(', ') + '\n' +
+            'moves: ' + moves.join(', ') + '\n' +
+            'removals: ' + removals.join(', ') + '\n' +
+            'identityChanges: ' + identityChanges.join(', ') + '\n';
     }
 }
 /**
@@ -505,10 +507,9 @@ export class CollectionChangeRecord {
         this._nextIdentityChange = null;
     }
     toString() {
-        return this.previousIndex === this.currentIndex ?
-            stringify(this.item) :
-            stringify(this.item) + '[' + stringify(this.previousIndex) + '->' +
-                stringify(this.currentIndex) + ']';
+        return this.previousIndex === this.currentIndex ? stringify(this.item) :
+            stringify(this.item) + '[' +
+                stringify(this.previousIndex) + '->' + stringify(this.currentIndex) + ']';
     }
 }
 // A linked list of CollectionChangeRecords with the same CollectionChangeRecord.item

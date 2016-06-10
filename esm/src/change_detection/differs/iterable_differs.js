@@ -1,7 +1,7 @@
-import { isBlank, isPresent, getTypeNameForDebugging } from '../../facade/lang';
-import { BaseException } from '../../facade/exceptions';
+import { OptionalMetadata, Provider, SkipSelfMetadata } from '../../di';
 import { ListWrapper } from '../../facade/collection';
-import { Provider, SkipSelfMetadata, OptionalMetadata } from '../../di';
+import { BaseException } from '../../facade/exceptions';
+import { getTypeNameForDebugging, isBlank, isPresent } from '../../facade/lang';
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * @ts2dart_const

@@ -1,10 +1,10 @@
 "use strict";
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
 var exceptions_1 = require('../facade/exceptions');
-var view_type_1 = require('./view_type');
+var lang_1 = require('../facade/lang');
 var element_ref_1 = require('./element_ref');
 var view_container_ref_1 = require('./view_container_ref');
+var view_type_1 = require('./view_type');
 /**
  * An AppElement is created for elements that have a ViewContainerRef,
  * a nested component or a <template> element to keep data around

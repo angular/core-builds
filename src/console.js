@@ -1,6 +1,6 @@
 "use strict";
-var lang_1 = require('./facade/lang');
 var decorators_1 = require('./di/decorators');
+var lang_1 = require('./facade/lang');
 // Note: Need to rename warn as in Dart
 // class members and imports can't use the same name.
 var _warnImpl = lang_1.warn;

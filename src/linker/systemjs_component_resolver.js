@@ -11,9 +11,9 @@ var SystemJsComponentResolver = (function () {
     SystemJsComponentResolver.prototype.resolveComponent = function (componentType) {
         var _this = this;
         if (lang_1.isString(componentType)) {
-            return lang_1.global.System.import(componentType).then(function (module /** TODO #9100 */) {
-                return _this._resolver.resolveComponent(module.default);
-            });
+            return lang_1.global
+                .System.import(componentType)
+                .then(function (module /** TODO #9100 */) { return _this._resolver.resolveComponent(module.default); });
         }
         else {
             return this._resolver.resolveComponent(componentType);

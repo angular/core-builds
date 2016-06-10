@@ -1,9 +1,9 @@
-import { ComponentResolver } from './component_resolver';
+import { Injector } from '../di/injector';
+import { ResolvedReflectiveProvider } from '../di/reflective_provider';
 import { Type } from '../facade/lang';
 import { ComponentRef } from './component_factory';
+import { ComponentResolver } from './component_resolver';
 import { ViewContainerRef } from './view_container_ref';
-import { ResolvedReflectiveProvider } from '../di/reflective_provider';
-import { Injector } from '../di/injector';
 /**
  * Use ComponentResolver and ViewContainerRef directly.
  *

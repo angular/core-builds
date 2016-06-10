@@ -1,5 +1,5 @@
-export { WtfScopeFn } from './wtf_impl';
 import * as impl from './wtf_impl';
+export { WtfScopeFn } from './wtf_impl';
 /**
  * True if WTF is enabled.
  */

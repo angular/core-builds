@@ -1,10 +1,10 @@
 import { ListWrapper } from '../facade/collection';
-import { resolveReflectiveProviders } from './reflective_provider';
-import { AbstractProviderError, NoProviderError, CyclicDependencyError, InstantiationError, OutOfBoundsError } from './reflective_exceptions';
 import { BaseException, unimplemented } from '../facade/exceptions';
-import { ReflectiveKey } from './reflective_key';
-import { SelfMetadata, SkipSelfMetadata } from './metadata';
 import { Injector, THROW_IF_NOT_FOUND } from './injector';
+import { SelfMetadata, SkipSelfMetadata } from './metadata';
+import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_exceptions';
+import { ReflectiveKey } from './reflective_key';
+import { resolveReflectiveProviders } from './reflective_provider';
 var __unused; // avoid unused import when Type union types are erased
 // Threshold for the dynamic version
 const _MAX_CONSTRUCTION_COUNTER = 10;
@@ -774,7 +774,9 @@ export class ReflectiveInjector_ {
         }
     }
     get displayName() {
-        return `ReflectiveInjector(providers: [${_mapProviders(this, (b) => ` "${b.key.displayName}" `).join(", ")}])`;
+        const providers = _mapProviders(this, (b) => ' "' + b.key.displayName + '" ')
+            .join(', ');
+        return `ReflectiveInjector(providers: [${providers}])`;
     }
     toString() { return this.displayName; }
 }

@@ -1,4 +1,4 @@
-import { ReflectiveInjector, Provider, Type } from '../index';
+import { Provider, ReflectiveInjector, Type } from '../index';
 export { async } from './async';
 export declare class TestInjector {
     private _instantiated;

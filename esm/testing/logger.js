@@ -10,7 +10,7 @@ export class Log {
         };
     }
     clear() { this.logItems = []; }
-    result() { return this.logItems.join("; "); }
+    result() { return this.logItems.join('; '); }
 }
 /** @nocollapse */
 Log.decorators = [

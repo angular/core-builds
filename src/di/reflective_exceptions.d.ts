@@ -1,6 +1,6 @@
 import { BaseException, WrappedException } from '../facade/exceptions';
-import { ReflectiveKey } from './reflective_key';
 import { ReflectiveInjector } from './reflective_injector';
+import { ReflectiveKey } from './reflective_key';
 /**
  * Base class for all errors arising from misconfigured providers.
  * @stable

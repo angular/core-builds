@@ -1,9 +1,9 @@
 import { Injector } from '../di/injector';
+import { ComponentFactory, ComponentRef } from './component_factory';
 import { AppElement } from './element';
 import { ElementRef } from './element_ref';
 import { TemplateRef } from './template_ref';
 import { EmbeddedViewRef, ViewRef } from './view_ref';
-import { ComponentFactory, ComponentRef } from './component_factory';
 /**
  * Represents a container where one or more Views can be attached.
  *

@@ -1,9 +1,9 @@
-import { Type } from '../facade/lang';
-import { ElementRef } from './element_ref';
-import { ViewRef } from './view_ref';
-import { AppElement } from './element';
 import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
+import { Type } from '../facade/lang';
+import { AppElement } from './element';
+import { ElementRef } from './element_ref';
+import { ViewRef } from './view_ref';
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
  *

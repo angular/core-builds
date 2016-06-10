@@ -1,10 +1,10 @@
-import { ListWrapper } from '../facade/collection';
-import { AppElement } from './element';
-import { isPresent } from '../facade/lang';
 import { ObservableWrapper } from '../facade/async';
+import { ListWrapper } from '../facade/collection';
+import { isPresent } from '../facade/lang';
+import { AppElement } from './element';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
-import { flattenNestedViewRenderNodes, ensureSlotCount } from './view_utils';
+import { ensureSlotCount, flattenNestedViewRenderNodes } from './view_utils';
 import { ChangeDetectionStrategy, ChangeDetectorState } from '../change_detection/change_detection';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { ExpressionChangedAfterItHasBeenCheckedException, ViewDestroyedException, ViewWrappedException } from './exceptions';
@@ -55,9 +55,7 @@ export class AppView {
     }
     registerAndStartAnimation(element, animationName, player) {
         this.activeAnimationPlayers.set(element, animationName, player);
-        player.onDone(() => {
-            this.activeAnimationPlayers.remove(element, animationName);
-        });
+        player.onDone(() => { this.activeAnimationPlayers.remove(element, animationName); });
         player.play();
     }
     create(context, givenProjectableNodes, rootSelectorOrNode) {
@@ -163,9 +161,7 @@ export class AppView {
         }
         else {
             var player = new AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
-            player.onDone(() => {
-                this.renderer.destroyView(hostElement, this.allNodes);
-            });
+            player.onDone(() => { this.renderer.destroyView(hostElement, this.allNodes); });
         }
     }
     /**
@@ -183,9 +179,7 @@ export class AppView {
         }
         else {
             var player = new AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
-            player.onDone(() => {
-                this.renderer.detachView(this.flatRootNodes);
-            });
+            player.onDone(() => { this.renderer.detachView(this.flatRootNodes); });
         }
     }
     get changeDetectorRef() { return this.ref; }

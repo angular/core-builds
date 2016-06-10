@@ -1,5 +1,5 @@
-import { Type } from '../facade/lang';
 import { AnimationEntryMetadata } from '../animation/metadata';
+import { Type } from '../facade/lang';
 /**
  * Defines template and style encapsulation options available for Component's {@link View}.
  *

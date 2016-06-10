@@ -1,5 +1,5 @@
-import { Type } from '../facade/lang';
 import { DependencyMetadata } from '../di/metadata';
+import { Type } from '../facade/lang';
 /**
  * Specifies that a constant attribute value should be injected.
  *

@@ -1,6 +1,6 @@
-import { ComponentResolver } from './component_resolver';
 import { Type } from '../facade/lang';
 import { ComponentFactory } from './component_factory';
+import { ComponentResolver } from './component_resolver';
 /**
  * Component resolver that can load components lazily
  * @experimental

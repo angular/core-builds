@@ -1,13 +1,11 @@
+import { ListWrapper, Map, StringMapWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
-import { ListWrapper, StringMapWrapper, Map } from '../facade/collection';
 export class ActiveAnimationPlayersMap {
     constructor() {
         this._map = new Map();
         this._allPlayers = [];
     }
-    get length() {
-        return this.getAllPlayers().length;
-    }
+    get length() { return this.getAllPlayers().length; }
     find(element, animationName) {
         var playersByAnimation = this._map.get(element);
         if (isPresent(playersByAnimation)) {
@@ -32,9 +30,7 @@ export class ActiveAnimationPlayersMap {
         this._allPlayers.push(player);
         this._map.set(element, playersByAnimation);
     }
-    getAllPlayers() {
-        return this._allPlayers;
-    }
+    getAllPlayers() { return this._allPlayers; }
     remove(element, animationName) {
         var playersByAnimation = this._map.get(element);
         if (isPresent(playersByAnimation)) {

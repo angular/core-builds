@@ -46,9 +46,7 @@ export class AnimationGroupPlayer {
     }
     reset() { this._players.forEach(player => player.reset()); }
     setPosition(p /** TODO #9100 */) {
-        this._players.forEach(player => {
-            player.setPosition(p);
-        });
+        this._players.forEach(player => { player.setPosition(p); });
     }
     getPosition() {
         var min = 0;

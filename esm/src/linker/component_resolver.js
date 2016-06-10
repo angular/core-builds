@@ -1,9 +1,9 @@
-import { isBlank, isString, stringify } from '../facade/lang';
-import { BaseException } from '../facade/exceptions';
+import { Injectable } from '../di/decorators';
 import { PromiseWrapper } from '../facade/async';
+import { BaseException } from '../facade/exceptions';
+import { isBlank, isString, stringify } from '../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { ComponentFactory } from './component_factory';
-import { Injectable } from '../di/decorators';
 /**
  * Low-level service for loading {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.

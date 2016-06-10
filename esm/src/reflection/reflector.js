@@ -1,6 +1,6 @@
-import { isPresent } from '../facade/lang';
-import { BaseException } from '../facade/exceptions';
 import { Map, MapWrapper, Set, SetWrapper, StringMapWrapper } from '../facade/collection';
+import { BaseException } from '../facade/exceptions';
+import { isPresent } from '../facade/lang';
 import { ReflectorReader } from './reflector_reader';
 /**
  * Reflective information about a symbol, including annotations, interfaces, and other metadata.

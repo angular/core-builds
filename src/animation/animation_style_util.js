@@ -1,8 +1,8 @@
 "use strict";
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
-var metadata_1 = require('./metadata');
+var lang_1 = require('../facade/lang');
 var animation_constants_1 = require('./animation_constants');
+var metadata_1 = require('./metadata');
 function balanceAnimationStyles(previousStyles, newStyles, nullValue) {
     if (nullValue === void 0) { nullValue = null; }
     var finalStyles = {};
@@ -63,9 +63,7 @@ function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes)
 exports.balanceAnimationKeyframes = balanceAnimationKeyframes;
 function clearStyles(styles) {
     var finalStyles = {};
-    collection_1.StringMapWrapper.keys(styles).forEach(function (key) {
-        finalStyles[key] = null;
-    });
+    collection_1.StringMapWrapper.keys(styles).forEach(function (key) { finalStyles[key] = null; });
     return finalStyles;
 }
 exports.clearStyles = clearStyles;

@@ -1,13 +1,12 @@
-import { looseIdentical, isPrimitive } from '../facade/lang';
-import { isListLikeIterable, areIterablesEqual } from '../facade/collection';
+import { areIterablesEqual, isListLikeIterable } from '../facade/collection';
+import { isPrimitive, looseIdentical } from '../facade/lang';
 export { looseIdentical } from '../facade/lang';
 export var uninitialized = new Object();
 export function devModeEqual(a, b) {
     if (isListLikeIterable(a) && isListLikeIterable(b)) {
         return areIterablesEqual(a, b, devModeEqual);
     }
-    else if (!isListLikeIterable(a) && !isPrimitive(a) && !isListLikeIterable(b) &&
-        !isPrimitive(b)) {
+    else if (!isListLikeIterable(a) && !isPrimitive(a) && !isListLikeIterable(b) && !isPrimitive(b)) {
         return true;
     }
     else {

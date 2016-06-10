@@ -2,13 +2,13 @@
  * This indirection is needed to free up Component, etc symbols in the public API
  * to be used by the decorator versions of these annotations.
  */
-export { QueryMetadata, ContentChildrenMetadata, ContentChildMetadata, ViewChildrenMetadata, ViewQueryMetadata, ViewChildMetadata, AttributeMetadata } from './metadata/di';
-export { ComponentMetadata, DirectiveMetadata, PipeMetadata, InputMetadata, OutputMetadata, HostBindingMetadata, HostListenerMetadata } from './metadata/directives';
-export { ViewMetadata, ViewEncapsulation } from './metadata/view';
-export { AfterContentInit, AfterContentChecked, AfterViewInit, AfterViewChecked, OnChanges, OnDestroy, OnInit, DoCheck } from './metadata/lifecycle_hooks';
-import { QueryMetadata, ContentChildrenMetadata, ContentChildMetadata, ViewChildrenMetadata, ViewChildMetadata, ViewQueryMetadata, AttributeMetadata } from './metadata/di';
-import { ComponentMetadata, DirectiveMetadata, PipeMetadata, InputMetadata, OutputMetadata, HostBindingMetadata, HostListenerMetadata } from './metadata/directives';
+import { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+import { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 import { ViewMetadata } from './metadata/view';
+export { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
+export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
+export { ViewEncapsulation, ViewMetadata } from './metadata/view';
 import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/decorators';
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**

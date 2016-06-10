@@ -1,15 +1,15 @@
 "use strict";
-var security_1 = require('../security');
-var lang_1 = require('../facade/lang');
+var application_tokens_1 = require('../application_tokens');
+var change_detection_1 = require('../change_detection/change_detection');
+var change_detection_util_1 = require('../change_detection/change_detection_util');
+var decorators_1 = require('../di/decorators');
 var collection_1 = require('../facade/collection');
 var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
+var api_1 = require('../render/api');
+var security_1 = require('../security');
 var element_1 = require('./element');
 var exceptions_2 = require('./exceptions');
-var change_detection_1 = require('../change_detection/change_detection');
-var api_1 = require('../render/api');
-var application_tokens_1 = require('../application_tokens');
-var decorators_1 = require('../di/decorators');
-var change_detection_util_1 = require("../change_detection/change_detection_util");
 var ViewUtils = (function () {
     function ViewUtils(_renderer, _appId, sanitizer) {
         this._renderer = _renderer;
@@ -99,8 +99,7 @@ function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6,
                 c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
         case 6:
             return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
-                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6;
+                c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
         case 7:
             return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
                 c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
@@ -112,8 +111,7 @@ function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6,
         case 9:
             return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) +
                 c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
-                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) +
-                c9;
+                c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
         default:
             throw new exceptions_1.BaseException("Does not support more than 9 expressions");
     }

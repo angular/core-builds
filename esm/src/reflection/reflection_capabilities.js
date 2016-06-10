@@ -1,4 +1,4 @@
-import { Type, isPresent, isFunction, global, stringify } from '../facade/lang';
+import { Type, global, isFunction, isPresent, stringify } from '../facade/lang';
 export class ReflectionCapabilities {
     constructor(reflect) {
         this._reflect = isPresent(reflect) ? reflect : global.Reflect;
@@ -139,8 +139,7 @@ export class ReflectionCapabilities {
         if (isPresent(typeOrFunc.propDecorators)) {
             let propDecorators = typeOrFunc.propDecorators;
             let propMetadata = {};
-            Object.keys(propDecorators)
-                .forEach(prop => {
+            Object.keys(propDecorators).forEach(prop => {
                 propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
             });
             return propMetadata;

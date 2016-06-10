@@ -1,6 +1,6 @@
-import { ReflectiveInjector, PLATFORM_INITIALIZER } from '../index';
-import { BaseException } from '../src/facade/exceptions';
+import { PLATFORM_INITIALIZER, ReflectiveInjector } from '../index';
 import { ListWrapper } from '../src/facade/collection';
+import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, isPresent } from '../src/facade/lang';
 import { async } from './async';
 import { AsyncTestCompleter } from './async_test_completer';

@@ -1,5 +1,5 @@
-import { OpaqueToken } from './di';
 import { Math, StringWrapper } from '../src/facade/lang';
+import { OpaqueToken } from './di';
 /**
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
@@ -32,17 +32,17 @@ function _randomChar() {
  * @experimental
  */
 export const PLATFORM_INITIALIZER = 
-/*@ts2dart_const*/ new OpaqueToken("Platform Initializer");
+/*@ts2dart_const*/ new OpaqueToken('Platform Initializer');
 /**
  * A function that will be executed when an application is initialized.
  * @experimental
  */
 export const APP_INITIALIZER = 
-/*@ts2dart_const*/ new OpaqueToken("Application Initializer");
+/*@ts2dart_const*/ new OpaqueToken('Application Initializer');
 /**
  * A token which indicates the root directory of the application
  * @experimental
  */
 export const PACKAGE_ROOT_URL = 
-/*@ts2dart_const*/ new OpaqueToken("Application Packages Root URL");
+/*@ts2dart_const*/ new OpaqueToken('Application Packages Root URL');
 //# sourceMappingURL=application_tokens.js.map

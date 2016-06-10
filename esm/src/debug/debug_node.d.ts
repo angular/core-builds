@@ -1,5 +1,5 @@
-import { Predicate } from '../facade/collection';
 import { Injector } from '../di';
+import { Predicate } from '../facade/collection';
 import { RenderDebugInfo } from '../render/api';
 export declare class EventListener {
     name: string;

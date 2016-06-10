@@ -1,6 +1,6 @@
 "use strict";
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
 var lang_2 = require('../facade/lang');
 exports.looseIdentical = lang_2.looseIdentical;
 exports.uninitialized = new Object();
@@ -8,8 +8,7 @@ function devModeEqual(a, b) {
     if (collection_1.isListLikeIterable(a) && collection_1.isListLikeIterable(b)) {
         return collection_1.areIterablesEqual(a, b, devModeEqual);
     }
-    else if (!collection_1.isListLikeIterable(a) && !lang_1.isPrimitive(a) && !collection_1.isListLikeIterable(b) &&
-        !lang_1.isPrimitive(b)) {
+    else if (!collection_1.isListLikeIterable(a) && !lang_1.isPrimitive(a) && !collection_1.isListLikeIterable(b) && !lang_1.isPrimitive(b)) {
         return true;
     }
     else {

@@ -1,5 +1,5 @@
-import { ChangeDetectorRef } from '../change_detector_ref';
 import { Provider } from '../../di';
+import { ChangeDetectorRef } from '../change_detector_ref';
 /**
  * A differ that tracks changes made to an object over time.
  */

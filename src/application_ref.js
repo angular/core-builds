@@ -4,17 +4,17 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var ng_zone_1 = require('./zone/ng_zone');
-var lang_1 = require('../src/facade/lang');
-var di_1 = require('./di');
-var application_tokens_1 = require('./application_tokens');
 var async_1 = require('../src/facade/async');
 var collection_1 = require('../src/facade/collection');
-var testability_1 = require('./testability/testability');
-var component_resolver_1 = require('./linker/component_resolver');
 var exceptions_1 = require('../src/facade/exceptions');
+var lang_1 = require('../src/facade/lang');
+var application_tokens_1 = require('./application_tokens');
 var console_1 = require('./console');
+var di_1 = require('./di');
+var component_resolver_1 = require('./linker/component_resolver');
 var profile_1 = require('./profile/profile');
+var testability_1 = require('./testability/testability');
+var ng_zone_1 = require('./zone/ng_zone');
 /**
  * Create an Angular zone.
  * @experimental
@@ -35,7 +35,7 @@ function createPlatform(injector) {
         throw new exceptions_1.BaseException('Already creating a platform...');
     }
     if (lang_1.isPresent(_platform) && !_platform.disposed) {
-        throw new exceptions_1.BaseException("There can be only one platform. Destroy the previous one to create a new one.");
+        throw new exceptions_1.BaseException('There can be only one platform. Destroy the previous one to create a new one.');
     }
     lang_1.lockMode();
     _inPlatformCreate = true;
@@ -332,8 +332,8 @@ var ApplicationRef_ = (function (_super) {
             _this._loadComponent(compRef);
             var c = _this._injector.get(console_1.Console);
             if (lang_1.assertionsEnabled()) {
-                var prodDescription = lang_1.IS_DART ? "Production mode is disabled in Dart." :
-                    "Call enableProdMode() to enable the production mode.";
+                var prodDescription = lang_1.IS_DART ? 'Production mode is disabled in Dart.' :
+                    'Call enableProdMode() to enable the production mode.';
                 c.log("Angular 2 is running in the development mode. " + prodDescription);
             }
             return compRef;
@@ -366,7 +366,7 @@ var ApplicationRef_ = (function (_super) {
     });
     ApplicationRef_.prototype.tick = function () {
         if (this._runningTick) {
-            throw new exceptions_1.BaseException("ApplicationRef.tick is called recursively");
+            throw new exceptions_1.BaseException('ApplicationRef.tick is called recursively');
         }
         var s = ApplicationRef_._tickScope();
         try {
@@ -416,6 +416,6 @@ exports.PLATFORM_CORE_PROVIDERS =
 exports.APPLICATION_CORE_PROVIDERS = [
     /* @ts2dart_Provider */ { provide: ng_zone_1.NgZone, useFactory: createNgZone, deps: [] },
     ApplicationRef_,
-    /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ }
+    /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
 ];
 //# sourceMappingURL=application_ref.js.map

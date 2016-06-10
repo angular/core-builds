@@ -1,9 +1,9 @@
-import { Map, MapWrapper } from '../facade/collection';
-import { scheduleMicroTask } from '../facade/lang';
-import { BaseException } from '../facade/exceptions';
-import { NgZone } from '../zone/ng_zone';
-import { ObservableWrapper } from '../facade/async';
 import { Injectable } from '../di/decorators';
+import { ObservableWrapper } from '../facade/async';
+import { Map, MapWrapper } from '../facade/collection';
+import { BaseException } from '../facade/exceptions';
+import { scheduleMicroTask } from '../facade/lang';
+import { NgZone } from '../zone/ng_zone';
 export class Testability {
     constructor(_ngZone) {
         this._ngZone = _ngZone;

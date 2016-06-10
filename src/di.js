@@ -8,11 +8,11 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 var metadata_1 = require('./di/metadata');
-exports.InjectMetadata = metadata_1.InjectMetadata;
-exports.OptionalMetadata = metadata_1.OptionalMetadata;
-exports.InjectableMetadata = metadata_1.InjectableMetadata;
-exports.SelfMetadata = metadata_1.SelfMetadata;
 exports.HostMetadata = metadata_1.HostMetadata;
+exports.InjectMetadata = metadata_1.InjectMetadata;
+exports.InjectableMetadata = metadata_1.InjectableMetadata;
+exports.OptionalMetadata = metadata_1.OptionalMetadata;
+exports.SelfMetadata = metadata_1.SelfMetadata;
 exports.SkipSelfMetadata = metadata_1.SkipSelfMetadata;
 // we have to reexport * because Dart and TS export two different sets of types
 __export(require('./di/decorators'));

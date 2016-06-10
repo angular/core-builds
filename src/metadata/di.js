@@ -4,9 +4,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var lang_1 = require('../facade/lang');
-var metadata_1 = require('../di/metadata');
 var forward_ref_1 = require('../di/forward_ref');
+var metadata_1 = require('../di/metadata');
+var lang_1 = require('../facade/lang');
 /**
  * Specifies that a constant attribute value should be injected.
  *

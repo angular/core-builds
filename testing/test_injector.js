@@ -1,7 +1,7 @@
 "use strict";
 var index_1 = require('../index');
-var exceptions_1 = require('../src/facade/exceptions');
 var collection_1 = require('../src/facade/collection');
+var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 var async_1 = require('./async');
 var async_test_completer_1 = require('./async_test_completer');

@@ -5,8 +5,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var collection_1 = require('../facade/collection');
-var lang_1 = require('../facade/lang');
 var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
 function findFirstClosedCycle(keys) {
     var res = [];
     for (var i = 0; i < keys.length; ++i) {
@@ -24,10 +24,10 @@ function constructResolvingPath(keys) {
     if (keys.length > 1) {
         var reversed = findFirstClosedCycle(collection_1.ListWrapper.reversed(keys));
         var tokenStrs = reversed.map(function (k) { return lang_1.stringify(k.token); });
-        return " (" + tokenStrs.join(' -> ') + ")";
+        return ' (' + tokenStrs.join(' -> ') + ')';
     }
     else {
-        return "";
+        return '';
     }
 }
 /**
@@ -37,7 +37,7 @@ function constructResolvingPath(keys) {
 var AbstractProviderError = (function (_super) {
     __extends(AbstractProviderError, _super);
     function AbstractProviderError(injector, key, constructResolvingMessage) {
-        _super.call(this, "DI Exception");
+        _super.call(this, 'DI Exception');
         this.keys = [key];
         this.injectors = [injector];
         this.constructResolvingMessage = constructResolvingMessage;
@@ -139,7 +139,7 @@ exports.CyclicDependencyError = CyclicDependencyError;
 var InstantiationError = (function (_super) {
     __extends(InstantiationError, _super);
     function InstantiationError(injector, originalException /** TODO #9100 */, originalStack /** TODO #9100 */, key) {
-        _super.call(this, "DI Exception", originalException, originalStack, null);
+        _super.call(this, 'DI Exception', originalException, originalStack, null);
         this.keys = [key];
         this.injectors = [injector];
     }
@@ -232,10 +232,10 @@ var NoAnnotationError = (function (_super) {
                 signature.push(parameter.map(lang_1.stringify).join(' '));
             }
         }
-        return "Cannot resolve all parameters for '" + lang_1.stringify(typeOrFunc) + "'(" +
-            signature.join(', ') + "). " +
-            "Make sure that all the parameters are decorated with Inject or have valid type annotations and that '" +
-            lang_1.stringify(typeOrFunc) + "' is decorated with Injectable.";
+        return 'Cannot resolve all parameters for \'' + lang_1.stringify(typeOrFunc) + '\'(' +
+            signature.join(', ') + '). ' +
+            'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
+            lang_1.stringify(typeOrFunc) + '\' is decorated with Injectable.';
     };
     return NoAnnotationError;
 }(exceptions_1.BaseException));
@@ -278,7 +278,7 @@ exports.OutOfBoundsError = OutOfBoundsError;
 var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
     __extends(MixingMultiProvidersWithRegularProvidersError, _super);
     function MixingMultiProvidersWithRegularProvidersError(provider1 /** TODO #9100 */, provider2 /** TODO #9100 */) {
-        _super.call(this, "Cannot mix multi providers and regular providers, got: " + provider1.toString() + " " +
+        _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
             provider2.toString());
     }
     return MixingMultiProvidersWithRegularProvidersError;

@@ -1,12 +1,14 @@
 "use strict";
-var lang_1 = require('../facade/lang');
 var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
 var AnimationPlayer = (function () {
     function AnimationPlayer() {
     }
     Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
         get: function () { throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class'); },
-        set: function (player) { throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class'); },
+        set: function (player) {
+            throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class');
+        },
         enumerable: true,
         configurable: true
     });
@@ -29,9 +31,7 @@ var NoOpAnimationPlayer = (function () {
     NoOpAnimationPlayer.prototype.play = function () { };
     NoOpAnimationPlayer.prototype.pause = function () { };
     NoOpAnimationPlayer.prototype.restart = function () { };
-    NoOpAnimationPlayer.prototype.finish = function () {
-        this._onFinish();
-    };
+    NoOpAnimationPlayer.prototype.finish = function () { this._onFinish(); };
     NoOpAnimationPlayer.prototype.destroy = function () { };
     NoOpAnimationPlayer.prototype.reset = function () { };
     NoOpAnimationPlayer.prototype.setPosition = function (p /** TODO #9100 */) { };

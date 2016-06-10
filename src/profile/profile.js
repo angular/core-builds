@@ -69,7 +69,5 @@ exports.wtfStartTimeRange = exports.wtfEnabled ? impl.startTimeRange : function 
  * enabled.
  * @experimental
  */
-exports.wtfEndTimeRange = exports.wtfEnabled ? impl.endTimeRange : function (r) {
-    return null;
-};
+exports.wtfEndTimeRange = exports.wtfEnabled ? impl.endTimeRange : function (r) { return null; };
 //# sourceMappingURL=profile.js.map

@@ -1,5 +1,5 @@
-import { isPresent, isBlank } from '../facade/lang';
 import { StringMapWrapper } from '../facade/collection';
+import { isBlank, isPresent } from '../facade/lang';
 import { ViewType } from './view_type';
 /* @ts2dart_const */
 export class StaticNodeDebugInfo {
@@ -61,7 +61,8 @@ export class DebugContext {
             StringMapWrapper.forEach(refs, (refToken /** TODO #9100 */, refName /** TODO #9100 */) => {
                 var varValue;
                 if (isBlank(refToken)) {
-                    varValue = isPresent(this._view.allNodes) ? this._view.allNodes[this._nodeIndex] : null;
+                    varValue =
+                        isPresent(this._view.allNodes) ? this._view.allNodes[this._nodeIndex] : null;
                 }
                 else {
                     varValue = this._view.injectorGet(refToken, this._nodeIndex, null);

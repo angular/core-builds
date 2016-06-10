@@ -1,7 +1,7 @@
-import { isBlank, isPresent } from '../../facade/lang';
-import { BaseException } from '../../facade/exceptions';
+import { OptionalMetadata, Provider, SkipSelfMetadata } from '../../di';
 import { ListWrapper } from '../../facade/collection';
-import { Provider, SkipSelfMetadata, OptionalMetadata } from '../../di';
+import { BaseException } from '../../facade/exceptions';
+import { isBlank, isPresent } from '../../facade/lang';
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  * @ts2dart_const

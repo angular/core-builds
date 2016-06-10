@@ -2,15 +2,15 @@
  * This indirection is needed to free up Component, etc symbols in the public API
  * to be used by the decorator versions of these annotations.
  */
-export { QueryMetadata, ContentChildrenMetadata, ContentChildMetadata, ViewChildrenMetadata, ViewQueryMetadata, ViewChildMetadata, AttributeMetadata } from './metadata/di';
-export { ComponentMetadata, DirectiveMetadata, PipeMetadata, InputMetadata, OutputMetadata, HostBindingMetadata, HostListenerMetadata } from './metadata/directives';
-export { ViewMetadata, ViewEncapsulation } from './metadata/view';
-export { AfterContentInit, AfterContentChecked, AfterViewInit, AfterViewChecked, OnChanges, OnDestroy, OnInit, DoCheck } from './metadata/lifecycle_hooks';
-import { QueryMetadata, ContentChildrenMetadata, ViewChildrenMetadata, AttributeMetadata } from './metadata/di';
-import { ComponentMetadata, DirectiveMetadata } from './metadata/directives';
-import { ViewMetadata, ViewEncapsulation } from './metadata/view';
-import { AnimationEntryMetadata } from './animation/metadata';
 import { ChangeDetectionStrategy } from '../src/change_detection/change_detection';
+import { AnimationEntryMetadata } from './animation/metadata';
+import { AttributeMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildrenMetadata } from './metadata/di';
+import { ComponentMetadata, DirectiveMetadata } from './metadata/directives';
+import { ViewEncapsulation, ViewMetadata } from './metadata/view';
+export { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
+export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
+export { ViewEncapsulation, ViewMetadata } from './metadata/view';
 import { TypeDecorator } from './util/decorators';
 import { Type } from '../src/facade/lang';
 /**

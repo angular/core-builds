@@ -1,7 +1,7 @@
-import { Provider } from './provider';
-import { ResolvedReflectiveProvider } from './reflective_provider';
 import { Type } from '../facade/lang';
 import { Injector } from './injector';
+import { Provider } from './provider';
+import { ResolvedReflectiveProvider } from './reflective_provider';
 export interface ReflectiveProtoInjectorStrategy {
     getProviderAtIndex(index: number): ResolvedReflectiveProvider;
     createInjectorStrategy(inj: ReflectiveInjector_): ReflectiveInjectorStrategy;

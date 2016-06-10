@@ -14,13 +14,8 @@
 })(exports.LifecycleHooks || (exports.LifecycleHooks = {}));
 var LifecycleHooks = exports.LifecycleHooks;
 exports.LIFECYCLE_HOOKS_VALUES = [
-    LifecycleHooks.OnInit,
-    LifecycleHooks.OnDestroy,
-    LifecycleHooks.DoCheck,
-    LifecycleHooks.OnChanges,
-    LifecycleHooks.AfterContentInit,
-    LifecycleHooks.AfterContentChecked,
-    LifecycleHooks.AfterViewInit,
+    LifecycleHooks.OnInit, LifecycleHooks.OnDestroy, LifecycleHooks.DoCheck, LifecycleHooks.OnChanges,
+    LifecycleHooks.AfterContentInit, LifecycleHooks.AfterContentChecked, LifecycleHooks.AfterViewInit,
     LifecycleHooks.AfterViewChecked
 ];
 /**
@@ -130,17 +125,21 @@ exports.OnInit = OnInit;
 /**
  * Implement this interface to supplement the default change detection algorithm in your directive.
  *
- * `ngDoCheck` gets called to check the changes in the directives in addition to the default algorithm.
+ * `ngDoCheck` gets called to check the changes in the directives in addition to the default
+ * algorithm.
  *
  * The default change detection algorithm looks for differences by comparing bound-property values
  * by reference across change detection runs.
  *
  * Note that a directive typically should not use both `DoCheck` and {@link OnChanges} to respond to
- * changes on the same input. `ngOnChanges` will continue to be called when the default change detector
- * detects changes, so it is usually unnecessary to respond to changes on the same input in both hooks.
+ * changes on the same input. `ngOnChanges` will continue to be called when the default change
+ * detector
+ * detects changes, so it is usually unnecessary to respond to changes on the same input in both
+ * hooks.
  * Reaction to the changes have to be handled from within the `ngDoCheck` callback.
  *
- * You can use {@link KeyValueDiffers} and {@link IterableDiffers} to help add your custom check mechanisms.
+ * You can use {@link KeyValueDiffers} and {@link IterableDiffers} to help add your custom check
+ * mechanisms.
  *
  * ### Example ([live demo](http://plnkr.co/edit/QpnIlF0CR2i5bcYbHEUJ?p=preview))
  *

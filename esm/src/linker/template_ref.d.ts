@@ -1,5 +1,5 @@
-import { ElementRef } from './element_ref';
 import { AppElement } from './element';
+import { ElementRef } from './element_ref';
 import { EmbeddedViewRef } from './view_ref';
 /**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.

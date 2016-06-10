@@ -1,7 +1,7 @@
-import { Renderer, RootRenderer, RenderComponentType, RenderDebugInfo } from '../render/api';
 import { AnimationKeyframe } from '../animation/animation_keyframe';
-import { AnimationStyles } from '../animation/animation_styles';
 import { AnimationPlayer } from '../animation/animation_player';
+import { AnimationStyles } from '../animation/animation_styles';
+import { RenderComponentType, RenderDebugInfo, Renderer, RootRenderer } from '../render/api';
 export declare class DebugDomRootRenderer implements RootRenderer {
     private _delegate;
     constructor(_delegate: RootRenderer);

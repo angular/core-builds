@@ -1,6 +1,6 @@
-import { isPresent } from '../facade/lang';
-import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
+import { InjectableMetadata } from '../di/metadata';
+import { isPresent } from '../facade/lang';
 /**
  * Directives allow you to attach behavior to elements in the DOM.
  *
@@ -535,9 +535,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      * }
      * ```
      */
-    get providers() {
-        return this._providers;
-    }
+    get providers() { return this._providers; }
 }
 /**
  * Declare reusable UI building blocks for an application.
@@ -630,9 +628,7 @@ export class ComponentMetadata extends DirectiveMetadata {
      *
      * ```
      */
-    get viewProviders() {
-        return this._viewProviders;
-    }
+    get viewProviders() { return this._viewProviders; }
 }
 /**
  * Declare reusable pipe function.

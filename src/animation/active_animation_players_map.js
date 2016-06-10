@@ -1,15 +1,13 @@
 "use strict";
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
 var ActiveAnimationPlayersMap = (function () {
     function ActiveAnimationPlayersMap() {
         this._map = new collection_1.Map();
         this._allPlayers = [];
     }
     Object.defineProperty(ActiveAnimationPlayersMap.prototype, "length", {
-        get: function () {
-            return this.getAllPlayers().length;
-        },
+        get: function () { return this.getAllPlayers().length; },
         enumerable: true,
         configurable: true
     });
@@ -37,9 +35,7 @@ var ActiveAnimationPlayersMap = (function () {
         this._allPlayers.push(player);
         this._map.set(element, playersByAnimation);
     };
-    ActiveAnimationPlayersMap.prototype.getAllPlayers = function () {
-        return this._allPlayers;
-    };
+    ActiveAnimationPlayersMap.prototype.getAllPlayers = function () { return this._allPlayers; };
     ActiveAnimationPlayersMap.prototype.remove = function (element, animationName) {
         var playersByAnimation = this._map.get(element);
         if (lang_1.isPresent(playersByAnimation)) {

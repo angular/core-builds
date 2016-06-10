@@ -1,8 +1,8 @@
-import { ViewEncapsulation } from '../metadata/view';
-import { Injector } from '../di/injector';
 import { AnimationKeyframe } from '../../src/animation/animation_keyframe';
 import { AnimationPlayer } from '../../src/animation/animation_player';
 import { AnimationStyles } from '../../src/animation/animation_styles';
+import { Injector } from '../di/injector';
+import { ViewEncapsulation } from '../metadata/view';
 /**
  * @experimental
  */

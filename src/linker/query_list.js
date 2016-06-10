@@ -1,7 +1,7 @@
 "use strict";
+var async_1 = require('../facade/async');
 var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
-var async_1 = require('../facade/async');
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
@@ -71,7 +71,9 @@ var QueryList = (function () {
      * converts QueryList into an array
      */
     QueryList.prototype.toArray = function () { return collection_1.ListWrapper.clone(this._results); };
-    QueryList.prototype[lang_1.getSymbolIterator()] = function () { return this._results[lang_1.getSymbolIterator()](); };
+    QueryList.prototype[lang_1.getSymbolIterator()] = function () {
+        return this._results[lang_1.getSymbolIterator()]();
+    };
     QueryList.prototype.toString = function () { return this._results.toString(); };
     /**
      * @internal

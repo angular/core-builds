@@ -1,5 +1,5 @@
-import { isBlank } from '../facade/lang';
 import { unimplemented } from '../facade/exceptions';
+import { isBlank } from '../facade/lang';
 import { ViewUtils } from './view_utils';
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.

@@ -9,9 +9,7 @@ var AnimationSequencePlayer = (function () {
         this._subscriptions = [];
         this._finished = false;
         this.parentPlayer = null;
-        this._players.forEach(function (player) {
-            player.parentPlayer = _this;
-        });
+        this._players.forEach(function (player) { player.parentPlayer = _this; });
         this._onNext(false);
     }
     AnimationSequencePlayer.prototype._onNext = function (start) {
@@ -63,12 +61,8 @@ var AnimationSequencePlayer = (function () {
         this._onFinish();
         this._players.forEach(function (player) { return player.destroy(); });
     };
-    AnimationSequencePlayer.prototype.setPosition = function (p /** TODO #9100 */) {
-        this._players[0].setPosition(p);
-    };
-    AnimationSequencePlayer.prototype.getPosition = function () {
-        return this._players[0].getPosition();
-    };
+    AnimationSequencePlayer.prototype.setPosition = function (p /** TODO #9100 */) { this._players[0].setPosition(p); };
+    AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
     return AnimationSequencePlayer;
 }());
 exports.AnimationSequencePlayer = AnimationSequencePlayer;

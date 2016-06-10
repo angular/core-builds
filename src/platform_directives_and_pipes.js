@@ -26,7 +26,7 @@ var di_1 = require('./di');
  * @stable
  */
 exports.PLATFORM_DIRECTIVES = 
-/*@ts2dart_const*/ new di_1.OpaqueToken("Platform Directives");
+/*@ts2dart_const*/ new di_1.OpaqueToken('Platform Directives');
 /**
  * A token that can be provided when bootstraping an application to make an array of pipes
  * available in every component of the application.
@@ -51,5 +51,5 @@ exports.PLATFORM_DIRECTIVES =
  * ```
  * @stable
  */
-exports.PLATFORM_PIPES = new di_1.OpaqueToken("Platform Pipes");
+exports.PLATFORM_PIPES = new di_1.OpaqueToken('Platform Pipes');
 //# sourceMappingURL=platform_directives_and_pipes.js.map

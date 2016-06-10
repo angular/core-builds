@@ -1,6 +1,6 @@
-import { SanitizationService } from '../security';
-import { RootRenderer, RenderComponentType } from '../render/api';
 import { ViewEncapsulation } from '../metadata/view';
+import { RenderComponentType, RootRenderer } from '../render/api';
+import { SanitizationService } from '../security';
 export declare class ViewUtils {
     private _renderer;
     private _appId;

@@ -1,14 +1,14 @@
-import { NgZone } from './zone/ng_zone';
-import { isBlank, isPresent, assertionsEnabled, lockMode, isPromise, IS_DART } from '../src/facade/lang';
-import { Injector, Injectable } from './di';
-import { PLATFORM_INITIALIZER, APP_INITIALIZER } from './application_tokens';
-import { PromiseWrapper, ObservableWrapper } from '../src/facade/async';
+import { ObservableWrapper, PromiseWrapper } from '../src/facade/async';
 import { ListWrapper } from '../src/facade/collection';
-import { TestabilityRegistry, Testability } from './testability/testability';
-import { ComponentResolver } from './linker/component_resolver';
 import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/exceptions';
+import { IS_DART, assertionsEnabled, isBlank, isPresent, isPromise, lockMode } from '../src/facade/lang';
+import { APP_INITIALIZER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
-import { wtfLeave, wtfCreateScope } from './profile/profile';
+import { Injectable, Injector } from './di';
+import { ComponentResolver } from './linker/component_resolver';
+import { wtfCreateScope, wtfLeave } from './profile/profile';
+import { Testability, TestabilityRegistry } from './testability/testability';
+import { NgZone } from './zone/ng_zone';
 /**
  * Create an Angular zone.
  * @experimental
@@ -28,7 +28,7 @@ export function createPlatform(injector) {
         throw new BaseException('Already creating a platform...');
     }
     if (isPresent(_platform) && !_platform.disposed) {
-        throw new BaseException("There can be only one platform. Destroy the previous one to create a new one.");
+        throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
     }
     lockMode();
     _inPlatformCreate = true;
@@ -276,8 +276,8 @@ export class ApplicationRef_ extends ApplicationRef {
             this._loadComponent(compRef);
             let c = this._injector.get(Console);
             if (assertionsEnabled()) {
-                let prodDescription = IS_DART ? "Production mode is disabled in Dart." :
-                    "Call enableProdMode() to enable the production mode.";
+                let prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
+                    'Call enableProdMode() to enable the production mode.';
                 c.log(`Angular 2 is running in the development mode. ${prodDescription}`);
             }
             return compRef;
@@ -302,7 +302,7 @@ export class ApplicationRef_ extends ApplicationRef {
     get zone() { return this._zone; }
     tick() {
         if (this._runningTick) {
-            throw new BaseException("ApplicationRef.tick is called recursively");
+            throw new BaseException('ApplicationRef.tick is called recursively');
         }
         var s = ApplicationRef_._tickScope();
         try {
@@ -346,6 +346,6 @@ export const PLATFORM_CORE_PROVIDERS =
 export const APPLICATION_CORE_PROVIDERS = [
     /* @ts2dart_Provider */ { provide: NgZone, useFactory: createNgZone, deps: [] },
     ApplicationRef_,
-    /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ }
+    /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
 ];
 //# sourceMappingURL=application_ref.js.map

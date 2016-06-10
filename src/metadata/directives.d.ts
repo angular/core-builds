@@ -1,8 +1,8 @@
-import { Type } from '../facade/lang';
-import { InjectableMetadata } from '../di/metadata';
-import { ViewEncapsulation } from './view';
-import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { AnimationEntryMetadata } from '../animation/metadata';
+import { ChangeDetectionStrategy } from '../change_detection/constants';
+import { InjectableMetadata } from '../di/metadata';
+import { Type } from '../facade/lang';
+import { ViewEncapsulation } from './view';
 /**
  * Directives allow you to attach behavior to elements in the DOM.
  *
@@ -890,7 +890,8 @@ export declare class ComponentMetadata extends DirectiveMetadata {
      * As depicted in the code above, a group of related animation states are all contained within
      * an animation `trigger` (the code example above called the trigger `myTriggerName`).
      * When a trigger is created then it can be bound onto an element within the component's
-     * template via a property prefixed by an `@` symbol followed by trigger name and an expression that
+     * template via a property prefixed by an `@` symbol followed by trigger name and an expression
+     * that
      * is used to determine the state value for that trigger.
      *
      * ```html
@@ -898,7 +899,8 @@ export declare class ComponentMetadata extends DirectiveMetadata {
      * <div @myTriggerName="expression">...</div>
      * ```
      *
-     * For state changes to be executed, the `expression` value must change value from its existing value
+     * For state changes to be executed, the `expression` value must change value from its existing
+     * value
      * to something that we have set an animation to animate on (in the example above we are listening
      * to a change of state between `on` and `off`). The `expression` value attached to the trigger
      * must be something that can be evaluated with the template/component context.

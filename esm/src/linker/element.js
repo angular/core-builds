@@ -1,9 +1,9 @@
-import { isPresent } from '../facade/lang';
 import { ListWrapper } from '../facade/collection';
 import { BaseException } from '../facade/exceptions';
-import { ViewType } from './view_type';
+import { isPresent } from '../facade/lang';
 import { ElementRef } from './element_ref';
 import { ViewContainerRef_ } from './view_container_ref';
+import { ViewType } from './view_type';
 /**
  * An AppElement is created for elements that have a ViewContainerRef,
  * a nested component or a <template> element to keep data around

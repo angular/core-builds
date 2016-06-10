@@ -25,7 +25,7 @@ import { OpaqueToken } from './di';
  * @stable
  */
 export const PLATFORM_DIRECTIVES = 
-/*@ts2dart_const*/ new OpaqueToken("Platform Directives");
+/*@ts2dart_const*/ new OpaqueToken('Platform Directives');
 /**
  * A token that can be provided when bootstraping an application to make an array of pipes
  * available in every component of the application.
@@ -50,5 +50,5 @@ export const PLATFORM_DIRECTIVES =
  * ```
  * @stable
  */
-export const PLATFORM_PIPES = new OpaqueToken("Platform Pipes");
+export const PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
 //# sourceMappingURL=platform_directives_and_pipes.js.map

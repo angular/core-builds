@@ -4,10 +4,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var collection_1 = require('../facade/collection');
-var element_1 = require('./element');
-var lang_1 = require('../facade/lang');
 var async_1 = require('../facade/async');
+var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
+var element_1 = require('./element');
 var view_ref_1 = require('./view_ref');
 var view_type_1 = require('./view_type');
 var view_utils_1 = require('./view_utils');
@@ -63,9 +63,7 @@ var AppView = (function () {
     AppView.prototype.registerAndStartAnimation = function (element, animationName, player) {
         var _this = this;
         this.activeAnimationPlayers.set(element, animationName, player);
-        player.onDone(function () {
-            _this.activeAnimationPlayers.remove(element, animationName);
-        });
+        player.onDone(function () { _this.activeAnimationPlayers.remove(element, animationName); });
         player.play();
     };
     AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
@@ -172,9 +170,7 @@ var AppView = (function () {
         }
         else {
             var player = new animation_group_player_1.AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
-            player.onDone(function () {
-                _this.renderer.destroyView(hostElement, _this.allNodes);
-            });
+            player.onDone(function () { _this.renderer.destroyView(hostElement, _this.allNodes); });
         }
     };
     /**
@@ -193,9 +189,7 @@ var AppView = (function () {
         }
         else {
             var player = new animation_group_player_1.AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
-            player.onDone(function () {
-                _this.renderer.detachView(_this.flatRootNodes);
-            });
+            player.onDone(function () { _this.renderer.detachView(_this.flatRootNodes); });
         }
     };
     Object.defineProperty(AppView.prototype, "changeDetectorRef", {

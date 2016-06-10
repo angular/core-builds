@@ -120,7 +120,9 @@ var ReflectionCapabilities = (function () {
         if (lang_1.isPresent(typeOrFunc.ctorParameters)) {
             var ctorParameters = typeOrFunc.ctorParameters;
             var paramTypes_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && ctorParam.type; });
-            var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
+            var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) {
+                return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
+            });
             return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
         }
         // API for metadata created by invoking the decorators.
@@ -170,8 +172,7 @@ var ReflectionCapabilities = (function () {
         if (lang_1.isPresent(typeOrFunc.propDecorators)) {
             var propDecorators_1 = typeOrFunc.propDecorators;
             var propMetadata_1 = {};
-            Object.keys(propDecorators_1)
-                .forEach(function (prop) {
+            Object.keys(propDecorators_1).forEach(function (prop) {
                 propMetadata_1[prop] = convertTsickleDecoratorIntoMetadata(propDecorators_1[prop]);
             });
             return propMetadata_1;

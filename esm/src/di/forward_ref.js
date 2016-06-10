@@ -1,4 +1,4 @@
-import { stringify, isFunction } from '../facade/lang';
+import { isFunction, stringify } from '../facade/lang';
 /**
  * Allows to refer to references which are not yet defined.
  *

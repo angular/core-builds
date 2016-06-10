@@ -1,6 +1,6 @@
 "use strict";
-var exceptions_1 = require('../../facade/exceptions');
 var collection_1 = require('../../facade/collection');
+var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 /* @ts2dart_const */
 var DefaultIterableDifferFactory = (function () {
@@ -484,10 +484,12 @@ var DefaultIterableDiffer = (function () {
         this.forEachRemovedItem(function (record /** TODO #9100 */) { return removals.push(record); });
         var identityChanges = [];
         this.forEachIdentityChange(function (record /** TODO #9100 */) { return identityChanges.push(record); });
-        return "collection: " + list.join(', ') + "\n" + "previous: " + previous.join(', ') + "\n" +
-            "additions: " + additions.join(', ') + "\n" + "moves: " + moves.join(', ') + "\n" +
-            "removals: " + removals.join(', ') + "\n" + "identityChanges: " +
-            identityChanges.join(', ') + "\n";
+        return 'collection: ' + list.join(', ') + '\n' +
+            'previous: ' + previous.join(', ') + '\n' +
+            'additions: ' + additions.join(', ') + '\n' +
+            'moves: ' + moves.join(', ') + '\n' +
+            'removals: ' + removals.join(', ') + '\n' +
+            'identityChanges: ' + identityChanges.join(', ') + '\n';
     };
     return DefaultIterableDiffer;
 }());
@@ -523,10 +525,9 @@ var CollectionChangeRecord = (function () {
         this._nextIdentityChange = null;
     }
     CollectionChangeRecord.prototype.toString = function () {
-        return this.previousIndex === this.currentIndex ?
-            lang_1.stringify(this.item) :
-            lang_1.stringify(this.item) + '[' + lang_1.stringify(this.previousIndex) + '->' +
-                lang_1.stringify(this.currentIndex) + ']';
+        return this.previousIndex === this.currentIndex ? lang_1.stringify(this.item) :
+            lang_1.stringify(this.item) + '[' +
+                lang_1.stringify(this.previousIndex) + '->' + lang_1.stringify(this.currentIndex) + ']';
     };
     return CollectionChangeRecord;
 }());

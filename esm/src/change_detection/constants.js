@@ -66,7 +66,7 @@ export var CHANGE_DETECTION_STRATEGY_VALUES = [
     ChangeDetectionStrategy.CheckAlways,
     ChangeDetectionStrategy.Detached,
     ChangeDetectionStrategy.OnPush,
-    ChangeDetectionStrategy.Default
+    ChangeDetectionStrategy.Default,
 ];
 /**
  * List of possible {@link ChangeDetectorState} values.
@@ -74,7 +74,7 @@ export var CHANGE_DETECTION_STRATEGY_VALUES = [
 export var CHANGE_DETECTOR_STATE_VALUES = [
     ChangeDetectorState.NeverChecked,
     ChangeDetectorState.CheckedBefore,
-    ChangeDetectorState.Errored
+    ChangeDetectorState.Errored,
 ];
 export function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return isBlank(changeDetectionStrategy) ||

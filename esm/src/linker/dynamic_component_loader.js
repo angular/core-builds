@@ -1,7 +1,7 @@
-import { ComponentResolver } from './component_resolver';
-import { isPresent } from '../facade/lang';
-import { ReflectiveInjector } from '../di/reflective_injector';
 import { Injectable } from '../di/decorators';
+import { ReflectiveInjector } from '../di/reflective_injector';
+import { isPresent } from '../facade/lang';
+import { ComponentResolver } from './component_resolver';
 /**
  * Use ComponentResolver and ViewContainerRef directly.
  *

@@ -1,4 +1,4 @@
-import { InjectMetadata, OptionalMetadata, InjectableMetadata, SelfMetadata, HostMetadata, SkipSelfMetadata } from './metadata';
+import { HostMetadata, InjectMetadata, InjectableMetadata, OptionalMetadata, SelfMetadata, SkipSelfMetadata } from './metadata';
 /**
  * Factory for creating {@link InjectMetadata}.
  * @stable

@@ -1,6 +1,6 @@
-import { stringify, isString, StringWrapper } from '../facade/lang';
-import { DependencyMetadata } from '../di/metadata';
 import { resolveForwardRef } from '../di/forward_ref';
+import { DependencyMetadata } from '../di/metadata';
+import { StringWrapper, isString, stringify } from '../facade/lang';
 /**
  * Specifies that a constant attribute value should be injected.
  *

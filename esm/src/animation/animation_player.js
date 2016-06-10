@@ -1,8 +1,10 @@
-import { scheduleMicroTask } from '../facade/lang';
 import { BaseException } from '../facade/exceptions';
+import { scheduleMicroTask } from '../facade/lang';
 export class AnimationPlayer {
     get parentPlayer() { throw new BaseException('NOT IMPLEMENTED: Base Class'); }
-    set parentPlayer(player) { throw new BaseException('NOT IMPLEMENTED: Base Class'); }
+    set parentPlayer(player) {
+        throw new BaseException('NOT IMPLEMENTED: Base Class');
+    }
 }
 export class NoOpAnimationPlayer {
     constructor() {
@@ -19,9 +21,7 @@ export class NoOpAnimationPlayer {
     play() { }
     pause() { }
     restart() { }
-    finish() {
-        this._onFinish();
-    }
+    finish() { this._onFinish(); }
     destroy() { }
     reset() { }
     setPosition(p /** TODO #9100 */) { }

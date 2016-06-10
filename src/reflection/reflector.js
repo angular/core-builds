@@ -4,9 +4,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var lang_1 = require('../facade/lang');
-var exceptions_1 = require('../facade/exceptions');
 var collection_1 = require('../facade/collection');
+var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
 var reflector_reader_1 = require('./reflector_reader');
 /**
  * Reflective information about a symbol, including annotations, interfaces, and other metadata.

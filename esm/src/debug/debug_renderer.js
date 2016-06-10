@@ -1,5 +1,5 @@
 import { isPresent } from '../facade/lang';
-import { DebugNode, DebugElement, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
+import { DebugElement, DebugNode, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
 export class DebugDomRootRenderer {
     constructor(_delegate) {
         this._delegate = _delegate;

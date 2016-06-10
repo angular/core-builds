@@ -1,8 +1,8 @@
-import { NgZone } from './zone/ng_zone';
 import { Type } from '../src/facade/lang';
-import { Injector } from './di';
-import { ComponentRef, ComponentFactory } from './linker/component_factory';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
+import { Injector } from './di';
+import { ComponentFactory, ComponentRef } from './linker/component_factory';
+import { NgZone } from './zone/ng_zone';
 /**
  * Create an Angular zone.
  * @experimental

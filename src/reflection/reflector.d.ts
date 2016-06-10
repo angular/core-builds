@@ -1,9 +1,9 @@
 import { Type } from '../facade/lang';
-import { SetterFn, GetterFn, MethodFn } from './types';
-import { ReflectorReader } from './reflector_reader';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
-export { SetterFn, GetterFn, MethodFn } from './types';
+import { ReflectorReader } from './reflector_reader';
+import { GetterFn, MethodFn, SetterFn } from './types';
 export { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
+export { GetterFn, MethodFn, SetterFn } from './types';
 /**
  * Reflective information about a symbol, including annotations, interfaces, and other metadata.
  */

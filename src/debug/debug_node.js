@@ -4,8 +4,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
 var EventListener = (function () {
     function EventListener(name, callback) {
         this.name = name;

@@ -1,5 +1,5 @@
+import { RenderComponentType, RenderDebugInfo, Renderer } from '../render/api';
 import { AppElement } from './element';
-import { Renderer, RenderComponentType, RenderDebugInfo } from '../render/api';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
 import { ViewUtils } from './view_utils';

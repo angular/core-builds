@@ -3,7 +3,7 @@
  * @description
  * The `di` module provides dependency injection container services.
  */
-export { InjectMetadata, OptionalMetadata, InjectableMetadata, SelfMetadata, HostMetadata, SkipSelfMetadata } from './di/metadata';
+export { HostMetadata, InjectMetadata, InjectableMetadata, OptionalMetadata, SelfMetadata, SkipSelfMetadata } from './di/metadata';
 // we have to reexport * because Dart and TS export two different sets of types
 export * from './di/decorators';
 export { forwardRef, resolveForwardRef } from './di/forward_ref';

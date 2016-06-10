@@ -4,9 +4,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var lang_1 = require('../facade/lang');
-var metadata_1 = require('../di/metadata');
 var constants_1 = require('../change_detection/constants');
+var metadata_1 = require('../di/metadata');
+var lang_1 = require('../facade/lang');
 /**
  * Directives allow you to attach behavior to elements in the DOM.
  *
@@ -560,9 +560,7 @@ var DirectiveMetadata = (function (_super) {
          * }
          * ```
          */
-        get: function () {
-            return this._providers;
-        },
+        get: function () { return this._providers; },
         enumerable: true,
         configurable: true
     });
@@ -663,9 +661,7 @@ var ComponentMetadata = (function (_super) {
          *
          * ```
          */
-        get: function () {
-            return this._viewProviders;
-        },
+        get: function () { return this._viewProviders; },
         enumerable: true,
         configurable: true
     });

@@ -7,9 +7,7 @@ export class AnimationSequencePlayer {
         this._subscriptions = [];
         this._finished = false;
         this.parentPlayer = null;
-        this._players.forEach(player => {
-            player.parentPlayer = this;
-        });
+        this._players.forEach(player => { player.parentPlayer = this; });
         this._onNext(false);
     }
     _onNext(start) {
@@ -60,11 +58,7 @@ export class AnimationSequencePlayer {
         this._onFinish();
         this._players.forEach(player => player.destroy());
     }
-    setPosition(p /** TODO #9100 */) {
-        this._players[0].setPosition(p);
-    }
-    getPosition() {
-        return this._players[0].getPosition();
-    }
+    setPosition(p /** TODO #9100 */) { this._players[0].setPosition(p); }
+    getPosition() { return this._players[0].getPosition(); }
 }
 //# sourceMappingURL=animation_sequence_player.js.map

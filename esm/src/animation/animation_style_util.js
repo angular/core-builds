@@ -1,7 +1,7 @@
-import { isPresent } from '../facade/lang';
 import { ListWrapper, StringMapWrapper } from '../facade/collection';
-import { AUTO_STYLE } from './metadata';
+import { isPresent } from '../facade/lang';
 import { FILL_STYLE_FLAG } from './animation_constants';
+import { AUTO_STYLE } from './metadata';
 export function balanceAnimationStyles(previousStyles, newStyles, nullValue = null) {
     var finalStyles = {};
     StringMapWrapper.forEach(newStyles, (value /** TODO #9100 */, prop /** TODO #9100 */) => {
@@ -59,9 +59,7 @@ export function balanceAnimationKeyframes(collectedStyles, finalStateStyles, key
 }
 export function clearStyles(styles) {
     var finalStyles = {};
-    StringMapWrapper.keys(styles).forEach(key => {
-        finalStyles[key] = null;
-    });
+    StringMapWrapper.keys(styles).forEach(key => { finalStyles[key] = null; });
     return finalStyles;
 }
 export function collectAndResolveStyles(collection, styles) {

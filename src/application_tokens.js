@@ -1,6 +1,6 @@
 "use strict";
-var di_1 = require('./di');
 var lang_1 = require('../src/facade/lang');
+var di_1 = require('./di');
 /**
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
@@ -33,17 +33,17 @@ function _randomChar() {
  * @experimental
  */
 exports.PLATFORM_INITIALIZER = 
-/*@ts2dart_const*/ new di_1.OpaqueToken("Platform Initializer");
+/*@ts2dart_const*/ new di_1.OpaqueToken('Platform Initializer');
 /**
  * A function that will be executed when an application is initialized.
  * @experimental
  */
 exports.APP_INITIALIZER = 
-/*@ts2dart_const*/ new di_1.OpaqueToken("Application Initializer");
+/*@ts2dart_const*/ new di_1.OpaqueToken('Application Initializer');
 /**
  * A token which indicates the root directory of the application
  * @experimental
  */
 exports.PACKAGE_ROOT_URL = 
-/*@ts2dart_const*/ new di_1.OpaqueToken("Application Packages Root URL");
+/*@ts2dart_const*/ new di_1.OpaqueToken('Application Packages Root URL');
 //# sourceMappingURL=application_tokens.js.map
