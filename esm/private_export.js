@@ -85,7 +85,7 @@ export var __core_private__ = {
     AnimationSequencePlayer: AnimationSequencePlayer_,
     AnimationGroupPlayer: AnimationGroupPlayer_,
     AnimationKeyframe: AnimationKeyframe_,
-    balanceAnimationStyles: animationUtils.balanceAnimationStyles,
+    prepareFinalAnimationStyles: animationUtils.prepareFinalAnimationStyles,
     balanceAnimationKeyframes: animationUtils.balanceAnimationKeyframes,
     flattenStyles: animationUtils.flattenStyles,
     clearStyles: animationUtils.clearStyles,

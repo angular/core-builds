@@ -3,20 +3,20 @@ var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
 var animation_constants_1 = require('./animation_constants');
 var metadata_1 = require('./metadata');
-function balanceAnimationStyles(previousStyles, newStyles, nullValue) {
+function prepareFinalAnimationStyles(previousStyles, newStyles, nullValue) {
     if (nullValue === void 0) { nullValue = null; }
     var finalStyles = {};
-    collection_1.StringMapWrapper.forEach(newStyles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
-        finalStyles[prop] = value.toString();
+    collection_1.StringMapWrapper.forEach(newStyles, function (value, prop) {
+        finalStyles[prop] = value == metadata_1.AUTO_STYLE ? nullValue : value.toString();
     });
-    collection_1.StringMapWrapper.forEach(previousStyles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
+    collection_1.StringMapWrapper.forEach(previousStyles, function (value, prop) {
         if (!lang_1.isPresent(finalStyles[prop])) {
             finalStyles[prop] = nullValue;
         }
     });
     return finalStyles;
 }
-exports.balanceAnimationStyles = balanceAnimationStyles;
+exports.prepareFinalAnimationStyles = prepareFinalAnimationStyles;
 function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes) {
     var limit = keyframes.length - 1;
     var firstKeyframe = keyframes[0];
@@ -24,7 +24,7 @@ function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes)
     var flatenedFirstKeyframeStyles = flattenStyles(firstKeyframe.styles.styles);
     var extraFirstKeyframeStyles = {};
     var hasExtraFirstStyles = false;
-    collection_1.StringMapWrapper.forEach(collectedStyles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
+    collection_1.StringMapWrapper.forEach(collectedStyles, function (value, prop) {
         // if the style is already defined in the first keyframe then
         // we do not replace it.
         if (!flatenedFirstKeyframeStyles[prop]) {
@@ -40,7 +40,7 @@ function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes)
     var flatenedFinalKeyframeStyles = flattenStyles(finalKeyframe.styles.styles);
     var extraFinalKeyframeStyles = {};
     var hasExtraFinalStyles = false;
-    collection_1.StringMapWrapper.forEach(keyframeCollectedStyles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
+    collection_1.StringMapWrapper.forEach(keyframeCollectedStyles, function (value, prop) {
         if (!lang_1.isPresent(flatenedFinalKeyframeStyles[prop])) {
             extraFinalKeyframeStyles[prop] = metadata_1.AUTO_STYLE;
             hasExtraFinalStyles = true;
@@ -49,7 +49,7 @@ function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes)
     if (hasExtraFinalStyles) {
         finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
     }
-    collection_1.StringMapWrapper.forEach(flatenedFinalKeyframeStyles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
+    collection_1.StringMapWrapper.forEach(flatenedFinalKeyframeStyles, function (value, prop) {
         if (!lang_1.isPresent(flatenedFirstKeyframeStyles[prop])) {
             extraFirstKeyframeStyles[prop] = metadata_1.AUTO_STYLE;
             hasExtraFirstStyles = true;
@@ -70,7 +70,7 @@ exports.clearStyles = clearStyles;
 function collectAndResolveStyles(collection, styles) {
     return styles.map(function (entry) {
         var stylesObj = {};
-        collection_1.StringMapWrapper.forEach(entry, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
+        collection_1.StringMapWrapper.forEach(entry, function (value, prop) {
             if (value == animation_constants_1.FILL_STYLE_FLAG) {
                 value = collection[prop];
                 if (!lang_1.isPresent(value)) {
@@ -85,17 +85,13 @@ function collectAndResolveStyles(collection, styles) {
 }
 exports.collectAndResolveStyles = collectAndResolveStyles;
 function renderStyles(element, renderer, styles) {
-    collection_1.StringMapWrapper.forEach(styles, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
-        renderer.setElementStyle(element, prop, value);
-    });
+    collection_1.StringMapWrapper.forEach(styles, function (value, prop) { renderer.setElementStyle(element, prop, value); });
 }
 exports.renderStyles = renderStyles;
 function flattenStyles(styles) {
     var finalStyles = {};
     styles.forEach(function (entry) {
-        collection_1.StringMapWrapper.forEach(entry, function (value /** TODO #9100 */, prop /** TODO #9100 */) {
-            finalStyles[prop] = value;
-        });
+        collection_1.StringMapWrapper.forEach(entry, function (value, prop) { finalStyles[prop] = value; });
     });
     return finalStyles;
 }

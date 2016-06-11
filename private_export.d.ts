@@ -108,7 +108,7 @@ export declare namespace __core_private_types__ {
     var AnimationGroupPlayer: typeof AnimationGroupPlayer_;
     type AnimationKeyframe = AnimationKeyframe_;
     var AnimationKeyframe: typeof AnimationKeyframe_;
-    var balanceAnimationStyles: typeof animationUtils.balanceAnimationStyles;
+    var prepareFinalAnimationStyles: typeof animationUtils.prepareFinalAnimationStyles;
     var balanceAnimationKeyframes: typeof animationUtils.balanceAnimationKeyframes;
     var flattenStyles: typeof animationUtils.flattenStyles;
     var clearStyles: typeof animationUtils.clearStyles;
@@ -178,11 +178,11 @@ export declare var __core_private__: {
     AnimationSequencePlayer: typeof AnimationSequencePlayer_;
     AnimationGroupPlayer: typeof AnimationGroupPlayer_;
     AnimationKeyframe: typeof AnimationKeyframe_;
-    balanceAnimationStyles: (previousStyles: {
+    prepareFinalAnimationStyles: (previousStyles: {
         [key: string]: string | number;
     }, newStyles: {
         [key: string]: string | number;
-    }, nullValue?: any) => {
+    }, nullValue?: string) => {
         [key: string]: string;
     };
     balanceAnimationKeyframes: (collectedStyles: {
@@ -192,7 +192,9 @@ export declare var __core_private__: {
     }, keyframes: any[]) => any[];
     flattenStyles: (styles: {
         [key: string]: string | number;
-    }[]) => {};
+    }[]) => {
+        [key: string]: string;
+    };
     clearStyles: (styles: {
         [key: string]: string | number;
     }) => {
@@ -205,7 +207,9 @@ export declare var __core_private__: {
         [key: string]: string | number;
     }, styles: {
         [key: string]: string | number;
-    }[]) => {}[];
+    }[]) => {
+        [key: string]: string | number;
+    }[];
     AnimationStyles: typeof AnimationStyles_;
     ANY_STATE: string;
     DEFAULT_STATE: string;
