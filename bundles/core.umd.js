@@ -94,7 +94,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return Array.isArray(obj);
     }
     function noop() { }
-    function stringify(token /** TODO #9100 */) {
+    function stringify(token) {
         if (typeof token === 'string') {
             return token;
         }
@@ -155,7 +155,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         StringWrapper.replaceAllMapped = function (s, from, cb) {
             return s.replace(from, function () {
-                var matches = []; /** TODO #9100 */
+                var matches = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     matches[_i - 0] = arguments[_i];
                 }
@@ -231,7 +231,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return NumberWrapper;
     }());
     // JS has NaN !== NaN
-    function looseIdentical(a /** TODO #9100 */, b /** TODO #9100 */) {
+    function looseIdentical(a, b) {
         return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
     }
     // JS considers NaN is the same as NaN for map Key (while NaN !== NaN otherwise)
@@ -6519,7 +6519,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         function PromiseWrapper() {
         }
         PromiseWrapper.resolve = function (obj) { return Promise.resolve(obj); };
-        PromiseWrapper.reject = function (obj, _ /** TODO #9100 */) { return Promise.reject(obj); };
+        PromiseWrapper.reject = function (obj, _) { return Promise.reject(obj); };
         // Note: We can't rename this method into `catch`, as this is not a valid
         // method name in Dart.
         PromiseWrapper.catchError = function (promise, onError) {
