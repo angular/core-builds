@@ -2738,7 +2738,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return constructor;
     }
     var Reflect = global$1.Reflect;
-    function makeDecorator(annotationCls /** TODO #9100 */, chainFn) {
+    function makeDecorator(annotationCls /* TODO #9100 */, chainFn) {
         if (chainFn === void 0) { chainFn = null; }
         function DecoratorFactory(objOrType /** TODO #9100 */) {
             var annotationInstance = new annotationCls(objOrType);

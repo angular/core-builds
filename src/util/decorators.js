@@ -166,7 +166,7 @@ var Reflect = lang_1.global.Reflect;
         throw 'reflect-metadata shim is required when using class decorators';
     }
 })();
-function makeDecorator(annotationCls /** TODO #9100 */, chainFn) {
+function makeDecorator(annotationCls /* TODO #9100 */, chainFn) {
     if (chainFn === void 0) { chainFn = null; }
     function DecoratorFactory(objOrType /** TODO #9100 */) {
         var annotationInstance = new annotationCls(objOrType);
