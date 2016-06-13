@@ -10361,58 +10361,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function removeDebugNodeFromIndex(node) {
         _nativeNodeToDebugNode.delete(node.nativeNode);
     }
-    /**
-     * A token that can be provided when bootstraping an application to make an array of directives
-     * available in every component of the application.
-     *
-     * ### Example
-     *
-     * ```typescript
-     * import {PLATFORM_DIRECTIVES} from '@angular/core';
-     * import {OtherDirective} from './myDirectives';
-     *
-     * @Component({
-     *   selector: 'my-component',
-     *   template: `
-     *     <!-- can use other directive even though the component does not list it in `directives` -->
-     *     <other-directive></other-directive>
-     *   `
-     * })
-     * export class MyComponent {
-     *   ...
-     * }
-     *
-     * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective], multi:true}]);
-     * ```
-     * @stable
-     */
-    var PLATFORM_DIRECTIVES = 
-    /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
-    /**
-     * A token that can be provided when bootstraping an application to make an array of pipes
-     * available in every component of the application.
-     *
-     * ### Example
-     *
-     * ```typescript
-     * import {PLATFORM_PIPES} from '@angular/core';
-     * import {OtherPipe} from './myPipe';
-     *
-     * @Component({
-     *   selector: 'my-component',
-     *   template: `
-     *     {{123 | other-pipe}}
-     *   `
-     * })
-     * export class MyComponent {
-     *   ...
-     * }
-     *
-     * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
-     * ```
-     * @stable
-     */
-    var PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
     function _reflector() {
         return reflector;
     }
@@ -12197,8 +12145,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.KeyValueDiffers = KeyValueDiffers;
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;
-    exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
-    exports.PLATFORM_PIPES = PLATFORM_PIPES;
     exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
     exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
     exports.__core_private__ = __core_private__;

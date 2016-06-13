@@ -35,7 +35,6 @@ exports.asNativeElements = debug_node_1.asNativeElements;
 exports.getDebugNode = debug_node_1.getDebugNode;
 __export(require('./src/testability/testability'));
 __export(require('./src/change_detection'));
-__export(require('./src/platform_directives_and_pipes'));
 __export(require('./src/platform_common_providers'));
 __export(require('./src/application_common_providers'));
 var profile_1 = require('./src/profile/profile');
