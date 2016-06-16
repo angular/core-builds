@@ -2849,6 +2849,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * {@example core/ts/metadata/metadata.ts region='component'}
      * @stable
+     * @Annotation
      */
     var Component = makeDecorator(ComponentMetadata, function (fn) { return fn.View = View; });
     // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
@@ -3230,6 +3231,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * the instantiated
      * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
      * @stable
+     * @Annotation
      */
     var Directive = makeDecorator(DirectiveMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewMetadata.
@@ -3262,6 +3264,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      * ```
      * @deprecated
+     * @Annotation
      */
     var View = makeDecorator(ViewMetadata, function (fn) { return fn.View = View; });
     /**
@@ -3281,6 +3284,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
      * @stable
+     * @Annotation
      */
     var Attribute = makeParamDecorator(AttributeMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from QueryMetadata.
@@ -3391,6 +3395,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * The injected object is an unmodifiable live list.
      * See {@link QueryList} for more details.
      * @deprecated
+     * @Annotation
      */
     var Query = makeParamDecorator(QueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
@@ -3414,6 +3419,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      * ```
      * @stable
+     * @Annotation
      */
     var ContentChildren = makePropDecorator(ContentChildrenMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildMetadata.
@@ -3446,6 +3452,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * </container>
      * ```
      * @stable
+     * @Annotation
      */
     var ContentChild = makePropDecorator(ContentChildMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildrenMetadata.
@@ -3528,6 +3535,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * See also: [ViewChildrenMetadata]
      * @stable
+     * @Annotation
      */
     var ViewChildren = makePropDecorator(ViewChildrenMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildMetadata.
@@ -3601,6 +3609,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```
      * See also: [ViewChildMetadata]
      * @stable
+     * @Annotation
      */
     var ViewChild = makePropDecorator(ViewChildMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewQueryMetadata.
@@ -3639,6 +3648,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * The injected object is an iterable and observable live list.
      * See {@link QueryList} for more details.
      * @deprecated
+     * @Annotation
      */
     var ViewQuery = makeParamDecorator(ViewQueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
@@ -3649,6 +3659,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * {@example core/ts/metadata/metadata.ts region='pipe'}
      * @stable
+     * @Annotation
      */
     var Pipe = makeDecorator(PipeMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from InputMetadata.
@@ -3693,6 +3704,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * bootstrap(App);
      * ```
      * @stable
+     * @Annotation
      */
     var Input = makePropDecorator(InputMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from OutputMetadata.
@@ -3737,6 +3749,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * bootstrap(App);
      * ```
      * @stable
+     * @Annotation
      */
     var Output = makePropDecorator(OutputMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from HostBindingMetadata.
@@ -3775,6 +3788,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * bootstrap(App);
      * ```
      * @stable
+     * @Annotation
      */
     var HostBinding = makePropDecorator(HostBindingMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from HostListenerMetadata.
@@ -3812,36 +3826,43 @@ var __extends = (this && this.__extends) || function (d, b) {
      * bootstrap(App);
      * ```
      * @stable
+     * @Annotation
      */
     var HostListener = makePropDecorator(HostListenerMetadata);
     /**
      * Factory for creating {@link InjectMetadata}.
      * @stable
+     * @Annotation
      */
     var Inject = makeParamDecorator(InjectMetadata);
     /**
      * Factory for creating {@link OptionalMetadata}.
      * @stable
+     * @Annotation
      */
     var Optional = makeParamDecorator(OptionalMetadata);
     /**
      * Factory for creating {@link InjectableMetadata}.
      * @stable
+     * @Annotation
      */
     var Injectable = makeDecorator(InjectableMetadata);
     /**
      * Factory for creating {@link SelfMetadata}.
      * @stable
+     * @Annotation
      */
     var Self = makeParamDecorator(SelfMetadata);
     /**
      * Factory for creating {@link HostMetadata}.
      * @stable
+     * @Annotation
      */
     var Host = makeParamDecorator(HostMetadata);
     /**
      * Factory for creating {@link SkipSelfMetadata}.
      * @stable
+     * @Annotation
      */
     var SkipSelf = makeParamDecorator(SkipSelfMetadata);
     /**
