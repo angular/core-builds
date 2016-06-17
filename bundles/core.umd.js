@@ -10163,6 +10163,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         function ViewRef_(_view) {
             this._view = _view;
             this._view = _view;
+            this._originalMode = this._view.cdMode;
         }
         Object.defineProperty(ViewRef_.prototype, "internalView", {
             get: function () { return this._view; },
@@ -10189,7 +10190,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         ViewRef_.prototype.detectChanges = function () { this._view.detectChanges(false); };
         ViewRef_.prototype.checkNoChanges = function () { this._view.detectChanges(true); };
         ViewRef_.prototype.reattach = function () {
-            this._view.cdMode = exports.ChangeDetectionStrategy.CheckAlways;
+            this._view.cdMode = this._originalMode;
             this.markForCheck();
         };
         ViewRef_.prototype.onDestroy = function (callback) { this._view.disposables.push(callback); };
