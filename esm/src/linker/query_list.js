@@ -45,7 +45,9 @@ export class QueryList {
     /**
      * returns a reduced value.
      */
-    reduce(fn, init) { return this._results.reduce(fn, init); }
+    reduce(fn, init) {
+        return this._results.reduce(fn, init);
+    }
     /**
      * executes function for each element in a query.
      */

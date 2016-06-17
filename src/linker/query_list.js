@@ -62,7 +62,9 @@ var QueryList = (function () {
     /**
      * returns a reduced value.
      */
-    QueryList.prototype.reduce = function (fn, init) { return this._results.reduce(fn, init); };
+    QueryList.prototype.reduce = function (fn, init) {
+        return this._results.reduce(fn, init);
+    };
     /**
      * executes function for each element in a query.
      */
