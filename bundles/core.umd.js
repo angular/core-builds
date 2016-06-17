@@ -42,30 +42,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return typeof type;
     }
     var Math = global$1.Math;
-    var _devMode = true;
-    var _modeLocked = false;
-    function lockMode() {
-        _modeLocked = true;
-    }
-    /**
-     * Disable Angular's development mode, which turns off assertions and other
-     * checks within the framework.
-     *
-     * One important assertion this disables verifies that a change detection pass
-     * does not result in additional changes to any bindings (also known as
-     * unidirectional data flow).
-     * @stable
-     */
-    function enableProdMode() {
-        if (_modeLocked) {
-            // Cannot use BaseException as that ends up importing from facade/lang.
-            throw 'Cannot enable prod mode after platform setup.';
-        }
-        _devMode = false;
-    }
-    function assertionsEnabled() {
-        return _devMode;
-    }
     // TODO: remove calls to assert in production environment
     // Note: Can't just export this and import in in other files
     // as `assert` is a reserved keyword in Dart
@@ -9443,10 +9419,48 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     function createNgZone() {
-        return new NgZone({ enableLongStackTrace: assertionsEnabled() });
+        return new NgZone({ enableLongStackTrace: isDevMode() });
     }
+    var _devMode = true;
+    var _runModeLocked = false;
     var _platform;
     var _inPlatformCreate = false;
+    /**
+     * Disable Angular's development mode, which turns off assertions and other
+     * checks within the framework.
+     *
+     * One important assertion this disables verifies that a change detection pass
+     * does not result in additional changes to any bindings (also known as
+     * unidirectional data flow).
+     * @stable
+     */
+    function enableProdMode() {
+        if (_runModeLocked) {
+            // Cannot use BaseException as that ends up importing from facade/lang.
+            throw new BaseException('Cannot enable prod mode after platform setup.');
+        }
+        _devMode = false;
+    }
+    /**
+     * Returns whether Angular is in development mode.
+     * This can only be read after `lockRunMode` has been called.
+     *
+     * By default, this is true, unless a user calls `enableProdMode`.
+     */
+    function isDevMode() {
+        if (!_runModeLocked) {
+            throw new BaseException("Dev mode can't be read before bootstrap!");
+        }
+        return _devMode;
+    }
+    /**
+     * Locks the run mode of Angular. After this has been called,
+     * it can't be changed any more. I.e. `isDevMode()` will always
+     * return the same value.
+     */
+    function lockRunMode() {
+        _runModeLocked = true;
+    }
     /**
      * Creates a platform.
      * Platforms have to be eagerly created via this function.
@@ -9459,7 +9473,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (isPresent(_platform) && !_platform.disposed) {
             throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
         }
-        lockMode();
+        lockRunMode();
         _inPlatformCreate = true;
         try {
             _platform = injector.get(PlatformRef);
@@ -9660,7 +9674,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             /** @internal */
             this._enforceNoNewChanges = false;
             var zone = _injector.get(NgZone);
-            this._enforceNoNewChanges = assertionsEnabled();
+            this._enforceNoNewChanges = isDevMode();
             zone.run(function () { _this._exceptionHandler = _injector.get(ExceptionHandler); });
             this._asyncInitDonePromise = this.run(function () {
                 var inits = _injector.get(APP_INITIALIZER, null);
@@ -9744,7 +9758,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
                 _this._loadComponent(compRef);
                 var c = _this._injector.get(Console);
-                if (assertionsEnabled()) {
+                if (isDevMode()) {
                     var prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
                         'Call enableProdMode() to enable the production mode.';
                     c.log("Angular 2 is running in the development mode. " + prodDescription);
@@ -12106,6 +12120,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.createNgZone = createNgZone;
     exports.PlatformRef = PlatformRef;
     exports.ApplicationRef = ApplicationRef;
+    exports.enableProdMode = enableProdMode;
+    exports.lockRunMode = lockRunMode;
+    exports.isDevMode = isDevMode;
     exports.APP_ID = APP_ID;
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
@@ -12119,7 +12136,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.wtfStartTimeRange = wtfStartTimeRange;
     exports.wtfEndTimeRange = wtfEndTimeRange;
     exports.Type = Type;
-    exports.enableProdMode = enableProdMode;
     exports.EventEmitter = EventEmitter;
     exports.ExceptionHandler = ExceptionHandler;
     exports.WrappedException = WrappedException;

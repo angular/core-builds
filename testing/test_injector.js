@@ -1,5 +1,6 @@
 "use strict";
 var index_1 = require('../index');
+var application_ref_1 = require('../src/application_ref');
 var collection_1 = require('../src/facade/collection');
 var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
@@ -27,6 +28,7 @@ var TestInjector = (function () {
         this._providers = collection_1.ListWrapper.concat(this._providers, providers);
     };
     TestInjector.prototype.createInjector = function () {
+        application_ref_1.lockRunMode();
         var rootInjector = index_1.ReflectiveInjector.resolveAndCreate(this.platformProviders);
         this._injector = rootInjector.resolveAndCreateChild(collection_1.ListWrapper.concat(this.applicationProviders, this._providers));
         this._instantiated = true;
