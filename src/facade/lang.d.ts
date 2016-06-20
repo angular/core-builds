@@ -143,3 +143,4 @@ export declare function evalExpression(sourceUrl: string, expr: string, declarat
 export declare function isPrimitive(obj: any): boolean;
 export declare function hasConstructor(value: Object, type: Type): boolean;
 export declare function escape(s: string): string;
+export declare function escapeRegExp(s: string): string;

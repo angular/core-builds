@@ -443,4 +443,8 @@ function escape(s) {
     return _global.encodeURI(s);
 }
 exports.escape = escape;
+function escapeRegExp(s) {
+    return s.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+}
+exports.escapeRegExp = escapeRegExp;
 //# sourceMappingURL=lang.js.map

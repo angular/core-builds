@@ -38,6 +38,7 @@ export interface ComponentDecorator extends TypeDecorator {
         styles?: string[];
         styleUrls?: string[];
         animations?: AnimationEntryMetadata[];
+        interpolation?: [string, string];
     }): ViewDecorator;
 }
 /**
@@ -58,6 +59,7 @@ export interface ViewDecorator extends TypeDecorator {
         styles?: string[];
         styleUrls?: string[];
         animations?: AnimationEntryMetadata[];
+        interpolation?: [string, string];
     }): ViewDecorator;
 }
 /**
@@ -180,6 +182,7 @@ export interface ComponentMetadataFactory {
         directives?: Array<Type | any[]>;
         pipes?: Array<Type | any[]>;
         encapsulation?: ViewEncapsulation;
+        interpolation?: [string, string];
     }): ComponentDecorator;
     new (obj: {
         selector?: string;
@@ -206,6 +209,7 @@ export interface ComponentMetadataFactory {
         directives?: Array<Type | any[]>;
         pipes?: Array<Type | any[]>;
         encapsulation?: ViewEncapsulation;
+        interpolation?: [string, string];
     }): ComponentMetadata;
 }
 /**
@@ -260,6 +264,7 @@ export interface ViewMetadataFactory {
         styles?: string[];
         styleUrls?: string[];
         animations?: AnimationEntryMetadata[];
+        interpolation?: [string, string];
     }): ViewDecorator;
     new (obj: {
         templateUrl?: string;
@@ -270,6 +275,7 @@ export interface ViewMetadataFactory {
         styles?: string[];
         styleUrls?: string[];
         animations?: AnimationEntryMetadata[];
+        interpolation?: [string, string];
     }): ViewMetadata;
 }
 /**

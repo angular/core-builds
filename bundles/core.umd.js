@@ -1696,7 +1696,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
@@ -1719,6 +1719,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.encapsulation = encapsulation;
             this.moduleId = moduleId;
             this.animations = animations;
+            this.interpolation = interpolation;
         }
         Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
             /**
@@ -2043,7 +2044,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var ViewMetadata = (function () {
         function ViewMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations;
+            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
             this.templateUrl = templateUrl;
             this.template = template;
             this.styleUrls = styleUrls;
@@ -2052,6 +2053,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.pipes = pipes;
             this.encapsulation = encapsulation;
             this.animations = animations;
+            this.interpolation = interpolation;
         }
         return ViewMetadata;
     }());

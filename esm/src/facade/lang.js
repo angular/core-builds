@@ -354,4 +354,7 @@ export function hasConstructor(value, type) {
 export function escape(s) {
     return _global.encodeURI(s);
 }
+export function escapeRegExp(s) {
+    return s.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+}
 //# sourceMappingURL=lang.js.map
