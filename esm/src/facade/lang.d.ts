@@ -68,7 +68,7 @@ export declare class StringWrapper {
     static replace(s: string, from: string, replace: string): string;
     static replaceAll(s: string, from: RegExp, replace: string): string;
     static slice<T>(s: string, from?: number, to?: number): string;
-    static replaceAllMapped(s: string, from: RegExp, cb: Function): string;
+    static replaceAllMapped(s: string, from: RegExp, cb: (m: string[]) => string): string;
     static contains(s: string, substr: string): boolean;
     static compare(a: string, b: string): number;
 }

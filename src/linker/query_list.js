@@ -77,14 +77,10 @@ var QueryList = (function () {
         return this._results[lang_1.getSymbolIterator()]();
     };
     QueryList.prototype.toString = function () { return this._results.toString(); };
-    /**
-     * @internal
-     */
     QueryList.prototype.reset = function (res) {
         this._results = collection_1.ListWrapper.flatten(res);
         this._dirty = false;
     };
-    /** @internal */
     QueryList.prototype.notifyOnChanges = function () { this._emitter.emit(this); };
     /** internal */
     QueryList.prototype.setDirty = function () { this._dirty = true; };

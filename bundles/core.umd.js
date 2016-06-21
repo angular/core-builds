@@ -9966,14 +9966,10 @@ var __extends = (this && this.__extends) || function (d, b) {
             return this._results[getSymbolIterator()]();
         };
         QueryList.prototype.toString = function () { return this._results.toString(); };
-        /**
-         * @internal
-         */
         QueryList.prototype.reset = function (res) {
             this._results = ListWrapper.flatten(res);
             this._dirty = false;
         };
-        /** @internal */
         QueryList.prototype.notifyOnChanges = function () { this._emitter.emit(this); };
         /** internal */
         QueryList.prototype.setDirty = function () { this._dirty = true; };
