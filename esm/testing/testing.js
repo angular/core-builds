@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { isPromise, isString } from '../src/facade/lang';
 import { getTestInjector } from './test_injector';
 export { async, inject, injectAsync } from './test_injector';

@@ -14,6 +14,13 @@ var __extends = (this && this.__extends) || function (d, b) {
             (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}), global.Rx, global.Rx, global.Rx.Observable.prototype, global.Rx));
 }(this, function (exports, rxjs_Subject, rxjs_observable_PromiseObservable, rxjs_operator_toPromise, rxjs_Observable) {
     'use strict';
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var globalScope;
     if (typeof window === 'undefined') {
         if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
@@ -1983,6 +1990,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         return HostListenerMetadata;
     }());
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Defines template and style encapsulation options available for Component's {@link View}.
      *
      * See {@link ViewMetadata#encapsulation}.
@@ -2057,6 +2071,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ViewMetadata;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * @stable
      */
@@ -3845,6 +3866,13 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var SkipSelf = makeParamDecorator(SkipSelfMetadata);
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * A base class for the WrappedException that can be used to identify
      * a WrappedException from ExceptionHandler without adding circular
      * dependency.
@@ -5011,6 +5039,13 @@ var __extends = (this && this.__extends) || function (d, b) {
             return annotation;
         });
     }
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Provides read-only access to reflection data about symbols. Used internally by Angular
      * to power dependency injection and compilation.
@@ -6476,6 +6511,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         return res;
     }
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Creates a token that can be used in a DI Provider.
      *
      * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
@@ -6505,6 +6547,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
         return OpaqueToken;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var PromiseCompleter = (function () {
         function PromiseCompleter() {
             var _this = this;
@@ -7940,6 +7989,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         return SimpleChange;
     }());
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * @stable
      */
     var ChangeDetectorRef = (function () {
@@ -8034,6 +8090,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         return RootRenderer;
     }());
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * A SecurityContext marks a location that has dangerous security implications, e.g. a DOM property
      * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
      * handled.
@@ -8058,6 +8121,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return SanitizationService;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * A wrapper around a native element inside of a View.
      *
@@ -8316,6 +8386,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ViewContainerRef_;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var ViewType;
     (function (ViewType) {
         // A view that contains the host element with bound component directive.
@@ -8958,6 +9035,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     ReflectorComponentResolver.decorators = [
         { type: Injectable },
     ];
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Stores error information; delivered via [NgZone.onError] stream.
      * @deprecated
@@ -10488,6 +10572,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         /* @ts2dart_Provider */ { provide: KeyValueDiffers, useValue: defaultKeyValueDiffers },
         /* @ts2dart_Provider */ { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
     ];
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
     var ANY_STATE = '*';
     var DEFAULT_STATE = '*';
@@ -10603,6 +10694,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return AnimationGroupPlayer;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var AnimationKeyframe = (function () {
         function AnimationKeyframe(offset, styles) {
             this.offset = offset;
@@ -11360,6 +11458,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return finalStyles;
     }
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var AnimationStyles = (function () {
         function AnimationStyles(styles) {
             this.styles = styles;
@@ -12043,6 +12148,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return lastNode;
     }
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * This is here because DART requires it. It is noop in JS.
      */
