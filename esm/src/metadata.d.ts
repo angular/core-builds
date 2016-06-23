@@ -190,6 +190,7 @@ export interface ComponentMetadataFactory {
         pipes?: Array<Type | any[]>;
         encapsulation?: ViewEncapsulation;
         interpolation?: [string, string];
+        precompile?: Array<Type | any[]>;
     }): ComponentDecorator;
     new (obj: {
         selector?: string;
@@ -217,6 +218,7 @@ export interface ComponentMetadataFactory {
         pipes?: Array<Type | any[]>;
         encapsulation?: ViewEncapsulation;
         interpolation?: [string, string];
+        precompile?: Array<Type | any[]>;
     }): ComponentMetadata;
 }
 /**

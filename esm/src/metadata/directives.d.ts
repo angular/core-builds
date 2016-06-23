@@ -931,7 +931,14 @@ export declare class ComponentMetadata extends DirectiveMetadata {
     pipes: Array<Type | any[]>;
     encapsulation: ViewEncapsulation;
     interpolation: [string, string];
-    constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation}?: {
+    /**
+     * Defines the components that should be precompiled as well when
+     * this component is defined. For each components listed here,
+     * Angular will create a {@link ComponentFactory ComponentFactory} and store it in the
+     * {@link ComponentFactoryResolver ComponentFactoryResolver}.
+     */
+    precompile: Array<Type | any[]>;
+    constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, precompile}?: {
         selector?: string;
         inputs?: string[];
         outputs?: string[];
@@ -957,6 +964,7 @@ export declare class ComponentMetadata extends DirectiveMetadata {
         pipes?: Array<Type | any[]>;
         encapsulation?: ViewEncapsulation;
         interpolation?: [string, string];
+        precompile?: Array<Type | any[]>;
     });
 }
 /**

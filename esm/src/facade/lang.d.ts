@@ -45,6 +45,9 @@ export interface Type extends Function {
 export interface ConcreteType extends Type {
     new (...args: any[]): any;
 }
+export interface ClassWithConstructor<T> {
+    new (...args: any[]): T;
+}
 export declare function getTypeNameForDebugging(type: Type): string;
 export declare var Math: any;
 export declare var Date: DateConstructor;

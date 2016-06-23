@@ -20,6 +20,7 @@ var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
 var provider_util = require('./src/di/provider_util');
 var reflective_provider = require('./src/di/reflective_provider');
+var component_factory_resolver = require('./src/linker/component_factory_resolver');
 var component_resolver = require('./src/linker/component_resolver');
 var debug_context = require('./src/linker/debug_context');
 var element = require('./src/linker/element');
@@ -45,6 +46,7 @@ exports.__core_private__ = {
     LIFECYCLE_HOOKS_VALUES: lifecycle_hooks.LIFECYCLE_HOOKS_VALUES,
     ReflectorReader: reflector_reader.ReflectorReader,
     ReflectorComponentResolver: component_resolver.ReflectorComponentResolver,
+    CodegenComponentFactoryResolver: component_factory_resolver.CodegenComponentFactoryResolver,
     AppElement: element.AppElement,
     AppView: view.AppView,
     DebugAppView: view.DebugAppView,

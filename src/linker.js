@@ -10,6 +10,9 @@
 var component_factory_1 = require('./linker/component_factory');
 exports.ComponentFactory = component_factory_1.ComponentFactory;
 exports.ComponentRef = component_factory_1.ComponentRef;
+var component_factory_resolver_1 = require('./linker/component_factory_resolver');
+exports.ComponentFactoryResolver = component_factory_resolver_1.ComponentFactoryResolver;
+exports.NoComponentFactoryError = component_factory_resolver_1.NoComponentFactoryError;
 var component_resolver_1 = require('./linker/component_resolver');
 exports.ComponentResolver = component_resolver_1.ComponentResolver;
 var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');

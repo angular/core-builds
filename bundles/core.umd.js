@@ -1703,7 +1703,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
@@ -1727,6 +1727,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.moduleId = moduleId;
             this.animations = animations;
             this.interpolation = interpolation;
+            this.precompile = precompile;
         }
         Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
             /**
@@ -9929,6 +9930,46 @@ var __extends = (this && this.__extends) || function (d, b) {
         ApplicationRef_,
         /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
+    var NoComponentFactoryError = (function (_super) {
+        __extends(NoComponentFactoryError, _super);
+        function NoComponentFactoryError(component) {
+            _super.call(this, "No component factory found for " + stringify(component));
+            this.component = component;
+        }
+        return NoComponentFactoryError;
+    }(BaseException));
+    var _NullComponentFactoryResolver = (function () {
+        function _NullComponentFactoryResolver() {
+        }
+        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            throw new NoComponentFactoryError(component);
+        };
+        return _NullComponentFactoryResolver;
+    }());
+    var ComponentFactoryResolver = (function () {
+        function ComponentFactoryResolver() {
+        }
+        return ComponentFactoryResolver;
+    }());
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    var CodegenComponentFactoryResolver = (function () {
+        function CodegenComponentFactoryResolver(factories, _parent) {
+            this._parent = _parent;
+            this._factories = new Map();
+            for (var i = 0; i < factories.length; i++) {
+                var factory = factories[i];
+                this._factories.set(factory.componentType, factory);
+            }
+        }
+        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            var result = this._factories.get(component);
+            if (!result) {
+                result = this._parent.resolveComponentFactory(component);
+            }
+            return result;
+        };
+        return CodegenComponentFactoryResolver;
+    }());
     /**
      * Use ComponentResolver and ViewContainerRef directly.
      *
@@ -10566,6 +10607,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     /*@ts2dart_const*/ [
         APPLICATION_CORE_PROVIDERS,
         /* @ts2dart_Provider */ { provide: ComponentResolver, useClass: ReflectorComponentResolver },
+        { provide: ComponentFactoryResolver, useValue: ComponentFactoryResolver.NULL },
         APP_ID_RANDOM_PROVIDER,
         ViewUtils,
         /* @ts2dart_Provider */ { provide: IterableDiffers, useValue: defaultIterableDiffers },
@@ -12168,6 +12210,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         LIFECYCLE_HOOKS_VALUES: LIFECYCLE_HOOKS_VALUES,
         ReflectorReader: ReflectorReader,
         ReflectorComponentResolver: ReflectorComponentResolver,
+        CodegenComponentFactoryResolver: CodegenComponentFactoryResolver,
         AppElement: AppElement,
         AppView: AppView,
         DebugAppView: DebugAppView,
@@ -12334,6 +12377,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RootRenderer = RootRenderer;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
+    exports.ComponentFactoryResolver = ComponentFactoryResolver;
+    exports.NoComponentFactoryError = NoComponentFactoryError;
     exports.ComponentResolver = ComponentResolver;
     exports.DynamicComponentLoader = DynamicComponentLoader;
     exports.ElementRef = ElementRef;
