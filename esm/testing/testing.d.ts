@@ -1,4 +1,3 @@
-export { async, inject, injectAsync } from './test_injector';
 export declare var expect: Function;
 /**
  * Run a function (with an optional asynchronous callback) after each test case.

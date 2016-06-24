@@ -12,10 +12,6 @@
  */
 var lang_1 = require('../src/facade/lang');
 var test_injector_1 = require('./test_injector');
-var test_injector_2 = require('./test_injector');
-exports.async = test_injector_2.async;
-exports.inject = test_injector_2.inject;
-exports.injectAsync = test_injector_2.injectAsync;
 var _global = (typeof window === 'undefined' ? global : window);
 exports.expect = _global.expect;
 /**
@@ -69,6 +65,7 @@ var jsmBeforeEach = _global.beforeEach;
 var jsmIt = _global.it;
 var jsmIIt = _global.fit;
 var jsmXIt = _global.xit;
+// TODO(juliemr): override the globals and make them throw with a useful message.
 var testInjector = test_injector_1.getTestInjector();
 // Reset the test providers before each test.
 jsmBeforeEach(function () { testInjector.reset(); });

@@ -59,16 +59,6 @@ function _getFakeAsyncZoneSpec() {
     return zoneSpec;
 }
 /**
- * Clear the queue of pending timers and microtasks.
- * Tests no longer need to call this explicitly.
- *
- * @deprecated
- */
-function clearPendingTimers() {
-    // Do nothing.
-}
-exports.clearPendingTimers = clearPendingTimers;
-/**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
  *
  * The microtasks queue is drained at the very start of this function and after any timer callback

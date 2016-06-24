@@ -11,10 +11,7 @@ var application_ref_1 = require('../src/application_ref');
 var collection_1 = require('../src/facade/collection');
 var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
-var async_1 = require('./async');
 var async_test_completer_1 = require('./async_test_completer');
-var async_2 = require('./async');
-exports.async = async_2.async;
 var TestInjector = (function () {
     function TestInjector() {
         this._instantiated = false;
@@ -159,14 +156,6 @@ var InjectSetupWrapper = (function () {
             return inject_impl(tokens, fn)();
         };
     };
-    /** @deprecated {use async(withProviders().inject())} */
-    InjectSetupWrapper.prototype.injectAsync = function (tokens, fn) {
-        var _this = this;
-        return function () {
-            _this._addProviders();
-            return injectAsync_impl(tokens, fn)();
-        };
-    };
     return InjectSetupWrapper;
 }());
 exports.InjectSetupWrapper = InjectSetupWrapper;
@@ -174,29 +163,7 @@ function withProviders(providers) {
     return new InjectSetupWrapper(providers);
 }
 exports.withProviders = withProviders;
-/**
- * @deprecated {use async(inject())}
- *
- * Allows injecting dependencies in `beforeEach()` and `it()`. The test must return
- * a promise which will resolve when all asynchronous activity is complete.
- *
- * Example:
- *
- * ```
- * it('...', injectAsync([AClass], (object) => {
- *   return object.doSomething().then(() => {
- *     expect(...);
- *   });
- * })
- * ```
- *
- */
-function injectAsync(tokens, fn) {
-    return async_1.async(inject(tokens, fn));
-}
-exports.injectAsync = injectAsync;
 // This is to ensure inject(Async) within InjectSetupWrapper doesn't call itself
 // when transpiled to Dart.
 var inject_impl = inject;
-var injectAsync_impl = injectAsync;
 //# sourceMappingURL=test_injector.js.map

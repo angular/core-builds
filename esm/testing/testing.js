@@ -7,7 +7,6 @@
  */
 import { isPromise, isString } from '../src/facade/lang';
 import { getTestInjector } from './test_injector';
-export { async, inject, injectAsync } from './test_injector';
 var _global = (typeof window === 'undefined' ? global : window);
 export var expect = _global.expect;
 /**
@@ -61,6 +60,7 @@ var jsmBeforeEach = _global.beforeEach;
 var jsmIt = _global.it;
 var jsmIIt = _global.fit;
 var jsmXIt = _global.xit;
+// TODO(juliemr): override the globals and make them throw with a useful message.
 var testInjector = getTestInjector();
 // Reset the test providers before each test.
 jsmBeforeEach(() => { testInjector.reset(); });

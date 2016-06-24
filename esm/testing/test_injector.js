@@ -10,9 +10,7 @@ import { lockRunMode } from '../src/application_ref';
 import { ListWrapper } from '../src/facade/collection';
 import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, isPresent } from '../src/facade/lang';
-import { async } from './async';
 import { AsyncTestCompleter } from './async_test_completer';
-export { async } from './async';
 export class TestInjector {
     constructor() {
         this._instantiated = false;
@@ -149,39 +147,11 @@ export class InjectSetupWrapper {
             return inject_impl(tokens, fn)();
         };
     }
-    /** @deprecated {use async(withProviders().inject())} */
-    injectAsync(tokens, fn) {
-        return () => {
-            this._addProviders();
-            return injectAsync_impl(tokens, fn)();
-        };
-    }
 }
 export function withProviders(providers) {
     return new InjectSetupWrapper(providers);
 }
-/**
- * @deprecated {use async(inject())}
- *
- * Allows injecting dependencies in `beforeEach()` and `it()`. The test must return
- * a promise which will resolve when all asynchronous activity is complete.
- *
- * Example:
- *
- * ```
- * it('...', injectAsync([AClass], (object) => {
- *   return object.doSomething().then(() => {
- *     expect(...);
- *   });
- * })
- * ```
- *
- */
-export function injectAsync(tokens, fn) {
-    return async(inject(tokens, fn));
-}
 // This is to ensure inject(Async) within InjectSetupWrapper doesn't call itself
 // when transpiled to Dart.
 var inject_impl = inject;
-var injectAsync_impl = injectAsync;
 //# sourceMappingURL=test_injector.js.map

@@ -23,6 +23,10 @@
 export function async(fn) {
     return () => new Promise((finishCallback, failCallback) => {
         var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];
+        if (AsyncTestZoneSpec === undefined) {
+            throw new Error('AsyncTestZoneSpec is needed for the async() test helper but could not be found. ' +
+                'Please make sure that your environment includes zone.js/dist/async-test.js');
+        }
         var testZoneSpec = new AsyncTestZoneSpec(finishCallback, failCallback, 'test');
         var testZone = Zone.current.fork(testZoneSpec);
         return testZone.run(fn);

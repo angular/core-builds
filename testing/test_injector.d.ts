@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Provider, ReflectiveInjector, Type } from '../index';
-export { async } from './async';
 export declare class TestInjector {
     private _instantiated;
     private _injector;
@@ -65,25 +64,5 @@ export declare class InjectSetupWrapper {
     constructor(_providers: () => any);
     private _addProviders();
     inject(tokens: any[], fn: Function): Function;
-    /** @deprecated {use async(withProviders().inject())} */
-    injectAsync(tokens: any[], fn: Function): Function;
 }
 export declare function withProviders(providers: () => any): InjectSetupWrapper;
-/**
- * @deprecated {use async(inject())}
- *
- * Allows injecting dependencies in `beforeEach()` and `it()`. The test must return
- * a promise which will resolve when all asynchronous activity is complete.
- *
- * Example:
- *
- * ```
- * it('...', injectAsync([AClass], (object) => {
- *   return object.doSomething().then(() => {
- *     expect(...);
- *   });
- * })
- * ```
- *
- */
-export declare function injectAsync(tokens: any[], fn: Function): Function;
