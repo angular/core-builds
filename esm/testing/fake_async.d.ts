@@ -14,7 +14,7 @@
  * @param fn
  * @returns {Function} The function wrapped to be executed in the fakeAsync zone
  */
-export declare function fakeAsync(fn: Function): Function;
+export declare function fakeAsync(fn: Function): (...args: any[]) => any;
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
  *

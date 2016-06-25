@@ -58,11 +58,11 @@ export declare function resetBaseTestProviders(): void;
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
  */
-export declare function inject(tokens: any[], fn: Function): Function;
+export declare function inject(tokens: any[], fn: Function): () => any;
 export declare class InjectSetupWrapper {
     private _providers;
     constructor(_providers: () => any);
     private _addProviders();
-    inject(tokens: any[], fn: Function): Function;
+    inject(tokens: any[], fn: Function): () => any;
 }
 export declare function withProviders(providers: () => any): InjectSetupWrapper;
