@@ -10,14 +10,23 @@ import { Type } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
  */
 export declare class TestComponentRenderer {
     insertRootElement(rootElementId: string): void;
 }
+/**
+ * @experimental
+ */
 export declare var ComponentFixtureAutoDetect: OpaqueToken;
+/**
+ * @experimental
+ */
 export declare var ComponentFixtureNoNgZone: OpaqueToken;
 /**
  * Builds a ComponentFixture for use in component level tests.
+ * @stable
  */
 export declare class TestComponentBuilder {
     protected _injector: Injector;

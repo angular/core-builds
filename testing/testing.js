@@ -98,6 +98,8 @@ if (_global.beforeEach) {
 /**
  * Allows overriding default providers of the test injector,
  * which are defined in test_injector.js
+ *
+ * @stable
  */
 function addProviders(providers) {
     if (!providers)

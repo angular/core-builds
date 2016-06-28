@@ -12,11 +12,19 @@ import { ComponentFixture } from './component_fixture';
 import { tick } from './fake_async';
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
  */
 export class TestComponentRenderer {
     insertRootElement(rootElementId) { }
 }
+/**
+ * @experimental
+ */
 export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDetect');
+/**
+ * @experimental
+ */
 export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
 var _nextRootElementId = 0;
 export class TestComponentBuilder {

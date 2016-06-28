@@ -11,6 +11,9 @@ import { ListWrapper } from '../src/facade/collection';
 import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, isPresent } from '../src/facade/lang';
 import { AsyncTestCompleter } from './async_test_completer';
+/**
+ * @experimental
+ */
 export class TestInjector {
     constructor() {
         this._instantiated = false;
@@ -52,6 +55,9 @@ export class TestInjector {
     }
 }
 var _testInjector = null;
+/**
+ * @experimental
+ */
 export function getTestInjector() {
     if (_testInjector == null) {
         _testInjector = new TestInjector();
@@ -68,6 +74,8 @@ export function getTestInjector() {
  *
  * Test Providers for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
+ *
+ * @experimental
  */
 export function setBaseTestProviders(platformProviders, applicationProviders) {
     var testInjector = getTestInjector();
@@ -85,6 +93,8 @@ export function setBaseTestProviders(platformProviders, applicationProviders) {
 }
 /**
  * Reset the providers for the test injector.
+ *
+ * @experimental
  */
 export function resetBaseTestProviders() {
     var testInjector = getTestInjector();
@@ -114,6 +124,7 @@ export function resetBaseTestProviders() {
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
+ * @stable
  */
 export function inject(tokens, fn) {
     let testInjector = getTestInjector();
@@ -131,6 +142,9 @@ export function inject(tokens, fn) {
         return () => { return getTestInjector().execute(tokens, fn); };
     }
 }
+/**
+ * @experimental
+ */
 export class InjectSetupWrapper {
     constructor(_providers) {
         this._providers = _providers;
@@ -148,6 +162,9 @@ export class InjectSetupWrapper {
         };
     }
 }
+/**
+ * @experimental
+ */
 export function withProviders(providers) {
     return new InjectSetupWrapper(providers);
 }

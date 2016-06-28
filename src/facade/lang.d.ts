@@ -30,12 +30,17 @@ export declare function scheduleMicroTask(fn: Function): void;
 export declare const IS_DART: boolean;
 declare var _global: BrowserNodeGlobal;
 export { _global as global };
+/**
+ * @stable
+ */
 export declare var Type: FunctionConstructor;
 /**
  * Runtime representation a type that a Component or other object is instances of.
  *
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
+ *
+ * @stable
  */
 export interface Type extends Function {
 }

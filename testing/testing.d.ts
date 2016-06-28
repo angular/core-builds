@@ -78,6 +78,8 @@ export declare var xit: any;
 /**
  * Allows overriding default providers of the test injector,
  * which are defined in test_injector.js
+ *
+ * @stable
  */
 export declare function addProviders(providers: Array<any>): void;
 /**

@@ -14,7 +14,7 @@ export declare class EventListener {
     constructor(name: string, callback: Function);
 }
 /**
- * @experimental
+ * @experimental All debugging apis are currently experimental.
  */
 export declare class DebugNode {
     private _debugInfo;
@@ -38,7 +38,7 @@ export declare class DebugNode {
     inject(token: any): any;
 }
 /**
- * @experimental
+ * @experimental All debugging apis are currently experimental.
  */
 export declare class DebugElement extends DebugNode {
     name: string;

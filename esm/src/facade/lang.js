@@ -26,6 +26,9 @@ export const IS_DART = false;
 // exports the original value of the symbol.
 var _global = globalScope;
 export { _global as global };
+/**
+ * @stable
+ */
 export var Type = Function;
 export function getTypeNameForDebugging(type) {
     if (type['name']) {

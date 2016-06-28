@@ -13,6 +13,8 @@ var component_fixture_1 = require('./component_fixture');
 var fake_async_1 = require('./fake_async');
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
  */
 var TestComponentRenderer = (function () {
     function TestComponentRenderer() {
@@ -21,7 +23,13 @@ var TestComponentRenderer = (function () {
     return TestComponentRenderer;
 }());
 exports.TestComponentRenderer = TestComponentRenderer;
+/**
+ * @experimental
+ */
 exports.ComponentFixtureAutoDetect = new index_1.OpaqueToken('ComponentFixtureAutoDetect');
+/**
+ * @experimental
+ */
 exports.ComponentFixtureNoNgZone = new index_1.OpaqueToken('ComponentFixtureNoNgZone');
 var _nextRootElementId = 0;
 var TestComponentBuilder = (function () {

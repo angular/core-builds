@@ -13,6 +13,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
+/**
+ * @stable
+ */
 var NoComponentFactoryError = (function (_super) {
     __extends(NoComponentFactoryError, _super);
     function NoComponentFactoryError(component) {
@@ -30,6 +33,9 @@ var _NullComponentFactoryResolver = (function () {
     };
     return _NullComponentFactoryResolver;
 }());
+/**
+ * @stable
+ */
 var ComponentFactoryResolver = (function () {
     function ComponentFactoryResolver() {
     }

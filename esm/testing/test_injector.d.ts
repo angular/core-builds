@@ -6,6 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Provider, ReflectiveInjector, Type } from '../index';
+/**
+ * @experimental
+ */
 export declare class TestInjector {
     private _instantiated;
     private _injector;
@@ -18,6 +21,9 @@ export declare class TestInjector {
     get(token: any): any;
     execute(tokens: any[], fn: Function): any;
 }
+/**
+ * @experimental
+ */
 export declare function getTestInjector(): TestInjector;
 /**
  * Set the providers that the test injector should use. These should be providers
@@ -29,10 +35,14 @@ export declare function getTestInjector(): TestInjector;
  *
  * Test Providers for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
+ *
+ * @experimental
  */
 export declare function setBaseTestProviders(platformProviders: Array<Type | Provider | any[]>, applicationProviders: Array<Type | Provider | any[]>): void;
 /**
  * Reset the providers for the test injector.
+ *
+ * @experimental
  */
 export declare function resetBaseTestProviders(): void;
 /**
@@ -57,12 +67,19 @@ export declare function resetBaseTestProviders(): void;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
+ * @stable
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
+/**
+ * @experimental
+ */
 export declare class InjectSetupWrapper {
     private _providers;
     constructor(_providers: () => any);
     private _addProviders();
     inject(tokens: any[], fn: Function): () => any;
 }
+/**
+ * @experimental
+ */
 export declare function withProviders(providers: () => any): InjectSetupWrapper;

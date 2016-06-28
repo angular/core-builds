@@ -11,6 +11,8 @@ import { BaseException } from '../src/facade/exceptions';
 import { scheduleMicroTask } from '../src/facade/lang';
 /**
  * Fixture for debugging and testing a component.
+ *
+ * @stable
  */
 export class ComponentFixture {
     constructor(componentRef, ngZone, autoDetect) {
