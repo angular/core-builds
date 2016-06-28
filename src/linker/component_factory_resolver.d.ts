@@ -1,10 +1,16 @@
 import { BaseException } from '../facade/exceptions';
 import { ClassWithConstructor } from '../facade/lang';
 import { ComponentFactory } from './component_factory';
+/**
+ * @stable
+ */
 export declare class NoComponentFactoryError extends BaseException {
     component: Function;
     constructor(component: Function);
 }
+/**
+ * @stable
+ */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
     abstract resolveComponentFactory<T>(component: ClassWithConstructor<T>): ComponentFactory<T>;

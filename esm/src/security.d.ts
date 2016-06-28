@@ -11,6 +11,8 @@
  * handled.
  *
  * See DomSanitizationService for more details on security in Angular applications.
+ *
+ * @stable
  */
 export declare enum SecurityContext {
     NONE = 0,
@@ -23,6 +25,8 @@ export declare enum SecurityContext {
 /**
  * SanitizationService is used by the views to sanitize potentially dangerous values. This is a
  * private API, use code should only refer to DomSanitizationService.
+ *
+ * @stable
  */
 export declare abstract class SanitizationService {
     abstract sanitize(context: SecurityContext, value: string): string;

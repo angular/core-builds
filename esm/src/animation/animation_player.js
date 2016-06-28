@@ -7,6 +7,9 @@
  */
 import { BaseException } from '../facade/exceptions';
 import { scheduleMicroTask } from '../facade/lang';
+/**
+ * @experimental Animation support is experimental.
+ */
 export class AnimationPlayer {
     get parentPlayer() { throw new BaseException('NOT IMPLEMENTED: Base Class'); }
     set parentPlayer(player) {

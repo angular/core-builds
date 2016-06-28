@@ -11,6 +11,8 @@
  * handled.
  *
  * See DomSanitizationService for more details on security in Angular applications.
+ *
+ * @stable
  */
 export var SecurityContext;
 (function (SecurityContext) {
@@ -24,6 +26,8 @@ export var SecurityContext;
 /**
  * SanitizationService is used by the views to sanitize potentially dangerous values. This is a
  * private API, use code should only refer to DomSanitizationService.
+ *
+ * @stable
  */
 export class SanitizationService {
 }

@@ -66,6 +66,9 @@ export declare class ComponentRef_<C> extends ComponentRef<C> {
     destroy(): void;
     onDestroy(callback: Function): void;
 }
+/**
+ * @stable
+ */
 export declare class ComponentFactory<C> {
     selector: string;
     private _viewFactory;

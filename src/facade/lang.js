@@ -33,6 +33,9 @@ exports.IS_DART = false;
 // exports the original value of the symbol.
 var _global = globalScope;
 exports.global = _global;
+/**
+ * @stable
+ */
 exports.Type = Function;
 function getTypeNameForDebugging(type) {
     if (type['name']) {

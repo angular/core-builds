@@ -8,6 +8,8 @@
 import { ChangeDetectorRef, ComponentRef, DebugElement, ElementRef, NgZone } from '../index';
 /**
  * Fixture for debugging and testing a component.
+ *
+ * @stable
  */
 export declare class ComponentFixture<T> {
     /**

@@ -10,6 +10,8 @@
  *
  * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
  * element.
+ *
+ * @stable
  */
 export declare class ElementRef {
     /**

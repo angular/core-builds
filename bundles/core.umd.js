@@ -41,6 +41,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     // Need to declare a new variable for global here since TypeScript
     // exports the original value of the symbol.
     var global$1 = globalScope;
+    /**
+     * @stable
+     */
     var Type = Function;
     function getTypeNameForDebugging(type) {
         if (type['name']) {
@@ -2046,6 +2049,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      * ```
      * @ts2dart_const
+     *
+     * @experimental You should most likely be using ComponentMetadata instead.
      */
     var ViewMetadata = (function () {
         function ViewMetadata(_a) {
@@ -5993,6 +5998,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
      * resolve all of the object's dependencies automatically.
+     *
+     * @stable
      */
     var ReflectiveInjector = (function () {
         function ReflectiveInjector() {
@@ -8093,6 +8100,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * handled.
      *
      * See DomSanitizationService for more details on security in Angular applications.
+     *
+     * @stable
      */
     var SecurityContext;
     (function (SecurityContext) {
@@ -8106,6 +8115,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * SanitizationService is used by the views to sanitize potentially dangerous values. This is a
      * private API, use code should only refer to DomSanitizationService.
+     *
+     * @stable
      */
     var SanitizationService = (function () {
         function SanitizationService() {
@@ -8124,6 +8135,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
      * element.
+     *
+     * @stable
      */
     // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
     // i.e. users have to ask for what they need. With that, we can build better analysis tools
@@ -8962,6 +8975,9 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @ts2dart_const
      */
     var EMPTY_CONTEXT = new Object();
+    /**
+     * @stable
+     */
     var ComponentFactory = (function () {
         function ComponentFactory(selector, _viewFactory, _componentType) {
             this.selector = selector;
@@ -9508,7 +9524,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * One important assertion this disables verifies that a change detection pass
      * does not result in additional changes to any bindings (also known as
      * unidirectional data flow).
-     * @stable
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function enableProdMode() {
         if (_runModeLocked) {
@@ -9522,6 +9539,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * This can only be read after `lockRunMode` has been called.
      *
      * By default, this is true, unless a user calls `enableProdMode`.
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function isDevMode() {
         if (!_runModeLocked) {
@@ -9533,6 +9552,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Locks the run mode of Angular. After this has been called,
      * it can't be changed any more. I.e. `isDevMode()` will always
      * return the same value.
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function lockRunMode() {
         _runModeLocked = true;
@@ -9540,7 +9561,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Creates a platform.
      * Platforms have to be eagerly created via this function.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function createPlatform(injector) {
         if (_inPlatformCreate) {
@@ -9562,7 +9584,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Checks that there currently is a platform
      * which contains the given token as a provider.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function assertPlatform(requiredToken) {
         var platform = getPlatform();
@@ -9576,7 +9599,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     /**
      * Dispose the existing platform.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function disposePlatform() {
         if (isPresent(_platform) && !_platform.disposed) {
@@ -9585,7 +9609,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     /**
      * Returns the current platform.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function getPlatform() {
         return isPresent(_platform) && !_platform.disposed ? _platform : null;
@@ -9593,7 +9618,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Shortcut for ApplicationRef.bootstrap.
      * Requires a platform to be created first.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function coreBootstrap(componentFactory, injector) {
         var appRef = injector.get(ApplicationRef);
@@ -9603,7 +9629,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Resolves the componentFactory for the given component,
      * waits for asynchronous initializers and bootstraps the component.
      * Requires a platform to be created first.
-     * @experimental
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     function coreLoadAndBootstrap(componentType, injector) {
         var appRef = injector.get(ApplicationRef);
@@ -9621,7 +9648,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
      * explicitly by calling {@link createPlatform}().
-     * @stable
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     var PlatformRef = (function () {
         function PlatformRef() {
@@ -9693,7 +9721,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * A reference to an Angular application running on a page.
      *
      * For more about Angular applications, see the documentation for {@link bootstrap}.
-     * @stable
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
     var ApplicationRef = (function () {
         function ApplicationRef() {
@@ -9920,6 +9949,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         ApplicationRef_,
         /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
+    /**
+     * @stable
+     */
     var NoComponentFactoryError = (function (_super) {
         __extends(NoComponentFactoryError, _super);
         function NoComponentFactoryError(component) {
@@ -9936,6 +9968,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return _NullComponentFactoryResolver;
     }());
+    /**
+     * @stable
+     */
     var ComponentFactoryResolver = (function () {
         function ComponentFactoryResolver() {
         }
@@ -10341,7 +10376,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return EventListener;
     }());
     /**
-     * @experimental
+     * @experimental All debugging apis are currently experimental.
      */
     var DebugNode = (function () {
         function DebugNode(nativeNode, parent, _debugInfo) {
@@ -10400,7 +10435,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return DebugNode;
     }());
     /**
-     * @experimental
+     * @experimental All debugging apis are currently experimental.
      */
     var DebugElement = (function (_super) {
         __extends(DebugElement, _super);
@@ -10615,6 +10650,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ANY_STATE = '*';
     var DEFAULT_STATE = '*';
     var EMPTY_STATE = 'void';
+    /**
+     * @experimental Animation support is experimental.
+     */
     var AnimationPlayer = (function () {
         function AnimationPlayer() {
         }
@@ -10804,11 +10842,16 @@ var __extends = (this && this.__extends) || function (d, b) {
         AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
         return AnimationSequencePlayer;
     }());
+    /**
+     * @experimental Animation support is experimental.
+     */
     var AUTO_STYLE = '*';
     /**
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link trigger trigger
      * animation function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationEntryMetadata = (function () {
         function AnimationEntryMetadata(name, definitions) {
@@ -10817,6 +10860,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationEntryMetadata;
     }());
+    /**
+     * @experimental Animation support is experimental.
+     */
     var AnimationStateMetadata = (function () {
         function AnimationStateMetadata() {
         }
@@ -10826,6 +10872,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link state state animation
      * function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
         __extends(AnimationStateDeclarationMetadata, _super);
@@ -10840,6 +10888,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the
      * {@link transition transition animation function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationStateTransitionMetadata = (function (_super) {
         __extends(AnimationStateTransitionMetadata, _super);
@@ -10850,6 +10900,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationStateTransitionMetadata;
     }(AnimationStateMetadata));
+    /**
+     * @experimental Animation support is experimental.
+     */
     var AnimationMetadata = (function () {
         function AnimationMetadata() {
         }
@@ -10859,6 +10912,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link keyframes keyframes
      * animation function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
         __extends(AnimationKeyframesSequenceMetadata, _super);
@@ -10872,6 +10927,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link style style animation
      * function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationStyleMetadata = (function (_super) {
         __extends(AnimationStyleMetadata, _super);
@@ -10887,6 +10944,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link animate animate
      * animation function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationAnimateMetadata = (function (_super) {
         __extends(AnimationAnimateMetadata, _super);
@@ -10897,6 +10956,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationAnimateMetadata;
     }(AnimationMetadata));
+    /**
+     * @experimental Animation support is experimental.
+     */
     var AnimationWithStepsMetadata = (function (_super) {
         __extends(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
@@ -10913,6 +10975,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link sequence sequence
      * animation function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationSequenceMetadata = (function (_super) {
         __extends(AnimationSequenceMetadata, _super);
@@ -10931,6 +10995,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Metadata representing the entry of animations.
      * Instances of this class are provided via the animation DSL when the {@link group group animation
      * function} is called.
+     *
+     * @experimental Animation support is experimental.
      */
     var AnimationGroupMetadata = (function (_super) {
         __extends(AnimationGroupMetadata, _super);
@@ -10994,6 +11060,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function animate(timing, styles) {
         if (styles === void 0) { styles = null; }
@@ -11039,6 +11107,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function group(steps) {
         return new AnimationGroupMetadata(steps);
@@ -11079,6 +11149,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function sequence(steps) {
         return new AnimationSequenceMetadata(steps);
@@ -11127,6 +11199,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function style(tokens) {
         var input;
@@ -11201,6 +11275,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function state(stateNameExpr, styles) {
         return new AnimationStateDeclarationMetadata(stateNameExpr, styles);
@@ -11251,6 +11327,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function keyframes(steps) {
         return new AnimationKeyframesSequenceMetadata(steps);
@@ -11340,6 +11418,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function transition(stateChangeExpr, steps) {
         var animationData = isArray(steps) ? new AnimationSequenceMetadata(steps) :
@@ -11399,6 +11479,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
      *
      * {@example core/animation/ts/dsl/animation_example.ts region='Component'}
+     *
+     * @experimental Animation support is experimental.
      */
     function trigger(name, animation) {
         return new AnimationEntryMetadata(name, animation);
