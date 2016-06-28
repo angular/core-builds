@@ -49,7 +49,7 @@ import { stringify } from '../facade/lang';
  * @stable
  */
 export class InjectMetadata {
-    constructor(token /** TODO #9100 */) {
+    constructor(token) {
         this.token = token;
     }
     toString() { return `@Inject(${stringify(this.token)})`; }

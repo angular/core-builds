@@ -69,7 +69,7 @@ export function resolveReflectiveFactory(provider) {
         resolvedDeps = _dependenciesFor(useClass);
     }
     else if (isPresent(provider.useExisting)) {
-        factoryFn = (aliasInstance /** TODO #9100 */) => aliasInstance;
+        factoryFn = (aliasInstance) => aliasInstance;
         resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
     }
     else if (isPresent(provider.useFactory)) {

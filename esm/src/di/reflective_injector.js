@@ -791,9 +791,9 @@ export class ReflectiveInjector_ {
 }
 var INJECTOR_KEY = ReflectiveKey.get(Injector);
 function _mapProviders(injector, fn) {
-    var res = [];
+    var res = new Array(injector._proto.numberOfProviders);
     for (var i = 0; i < injector._proto.numberOfProviders; ++i) {
-        res.push(fn(injector._proto.getProviderAtIndex(i)));
+        res[i] = fn(injector._proto.getProviderAtIndex(i));
     }
     return res;
 }

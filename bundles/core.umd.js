@@ -346,7 +346,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var InjectMetadata = (function () {
-        function InjectMetadata(token /** TODO #9100 */) {
+        function InjectMetadata(token) {
             this.token = token;
         }
         InjectMetadata.prototype.toString = function () { return "@Inject(" + stringify(this.token) + ")"; };
@@ -4502,9 +4502,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 res.push(keys[i]);
                 return res;
             }
-            else {
-                res.push(keys[i]);
-            }
+            res.push(keys[i]);
         }
         return res;
     }
@@ -4514,9 +4512,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var tokenStrs = reversed.map(function (k) { return stringify(k.token); });
             return ' (' + tokenStrs.join(' -> ') + ')';
         }
-        else {
-            return '';
-        }
+        return '';
     }
     /**
      * Base class for all errors arising from misconfigured providers.
@@ -4623,7 +4619,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var InstantiationError = (function (_super) {
         __extends(InstantiationError, _super);
-        function InstantiationError(injector, originalException /** TODO #9100 */, originalStack /** TODO #9100 */, key) {
+        function InstantiationError(injector, originalException, originalStack, key) {
             _super.call(this, 'DI Exception', originalException, originalStack, null);
             this.keys = [key];
             this.injectors = [injector];
@@ -4665,7 +4661,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var InvalidProviderError = (function (_super) {
         __extends(InvalidProviderError, _super);
-        function InvalidProviderError(provider /** TODO #9100 */) {
+        function InvalidProviderError(provider) {
             _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
         }
         return InvalidProviderError;
@@ -4701,10 +4697,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var NoAnnotationError = (function (_super) {
         __extends(NoAnnotationError, _super);
-        function NoAnnotationError(typeOrFunc /** TODO #9100 */, params) {
+        function NoAnnotationError(typeOrFunc, params) {
             _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
         }
-        NoAnnotationError._genMessage = function (typeOrFunc /** TODO #9100 */, params) {
+        NoAnnotationError._genMessage = function (typeOrFunc, params) {
             var signature = [];
             for (var i = 0, ii = params.length; i < ii; i++) {
                 var parameter = params[i];
@@ -4738,7 +4734,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var OutOfBoundsError = (function (_super) {
         __extends(OutOfBoundsError, _super);
-        function OutOfBoundsError(index /** TODO #9100 */) {
+        function OutOfBoundsError(index) {
             _super.call(this, "Index " + index + " is out-of-bounds.");
         }
         return OutOfBoundsError;
@@ -4758,7 +4754,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
         __extends(MixingMultiProvidersWithRegularProvidersError, _super);
-        function MixingMultiProvidersWithRegularProvidersError(provider1 /** TODO #9100 */, provider2 /** TODO #9100 */) {
+        function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
             _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
                 provider2.toString());
         }
@@ -5215,7 +5211,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated
      */
     var Provider = (function () {
-        function Provider(token /** TODO #9100 */, _a) {
+        function Provider(token, _a) {
             var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
             this.token = token;
             this.useClass = useClass;
@@ -5270,7 +5266,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var Binding = (function (_super) {
         __extends(Binding, _super);
-        function Binding(token /** TODO #9100 */, _a) {
+        function Binding(token, _a) {
             var toClass = _a.toClass, toValue = _a.toValue, toAlias = _a.toAlias, toFactory = _a.toFactory, deps = _a.deps, multi = _a.multi;
             _super.call(this, token, {
                 useClass: toClass,
@@ -5327,7 +5323,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @deprecated
      */
-    function bind(token /** TODO #9100 */) {
+    function bind(token) {
         return new ProviderBuilder(token);
     }
     /**
@@ -5335,7 +5331,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated
      */
     var ProviderBuilder = (function () {
-        function ProviderBuilder(token /** TODO #9100 */) {
+        function ProviderBuilder(token) {
             this.token = token;
         }
         /**
@@ -5456,7 +5452,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * <!-- TODO: improve the docs -->
      * @deprecated
      */
-    function provide(token /** TODO #9100 */, _a) {
+    function provide(token, _a) {
         var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
         return new Provider(token, {
             useClass: useClass,
@@ -5535,7 +5531,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             resolvedDeps = _dependenciesFor(useClass);
         }
         else if (isPresent(provider.useExisting)) {
-            factoryFn = function (aliasInstance /** TODO #9100 */) { return aliasInstance; };
+            factoryFn = function (aliasInstance) { return aliasInstance; };
             resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
         }
         else if (isPresent(provider.useFactory)) {
@@ -6502,9 +6498,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     var INJECTOR_KEY = ReflectiveKey.get(Injector);
     function _mapProviders(injector, fn) {
-        var res = [];
+        var res = new Array(injector._proto.numberOfProviders);
         for (var i = 0; i < injector._proto.numberOfProviders; ++i) {
-            res.push(fn(injector._proto.getProviderAtIndex(i)));
+            res[i] = fn(injector._proto.getProviderAtIndex(i));
         }
         return res;
     }

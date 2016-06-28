@@ -80,7 +80,7 @@ function resolveReflectiveFactory(provider) {
         resolvedDeps = _dependenciesFor(useClass);
     }
     else if (lang_1.isPresent(provider.useExisting)) {
-        factoryFn = function (aliasInstance /** TODO #9100 */) { return aliasInstance; };
+        factoryFn = function (aliasInstance) { return aliasInstance; };
         resolvedDeps = [ReflectiveDependency.fromKey(reflective_key_1.ReflectiveKey.get(provider.useExisting))];
     }
     else if (lang_1.isPresent(provider.useFactory)) {
