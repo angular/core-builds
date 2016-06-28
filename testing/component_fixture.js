@@ -12,8 +12,6 @@ var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 /**
  * Fixture for debugging and testing a component.
- *
- * @stable
  */
 var ComponentFixture = (function () {
     function ComponentFixture(componentRef, ngZone, autoDetect) {

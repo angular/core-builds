@@ -12,9 +12,6 @@ var collection_1 = require('../src/facade/collection');
 var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 var async_test_completer_1 = require('./async_test_completer');
-/**
- * @experimental
- */
 var TestInjector = (function () {
     function TestInjector() {
         this._instantiated = false;
@@ -59,9 +56,6 @@ var TestInjector = (function () {
 }());
 exports.TestInjector = TestInjector;
 var _testInjector = null;
-/**
- * @experimental
- */
 function getTestInjector() {
     if (_testInjector == null) {
         _testInjector = new TestInjector();
@@ -79,8 +73,6 @@ exports.getTestInjector = getTestInjector;
  *
  * Test Providers for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
- *
- * @experimental
  */
 function setBaseTestProviders(platformProviders, applicationProviders) {
     var testInjector = getTestInjector();
@@ -99,8 +91,6 @@ function setBaseTestProviders(platformProviders, applicationProviders) {
 exports.setBaseTestProviders = setBaseTestProviders;
 /**
  * Reset the providers for the test injector.
- *
- * @experimental
  */
 function resetBaseTestProviders() {
     var testInjector = getTestInjector();
@@ -131,7 +121,6 @@ exports.resetBaseTestProviders = resetBaseTestProviders;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
  */
 function inject(tokens, fn) {
     var testInjector = getTestInjector();
@@ -150,9 +139,6 @@ function inject(tokens, fn) {
     }
 }
 exports.inject = inject;
-/**
- * @experimental
- */
 var InjectSetupWrapper = (function () {
     function InjectSetupWrapper(_providers) {
         this._providers = _providers;
@@ -173,9 +159,6 @@ var InjectSetupWrapper = (function () {
     return InjectSetupWrapper;
 }());
 exports.InjectSetupWrapper = InjectSetupWrapper;
-/**
- * @experimental
- */
 function withProviders(providers) {
     return new InjectSetupWrapper(providers);
 }

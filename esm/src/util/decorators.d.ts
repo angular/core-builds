@@ -8,8 +8,6 @@
 import { ConcreteType, Type } from '../facade/lang';
 /**
  * Declares the interface to be used with {@link Class}.
- *
- * @stable
  */
 export interface ClassDefinition {
     /**
@@ -53,7 +51,6 @@ export interface ClassDefinition {
  * @ng.View({...})
  * class MyClass {...}
  * ```
- * @stable
  */
 export interface TypeDecorator {
     /**

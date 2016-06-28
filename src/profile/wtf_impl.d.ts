@@ -1,7 +1,5 @@
 /**
  * A scope function for the Web Tracing Framework (WTF).
- *
- * @experimental
  */
 export interface WtfScopeFn {
     (arg0?: any, arg1?: any): any;

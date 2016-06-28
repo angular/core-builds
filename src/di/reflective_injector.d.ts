@@ -114,8 +114,6 @@ export declare class ReflectiveInjectorDynamicStrategy implements ReflectiveInje
  *
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
- *
- * @stable
  */
 export declare abstract class ReflectiveInjector implements Injector {
     /**

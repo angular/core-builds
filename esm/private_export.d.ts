@@ -71,10 +71,10 @@ export declare namespace __core_private_types__ {
     var ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     type RenderDebugInfo = api.RenderDebugInfo;
     var RenderDebugInfo: typeof api.RenderDebugInfo;
-    type SecurityContext = security.SecurityContext;
     var SecurityContext: typeof security.SecurityContext;
-    type SanitizationService = security.SanitizationService;
+    type SecurityContext = security.SecurityContext;
     var SanitizationService: typeof security.SanitizationService;
+    type SanitizationService = security.SanitizationService;
     type TemplateRef_<C> = template_ref.TemplateRef_<C>;
     var TemplateRef_: typeof template_ref.TemplateRef_;
     var wtfInit: typeof wtf_init.wtfInit;

@@ -15,8 +15,7 @@ export declare function createNgZone(): NgZone;
  * One important assertion this disables verifies that a change detection pass
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare function enableProdMode(): void;
 /**
@@ -24,57 +23,47 @@ export declare function enableProdMode(): void;
  * This can only be read after `lockRunMode` has been called.
  *
  * By default, this is true, unless a user calls `enableProdMode`.
- *
- * @experimental APIs related to application bootstrap are currently under review.
  */
 export declare function isDevMode(): boolean;
 /**
  * Locks the run mode of Angular. After this has been called,
  * it can't be changed any more. I.e. `isDevMode()` will always
  * return the same value.
- *
- * @experimental APIs related to application bootstrap are currently under review.
  */
 export declare function lockRunMode(): void;
 /**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function assertPlatform(requiredToken: any): PlatformRef;
 /**
  * Dispose the existing platform.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function disposePlatform(): void;
 /**
  * Returns the current platform.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function getPlatform(): PlatformRef;
 /**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, injector: Injector): ComponentRef<C>;
 /**
  * Resolves the componentFactory for the given component,
  * waits for asynchronous initializers and bootstraps the component.
  * Requires a platform to be created first.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export declare function coreLoadAndBootstrap(componentType: Type, injector: Injector): Promise<ComponentRef<any>>;
 /**
@@ -84,8 +73,7 @@ export declare function coreLoadAndBootstrap(componentType: Type, injector: Inje
  *
  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
  * explicitly by calling {@link createPlatform}().
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare abstract class PlatformRef {
     /**
@@ -117,8 +105,7 @@ export declare class PlatformRef_ extends PlatformRef {
  * A reference to an Angular application running on a page.
  *
  * For more about Angular applications, see the documentation for {@link bootstrap}.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare abstract class ApplicationRef {
     /**

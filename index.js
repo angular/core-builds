@@ -12,7 +12,7 @@ function __export(m) {
 /**
  * @module
  * @description
- * Entry point from which you should import all public core APIs.
+ * Starting point to import all public core APIs.
  */
 __export(require('./src/metadata'));
 __export(require('./src/util'));

@@ -128,9 +128,6 @@ exports.ComponentRef_ = ComponentRef_;
  * @ts2dart_const
  */
 var EMPTY_CONTEXT = new Object();
-/**
- * @stable
- */
 var ComponentFactory = (function () {
     function ComponentFactory(selector, _viewFactory, _componentType) {
         this.selector = selector;

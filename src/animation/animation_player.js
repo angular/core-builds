@@ -8,9 +8,6 @@
 "use strict";
 var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
-/**
- * @experimental Animation support is experimental.
- */
 var AnimationPlayer = (function () {
     function AnimationPlayer() {
     }

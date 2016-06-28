@@ -67,9 +67,6 @@ export class ComponentRef_ extends ComponentRef {
  * @ts2dart_const
  */
 const EMPTY_CONTEXT = new Object();
-/**
- * @stable
- */
 export class ComponentFactory {
     constructor(selector, _viewFactory, _componentType) {
         this.selector = selector;

@@ -34,8 +34,7 @@ var _inPlatformCreate = false;
  * One important assertion this disables verifies that a change detection pass
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export function enableProdMode() {
     if (_runModeLocked) {
@@ -49,8 +48,6 @@ export function enableProdMode() {
  * This can only be read after `lockRunMode` has been called.
  *
  * By default, this is true, unless a user calls `enableProdMode`.
- *
- * @experimental APIs related to application bootstrap are currently under review.
  */
 export function isDevMode() {
     if (!_runModeLocked) {
@@ -62,8 +59,6 @@ export function isDevMode() {
  * Locks the run mode of Angular. After this has been called,
  * it can't be changed any more. I.e. `isDevMode()` will always
  * return the same value.
- *
- * @experimental APIs related to application bootstrap are currently under review.
  */
 export function lockRunMode() {
     _runModeLocked = true;
@@ -71,8 +66,7 @@ export function lockRunMode() {
 /**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function createPlatform(injector) {
     if (_inPlatformCreate) {
@@ -94,8 +88,7 @@ export function createPlatform(injector) {
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function assertPlatform(requiredToken) {
     var platform = getPlatform();
@@ -109,8 +102,7 @@ export function assertPlatform(requiredToken) {
 }
 /**
  * Dispose the existing platform.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function disposePlatform() {
     if (isPresent(_platform) && !_platform.disposed) {
@@ -119,8 +111,7 @@ export function disposePlatform() {
 }
 /**
  * Returns the current platform.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function getPlatform() {
     return isPresent(_platform) && !_platform.disposed ? _platform : null;
@@ -128,8 +119,7 @@ export function getPlatform() {
 /**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function coreBootstrap(componentFactory, injector) {
     var appRef = injector.get(ApplicationRef);
@@ -139,8 +129,7 @@ export function coreBootstrap(componentFactory, injector) {
  * Resolves the componentFactory for the given component,
  * waits for asynchronous initializers and bootstraps the component.
  * Requires a platform to be created first.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @experimental
  */
 export function coreLoadAndBootstrap(componentType, injector) {
     var appRef = injector.get(ApplicationRef);
@@ -158,8 +147,7 @@ export function coreLoadAndBootstrap(componentType, injector) {
  *
  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
  * explicitly by calling {@link createPlatform}().
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export class PlatformRef {
     /**
@@ -210,8 +198,7 @@ PlatformRef_.ctorParameters = [
  * A reference to an Angular application running on a page.
  *
  * For more about Angular applications, see the documentation for {@link bootstrap}.
- *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export class ApplicationRef {
     /**

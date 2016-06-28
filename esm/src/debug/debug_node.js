@@ -15,7 +15,7 @@ export class EventListener {
     ;
 }
 /**
- * @experimental All debugging apis are currently experimental.
+ * @experimental
  */
 export class DebugNode {
     constructor(nativeNode, parent, _debugInfo) {
@@ -49,7 +49,7 @@ export class DebugNode {
     inject(token) { return this.injector.get(token); }
 }
 /**
- * @experimental All debugging apis are currently experimental.
+ * @experimental
  */
 export class DebugElement extends DebugNode {
     constructor(nativeNode, parent, _debugInfo) {

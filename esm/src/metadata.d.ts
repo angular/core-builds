@@ -24,8 +24,6 @@ import { Type } from '../src/facade/lang';
  * Interface for the {@link DirectiveMetadata} decorator function.
  *
  * See {@link DirectiveFactory}.
- *
- * @stable
  */
 export interface DirectiveDecorator extends TypeDecorator {
 }
@@ -33,8 +31,6 @@ export interface DirectiveDecorator extends TypeDecorator {
  * Interface for the {@link ComponentMetadata} decorator function.
  *
  * See {@link ComponentFactory}.
- *
- * @stable
  */
 export interface ComponentDecorator extends TypeDecorator {
     /**
@@ -56,8 +52,6 @@ export interface ComponentDecorator extends TypeDecorator {
  * Interface for the {@link ViewMetadata} decorator function.
  *
  * See {@link ViewFactory}.
- *
- * @experimental
  */
 export interface ViewDecorator extends TypeDecorator {
     /**
@@ -105,8 +99,6 @@ export interface ViewDecorator extends TypeDecorator {
  *   new ng.Directive({...})
  * ]
  * ```
- *
- * @stable
  */
 export interface DirectiveMetadataFactory {
     (obj: {
@@ -170,8 +162,6 @@ export interface DirectiveMetadataFactory {
  *   new ng.Component({...})
  * ]
  * ```
- *
- * @stable
  */
 export interface ComponentMetadataFactory {
     (obj: {
@@ -272,8 +262,6 @@ export interface ComponentMetadataFactory {
  *   new ng.View({...})
  * ]
  * ```
- *
- * @experimental You should most likely use ComponentMetadataFactory instead
  */
 export interface ViewMetadataFactory {
     (obj: {
@@ -332,8 +320,6 @@ export interface ViewMetadataFactory {
  *   [new ng.Attribute('title')]
  * ]
  * ```
- *
- * @stable
  */
 export interface AttributeMetadataFactory {
     (name: string): TypeDecorator;

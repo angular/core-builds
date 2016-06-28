@@ -12,8 +12,6 @@
  * handled.
  *
  * See DomSanitizationService for more details on security in Angular applications.
- *
- * @stable
  */
 (function (SecurityContext) {
     SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
@@ -27,8 +25,6 @@ var SecurityContext = exports.SecurityContext;
 /**
  * SanitizationService is used by the views to sanitize potentially dangerous values. This is a
  * private API, use code should only refer to DomSanitizationService.
- *
- * @stable
  */
 var SanitizationService = (function () {
     function SanitizationService() {

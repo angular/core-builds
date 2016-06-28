@@ -23,7 +23,7 @@ var EventListener = (function () {
 }());
 exports.EventListener = EventListener;
 /**
- * @experimental All debugging apis are currently experimental.
+ * @experimental
  */
 var DebugNode = (function () {
     function DebugNode(nativeNode, parent, _debugInfo) {
@@ -83,7 +83,7 @@ var DebugNode = (function () {
 }());
 exports.DebugNode = DebugNode;
 /**
- * @experimental All debugging apis are currently experimental.
+ * @experimental
  */
 var DebugElement = (function (_super) {
     __extends(DebugElement, _super);

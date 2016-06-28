@@ -7,9 +7,6 @@
  */
 import { BaseException } from '../facade/exceptions';
 import { stringify } from '../facade/lang';
-/**
- * @stable
- */
 export class NoComponentFactoryError extends BaseException {
     constructor(component) {
         super(`No component factory found for ${stringify(component)}`);
@@ -21,9 +18,6 @@ class _NullComponentFactoryResolver {
         throw new NoComponentFactoryError(component);
     }
 }
-/**
- * @stable
- */
 export class ComponentFactoryResolver {
 }
 ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();

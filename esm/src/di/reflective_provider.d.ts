@@ -36,8 +36,6 @@ export declare class ReflectiveDependency {
  *
  * expect(injector.get('message')).toEqual('Hello');
  * ```
- *
- * @experimental
  */
 export interface ResolvedReflectiveProvider {
     /**
