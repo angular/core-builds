@@ -9950,6 +9950,38 @@ var __extends = (this && this.__extends) || function (d, b) {
         /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
     /**
+     * Low-level service for running the angular compiler duirng runtime
+     * to create {@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     * @stable
+     */
+    var Compiler = (function () {
+        function Compiler() {
+        }
+        /**
+         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
+         */
+        Compiler.prototype.compileComponentAsync = function (component) {
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Compiles the given component. All templates have to be either inline or compiled via
+         * `compileComponentAsync` before.
+         */
+        Compiler.prototype.compileComponentSync = function (component) {
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Clears all caches
+         */
+        Compiler.prototype.clearCache = function () { };
+        /**
+         * Clears the cache for the given component.
+         */
+        Compiler.prototype.clearCacheFor = function (compType) { };
+        return Compiler;
+    }());
+    /**
      * @stable
      */
     var NoComponentFactoryError = (function (_super) {
@@ -12449,6 +12481,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;
+    exports.Compiler = Compiler;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;

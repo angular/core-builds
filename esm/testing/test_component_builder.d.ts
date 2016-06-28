@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AnimationEntryMetadata, ComponentFactory, Injector, NgZone, OpaqueToken, ViewMetadata } from '../index';
-import { Type } from '../src/facade/lang';
+import { ConcreteType, Type } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -71,11 +71,7 @@ export declare class TestComponentBuilder {
     /**
      * Builds and returns a ComponentFixture.
      */
-    createAsync(rootComponentType: Type): Promise<ComponentFixture<any>>;
-    createFakeAsync(rootComponentType: Type): ComponentFixture<any>;
-    /**
-     * @deprecated createSync will be replaced with the ability to precompile components from within
-     * the test.
-     */
-    createSync<C>(componentFactory: ComponentFactory<C>): ComponentFixture<C>;
+    createAsync<T>(rootComponentType: ConcreteType<T>): Promise<ComponentFixture<T>>;
+    createFakeAsync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
+    createSync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
 }

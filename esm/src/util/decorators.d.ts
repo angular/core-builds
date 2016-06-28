@@ -70,7 +70,7 @@ export interface TypeDecorator {
     /**
      * Generate a class from the definition and annotate it with {@link TypeDecorator#annotations}.
      */
-    Class(obj: ClassDefinition): ConcreteType;
+    Class(obj: ClassDefinition): ConcreteType<any>;
 }
 /**
  * Provides a way for expressing ES6 classes with parameter annotations in ES5.
@@ -154,7 +154,7 @@ export interface TypeDecorator {
  * ```
  * @stable
  */
-export declare function Class(clsDef: ClassDefinition): ConcreteType;
+export declare function Class(clsDef: ClassDefinition): ConcreteType<any>;
 export declare function makeDecorator(annotationCls: any, chainFn?: (fn: Function) => void): (...args: any[]) => (cls: any) => any;
 export declare function makeParamDecorator(annotationCls: any): any;
 export declare function makePropDecorator(annotationCls: any): any;

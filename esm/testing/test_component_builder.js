@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentResolver, Injectable, Injector, NgZone, OpaqueToken } from '../index';
+import { Compiler, Injectable, Injector, NgZone, OpaqueToken } from '../index';
 import { PromiseWrapper } from '../src/facade/async';
 import { IS_DART, isPresent } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
@@ -93,8 +93,9 @@ export class TestComponentBuilder {
     createAsync(rootComponentType) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
+        let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            let promise = this._injector.get(ComponentResolver).resolveComponent(rootComponentType);
+            let promise = compiler.compileComponentAsync(rootComponentType);
             return promise.then(componentFactory => this.createFromFactory(ngZone, componentFactory));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
@@ -109,14 +110,13 @@ export class TestComponentBuilder {
         }
         return result;
     }
-    /**
-     * @deprecated createSync will be replaced with the ability to precompile components from within
-     * the test.
-     */
-    createSync(componentFactory) {
+    createSync(rootComponentType) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
-        let initComponent = () => this.createFromFactory(ngZone, componentFactory);
+        let compiler = this._injector.get(Compiler);
+        let initComponent = () => {
+            return this.createFromFactory(ngZone, this._injector.get(Compiler).compileComponentSync(rootComponentType));
+        };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }
 }

@@ -47,10 +47,7 @@ export interface Type extends Function {
 /**
  * Runtime representation of a type that is constructable (non-abstract).
  */
-export interface ConcreteType extends Type {
-    new (...args: any[]): any;
-}
-export interface ClassWithConstructor<T> {
+export interface ConcreteType<T> extends Type {
     new (...args: any[]): T;
 }
 export declare function getTypeNameForDebugging(type: Type): string;

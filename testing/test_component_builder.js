@@ -99,8 +99,9 @@ var TestComponentBuilder = (function () {
         var _this = this;
         var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
+        var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
-            var promise = _this._injector.get(index_1.ComponentResolver).resolveComponent(rootComponentType);
+            var promise = compiler.compileComponentAsync(rootComponentType);
             return promise.then(function (componentFactory) { return _this.createFromFactory(ngZone, componentFactory); });
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
@@ -115,15 +116,14 @@ var TestComponentBuilder = (function () {
         }
         return result;
     };
-    /**
-     * @deprecated createSync will be replaced with the ability to precompile components from within
-     * the test.
-     */
-    TestComponentBuilder.prototype.createSync = function (componentFactory) {
+    TestComponentBuilder.prototype.createSync = function (rootComponentType) {
         var _this = this;
         var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
-        var initComponent = function () { return _this.createFromFactory(ngZone, componentFactory); };
+        var compiler = this._injector.get(index_1.Compiler);
+        var initComponent = function () {
+            return _this.createFromFactory(ngZone, _this._injector.get(index_1.Compiler).compileComponentSync(rootComponentType));
+        };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     };
     /** @nocollapse */
