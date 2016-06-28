@@ -1041,28 +1041,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ViewChildMetadata;
     }(ViewQueryMetadata));
     /**
-     * Describes the current state of the change detector.
-     */
-    var ChangeDetectorState;
-    (function (ChangeDetectorState) {
-        /**
-         * `NeverChecked` means that the change detector has not been checked yet, and
-         * initialization methods should be called during detection.
-         */
-        ChangeDetectorState[ChangeDetectorState["NeverChecked"] = 0] = "NeverChecked";
-        /**
-         * `CheckedBefore` means that the change detector has successfully completed at least
-         * one detection previously.
-         */
-        ChangeDetectorState[ChangeDetectorState["CheckedBefore"] = 1] = "CheckedBefore";
-        /**
-         * `Errored` means that the change detector encountered an error checking a binding
-         * or calling a directive lifecycle method and is now in an inconsistent state. Change
-         * detectors in this state will no longer detect changes.
-         */
-        ChangeDetectorState[ChangeDetectorState["Errored"] = 2] = "Errored";
-    })(ChangeDetectorState || (ChangeDetectorState = {}));
-    /**
      * Describes within the change detector which strategy will be used the next time change
      * detection is triggered.
      * @stable
@@ -1070,42 +1048,54 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ChangeDetectionStrategy;
     (function (ChangeDetectionStrategy) {
         /**
+         * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+         */
+        ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 0] = "OnPush";
+        /**
+         * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+         */
+        ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 1] = "Default";
+    })(exports.ChangeDetectionStrategy || (exports.ChangeDetectionStrategy = {}));
+    /**
+     * Describes the status of the detector.
+     */
+    var ChangeDetectorStatus;
+    (function (ChangeDetectorStatus) {
+        /**
          * `CheckedOnce` means that after calling detectChanges the mode of the change detector
          * will become `Checked`.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["CheckOnce"] = 0] = "CheckOnce";
+        ChangeDetectorStatus[ChangeDetectorStatus["CheckOnce"] = 0] = "CheckOnce";
         /**
          * `Checked` means that the change detector should be skipped until its mode changes to
          * `CheckOnce`.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["Checked"] = 1] = "Checked";
+        ChangeDetectorStatus[ChangeDetectorStatus["Checked"] = 1] = "Checked";
         /**
          * `CheckAlways` means that after calling detectChanges the mode of the change detector
          * will remain `CheckAlways`.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["CheckAlways"] = 2] = "CheckAlways";
+        ChangeDetectorStatus[ChangeDetectorStatus["CheckAlways"] = 2] = "CheckAlways";
         /**
          * `Detached` means that the change detector sub tree is not a part of the main tree and
          * should be skipped.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["Detached"] = 3] = "Detached";
+        ChangeDetectorStatus[ChangeDetectorStatus["Detached"] = 3] = "Detached";
         /**
-         * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+         * `Errored` means that the change detector encountered an error checking a binding
+         * or calling a directive lifecycle method and is now in an inconsistent state. Change
+         * detectors in this state will no longer detect changes.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["OnPush"] = 4] = "OnPush";
+        ChangeDetectorStatus[ChangeDetectorStatus["Errored"] = 4] = "Errored";
         /**
-         * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+         * `Destroyed` means that the change detector is destroyed.
          */
-        ChangeDetectionStrategy[ChangeDetectionStrategy["Default"] = 5] = "Default";
-    })(exports.ChangeDetectionStrategy || (exports.ChangeDetectionStrategy = {}));
+        ChangeDetectorStatus[ChangeDetectorStatus["Destroyed"] = 5] = "Destroyed";
+    })(ChangeDetectorStatus || (ChangeDetectorStatus = {}));
     /**
      * List of possible {@link ChangeDetectionStrategy} values.
      */
     var CHANGE_DETECTION_STRATEGY_VALUES = [
-        exports.ChangeDetectionStrategy.CheckOnce,
-        exports.ChangeDetectionStrategy.Checked,
-        exports.ChangeDetectionStrategy.CheckAlways,
-        exports.ChangeDetectionStrategy.Detached,
         exports.ChangeDetectionStrategy.OnPush,
         exports.ChangeDetectionStrategy.Default,
     ];
@@ -10331,7 +10321,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             configurable: true
         });
         ViewRef_.prototype.markForCheck = function () { this._view.markPathToRootAsCheckOnce(); };
-        ViewRef_.prototype.detach = function () { this._view.cdMode = exports.ChangeDetectionStrategy.Detached; };
+        ViewRef_.prototype.detach = function () { this._view.cdMode = ChangeDetectorStatus.Detached; };
         ViewRef_.prototype.detectChanges = function () { this._view.detectChanges(false); };
         ViewRef_.prototype.checkNoChanges = function () { this._view.detectChanges(true); };
         ViewRef_.prototype.reattach = function () {
@@ -11833,10 +11823,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.contentChildren = [];
             this.viewChildren = [];
             this.viewContainerElement = null;
-            // The names of the below fields must be kept in sync with codegen_name_util.ts or
-            // change detection will fail.
-            this.cdState = ChangeDetectorState.NeverChecked;
-            this.destroyed = false;
+            this.numberOfChecks = 0;
             this.activeAnimationPlayers = new ActiveAnimationPlayersMap();
             this.ref = new ViewRef_(this);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
@@ -11846,6 +11833,11 @@ var __extends = (this && this.__extends) || function (d, b) {
                 this.renderer = declarationAppElement.parentView.renderer;
             }
         }
+        Object.defineProperty(AppView.prototype, "destroyed", {
+            get: function () { return this.cdMode === ChangeDetectorStatus.Destroyed; },
+            enumerable: true,
+            configurable: true
+        });
         AppView.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
             if (removeAllAnimations === void 0) { removeAllAnimations = false; }
             if (removeAllAnimations) {
@@ -11938,7 +11930,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._destroyRecurse();
         };
         AppView.prototype._destroyRecurse = function () {
-            if (this.destroyed) {
+            if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 return;
             }
             var children = this.contentChildren;
@@ -11950,7 +11942,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 children[i]._destroyRecurse();
             }
             this.destroyLocal();
-            this.destroyed = true;
+            this.cdMode = ChangeDetectorStatus.Destroyed;
         };
         AppView.prototype.destroyLocal = function () {
             var _this = this;
@@ -12023,16 +12015,16 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppView.prototype.dirtyParentQueriesInternal = function () { };
         AppView.prototype.detectChanges = function (throwOnChange) {
             var s = _scope_check(this.clazz);
-            if (this.cdMode === exports.ChangeDetectionStrategy.Checked ||
-                this.cdState === ChangeDetectorState.Errored)
+            if (this.cdMode === ChangeDetectorStatus.Checked ||
+                this.cdMode === ChangeDetectorStatus.Errored)
                 return;
-            if (this.destroyed) {
+            if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 this.throwDestroyedError('detectChanges');
             }
             this.detectChangesInternal(throwOnChange);
-            if (this.cdMode === exports.ChangeDetectionStrategy.CheckOnce)
-                this.cdMode = exports.ChangeDetectionStrategy.Checked;
-            this.cdState = ChangeDetectorState.CheckedBefore;
+            if (this.cdMode === ChangeDetectorStatus.CheckOnce)
+                this.cdMode = ChangeDetectorStatus.Checked;
+            this.numberOfChecks++;
             wtfLeave(s);
         };
         /**
@@ -12045,7 +12037,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppView.prototype.detectContentChildrenChanges = function (throwOnChange) {
             for (var i = 0; i < this.contentChildren.length; ++i) {
                 var child = this.contentChildren[i];
-                if (child.cdMode === exports.ChangeDetectionStrategy.Detached)
+                if (child.cdMode === ChangeDetectorStatus.Detached)
                     continue;
                 child.detectChanges(throwOnChange);
             }
@@ -12053,7 +12045,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppView.prototype.detectViewChildrenChanges = function (throwOnChange) {
             for (var i = 0; i < this.viewChildren.length; ++i) {
                 var child = this.viewChildren[i];
-                if (child.cdMode === exports.ChangeDetectionStrategy.Detached)
+                if (child.cdMode === ChangeDetectorStatus.Detached)
                     continue;
                 child.detectChanges(throwOnChange);
             }
@@ -12068,12 +12060,12 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.dirtyParentQueriesInternal();
             this.viewContainerElement = null;
         };
-        AppView.prototype.markAsCheckOnce = function () { this.cdMode = exports.ChangeDetectionStrategy.CheckOnce; };
+        AppView.prototype.markAsCheckOnce = function () { this.cdMode = ChangeDetectorStatus.CheckOnce; };
         AppView.prototype.markPathToRootAsCheckOnce = function () {
             var c = this;
-            while (isPresent(c) && c.cdMode !== exports.ChangeDetectionStrategy.Detached) {
-                if (c.cdMode === exports.ChangeDetectionStrategy.Checked) {
-                    c.cdMode = exports.ChangeDetectionStrategy.CheckOnce;
+            while (isPresent(c) && c.cdMode !== ChangeDetectorStatus.Detached) {
+                if (c.cdMode === ChangeDetectorStatus.Checked) {
+                    c.cdMode = ChangeDetectorStatus.CheckOnce;
                 }
                 var parentEl = c.type === ViewType.COMPONENT ? c.declarationAppElement : c.viewContainerElement;
                 c = isPresent(parentEl) ? parentEl.parentView : null;
@@ -12147,7 +12139,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         DebugAppView.prototype._rethrowWithContext = function (e, stack) {
             if (!(e instanceof ViewWrappedException)) {
                 if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedException)) {
-                    this.cdState = ChangeDetectorState.Errored;
+                    this.cdMode = ChangeDetectorStatus.Errored;
                 }
                 if (isPresent(this._currentDebugContext)) {
                     throw new ViewWrappedException(e, stack, this._currentDebugContext);
@@ -12203,7 +12195,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function wtfInit() { }
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
-        ChangeDetectorState: ChangeDetectorState,
+        ChangeDetectorStatus: ChangeDetectorStatus,
         CHANGE_DETECTION_STRATEGY_VALUES: CHANGE_DETECTION_STRATEGY_VALUES,
         constructDependencies: constructDependencies,
         LifecycleHooks: LifecycleHooks,
