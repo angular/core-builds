@@ -27,6 +27,11 @@ export const IS_DART = false;
 var _global = globalScope;
 export { _global as global };
 /**
+ * Runtime representation a type that a Component or other object is instances of.
+ *
+ * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+ * the `MyCustomComponent` constructor function.
+ *
  * @stable
  */
 export var Type = Function;
