@@ -3108,7 +3108,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   overlayManager:OverlayManager; // NOT YET IMPLEMENTED
      *
      *   constructor(overlayManager:OverlayManager) {
-     *     this.overlay = overlay;
+     *     this.overlayManager = overlayManager;
      *   }
      *
      *   onMouseEnter() {

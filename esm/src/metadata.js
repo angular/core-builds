@@ -295,7 +295,7 @@ export var Component = makeDecorator(ComponentMetadata, (fn) => fn.View = View);
  *   overlayManager:OverlayManager; // NOT YET IMPLEMENTED
  *
  *   constructor(overlayManager:OverlayManager) {
- *     this.overlay = overlay;
+ *     this.overlayManager = overlayManager;
  *   }
  *
  *   onMouseEnter() {
