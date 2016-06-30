@@ -267,48 +267,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return !isJsObject(obj);
     }
     /**
-     * Allows to refer to references which are not yet defined.
-     *
-     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
-     * DI is declared,
-     * but not yet defined. It is also used when the `token` which we use when creating a query is not
-     * yet defined.
-     *
-     * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
-     * @experimental
-     */
-    function forwardRef(forwardRefFn) {
-        forwardRefFn.__forward_ref__ = forwardRef;
-        forwardRefFn.toString = function () { return stringify(this()); };
-        return forwardRefFn;
-    }
-    /**
-     * Lazily retrieves the reference value from a forwardRef.
-     *
-     * Acts as the identity function when given a non-forward-ref value.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
-     *
-     * ```typescript
-     * var ref = forwardRef(() => "refValue");
-     * expect(resolveForwardRef(ref)).toEqual("refValue");
-     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
-     * ```
-     *
-     * See: {@link forwardRef}
-     * @experimental
-     */
-    function resolveForwardRef(type) {
-        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
-            type.__forward_ref__ === forwardRef) {
-            return type();
-        }
-        else {
-            return type;
-        }
-    }
-    /**
      * A parameter metadata that specifies a dependency.
      *
      * ### Example ([live demo](http://plnkr.co/edit/6uHYJK?p=preview))
@@ -570,6 +528,99 @@ var __extends = (this && this.__extends) || function (d, b) {
         HostMetadata.prototype.toString = function () { return "@Host()"; };
         return HostMetadata;
     }());
+    /**
+     * Declares an Application Module.
+     * @stable
+     */
+    var AppModuleMetadata = (function (_super) {
+        __extends(AppModuleMetadata, _super);
+        function AppModuleMetadata(_a) {
+            var _b = _a === void 0 ? {} : _a, providers = _b.providers, directives = _b.directives, pipes = _b.pipes, precompile = _b.precompile, modules = _b.modules;
+            _super.call(this);
+            this._providers = providers;
+            this.directives = directives;
+            this.pipes = pipes;
+            this.precompile = precompile;
+            this.modules = modules;
+        }
+        Object.defineProperty(AppModuleMetadata.prototype, "providers", {
+            /**
+             * Defines the set of injectable objects that are available in the injector
+             * of this module.
+             *
+             * ## Simple Example
+             *
+             * Here is an example of a class that can be injected:
+             *
+             * ```
+             * class Greeter {
+             *    greet(name:string) {
+             *      return 'Hello ' + name + '!';
+             *    }
+             * }
+             *
+             * @AppModule({
+             *   providers: [
+             *     Greeter
+             *   ]
+             * })
+             * class HelloWorld {
+             *   greeter:Greeter;
+             *
+             *   constructor(greeter:Greeter) {
+             *     this.greeter = greeter;
+             *   }
+             * }
+             * ```
+             */
+            get: function () { return this._providers; },
+            enumerable: true,
+            configurable: true
+        });
+        return AppModuleMetadata;
+    }(InjectableMetadata));
+    /**
+     * Allows to refer to references which are not yet defined.
+     *
+     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+     * DI is declared,
+     * but not yet defined. It is also used when the `token` which we use when creating a query is not
+     * yet defined.
+     *
+     * ### Example
+     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+     * @experimental
+     */
+    function forwardRef(forwardRefFn) {
+        forwardRefFn.__forward_ref__ = forwardRef;
+        forwardRefFn.toString = function () { return stringify(this()); };
+        return forwardRefFn;
+    }
+    /**
+     * Lazily retrieves the reference value from a forwardRef.
+     *
+     * Acts as the identity function when given a non-forward-ref value.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
+     *
+     * ```typescript
+     * var ref = forwardRef(() => "refValue");
+     * expect(resolveForwardRef(ref)).toEqual("refValue");
+     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
+     * ```
+     *
+     * See: {@link forwardRef}
+     * @experimental
+     */
+    function resolveForwardRef(type) {
+        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
+            type.__forward_ref__ === forwardRef) {
+            return type();
+        }
+        else {
+            return type;
+        }
+    }
     /**
      * Specifies that a constant attribute value should be injected.
      *
@@ -3831,6 +3882,12 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var HostListener = makePropDecorator(HostListenerMetadata);
     /**
+     * Declares an app module.
+     * @stable
+     * @Annotation
+     */
+    var AppModule = makeDecorator(AppModuleMetadata);
+    /**
      * Factory for creating {@link InjectMetadata}.
      * @stable
      * @Annotation
@@ -4466,6 +4523,18 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     var _THROW_IF_NOT_FOUND = new Object();
     var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    var _NullInjector = (function () {
+        function _NullInjector() {
+        }
+        _NullInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
+            if (notFoundValue === _THROW_IF_NOT_FOUND) {
+                throw new BaseException("No provider for " + stringify(token) + "!");
+            }
+            return notFoundValue;
+        };
+        return _NullInjector;
+    }());
     /**
      * @stable
      */
@@ -4500,6 +4569,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return Injector;
     }());
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    Injector.NULL = new _NullInjector();
     function findFirstClosedCycle(keys) {
         var res = [];
         for (var i = 0; i < keys.length; ++i) {
@@ -9955,38 +10025,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
     /**
-     * Low-level service for running the angular compiler duirng runtime
-     * to create {@link ComponentFactory}s, which
-     * can later be used to create and render a Component instance.
-     * @stable
-     */
-    var Compiler = (function () {
-        function Compiler() {
-        }
-        /**
-         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
-         */
-        Compiler.prototype.compileComponentAsync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
-        };
-        /**
-         * Compiles the given component. All templates have to be either inline or compiled via
-         * `compileComponentAsync` before.
-         */
-        Compiler.prototype.compileComponentSync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
-        };
-        /**
-         * Clears all caches
-         */
-        Compiler.prototype.clearCache = function () { };
-        /**
-         * Clears the cache for the given component.
-         */
-        Compiler.prototype.clearCacheFor = function (compType) { };
-        return Compiler;
-    }());
-    /**
      * @stable
      */
     var NoComponentFactoryError = (function (_super) {
@@ -10031,6 +10069,142 @@ var __extends = (this && this.__extends) || function (d, b) {
             return result;
         };
         return CodegenComponentFactoryResolver;
+    }());
+    /**
+     * Represents an instance of an AppModule created via a {@link AppModuleFactory}.
+     *
+     * `AppModuleRef` provides access to the AppModule Instance as well other objects related to this
+     * AppModule Instance.
+     * @stable
+     */
+    var AppModuleRef = (function () {
+        function AppModuleRef() {
+        }
+        Object.defineProperty(AppModuleRef.prototype, "injector", {
+            /**
+             * The injector that contains all of the providers of the AppModule.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AppModuleRef.prototype, "componentFactoryResolver", {
+            /**
+             * The ComponentFactoryResolver to get hold of the ComponentFactories
+             * delcared in the `precompile` property of the module.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AppModuleRef.prototype, "instance", {
+            /**
+             * The AppModule instance.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        return AppModuleRef;
+    }());
+    /**
+     * @stable
+     */
+    var AppModuleFactory = (function () {
+        function AppModuleFactory(_injectorClass, _moduleype) {
+            this._injectorClass = _injectorClass;
+            this._moduleype = _moduleype;
+        }
+        Object.defineProperty(AppModuleFactory.prototype, "moduleType", {
+            get: function () { return this._moduleype; },
+            enumerable: true,
+            configurable: true
+        });
+        AppModuleFactory.prototype.create = function (parentInjector) {
+            if (parentInjector === void 0) { parentInjector = null; }
+            if (!parentInjector) {
+                parentInjector = Injector.NULL;
+            }
+            var instance = new this._injectorClass(parentInjector);
+            instance.create();
+            return instance;
+        };
+        return AppModuleFactory;
+    }());
+    var _UNDEFINED = new Object();
+    var AppModuleInjector = (function (_super) {
+        __extends(AppModuleInjector, _super);
+        function AppModuleInjector(parent, factories) {
+            _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
+            this.parent = parent;
+        }
+        AppModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
+        AppModuleInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+            if (token === Injector || token === ComponentFactoryResolver) {
+                return this;
+            }
+            var result = this.getInternal(token, _UNDEFINED);
+            return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
+        };
+        Object.defineProperty(AppModuleInjector.prototype, "injector", {
+            get: function () { return this; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AppModuleInjector.prototype, "componentFactoryResolver", {
+            get: function () { return this; },
+            enumerable: true,
+            configurable: true
+        });
+        return AppModuleInjector;
+    }(CodegenComponentFactoryResolver));
+    /**
+     * Low-level service for running the angular compiler duirng runtime
+     * to create {@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     * @stable
+     */
+    var Compiler = (function () {
+        function Compiler() {
+        }
+        /**
+         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
+         */
+        Compiler.prototype.compileComponentAsync = function (component, _a) {
+            var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Compiles the given component. All templates have to be either inline or compiled via
+         * `compileComponentAsync` before.
+         */
+        Compiler.prototype.compileComponentSync = function (component, _a) {
+            var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Compiles the given App Module. All templates of the components listed in `precompile`
+         * have to be either inline or compiled before via `compileComponentAsync` /
+         * `compileAppModuleAsync`.
+         */
+        Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
+            if (metadata === void 0) { metadata = null; }
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        };
+        Compiler.prototype.compileAppModuleAsync = function (moduleType, metadata) {
+            if (metadata === void 0) { metadata = null; }
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        };
+        /**
+         * Clears all caches
+         */
+        Compiler.prototype.clearCache = function () { };
+        /**
+         * Clears the cache for the given component/appModule.
+         */
+        Compiler.prototype.clearCacheFor = function (type) { };
+        return Compiler;
     }());
     /**
      * Use ComponentResolver and ViewContainerRef directly.
@@ -11855,7 +12029,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return DebugContext;
     }());
-    var _UNDEFINED = new Object();
+    var _UNDEFINED$1 = new Object();
     var ElementInjector = (function (_super) {
         __extends(ElementInjector, _super);
         function ElementInjector(_view, _nodeIndex) {
@@ -11865,11 +12039,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         ElementInjector.prototype.get = function (token, notFoundValue) {
             if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
-            var result = _UNDEFINED;
-            if (result === _UNDEFINED) {
-                result = this._view.injectorGet(token, this._nodeIndex, _UNDEFINED);
+            var result = _UNDEFINED$1;
+            if (result === _UNDEFINED$1) {
+                result = this._view.injectorGet(token, this._nodeIndex, _UNDEFINED$1);
             }
-            if (result === _UNDEFINED) {
+            if (result === _UNDEFINED$1) {
                 result = this._view.parentInjector.get(token, notFoundValue);
             }
             return result;
@@ -12325,6 +12499,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppElement: AppElement,
         AppView: AppView,
         DebugAppView: DebugAppView,
+        AppModuleInjector: AppModuleInjector,
         ViewType: ViewType,
         MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         checkBinding: checkBinding,
@@ -12426,6 +12601,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Output = Output;
     exports.HostBinding = HostBinding;
     exports.HostListener = HostListener;
+    exports.AppModule = AppModule;
+    exports.AppModuleMetadata = AppModuleMetadata;
     exports.AttributeMetadata = AttributeMetadata;
     exports.ContentChildMetadata = ContentChildMetadata;
     exports.ContentChildrenMetadata = ContentChildrenMetadata;
@@ -12486,6 +12663,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;
+    exports.AppModuleFactory = AppModuleFactory;
+    exports.AppModuleRef = AppModuleRef;
     exports.Compiler = Compiler;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;

@@ -20,6 +20,7 @@ import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
 import * as provider_util from './src/di/provider_util';
 import * as reflective_provider from './src/di/reflective_provider';
+import * as app_module_factory from './src/linker/app_module_factory';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as component_resolver from './src/linker/component_resolver';
 import * as debug_context from './src/linker/debug_context';
@@ -54,6 +55,7 @@ export declare namespace __core_private_types__ {
     type AppElement = element.AppElement;
     var AppElement: typeof element.AppElement;
     var AppView: typeof view.AppView;
+    var AppModuleInjector: typeof app_module_factory.AppModuleInjector;
     type DebugAppView<T> = view.DebugAppView<T>;
     var DebugAppView: typeof view.DebugAppView;
     type ViewType = view_type.ViewType;
@@ -143,6 +145,7 @@ export declare var __core_private__: {
     AppElement: typeof element.AppElement;
     AppView: typeof view.AppView;
     DebugAppView: typeof view.DebugAppView;
+    AppModuleInjector: typeof app_module_factory.AppModuleInjector;
     ViewType: typeof view_type.ViewType;
     MAX_INTERPOLATION_VALUES: number;
     checkBinding: (throwOnChange: boolean, oldValue: any, newValue: any) => boolean;

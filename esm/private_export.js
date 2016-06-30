@@ -19,6 +19,7 @@ import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
 import * as provider_util from './src/di/provider_util';
 import * as reflective_provider from './src/di/reflective_provider';
+import * as app_module_factory from './src/linker/app_module_factory';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as component_resolver from './src/linker/component_resolver';
 import * as debug_context from './src/linker/debug_context';
@@ -49,6 +50,7 @@ export var __core_private__ = {
     AppElement: element.AppElement,
     AppView: view.AppView,
     DebugAppView: view.DebugAppView,
+    AppModuleInjector: app_module_factory.AppModuleInjector,
     ViewType: view_type.ViewType,
     MAX_INTERPOLATION_VALUES: view_utils.MAX_INTERPOLATION_VALUES,
     checkBinding: view_utils.checkBinding,

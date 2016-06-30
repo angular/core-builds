@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for compiler
+export { AppModuleFactory, AppModuleRef } from './linker/app_module_factory';
 export { Compiler } from './linker/compiler';
 export { ComponentFactory, ComponentRef } from './linker/component_factory';
 export { ComponentFactoryResolver, NoComponentFactoryError } from './linker/component_factory_resolver';

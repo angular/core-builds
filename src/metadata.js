@@ -6,9 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
+var app_module_1 = require('./metadata/app_module');
 var di_1 = require('./metadata/di');
 var directives_1 = require('./metadata/directives');
 var view_1 = require('./metadata/view');
+var app_module_2 = require('./metadata/app_module');
+exports.AppModuleMetadata = app_module_2.AppModuleMetadata;
 var di_2 = require('./metadata/di');
 exports.AttributeMetadata = di_2.AttributeMetadata;
 exports.ContentChildMetadata = di_2.ContentChildMetadata;
@@ -1042,4 +1045,10 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
  * @Annotation
  */
 exports.HostListener = decorators_1.makePropDecorator(directives_1.HostListenerMetadata);
+/**
+ * Declares an app module.
+ * @stable
+ * @Annotation
+ */
+exports.AppModule = decorators_1.makeDecorator(app_module_1.AppModuleMetadata);
 //# sourceMappingURL=metadata.js.map

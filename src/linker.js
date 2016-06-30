@@ -7,6 +7,9 @@
  */
 "use strict";
 // Public API for compiler
+var app_module_factory_1 = require('./linker/app_module_factory');
+exports.AppModuleFactory = app_module_factory_1.AppModuleFactory;
+exports.AppModuleRef = app_module_factory_1.AppModuleRef;
 var compiler_1 = require('./linker/compiler');
 exports.Compiler = compiler_1.Compiler;
 var component_factory_1 = require('./linker/component_factory');

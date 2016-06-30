@@ -17,23 +17,34 @@ export class Compiler {
     /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
-    compileComponentAsync(component) {
+    compileComponentAsync(component, { moduleDirectives = [], modulePipes = [] } = {}) {
         throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
     }
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
      * `compileComponentAsync` before.
      */
-    compileComponentSync(component) {
+    compileComponentSync(component, { moduleDirectives = [], modulePipes = [] } = {}) {
         throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
+    }
+    /**
+     * Compiles the given App Module. All templates of the components listed in `precompile`
+     * have to be either inline or compiled before via `compileComponentAsync` /
+     * `compileAppModuleAsync`.
+     */
+    compileAppModuleSync(moduleType, metadata = null) {
+        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(moduleType)}`);
+    }
+    compileAppModuleAsync(moduleType, metadata = null) {
+        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(moduleType)}`);
     }
     /**
      * Clears all caches
      */
     clearCache() { }
     /**
-     * Clears the cache for the given component.
+     * Clears the cache for the given component/appModule.
      */
-    clearCacheFor(compType) { }
+    clearCacheFor(type) { }
 }
 //# sourceMappingURL=compiler.js.map

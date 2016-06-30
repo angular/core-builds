@@ -20,6 +20,7 @@ var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
 var provider_util = require('./src/di/provider_util');
 var reflective_provider = require('./src/di/reflective_provider');
+var app_module_factory = require('./src/linker/app_module_factory');
 var component_factory_resolver = require('./src/linker/component_factory_resolver');
 var component_resolver = require('./src/linker/component_resolver');
 var debug_context = require('./src/linker/debug_context');
@@ -50,6 +51,7 @@ exports.__core_private__ = {
     AppElement: element.AppElement,
     AppView: view.AppView,
     DebugAppView: view.DebugAppView,
+    AppModuleInjector: app_module_factory.AppModuleInjector,
     ViewType: view_type.ViewType,
     MAX_INTERPOLATION_VALUES: view_utils.MAX_INTERPOLATION_VALUES,
     checkBinding: view_utils.checkBinding,
