@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
-import { AnimationDriver as AnimationDriver_, NoOpAnimationDriver as NoOpAnimationDriver_ } from './src/animation/animation_driver';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
 import { AnimationPlayer as AnimationPlayer_, NoOpAnimationPlayer as NoOpAnimationPlayer_ } from './src/animation/animation_player';
@@ -35,7 +34,6 @@ import * as reflection from './src/reflection/reflection';
 import * as reflection_capabilities from './src/reflection/reflection_capabilities';
 import * as reflector_reader from './src/reflection/reflector_reader';
 import * as api from './src/render/api';
-import * as security from './src/security';
 import * as decorators from './src/util/decorators';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
@@ -64,8 +62,6 @@ export var __core_private__ = {
     uninitialized: change_detection_util.uninitialized,
     ValueUnwrapper: change_detection_util.ValueUnwrapper,
     RenderDebugInfo: api.RenderDebugInfo,
-    SecurityContext: security.SecurityContext,
-    SanitizationService: security.SanitizationService,
     TemplateRef_: template_ref.TemplateRef_,
     wtfInit: wtf_init.wtfInit,
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
@@ -91,8 +87,6 @@ export var __core_private__ = {
     Reflector: reflection.Reflector,
     NoOpAnimationPlayer: NoOpAnimationPlayer_,
     AnimationPlayer: AnimationPlayer_,
-    NoOpAnimationDriver: NoOpAnimationDriver_,
-    AnimationDriver: AnimationDriver_,
     AnimationSequencePlayer: AnimationSequencePlayer_,
     AnimationGroupPlayer: AnimationGroupPlayer_,
     AnimationKeyframe: AnimationKeyframe_,

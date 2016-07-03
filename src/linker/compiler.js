@@ -12,6 +12,10 @@ var lang_1 = require('../facade/lang');
  * Low-level service for running the angular compiler duirng runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
+ *
+ * Each `@AppModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the app module for compilation
+ * of components.
  * @stable
  */
 var Compiler = (function () {
@@ -20,16 +24,14 @@ var Compiler = (function () {
     /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
-    Compiler.prototype.compileComponentAsync = function (component, _a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+    Compiler.prototype.compileComponentAsync = function (component) {
         throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
     };
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
      * `compileComponentAsync` before.
      */
-    Compiler.prototype.compileComponentSync = function (component, _a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+    Compiler.prototype.compileComponentSync = function (component) {
         throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
     };
     /**

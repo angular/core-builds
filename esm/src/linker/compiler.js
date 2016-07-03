@@ -11,20 +11,24 @@ import { stringify } from '../facade/lang';
  * Low-level service for running the angular compiler duirng runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
+ *
+ * Each `@AppModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the app module for compilation
+ * of components.
  * @stable
  */
 export class Compiler {
     /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
-    compileComponentAsync(component, { moduleDirectives = [], modulePipes = [] } = {}) {
+    compileComponentAsync(component) {
         throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
     }
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
      * `compileComponentAsync` before.
      */
-    compileComponentSync(component, { moduleDirectives = [], modulePipes = [] } = {}) {
+    compileComponentSync(component) {
         throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
     }
     /**

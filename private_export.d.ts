@@ -7,7 +7,6 @@
  */
 import { Provider } from './index';
 import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
-import { AnimationDriver as AnimationDriver_, NoOpAnimationDriver as NoOpAnimationDriver_ } from './src/animation/animation_driver';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
 import { AnimationPlayer as AnimationPlayer_, NoOpAnimationPlayer as NoOpAnimationPlayer_ } from './src/animation/animation_player';
@@ -37,7 +36,6 @@ import { Reflector } from './src/reflection/reflection';
 import * as reflection_capabilities from './src/reflection/reflection_capabilities';
 import * as reflector_reader from './src/reflection/reflector_reader';
 import * as api from './src/render/api';
-import * as security from './src/security';
 import * as decorators from './src/util/decorators';
 export declare namespace __core_private_types__ {
     var isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
@@ -73,10 +71,6 @@ export declare namespace __core_private_types__ {
     var ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     type RenderDebugInfo = api.RenderDebugInfo;
     var RenderDebugInfo: typeof api.RenderDebugInfo;
-    type SecurityContext = security.SecurityContext;
-    var SecurityContext: typeof security.SecurityContext;
-    type SanitizationService = security.SanitizationService;
-    var SanitizationService: typeof security.SanitizationService;
     type TemplateRef_<C> = template_ref.TemplateRef_<C>;
     var TemplateRef_: typeof template_ref.TemplateRef_;
     var wtfInit: typeof wtf_init.wtfInit;
@@ -109,10 +103,6 @@ export declare namespace __core_private_types__ {
     var NoOpAnimationPlayer: typeof NoOpAnimationPlayer_;
     type AnimationPlayer = AnimationPlayer_;
     var AnimationPlayer: typeof AnimationPlayer_;
-    type NoOpAnimationDriver = NoOpAnimationDriver_;
-    var NoOpAnimationDriver: typeof NoOpAnimationDriver_;
-    type AnimationDriver = AnimationDriver_;
-    var AnimationDriver: typeof AnimationDriver_;
     type AnimationSequencePlayer = AnimationSequencePlayer_;
     var AnimationSequencePlayer: typeof AnimationSequencePlayer_;
     type AnimationGroupPlayer = AnimationGroupPlayer_;
@@ -159,8 +149,6 @@ export declare var __core_private__: {
     uninitialized: Object;
     ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     RenderDebugInfo: typeof api.RenderDebugInfo;
-    SecurityContext: typeof security.SecurityContext;
-    SanitizationService: typeof security.SanitizationService;
     TemplateRef_: typeof template_ref.TemplateRef_;
     wtfInit: () => void;
     ReflectionCapabilities: typeof reflection_capabilities.ReflectionCapabilities;
@@ -186,8 +174,6 @@ export declare var __core_private__: {
     Reflector: typeof Reflector;
     NoOpAnimationPlayer: typeof NoOpAnimationPlayer_;
     AnimationPlayer: typeof AnimationPlayer_;
-    NoOpAnimationDriver: typeof NoOpAnimationDriver_;
-    AnimationDriver: typeof AnimationDriver_;
     AnimationSequencePlayer: typeof AnimationSequencePlayer_;
     AnimationGroupPlayer: typeof AnimationGroupPlayer_;
     AnimationKeyframe: typeof AnimationKeyframe_;

@@ -11,7 +11,9 @@ import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/ex
 import { IS_DART, isBlank, isPresent, isPromise } from '../src/facade/lang';
 import { APP_INITIALIZER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
-import { Injectable, Injector } from './di';
+import { Inject, Injectable, Injector, Optional, OptionalMetadata, SkipSelfMetadata } from './di';
+import { ComponentFactory } from './linker/component_factory';
+import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { ComponentResolver } from './linker/component_resolver';
 import { wtfCreateScope, wtfLeave } from './profile/profile';
 import { Testability, TestabilityRegistry } from './testability/testability';
@@ -20,7 +22,16 @@ import { NgZone } from './zone/ng_zone';
  * Create an Angular zone.
  * @experimental
  */
-export function createNgZone() {
+export function createNgZone(parent) {
+    // If an NgZone is already present in the parent injector,
+    // use that one. Creating the NgZone in the same injector as the
+    // application is dangerous as some services might get created before
+    // the NgZone has been created.
+    // We keep the NgZone factory in the application providers for
+    // backwards compatibility for now though.
+    if (parent) {
+        return parent;
+    }
     return new NgZone({ enableLongStackTrace: isDevMode() });
 }
 var _devMode = true;
@@ -231,11 +242,16 @@ export class ApplicationRef {
     ;
 }
 export class ApplicationRef_ extends ApplicationRef {
-    constructor(_platform, _zone, _injector) {
+    constructor(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
         super();
         this._platform = _platform;
         this._zone = _zone;
+        this._console = _console;
         this._injector = _injector;
+        this._exceptionHandler = _exceptionHandler;
+        this._componentFactoryResolver = _componentFactoryResolver;
+        this._testabilityRegistry = _testabilityRegistry;
+        this._testability = _testability;
         /** @internal */
         this._bootstrapListeners = [];
         /** @internal */
@@ -250,11 +266,8 @@ export class ApplicationRef_ extends ApplicationRef {
         this._runningTick = false;
         /** @internal */
         this._enforceNoNewChanges = false;
-        var zone = _injector.get(NgZone);
         this._enforceNoNewChanges = isDevMode();
-        zone.run(() => { this._exceptionHandler = _injector.get(ExceptionHandler); });
         this._asyncInitDonePromise = this.run(() => {
-            let inits = _injector.get(APP_INITIALIZER, null);
             var asyncInitResults = [];
             var asyncInitDonePromise;
             if (isPresent(inits)) {
@@ -276,7 +289,7 @@ export class ApplicationRef_ extends ApplicationRef {
             }
             return asyncInitDonePromise;
         });
-        ObservableWrapper.subscribe(zone.onError, (error) => {
+        ObservableWrapper.subscribe(this._zone.onError, (error) => {
             this._exceptionHandler.call(error.error, error.stackTrace);
         });
         ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, (_) => { this._zone.run(() => { this.tick(); }); });
@@ -293,7 +306,6 @@ export class ApplicationRef_ extends ApplicationRef {
     }
     waitForAsyncInitializers() { return this._asyncInitDonePromise; }
     run(callback) {
-        var zone = this.injector.get(NgZone);
         var result;
         // Note: Don't use zone.runGuarded as we want to know about
         // the thrown exception!
@@ -301,7 +313,7 @@ export class ApplicationRef_ extends ApplicationRef {
         // of `zone.run` as Dart swallows rejected promises
         // via the onError callback of the promise.
         var completer = PromiseWrapper.completer();
-        zone.run(() => {
+        this._zone.run(() => {
             try {
                 result = callback();
                 if (isPromise(result)) {
@@ -318,11 +330,19 @@ export class ApplicationRef_ extends ApplicationRef {
         });
         return isPromise(result) ? completer.promise : result;
     }
-    bootstrap(componentFactory) {
+    bootstrap(componentOrFactory) {
         if (!this._asyncInitDone) {
             throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
         }
         return this.run(() => {
+            let componentFactory;
+            if (componentOrFactory instanceof ComponentFactory) {
+                componentFactory = componentOrFactory;
+            }
+            else {
+                componentFactory =
+                    this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+            }
             this._rootComponentTypes.push(componentFactory.componentType);
             var compRef = componentFactory.create(this._injector, [], componentFactory.selector);
             compRef.onDestroy(() => { this._unloadComponent(compRef); });
@@ -332,11 +352,10 @@ export class ApplicationRef_ extends ApplicationRef {
                     .registerApplication(compRef.location.nativeElement, testability);
             }
             this._loadComponent(compRef);
-            let c = this._injector.get(Console);
             if (isDevMode()) {
                 let prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
                     'Call enableProdMode() to enable the production mode.';
-                c.log(`Angular 2 is running in the development mode. ${prodDescription}`);
+                this._console.log(`Angular 2 is running in the development mode. ${prodDescription}`);
             }
             return compRef;
         });
@@ -393,7 +412,13 @@ ApplicationRef_.decorators = [
 ApplicationRef_.ctorParameters = [
     { type: PlatformRef_, },
     { type: NgZone, },
+    { type: Console, },
     { type: Injector, },
+    { type: ExceptionHandler, },
+    { type: ComponentFactoryResolver, },
+    { type: TestabilityRegistry, decorators: [{ type: Optional },] },
+    { type: Testability, decorators: [{ type: Optional },] },
+    { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
 ];
 export const PLATFORM_CORE_PROVIDERS = 
 /*@ts2dart_const*/ [
@@ -402,7 +427,11 @@ export const PLATFORM_CORE_PROVIDERS =
     /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
 ];
 export const APPLICATION_CORE_PROVIDERS = [
-    /* @ts2dart_Provider */ { provide: NgZone, useFactory: createNgZone, deps: [] },
+    /* @ts2dart_Provider */ {
+        provide: NgZone,
+        useFactory: createNgZone,
+        deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
+    },
     ApplicationRef_,
     /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
 ];

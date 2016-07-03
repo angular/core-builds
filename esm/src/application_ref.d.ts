@@ -1,13 +1,17 @@
-import { Type } from '../src/facade/lang';
+import { ExceptionHandler } from '../src/facade/exceptions';
+import { ConcreteType, Type } from '../src/facade/lang';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
+import { Console } from './console';
 import { Injector } from './di';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
+import { ComponentFactoryResolver } from './linker/component_factory_resolver';
+import { Testability, TestabilityRegistry } from './testability/testability';
 import { NgZone } from './zone/ng_zone';
 /**
  * Create an Angular zone.
  * @experimental
  */
-export declare function createNgZone(): NgZone;
+export declare function createNgZone(parent: NgZone): NgZone;
 /**
  * Disable Angular's development mode, which turns off assertions and other
  * checks within the framework.
@@ -152,7 +156,7 @@ export declare abstract class ApplicationRef {
      * ### Example
      * {@example core/ts/platform/platform.ts region='longform'}
      */
-    abstract bootstrap<C>(componentFactory: ComponentFactory<C>): ComponentRef<C>;
+    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | ConcreteType<C>): ComponentRef<C>;
     /**
      * Retrieve the application {@link Injector}.
      */
@@ -184,18 +188,22 @@ export declare abstract class ApplicationRef {
 export declare class ApplicationRef_ extends ApplicationRef {
     private _platform;
     private _zone;
+    private _console;
     private _injector;
     private _exceptionHandler;
+    private _componentFactoryResolver;
+    private _testabilityRegistry;
+    private _testability;
     private _asyncInitDonePromise;
     private _asyncInitDone;
-    constructor(_platform: PlatformRef_, _zone: NgZone, _injector: Injector);
+    constructor(_platform: PlatformRef_, _zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ExceptionHandler, _componentFactoryResolver: ComponentFactoryResolver, _testabilityRegistry: TestabilityRegistry, _testability: Testability, inits: Function[]);
     registerBootstrapListener(listener: (ref: ComponentRef<any>) => void): void;
     registerDisposeListener(dispose: () => void): void;
     registerChangeDetector(changeDetector: ChangeDetectorRef): void;
     unregisterChangeDetector(changeDetector: ChangeDetectorRef): void;
     waitForAsyncInitializers(): Promise<any>;
     run(callback: Function): any;
-    bootstrap<C>(componentFactory: ComponentFactory<C>): ComponentRef<C>;
+    bootstrap<C>(componentOrFactory: ComponentFactory<C> | ConcreteType<C>): ComponentRef<C>;
     readonly injector: Injector;
     readonly zone: NgZone;
     tick(): void;
@@ -208,7 +216,7 @@ export declare const PLATFORM_CORE_PROVIDERS: (typeof PlatformRef_ | {
 })[];
 export declare const APPLICATION_CORE_PROVIDERS: ({
     provide: typeof NgZone;
-    useFactory: () => NgZone;
+    useFactory: (parent: NgZone) => NgZone;
     deps: any;
 } | typeof ApplicationRef_ | {
     provide: typeof ApplicationRef;

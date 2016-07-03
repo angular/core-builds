@@ -8174,7 +8174,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @stable
      */
-    var SecurityContext;
+    exports.SecurityContext;
     (function (SecurityContext) {
         SecurityContext[SecurityContext["NONE"] = 0] = "NONE";
         SecurityContext[SecurityContext["HTML"] = 1] = "HTML";
@@ -8182,10 +8182,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         SecurityContext[SecurityContext["SCRIPT"] = 3] = "SCRIPT";
         SecurityContext[SecurityContext["URL"] = 4] = "URL";
         SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
-    })(SecurityContext || (SecurityContext = {}));
+    })(exports.SecurityContext || (exports.SecurityContext = {}));
     /**
-     * SanitizationService is used by the views to sanitize potentially dangerous values. This is a
-     * private API, use code should only refer to DomSanitizationService.
+     * SanitizationService is used by the views to sanitize potentially dangerous values.
      *
      * @stable
      */
@@ -9082,6 +9081,52 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ComponentFactory;
     }());
     /**
+     * @stable
+     */
+    var NoComponentFactoryError = (function (_super) {
+        __extends(NoComponentFactoryError, _super);
+        function NoComponentFactoryError(component) {
+            _super.call(this, "No component factory found for " + stringify(component));
+            this.component = component;
+        }
+        return NoComponentFactoryError;
+    }(BaseException));
+    var _NullComponentFactoryResolver = (function () {
+        function _NullComponentFactoryResolver() {
+        }
+        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            throw new NoComponentFactoryError(component);
+        };
+        return _NullComponentFactoryResolver;
+    }());
+    /**
+     * @stable
+     */
+    var ComponentFactoryResolver = (function () {
+        function ComponentFactoryResolver() {
+        }
+        return ComponentFactoryResolver;
+    }());
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    var CodegenComponentFactoryResolver = (function () {
+        function CodegenComponentFactoryResolver(factories, _parent) {
+            this._parent = _parent;
+            this._factories = new Map();
+            for (var i = 0; i < factories.length; i++) {
+                var factory = factories[i];
+                this._factories.set(factory.componentType, factory);
+            }
+        }
+        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+            var result = this._factories.get(component);
+            if (!result) {
+                result = this._parent.resolveComponentFactory(component);
+            }
+            return result;
+        };
+        return CodegenComponentFactoryResolver;
+    }());
+    /**
      * Low-level service for loading {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
      * @experimental
@@ -9585,7 +9630,16 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Create an Angular zone.
      * @experimental
      */
-    function createNgZone() {
+    function createNgZone(parent) {
+        // If an NgZone is already present in the parent injector,
+        // use that one. Creating the NgZone in the same injector as the
+        // application is dangerous as some services might get created before
+        // the NgZone has been created.
+        // We keep the NgZone factory in the application providers for
+        // backwards compatibility for now though.
+        if (parent) {
+            return parent;
+        }
         return new NgZone({ enableLongStackTrace: isDevMode() });
     }
     var _devMode = true;
@@ -9833,12 +9887,17 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     var ApplicationRef_ = (function (_super) {
         __extends(ApplicationRef_, _super);
-        function ApplicationRef_(_platform, _zone, _injector) {
+        function ApplicationRef_(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
             var _this = this;
             _super.call(this);
             this._platform = _platform;
             this._zone = _zone;
+            this._console = _console;
             this._injector = _injector;
+            this._exceptionHandler = _exceptionHandler;
+            this._componentFactoryResolver = _componentFactoryResolver;
+            this._testabilityRegistry = _testabilityRegistry;
+            this._testability = _testability;
             /** @internal */
             this._bootstrapListeners = [];
             /** @internal */
@@ -9853,11 +9912,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._runningTick = false;
             /** @internal */
             this._enforceNoNewChanges = false;
-            var zone = _injector.get(NgZone);
             this._enforceNoNewChanges = isDevMode();
-            zone.run(function () { _this._exceptionHandler = _injector.get(ExceptionHandler); });
             this._asyncInitDonePromise = this.run(function () {
-                var inits = _injector.get(APP_INITIALIZER, null);
                 var asyncInitResults = [];
                 var asyncInitDonePromise;
                 if (isPresent(inits)) {
@@ -9879,7 +9935,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
                 return asyncInitDonePromise;
             });
-            ObservableWrapper.subscribe(zone.onError, function (error) {
+            ObservableWrapper.subscribe(this._zone.onError, function (error) {
                 _this._exceptionHandler.call(error.error, error.stackTrace);
             });
             ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, function (_) { _this._zone.run(function () { _this.tick(); }); });
@@ -9897,7 +9953,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._asyncInitDonePromise; };
         ApplicationRef_.prototype.run = function (callback) {
             var _this = this;
-            var zone = this.injector.get(NgZone);
             var result;
             // Note: Don't use zone.runGuarded as we want to know about
             // the thrown exception!
@@ -9905,7 +9960,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             // of `zone.run` as Dart swallows rejected promises
             // via the onError callback of the promise.
             var completer = PromiseWrapper.completer();
-            zone.run(function () {
+            this._zone.run(function () {
                 try {
                     result = callback();
                     if (isPromise(result)) {
@@ -9922,12 +9977,20 @@ var __extends = (this && this.__extends) || function (d, b) {
             });
             return isPromise(result) ? completer.promise : result;
         };
-        ApplicationRef_.prototype.bootstrap = function (componentFactory) {
+        ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
             var _this = this;
             if (!this._asyncInitDone) {
                 throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
             }
             return this.run(function () {
+                var componentFactory;
+                if (componentOrFactory instanceof ComponentFactory) {
+                    componentFactory = componentOrFactory;
+                }
+                else {
+                    componentFactory =
+                        _this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+                }
                 _this._rootComponentTypes.push(componentFactory.componentType);
                 var compRef = componentFactory.create(_this._injector, [], componentFactory.selector);
                 compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -9937,11 +10000,10 @@ var __extends = (this && this.__extends) || function (d, b) {
                         .registerApplication(compRef.location.nativeElement, testability);
                 }
                 _this._loadComponent(compRef);
-                var c = _this._injector.get(Console);
                 if (isDevMode()) {
                     var prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
                         'Call enableProdMode() to enable the production mode.';
-                    c.log("Angular 2 is running in the development mode. " + prodDescription);
+                    _this._console.log("Angular 2 is running in the development mode. " + prodDescription);
                 }
                 return compRef;
             });
@@ -10011,7 +10073,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     ApplicationRef_.ctorParameters = [
         { type: PlatformRef_, },
         { type: NgZone, },
+        { type: Console, },
         { type: Injector, },
+        { type: ExceptionHandler, },
+        { type: ComponentFactoryResolver, },
+        { type: TestabilityRegistry, decorators: [{ type: Optional },] },
+        { type: Testability, decorators: [{ type: Optional },] },
+        { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
     ];
     var PLATFORM_CORE_PROVIDERS = 
     /*@ts2dart_const*/ [
@@ -10020,56 +10088,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
     ];
     var APPLICATION_CORE_PROVIDERS = [
-        /* @ts2dart_Provider */ { provide: NgZone, useFactory: createNgZone, deps: [] },
+        /* @ts2dart_Provider */ {
+            provide: NgZone,
+            useFactory: createNgZone,
+            deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
+        },
         ApplicationRef_,
         /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
-    /**
-     * @stable
-     */
-    var NoComponentFactoryError = (function (_super) {
-        __extends(NoComponentFactoryError, _super);
-        function NoComponentFactoryError(component) {
-            _super.call(this, "No component factory found for " + stringify(component));
-            this.component = component;
-        }
-        return NoComponentFactoryError;
-    }(BaseException));
-    var _NullComponentFactoryResolver = (function () {
-        function _NullComponentFactoryResolver() {
-        }
-        _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            throw new NoComponentFactoryError(component);
-        };
-        return _NullComponentFactoryResolver;
-    }());
-    /**
-     * @stable
-     */
-    var ComponentFactoryResolver = (function () {
-        function ComponentFactoryResolver() {
-        }
-        return ComponentFactoryResolver;
-    }());
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
-    var CodegenComponentFactoryResolver = (function () {
-        function CodegenComponentFactoryResolver(factories, _parent) {
-            this._parent = _parent;
-            this._factories = new Map();
-            for (var i = 0; i < factories.length; i++) {
-                var factory = factories[i];
-                this._factories.set(factory.componentType, factory);
-            }
-        }
-        CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            var result = this._factories.get(component);
-            if (!result) {
-                result = this._parent.resolveComponentFactory(component);
-            }
-            return result;
-        };
-        return CodegenComponentFactoryResolver;
-    }());
     /**
      * Represents an instance of an AppModule created via a {@link AppModuleFactory}.
      *
@@ -10163,6 +10189,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Low-level service for running the angular compiler duirng runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
+     *
+     * Each `@AppModule` provides an own `Compiler` to its injector,
+     * that will use the directives/pipes of the app module for compilation
+     * of components.
      * @stable
      */
     var Compiler = (function () {
@@ -10171,16 +10201,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         /**
          * Loads the template and styles of a component and returns the associated `ComponentFactory`.
          */
-        Compiler.prototype.compileComponentAsync = function (component, _a) {
-            var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+        Compiler.prototype.compileComponentAsync = function (component) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
          * `compileComponentAsync` before.
          */
-        Compiler.prototype.compileComponentSync = function (component, _a) {
-            var _b = _a === void 0 ? {} : _a, _c = _b.moduleDirectives, moduleDirectives = _c === void 0 ? [] : _c, _d = _b.modulePipes, modulePipes = _d === void 0 ? [] : _d;
+        Compiler.prototype.compileComponentSync = function (component) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
         };
         /**
@@ -10834,6 +10862,15 @@ var __extends = (this && this.__extends) || function (d, b) {
         Console
     ];
     // avoid unused import when Type union types are erased
+    function _componentFactoryResolverFactory() {
+        return ComponentFactoryResolver.NULL;
+    }
+    function _iterableDiffersFactory() {
+        return defaultIterableDiffers;
+    }
+    function _keyValueDiffersFactory() {
+        return defaultKeyValueDiffers;
+    }
     /**
      * A default set of providers which should be included in any Angular
      * application, regardless of the platform it runs onto.
@@ -10843,11 +10880,19 @@ var __extends = (this && this.__extends) || function (d, b) {
     /*@ts2dart_const*/ [
         APPLICATION_CORE_PROVIDERS,
         /* @ts2dart_Provider */ { provide: ComponentResolver, useClass: ReflectorComponentResolver },
-        { provide: ComponentFactoryResolver, useValue: ComponentFactoryResolver.NULL },
+        { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory, deps: [] },
         APP_ID_RANDOM_PROVIDER,
         ViewUtils,
-        /* @ts2dart_Provider */ { provide: IterableDiffers, useValue: defaultIterableDiffers },
-        /* @ts2dart_Provider */ { provide: KeyValueDiffers, useValue: defaultKeyValueDiffers },
+        /* @ts2dart_Provider */ {
+            provide: IterableDiffers,
+            useFactory: _iterableDiffersFactory,
+            deps: []
+        },
+        /* @ts2dart_Provider */ {
+            provide: KeyValueDiffers,
+            useFactory: _keyValueDiffersFactory,
+            deps: []
+        },
         /* @ts2dart_Provider */ { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
     ];
     /**
@@ -10861,60 +10906,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ANY_STATE = '*';
     var DEFAULT_STATE = '*';
     var EMPTY_STATE = 'void';
-    /**
-     * @experimental Animation support is experimental.
-     */
-    var AnimationPlayer = (function () {
-        function AnimationPlayer() {
-        }
-        Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
-            get: function () { throw new BaseException('NOT IMPLEMENTED: Base Class'); },
-            set: function (player) {
-                throw new BaseException('NOT IMPLEMENTED: Base Class');
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return AnimationPlayer;
-    }());
-    var NoOpAnimationPlayer = (function () {
-        function NoOpAnimationPlayer() {
-            var _this = this;
-            this._subscriptions = [];
-            this.parentPlayer = null;
-            scheduleMicroTask(function () { return _this._onFinish(); });
-        }
-        /** @internal */
-        NoOpAnimationPlayer.prototype._onFinish = function () {
-            this._subscriptions.forEach(function (entry) { entry(); });
-            this._subscriptions = [];
-        };
-        NoOpAnimationPlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
-        NoOpAnimationPlayer.prototype.play = function () { };
-        NoOpAnimationPlayer.prototype.pause = function () { };
-        NoOpAnimationPlayer.prototype.restart = function () { };
-        NoOpAnimationPlayer.prototype.finish = function () { this._onFinish(); };
-        NoOpAnimationPlayer.prototype.destroy = function () { };
-        NoOpAnimationPlayer.prototype.reset = function () { };
-        NoOpAnimationPlayer.prototype.setPosition = function (p /** TODO #9100 */) { };
-        NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
-        return NoOpAnimationPlayer;
-    }());
-    var AnimationDriver = (function () {
-        function AnimationDriver() {
-        }
-        return AnimationDriver;
-    }());
-    var NoOpAnimationDriver = (function (_super) {
-        __extends(NoOpAnimationDriver, _super);
-        function NoOpAnimationDriver() {
-            _super.apply(this, arguments);
-        }
-        NoOpAnimationDriver.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing) {
-            return new NoOpAnimationPlayer();
-        };
-        return NoOpAnimationDriver;
-    }(AnimationDriver));
     var Math$1 = global$1.Math;
     var AnimationGroupPlayer = (function () {
         function AnimationGroupPlayer(_players) {
@@ -10988,6 +10979,45 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.styles = styles;
         }
         return AnimationKeyframe;
+    }());
+    /**
+     * @experimental Animation support is experimental.
+     */
+    var AnimationPlayer = (function () {
+        function AnimationPlayer() {
+        }
+        Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
+            get: function () { throw new BaseException('NOT IMPLEMENTED: Base Class'); },
+            set: function (player) {
+                throw new BaseException('NOT IMPLEMENTED: Base Class');
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return AnimationPlayer;
+    }());
+    var NoOpAnimationPlayer = (function () {
+        function NoOpAnimationPlayer() {
+            var _this = this;
+            this._subscriptions = [];
+            this.parentPlayer = null;
+            scheduleMicroTask(function () { return _this._onFinish(); });
+        }
+        /** @internal */
+        NoOpAnimationPlayer.prototype._onFinish = function () {
+            this._subscriptions.forEach(function (entry) { entry(); });
+            this._subscriptions = [];
+        };
+        NoOpAnimationPlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
+        NoOpAnimationPlayer.prototype.play = function () { };
+        NoOpAnimationPlayer.prototype.pause = function () { };
+        NoOpAnimationPlayer.prototype.restart = function () { };
+        NoOpAnimationPlayer.prototype.finish = function () { this._onFinish(); };
+        NoOpAnimationPlayer.prototype.destroy = function () { };
+        NoOpAnimationPlayer.prototype.reset = function () { };
+        NoOpAnimationPlayer.prototype.setPosition = function (p /** TODO #9100 */) { };
+        NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
+        return NoOpAnimationPlayer;
     }());
     var AnimationSequencePlayer = (function () {
         function AnimationSequencePlayer(_players) {
@@ -12513,8 +12543,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         uninitialized: uninitialized,
         ValueUnwrapper: ValueUnwrapper,
         RenderDebugInfo: RenderDebugInfo,
-        SecurityContext: SecurityContext,
-        SanitizationService: SanitizationService,
         TemplateRef_: TemplateRef_,
         wtfInit: wtfInit,
         ReflectionCapabilities: ReflectionCapabilities,
@@ -12540,8 +12568,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         Reflector: Reflector,
         NoOpAnimationPlayer: NoOpAnimationPlayer,
         AnimationPlayer: AnimationPlayer,
-        NoOpAnimationDriver: NoOpAnimationDriver,
-        AnimationDriver: AnimationDriver,
         AnimationSequencePlayer: AnimationSequencePlayer,
         AnimationGroupPlayer: AnimationGroupPlayer,
         AnimationKeyframe: AnimationKeyframe,
@@ -12563,7 +12589,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.getPlatform = getPlatform;
     exports.coreBootstrap = coreBootstrap;
     exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
-    exports.createNgZone = createNgZone;
     exports.PlatformRef = PlatformRef;
     exports.ApplicationRef = ApplicationRef;
     exports.enableProdMode = enableProdMode;
@@ -12577,6 +12602,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
+    exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
     exports.wtfCreateScope = wtfCreateScope;
     exports.wtfLeave = wtfLeave;
     exports.wtfStartTimeRange = wtfStartTimeRange;
@@ -12587,6 +12613,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.WrappedException = WrappedException;
     exports.BaseException = BaseException;
     exports.AnimationPlayer = AnimationPlayer;
+    exports.SanitizationService = SanitizationService;
     exports.Component = Component;
     exports.Directive = Directive;
     exports.Attribute = Attribute;
@@ -12695,7 +12722,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
     exports.PLATFORM_PIPES = PLATFORM_PIPES;
     exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
-    exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
     exports.__core_private__ = __core_private__;
     exports.AUTO_STYLE = AUTO_STYLE;
     exports.AnimationEntryMetadata = AnimationEntryMetadata;

@@ -18,7 +18,7 @@ import { OpaqueToken } from './di';
  * @experimental
  */
 export const APP_ID = new OpaqueToken('AppId');
-function _appIdRandomProviderFactory() {
+export function _appIdRandomProviderFactory() {
     return `${_randomChar()}${_randomChar()}${_randomChar()}`;
 }
 /**

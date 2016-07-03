@@ -22,6 +22,7 @@ exports.APP_ID = new di_1.OpaqueToken('AppId');
 function _appIdRandomProviderFactory() {
     return "" + _randomChar() + _randomChar() + _randomChar();
 }
+exports._appIdRandomProviderFactory = _appIdRandomProviderFactory;
 /**
  * Providers that will generate a random APP_ID_TOKEN.
  * @experimental

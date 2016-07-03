@@ -13,6 +13,15 @@ import { ComponentResolver, ReflectorComponentResolver } from './linker/componen
 import { DynamicComponentLoader, DynamicComponentLoader_ } from './linker/dynamic_component_loader';
 import { ViewUtils } from './linker/view_utils';
 let __unused; // avoid unused import when Type union types are erased
+export function _componentFactoryResolverFactory() {
+    return ComponentFactoryResolver.NULL;
+}
+export function _iterableDiffersFactory() {
+    return defaultIterableDiffers;
+}
+export function _keyValueDiffersFactory() {
+    return defaultKeyValueDiffers;
+}
 /**
  * A default set of providers which should be included in any Angular
  * application, regardless of the platform it runs onto.
@@ -22,11 +31,19 @@ export const APPLICATION_COMMON_PROVIDERS =
 /*@ts2dart_const*/ [
     APPLICATION_CORE_PROVIDERS,
     /* @ts2dart_Provider */ { provide: ComponentResolver, useClass: ReflectorComponentResolver },
-    { provide: ComponentFactoryResolver, useValue: ComponentFactoryResolver.NULL },
+    { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory, deps: [] },
     APP_ID_RANDOM_PROVIDER,
     ViewUtils,
-    /* @ts2dart_Provider */ { provide: IterableDiffers, useValue: defaultIterableDiffers },
-    /* @ts2dart_Provider */ { provide: KeyValueDiffers, useValue: defaultKeyValueDiffers },
+    /* @ts2dart_Provider */ {
+        provide: IterableDiffers,
+        useFactory: _iterableDiffersFactory,
+        deps: []
+    },
+    /* @ts2dart_Provider */ {
+        provide: KeyValueDiffers,
+        useFactory: _keyValueDiffersFactory,
+        deps: []
+    },
     /* @ts2dart_Provider */ { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
 ];
 //# sourceMappingURL=application_common_providers.js.map

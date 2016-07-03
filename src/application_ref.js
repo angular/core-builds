@@ -18,6 +18,8 @@ var lang_1 = require('../src/facade/lang');
 var application_tokens_1 = require('./application_tokens');
 var console_1 = require('./console');
 var di_1 = require('./di');
+var component_factory_1 = require('./linker/component_factory');
+var component_factory_resolver_1 = require('./linker/component_factory_resolver');
 var component_resolver_1 = require('./linker/component_resolver');
 var profile_1 = require('./profile/profile');
 var testability_1 = require('./testability/testability');
@@ -26,7 +28,16 @@ var ng_zone_1 = require('./zone/ng_zone');
  * Create an Angular zone.
  * @experimental
  */
-function createNgZone() {
+function createNgZone(parent) {
+    // If an NgZone is already present in the parent injector,
+    // use that one. Creating the NgZone in the same injector as the
+    // application is dangerous as some services might get created before
+    // the NgZone has been created.
+    // We keep the NgZone factory in the application providers for
+    // backwards compatibility for now though.
+    if (parent) {
+        return parent;
+    }
     return new ng_zone_1.NgZone({ enableLongStackTrace: isDevMode() });
 }
 exports.createNgZone = createNgZone;
@@ -287,12 +298,17 @@ var ApplicationRef = (function () {
 exports.ApplicationRef = ApplicationRef;
 var ApplicationRef_ = (function (_super) {
     __extends(ApplicationRef_, _super);
-    function ApplicationRef_(_platform, _zone, _injector) {
+    function ApplicationRef_(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
         var _this = this;
         _super.call(this);
         this._platform = _platform;
         this._zone = _zone;
+        this._console = _console;
         this._injector = _injector;
+        this._exceptionHandler = _exceptionHandler;
+        this._componentFactoryResolver = _componentFactoryResolver;
+        this._testabilityRegistry = _testabilityRegistry;
+        this._testability = _testability;
         /** @internal */
         this._bootstrapListeners = [];
         /** @internal */
@@ -307,11 +323,8 @@ var ApplicationRef_ = (function (_super) {
         this._runningTick = false;
         /** @internal */
         this._enforceNoNewChanges = false;
-        var zone = _injector.get(ng_zone_1.NgZone);
         this._enforceNoNewChanges = isDevMode();
-        zone.run(function () { _this._exceptionHandler = _injector.get(exceptions_1.ExceptionHandler); });
         this._asyncInitDonePromise = this.run(function () {
-            var inits = _injector.get(application_tokens_1.APP_INITIALIZER, null);
             var asyncInitResults = [];
             var asyncInitDonePromise;
             if (lang_1.isPresent(inits)) {
@@ -333,7 +346,7 @@ var ApplicationRef_ = (function (_super) {
             }
             return asyncInitDonePromise;
         });
-        async_1.ObservableWrapper.subscribe(zone.onError, function (error) {
+        async_1.ObservableWrapper.subscribe(this._zone.onError, function (error) {
             _this._exceptionHandler.call(error.error, error.stackTrace);
         });
         async_1.ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, function (_) { _this._zone.run(function () { _this.tick(); }); });
@@ -351,7 +364,6 @@ var ApplicationRef_ = (function (_super) {
     ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._asyncInitDonePromise; };
     ApplicationRef_.prototype.run = function (callback) {
         var _this = this;
-        var zone = this.injector.get(ng_zone_1.NgZone);
         var result;
         // Note: Don't use zone.runGuarded as we want to know about
         // the thrown exception!
@@ -359,7 +371,7 @@ var ApplicationRef_ = (function (_super) {
         // of `zone.run` as Dart swallows rejected promises
         // via the onError callback of the promise.
         var completer = async_1.PromiseWrapper.completer();
-        zone.run(function () {
+        this._zone.run(function () {
             try {
                 result = callback();
                 if (lang_1.isPromise(result)) {
@@ -376,12 +388,20 @@ var ApplicationRef_ = (function (_super) {
         });
         return lang_1.isPromise(result) ? completer.promise : result;
     };
-    ApplicationRef_.prototype.bootstrap = function (componentFactory) {
+    ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
         var _this = this;
         if (!this._asyncInitDone) {
             throw new exceptions_1.BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
         }
         return this.run(function () {
+            var componentFactory;
+            if (componentOrFactory instanceof component_factory_1.ComponentFactory) {
+                componentFactory = componentOrFactory;
+            }
+            else {
+                componentFactory =
+                    _this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+            }
             _this._rootComponentTypes.push(componentFactory.componentType);
             var compRef = componentFactory.create(_this._injector, [], componentFactory.selector);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -391,11 +411,10 @@ var ApplicationRef_ = (function (_super) {
                     .registerApplication(compRef.location.nativeElement, testability);
             }
             _this._loadComponent(compRef);
-            var c = _this._injector.get(console_1.Console);
             if (isDevMode()) {
                 var prodDescription = lang_1.IS_DART ? 'Production mode is disabled in Dart.' :
                     'Call enableProdMode() to enable the production mode.';
-                c.log("Angular 2 is running in the development mode. " + prodDescription);
+                _this._console.log("Angular 2 is running in the development mode. " + prodDescription);
             }
             return compRef;
         });
@@ -463,7 +482,13 @@ var ApplicationRef_ = (function (_super) {
     ApplicationRef_.ctorParameters = [
         { type: PlatformRef_, },
         { type: ng_zone_1.NgZone, },
+        { type: console_1.Console, },
         { type: di_1.Injector, },
+        { type: exceptions_1.ExceptionHandler, },
+        { type: component_factory_resolver_1.ComponentFactoryResolver, },
+        { type: testability_1.TestabilityRegistry, decorators: [{ type: di_1.Optional },] },
+        { type: testability_1.Testability, decorators: [{ type: di_1.Optional },] },
+        { type: Array, decorators: [{ type: di_1.Optional }, { type: di_1.Inject, args: [application_tokens_1.APP_INITIALIZER,] },] },
     ];
     return ApplicationRef_;
 }(ApplicationRef));
@@ -475,7 +500,11 @@ exports.PLATFORM_CORE_PROVIDERS =
     /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
 ];
 exports.APPLICATION_CORE_PROVIDERS = [
-    /* @ts2dart_Provider */ { provide: ng_zone_1.NgZone, useFactory: createNgZone, deps: [] },
+    /* @ts2dart_Provider */ {
+        provide: ng_zone_1.NgZone,
+        useFactory: createNgZone,
+        deps: [[new di_1.SkipSelfMetadata(), new di_1.OptionalMetadata(), ng_zone_1.NgZone]]
+    },
     ApplicationRef_,
     /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
 ];

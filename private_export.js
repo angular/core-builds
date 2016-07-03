@@ -7,7 +7,6 @@
  */
 "use strict";
 var animation_constants_1 = require('./src/animation/animation_constants');
-var animation_driver_1 = require('./src/animation/animation_driver');
 var animation_group_player_1 = require('./src/animation/animation_group_player');
 var animation_keyframe_1 = require('./src/animation/animation_keyframe');
 var animation_player_1 = require('./src/animation/animation_player');
@@ -36,7 +35,6 @@ var reflection = require('./src/reflection/reflection');
 var reflection_capabilities = require('./src/reflection/reflection_capabilities');
 var reflector_reader = require('./src/reflection/reflector_reader');
 var api = require('./src/render/api');
-var security = require('./src/security');
 var decorators = require('./src/util/decorators');
 exports.__core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
@@ -65,8 +63,6 @@ exports.__core_private__ = {
     uninitialized: change_detection_util.uninitialized,
     ValueUnwrapper: change_detection_util.ValueUnwrapper,
     RenderDebugInfo: api.RenderDebugInfo,
-    SecurityContext: security.SecurityContext,
-    SanitizationService: security.SanitizationService,
     TemplateRef_: template_ref.TemplateRef_,
     wtfInit: wtf_init.wtfInit,
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
@@ -92,8 +88,6 @@ exports.__core_private__ = {
     Reflector: reflection.Reflector,
     NoOpAnimationPlayer: animation_player_1.NoOpAnimationPlayer,
     AnimationPlayer: animation_player_1.AnimationPlayer,
-    NoOpAnimationDriver: animation_driver_1.NoOpAnimationDriver,
-    AnimationDriver: animation_driver_1.AnimationDriver,
     AnimationSequencePlayer: animation_sequence_player_1.AnimationSequencePlayer,
     AnimationGroupPlayer: animation_group_player_1.AnimationGroupPlayer,
     AnimationKeyframe: animation_keyframe_1.AnimationKeyframe,

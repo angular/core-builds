@@ -9,6 +9,7 @@
  * @experimental
  */
 export declare const APP_ID: any;
+export declare function _appIdRandomProviderFactory(): string;
 /**
  * Providers that will generate a random APP_ID_TOKEN.
  * @experimental
@@ -16,7 +17,7 @@ export declare const APP_ID: any;
 export declare const APP_ID_RANDOM_PROVIDER: {
     provide: any;
     useFactory: () => string;
-    deps: any;
+    deps: any[];
 };
 /**
  * A function that will be executed when a platform is initialized.

@@ -14,6 +14,18 @@ var component_resolver_1 = require('./linker/component_resolver');
 var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');
 var view_utils_1 = require('./linker/view_utils');
 var __unused; // avoid unused import when Type union types are erased
+function _componentFactoryResolverFactory() {
+    return component_factory_resolver_1.ComponentFactoryResolver.NULL;
+}
+exports._componentFactoryResolverFactory = _componentFactoryResolverFactory;
+function _iterableDiffersFactory() {
+    return change_detection_1.defaultIterableDiffers;
+}
+exports._iterableDiffersFactory = _iterableDiffersFactory;
+function _keyValueDiffersFactory() {
+    return change_detection_1.defaultKeyValueDiffers;
+}
+exports._keyValueDiffersFactory = _keyValueDiffersFactory;
 /**
  * A default set of providers which should be included in any Angular
  * application, regardless of the platform it runs onto.
@@ -23,11 +35,19 @@ exports.APPLICATION_COMMON_PROVIDERS =
 /*@ts2dart_const*/ [
     application_ref_1.APPLICATION_CORE_PROVIDERS,
     /* @ts2dart_Provider */ { provide: component_resolver_1.ComponentResolver, useClass: component_resolver_1.ReflectorComponentResolver },
-    { provide: component_factory_resolver_1.ComponentFactoryResolver, useValue: component_factory_resolver_1.ComponentFactoryResolver.NULL },
+    { provide: component_factory_resolver_1.ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory, deps: [] },
     application_tokens_1.APP_ID_RANDOM_PROVIDER,
     view_utils_1.ViewUtils,
-    /* @ts2dart_Provider */ { provide: change_detection_1.IterableDiffers, useValue: change_detection_1.defaultIterableDiffers },
-    /* @ts2dart_Provider */ { provide: change_detection_1.KeyValueDiffers, useValue: change_detection_1.defaultKeyValueDiffers },
+    /* @ts2dart_Provider */ {
+        provide: change_detection_1.IterableDiffers,
+        useFactory: _iterableDiffersFactory,
+        deps: []
+    },
+    /* @ts2dart_Provider */ {
+        provide: change_detection_1.KeyValueDiffers,
+        useFactory: _keyValueDiffersFactory,
+        deps: []
+    },
     /* @ts2dart_Provider */ { provide: dynamic_component_loader_1.DynamicComponentLoader, useClass: dynamic_component_loader_1.DynamicComponentLoader_ },
 ];
 //# sourceMappingURL=application_common_providers.js.map
