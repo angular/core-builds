@@ -10190,6 +10190,22 @@ var __extends = (this && this.__extends) || function (d, b) {
         return AppModuleInjector;
     }(CodegenComponentFactoryResolver));
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Used to load app moduled factories.
+     * @experimental
+     */
+    var AppModuleFactoryLoader = (function () {
+        function AppModuleFactoryLoader() {
+        }
+        return AppModuleFactoryLoader;
+    }());
+    /**
      * Low-level service for running the angular compiler duirng runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
@@ -10383,6 +10399,58 @@ var __extends = (this && this.__extends) || function (d, b) {
         return QueryList;
     }());
     var _SEPARATOR = '#';
+    var SystemJsAppModuleLoader = (function () {
+        function SystemJsAppModuleLoader(_compiler) {
+            this._compiler = _compiler;
+        }
+        SystemJsAppModuleLoader.prototype.load = function (path) {
+            var _this = this;
+            var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
+            if (exportName === undefined)
+                exportName = 'default';
+            return global$1
+                .System.import(module)
+                .then(function (module) { return module[exportName]; })
+                .then(function (type) { return checkNotEmpty(type, module, exportName); })
+                .then(function (type) { return _this._compiler.compileAppModuleAsync(type); });
+        };
+        return SystemJsAppModuleLoader;
+    }());
+    /** @nocollapse */
+    SystemJsAppModuleLoader.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsAppModuleLoader.ctorParameters = [
+        { type: Compiler, },
+    ];
+    var FACTORY_MODULE_SUFFIX = '.ngfactory';
+    var FACTORY_CLASS_SUFFIX = 'NgFactory';
+    /**
+     * AppModuleFactoryLoader that uses SystemJS to load AppModuleFactories
+     * @experimental
+     */
+    var SystemJsAppModuleFactoryLoader = (function () {
+        function SystemJsAppModuleFactoryLoader() {
+        }
+        SystemJsAppModuleFactoryLoader.prototype.load = function (path) {
+            var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
+            if (exportName === undefined)
+                exportName = 'default';
+            return global$1
+                .System.import(module + FACTORY_MODULE_SUFFIX)
+                .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
+                .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
+        };
+        return SystemJsAppModuleFactoryLoader;
+    }());
+    function checkNotEmpty(value, modulePath, exportName) {
+        if (!value) {
+            throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
+        }
+        return value;
+    }
+    var _SEPARATOR$1 = '#';
     /**
      * Component resolver that can load components lazily
      * @experimental
@@ -10394,7 +10462,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         SystemJsComponentResolver.prototype.resolveComponent = function (componentType) {
             var _this = this;
             if (isString(componentType)) {
-                var _a = componentType.split(_SEPARATOR), module = _a[0], component_1 = _a[1];
+                var _a = componentType.split(_SEPARATOR$1), module = _a[0], component_1 = _a[1];
                 if (component_1 === void (0)) {
                     // Use the default export when no component is specified
                     component_1 = 'default';
@@ -10408,8 +10476,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         SystemJsComponentResolver.prototype.clearCache = function () { };
         return SystemJsComponentResolver;
     }());
-    var FACTORY_MODULE_SUFFIX = '.ngfactory';
-    var FACTORY_CLASS_SUFFIX = 'NgFactory';
+    var FACTORY_MODULE_SUFFIX$1 = '.ngfactory';
+    var FACTORY_CLASS_SUFFIX$1 = 'NgFactory';
     /**
      * Component resolver that can load component factories lazily
      * @experimental
@@ -10419,10 +10487,10 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         SystemJsCmpFactoryResolver.prototype.resolveComponent = function (componentType) {
             if (isString(componentType)) {
-                var _a = componentType.split(_SEPARATOR), module = _a[0], factory_1 = _a[1];
+                var _a = componentType.split(_SEPARATOR$1), module = _a[0], factory_1 = _a[1];
                 return global$1
-                    .System.import(module + FACTORY_MODULE_SUFFIX)
-                    .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX]; });
+                    .System.import(module + FACTORY_MODULE_SUFFIX$1)
+                    .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX$1]; });
             }
             return Promise.resolve(null);
         };
@@ -12696,6 +12764,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RootRenderer = RootRenderer;
     exports.AppModuleFactory = AppModuleFactory;
     exports.AppModuleRef = AppModuleRef;
+    exports.AppModuleFactoryLoader = AppModuleFactoryLoader;
     exports.Compiler = Compiler;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
@@ -12706,6 +12775,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
     exports.QueryList = QueryList;
+    exports.SystemJsAppModuleFactoryLoader = SystemJsAppModuleFactoryLoader;
+    exports.SystemJsAppModuleLoader = SystemJsAppModuleLoader;
     exports.SystemJsCmpFactoryResolver = SystemJsCmpFactoryResolver;
     exports.SystemJsComponentResolver = SystemJsComponentResolver;
     exports.TemplateRef = TemplateRef;
