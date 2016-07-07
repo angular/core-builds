@@ -24,22 +24,22 @@ export declare function createNgZone(parent: NgZone): NgZone;
  */
 export declare function enableProdMode(): void;
 /**
- * Returns whether Angular is in development mode.
- * This can only be read after `lockRunMode` has been called.
- *
- * By default, this is true, unless a user calls `enableProdMode`.
- *
- * @experimental APIs related to application bootstrap are currently under review.
- */
-export declare function isDevMode(): boolean;
-/**
  * Locks the run mode of Angular. After this has been called,
  * it can't be changed any more. I.e. `isDevMode()` will always
  * return the same value.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
  */
 export declare function lockRunMode(): void;
+/**
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export declare function isDevMode(): boolean;
 /**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.

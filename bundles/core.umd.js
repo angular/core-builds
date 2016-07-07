@@ -9703,28 +9703,26 @@ var __extends = (this && this.__extends) || function (d, b) {
         _devMode = false;
     }
     /**
-     * Returns whether Angular is in development mode.
-     * This can only be read after `lockRunMode` has been called.
-     *
-     * By default, this is true, unless a user calls `enableProdMode`.
-     *
-     * @experimental APIs related to application bootstrap are currently under review.
-     */
-    function isDevMode() {
-        if (!_runModeLocked) {
-            throw new BaseException("Dev mode can't be read before bootstrap!");
-        }
-        return _devMode;
-    }
-    /**
      * Locks the run mode of Angular. After this has been called,
      * it can't be changed any more. I.e. `isDevMode()` will always
      * return the same value.
      *
-     * @experimental APIs related to application bootstrap are currently under review.
+     * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
      */
     function lockRunMode() {
+        console.warn('lockRunMode() is deprecated and not needed any more.');
+    }
+    /**
+     * Returns whether Angular is in development mode. After called once,
+     * the value is locked and won't change any more.
+     *
+     * By default, this is true, unless a user calls `enableProdMode` before calling this.
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
+     */
+    function isDevMode() {
         _runModeLocked = true;
+        return _devMode;
     }
     /**
      * Creates a platform.
@@ -9739,7 +9737,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (isPresent(_platform) && !_platform.disposed) {
             throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
         }
-        lockRunMode();
         _inPlatformCreate = true;
         try {
             _platform = injector.get(PlatformRef);
