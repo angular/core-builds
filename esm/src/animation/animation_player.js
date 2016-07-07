@@ -19,7 +19,6 @@ export class AnimationPlayer {
 export class NoOpAnimationPlayer {
     constructor() {
         this._subscriptions = [];
-        this._started = false;
         this.parentPlayer = null;
         scheduleMicroTask(() => this._onFinish());
     }
@@ -29,9 +28,7 @@ export class NoOpAnimationPlayer {
         this._subscriptions = [];
     }
     onDone(fn) { this._subscriptions.push(fn); }
-    hasStarted() { return this._started; }
-    init() { }
-    play() { this._started = true; }
+    play() { }
     pause() { }
     restart() { }
     finish() { this._onFinish(); }

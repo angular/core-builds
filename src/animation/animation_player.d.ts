@@ -3,8 +3,6 @@
  */
 export declare abstract class AnimationPlayer {
     abstract onDone(fn: Function): void;
-    abstract init(): void;
-    abstract hasStarted(): boolean;
     abstract play(): void;
     abstract pause(): void;
     abstract restart(): void;
@@ -17,12 +15,9 @@ export declare abstract class AnimationPlayer {
 }
 export declare class NoOpAnimationPlayer implements AnimationPlayer {
     private _subscriptions;
-    private _started;
     parentPlayer: AnimationPlayer;
     constructor();
     onDone(fn: Function): void;
-    hasStarted(): boolean;
-    init(): void;
     play(): void;
     pause(): void;
     restart(): void;
