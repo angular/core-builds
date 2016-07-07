@@ -10206,6 +10206,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         return AppModuleFactoryLoader;
     }());
     /**
+     * Indicates that a component is still being loaded in a synchronous compile.
+     *
+     * @stable
+     */
+    var ComponentStillLoadingError = (function (_super) {
+        __extends(ComponentStillLoadingError, _super);
+        function ComponentStillLoadingError(compType) {
+            _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
+            this.compType = compType;
+        }
+        return ComponentStillLoadingError;
+    }(BaseException));
+    /**
      * Low-level service for running the angular compiler duirng runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
@@ -10218,6 +10231,16 @@ var __extends = (this && this.__extends) || function (d, b) {
     var Compiler = (function () {
         function Compiler() {
         }
+        Object.defineProperty(Compiler.prototype, "injector", {
+            /**
+             * Returns the injector with which the compiler has been created.
+             */
+            get: function () {
+                throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Loads the template and styles of a component and returns the associated `ComponentFactory`.
          */
@@ -10226,7 +10249,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
-         * `compileComponentAsync` before.
+         * `compileComponentAsync` before. Otherwise throws a {@link
+         * CompileSyncComponentStillLoadingError}.
          */
         Compiler.prototype.compileComponentSync = function (component) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
@@ -10234,7 +10258,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         /**
          * Compiles the given App Module. All templates of the components listed in `precompile`
          * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileAppModuleAsync`.
+         * `compileAppModuleAsync`. Otherwise throws a {@link CompileSyncComponentStillLoadingError}.
          */
         Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
             if (metadata === void 0) { metadata = null; }
@@ -12766,6 +12790,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.AppModuleRef = AppModuleRef;
     exports.AppModuleFactoryLoader = AppModuleFactoryLoader;
     exports.Compiler = Compiler;
+    exports.ComponentStillLoadingError = ComponentStillLoadingError;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;

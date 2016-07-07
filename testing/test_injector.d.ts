@@ -5,20 +5,50 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Provider, ReflectiveInjector, Type } from '../index';
+import { Compiler, Injector, PlatformRef, Provider, Type } from '../index';
+/**
+ * Signature of the compiler factory passed to `initTestEnvironment`.
+ *
+ * @experimental
+ */
+export declare type TestCompilerFactory = (config: {
+    providers?: Array<Type | Provider | any[]>;
+    useJit?: boolean;
+}) => Compiler;
 /**
  * @experimental
  */
-export declare class TestInjector {
+export declare class TestInjector implements Injector {
     private _instantiated;
-    private _injector;
+    private _compiler;
+    private _moduleRef;
+    private _compilerProviders;
+    private _compilerUseJit;
     private _providers;
+    private _directives;
+    private _pipes;
+    private _modules;
+    private _precompile;
     reset(): void;
-    platformProviders: Array<Type | Provider | any[] | any>;
-    applicationProviders: Array<Type | Provider | any[] | any>;
-    addProviders(providers: Array<Type | Provider | any[] | any>): void;
-    createInjector(): ReflectiveInjector;
-    get(token: any): any;
+    compilerFactory: TestCompilerFactory;
+    platform: PlatformRef;
+    appModule: Type;
+    configureCompiler(config: {
+        providers?: any[];
+        useJit?: boolean;
+    }): void;
+    configureModule(moduleDef: {
+        providers?: any[];
+        directives?: any[];
+        pipes?: any[];
+        precompile?: any[];
+        modules?: any[];
+    }): void;
+    createInjectorSync(): Injector;
+    createInjectorAsync(): Promise<Injector>;
+    private _createCompilerAndModuleMeta();
+    private _createFromModuleFactory(appModuleFactory);
+    get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function): any;
 }
 /**
@@ -31,20 +61,20 @@ export declare function getTestInjector(): TestInjector;
  *
  * This may only be called once, to set up the common providers for the current test
  * suite on the current platform. If you absolutely need to change the providers,
- * first use `resetBaseTestProviders`.
+ * first use `resetTestEnvironment`.
  *
  * Test Providers for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
  *
  * @experimental
  */
-export declare function setBaseTestProviders(platformProviders: Array<Type | Provider | any[]>, applicationProviders: Array<Type | Provider | any[]>): void;
+export declare function initTestEnvironment(compilerFactory: TestCompilerFactory, platform: PlatformRef, appModule: Type): void;
 /**
  * Reset the providers for the test injector.
  *
  * @experimental
  */
-export declare function resetBaseTestProviders(): void;
+export declare function resetTestEnvironment(): void;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
@@ -74,12 +104,28 @@ export declare function inject(tokens: any[], fn: Function): () => any;
  * @experimental
  */
 export declare class InjectSetupWrapper {
-    private _providers;
-    constructor(_providers: () => any);
-    private _addProviders();
+    private _moduleDef;
+    constructor(_moduleDef: () => {
+        providers?: any[];
+        directives?: any[];
+        pipes?: any[];
+        precompile?: any[];
+        modules?: any[];
+    });
+    private _addModule();
     inject(tokens: any[], fn: Function): () => any;
 }
 /**
  * @experimental
  */
 export declare function withProviders(providers: () => any): InjectSetupWrapper;
+/**
+ * @experimental
+ */
+export declare function withModule(moduleDef: () => {
+    providers?: any[];
+    directives?: any[];
+    pipes?: any[];
+    precompile?: any[];
+    modules?: any[];
+}): InjectSetupWrapper;

@@ -1,7 +1,25 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { Injector } from '../di';
+import { BaseException } from '../facade/exceptions';
 import { ConcreteType, Type } from '../facade/lang';
 import { AppModuleMetadata } from '../metadata/app_module';
 import { AppModuleFactory } from './app_module_factory';
 import { ComponentFactory } from './component_factory';
+/**
+ * Indicates that a component is still being loaded in a synchronous compile.
+ *
+ * @stable
+ */
+export declare class ComponentStillLoadingError extends BaseException {
+    compType: Type;
+    constructor(compType: Type);
+}
 /**
  * Low-level service for running the angular compiler duirng runtime
  * to create {@link ComponentFactory}s, which
@@ -14,18 +32,23 @@ import { ComponentFactory } from './component_factory';
  */
 export declare class Compiler {
     /**
+     * Returns the injector with which the compiler has been created.
+     */
+    readonly injector: Injector;
+    /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
     compileComponentAsync<T>(component: ConcreteType<T>): Promise<ComponentFactory<T>>;
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
-     * `compileComponentAsync` before.
+     * `compileComponentAsync` before. Otherwise throws a {@link
+     * CompileSyncComponentStillLoadingError}.
      */
     compileComponentSync<T>(component: ConcreteType<T>): ComponentFactory<T>;
     /**
      * Compiles the given App Module. All templates of the components listed in `precompile`
      * have to be either inline or compiled before via `compileComponentAsync` /
-     * `compileAppModuleAsync`.
+     * `compileAppModuleAsync`. Otherwise throws a {@link CompileSyncComponentStillLoadingError}.
      */
     compileAppModuleSync<T>(moduleType: ConcreteType<T>, metadata?: AppModuleMetadata): AppModuleFactory<T>;
     compileAppModuleAsync<T>(moduleType: ConcreteType<T>, metadata?: AppModuleMetadata): Promise<AppModuleFactory<T>>;

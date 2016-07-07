@@ -83,6 +83,29 @@ export declare var xit: any;
  */
 export declare function addProviders(providers: Array<any>): void;
 /**
+ * Allows overriding default providers, directives, pipes, modules of the test injector,
+ * which are defined in test_injector.js
+ *
+ * @stable
+ */
+export declare function configureModule(moduleDef: {
+    providers?: any[];
+    directives?: any[];
+    pipes?: any[];
+    precompile?: any[];
+    modules?: any[];
+}): void;
+/**
+ * Allows overriding default compiler providers and settings
+ * which are defined in test_injector.js
+ *
+ * @stable
+ */
+export declare function configureCompiler(config: {
+    providers?: any[];
+    useJit?: boolean;
+}): void;
+/**
  * @deprecated Use beforeEach(() => addProviders())
  */
 export declare function beforeEachProviders(fn: () => Array<any>): void;
