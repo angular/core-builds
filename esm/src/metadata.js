@@ -10,7 +10,7 @@ import { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, Query
 import { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 import { ViewMetadata } from './metadata/view';
 export { AppModuleMetadata } from './metadata/app_module';
-export { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+export { ANALYZE_FOR_PRECOMPILE, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
 export { ViewEncapsulation, ViewMetadata } from './metadata/view';

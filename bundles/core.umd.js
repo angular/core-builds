@@ -622,6 +622,78 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
     }
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Creates a token that can be used in a DI Provider.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+     *
+     * ```typescript
+     * var t = new OpaqueToken("value");
+     *
+     * var injector = Injector.resolveAndCreate([
+     *   {provide: t, useValue: "bindingValue"}
+     * ]);
+     *
+     * expect(injector.get(t)).toEqual("bindingValue");
+     * ```
+     *
+     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
+     * caused by multiple providers using the same string as two different tokens.
+     *
+     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
+     * error messages.
+     * @ts2dart_const
+     * @stable
+     */
+    var OpaqueToken = (function () {
+        function OpaqueToken(_desc) {
+            this._desc = _desc;
+        }
+        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
+        return OpaqueToken;
+    }());
+    /**
+     * This token can be used to create a virtual provider that will populate the
+     * `precompile` fields of components and app modules based on its `useValue`.
+     * All components that are referenced in the `useValue` value (either directly
+     * or in a nested array or map) will be added to the `precompile` property.
+     *
+     * ### Example
+     * The following example shows how the router can populate the `precompile`
+     * field of an AppModule based on the router configuration which refers
+     * to components.
+     *
+     * ```typescript
+     * // helper function inside the router
+     * function provideRoutes(routes) {
+     *   return [
+     *     {provide: ROUTES, useValue: routes},
+     *     {provide: ANALYZE_FOR_PRECOMPILE, useValue: routes, multi: true}
+     *   ];
+     * }
+     *
+     * // user code
+     * let routes = [
+     *   {path: '/root', component: RootComp},
+     *   {path: /teams', component: TeamsComp}
+     * ];
+     *
+     * @AppModule({
+     *   providers: [provideRoutes(routes)]
+     * })
+     * class ModuleWithRoutes {}
+     * ```
+     *
+     * @experimental
+     */
+    var ANALYZE_FOR_PRECOMPILE = new OpaqueToken('AnalyzeForPrecompile');
+    /**
      * Specifies that a constant attribute value should be injected.
      *
      * The directive can inject constant string literals of host element attributes.
@@ -6583,43 +6655,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return res;
     }
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Creates a token that can be used in a DI Provider.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
-     *
-     * ```typescript
-     * var t = new OpaqueToken("value");
-     *
-     * var injector = Injector.resolveAndCreate([
-     *   {provide: t, useValue: "bindingValue"}
-     * ]);
-     *
-     * expect(injector.get(t)).toEqual("bindingValue");
-     * ```
-     *
-     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
-     * caused by multiple providers using the same string as two different tokens.
-     *
-     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
-     * error messages.
-     * @ts2dart_const
-     * @stable
-     */
-    var OpaqueToken = (function () {
-        function OpaqueToken(_desc) {
-            this._desc = _desc;
-        }
-        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
-        return OpaqueToken;
-    }());
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -12726,6 +12761,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.HostListener = HostListener;
     exports.AppModule = AppModule;
     exports.AppModuleMetadata = AppModuleMetadata;
+    exports.ANALYZE_FOR_PRECOMPILE = ANALYZE_FOR_PRECOMPILE;
     exports.AttributeMetadata = AttributeMetadata;
     exports.ContentChildMetadata = ContentChildMetadata;
     exports.ContentChildrenMetadata = ContentChildrenMetadata;

@@ -13,6 +13,7 @@ var view_1 = require('./metadata/view');
 var app_module_2 = require('./metadata/app_module');
 exports.AppModuleMetadata = app_module_2.AppModuleMetadata;
 var di_2 = require('./metadata/di');
+exports.ANALYZE_FOR_PRECOMPILE = di_2.ANALYZE_FOR_PRECOMPILE;
 exports.AttributeMetadata = di_2.AttributeMetadata;
 exports.ContentChildMetadata = di_2.ContentChildMetadata;
 exports.ContentChildrenMetadata = di_2.ContentChildrenMetadata;
