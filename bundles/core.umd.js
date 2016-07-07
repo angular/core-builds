@@ -11766,7 +11766,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```html
      * <!-- somewhere inside of my-component-tpl.html -->
-     * <div @myAnimationTrigger="myStatusExp">...</div>
+     * <div [@myAnimationTrigger]="myStatusExp">...</div>
      * ```
      *
      * #### The final `animate` call
@@ -11813,7 +11813,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * {@link ComponentMetadata#animations-anchor animations section}. An animation trigger can
      * be placed on an element within a template by referencing the name of the
      * trigger followed by the expression value that the trigger is bound to
-     * (in the form of `@triggerName="expression"`.
+     * (in the form of `[@triggerName]="expression"`.
      *
      * ### Usage
      *
@@ -11845,7 +11845,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```html
      * <!-- somewhere inside of my-component-tpl.html -->
-     * <div @myAnimationTrigger="myStatusExp">...</div>
+     * <div [@myAnimationTrigger]="myStatusExp">...</div>
      * ```
      *
      * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
