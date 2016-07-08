@@ -41,14 +41,13 @@ export declare class Compiler {
     compileComponentAsync<T>(component: ConcreteType<T>): Promise<ComponentFactory<T>>;
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
-     * `compileComponentAsync` before. Otherwise throws a {@link
-     * CompileSyncComponentStillLoadingError}.
+     * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     compileComponentSync<T>(component: ConcreteType<T>): ComponentFactory<T>;
     /**
      * Compiles the given App Module. All templates of the components listed in `precompile`
      * have to be either inline or compiled before via `compileComponentAsync` /
-     * `compileAppModuleAsync`. Otherwise throws a {@link CompileSyncComponentStillLoadingError}.
+     * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     compileAppModuleSync<T>(moduleType: ConcreteType<T>, metadata?: AppModuleMetadata): AppModuleFactory<T>;
     compileAppModuleAsync<T>(moduleType: ConcreteType<T>, metadata?: AppModuleMetadata): Promise<AppModuleFactory<T>>;

@@ -1552,7 +1552,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ## Lifecycle hooks
      *
-     * When the directive class implements some {@link ../../../guide/lifecycle-hooks.html} the
+     * When the directive class implements some {@linkDocs guide/lifecycle-hooks} the
      * callbacks are called by the change detection at defined points in time during the life of the
      * directive.
      *
@@ -1813,7 +1813,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ## Lifecycle hooks
      *
-     * When the component class implements some {@link ../../../guide/lifecycle-hooks.html} the
+     * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
      * callbacks are called by the change detection at defined points in time during the life of the
      * component.
      *
@@ -2121,7 +2121,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Defines template and style encapsulation options available for Component's {@link View}.
+     * Defines template and style encapsulation options available for Component's {@link Component}.
      *
      * See {@link ViewMetadata#encapsulation}.
      * @stable
@@ -2968,7 +2968,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ## Lifecycle hooks
      *
-     * When the component class implements some {@link ../../../guide/lifecycle-hooks.html} the
+     * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
      * callbacks are called by the change detection at defined points in time during the life of the
      * component.
      *
@@ -3298,7 +3298,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ## Lifecycle hooks
      *
-     * When the directive class implements some {@link ../../../guide/lifecycle-hooks.html} the
+     * When the directive class implements some {@linkDocs guide/lifecycle-hooks} the
      * callbacks are called by the change detection at defined points in time during the life of the
      * directive.
      *
@@ -4691,8 +4691,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         return AbstractProviderError;
     }(BaseException));
     /**
-     * Thrown when trying to retrieve a dependency by `Key` from {@link Injector}, but the
-     * {@link Injector} does not have a {@link Provider} for {@link Key}.
+     * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
+     * {@link Injector} does not have a {@link Provider} for the given key.
      *
      * ### Example ([live demo](http://plnkr.co/edit/vq8D3FRB9aGbnWJqtEPE?p=preview))
      *
@@ -5470,7 +5470,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * to an existing `token`.
      * See {@link ProviderBuilder} for more details.
      *
-     * The `token` is most commonly a class or {@link OpaqueToken-class.html}.
+     * The `token` is most commonly a class or {@link OpaqueToken}.
      *
      * @deprecated
      */
@@ -10281,8 +10281,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
-         * `compileComponentAsync` before. Otherwise throws a {@link
-         * CompileSyncComponentStillLoadingError}.
+         * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
          */
         Compiler.prototype.compileComponentSync = function (component) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
@@ -10290,7 +10289,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         /**
          * Compiles the given App Module. All templates of the components listed in `precompile`
          * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileAppModuleAsync`. Otherwise throws a {@link CompileSyncComponentStillLoadingError}.
+         * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
          */
         Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
             if (metadata === void 0) { metadata = null; }

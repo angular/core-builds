@@ -58,8 +58,7 @@ var Compiler = (function () {
     };
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
-     * `compileComponentAsync` before. Otherwise throws a {@link
-     * CompileSyncComponentStillLoadingError}.
+     * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     Compiler.prototype.compileComponentSync = function (component) {
         throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
@@ -67,7 +66,7 @@ var Compiler = (function () {
     /**
      * Compiles the given App Module. All templates of the components listed in `precompile`
      * have to be either inline or compiled before via `compileComponentAsync` /
-     * `compileAppModuleAsync`. Otherwise throws a {@link CompileSyncComponentStillLoadingError}.
+     * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
         if (metadata === void 0) { metadata = null; }

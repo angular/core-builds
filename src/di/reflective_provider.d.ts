@@ -54,7 +54,7 @@ export interface ResolvedReflectiveProvider {
     multiProvider: boolean;
 }
 /**
- * See {@link ResolvedProvider} instead.
+ * See {@link ResolvedReflectiveProvider} instead.
  *
  * @deprecated
  */

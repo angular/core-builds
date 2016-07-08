@@ -326,7 +326,7 @@ import { isPresent } from '../facade/lang';
  *
  * ## Lifecycle hooks
  *
- * When the directive class implements some {@link ../../../guide/lifecycle-hooks.html} the
+ * When the directive class implements some {@linkDocs guide/lifecycle-hooks} the
  * callbacks are called by the change detection at defined points in time during the life of the
  * directive.
  *
@@ -564,7 +564,7 @@ export class DirectiveMetadata extends InjectableMetadata {
  *
  * ## Lifecycle hooks
  *
- * When the component class implements some {@link ../../../guide/lifecycle-hooks.html} the
+ * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
  * callbacks are called by the change detection at defined points in time during the life of the
  * component.
  *

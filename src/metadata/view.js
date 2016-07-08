@@ -7,7 +7,7 @@
  */
 "use strict";
 /**
- * Defines template and style encapsulation options available for Component's {@link View}.
+ * Defines template and style encapsulation options available for Component's {@link Component}.
  *
  * See {@link ViewMetadata#encapsulation}.
  * @stable
