@@ -210,9 +210,11 @@ export function bootstrapModule(moduleType, platform, compilerOptions = {}) {
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated Use {@link bootstrapModuleFactory} instead.
  */
 export function coreBootstrap(componentFactory, injector) {
+    let console = injector.get(Console);
+    console.warn('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
     var appRef = injector.get(ApplicationRef);
     return appRef.bootstrap(componentFactory);
 }
@@ -221,9 +223,11 @@ export function coreBootstrap(componentFactory, injector) {
  * waits for asynchronous initializers and bootstraps the component.
  * Requires a platform to be created first.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated Use {@link bootstrapModule} instead.
  */
 export function coreLoadAndBootstrap(componentType, injector) {
+    let console = injector.get(Console);
+    console.warn('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
     var appRef = injector.get(ApplicationRef);
     return appRef.run(() => {
         var componentResolver = injector.get(ComponentResolver);

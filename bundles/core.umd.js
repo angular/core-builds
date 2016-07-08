@@ -9306,25 +9306,33 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Low-level service for loading {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
-     * @experimental
+     *
+     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
+     * AppModule}.precompile}/{@link Component}.precompile or
+     * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
+     * Use {@link AppModuleFactoryLoader} for lazy loading.
      */
     var ComponentResolver = (function () {
         function ComponentResolver() {
         }
         return ComponentResolver;
     }());
+    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @AppModule/@Component.precompile or ANALYZE_FOR_PRECOMPILE provider instead.';
+    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use AppModuleFactoryLoader instead.';
     function _isComponentFactory(type) {
         return type instanceof ComponentFactory;
     }
     var ReflectorComponentResolver = (function (_super) {
         __extends(ReflectorComponentResolver, _super);
-        function ReflectorComponentResolver() {
-            _super.apply(this, arguments);
+        function ReflectorComponentResolver(_console) {
+            _super.call(this);
+            this._console = _console;
         }
         ReflectorComponentResolver.prototype.resolveComponent = function (component) {
             if (isString(component)) {
                 return PromiseWrapper.reject(new BaseException("Cannot resolve component using '" + component + "'."), null);
             }
+            this._console.warn(ComponentResolver.DynamicCompilationDeprecationMsg);
             var metadatas = reflector.annotations(component);
             var componentFactory = metadatas.find(_isComponentFactory);
             if (isBlank(componentFactory)) {
@@ -9338,6 +9346,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     /** @nocollapse */
     ReflectorComponentResolver.decorators = [
         { type: Injectable },
+    ];
+    /** @nocollapse */
+    ReflectorComponentResolver.ctorParameters = [
+        { type: Console, },
     ];
     /**
      * @license
@@ -9995,9 +10007,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Shortcut for ApplicationRef.bootstrap.
      * Requires a platform to be created first.
      *
-     * @experimental APIs related to application bootstrap are currently under review.
+     * @deprecated Use {@link bootstrapModuleFactory} instead.
      */
     function coreBootstrap(componentFactory, injector) {
+        var console = injector.get(Console);
+        console.warn('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
         var appRef = injector.get(ApplicationRef);
         return appRef.bootstrap(componentFactory);
     }
@@ -10006,9 +10020,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * waits for asynchronous initializers and bootstraps the component.
      * Requires a platform to be created first.
      *
-     * @experimental APIs related to application bootstrap are currently under review.
+     * @deprecated Use {@link bootstrapModule} instead.
      */
     function coreLoadAndBootstrap(componentType, injector) {
+        var console = injector.get(Console);
+        console.warn('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
         var appRef = injector.get(ApplicationRef);
         return appRef.run(function () {
             var componentResolver = injector.get(ComponentResolver);
@@ -10645,17 +10661,15 @@ var __extends = (this && this.__extends) || function (d, b) {
         return value;
     }
     var _SEPARATOR$1 = '#';
-    /**
-     * Component resolver that can load components lazily
-     * @experimental
-     */
     var SystemJsComponentResolver = (function () {
-        function SystemJsComponentResolver(_resolver) {
+        function SystemJsComponentResolver(_resolver, _console) {
             this._resolver = _resolver;
+            this._console = _console;
         }
         SystemJsComponentResolver.prototype.resolveComponent = function (componentType) {
             var _this = this;
             if (isString(componentType)) {
+                this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
                 var _a = componentType.split(_SEPARATOR$1), module = _a[0], component_1 = _a[1];
                 if (component_1 === void (0)) {
                     // Use the default export when no component is specified
@@ -10670,17 +10684,24 @@ var __extends = (this && this.__extends) || function (d, b) {
         SystemJsComponentResolver.prototype.clearCache = function () { };
         return SystemJsComponentResolver;
     }());
+    /** @nocollapse */
+    SystemJsComponentResolver.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsComponentResolver.ctorParameters = [
+        { type: ComponentResolver, },
+        { type: Console, },
+    ];
     var FACTORY_MODULE_SUFFIX$1 = '.ngfactory';
     var FACTORY_CLASS_SUFFIX$1 = 'NgFactory';
-    /**
-     * Component resolver that can load component factories lazily
-     * @experimental
-     */
     var SystemJsCmpFactoryResolver = (function () {
-        function SystemJsCmpFactoryResolver() {
+        function SystemJsCmpFactoryResolver(_console) {
+            this._console = _console;
         }
         SystemJsCmpFactoryResolver.prototype.resolveComponent = function (componentType) {
             if (isString(componentType)) {
+                this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
                 var _a = componentType.split(_SEPARATOR$1), module = _a[0], factory_1 = _a[1];
                 return global$1
                     .System.import(module + FACTORY_MODULE_SUFFIX$1)
@@ -10691,6 +10712,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         SystemJsCmpFactoryResolver.prototype.clearCache = function () { };
         return SystemJsCmpFactoryResolver;
     }());
+    /** @nocollapse */
+    SystemJsCmpFactoryResolver.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsCmpFactoryResolver.ctorParameters = [
+        { type: Console, },
+    ];
     var EMPTY_CONTEXT$1 = new Object();
     /**
      * Represents an Embedded Template that can be used to instantiate Embedded Views.
@@ -11061,7 +11090,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         _nativeNodeToDebugNode.delete(node.nativeNode);
     }
     /**
-       A token that can be provided when bootstrapping an application to make an array of directives
+      * A token that can be provided when bootstrapping an application to make an array of directives
       * available in every component of the application.
       *
       * ### Example
@@ -11084,7 +11113,9 @@ var __extends = (this && this.__extends) || function (d, b) {
       * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective],
       multi:true}]);
       * ```
-      * @stable
+      *
+      * @deprecated Providing platform directives via a provider is deprecated. Provide platform
+      * directives via an {@link AppModule} instead.
       */
     var PLATFORM_DIRECTIVES = 
     /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
@@ -11110,7 +11141,9 @@ var __extends = (this && this.__extends) || function (d, b) {
       *
       * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
       * ```
-      * @stable
+      *
+      * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
+      * {@link AppModule} instead.
       */
     var PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
     function _reflector() {

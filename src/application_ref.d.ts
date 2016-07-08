@@ -119,7 +119,7 @@ export declare function bootstrapModule<M>(moduleType: ConcreteType<M>, platform
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated Use {@link bootstrapModuleFactory} instead.
  */
 export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, injector: Injector): ComponentRef<C>;
 /**
@@ -127,7 +127,7 @@ export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, 
  * waits for asynchronous initializers and bootstraps the component.
  * Requires a platform to be created first.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated Use {@link bootstrapModule} instead.
  */
 export declare function coreLoadAndBootstrap(componentType: Type, injector: Injector): Promise<ComponentRef<any>>;
 /**

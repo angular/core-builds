@@ -8,7 +8,7 @@
 "use strict";
 var di_1 = require('./di');
 /**
-   A token that can be provided when bootstrapping an application to make an array of directives
+  * A token that can be provided when bootstrapping an application to make an array of directives
   * available in every component of the application.
   *
   * ### Example
@@ -31,7 +31,9 @@ var di_1 = require('./di');
   * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective],
   multi:true}]);
   * ```
-  * @stable
+  *
+  * @deprecated Providing platform directives via a provider is deprecated. Provide platform
+  * directives via an {@link AppModule} instead.
   */
 exports.PLATFORM_DIRECTIVES = 
 /*@ts2dart_const*/ new di_1.OpaqueToken('Platform Directives');
@@ -57,7 +59,9 @@ exports.PLATFORM_DIRECTIVES =
   *
   * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
   * ```
-  * @stable
+  *
+  * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
+  * {@link AppModule} instead.
   */
 exports.PLATFORM_PIPES = new di_1.OpaqueToken('Platform Pipes');
 //# sourceMappingURL=platform_directives_and_pipes.js.map
