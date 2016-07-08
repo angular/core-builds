@@ -60,7 +60,7 @@ exports.__core_private__ = {
     DebugContext: debug_context.DebugContext,
     StaticNodeDebugInfo: debug_context.StaticNodeDebugInfo,
     devModeEqual: change_detection_util.devModeEqual,
-    uninitialized: change_detection_util.uninitialized,
+    UNINITIALIZED: change_detection_util.UNINITIALIZED,
     ValueUnwrapper: change_detection_util.ValueUnwrapper,
     RenderDebugInfo: api.RenderDebugInfo,
     TemplateRef_: template_ref.TemplateRef_,

@@ -67,7 +67,7 @@ export declare namespace __core_private_types__ {
     var DebugContext: typeof debug_context.DebugContext;
     var StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     var devModeEqual: typeof change_detection_util.devModeEqual;
-    var uninitialized: typeof change_detection_util.uninitialized;
+    var UNINITIALIZED: typeof change_detection_util.UNINITIALIZED;
     var ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     type RenderDebugInfo = api.RenderDebugInfo;
     var RenderDebugInfo: typeof api.RenderDebugInfo;
@@ -146,7 +146,9 @@ export declare var __core_private__: {
     DebugContext: typeof debug_context.DebugContext;
     StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     devModeEqual: (a: any, b: any) => boolean;
-    uninitialized: Object;
+    UNINITIALIZED: {
+        toString: () => string;
+    };
     ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     RenderDebugInfo: typeof api.RenderDebugInfo;
     TemplateRef_: typeof template_ref.TemplateRef_;
