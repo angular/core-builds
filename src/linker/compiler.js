@@ -87,4 +87,64 @@ var Compiler = (function () {
     return Compiler;
 }());
 exports.Compiler = Compiler;
+/**
+ * A factory for creating a Compiler
+ *
+ * @experimental
+ */
+var CompilerFactory = (function () {
+    function CompilerFactory() {
+    }
+    CompilerFactory.mergeOptions = function (defaultOptions, newOptions) {
+        if (defaultOptions === void 0) { defaultOptions = {}; }
+        if (newOptions === void 0) { newOptions = {}; }
+        return {
+            useDebug: _firstDefined(newOptions.useDebug, defaultOptions.useDebug),
+            useJit: _firstDefined(newOptions.useJit, defaultOptions.useJit),
+            defaultEncapsulation: _firstDefined(newOptions.defaultEncapsulation, defaultOptions.defaultEncapsulation),
+            providers: _mergeArrays(defaultOptions.providers, newOptions.providers),
+            deprecatedAppProviders: _mergeArrays(defaultOptions.deprecatedAppProviders, newOptions.deprecatedAppProviders)
+        };
+    };
+    CompilerFactory.prototype.withDefaults = function (options) {
+        if (options === void 0) { options = {}; }
+        return new _DefaultApplyingCompilerFactory(this, options);
+    };
+    return CompilerFactory;
+}());
+exports.CompilerFactory = CompilerFactory;
+var _DefaultApplyingCompilerFactory = (function (_super) {
+    __extends(_DefaultApplyingCompilerFactory, _super);
+    function _DefaultApplyingCompilerFactory(_delegate, _options) {
+        _super.call(this);
+        this._delegate = _delegate;
+        this._options = _options;
+    }
+    _DefaultApplyingCompilerFactory.prototype.createCompiler = function (options) {
+        if (options === void 0) { options = {}; }
+        return this._delegate.createCompiler(CompilerFactory.mergeOptions(this._options, options));
+    };
+    return _DefaultApplyingCompilerFactory;
+}(CompilerFactory));
+function _firstDefined() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i - 0] = arguments[_i];
+    }
+    for (var i = 0; i < args.length; i++) {
+        if (args[i] !== undefined) {
+            return args[i];
+        }
+    }
+    return undefined;
+}
+function _mergeArrays() {
+    var parts = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        parts[_i - 0] = arguments[_i];
+    }
+    var result = [];
+    parts.forEach(function (part) { return result.push.apply(result, part); });
+    return result;
+}
 //# sourceMappingURL=compiler.js.map

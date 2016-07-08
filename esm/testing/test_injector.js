@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AppModuleMetadata, ComponentStillLoadingError, Injector } from '../index';
+import { AppModuleMetadata, CompilerFactory, ComponentStillLoadingError, Injector } from '../index';
 import { ListWrapper } from '../src/facade/collection';
 import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, stringify } from '../src/facade/lang';
@@ -26,7 +26,6 @@ export class TestInjector {
         this._pipes = [];
         this._modules = [];
         this._precompile = [];
-        this.compilerFactory = null;
         this.platform = null;
         this.appModule = null;
     }
@@ -89,8 +88,12 @@ export class TestInjector {
             .then((appModuleFactory) => this._createFromModuleFactory(appModuleFactory));
     }
     _createCompilerAndModuleMeta() {
-        this._compiler =
-            this.compilerFactory({ providers: this._compilerProviders, useJit: this._compilerUseJit });
+        const compilerFactory = this.platform.injector.get(CompilerFactory);
+        this._compiler = compilerFactory.createCompiler({
+            providers: this._compilerProviders,
+            useJit: this._compilerUseJit,
+            deprecatedAppProviders: this._providers
+        });
         const moduleMeta = new AppModuleMetadata({
             providers: this._providers.concat([{ provide: TestInjector, useValue: this }]),
             modules: this._modules.concat([this.appModule]),
@@ -143,17 +146,16 @@ export function getTestInjector() {
  * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
- * Test Providers for individual platforms are available from
+ * Test modules and platforms for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
  *
  * @experimental
  */
-export function initTestEnvironment(compilerFactory, platform, appModule) {
+export function initTestEnvironment(appModule, platform) {
     var testInjector = getTestInjector();
-    if (testInjector.compilerFactory || testInjector.platform || testInjector.appModule) {
+    if (testInjector.platform || testInjector.appModule) {
         throw new BaseException('Cannot set base providers because it has already been called');
     }
-    testInjector.compilerFactory = compilerFactory;
     testInjector.platform = platform;
     testInjector.appModule = appModule;
 }
@@ -164,7 +166,6 @@ export function initTestEnvironment(compilerFactory, platform, appModule) {
  */
 export function resetTestEnvironment() {
     var testInjector = getTestInjector();
-    testInjector.compilerFactory = null;
     testInjector.platform = null;
     testInjector.appModule = null;
     testInjector.reset();

@@ -6892,6 +6892,137 @@ var __extends = (this && this.__extends) || function (d, b) {
     Console.decorators = [
         { type: Injectable },
     ];
+    /**
+     * Indicates that a component is still being loaded in a synchronous compile.
+     *
+     * @stable
+     */
+    var ComponentStillLoadingError = (function (_super) {
+        __extends(ComponentStillLoadingError, _super);
+        function ComponentStillLoadingError(compType) {
+            _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
+            this.compType = compType;
+        }
+        return ComponentStillLoadingError;
+    }(BaseException));
+    /**
+     * Low-level service for running the angular compiler duirng runtime
+     * to create {@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     *
+     * Each `@AppModule` provides an own `Compiler` to its injector,
+     * that will use the directives/pipes of the app module for compilation
+     * of components.
+     * @stable
+     */
+    var Compiler = (function () {
+        function Compiler() {
+        }
+        Object.defineProperty(Compiler.prototype, "injector", {
+            /**
+             * Returns the injector with which the compiler has been created.
+             */
+            get: function () {
+                throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
+         */
+        Compiler.prototype.compileComponentAsync = function (component) {
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Compiles the given component. All templates have to be either inline or compiled via
+         * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
+         */
+        Compiler.prototype.compileComponentSync = function (component) {
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        };
+        /**
+         * Compiles the given App Module. All templates of the components listed in `precompile`
+         * have to be either inline or compiled before via `compileComponentAsync` /
+         * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+         */
+        Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
+            if (metadata === void 0) { metadata = null; }
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        };
+        Compiler.prototype.compileAppModuleAsync = function (moduleType, metadata) {
+            if (metadata === void 0) { metadata = null; }
+            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        };
+        /**
+         * Clears all caches
+         */
+        Compiler.prototype.clearCache = function () { };
+        /**
+         * Clears the cache for the given component/appModule.
+         */
+        Compiler.prototype.clearCacheFor = function (type) { };
+        return Compiler;
+    }());
+    /**
+     * A factory for creating a Compiler
+     *
+     * @experimental
+     */
+    var CompilerFactory = (function () {
+        function CompilerFactory() {
+        }
+        CompilerFactory.mergeOptions = function (defaultOptions, newOptions) {
+            if (defaultOptions === void 0) { defaultOptions = {}; }
+            if (newOptions === void 0) { newOptions = {}; }
+            return {
+                useDebug: _firstDefined(newOptions.useDebug, defaultOptions.useDebug),
+                useJit: _firstDefined(newOptions.useJit, defaultOptions.useJit),
+                defaultEncapsulation: _firstDefined(newOptions.defaultEncapsulation, defaultOptions.defaultEncapsulation),
+                providers: _mergeArrays(defaultOptions.providers, newOptions.providers),
+                deprecatedAppProviders: _mergeArrays(defaultOptions.deprecatedAppProviders, newOptions.deprecatedAppProviders)
+            };
+        };
+        CompilerFactory.prototype.withDefaults = function (options) {
+            if (options === void 0) { options = {}; }
+            return new _DefaultApplyingCompilerFactory(this, options);
+        };
+        return CompilerFactory;
+    }());
+    var _DefaultApplyingCompilerFactory = (function (_super) {
+        __extends(_DefaultApplyingCompilerFactory, _super);
+        function _DefaultApplyingCompilerFactory(_delegate, _options) {
+            _super.call(this);
+            this._delegate = _delegate;
+            this._options = _options;
+        }
+        _DefaultApplyingCompilerFactory.prototype.createCompiler = function (options) {
+            if (options === void 0) { options = {}; }
+            return this._delegate.createCompiler(CompilerFactory.mergeOptions(this._options, options));
+        };
+        return _DefaultApplyingCompilerFactory;
+    }(CompilerFactory));
+    function _firstDefined() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        for (var i = 0; i < args.length; i++) {
+            if (args[i] !== undefined) {
+                return args[i];
+            }
+        }
+        return undefined;
+    }
+    function _mergeArrays() {
+        var parts = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            parts[_i - 0] = arguments[_i];
+        }
+        var result = [];
+        parts.forEach(function (part) { return result.push.apply(result, part); });
+        return result;
+    }
     /* @ts2dart_const */
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
@@ -9754,6 +9885,20 @@ var __extends = (this && this.__extends) || function (d, b) {
         return _platform;
     }
     /**
+     * Creates a fatory for a platform
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
+     */
+    function createPlatformFactory(name, providers) {
+        var marker = new OpaqueToken("Platform: " + name);
+        return function () {
+            if (!getPlatform()) {
+                createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat({ provide: marker, useValue: true })));
+            }
+            return assertPlatform(marker);
+        };
+    }
+    /**
      * Checks that there currently is a platform
      * which contains the given token as a provider.
      *
@@ -9786,6 +9931,65 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     function getPlatform() {
         return isPresent(_platform) && !_platform.disposed ? _platform : null;
+    }
+    /**
+     * Creates an instance of an `@AppModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * @AppModule({
+     *   modules: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {bootstrapModuleFactory} from '@angular/core';
+     * import {browserPlatform} from '@angular/platform-browser';
+     *
+     * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
+     * ```
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
+     */
+    function bootstrapModuleFactory(moduleFactory, platform) {
+        // Note: We need to create the NgZone _before_ we instantiate the module,
+        // as instantiating the module creates some providers eagerly.
+        // So we create a mini parent injector that just contains the new NgZone and
+        // pass that as parent to the AppModuleFactory.
+        var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+        var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], platform.injector);
+        return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
+    }
+    /**
+     * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * @AppModule({
+     *   modules: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = bootstrapModule(MyModule, browserPlatform());
+     * ```
+     * @stable
+     */
+    function bootstrapModule(moduleType, platform, compilerOptions) {
+        if (compilerOptions === void 0) { compilerOptions = {}; }
+        var compilerFactory = platform.injector.get(CompilerFactory);
+        var compiler = compilerFactory.createCompiler(compilerOptions);
+        return compiler.compileAppModuleAsync(moduleType)
+            .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
+            .then(function (moduleRef) {
+            var appRef = moduleRef.injector.get(ApplicationRef);
+            return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
+        });
     }
     /**
      * Shortcut for ApplicationRef.bootstrap.
@@ -10243,78 +10447,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         function AppModuleFactoryLoader() {
         }
         return AppModuleFactoryLoader;
-    }());
-    /**
-     * Indicates that a component is still being loaded in a synchronous compile.
-     *
-     * @stable
-     */
-    var ComponentStillLoadingError = (function (_super) {
-        __extends(ComponentStillLoadingError, _super);
-        function ComponentStillLoadingError(compType) {
-            _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
-            this.compType = compType;
-        }
-        return ComponentStillLoadingError;
-    }(BaseException));
-    /**
-     * Low-level service for running the angular compiler duirng runtime
-     * to create {@link ComponentFactory}s, which
-     * can later be used to create and render a Component instance.
-     *
-     * Each `@AppModule` provides an own `Compiler` to its injector,
-     * that will use the directives/pipes of the app module for compilation
-     * of components.
-     * @stable
-     */
-    var Compiler = (function () {
-        function Compiler() {
-        }
-        Object.defineProperty(Compiler.prototype, "injector", {
-            /**
-             * Returns the injector with which the compiler has been created.
-             */
-            get: function () {
-                throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
-         */
-        Compiler.prototype.compileComponentAsync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
-        };
-        /**
-         * Compiles the given component. All templates have to be either inline or compiled via
-         * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
-         */
-        Compiler.prototype.compileComponentSync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
-        };
-        /**
-         * Compiles the given App Module. All templates of the components listed in `precompile`
-         * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
-         */
-        Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
-        };
-        Compiler.prototype.compileAppModuleAsync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
-        };
-        /**
-         * Clears all caches
-         */
-        Compiler.prototype.clearCache = function () { };
-        /**
-         * Clears the cache for the given component/appModule.
-         */
-        Compiler.prototype.clearCacheFor = function (type) { };
-        return Compiler;
     }());
     /**
      * Use ComponentResolver and ViewContainerRef directly.
@@ -12721,6 +12853,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.assertPlatform = assertPlatform;
     exports.disposePlatform = disposePlatform;
     exports.getPlatform = getPlatform;
+    exports.bootstrapModuleFactory = bootstrapModuleFactory;
+    exports.bootstrapModule = bootstrapModule;
     exports.coreBootstrap = coreBootstrap;
     exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
     exports.PlatformRef = PlatformRef;
@@ -12728,6 +12862,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.enableProdMode = enableProdMode;
     exports.lockRunMode = lockRunMode;
     exports.isDevMode = isDevMode;
+    exports.createPlatformFactory = createPlatformFactory;
     exports.APP_ID = APP_ID;
     exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
@@ -12829,6 +12964,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.AppModuleRef = AppModuleRef;
     exports.AppModuleFactoryLoader = AppModuleFactoryLoader;
     exports.Compiler = Compiler;
+    exports.CompilerFactory = CompilerFactory;
     exports.ComponentStillLoadingError = ComponentStillLoadingError;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;

@@ -5,16 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Compiler, Injector, PlatformRef, Provider, Type } from '../index';
-/**
- * Signature of the compiler factory passed to `initTestEnvironment`.
- *
- * @experimental
- */
-export declare type TestCompilerFactory = (config: {
-    providers?: Array<Type | Provider | any[]>;
-    useJit?: boolean;
-}) => Compiler;
+import { Injector, PlatformRef, Type } from '../index';
 /**
  * @experimental
  */
@@ -30,7 +21,6 @@ export declare class TestInjector implements Injector {
     private _modules;
     private _precompile;
     reset(): void;
-    compilerFactory: TestCompilerFactory;
     platform: PlatformRef;
     appModule: Type;
     configureCompiler(config: {
@@ -63,12 +53,12 @@ export declare function getTestInjector(): TestInjector;
  * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
- * Test Providers for individual platforms are available from
+ * Test modules and platforms for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
  *
  * @experimental
  */
-export declare function initTestEnvironment(compilerFactory: TestCompilerFactory, platform: PlatformRef, appModule: Type): void;
+export declare function initTestEnvironment(appModule: Type, platform: PlatformRef): void;
 /**
  * Reset the providers for the test injector.
  *

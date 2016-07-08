@@ -14,6 +14,7 @@ var app_module_factory_loader_1 = require('./linker/app_module_factory_loader');
 exports.AppModuleFactoryLoader = app_module_factory_loader_1.AppModuleFactoryLoader;
 var compiler_1 = require('./linker/compiler');
 exports.Compiler = compiler_1.Compiler;
+exports.CompilerFactory = compiler_1.CompilerFactory;
 exports.ComponentStillLoadingError = compiler_1.ComponentStillLoadingError;
 var component_factory_1 = require('./linker/component_factory');
 exports.ComponentFactory = component_factory_1.ComponentFactory;

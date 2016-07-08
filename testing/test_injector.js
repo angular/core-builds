@@ -27,7 +27,6 @@ var TestInjector = (function () {
         this._pipes = [];
         this._modules = [];
         this._precompile = [];
-        this.compilerFactory = null;
         this.platform = null;
         this.appModule = null;
     }
@@ -91,8 +90,12 @@ var TestInjector = (function () {
             .then(function (appModuleFactory) { return _this._createFromModuleFactory(appModuleFactory); });
     };
     TestInjector.prototype._createCompilerAndModuleMeta = function () {
-        this._compiler =
-            this.compilerFactory({ providers: this._compilerProviders, useJit: this._compilerUseJit });
+        var compilerFactory = this.platform.injector.get(index_1.CompilerFactory);
+        this._compiler = compilerFactory.createCompiler({
+            providers: this._compilerProviders,
+            useJit: this._compilerUseJit,
+            deprecatedAppProviders: this._providers
+        });
         var moduleMeta = new index_1.AppModuleMetadata({
             providers: this._providers.concat([{ provide: TestInjector, useValue: this }]),
             modules: this._modules.concat([this.appModule]),
@@ -150,17 +153,16 @@ exports.getTestInjector = getTestInjector;
  * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
- * Test Providers for individual platforms are available from
+ * Test modules and platforms for individual platforms are available from
  * 'angular2/platform/testing/<platform_name>'.
  *
  * @experimental
  */
-function initTestEnvironment(compilerFactory, platform, appModule) {
+function initTestEnvironment(appModule, platform) {
     var testInjector = getTestInjector();
-    if (testInjector.compilerFactory || testInjector.platform || testInjector.appModule) {
+    if (testInjector.platform || testInjector.appModule) {
         throw new exceptions_1.BaseException('Cannot set base providers because it has already been called');
     }
-    testInjector.compilerFactory = compilerFactory;
     testInjector.platform = platform;
     testInjector.appModule = appModule;
 }
@@ -172,7 +174,6 @@ exports.initTestEnvironment = initTestEnvironment;
  */
 function resetTestEnvironment() {
     var testInjector = getTestInjector();
-    testInjector.compilerFactory = null;
     testInjector.platform = null;
     testInjector.appModule = null;
     testInjector.reset();

@@ -68,4 +68,46 @@ export class Compiler {
      */
     clearCacheFor(type) { }
 }
+/**
+ * A factory for creating a Compiler
+ *
+ * @experimental
+ */
+export class CompilerFactory {
+    static mergeOptions(defaultOptions = {}, newOptions = {}) {
+        return {
+            useDebug: _firstDefined(newOptions.useDebug, defaultOptions.useDebug),
+            useJit: _firstDefined(newOptions.useJit, defaultOptions.useJit),
+            defaultEncapsulation: _firstDefined(newOptions.defaultEncapsulation, defaultOptions.defaultEncapsulation),
+            providers: _mergeArrays(defaultOptions.providers, newOptions.providers),
+            deprecatedAppProviders: _mergeArrays(defaultOptions.deprecatedAppProviders, newOptions.deprecatedAppProviders)
+        };
+    }
+    withDefaults(options = {}) {
+        return new _DefaultApplyingCompilerFactory(this, options);
+    }
+}
+class _DefaultApplyingCompilerFactory extends CompilerFactory {
+    constructor(_delegate, _options) {
+        super();
+        this._delegate = _delegate;
+        this._options = _options;
+    }
+    createCompiler(options = {}) {
+        return this._delegate.createCompiler(CompilerFactory.mergeOptions(this._options, options));
+    }
+}
+function _firstDefined(...args) {
+    for (var i = 0; i < args.length; i++) {
+        if (args[i] !== undefined) {
+            return args[i];
+        }
+    }
+    return undefined;
+}
+function _mergeArrays(...parts) {
+    let result = [];
+    parts.forEach((part) => result.push(...part));
+    return result;
+}
 //# sourceMappingURL=compiler.js.map

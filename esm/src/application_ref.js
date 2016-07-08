@@ -11,7 +11,8 @@ import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/ex
 import { IS_DART, isBlank, isPresent, isPromise } from '../src/facade/lang';
 import { APP_INITIALIZER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
-import { Inject, Injectable, Injector, Optional, OptionalMetadata, SkipSelfMetadata } from './di';
+import { Inject, Injectable, Injector, OpaqueToken, Optional, OptionalMetadata, ReflectiveInjector, SkipSelfMetadata } from './di';
+import { CompilerFactory } from './linker/compiler';
 import { ComponentFactory } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { ComponentResolver } from './linker/component_resolver';
@@ -100,6 +101,20 @@ export function createPlatform(injector) {
     return _platform;
 }
 /**
+ * Creates a fatory for a platform
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export function createPlatformFactory(name, providers) {
+    const marker = new OpaqueToken(`Platform: ${name}`);
+    return () => {
+        if (!getPlatform()) {
+            createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat({ provide: marker, useValue: true })));
+        }
+        return assertPlatform(marker);
+    };
+}
+/**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
  *
@@ -132,6 +147,64 @@ export function disposePlatform() {
  */
 export function getPlatform() {
     return isPresent(_platform) && !_platform.disposed ? _platform : null;
+}
+/**
+ * Creates an instance of an `@AppModule` for the given platform
+ * for offline compilation.
+ *
+ * ## Simple Example
+ *
+ * ```typescript
+ * my_module.ts:
+ *
+ * @AppModule({
+ *   modules: [BrowserModule]
+ * })
+ * class MyModule {}
+ *
+ * main.ts:
+ * import {MyModuleNgFactory} from './my_module.ngfactory';
+ * import {bootstrapModuleFactory} from '@angular/core';
+ * import {browserPlatform} from '@angular/platform-browser';
+ *
+ * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
+ * ```
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export function bootstrapModuleFactory(moduleFactory, platform) {
+    // Note: We need to create the NgZone _before_ we instantiate the module,
+    // as instantiating the module creates some providers eagerly.
+    // So we create a mini parent injector that just contains the new NgZone and
+    // pass that as parent to the AppModuleFactory.
+    const ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+    const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], platform.injector);
+    return ngZone.run(() => moduleFactory.create(ngZoneInjector));
+}
+/**
+ * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+ *
+ * ## Simple Example
+ *
+ * ```typescript
+ * @AppModule({
+ *   modules: [BrowserModule]
+ * })
+ * class MyModule {}
+ *
+ * let moduleRef = bootstrapModule(MyModule, browserPlatform());
+ * ```
+ * @stable
+ */
+export function bootstrapModule(moduleType, platform, compilerOptions = {}) {
+    const compilerFactory = platform.injector.get(CompilerFactory);
+    const compiler = compilerFactory.createCompiler(compilerOptions);
+    return compiler.compileAppModuleAsync(moduleType)
+        .then((moduleFactory) => bootstrapModuleFactory(moduleFactory, platform))
+        .then((moduleRef) => {
+        const appRef = moduleRef.injector.get(ApplicationRef);
+        return appRef.waitForAsyncInitializers().then(() => moduleRef);
+    });
 }
 /**
  * Shortcut for ApplicationRef.bootstrap.

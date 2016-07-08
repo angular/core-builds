@@ -3,6 +3,8 @@ import { ConcreteType, Type } from '../src/facade/lang';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 import { Console } from './console';
 import { Injector } from './di';
+import { AppModuleFactory, AppModuleRef } from './linker/app_module_factory';
+import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { Testability, TestabilityRegistry } from './testability/testability';
@@ -48,6 +50,12 @@ export declare function isDevMode(): boolean;
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 /**
+ * Creates a fatory for a platform
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export declare function createPlatformFactory(name: string, providers: any[]): () => PlatformRef;
+/**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
  *
@@ -66,6 +74,47 @@ export declare function disposePlatform(): void;
  * @experimental APIs related to application bootstrap are currently under review.
  */
 export declare function getPlatform(): PlatformRef;
+/**
+ * Creates an instance of an `@AppModule` for the given platform
+ * for offline compilation.
+ *
+ * ## Simple Example
+ *
+ * ```typescript
+ * my_module.ts:
+ *
+ * @AppModule({
+ *   modules: [BrowserModule]
+ * })
+ * class MyModule {}
+ *
+ * main.ts:
+ * import {MyModuleNgFactory} from './my_module.ngfactory';
+ * import {bootstrapModuleFactory} from '@angular/core';
+ * import {browserPlatform} from '@angular/platform-browser';
+ *
+ * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
+ * ```
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export declare function bootstrapModuleFactory<M>(moduleFactory: AppModuleFactory<M>, platform: PlatformRef): AppModuleRef<M>;
+/**
+ * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+ *
+ * ## Simple Example
+ *
+ * ```typescript
+ * @AppModule({
+ *   modules: [BrowserModule]
+ * })
+ * class MyModule {}
+ *
+ * let moduleRef = bootstrapModule(MyModule, browserPlatform());
+ * ```
+ * @stable
+ */
+export declare function bootstrapModule<M>(moduleType: ConcreteType<M>, platform: PlatformRef, compilerOptions?: CompilerOptions): Promise<AppModuleRef<M>>;
 /**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.

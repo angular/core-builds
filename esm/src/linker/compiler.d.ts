@@ -8,6 +8,7 @@
 import { Injector } from '../di';
 import { BaseException } from '../facade/exceptions';
 import { ConcreteType, Type } from '../facade/lang';
+import { ViewEncapsulation } from '../metadata';
 import { AppModuleMetadata } from '../metadata/app_module';
 import { AppModuleFactory } from './app_module_factory';
 import { ComponentFactory } from './component_factory';
@@ -59,4 +60,26 @@ export declare class Compiler {
      * Clears the cache for the given component/appModule.
      */
     clearCacheFor(type: Type): void;
+}
+/**
+ * Options for creating a compiler
+ *
+ * @experimental
+ */
+export declare type CompilerOptions = {
+    useDebug?: boolean;
+    useJit?: boolean;
+    defaultEncapsulation?: ViewEncapsulation;
+    providers?: any[];
+    deprecatedAppProviders?: any[];
+};
+/**
+ * A factory for creating a Compiler
+ *
+ * @experimental
+ */
+export declare abstract class CompilerFactory {
+    static mergeOptions(defaultOptions?: CompilerOptions, newOptions?: CompilerOptions): CompilerOptions;
+    withDefaults(options?: CompilerOptions): CompilerFactory;
+    abstract createCompiler(options?: CompilerOptions): Compiler;
 }
