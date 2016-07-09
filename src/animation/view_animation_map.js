@@ -8,28 +8,28 @@
 "use strict";
 var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
-var ActiveAnimationPlayersMap = (function () {
-    function ActiveAnimationPlayersMap() {
+var ViewAnimationMap = (function () {
+    function ViewAnimationMap() {
         this._map = new collection_1.Map();
         this._allPlayers = [];
     }
-    Object.defineProperty(ActiveAnimationPlayersMap.prototype, "length", {
+    Object.defineProperty(ViewAnimationMap.prototype, "length", {
         get: function () { return this.getAllPlayers().length; },
         enumerable: true,
         configurable: true
     });
-    ActiveAnimationPlayersMap.prototype.find = function (element, animationName) {
+    ViewAnimationMap.prototype.find = function (element, animationName) {
         var playersByAnimation = this._map.get(element);
         if (lang_1.isPresent(playersByAnimation)) {
             return playersByAnimation[animationName];
         }
     };
-    ActiveAnimationPlayersMap.prototype.findAllPlayersByElement = function (element) {
+    ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
         var players = [];
-        collection_1.StringMapWrapper.forEach(this._map.get(element), function (player /** TODO #9100 */) { return players.push(player); });
+        collection_1.StringMapWrapper.forEach(this._map.get(element), function (player) { return players.push(player); });
         return players;
     };
-    ActiveAnimationPlayersMap.prototype.set = function (element, animationName, player) {
+    ViewAnimationMap.prototype.set = function (element, animationName, player) {
         var playersByAnimation = this._map.get(element);
         if (!lang_1.isPresent(playersByAnimation)) {
             playersByAnimation = {};
@@ -42,8 +42,8 @@ var ActiveAnimationPlayersMap = (function () {
         this._allPlayers.push(player);
         this._map.set(element, playersByAnimation);
     };
-    ActiveAnimationPlayersMap.prototype.getAllPlayers = function () { return this._allPlayers; };
-    ActiveAnimationPlayersMap.prototype.remove = function (element, animationName) {
+    ViewAnimationMap.prototype.getAllPlayers = function () { return this._allPlayers; };
+    ViewAnimationMap.prototype.remove = function (element, animationName) {
         var playersByAnimation = this._map.get(element);
         if (lang_1.isPresent(playersByAnimation)) {
             var player = playersByAnimation[animationName];
@@ -55,7 +55,7 @@ var ActiveAnimationPlayersMap = (function () {
             }
         }
     };
-    return ActiveAnimationPlayersMap;
+    return ViewAnimationMap;
 }());
-exports.ActiveAnimationPlayersMap = ActiveAnimationPlayersMap;
-//# sourceMappingURL=active_animation_players_map.js.map
+exports.ViewAnimationMap = ViewAnimationMap;
+//# sourceMappingURL=view_animation_map.js.map

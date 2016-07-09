@@ -11212,6 +11212,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._players = _players;
             this._subscriptions = [];
             this._finished = false;
+            this._started = false;
             this.parentPlayer = null;
             var count = 0;
             var total = this._players.length;
@@ -11239,8 +11240,16 @@ var __extends = (this && this.__extends) || function (d, b) {
                 this._subscriptions = [];
             }
         };
+        AnimationGroupPlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
         AnimationGroupPlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
-        AnimationGroupPlayer.prototype.play = function () { this._players.forEach(function (player) { return player.play(); }); };
+        AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
+        AnimationGroupPlayer.prototype.play = function () {
+            if (!isPresent(this.parentPlayer)) {
+                this.init();
+            }
+            this._started = true;
+            this._players.forEach(function (player) { return player.play(); });
+        };
         AnimationGroupPlayer.prototype.pause = function () { this._players.forEach(function (player) { return player.pause(); }); };
         AnimationGroupPlayer.prototype.restart = function () { this._players.forEach(function (player) { return player.restart(); }); };
         AnimationGroupPlayer.prototype.finish = function () {
@@ -11299,6 +11308,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         function NoOpAnimationPlayer() {
             var _this = this;
             this._subscriptions = [];
+            this._started = false;
             this.parentPlayer = null;
             scheduleMicroTask(function () { return _this._onFinish(); });
         }
@@ -11308,7 +11318,9 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._subscriptions = [];
         };
         NoOpAnimationPlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
-        NoOpAnimationPlayer.prototype.play = function () { };
+        NoOpAnimationPlayer.prototype.hasStarted = function () { return this._started; };
+        NoOpAnimationPlayer.prototype.init = function () { };
+        NoOpAnimationPlayer.prototype.play = function () { this._started = true; };
         NoOpAnimationPlayer.prototype.pause = function () { };
         NoOpAnimationPlayer.prototype.restart = function () { };
         NoOpAnimationPlayer.prototype.finish = function () { this._onFinish(); };
@@ -11325,6 +11337,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._currentIndex = 0;
             this._subscriptions = [];
             this._finished = false;
+            this._started = false;
             this.parentPlayer = null;
             this._players.forEach(function (player) { player.parentPlayer = _this; });
             this._onNext(false);
@@ -11360,8 +11373,16 @@ var __extends = (this && this.__extends) || function (d, b) {
                 this._subscriptions = [];
             }
         };
+        AnimationSequencePlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
         AnimationSequencePlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
-        AnimationSequencePlayer.prototype.play = function () { this._activePlayer.play(); };
+        AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
+        AnimationSequencePlayer.prototype.play = function () {
+            if (!isPresent(this.parentPlayer)) {
+                this.init();
+            }
+            this._started = true;
+            this._activePlayer.play();
+        };
         AnimationSequencePlayer.prototype.pause = function () { this._activePlayer.pause(); };
         AnimationSequencePlayer.prototype.restart = function () {
             if (this._players.length > 0) {
@@ -12379,28 +12400,28 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ElementInjector;
     }(Injector));
-    var ActiveAnimationPlayersMap = (function () {
-        function ActiveAnimationPlayersMap() {
+    var ViewAnimationMap = (function () {
+        function ViewAnimationMap() {
             this._map = new Map$1();
             this._allPlayers = [];
         }
-        Object.defineProperty(ActiveAnimationPlayersMap.prototype, "length", {
+        Object.defineProperty(ViewAnimationMap.prototype, "length", {
             get: function () { return this.getAllPlayers().length; },
             enumerable: true,
             configurable: true
         });
-        ActiveAnimationPlayersMap.prototype.find = function (element, animationName) {
+        ViewAnimationMap.prototype.find = function (element, animationName) {
             var playersByAnimation = this._map.get(element);
             if (isPresent(playersByAnimation)) {
                 return playersByAnimation[animationName];
             }
         };
-        ActiveAnimationPlayersMap.prototype.findAllPlayersByElement = function (element) {
+        ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
             var players = [];
-            StringMapWrapper.forEach(this._map.get(element), function (player /** TODO #9100 */) { return players.push(player); });
+            StringMapWrapper.forEach(this._map.get(element), function (player) { return players.push(player); });
             return players;
         };
-        ActiveAnimationPlayersMap.prototype.set = function (element, animationName, player) {
+        ViewAnimationMap.prototype.set = function (element, animationName, player) {
             var playersByAnimation = this._map.get(element);
             if (!isPresent(playersByAnimation)) {
                 playersByAnimation = {};
@@ -12413,8 +12434,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._allPlayers.push(player);
             this._map.set(element, playersByAnimation);
         };
-        ActiveAnimationPlayersMap.prototype.getAllPlayers = function () { return this._allPlayers; };
-        ActiveAnimationPlayersMap.prototype.remove = function (element, animationName) {
+        ViewAnimationMap.prototype.getAllPlayers = function () { return this._allPlayers; };
+        ViewAnimationMap.prototype.remove = function (element, animationName) {
             var playersByAnimation = this._map.get(element);
             if (isPresent(playersByAnimation)) {
                 var player = playersByAnimation[animationName];
@@ -12426,7 +12447,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
             }
         };
-        return ActiveAnimationPlayersMap;
+        return ViewAnimationMap;
     }());
     var _scope_check = wtfCreateScope("AppView#check(ascii id)");
     /**
@@ -12446,7 +12467,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.viewChildren = [];
             this.viewContainerElement = null;
             this.numberOfChecks = 0;
-            this.activeAnimationPlayers = new ActiveAnimationPlayersMap();
+            this.animationPlayers = new ViewAnimationMap();
             this.ref = new ViewRef_(this);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
                 this.renderer = viewUtils.renderComponent(componentType);
@@ -12463,20 +12484,26 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppView.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
             if (removeAllAnimations === void 0) { removeAllAnimations = false; }
             if (removeAllAnimations) {
-                this.activeAnimationPlayers.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
+                this.animationPlayers.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
             }
             else {
-                var player = this.activeAnimationPlayers.find(element, animationName);
+                var player = this.animationPlayers.find(element, animationName);
                 if (isPresent(player)) {
                     player.destroy();
                 }
             }
         };
-        AppView.prototype.registerAndStartAnimation = function (element, animationName, player) {
+        AppView.prototype.queueAnimation = function (element, animationName, player) {
             var _this = this;
-            this.activeAnimationPlayers.set(element, animationName, player);
-            player.onDone(function () { _this.activeAnimationPlayers.remove(element, animationName); });
-            player.play();
+            this.animationPlayers.set(element, animationName, player);
+            player.onDone(function () { _this.animationPlayers.remove(element, animationName); });
+        };
+        AppView.prototype.triggerQueuedAnimations = function () {
+            this.animationPlayers.getAllPlayers().forEach(function (player) {
+                if (!player.hasStarted()) {
+                    player.play();
+                }
+            });
         };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
@@ -12577,11 +12604,11 @@ var __extends = (this && this.__extends) || function (d, b) {
             }
             this.destroyInternal();
             this.dirtyParentQueriesInternal();
-            if (this.activeAnimationPlayers.length == 0) {
+            if (this.animationPlayers.length == 0) {
                 this.renderer.destroyView(hostElement, this.allNodes);
             }
             else {
-                var player = new AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
+                var player = new AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
                 player.onDone(function () { _this.renderer.destroyView(hostElement, _this.allNodes); });
             }
         };
@@ -12596,11 +12623,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         AppView.prototype.detach = function () {
             var _this = this;
             this.detachInternal();
-            if (this.activeAnimationPlayers.length == 0) {
+            if (this.animationPlayers.length == 0) {
                 this.renderer.detachView(this.flatRootNodes);
             }
             else {
-                var player = new AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
+                var player = new AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
                 player.onDone(function () { _this.renderer.detachView(_this.flatRootNodes); });
             }
         };

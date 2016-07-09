@@ -7,7 +7,7 @@
  */
 import { ListWrapper, Map, StringMapWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
-export class ActiveAnimationPlayersMap {
+export class ViewAnimationMap {
     constructor() {
         this._map = new Map();
         this._allPlayers = [];
@@ -21,7 +21,7 @@ export class ActiveAnimationPlayersMap {
     }
     findAllPlayersByElement(element) {
         var players = [];
-        StringMapWrapper.forEach(this._map.get(element), (player /** TODO #9100 */) => players.push(player));
+        StringMapWrapper.forEach(this._map.get(element), (player) => players.push(player));
         return players;
     }
     set(element, animationName, player) {
@@ -51,4 +51,4 @@ export class ActiveAnimationPlayersMap {
         }
     }
 }
-//# sourceMappingURL=active_animation_players_map.js.map
+//# sourceMappingURL=view_animation_map.js.map

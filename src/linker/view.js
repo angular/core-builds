@@ -24,7 +24,7 @@ var exceptions_1 = require('./exceptions');
 var debug_context_1 = require('./debug_context');
 var element_injector_1 = require('./element_injector');
 var animation_group_player_1 = require('../animation/animation_group_player');
-var active_animation_players_map_1 = require('../animation/active_animation_players_map');
+var view_animation_map_1 = require('../animation/view_animation_map');
 var _scope_check = profile_1.wtfCreateScope("AppView#check(ascii id)");
 /**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -43,7 +43,7 @@ var AppView = (function () {
         this.viewChildren = [];
         this.viewContainerElement = null;
         this.numberOfChecks = 0;
-        this.activeAnimationPlayers = new active_animation_players_map_1.ActiveAnimationPlayersMap();
+        this.animationPlayers = new view_animation_map_1.ViewAnimationMap();
         this.ref = new view_ref_1.ViewRef_(this);
         if (type === view_type_1.ViewType.COMPONENT || type === view_type_1.ViewType.HOST) {
             this.renderer = viewUtils.renderComponent(componentType);
@@ -60,20 +60,26 @@ var AppView = (function () {
     AppView.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
         if (removeAllAnimations === void 0) { removeAllAnimations = false; }
         if (removeAllAnimations) {
-            this.activeAnimationPlayers.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
+            this.animationPlayers.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
         }
         else {
-            var player = this.activeAnimationPlayers.find(element, animationName);
+            var player = this.animationPlayers.find(element, animationName);
             if (lang_1.isPresent(player)) {
                 player.destroy();
             }
         }
     };
-    AppView.prototype.registerAndStartAnimation = function (element, animationName, player) {
+    AppView.prototype.queueAnimation = function (element, animationName, player) {
         var _this = this;
-        this.activeAnimationPlayers.set(element, animationName, player);
-        player.onDone(function () { _this.activeAnimationPlayers.remove(element, animationName); });
-        player.play();
+        this.animationPlayers.set(element, animationName, player);
+        player.onDone(function () { _this.animationPlayers.remove(element, animationName); });
+    };
+    AppView.prototype.triggerQueuedAnimations = function () {
+        this.animationPlayers.getAllPlayers().forEach(function (player) {
+            if (!player.hasStarted()) {
+                player.play();
+            }
+        });
     };
     AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
         this.context = context;
@@ -174,11 +180,11 @@ var AppView = (function () {
         }
         this.destroyInternal();
         this.dirtyParentQueriesInternal();
-        if (this.activeAnimationPlayers.length == 0) {
+        if (this.animationPlayers.length == 0) {
             this.renderer.destroyView(hostElement, this.allNodes);
         }
         else {
-            var player = new animation_group_player_1.AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
+            var player = new animation_group_player_1.AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
             player.onDone(function () { _this.renderer.destroyView(hostElement, _this.allNodes); });
         }
     };
@@ -193,11 +199,11 @@ var AppView = (function () {
     AppView.prototype.detach = function () {
         var _this = this;
         this.detachInternal();
-        if (this.activeAnimationPlayers.length == 0) {
+        if (this.animationPlayers.length == 0) {
             this.renderer.detachView(this.flatRootNodes);
         }
         else {
-            var player = new animation_group_player_1.AnimationGroupPlayer(this.activeAnimationPlayers.getAllPlayers());
+            var player = new animation_group_player_1.AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
             player.onDone(function () { _this.renderer.detachView(_this.flatRootNodes); });
         }
     };

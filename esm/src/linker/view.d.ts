@@ -7,7 +7,7 @@ import { ChangeDetectorRef, ChangeDetectorStatus } from '../change_detection/cha
 import { StaticNodeDebugInfo, DebugContext } from './debug_context';
 import { Injector } from '../di/injector';
 import { AnimationPlayer } from '../animation/animation_player';
-import { ActiveAnimationPlayersMap } from '../animation/active_animation_players_map';
+import { ViewAnimationMap } from '../animation/view_animation_map';
 /**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
  *
@@ -32,12 +32,13 @@ export declare abstract class AppView<T> {
     projectableNodes: Array<any | any[]>;
     renderer: Renderer;
     private _hasExternalHostElement;
-    activeAnimationPlayers: ActiveAnimationPlayersMap;
+    animationPlayers: ViewAnimationMap;
     context: T;
     constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentInjector: Injector, declarationAppElement: AppElement, cdMode: ChangeDetectorStatus);
     readonly destroyed: boolean;
     cancelActiveAnimation(element: any, animationName: string, removeAllAnimations?: boolean): void;
-    registerAndStartAnimation(element: any, animationName: string, player: AnimationPlayer): void;
+    queueAnimation(element: any, animationName: string, player: AnimationPlayer): void;
+    triggerQueuedAnimations(): void;
     create(context: T, givenProjectableNodes: Array<any | any[]>, rootSelectorOrNode: string | any): AppElement;
     /**
      * Overwritten by implementations.

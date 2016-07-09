@@ -1,5 +1,5 @@
 import { AnimationPlayer } from './animation_player';
-export declare class ActiveAnimationPlayersMap {
+export declare class ViewAnimationMap {
     private _map;
     private _allPlayers;
     readonly length: number;
