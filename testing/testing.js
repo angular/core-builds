@@ -13,87 +13,10 @@
  */
 var test_injector_1 = require('./test_injector');
 var _global = (typeof window === 'undefined' ? global : window);
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.expect = _global.expect;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.afterEach = _global.afterEach;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.describe = _global.describe;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.fdescribe = _global.fdescribe;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.ddescribe = _global.ddescribe;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.xdescribe = _global.xdescribe;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.beforeEach = _global.beforeEach;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.it = _global.it;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.fit = _global.fit;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.iit = _global.fit;
-/**
- * @deprecated you no longer need to import jasmine functions from @angular/core/testing. Simply use
- * the globals.
- *
- * See http://jasmine.github.io/ for more details.
- */
-exports.xit = _global.xit;
 var testInjector = test_injector_1.getTestInjector();
 // Reset the test providers before each test.
 if (_global.beforeEach) {
-    exports.beforeEach(function () { testInjector.reset(); });
+    _global.beforeEach(function () { testInjector.reset(); });
 }
 /**
  * Allows overriding default providers of the test injector,
@@ -152,11 +75,4 @@ function configureCompiler(config) {
     }
 }
 exports.configureCompiler = configureCompiler;
-/**
- * @deprecated Use beforeEach(() => addProviders())
- */
-function beforeEachProviders(fn) {
-    exports.beforeEach(function () { addProviders(fn()); });
-}
-exports.beforeEachProviders = beforeEachProviders;
 //# sourceMappingURL=testing.js.map
