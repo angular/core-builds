@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AppModuleMetadata, CompilerFactory, ComponentStillLoadingError, Injector } from '../index';
+import { AppModule, AppModuleMetadata, CompilerFactory, ComponentStillLoadingError, Injector, ReflectiveInjector, createPlatform } from '../index';
 import { ListWrapper } from '../src/facade/collection';
 import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, stringify } from '../src/facade/lang';
@@ -144,6 +144,30 @@ export function getTestInjector() {
  *
  * This may only be called once, to set up the common providers for the current test
  * suite on the current platform. If you absolutely need to change the providers,
+ * first use `resetBaseTestProviders`.
+ *
+ * Test modules and platforms for individual platforms are available from
+ * 'angular2/platform/testing/<platform_name>'.
+ *
+ * @deprecated Use initTestEnvironment instead
+ */
+export function setBaseTestProviders(platformProviders, applicationProviders) {
+    // Create a platform based on the Platform Providers.
+    var platformRef = createPlatform(ReflectiveInjector.resolveAndCreate(platformProviders));
+    class TestAppModule {
+    }
+    /** @nocollapse */
+    TestAppModule.decorators = [
+        { type: AppModule, args: [{ providers: applicationProviders },] },
+    ];
+    initTestEnvironment(TestAppModule, platformRef);
+}
+/**
+ * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+ * application module. These are common to every test in the suite.
+ *
+ * This may only be called once, to set up the common providers for the current test
+ * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
  * Test modules and platforms for individual platforms are available from
@@ -158,6 +182,14 @@ export function initTestEnvironment(appModule, platform) {
     }
     testInjector.platform = platform;
     testInjector.appModule = appModule;
+}
+/**
+ * Reset the providers for the test injector.
+ *
+ * @deprecated Use resetTestEnvironment instead.
+ */
+export function resetBaseTestProviders() {
+    resetTestEnvironment();
 }
 /**
  * Reset the providers for the test injector.

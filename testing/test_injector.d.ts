@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector, PlatformRef, Type } from '../index';
+import { Injector, PlatformRef, Provider, Type } from '../index';
 /**
  * @experimental
  */
@@ -51,6 +51,20 @@ export declare function getTestInjector(): TestInjector;
  *
  * This may only be called once, to set up the common providers for the current test
  * suite on the current platform. If you absolutely need to change the providers,
+ * first use `resetBaseTestProviders`.
+ *
+ * Test modules and platforms for individual platforms are available from
+ * 'angular2/platform/testing/<platform_name>'.
+ *
+ * @deprecated Use initTestEnvironment instead
+ */
+export declare function setBaseTestProviders(platformProviders: Array<Type | Provider | any[]>, applicationProviders: Array<Type | Provider | any[]>): void;
+/**
+ * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+ * application module. These are common to every test in the suite.
+ *
+ * This may only be called once, to set up the common providers for the current test
+ * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
  * Test modules and platforms for individual platforms are available from
@@ -59,6 +73,12 @@ export declare function getTestInjector(): TestInjector;
  * @experimental
  */
 export declare function initTestEnvironment(appModule: Type, platform: PlatformRef): void;
+/**
+ * Reset the providers for the test injector.
+ *
+ * @deprecated Use resetTestEnvironment instead.
+ */
+export declare function resetBaseTestProviders(): void;
 /**
  * Reset the providers for the test injector.
  *

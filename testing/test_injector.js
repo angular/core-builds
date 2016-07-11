@@ -151,6 +151,34 @@ exports.getTestInjector = getTestInjector;
  *
  * This may only be called once, to set up the common providers for the current test
  * suite on the current platform. If you absolutely need to change the providers,
+ * first use `resetBaseTestProviders`.
+ *
+ * Test modules and platforms for individual platforms are available from
+ * 'angular2/platform/testing/<platform_name>'.
+ *
+ * @deprecated Use initTestEnvironment instead
+ */
+function setBaseTestProviders(platformProviders, applicationProviders) {
+    // Create a platform based on the Platform Providers.
+    var platformRef = index_1.createPlatform(index_1.ReflectiveInjector.resolveAndCreate(platformProviders));
+    var TestAppModule = (function () {
+        function TestAppModule() {
+        }
+        /** @nocollapse */
+        TestAppModule.decorators = [
+            { type: index_1.AppModule, args: [{ providers: applicationProviders },] },
+        ];
+        return TestAppModule;
+    }());
+    initTestEnvironment(TestAppModule, platformRef);
+}
+exports.setBaseTestProviders = setBaseTestProviders;
+/**
+ * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+ * application module. These are common to every test in the suite.
+ *
+ * This may only be called once, to set up the common providers for the current test
+ * suite on the current platform. If you absolutely need to change the providers,
  * first use `resetTestEnvironment`.
  *
  * Test modules and platforms for individual platforms are available from
@@ -167,6 +195,15 @@ function initTestEnvironment(appModule, platform) {
     testInjector.appModule = appModule;
 }
 exports.initTestEnvironment = initTestEnvironment;
+/**
+ * Reset the providers for the test injector.
+ *
+ * @deprecated Use resetTestEnvironment instead.
+ */
+function resetBaseTestProviders() {
+    resetTestEnvironment();
+}
+exports.resetBaseTestProviders = resetBaseTestProviders;
 /**
  * Reset the providers for the test injector.
  *
