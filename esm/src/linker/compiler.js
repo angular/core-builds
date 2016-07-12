@@ -107,7 +107,7 @@ function _firstDefined(...args) {
 }
 function _mergeArrays(...parts) {
     let result = [];
-    parts.forEach((part) => result.push(...part));
+    parts.forEach((part) => result.push.apply(result, part));
     return result;
 }
 //# sourceMappingURL=compiler.js.map
