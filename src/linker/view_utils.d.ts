@@ -10,7 +10,9 @@ export declare class ViewUtils {
     /**
      * Used by the generated code
      */
-    createRenderComponentType(templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>): RenderComponentType;
+    createRenderComponentType(templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: {
+        [key: string]: Function;
+    }): RenderComponentType;
 }
 export declare function flattenNestedViewRenderNodes(nodes: any[]): any[];
 export declare function ensureSlotCount(projectableNodes: any[][], expectedSlotCount: number): any[][];

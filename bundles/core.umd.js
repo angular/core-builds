@@ -8259,13 +8259,15 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * @experimental
      */
+    // TODO (matsko): add typing for the animation function
     var RenderComponentType = (function () {
-        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles) {
+        function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
             this.id = id;
             this.templateUrl = templateUrl;
             this.slotCount = slotCount;
             this.encapsulation = encapsulation;
             this.styles = styles;
+            this.animations = animations;
         }
         return RenderComponentType;
     }());
@@ -8825,8 +8827,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         /**
          * Used by the generated code
          */
-        ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles) {
-            return new RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles);
+        // TODO (matsko): add typing for the animation function
+        ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles, animations) {
+            return new RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
         };
         /** @internal */
         ViewUtils.prototype.renderComponent = function (renderComponentType) {

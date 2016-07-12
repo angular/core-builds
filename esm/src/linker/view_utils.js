@@ -26,8 +26,9 @@ export class ViewUtils {
     /**
      * Used by the generated code
      */
-    createRenderComponentType(templateUrl, slotCount, encapsulation, styles) {
-        return new RenderComponentType(`${this._appId}-${this._nextCompTypeId++}`, templateUrl, slotCount, encapsulation, styles);
+    // TODO (matsko): add typing for the animation function
+    createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
+        return new RenderComponentType(`${this._appId}-${this._nextCompTypeId++}`, templateUrl, slotCount, encapsulation, styles, animations);
     }
     /** @internal */
     renderComponent(renderComponentType) {

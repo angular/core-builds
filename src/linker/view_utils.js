@@ -27,8 +27,9 @@ var ViewUtils = (function () {
     /**
      * Used by the generated code
      */
-    ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles) {
-        return new api_1.RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles);
+    // TODO (matsko): add typing for the animation function
+    ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles, animations) {
+        return new api_1.RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
     };
     /** @internal */
     ViewUtils.prototype.renderComponent = function (renderComponentType) {

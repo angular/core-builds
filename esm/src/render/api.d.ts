@@ -19,7 +19,12 @@ export declare class RenderComponentType {
     slotCount: number;
     encapsulation: ViewEncapsulation;
     styles: Array<string | any[]>;
-    constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>);
+    animations: {
+        [key: string]: Function;
+    };
+    constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: {
+        [key: string]: Function;
+    });
 }
 export declare abstract class RenderDebugInfo {
     readonly injector: Injector;
