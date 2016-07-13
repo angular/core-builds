@@ -5,20 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injectable, Optional } from '../di';
+import { Injectable } from '../di';
 import { global } from '../facade/lang';
 import { Compiler } from './compiler';
 const _SEPARATOR = '#';
-const FACTORY_MODULE_SUFFIX = '.ngfactory';
-const FACTORY_CLASS_SUFFIX = 'NgFactory';
 export class SystemJsAppModuleLoader {
     constructor(_compiler) {
         this._compiler = _compiler;
     }
     load(path) {
-        return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
-    }
-    loadAndCompile(path) {
         let [module, exportName] = path.split(_SEPARATOR);
         if (exportName === undefined)
             exportName = 'default';
@@ -28,7 +23,23 @@ export class SystemJsAppModuleLoader {
             .then((type) => checkNotEmpty(type, module, exportName))
             .then((type) => this._compiler.compileAppModuleAsync(type));
     }
-    loadFactory(path) {
+}
+/** @nocollapse */
+SystemJsAppModuleLoader.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+SystemJsAppModuleLoader.ctorParameters = [
+    { type: Compiler, },
+];
+const FACTORY_MODULE_SUFFIX = '.ngfactory';
+const FACTORY_CLASS_SUFFIX = 'NgFactory';
+/**
+ * AppModuleFactoryLoader that uses SystemJS to load AppModuleFactories
+ * @experimental
+ */
+export class SystemJsAppModuleFactoryLoader {
+    load(path) {
         let [module, exportName] = path.split(_SEPARATOR);
         if (exportName === undefined)
             exportName = 'default';
@@ -38,14 +49,6 @@ export class SystemJsAppModuleLoader {
             .then((factory) => checkNotEmpty(factory, module, exportName));
     }
 }
-/** @nocollapse */
-SystemJsAppModuleLoader.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-SystemJsAppModuleLoader.ctorParameters = [
-    { type: Compiler, decorators: [{ type: Optional },] },
-];
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);

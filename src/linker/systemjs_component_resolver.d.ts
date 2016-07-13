@@ -26,7 +26,7 @@ export declare class SystemJsComponentResolver implements ComponentResolver {
 /**
  * Component resolver that can load component factories lazily
  *
- * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsAppModuleLoader}
+ * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsAppModuleFactoryLoader}
  * to lazy
  * load {@link AppModuleFactory}s instead.
  */
