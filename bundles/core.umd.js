@@ -4434,7 +4434,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      *
-     * bootstrap(MyApp, [{provide: ExceptionHandler, useClass: MyExceptionHandler}])
+     * bootstrap(MyApp, {provide: ExceptionHandler, useClass: MyExceptionHandler}])
      *
      * ```
      * @stable
