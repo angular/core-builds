@@ -8942,8 +8942,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var EMPTY_MAP = {};
     function pureProxy1(fn) {
         var result;
-        var v0;
-        v0 = UNINITIALIZED;
+        var v0 = UNINITIALIZED;
         return function (p0) {
             if (!looseIdentical(v0, p0)) {
                 v0 = p0;
@@ -8954,8 +8953,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy2(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1;
-        v0 = v1 = UNINITIALIZED;
+        var v0 = UNINITIALIZED;
+        var v1 = UNINITIALIZED;
         return function (p0, p1) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
                 v0 = p0;
@@ -8967,8 +8966,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy3(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2;
-        v0 = v1 = v2 = UNINITIALIZED;
+        var v0 = UNINITIALIZED;
+        var v1 = UNINITIALIZED;
+        var v2 = UNINITIALIZED;
         return function (p0, p1, p2) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2)) {
                 v0 = p0;
@@ -8981,7 +8981,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy4(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3;
+        var v0, v1, v2, v3;
         v0 = v1 = v2 = v3 = UNINITIALIZED;
         return function (p0, p1, p2, p3) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -8997,7 +8997,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy5(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4;
+        var v0, v1, v2, v3, v4;
         v0 = v1 = v2 = v3 = v4 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -9014,7 +9014,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy6(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4 /** TODO #9100 */, v5;
+        var v0, v1, v2, v3, v4, v5;
         v0 = v1 = v2 = v3 = v4 = v5 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -9032,7 +9032,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy7(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4 /** TODO #9100 */, v5 /** TODO #9100 */, v6;
+        var v0, v1, v2, v3, v4, v5, v6;
         v0 = v1 = v2 = v3 = v4 = v5 = v6 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -9052,7 +9052,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy8(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4 /** TODO #9100 */, v5 /** TODO #9100 */, v6 /** TODO #9100 */, v7;
+        var v0, v1, v2, v3, v4, v5, v6, v7;
         v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -9073,7 +9073,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy9(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4 /** TODO #9100 */, v5 /** TODO #9100 */, v6 /** TODO #9100 */, v7 /** TODO #9100 */, v8;
+        var v0, v1, v2, v3, v4, v5, v6, v7, v8;
         v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -9095,7 +9095,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function pureProxy10(fn) {
         var result;
-        var v0 /** TODO #9100 */, v1 /** TODO #9100 */, v2 /** TODO #9100 */, v3 /** TODO #9100 */, v4 /** TODO #9100 */, v5 /** TODO #9100 */, v6 /** TODO #9100 */, v7 /** TODO #9100 */, v8 /** TODO #9100 */, v9;
+        var v0, v1, v2, v3, v4, v5, v6, v7, v8, v9;
         v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) {
             if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
@@ -12331,7 +12331,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         Object.defineProperty(DebugContext.prototype, "renderNode", {
             get: function () {
-                if (isPresent(this._nodeIndex) && isPresent(this._view.allNodes)) {
+                if (isPresent(this._nodeIndex) && this._view.allNodes) {
                     return this._view.allNodes[this._nodeIndex];
                 }
                 else {
@@ -12363,11 +12363,10 @@ var __extends = (this && this.__extends) || function (d, b) {
                 var staticNodeInfo = this._staticNodeInfo;
                 if (isPresent(staticNodeInfo)) {
                     var refs = staticNodeInfo.refTokens;
-                    StringMapWrapper.forEach(refs, function (refToken /** TODO #9100 */, refName /** TODO #9100 */) {
+                    StringMapWrapper.forEach(refs, function (refToken, refName) {
                         var varValue;
                         if (isBlank(refToken)) {
-                            varValue =
-                                isPresent(_this._view.allNodes) ? _this._view.allNodes[_this._nodeIndex] : null;
+                            varValue = _this._view.allNodes ? _this._view.allNodes[_this._nodeIndex] : null;
                         }
                         else {
                             varValue = _this._view.injectorGet(refToken, _this._nodeIndex, null);
@@ -12801,7 +12800,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         DebugAppView.prototype.eventHandler = function (cb) {
             var _this = this;
             var superHandler = _super.prototype.eventHandler.call(this, cb);
-            return function (event /** TODO #9100 */) {
+            return function (event) {
                 _this._resetDebug();
                 try {
                     return superHandler(event);

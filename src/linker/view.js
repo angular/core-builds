@@ -375,7 +375,7 @@ var DebugAppView = (function (_super) {
     DebugAppView.prototype.eventHandler = function (cb) {
         var _this = this;
         var superHandler = _super.prototype.eventHandler.call(this, cb);
-        return function (event /** TODO #9100 */) {
+        return function (event) {
             _this._resetDebug();
             try {
                 return superHandler(event);

@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injectable } from '../di/decorators';
-import { ReflectiveInjector } from '../di/reflective_injector';
+import { Injectable, ReflectiveInjector } from '../di';
 import { isPresent } from '../facade/lang';
 import { ComponentResolver } from './component_resolver';
 /**

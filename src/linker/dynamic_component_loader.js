@@ -11,8 +11,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var decorators_1 = require('../di/decorators');
-var reflective_injector_1 = require('../di/reflective_injector');
+var di_1 = require('../di');
 var lang_1 = require('../facade/lang');
 var component_resolver_1 = require('./component_resolver');
 /**
@@ -47,14 +46,14 @@ var DynamicComponentLoader_ = (function (_super) {
         return this._compiler.resolveComponent(type).then(function (componentFactory) {
             var contextInjector = location.parentInjector;
             var childInjector = lang_1.isPresent(providers) && providers.length > 0 ?
-                reflective_injector_1.ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
+                di_1.ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
                 contextInjector;
             return location.createComponent(componentFactory, location.length, childInjector, projectableNodes);
         });
     };
     /** @nocollapse */
     DynamicComponentLoader_.decorators = [
-        { type: decorators_1.Injectable },
+        { type: di_1.Injectable },
     ];
     /** @nocollapse */
     DynamicComponentLoader_.ctorParameters = [

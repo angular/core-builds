@@ -341,7 +341,7 @@ export class DebugAppView extends AppView {
     }
     eventHandler(cb) {
         var superHandler = super.eventHandler(cb);
-        return (event /** TODO #9100 */) => {
+        return (event) => {
             this._resetDebug();
             try {
                 return superHandler(event);

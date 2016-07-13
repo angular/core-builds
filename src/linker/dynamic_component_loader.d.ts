@@ -1,5 +1,11 @@
-import { Injector } from '../di/injector';
-import { ResolvedReflectiveProvider } from '../di/reflective_provider';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { Injector, ResolvedReflectiveProvider } from '../di';
 import { Type } from '../facade/lang';
 import { ComponentRef } from './component_factory';
 import { ComponentResolver } from './component_resolver';
