@@ -10612,11 +10612,16 @@ var __extends = (this && this.__extends) || function (d, b) {
         return QueryList;
     }());
     var _SEPARATOR = '#';
+    var FACTORY_MODULE_SUFFIX = '.ngfactory';
+    var FACTORY_CLASS_SUFFIX = 'NgFactory';
     var SystemJsAppModuleLoader = (function () {
         function SystemJsAppModuleLoader(_compiler) {
             this._compiler = _compiler;
         }
         SystemJsAppModuleLoader.prototype.load = function (path) {
+            return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
+        };
+        SystemJsAppModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
@@ -10627,26 +10632,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
                 .then(function (type) { return _this._compiler.compileAppModuleAsync(type); });
         };
-        return SystemJsAppModuleLoader;
-    }());
-    /** @nocollapse */
-    SystemJsAppModuleLoader.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    SystemJsAppModuleLoader.ctorParameters = [
-        { type: Compiler, },
-    ];
-    var FACTORY_MODULE_SUFFIX = '.ngfactory';
-    var FACTORY_CLASS_SUFFIX = 'NgFactory';
-    /**
-     * AppModuleFactoryLoader that uses SystemJS to load AppModuleFactories
-     * @experimental
-     */
-    var SystemJsAppModuleFactoryLoader = (function () {
-        function SystemJsAppModuleFactoryLoader() {
-        }
-        SystemJsAppModuleFactoryLoader.prototype.load = function (path) {
+        SystemJsAppModuleLoader.prototype.loadFactory = function (path) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
@@ -10655,8 +10641,16 @@ var __extends = (this && this.__extends) || function (d, b) {
                 .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        return SystemJsAppModuleFactoryLoader;
+        return SystemJsAppModuleLoader;
     }());
+    /** @nocollapse */
+    SystemJsAppModuleLoader.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsAppModuleLoader.ctorParameters = [
+        { type: Compiler, decorators: [{ type: Optional },] },
+    ];
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
             throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
@@ -13037,7 +13031,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
     exports.QueryList = QueryList;
-    exports.SystemJsAppModuleFactoryLoader = SystemJsAppModuleFactoryLoader;
     exports.SystemJsAppModuleLoader = SystemJsAppModuleLoader;
     exports.SystemJsCmpFactoryResolver = SystemJsCmpFactoryResolver;
     exports.SystemJsComponentResolver = SystemJsComponentResolver;

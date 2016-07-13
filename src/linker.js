@@ -33,7 +33,6 @@ exports.ExpressionChangedAfterItHasBeenCheckedException = exceptions_1.Expressio
 var query_list_1 = require('./linker/query_list');
 exports.QueryList = query_list_1.QueryList;
 var system_js_app_module_factory_loader_1 = require('./linker/system_js_app_module_factory_loader');
-exports.SystemJsAppModuleFactoryLoader = system_js_app_module_factory_loader_1.SystemJsAppModuleFactoryLoader;
 exports.SystemJsAppModuleLoader = system_js_app_module_factory_loader_1.SystemJsAppModuleLoader;
 var systemjs_component_resolver_1 = require('./linker/systemjs_component_resolver');
 exports.SystemJsCmpFactoryResolver = systemjs_component_resolver_1.SystemJsCmpFactoryResolver;
