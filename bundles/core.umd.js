@@ -4161,10 +4161,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         StringMapWrapper.set = function (map, key, value) { map[key] = value; };
         StringMapWrapper.keys = function (map) { return Object.keys(map); };
         StringMapWrapper.values = function (map) {
-            return Object.keys(map).reduce(function (r, a) {
-                r.push(map[a]);
-                return r;
-            }, []);
+            return Object.keys(map).map(function (k) { return map[k]; });
         };
         StringMapWrapper.isEmpty = function (map) {
             for (var prop in map) {
@@ -4174,23 +4171,20 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         StringMapWrapper.delete = function (map, key) { delete map[key]; };
         StringMapWrapper.forEach = function (map, callback) {
-            for (var prop in map) {
-                if (map.hasOwnProperty(prop)) {
-                    callback(map[prop], prop);
-                }
+            for (var _i = 0, _a = Object.keys(map); _i < _a.length; _i++) {
+                var k = _a[_i];
+                callback(map[k], k);
             }
         };
         StringMapWrapper.merge = function (m1, m2) {
             var m = {};
-            for (var attr in m1) {
-                if (m1.hasOwnProperty(attr)) {
-                    m[attr] = m1[attr];
-                }
+            for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {
+                var k = _a[_i];
+                m[k] = m1[k];
             }
-            for (var attr in m2) {
-                if (m2.hasOwnProperty(attr)) {
-                    m[attr] = m2[attr];
-                }
+            for (var _b = 0, _c = Object.keys(m2); _b < _c.length; _b++) {
+                var k = _c[_b];
+                m[k] = m2[k];
             }
             return m;
         };
@@ -7672,7 +7666,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         _DuplicateMap.prototype.toString = function () { return '_DuplicateMap(' + stringify(this.map) + ')'; };
         return _DuplicateMap;
     }());
-    /* @ts2dart_const */
     var DefaultKeyValueDifferFactory = (function () {
         function DefaultKeyValueDifferFactory() {
         }
@@ -7731,17 +7724,13 @@ var __extends = (this && this.__extends) || function (d, b) {
             }
         };
         DefaultKeyValueDiffer.prototype.diff = function (map) {
-            if (isBlank(map))
-                map = MapWrapper.createFromPairs([]);
-            if (!(map instanceof Map || isJsObject(map))) {
+            if (!map) {
+                map = new Map();
+            }
+            else if (!(map instanceof Map || isJsObject(map))) {
                 throw new BaseException("Error trying to diff '" + map + "'");
             }
-            if (this.check(map)) {
-                return this;
-            }
-            else {
-                return null;
-            }
+            return this.check(map) ? this : null;
         };
         DefaultKeyValueDiffer.prototype.onDestroy = function () { };
         DefaultKeyValueDiffer.prototype.check = function (map) {
@@ -7752,25 +7741,21 @@ var __extends = (this && this.__extends) || function (d, b) {
             var lastOldSeqRecord = null;
             var lastNewSeqRecord = null;
             var seqChanged = false;
-            this._forEach(map, function (value /** TODO #9100 */, key /** TODO #9100 */) {
+            this._forEach(map, function (value, key) {
                 var newSeqRecord;
-                if (oldSeqRecord !== null && key === oldSeqRecord.key) {
+                if (oldSeqRecord && key === oldSeqRecord.key) {
                     newSeqRecord = oldSeqRecord;
-                    if (!looseIdentical(value, oldSeqRecord.currentValue)) {
-                        oldSeqRecord.previousValue = oldSeqRecord.currentValue;
-                        oldSeqRecord.currentValue = value;
-                        _this._addToChanges(oldSeqRecord);
-                    }
+                    _this._maybeAddToChanges(newSeqRecord, value);
                 }
                 else {
                     seqChanged = true;
                     if (oldSeqRecord !== null) {
-                        oldSeqRecord._next = null;
                         _this._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
                         _this._addToRemovals(oldSeqRecord);
                     }
                     if (records.has(key)) {
                         newSeqRecord = records.get(key);
+                        _this._maybeAddToChanges(newSeqRecord, value);
                     }
                     else {
                         newSeqRecord = new KeyValueChangeRecord(key);
@@ -7792,7 +7777,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
                 lastOldSeqRecord = oldSeqRecord;
                 lastNewSeqRecord = newSeqRecord;
-                oldSeqRecord = oldSeqRecord === null ? null : oldSeqRecord._next;
+                oldSeqRecord = oldSeqRecord && oldSeqRecord._next;
             });
             this._truncate(lastOldSeqRecord, oldSeqRecord);
             return this.isDirty;
@@ -7800,7 +7785,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         /** @internal */
         DefaultKeyValueDiffer.prototype._reset = function () {
             if (this.isDirty) {
-                var record;
+                var record = void 0;
                 // Record the state of the mapping
                 for (record = this._previousMapHead = this._mapHead; record !== null; record = record._next) {
                     record._nextPrevious = record._next;
@@ -7811,31 +7796,6 @@ var __extends = (this && this.__extends) || function (d, b) {
                 for (record = this._additionsHead; record != null; record = record._nextAdded) {
                     record.previousValue = record.currentValue;
                 }
-                // todo(vicb) once assert is supported
-                // assert(() {
-                //  var r = _changesHead;
-                //  while (r != null) {
-                //    var nextRecord = r._nextChanged;
-                //    r._nextChanged = null;
-                //    r = nextRecord;
-                //  }
-                //
-                //  r = _additionsHead;
-                //  while (r != null) {
-                //    var nextRecord = r._nextAdded;
-                //    r._nextAdded = null;
-                //    r = nextRecord;
-                //  }
-                //
-                //  r = _removalsHead;
-                //  while (r != null) {
-                //    var nextRecord = r._nextRemoved;
-                //    r._nextRemoved = null;
-                //    r = nextRecord;
-                //  }
-                //
-                //  return true;
-                //});
                 this._changesHead = this._changesTail = null;
                 this._additionsHead = this._additionsTail = null;
                 this._removalsHead = this._removalsTail = null;
@@ -7851,11 +7811,6 @@ var __extends = (this && this.__extends) || function (d, b) {
                     lastRecord._next = null;
                 }
                 var nextRecord = record._next;
-                // todo(vicb) assert
-                // assert((() {
-                //  record._next = null;
-                //  return true;
-                //}));
                 this._addToRemovals(record);
                 lastRecord = record;
                 record = nextRecord;
@@ -7866,6 +7821,13 @@ var __extends = (this && this.__extends) || function (d, b) {
                 this._records.delete(rec.key);
             }
         };
+        DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
+            if (!looseIdentical(newValue, record.currentValue)) {
+                record.previousValue = record.currentValue;
+                record.currentValue = newValue;
+                this._addToChanges(record);
+            }
+        };
         /** @internal */
         DefaultKeyValueDiffer.prototype._isInRemovals = function (record) {
             return record === this._removalsHead || record._nextRemoved !== null ||
@@ -7873,12 +7835,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /** @internal */
         DefaultKeyValueDiffer.prototype._addToRemovals = function (record) {
-            // todo(vicb) assert
-            // assert(record._next == null);
-            // assert(record._nextAdded == null);
-            // assert(record._nextChanged == null);
-            // assert(record._nextRemoved == null);
-            // assert(record._prevRemoved == null);
             if (this._removalsHead === null) {
                 this._removalsHead = this._removalsTail = record;
             }
@@ -7897,18 +7853,10 @@ var __extends = (this && this.__extends) || function (d, b) {
             else {
                 prev._next = next;
             }
-            // todo(vicb) assert
-            // assert((() {
-            //  record._next = null;
-            //  return true;
-            //})());
+            record._next = null;
         };
         /** @internal */
         DefaultKeyValueDiffer.prototype._removeFromRemovals = function (record) {
-            // todo(vicb) assert
-            // assert(record._next == null);
-            // assert(record._nextAdded == null);
-            // assert(record._nextChanged == null);
             var prev = record._prevRemoved;
             var next = record._nextRemoved;
             if (prev === null) {
@@ -7927,12 +7875,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /** @internal */
         DefaultKeyValueDiffer.prototype._addToAdditions = function (record) {
-            // todo(vicb): assert
-            // assert(record._next == null);
-            // assert(record._nextAdded == null);
-            // assert(record._nextChanged == null);
-            // assert(record._nextRemoved == null);
-            // assert(record._prevRemoved == null);
             if (this._additionsHead === null) {
                 this._additionsHead = this._additionsTail = record;
             }
@@ -7943,11 +7885,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /** @internal */
         DefaultKeyValueDiffer.prototype._addToChanges = function (record) {
-            // todo(vicb) assert
-            // assert(record._nextAdded == null);
-            // assert(record._nextChanged == null);
-            // assert(record._nextRemoved == null);
-            // assert(record._prevRemoved == null);
             if (this._changesHead === null) {
                 this._changesHead = this._changesTail = record;
             }
@@ -7985,7 +7922,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 'removals: ' + removals.join(', ') + '\n';
         };
         /** @internal */
-        DefaultKeyValueDiffer.prototype._forEach = function (obj /** TODO #9100 */, fn) {
+        DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
             if (obj instanceof Map) {
                 obj.forEach(fn);
             }
@@ -12410,9 +12347,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             }
         };
         ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
-            var players = [];
-            StringMapWrapper.forEach(this._map.get(element), function (player) { return players.push(player); });
-            return players;
+            var el = this._map.get(element);
+            return el ? StringMapWrapper.values(el) : [];
         };
         ViewAnimationMap.prototype.set = function (element, animationName, player) {
             var playersByAnimation = this._map.get(element);

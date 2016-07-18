@@ -20,9 +20,8 @@ export class ViewAnimationMap {
         }
     }
     findAllPlayersByElement(element) {
-        var players = [];
-        StringMapWrapper.forEach(this._map.get(element), (player) => players.push(player));
-        return players;
+        const el = this._map.get(element);
+        return el ? StringMapWrapper.values(el) : [];
     }
     set(element, animationName, player) {
         var playersByAnimation = this._map.get(element);

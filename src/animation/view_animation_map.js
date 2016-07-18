@@ -25,9 +25,8 @@ var ViewAnimationMap = (function () {
         }
     };
     ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
-        var players = [];
-        collection_1.StringMapWrapper.forEach(this._map.get(element), function (player) { return players.push(player); });
-        return players;
+        var el = this._map.get(element);
+        return el ? collection_1.StringMapWrapper.values(el) : [];
     };
     ViewAnimationMap.prototype.set = function (element, animationName, player) {
         var playersByAnimation = this._map.get(element);
