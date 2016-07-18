@@ -2724,11 +2724,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         else if (fnOrArray instanceof Array) {
             var annotations = fnOrArray;
-            var fn = fnOrArray[fnOrArray.length - 1];
+            var annoLength = annotations.length - 1;
+            var fn = fnOrArray[annoLength];
             if (!isFunction(fn)) {
                 throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
             }
-            var annoLength = annotations.length - 1;
             if (annoLength != fn.length) {
                 throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
             }
@@ -2864,9 +2864,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         return constructor;
     }
     var Reflect = global$1.Reflect;
-    function makeDecorator(annotationCls /* TODO #9100 */, chainFn) {
+    function makeDecorator(annotationCls, chainFn) {
         if (chainFn === void 0) { chainFn = null; }
-        function DecoratorFactory(objOrType /** TODO #9100 */) {
+        function DecoratorFactory(objOrType) {
             var annotationInstance = new annotationCls(objOrType);
             if (this instanceof annotationCls) {
                 return annotationInstance;
@@ -2874,9 +2874,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             else {
                 var chainAnnotation = isFunction(this) && this.annotations instanceof Array ? this.annotations : [];
                 chainAnnotation.push(annotationInstance);
-                var TypeDecorator = function TypeDecorator(cls /** TODO #9100 */) {
-                    var annotations = Reflect.getOwnMetadata('annotations', cls);
-                    annotations = annotations || [];
+                var TypeDecorator = function TypeDecorator(cls) {
+                    var annotations = Reflect.getOwnMetadata('annotations', cls) || [];
                     annotations.push(annotationInstance);
                     Reflect.defineMetadata('annotations', annotations, cls);
                     return cls;
@@ -2892,9 +2891,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         DecoratorFactory.annotationCls = annotationCls;
         return DecoratorFactory;
     }
-    function makeParamDecorator(annotationCls /** TODO #9100 */) {
+    function makeParamDecorator(annotationCls) {
         function ParamDecoratorFactory() {
-            var args = []; /** TODO #9100 */
+            var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i - 0] = arguments[_i];
             }
@@ -2907,9 +2906,8 @@ var __extends = (this && this.__extends) || function (d, b) {
                 ParamDecorator.annotation = annotationInstance;
                 return ParamDecorator;
             }
-            function ParamDecorator(cls /** TODO #9100 */, unusedKey /** TODO #9100 */, index /** TODO #9100 */) {
-                var parameters = Reflect.getMetadata('parameters', cls);
-                parameters = parameters || [];
+            function ParamDecorator(cls, unusedKey, index) {
+                var parameters = Reflect.getMetadata('parameters', cls) || [];
                 // there might be gaps if some in between parameters do not have annotations.
                 // we pad with nulls.
                 while (parameters.length <= index) {
@@ -2926,9 +2924,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         ParamDecoratorFactory.annotationCls = annotationCls;
         return ParamDecoratorFactory;
     }
-    function makePropDecorator(annotationCls /** TODO #9100 */) {
+    function makePropDecorator(annotationCls) {
         function PropDecoratorFactory() {
-            var args = []; /** TODO #9100 */
+            var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 args[_i - 0] = arguments[_i];
             }
@@ -2939,8 +2937,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             }
             else {
                 return function PropDecorator(target, name) {
-                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor);
-                    meta = meta || {};
+                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
                     meta[name] = meta[name] || [];
                     meta[name].unshift(decoratorInstance);
                     Reflect.defineMetadata('propMetadata', meta, target.constructor);
