@@ -5,14 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector, PlatformRef, Provider, Type } from '../index';
+import { AppModuleFactory, Injector, PlatformRef, Provider, Type } from '../index';
 /**
  * @experimental
  */
-export declare class TestInjector implements Injector {
+export declare class TestBed implements Injector {
     private _instantiated;
     private _compiler;
     private _moduleRef;
+    private _appModuleFactory;
     private _compilerProviders;
     private _compilerUseJit;
     private _providers;
@@ -34,8 +35,8 @@ export declare class TestInjector implements Injector {
         precompile?: any[];
         modules?: any[];
     }): void;
-    createInjectorSync(): Injector;
-    createInjectorAsync(): Promise<Injector>;
+    createAppModuleFactory(): Promise<AppModuleFactory<any>>;
+    initTestAppModule(): void;
     private _createCompilerAndModuleMeta();
     private _createFromModuleFactory(appModuleFactory);
     get(token: any, notFoundValue?: any): any;
@@ -44,7 +45,11 @@ export declare class TestInjector implements Injector {
 /**
  * @experimental
  */
-export declare function getTestInjector(): TestInjector;
+export declare function getTestBed(): TestBed;
+/**
+ * @deprecated use getTestBed instead.
+ */
+export declare function getTestInjector(): TestBed;
 /**
  * Set the providers that the test injector should use. These should be providers
  * common to every test in the suite.
@@ -85,6 +90,14 @@ export declare function resetBaseTestProviders(): void;
  * @experimental
  */
 export declare function resetTestEnvironment(): void;
+/**
+ * Run asynchronous precompilation for the test's AppModule. It is necessary to call this function
+ * if your test is using an AppModule which has precompiled components that require an asynchronous
+ * call, such as an XHR. Should be called once before the test case.
+ *
+ * @experimental
+ */
+export declare function doAsyncPrecompilation(): Promise<any>;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *

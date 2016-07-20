@@ -15,11 +15,12 @@ var UNDEFINED = new Object();
 /**
  * @experimental
  */
-var TestInjector = (function () {
-    function TestInjector() {
+var TestBed = (function () {
+    function TestBed() {
         this._instantiated = false;
         this._compiler = null;
         this._moduleRef = null;
+        this._appModuleFactory = null;
         this._compilerProviders = [];
         this._compilerUseJit = true;
         this._providers = [];
@@ -30,9 +31,10 @@ var TestInjector = (function () {
         this.platform = null;
         this.appModule = null;
     }
-    TestInjector.prototype.reset = function () {
+    TestBed.prototype.reset = function () {
         this._compiler = null;
         this._moduleRef = null;
+        this._appModuleFactory = null;
         this._compilerProviders = [];
         this._compilerUseJit = true;
         this._providers = [];
@@ -42,7 +44,7 @@ var TestInjector = (function () {
         this._precompile = [];
         this._instantiated = false;
     };
-    TestInjector.prototype.configureCompiler = function (config) {
+    TestBed.prototype.configureCompiler = function (config) {
         if (this._instantiated) {
             throw new exceptions_1.BaseException('Cannot add configuration after test injector is instantiated');
         }
@@ -53,7 +55,7 @@ var TestInjector = (function () {
             this._compilerUseJit = config.useJit;
         }
     };
-    TestInjector.prototype.configureModule = function (moduleDef) {
+    TestBed.prototype.configureModule = function (moduleDef) {
         if (this._instantiated) {
             throw new exceptions_1.BaseException('Cannot add configuration after test injector is instantiated');
         }
@@ -73,14 +75,38 @@ var TestInjector = (function () {
             this._modules = collection_1.ListWrapper.concat(this._modules, moduleDef.modules);
         }
     };
-    TestInjector.prototype.createInjectorSync = function () {
+    TestBed.prototype.createAppModuleFactory = function () {
+        var _this = this;
         if (this._instantiated) {
-            return this;
+            throw new exceptions_1.BaseException('Cannot run precompilation when the test AppModule has already been instantiated. ' +
+                'Make sure you are not using `inject` before `doAsyncPrecompilation`.');
+        }
+        if (this._appModuleFactory) {
+            return Promise.resolve(this._appModuleFactory);
         }
         var moduleMeta = this._createCompilerAndModuleMeta();
-        return this._createFromModuleFactory(this._compiler.compileAppModuleSync(_NoopModule, moduleMeta));
+        return this._compiler.compileAppModuleAsync(_NoopModule, moduleMeta)
+            .then(function (appModuleFactory) {
+            _this._appModuleFactory = appModuleFactory;
+            return appModuleFactory;
+        });
     };
-    TestInjector.prototype.createInjectorAsync = function () {
+    TestBed.prototype.initTestAppModule = function () {
+        if (this._instantiated) {
+            return;
+        }
+        if (this._appModuleFactory) {
+            this._createFromModuleFactory(this._appModuleFactory);
+        }
+        else {
+            var moduleMeta = this._createCompilerAndModuleMeta();
+            this._createFromModuleFactory(this._compiler.compileAppModuleSync(_NoopModule, moduleMeta));
+        }
+    };
+    /**
+     * @internal
+     */
+    TestBed.prototype._createInjectorAsync = function () {
         var _this = this;
         if (this._instantiated) {
             return Promise.resolve(this);
@@ -89,7 +115,7 @@ var TestInjector = (function () {
         return this._compiler.compileAppModuleAsync(_NoopModule, moduleMeta)
             .then(function (appModuleFactory) { return _this._createFromModuleFactory(appModuleFactory); });
     };
-    TestInjector.prototype._createCompilerAndModuleMeta = function () {
+    TestBed.prototype._createCompilerAndModuleMeta = function () {
         var compilerFactory = this.platform.injector.get(index_1.CompilerFactory);
         this._compiler = compilerFactory.createCompiler({
             providers: this._compilerProviders,
@@ -97,7 +123,7 @@ var TestInjector = (function () {
             deprecatedAppProviders: this._providers
         });
         var moduleMeta = new index_1.AppModuleMetadata({
-            providers: this._providers.concat([{ provide: TestInjector, useValue: this }]),
+            providers: this._providers.concat([{ provide: TestBed, useValue: this }]),
             modules: this._modules.concat([this.appModule]),
             directives: this._directives,
             pipes: this._pipes,
@@ -105,17 +131,17 @@ var TestInjector = (function () {
         });
         return moduleMeta;
     };
-    TestInjector.prototype._createFromModuleFactory = function (appModuleFactory) {
+    TestBed.prototype._createFromModuleFactory = function (appModuleFactory) {
         this._moduleRef = appModuleFactory.create(this.platform.injector);
         this._instantiated = true;
         return this;
     };
-    TestInjector.prototype.get = function (token, notFoundValue) {
+    TestBed.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
         if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The TestInjector has not yet been created. Call createInjectorSync/Async first!');
+            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestAppModule first!');
         }
-        if (token === TestInjector) {
+        if (token === TestBed) {
             return this;
         }
         // Tests can inject things from the app module and from the compiler,
@@ -123,26 +149,33 @@ var TestInjector = (function () {
         var result = this._moduleRef.injector.get(token, UNDEFINED);
         return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
     };
-    TestInjector.prototype.execute = function (tokens, fn) {
+    TestBed.prototype.execute = function (tokens, fn) {
         var _this = this;
         if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The TestInjector has not yet been created. Call createInjectorSync/Async first!');
+            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestAppModule first!');
         }
         var params = tokens.map(function (t) { return _this.get(t); });
         return lang_1.FunctionWrapper.apply(fn, params);
     };
-    return TestInjector;
+    return TestBed;
 }());
-exports.TestInjector = TestInjector;
-var _testInjector = null;
+exports.TestBed = TestBed;
+var _testBed = null;
 /**
  * @experimental
  */
-function getTestInjector() {
-    if (_testInjector == null) {
-        _testInjector = new TestInjector();
+function getTestBed() {
+    if (_testBed == null) {
+        _testBed = new TestBed();
     }
-    return _testInjector;
+    return _testBed;
+}
+exports.getTestBed = getTestBed;
+/**
+ * @deprecated use getTestBed instead.
+ */
+function getTestInjector() {
+    return getTestBed();
 }
 exports.getTestInjector = getTestInjector;
 /**
@@ -187,12 +220,12 @@ exports.setBaseTestProviders = setBaseTestProviders;
  * @experimental
  */
 function initTestEnvironment(appModule, platform) {
-    var testInjector = getTestInjector();
-    if (testInjector.platform || testInjector.appModule) {
+    var testBed = getTestBed();
+    if (testBed.platform || testBed.appModule) {
         throw new exceptions_1.BaseException('Cannot set base providers because it has already been called');
     }
-    testInjector.platform = platform;
-    testInjector.appModule = appModule;
+    testBed.platform = platform;
+    testBed.appModule = appModule;
 }
 exports.initTestEnvironment = initTestEnvironment;
 /**
@@ -210,12 +243,24 @@ exports.resetBaseTestProviders = resetBaseTestProviders;
  * @experimental
  */
 function resetTestEnvironment() {
-    var testInjector = getTestInjector();
-    testInjector.platform = null;
-    testInjector.appModule = null;
-    testInjector.reset();
+    var testBed = getTestBed();
+    testBed.platform = null;
+    testBed.appModule = null;
+    testBed.reset();
 }
 exports.resetTestEnvironment = resetTestEnvironment;
+/**
+ * Run asynchronous precompilation for the test's AppModule. It is necessary to call this function
+ * if your test is using an AppModule which has precompiled components that require an asynchronous
+ * call, such as an XHR. Should be called once before the test case.
+ *
+ * @experimental
+ */
+function doAsyncPrecompilation() {
+    var testBed = getTestBed();
+    return testBed.createAppModuleFactory();
+}
+exports.doAsyncPrecompilation = doAsyncPrecompilation;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
@@ -241,42 +286,33 @@ exports.resetTestEnvironment = resetTestEnvironment;
  * @stable
  */
 function inject(tokens, fn) {
-    var testInjector = getTestInjector();
+    var testBed = getTestBed();
     if (tokens.indexOf(async_test_completer_1.AsyncTestCompleter) >= 0) {
         return function () {
             // Return an async test method that returns a Promise if AsyncTestCompleter is one of the
             // injected tokens.
-            return testInjector.createInjectorAsync().then(function () {
-                var completer = testInjector.get(async_test_completer_1.AsyncTestCompleter);
-                testInjector.execute(tokens, fn);
+            return testBed._createInjectorAsync().then(function () {
+                var completer = testBed.get(async_test_completer_1.AsyncTestCompleter);
+                testBed.execute(tokens, fn);
                 return completer.promise;
             });
         };
     }
     else {
         return function () {
-            // Return a asynchronous test method with the injected tokens.
-            // TODO(tbosch): Right now, we can only detect the AsyncTestZoneSpec via its name.
-            // (see https://github.com/angular/zone.js/issues/370)
-            if (Zone.current.name.toLowerCase().indexOf('asynctestzone') >= 0) {
-                return testInjector.createInjectorAsync().then(function () { return testInjector.execute(tokens, fn); });
+            try {
+                testBed.initTestAppModule();
             }
-            else {
-                // Return a synchronous test method with the injected tokens.
-                try {
-                    testInjector.createInjectorSync();
+            catch (e) {
+                if (e instanceof index_1.ComponentStillLoadingError) {
+                    throw new Error(("This test module precompiles the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but precompilation was never done. ") +
+                        "Please call \"doAsyncPrecompilation\" before \"inject\".");
                 }
-                catch (e) {
-                    if (e instanceof index_1.ComponentStillLoadingError) {
-                        throw new Error(("This test module precompiles the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but the test is synchronous. ") +
-                            "Please use the \"async(...)\" or \"fakeAsync(...)\" helper functions to make the test asynchronous.");
-                    }
-                    else {
-                        throw e;
-                    }
+                else {
+                    throw e;
                 }
-                return testInjector.execute(tokens, fn);
             }
+            return testBed.execute(tokens, fn);
         };
     }
 }
@@ -291,14 +327,14 @@ var InjectSetupWrapper = (function () {
     InjectSetupWrapper.prototype._addModule = function () {
         var moduleDef = this._moduleDef();
         if (moduleDef) {
-            getTestInjector().configureModule(moduleDef);
+            getTestBed().configureModule(moduleDef);
         }
     };
     InjectSetupWrapper.prototype.inject = function (tokens, fn) {
         var _this = this;
         return function () {
             _this._addModule();
-            return inject_impl(tokens, fn)();
+            return inject(tokens, fn)();
         };
     };
     return InjectSetupWrapper;
@@ -320,12 +356,9 @@ function withModule(moduleDef) {
     return new InjectSetupWrapper(moduleDef);
 }
 exports.withModule = withModule;
-// This is to ensure inject(Async) within InjectSetupWrapper doesn't call itself
-// when transpiled to Dart.
-var inject_impl = inject;
 var _NoopModule = (function () {
     function _NoopModule() {
     }
     return _NoopModule;
 }());
-//# sourceMappingURL=test_injector.js.map
+//# sourceMappingURL=test_bed.js.map
