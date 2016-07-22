@@ -45,16 +45,20 @@ var ComponentFixture = (function () {
                 });
             this._onStableSubscription = async_1.ObservableWrapper.subscribe(ngZone.onStable, function (_) {
                 _this._isStable = true;
-                // Check whether there are no pending macrotasks in a microtask so that ngZone gets a chance
-                // to update the state of pending macrotasks.
-                lang_1.scheduleMicroTask(function () {
-                    if (!_this.ngZone.hasPendingMacrotasks) {
-                        if (_this._completer != null) {
-                            _this._completer.resolve(true);
-                            _this._completer = null;
+                // Check whether there is a pending whenStable() completer to resolve.
+                if (_this._completer !== null) {
+                    // If so check whether there are no pending macrotasks before resolving.
+                    // Do this check in the next tick so that ngZone gets a chance to update the state of
+                    // pending macrotasks.
+                    lang_1.scheduleMicroTask(function () {
+                        if (!_this.ngZone.hasPendingMacrotasks) {
+                            if (_this._completer !== null) {
+                                _this._completer.resolve(true);
+                                _this._completer = null;
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
             this._onErrorSubscription = async_1.ObservableWrapper.subscribe(ngZone.onError, function (error) { throw error.error; });
         }
