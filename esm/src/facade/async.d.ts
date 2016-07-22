@@ -88,7 +88,7 @@ export declare class EventEmitter<T> extends Subject<T> {
      * delivers events synchronously or asynchronously.
      */
     constructor(isAsync?: boolean);
-    emit(value: T): void;
+    emit(value?: T): void;
     /**
      * @deprecated - use .emit(value) instead
      */
