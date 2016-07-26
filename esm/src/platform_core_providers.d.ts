@@ -4,7 +4,7 @@ import { PlatformRef } from './application_ref';
  *
  * @experimental
  */
-export declare const corePlatform: (extraProviders?: any[]) => PlatformRef;
+export declare const platformCore: (extraProviders?: any[]) => PlatformRef;
 /**
  * A default set of providers which should be included in any Angular platform.
  *

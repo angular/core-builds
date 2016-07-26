@@ -12,8 +12,8 @@ import { ComponentFactory } from './component_factory';
  * can later be used to create and render a Component instance.
  *
  * @deprecated Use {@link ComponentFactoryResolver} together with {@link
- * NgModule}.precompile}/{@link Component}.precompile or
- * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
+ * NgModule}.entryComponents}/{@link Component}.entryComponents or
+ * {@link ANALYZE_FOR_ENTRY_COMPONENTS} provider for dynamic component creation.
  * Use {@link NgModuleFactoryLoader} for lazy loading.
  */
 export declare abstract class ComponentResolver {

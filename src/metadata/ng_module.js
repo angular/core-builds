@@ -13,19 +13,29 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var metadata_1 = require('../di/metadata');
 /**
+ * Defines a schema that will allow any property on elements with a `-` in their name,
+ * which is the common rule for custom elements.
+ *
+ * @experimental
+ */
+exports.CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
  * Declares an Angular Module.
  * @experimental
  */
 var NgModuleMetadata = (function (_super) {
     __extends(NgModuleMetadata, _super);
     function NgModuleMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, precompile = _b.precompile;
+        var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, entryComponents = _b.entryComponents, schemas = _b.schemas;
         _super.call(this);
         this._providers = providers;
         this.declarations = declarations;
         this.imports = imports;
         this.exports = exports;
-        this.precompile = precompile;
+        this.entryComponents = entryComponents;
+        this.schemas = schemas;
     }
     Object.defineProperty(NgModuleMetadata.prototype, "providers", {
         /**

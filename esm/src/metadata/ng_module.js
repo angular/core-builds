@@ -7,17 +7,27 @@
  */
 import { InjectableMetadata } from '../di/metadata';
 /**
+ * Defines a schema that will allow any property on elements with a `-` in their name,
+ * which is the common rule for custom elements.
+ *
+ * @experimental
+ */
+export const CUSTOM_ELEMENTS_SCHEMA = {
+    name: 'custom-elements'
+};
+/**
  * Declares an Angular Module.
  * @experimental
  */
 export class NgModuleMetadata extends InjectableMetadata {
-    constructor({ providers, declarations, imports, exports, precompile } = {}) {
+    constructor({ providers, declarations, imports, exports, entryComponents, schemas } = {}) {
         super();
         this._providers = providers;
         this.declarations = declarations;
         this.imports = imports;
         this.exports = exports;
-        this.precompile = precompile;
+        this.entryComponents = entryComponents;
+        this.schemas = schemas;
     }
     /**
      * Defines the set of injectable objects that are available in the injector

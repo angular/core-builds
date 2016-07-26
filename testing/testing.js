@@ -6,11 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-/**
- * Public Test Library for unit testing Angular2 Applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
- */
 var test_bed_1 = require('./test_bed');
 var _global = (typeof window === 'undefined' ? global : window);
 var testBed = test_bed_1.getTestBed();

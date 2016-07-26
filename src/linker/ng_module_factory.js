@@ -36,7 +36,7 @@ var NgModuleRef = (function () {
     Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
         /**
          * The ComponentFactoryResolver to get hold of the ComponentFactories
-         * delcared in the `precompile` property of the module.
+         * delcared in the `entryComponents` property of the module.
          */
         get: function () { return exceptions_1.unimplemented(); },
         enumerable: true,

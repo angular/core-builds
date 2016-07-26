@@ -25,7 +25,7 @@ var _CORE_PLATFORM_PROVIDERS = [
  *
  * @experimental
  */
-exports.corePlatform = application_ref_1.createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+exports.platformCore = application_ref_1.createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
 /**
  * A default set of providers which should be included in any Angular platform.
  *

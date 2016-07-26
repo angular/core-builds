@@ -153,67 +153,6 @@ function getPlatform() {
 }
 exports.getPlatform = getPlatform;
 /**
- * Creates an instance of an `@NgModule` for the given platform
- * for offline compilation.
- *
- * ## Simple Example
- *
- * ```typescript
- * my_module.ts:
- *
- * @NgModule({
- *   imports: [BrowserModule]
- * })
- * class MyModule {}
- *
- * main.ts:
- * import {MyModuleNgFactory} from './my_module.ngfactory';
- * import {bootstrapModuleFactory} from '@angular/core';
- * import {browserPlatform} from '@angular/platform-browser';
- *
- * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
- * ```
- *
- * @experimental APIs related to application bootstrap are currently under review.
- */
-function bootstrapModuleFactory(moduleFactory, platform) {
-    // Note: We need to create the NgZone _before_ we instantiate the module,
-    // as instantiating the module creates some providers eagerly.
-    // So we create a mini parent injector that just contains the new NgZone and
-    // pass that as parent to the NgModuleFactory.
-    var ngZone = new ng_zone_1.NgZone({ enableLongStackTrace: isDevMode() });
-    var ngZoneInjector = di_1.ReflectiveInjector.resolveAndCreate([{ provide: ng_zone_1.NgZone, useValue: ngZone }], platform.injector);
-    return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
-}
-exports.bootstrapModuleFactory = bootstrapModuleFactory;
-/**
- * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
- *
- * ## Simple Example
- *
- * ```typescript
- * @NgModule({
- *   imports: [BrowserModule]
- * })
- * class MyModule {}
- *
- * let moduleRef = bootstrapModule(MyModule, browserPlatform());
- * ```
- * @stable
- */
-function bootstrapModule(moduleType, platform, compilerOptions) {
-    if (compilerOptions === void 0) { compilerOptions = []; }
-    var compilerFactory = platform.injector.get(compiler_1.CompilerFactory);
-    var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
-    return compiler.compileModuleAsync(moduleType)
-        .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
-        .then(function (moduleRef) {
-        var appRef = moduleRef.injector.get(ApplicationRef);
-        return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
-    });
-}
-exports.bootstrapModule = bootstrapModule;
-/**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
  *
@@ -247,6 +186,51 @@ exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
 var PlatformRef = (function () {
     function PlatformRef() {
     }
+    /**
+     * Creates an instance of an `@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {browserPlatform} from '@angular/platform-browser';
+     *
+     * let moduleRef = browserPlatform().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
+     */
+    PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
+        throw exceptions_1.unimplemented();
+    };
+    /**
+     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = browserPlatform().bootstrapModule(MyModule);
+     * ```
+     * @stable
+     */
+    PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+        if (compilerOptions === void 0) { compilerOptions = []; }
+        throw exceptions_1.unimplemented();
+    };
     Object.defineProperty(PlatformRef.prototype, "injector", {
         /**
          * Retrieve the platform {@link Injector}, which is the parent injector for
@@ -301,6 +285,27 @@ var PlatformRef_ = (function (_super) {
     };
     /** @internal */
     PlatformRef_.prototype._applicationDisposed = function (app) { collection_1.ListWrapper.remove(this._applications, app); };
+    PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+        // Note: We need to create the NgZone _before_ we instantiate the module,
+        // as instantiating the module creates some providers eagerly.
+        // So we create a mini parent injector that just contains the new NgZone and
+        // pass that as parent to the NgModuleFactory.
+        var ngZone = new ng_zone_1.NgZone({ enableLongStackTrace: isDevMode() });
+        var ngZoneInjector = di_1.ReflectiveInjector.resolveAndCreate([{ provide: ng_zone_1.NgZone, useValue: ngZone }], this.injector);
+        return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
+    };
+    PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+        var _this = this;
+        if (compilerOptions === void 0) { compilerOptions = []; }
+        var compilerFactory = this.injector.get(compiler_1.CompilerFactory);
+        var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+        return compiler.compileModuleAsync(moduleType)
+            .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory); })
+            .then(function (moduleRef) {
+            var appRef = moduleRef.injector.get(ApplicationRef);
+            return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
+        });
+    };
     /** @nocollapse */
     PlatformRef_.decorators = [
         { type: di_1.Injectable },

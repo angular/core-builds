@@ -609,12 +609,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * This token can be used to create a virtual provider that will populate the
-     * `precompile` fields of components and ng modules based on its `useValue`.
+     * `entryComponents` fields of components and ng modules based on its `useValue`.
      * All components that are referenced in the `useValue` value (either directly
-     * or in a nested array or map) will be added to the `precompile` property.
+     * or in a nested array or map) will be added to the `entryComponents` property.
      *
      * ### Example
-     * The following example shows how the router can populate the `precompile`
+     * The following example shows how the router can populate the `entryComponents`
      * field of an NgModule based on the router configuration which refers
      * to components.
      *
@@ -623,7 +623,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * function provideRoutes(routes) {
      *   return [
      *     {provide: ROUTES, useValue: routes},
-     *     {provide: ANALYZE_FOR_PRECOMPILE, useValue: routes, multi: true}
+     *     {provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: routes, multi: true}
      *   ];
      * }
      *
@@ -641,7 +641,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @experimental
      */
-    var ANALYZE_FOR_PRECOMPILE = new OpaqueToken('AnalyzeForPrecompile');
+    var ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
     /**
      * Specifies that a constant attribute value should be injected.
      *
@@ -1775,7 +1775,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile, entryComponents = _b.entryComponents;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
@@ -1799,7 +1799,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.moduleId = moduleId;
             this.animations = animations;
             this.interpolation = interpolation;
-            this.precompile = precompile;
+            this.entryComponents = precompile ? precompile : entryComponents;
         }
         Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
             /**
@@ -2063,19 +2063,29 @@ var __extends = (this && this.__extends) || function (d, b) {
         return HostListenerMetadata;
     }());
     /**
+     * Defines a schema that will allow any property on elements with a `-` in their name,
+     * which is the common rule for custom elements.
+     *
+     * @experimental
+     */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
+    /**
      * Declares an Angular Module.
      * @experimental
      */
     var NgModuleMetadata = (function (_super) {
         __extends(NgModuleMetadata, _super);
         function NgModuleMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, precompile = _b.precompile;
+            var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, entryComponents = _b.entryComponents, schemas = _b.schemas;
             _super.call(this);
             this._providers = providers;
             this.declarations = declarations;
             this.imports = imports;
             this.exports = exports;
-            this.precompile = precompile;
+            this.entryComponents = entryComponents;
+            this.schemas = schemas;
         }
         Object.defineProperty(NgModuleMetadata.prototype, "providers", {
             /**
@@ -6937,7 +6947,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
         };
         /**
-         * Compiles the given NgModule. All templates of the components listed in `precompile`
+         * Compiles the given NgModule. All templates of the components listed in `entryComponents`
          * have to be either inline or compiled before via `compileComponentAsync` /
          * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
          */
@@ -9784,65 +9794,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return isPresent(_platform) && !_platform.disposed ? _platform : null;
     }
     /**
-     * Creates an instance of an `@NgModule` for the given platform
-     * for offline compilation.
-     *
-     * ## Simple Example
-     *
-     * ```typescript
-     * my_module.ts:
-     *
-     * @NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * main.ts:
-     * import {MyModuleNgFactory} from './my_module.ngfactory';
-     * import {bootstrapModuleFactory} from '@angular/core';
-     * import {browserPlatform} from '@angular/platform-browser';
-     *
-     * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
-     * ```
-     *
-     * @experimental APIs related to application bootstrap are currently under review.
-     */
-    function bootstrapModuleFactory(moduleFactory, platform) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
-        // as instantiating the module creates some providers eagerly.
-        // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the NgModuleFactory.
-        var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
-        var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], platform.injector);
-        return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
-    }
-    /**
-     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
-     *
-     * ## Simple Example
-     *
-     * ```typescript
-     * @NgModule({
-     *   imports: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * let moduleRef = bootstrapModule(MyModule, browserPlatform());
-     * ```
-     * @stable
-     */
-    function bootstrapModule(moduleType, platform, compilerOptions) {
-        if (compilerOptions === void 0) { compilerOptions = []; }
-        var compilerFactory = platform.injector.get(CompilerFactory);
-        var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
-        return compiler.compileModuleAsync(moduleType)
-            .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
-            .then(function (moduleRef) {
-            var appRef = moduleRef.injector.get(ApplicationRef);
-            return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
-        });
-    }
-    /**
      * Shortcut for ApplicationRef.bootstrap.
      * Requires a platform to be created first.
      *
@@ -9874,6 +9825,51 @@ var __extends = (this && this.__extends) || function (d, b) {
     var PlatformRef = (function () {
         function PlatformRef() {
         }
+        /**
+         * Creates an instance of an `@NgModule` for the given platform
+         * for offline compilation.
+         *
+         * ## Simple Example
+         *
+         * ```typescript
+         * my_module.ts:
+         *
+         * @NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * main.ts:
+         * import {MyModuleNgFactory} from './my_module.ngfactory';
+         * import {browserPlatform} from '@angular/platform-browser';
+         *
+         * let moduleRef = browserPlatform().bootstrapModuleFactory(MyModuleNgFactory);
+         * ```
+         *
+         * @experimental APIs related to application bootstrap are currently under review.
+         */
+        PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            throw unimplemented();
+        };
+        /**
+         * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+         *
+         * ## Simple Example
+         *
+         * ```typescript
+         * @NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * let moduleRef = browserPlatform().bootstrapModule(MyModule);
+         * ```
+         * @stable
+         */
+        PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            throw unimplemented();
+        };
         Object.defineProperty(PlatformRef.prototype, "injector", {
             /**
              * Retrieve the platform {@link Injector}, which is the parent injector for
@@ -9927,6 +9923,27 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         /** @internal */
         PlatformRef_.prototype._applicationDisposed = function (app) { ListWrapper.remove(this._applications, app); };
+        PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            // Note: We need to create the NgZone _before_ we instantiate the module,
+            // as instantiating the module creates some providers eagerly.
+            // So we create a mini parent injector that just contains the new NgZone and
+            // pass that as parent to the NgModuleFactory.
+            var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+            var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
+            return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
+        };
+        PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            var _this = this;
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            var compilerFactory = this.injector.get(CompilerFactory);
+            var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+            return compiler.compileModuleAsync(moduleType)
+                .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory); })
+                .then(function (moduleRef) {
+                var appRef = moduleRef.injector.get(ApplicationRef);
+                return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
+            });
+        };
         return PlatformRef_;
     }(PlatformRef));
     /** @nocollapse */
@@ -10184,8 +10201,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * can later be used to create and render a Component instance.
      *
      * @deprecated Use {@link ComponentFactoryResolver} together with {@link
-     * NgModule}.precompile}/{@link Component}.precompile or
-     * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
+     * NgModule}.entryComponents}/{@link Component}.entryComponents or
+     * {@link ANALYZE_FOR_ENTRY_COMPONENTS} provider for dynamic component creation.
      * Use {@link NgModuleFactoryLoader} for lazy loading.
      */
     var ComponentResolver = (function () {
@@ -10193,7 +10210,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ComponentResolver;
     }());
-    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.precompile or ANALYZE_FOR_PRECOMPILE provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
+    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.entryComponents or ANALYZE_FOR_ENTRY_COMPONENTS provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
     ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use NgModuleFactoryLoader instead.';
     /**
      * Use ComponentFactoryResolver and ViewContainerRef directly.
@@ -10263,7 +10280,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
             /**
              * The ComponentFactoryResolver to get hold of the ComponentFactories
-             * delcared in the `precompile` property of the module.
+             * delcared in the `entryComponents` property of the module.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
@@ -10990,7 +11007,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @experimental
      */
-    var corePlatform = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+    var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
     /**
      * A default set of providers which should be included in any Angular platform.
      *
@@ -12769,8 +12786,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.assertPlatform = assertPlatform;
     exports.disposePlatform = disposePlatform;
     exports.getPlatform = getPlatform;
-    exports.bootstrapModuleFactory = bootstrapModuleFactory;
-    exports.bootstrapModule = bootstrapModule;
     exports.coreBootstrap = coreBootstrap;
     exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
     exports.PlatformRef = PlatformRef;
@@ -12815,7 +12830,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.HostBinding = HostBinding;
     exports.HostListener = HostListener;
     exports.NgModule = NgModule;
-    exports.ANALYZE_FOR_PRECOMPILE = ANALYZE_FOR_PRECOMPILE;
+    exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
     exports.AttributeMetadata = AttributeMetadata;
     exports.ContentChildMetadata = ContentChildMetadata;
     exports.ContentChildrenMetadata = ContentChildrenMetadata;
@@ -12838,6 +12853,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.OnChanges = OnChanges;
     exports.OnDestroy = OnDestroy;
     exports.OnInit = OnInit;
+    exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
     exports.NgModuleMetadata = NgModuleMetadata;
     exports.ViewMetadata = ViewMetadata;
     exports.Class = Class;
@@ -12913,7 +12929,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.WrappedValue = WrappedValue;
     exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
     exports.PLATFORM_PIPES = PLATFORM_PIPES;
-    exports.corePlatform = corePlatform;
+    exports.platformCore = platformCore;
     exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
     exports.__core_private__ = __core_private__;
     exports.AUTO_STYLE = AUTO_STYLE;

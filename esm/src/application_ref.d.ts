@@ -76,47 +76,6 @@ export declare function disposePlatform(): void;
  */
 export declare function getPlatform(): PlatformRef;
 /**
- * Creates an instance of an `@NgModule` for the given platform
- * for offline compilation.
- *
- * ## Simple Example
- *
- * ```typescript
- * my_module.ts:
- *
- * @NgModule({
- *   imports: [BrowserModule]
- * })
- * class MyModule {}
- *
- * main.ts:
- * import {MyModuleNgFactory} from './my_module.ngfactory';
- * import {bootstrapModuleFactory} from '@angular/core';
- * import {browserPlatform} from '@angular/platform-browser';
- *
- * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
- * ```
- *
- * @experimental APIs related to application bootstrap are currently under review.
- */
-export declare function bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, platform: PlatformRef): NgModuleRef<M>;
-/**
- * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
- *
- * ## Simple Example
- *
- * ```typescript
- * @NgModule({
- *   imports: [BrowserModule]
- * })
- * class MyModule {}
- *
- * let moduleRef = bootstrapModule(MyModule, browserPlatform());
- * ```
- * @stable
- */
-export declare function bootstrapModule<M>(moduleType: ConcreteType<M>, platform: PlatformRef, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
-/**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
  *
@@ -143,8 +102,48 @@ export declare function coreLoadAndBootstrap(componentType: Type, injector: Inje
  */
 export declare abstract class PlatformRef {
     /**
-     * Register a listener to be called when the platform is disposed.
+     * Creates an instance of an `@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {browserPlatform} from '@angular/platform-browser';
+     *
+     * let moduleRef = browserPlatform().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     *
+     * @experimental APIs related to application bootstrap are currently under review.
      */
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): NgModuleRef<M>;
+    /**
+     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * @NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = browserPlatform().bootstrapModule(MyModule);
+     * ```
+     * @stable
+     */
+    bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    /**
+  *Register a listener to be called when the platform is disposed.
+  */
     abstract registerDisposeListener(dispose: () => void): void;
     /**
      * Retrieve the platform {@link Injector}, which is the parent injector for
@@ -166,6 +165,8 @@ export declare class PlatformRef_ extends PlatformRef {
     readonly disposed: boolean;
     addApplication(appRef: ApplicationRef): void;
     dispose(): void;
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): NgModuleRef<M>;
+    bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
 }
 /**
  * A reference to an Angular application running on a page.

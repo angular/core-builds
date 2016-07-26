@@ -69,7 +69,7 @@ var Compiler = (function () {
         throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
     };
     /**
-     * Compiles the given NgModule. All templates of the components listed in `precompile`
+     * Compiles the given NgModule. All templates of the components listed in `entryComponents`
      * have to be either inline or compiled before via `compileComponentAsync` /
      * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
      */

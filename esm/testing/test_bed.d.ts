@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector, NgModuleFactory, PlatformRef, Provider, Type } from '../index';
+import { Injector, NgModuleFactory, PlatformRef, Provider, SchemaMetadata, Type } from '../index';
 /**
  * @experimental
  */
@@ -18,7 +18,8 @@ export declare class TestBed implements Injector {
     private _providers;
     private _declarations;
     private _imports;
-    private _precompile;
+    private _entryComponents;
+    private _schemas;
     reset(): void;
     platform: PlatformRef;
     ngModule: Type;
@@ -30,7 +31,8 @@ export declare class TestBed implements Injector {
         providers?: any[];
         declarations?: any[];
         imports?: any[];
-        precompile?: any[];
+        entryComponents?: any[];
+        schemas?: Array<SchemaMetadata | any>;
     }): void;
     createModuleFactory(): Promise<NgModuleFactory<any>>;
     initTestModule(): void;
@@ -88,13 +90,13 @@ export declare function resetBaseTestProviders(): void;
  */
 export declare function resetTestEnvironment(): void;
 /**
- * Run asynchronous precompilation for the test's NgModule. It is necessary to call this function
- * if your test is using an NgModule which has precompiled components that require an asynchronous
- * call, such as an XHR. Should be called once before the test case.
+ * Compile entryComponents with a `templateUrl` for the test's NgModule.
+ * It is necessary to call this function
+ * as fetching urls is asynchronous.
  *
  * @experimental
  */
-export declare function doAsyncPrecompilation(): Promise<any>;
+export declare function doAsyncEntryPointCompilation(): Promise<any>;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
@@ -129,7 +131,7 @@ export declare class InjectSetupWrapper {
         providers?: any[];
         declarations?: any[];
         imports?: any[];
-        precompile?: any[];
+        entryComponents?: any[];
     });
     private _addModule();
     inject(tokens: any[], fn: Function): () => any;
@@ -145,5 +147,6 @@ export declare function withModule(moduleDef: () => {
     providers?: any[];
     declarations?: any[];
     imports?: any[];
-    precompile?: any[];
+    entryComponents?: any[];
+    schemas?: Array<SchemaMetadata | any[]>;
 }): InjectSetupWrapper;

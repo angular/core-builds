@@ -3,12 +3,12 @@ import { OpaqueToken } from '../di/opaque_token';
 import { Type } from '../facade/lang';
 /**
  * This token can be used to create a virtual provider that will populate the
- * `precompile` fields of components and ng modules based on its `useValue`.
+ * `entryComponents` fields of components and ng modules based on its `useValue`.
  * All components that are referenced in the `useValue` value (either directly
- * or in a nested array or map) will be added to the `precompile` property.
+ * or in a nested array or map) will be added to the `entryComponents` property.
  *
  * ### Example
- * The following example shows how the router can populate the `precompile`
+ * The following example shows how the router can populate the `entryComponents`
  * field of an NgModule based on the router configuration which refers
  * to components.
  *
@@ -17,7 +17,7 @@ import { Type } from '../facade/lang';
  * function provideRoutes(routes) {
  *   return [
  *     {provide: ROUTES, useValue: routes},
- *     {provide: ANALYZE_FOR_PRECOMPILE, useValue: routes, multi: true}
+ *     {provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: routes, multi: true}
  *   ];
  * }
  *
@@ -35,7 +35,7 @@ import { Type } from '../facade/lang';
  *
  * @experimental
  */
-export declare const ANALYZE_FOR_PRECOMPILE: OpaqueToken;
+export declare const ANALYZE_FOR_ENTRY_COMPONENTS: OpaqueToken;
 /**
  * Specifies that a constant attribute value should be injected.
  *

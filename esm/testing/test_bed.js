@@ -24,7 +24,8 @@ export class TestBed {
         this._providers = [];
         this._declarations = [];
         this._imports = [];
-        this._precompile = [];
+        this._entryComponents = [];
+        this._schemas = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -36,7 +37,8 @@ export class TestBed {
         this._providers = [];
         this._declarations = [];
         this._imports = [];
-        this._precompile = [];
+        this._entryComponents = [];
+        this._schemas = [];
         this._instantiated = false;
     }
     configureCompiler(config) {
@@ -58,14 +60,17 @@ export class TestBed {
         if (moduleDef.imports) {
             this._imports = ListWrapper.concat(this._imports, moduleDef.imports);
         }
-        if (moduleDef.precompile) {
-            this._precompile = ListWrapper.concat(this._precompile, moduleDef.precompile);
+        if (moduleDef.entryComponents) {
+            this._entryComponents = ListWrapper.concat(this._entryComponents, moduleDef.entryComponents);
+        }
+        if (moduleDef.schemas) {
+            this._schemas = ListWrapper.concat(this._schemas, moduleDef.schemas);
         }
     }
     createModuleFactory() {
         if (this._instantiated) {
-            throw new BaseException('Cannot run precompilation when the test NgModule has already been instantiated. ' +
-                'Make sure you are not using `inject` before `doAsyncPrecompilation`.');
+            throw new BaseException('Cannot compile entryComponents when the test NgModule has already been instantiated. ' +
+                'Make sure you are not using `inject` before `doAsyncEntryPointCompilation`.');
         }
         if (this._ngModuleFactory) {
             return Promise.resolve(this._ngModuleFactory);
@@ -102,7 +107,8 @@ export class TestBed {
         const providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         const declarations = this._declarations;
         const imports = [this.ngModule, this._imports];
-        const precompile = this._precompile;
+        const entryComponents = this._entryComponents;
+        const schemas = this._schemas;
         class DynamicTestModule {
         }
         /** @nocollapse */
@@ -111,7 +117,8 @@ export class TestBed {
                         providers: providers,
                         declarations: declarations,
                         imports: imports,
-                        precompile: precompile
+                        entryComponents: entryComponents,
+                        schemas: schemas
                     },] },
         ];
         const compilerFactory = this.platform.injector.get(CompilerFactory);
@@ -223,13 +230,13 @@ export function resetTestEnvironment() {
     testBed.reset();
 }
 /**
- * Run asynchronous precompilation for the test's NgModule. It is necessary to call this function
- * if your test is using an NgModule which has precompiled components that require an asynchronous
- * call, such as an XHR. Should be called once before the test case.
+ * Compile entryComponents with a `templateUrl` for the test's NgModule.
+ * It is necessary to call this function
+ * as fetching urls is asynchronous.
  *
  * @experimental
  */
-export function doAsyncPrecompilation() {
+export function doAsyncEntryPointCompilation() {
     let testBed = getTestBed();
     return testBed.createModuleFactory();
 }
@@ -277,8 +284,8 @@ export function inject(tokens, fn) {
             }
             catch (e) {
                 if (e instanceof ComponentStillLoadingError) {
-                    throw new Error(`This test module precompiles the component ${stringify(e.compType)} which is using a "templateUrl", but precompilation was never done. ` +
-                        `Please call "doAsyncPrecompilation" before "inject".`);
+                    throw new Error(`This test module uses the entryComponents ${stringify(e.compType)} which is using a "templateUrl", but they were never compiled. ` +
+                        `Please call "doAsyncEntryPointCompilation" before "inject".`);
                 }
                 else {
                     throw e;

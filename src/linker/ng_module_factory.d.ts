@@ -24,7 +24,7 @@ export declare abstract class NgModuleRef<T> {
     injector: Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
-     * delcared in the `precompile` property of the module.
+     * delcared in the `entryComponents` property of the module.
      */
     componentFactoryResolver: ComponentFactoryResolver;
     /**

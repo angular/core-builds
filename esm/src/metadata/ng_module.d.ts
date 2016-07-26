@@ -8,6 +8,30 @@
 import { InjectableMetadata } from '../di/metadata';
 import { Type } from '../facade/lang';
 /**
+ * A wrapper around a module that also includes the providers.
+ *
+ * @experimental
+ */
+export interface ModuleWithProviders {
+    ngModule: Type;
+    providers?: any[];
+}
+/**
+ * Interface for schema definitions in @NgModules.
+ *
+ * @experimental
+ */
+export interface SchemaMetadata {
+    name: string;
+}
+/**
+ * Defines a schema that will allow any property on elements with a `-` in their name,
+ * which is the common rule for custom elements.
+ *
+ * @experimental
+ */
+export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
+/**
  * Declares an Angular Module.
  * @experimental
  */
@@ -60,6 +84,7 @@ export declare class NgModuleMetadata extends InjectableMetadata {
     /**
      * Specifies a list of modules whose exported directives/pipes
      * should be available to templates in this module.
+     * This can also contain {@link ModuleWithProviders}.
      *
      * ### Example
      *
@@ -71,7 +96,7 @@ export declare class NgModuleMetadata extends InjectableMetadata {
      * }
      * ```
      */
-    imports: Array<Type | any[]>;
+    imports: Array<Type | ModuleWithProviders | any[]>;
     /**
      * Specifies a list of directives/pipes/module that can be used within the template
      * of any component that is part of an angular module
@@ -89,17 +114,19 @@ export declare class NgModuleMetadata extends InjectableMetadata {
      */
     exports: Array<Type | any[]>;
     /**
-     * Defines the components that should be precompiled as well when
+     * Defines the components that should be compiled as well when
      * this component is defined. For each components listed here,
      * Angular will create a {@link ComponentFactory ComponentFactory} and store it in the
      * {@link ComponentFactoryResolver ComponentFactoryResolver}.
      */
-    precompile: Array<Type | any[]>;
-    constructor({providers, declarations, imports, exports, precompile}?: {
+    entryComponents: Array<Type | any[]>;
+    schemas: Array<SchemaMetadata | any[]>;
+    constructor({providers, declarations, imports, exports, entryComponents, schemas}?: {
         providers?: any[];
         declarations?: Array<Type | any[]>;
         imports?: Array<Type | any[]>;
         exports?: Array<Type | any[]>;
-        precompile?: Array<Type | any[]>;
+        entryComponents?: Array<Type | any[]>;
+        schemas?: Array<SchemaMetadata | any[]>;
     });
 }
