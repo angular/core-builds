@@ -71,7 +71,7 @@ export declare class TestComponentBuilder {
     /**
      * Builds and returns a ComponentFixture.
      */
-    createAsync<T>(rootComponentType: ConcreteType<T>): Promise<ComponentFixture<T>>;
-    createFakeAsync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
-    createSync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
+    createAsync<T>(rootComponentType: ConcreteType<T>, ngModule?: ConcreteType<any>): Promise<ComponentFixture<T>>;
+    createFakeAsync<T>(rootComponentType: ConcreteType<T>, ngModule?: ConcreteType<any>): ComponentFixture<T>;
+    createSync<T>(rootComponentType: ConcreteType<T>, ngModule?: ConcreteType<any>): ComponentFixture<T>;
 }

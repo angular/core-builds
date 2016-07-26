@@ -21,27 +21,9 @@ var di_1 = require('./di');
 var compiler_1 = require('./linker/compiler');
 var component_factory_1 = require('./linker/component_factory');
 var component_factory_resolver_1 = require('./linker/component_factory_resolver');
-var component_resolver_1 = require('./linker/component_resolver');
 var profile_1 = require('./profile/profile');
 var testability_1 = require('./testability/testability');
 var ng_zone_1 = require('./zone/ng_zone');
-/**
- * Create an Angular zone.
- * @experimental
- */
-function createNgZone(parent) {
-    // If an NgZone is already present in the parent injector,
-    // use that one. Creating the NgZone in the same injector as the
-    // application is dangerous as some services might get created before
-    // the NgZone has been created.
-    // We keep the NgZone factory in the application providers for
-    // backwards compatibility for now though.
-    if (parent) {
-        return parent;
-    }
-    return new ng_zone_1.NgZone({ enableLongStackTrace: isDevMode() });
-}
-exports.createNgZone = createNgZone;
 var _devMode = true;
 var _runModeLocked = false;
 var _platform;
@@ -116,11 +98,18 @@ exports.createPlatform = createPlatform;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-function createPlatformFactory(name, providers) {
+function createPlatformFactory(parentPlaformFactory, name, providers) {
+    if (providers === void 0) { providers = []; }
     var marker = new di_1.OpaqueToken("Platform: " + name);
-    return function () {
+    return function (extraProviders) {
+        if (extraProviders === void 0) { extraProviders = []; }
         if (!getPlatform()) {
-            createPlatform(di_1.ReflectiveInjector.resolveAndCreate(providers.concat({ provide: marker, useValue: true })));
+            if (parentPlaformFactory) {
+                parentPlaformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+            }
+            else {
+                createPlatform(di_1.ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+            }
         }
         return assertPlatform(marker);
     };
@@ -164,7 +153,7 @@ function getPlatform() {
 }
 exports.getPlatform = getPlatform;
 /**
- * Creates an instance of an `@AppModule` for the given platform
+ * Creates an instance of an `@NgModule` for the given platform
  * for offline compilation.
  *
  * ## Simple Example
@@ -172,8 +161,8 @@ exports.getPlatform = getPlatform;
  * ```typescript
  * my_module.ts:
  *
- * @AppModule({
- *   modules: [BrowserModule]
+ * @NgModule({
+ *   imports: [BrowserModule]
  * })
  * class MyModule {}
  *
@@ -191,20 +180,20 @@ function bootstrapModuleFactory(moduleFactory, platform) {
     // Note: We need to create the NgZone _before_ we instantiate the module,
     // as instantiating the module creates some providers eagerly.
     // So we create a mini parent injector that just contains the new NgZone and
-    // pass that as parent to the AppModuleFactory.
+    // pass that as parent to the NgModuleFactory.
     var ngZone = new ng_zone_1.NgZone({ enableLongStackTrace: isDevMode() });
     var ngZoneInjector = di_1.ReflectiveInjector.resolveAndCreate([{ provide: ng_zone_1.NgZone, useValue: ngZone }], platform.injector);
     return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
 }
 exports.bootstrapModuleFactory = bootstrapModuleFactory;
 /**
- * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+ * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
  *
  * ## Simple Example
  *
  * ```typescript
- * @AppModule({
- *   modules: [BrowserModule]
+ * @NgModule({
+ *   imports: [BrowserModule]
  * })
  * class MyModule {}
  *
@@ -213,10 +202,10 @@ exports.bootstrapModuleFactory = bootstrapModuleFactory;
  * @stable
  */
 function bootstrapModule(moduleType, platform, compilerOptions) {
-    if (compilerOptions === void 0) { compilerOptions = {}; }
+    if (compilerOptions === void 0) { compilerOptions = []; }
     var compilerFactory = platform.injector.get(compiler_1.CompilerFactory);
-    var compiler = compilerFactory.createCompiler(compilerOptions);
-    return compiler.compileAppModuleAsync(moduleType)
+    var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+    return compiler.compileModuleAsync(moduleType)
         .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
         .then(function (moduleRef) {
         var appRef = moduleRef.injector.get(ApplicationRef);
@@ -231,10 +220,7 @@ exports.bootstrapModule = bootstrapModule;
  * @deprecated Use {@link bootstrapModuleFactory} instead.
  */
 function coreBootstrap(componentFactory, injector) {
-    var console = injector.get(console_1.Console);
-    console.warn('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
-    var appRef = injector.get(ApplicationRef);
-    return appRef.bootstrap(componentFactory);
+    throw new exceptions_1.BaseException('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
 }
 exports.coreBootstrap = coreBootstrap;
 /**
@@ -245,15 +231,7 @@ exports.coreBootstrap = coreBootstrap;
  * @deprecated Use {@link bootstrapModule} instead.
  */
 function coreLoadAndBootstrap(componentType, injector) {
-    var console = injector.get(console_1.Console);
-    console.warn('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
-    var appRef = injector.get(ApplicationRef);
-    return appRef.run(function () {
-        var componentResolver = injector.get(component_resolver_1.ComponentResolver);
-        return async_1.PromiseWrapper
-            .all([componentResolver.resolveComponent(componentType), appRef.waitForAsyncInitializers()])
-            .then(function (arr) { return appRef.bootstrap(arr[0]); });
-    });
+    throw new exceptions_1.BaseException('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
 }
 exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
 /**
@@ -571,19 +549,4 @@ var ApplicationRef_ = (function (_super) {
     return ApplicationRef_;
 }(ApplicationRef));
 exports.ApplicationRef_ = ApplicationRef_;
-exports.PLATFORM_CORE_PROVIDERS = 
-/*@ts2dart_const*/ [
-    PlatformRef_,
-    /*@ts2dart_const*/ (
-    /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
-];
-exports.APPLICATION_CORE_PROVIDERS = [
-    /* @ts2dart_Provider */ {
-        provide: ng_zone_1.NgZone,
-        useFactory: createNgZone,
-        deps: [[new di_1.SkipSelfMetadata(), new di_1.OptionalMetadata(), ng_zone_1.NgZone]]
-    },
-    ApplicationRef_,
-    /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
-];
 //# sourceMappingURL=application_ref.js.map

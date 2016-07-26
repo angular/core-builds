@@ -32,7 +32,7 @@ import { OpaqueToken } from './di';
   * ```
   *
   * @deprecated Providing platform directives via a provider is deprecated. Provide platform
-  * directives via an {@link AppModule} instead.
+  * directives via an {@link NgModule} instead.
   */
 export declare const PLATFORM_DIRECTIVES: OpaqueToken;
 /**
@@ -59,6 +59,6 @@ export declare const PLATFORM_DIRECTIVES: OpaqueToken;
   * ```
   *
   * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
-  * {@link AppModule} instead.
+  * {@link NgModule} instead.
   */
 export declare const PLATFORM_PIPES: OpaqueToken;

@@ -6,12 +6,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var app_module_1 = require('./metadata/app_module');
 var di_1 = require('./metadata/di');
 var directives_1 = require('./metadata/directives');
+var ng_module_1 = require('./metadata/ng_module');
 var view_1 = require('./metadata/view');
-var app_module_2 = require('./metadata/app_module');
-exports.AppModuleMetadata = app_module_2.AppModuleMetadata;
 var di_2 = require('./metadata/di');
 exports.ANALYZE_FOR_PRECOMPILE = di_2.ANALYZE_FOR_PRECOMPILE;
 exports.AttributeMetadata = di_2.AttributeMetadata;
@@ -38,6 +36,8 @@ exports.DoCheck = lifecycle_hooks_1.DoCheck;
 exports.OnChanges = lifecycle_hooks_1.OnChanges;
 exports.OnDestroy = lifecycle_hooks_1.OnDestroy;
 exports.OnInit = lifecycle_hooks_1.OnInit;
+var ng_module_2 = require('./metadata/ng_module');
+exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
 var view_2 = require('./metadata/view');
 exports.ViewEncapsulation = view_2.ViewEncapsulation;
 exports.ViewMetadata = view_2.ViewMetadata;
@@ -1049,9 +1049,9 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
  */
 exports.HostListener = decorators_1.makePropDecorator(directives_1.HostListenerMetadata);
 /**
- * Declares an app module.
- * @stable
+ * Declares an ng module.
+ * @experimental
  * @Annotation
  */
-exports.AppModule = decorators_1.makeDecorator(app_module_1.AppModuleMetadata);
+exports.NgModule = decorators_1.makeDecorator(ng_module_1.NgModuleMetadata);
 //# sourceMappingURL=metadata.js.map

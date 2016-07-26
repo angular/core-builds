@@ -7,11 +7,11 @@
  */
 import { Injector, ResolvedReflectiveProvider } from '../di';
 import { Type } from '../facade/lang';
+import { Compiler } from './compiler';
 import { ComponentRef } from './component_factory';
-import { ComponentResolver } from './component_resolver';
 import { ViewContainerRef } from './view_container_ref';
 /**
- * Use ComponentResolver and ViewContainerRef directly.
+ * Use ComponentFactoryResolver and ViewContainerRef directly.
  *
  * @deprecated
  */
@@ -109,7 +109,7 @@ export declare abstract class DynamicComponentLoader {
 }
 export declare class DynamicComponentLoader_ extends DynamicComponentLoader {
     private _compiler;
-    constructor(_compiler: ComponentResolver);
+    constructor(_compiler: Compiler);
     loadAsRoot(type: Type, overrideSelectorOrNode: string | any, injector: Injector, onDispose?: () => void, projectableNodes?: any[][]): Promise<ComponentRef<any>>;
     loadNextToLocation(type: Type, location: ViewContainerRef, providers?: ResolvedReflectiveProvider[], projectableNodes?: any[][]): Promise<ComponentRef<any>>;
 }

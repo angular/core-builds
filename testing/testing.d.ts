@@ -13,10 +13,9 @@ export declare function addProviders(providers: Array<any>): void;
  */
 export declare function configureModule(moduleDef: {
     providers?: any[];
-    directives?: any[];
-    pipes?: any[];
+    declarations?: any[];
+    imports?: any[];
     precompile?: any[];
-    modules?: any[];
 }): void;
 /**
  * Allows overriding default compiler providers and settings

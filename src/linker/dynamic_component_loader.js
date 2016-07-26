@@ -13,9 +13,9 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var di_1 = require('../di');
 var lang_1 = require('../facade/lang');
-var component_resolver_1 = require('./component_resolver');
+var compiler_1 = require('./compiler');
 /**
- * Use ComponentResolver and ViewContainerRef directly.
+ * Use ComponentFactoryResolver and ViewContainerRef directly.
  *
  * @deprecated
  */
@@ -32,7 +32,7 @@ var DynamicComponentLoader_ = (function (_super) {
         this._compiler = _compiler;
     }
     DynamicComponentLoader_.prototype.loadAsRoot = function (type, overrideSelectorOrNode, injector, onDispose, projectableNodes) {
-        return this._compiler.resolveComponent(type).then(function (componentFactory) {
+        return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
             var componentRef = componentFactory.create(injector, projectableNodes, lang_1.isPresent(overrideSelectorOrNode) ? overrideSelectorOrNode : componentFactory.selector);
             if (lang_1.isPresent(onDispose)) {
                 componentRef.onDestroy(onDispose);
@@ -43,7 +43,7 @@ var DynamicComponentLoader_ = (function (_super) {
     DynamicComponentLoader_.prototype.loadNextToLocation = function (type, location, providers, projectableNodes) {
         if (providers === void 0) { providers = null; }
         if (projectableNodes === void 0) { projectableNodes = null; }
-        return this._compiler.resolveComponent(type).then(function (componentFactory) {
+        return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
             var contextInjector = location.parentInjector;
             var childInjector = lang_1.isPresent(providers) && providers.length > 0 ?
                 di_1.ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
@@ -57,7 +57,7 @@ var DynamicComponentLoader_ = (function (_super) {
     ];
     /** @nocollapse */
     DynamicComponentLoader_.ctorParameters = [
-        { type: component_resolver_1.ComponentResolver, },
+        { type: compiler_1.Compiler, },
     ];
     return DynamicComponentLoader_;
 }(DynamicComponentLoader));

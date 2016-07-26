@@ -19,11 +19,10 @@ var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
 var provider_util = require('./src/di/provider_util');
 var reflective_provider = require('./src/di/reflective_provider');
-var app_module_factory = require('./src/linker/app_module_factory');
 var component_factory_resolver = require('./src/linker/component_factory_resolver');
-var component_resolver = require('./src/linker/component_resolver');
 var debug_context = require('./src/linker/debug_context');
 var element = require('./src/linker/element');
+var ng_module_factory = require('./src/linker/ng_module_factory');
 var template_ref = require('./src/linker/template_ref');
 var view = require('./src/linker/view');
 var view_type = require('./src/linker/view_type');
@@ -44,12 +43,11 @@ exports.__core_private__ = {
     LifecycleHooks: lifecycle_hooks.LifecycleHooks,
     LIFECYCLE_HOOKS_VALUES: lifecycle_hooks.LIFECYCLE_HOOKS_VALUES,
     ReflectorReader: reflector_reader.ReflectorReader,
-    ReflectorComponentResolver: component_resolver.ReflectorComponentResolver,
     CodegenComponentFactoryResolver: component_factory_resolver.CodegenComponentFactoryResolver,
     AppElement: element.AppElement,
     AppView: view.AppView,
     DebugAppView: view.DebugAppView,
-    AppModuleInjector: app_module_factory.AppModuleInjector,
+    NgModuleInjector: ng_module_factory.NgModuleInjector,
     ViewType: view_type.ViewType,
     MAX_INTERPOLATION_VALUES: view_utils.MAX_INTERPOLATION_VALUES,
     checkBinding: view_utils.checkBinding,

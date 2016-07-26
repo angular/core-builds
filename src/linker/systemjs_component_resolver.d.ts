@@ -12,9 +12,9 @@ import { ComponentResolver } from './component_resolver';
 /**
  * Component resolver that can load components lazily
  *
- * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsAppModuleLoader} to lazy
+ * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsNgModuleLoader} to lazy
  * load
- * {@link AppModuleFactory}s instead.
+ * {@link NgModuleFactory}s instead.
  */
 export declare class SystemJsComponentResolver implements ComponentResolver {
     private _resolver;
@@ -26,9 +26,9 @@ export declare class SystemJsComponentResolver implements ComponentResolver {
 /**
  * Component resolver that can load component factories lazily
  *
- * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsAppModuleLoader}
+ * @deprecated Lazy loading of components is deprecated. Use {@link SystemJsNgModuleLoader}
  * to lazy
- * load {@link AppModuleFactory}s instead.
+ * load {@link NgModuleFactory}s instead.
  */
 export declare class SystemJsCmpFactoryResolver implements ComponentResolver {
     private _console;

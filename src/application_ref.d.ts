@@ -3,17 +3,12 @@ import { ConcreteType, Type } from '../src/facade/lang';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 import { Console } from './console';
 import { Injector } from './di';
-import { AppModuleFactory, AppModuleRef } from './linker/app_module_factory';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
+import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { Testability, TestabilityRegistry } from './testability/testability';
 import { NgZone } from './zone/ng_zone';
-/**
- * Create an Angular zone.
- * @experimental
- */
-export declare function createNgZone(parent: NgZone): NgZone;
 /**
  * Disable Angular's development mode, which turns off assertions and other
  * checks within the framework.
@@ -50,11 +45,17 @@ export declare function isDevMode(): boolean;
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 /**
+ * Factory for a platform.
+ *
+ * @experimental
+ */
+export declare type PlatformFactory = (extraProviders?: any[]) => PlatformRef;
+/**
  * Creates a fatory for a platform
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(name: string, providers: any[]): () => PlatformRef;
+export declare function createPlatformFactory(parentPlaformFactory: PlatformFactory, name: string, providers?: any[]): PlatformFactory;
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
@@ -75,7 +76,7 @@ export declare function disposePlatform(): void;
  */
 export declare function getPlatform(): PlatformRef;
 /**
- * Creates an instance of an `@AppModule` for the given platform
+ * Creates an instance of an `@NgModule` for the given platform
  * for offline compilation.
  *
  * ## Simple Example
@@ -83,8 +84,8 @@ export declare function getPlatform(): PlatformRef;
  * ```typescript
  * my_module.ts:
  *
- * @AppModule({
- *   modules: [BrowserModule]
+ * @NgModule({
+ *   imports: [BrowserModule]
  * })
  * class MyModule {}
  *
@@ -98,15 +99,15 @@ export declare function getPlatform(): PlatformRef;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function bootstrapModuleFactory<M>(moduleFactory: AppModuleFactory<M>, platform: PlatformRef): AppModuleRef<M>;
+export declare function bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, platform: PlatformRef): NgModuleRef<M>;
 /**
- * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+ * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
  *
  * ## Simple Example
  *
  * ```typescript
- * @AppModule({
- *   modules: [BrowserModule]
+ * @NgModule({
+ *   imports: [BrowserModule]
  * })
  * class MyModule {}
  *
@@ -114,7 +115,7 @@ export declare function bootstrapModuleFactory<M>(moduleFactory: AppModuleFactor
  * ```
  * @stable
  */
-export declare function bootstrapModule<M>(moduleType: ConcreteType<M>, platform: PlatformRef, compilerOptions?: CompilerOptions): Promise<AppModuleRef<M>>;
+export declare function bootstrapModule<M>(moduleType: ConcreteType<M>, platform: PlatformRef, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
 /**
  * Shortcut for ApplicationRef.bootstrap.
  * Requires a platform to be created first.
@@ -259,15 +260,3 @@ export declare class ApplicationRef_ extends ApplicationRef {
     dispose(): void;
     componentTypes: Type[];
 }
-export declare const PLATFORM_CORE_PROVIDERS: (typeof PlatformRef_ | {
-    provide: typeof PlatformRef;
-    useExisting: typeof PlatformRef_;
-})[];
-export declare const APPLICATION_CORE_PROVIDERS: ({
-    provide: typeof NgZone;
-    useFactory: (parent: NgZone) => NgZone;
-    deps: any;
-} | typeof ApplicationRef_ | {
-    provide: typeof ApplicationRef;
-    useExisting: typeof ApplicationRef_;
-})[];

@@ -32,7 +32,7 @@ import { OpaqueToken } from './di';
   * ```
   *
   * @deprecated Providing platform directives via a provider is deprecated. Provide platform
-  * directives via an {@link AppModule} instead.
+  * directives via an {@link NgModule} instead.
   */
 export const PLATFORM_DIRECTIVES = 
 /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
@@ -60,7 +60,7 @@ export const PLATFORM_DIRECTIVES =
   * ```
   *
   * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
-  * {@link AppModule} instead.
+  * {@link NgModule} instead.
   */
 export const PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
 //# sourceMappingURL=platform_directives_and_pipes.js.map

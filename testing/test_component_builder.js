@@ -95,34 +95,37 @@ var TestComponentBuilder = (function () {
     /**
      * Builds and returns a ComponentFixture.
      */
-    TestComponentBuilder.prototype.createAsync = function (rootComponentType) {
+    TestComponentBuilder.prototype.createAsync = function (rootComponentType, ngModule) {
         var _this = this;
+        if (ngModule === void 0) { ngModule = null; }
         var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
-            var promise = compiler.compileComponentAsync(rootComponentType);
+            var promise = compiler.compileComponentAsync(rootComponentType, ngModule);
             return promise.then(function (componentFactory) { return _this.createFromFactory(ngZone, componentFactory); });
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     };
-    TestComponentBuilder.prototype.createFakeAsync = function (rootComponentType) {
+    TestComponentBuilder.prototype.createFakeAsync = function (rootComponentType, ngModule) {
+        if (ngModule === void 0) { ngModule = null; }
         var result;
         var error;
-        async_1.PromiseWrapper.then(this.createAsync(rootComponentType), function (_result) { result = _result; }, function (_error) { error = _error; });
+        async_1.PromiseWrapper.then(this.createAsync(rootComponentType, ngModule), function (_result) { result = _result; }, function (_error) { error = _error; });
         fake_async_1.tick();
         if (lang_1.isPresent(error)) {
             throw error;
         }
         return result;
     };
-    TestComponentBuilder.prototype.createSync = function (rootComponentType) {
+    TestComponentBuilder.prototype.createSync = function (rootComponentType, ngModule) {
         var _this = this;
+        if (ngModule === void 0) { ngModule = null; }
         var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
-            return _this.createFromFactory(ngZone, _this._injector.get(index_1.Compiler).compileComponentSync(rootComponentType));
+            return _this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType, ngModule));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     };

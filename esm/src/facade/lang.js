@@ -94,11 +94,11 @@ export function stringify(token) {
     if (token === undefined || token === null) {
         return '' + token;
     }
-    if (token.name) {
-        return token.name;
-    }
     if (token.overriddenName) {
         return token.overriddenName;
+    }
+    if (token.name) {
+        return token.name;
     }
     var res = token.toString();
     var newLineIndex = res.indexOf('\n');

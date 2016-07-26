@@ -90,32 +90,32 @@ export class TestComponentBuilder {
     /**
      * Builds and returns a ComponentFixture.
      */
-    createAsync(rootComponentType) {
+    createAsync(rootComponentType, ngModule = null) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            let promise = compiler.compileComponentAsync(rootComponentType);
+            let promise = compiler.compileComponentAsync(rootComponentType, ngModule);
             return promise.then(componentFactory => this.createFromFactory(ngZone, componentFactory));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }
-    createFakeAsync(rootComponentType) {
+    createFakeAsync(rootComponentType, ngModule = null) {
         let result;
         let error;
-        PromiseWrapper.then(this.createAsync(rootComponentType), (_result) => { result = _result; }, (_error) => { error = _error; });
+        PromiseWrapper.then(this.createAsync(rootComponentType, ngModule), (_result) => { result = _result; }, (_error) => { error = _error; });
         tick();
         if (isPresent(error)) {
             throw error;
         }
         return result;
     }
-    createSync(rootComponentType) {
+    createSync(rootComponentType, ngModule = null) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            return this.createFromFactory(ngZone, this._injector.get(Compiler).compileComponentSync(rootComponentType));
+            return this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType, ngModule));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }

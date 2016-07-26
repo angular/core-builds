@@ -7,9 +7,9 @@
  */
 import { Injectable, ReflectiveInjector } from '../di';
 import { isPresent } from '../facade/lang';
-import { ComponentResolver } from './component_resolver';
+import { Compiler } from './compiler';
 /**
- * Use ComponentResolver and ViewContainerRef directly.
+ * Use ComponentFactoryResolver and ViewContainerRef directly.
  *
  * @deprecated
  */
@@ -21,7 +21,7 @@ export class DynamicComponentLoader_ extends DynamicComponentLoader {
         this._compiler = _compiler;
     }
     loadAsRoot(type, overrideSelectorOrNode, injector, onDispose, projectableNodes) {
-        return this._compiler.resolveComponent(type).then(componentFactory => {
+        return this._compiler.compileComponentAsync(type).then(componentFactory => {
             var componentRef = componentFactory.create(injector, projectableNodes, isPresent(overrideSelectorOrNode) ? overrideSelectorOrNode : componentFactory.selector);
             if (isPresent(onDispose)) {
                 componentRef.onDestroy(onDispose);
@@ -30,7 +30,7 @@ export class DynamicComponentLoader_ extends DynamicComponentLoader {
         });
     }
     loadNextToLocation(type, location, providers = null, projectableNodes = null) {
-        return this._compiler.resolveComponent(type).then(componentFactory => {
+        return this._compiler.compileComponentAsync(type).then(componentFactory => {
             var contextInjector = location.parentInjector;
             var childInjector = isPresent(providers) && providers.length > 0 ?
                 ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
@@ -45,6 +45,6 @@ DynamicComponentLoader_.decorators = [
 ];
 /** @nocollapse */
 DynamicComponentLoader_.ctorParameters = [
-    { type: ComponentResolver, },
+    { type: Compiler, },
 ];
 //# sourceMappingURL=dynamic_component_loader.js.map

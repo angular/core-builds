@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AppModuleFactory, Injector, PlatformRef, Provider, Type } from '../index';
+import { Injector, NgModuleFactory, PlatformRef, Provider, Type } from '../index';
 /**
  * @experimental
  */
@@ -13,32 +13,29 @@ export declare class TestBed implements Injector {
     private _instantiated;
     private _compiler;
     private _moduleRef;
-    private _appModuleFactory;
-    private _compilerProviders;
-    private _compilerUseJit;
+    private _ngModuleFactory;
+    private _compilerOptions;
     private _providers;
-    private _directives;
-    private _pipes;
-    private _modules;
+    private _declarations;
+    private _imports;
     private _precompile;
     reset(): void;
     platform: PlatformRef;
-    appModule: Type;
+    ngModule: Type;
     configureCompiler(config: {
         providers?: any[];
         useJit?: boolean;
     }): void;
     configureModule(moduleDef: {
         providers?: any[];
-        directives?: any[];
-        pipes?: any[];
+        declarations?: any[];
+        imports?: any[];
         precompile?: any[];
-        modules?: any[];
     }): void;
-    createAppModuleFactory(): Promise<AppModuleFactory<any>>;
-    initTestAppModule(): void;
-    private _createCompilerAndModuleMeta();
-    private _createFromModuleFactory(appModuleFactory);
+    createModuleFactory(): Promise<NgModuleFactory<any>>;
+    initTestModule(): void;
+    private _createCompilerAndModule();
+    private _createFromModuleFactory(ngModuleFactory);
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function): any;
 }
@@ -66,7 +63,7 @@ export declare function getTestInjector(): TestBed;
 export declare function setBaseTestProviders(platformProviders: Array<Type | Provider | any[]>, applicationProviders: Array<Type | Provider | any[]>): void;
 /**
  * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
- * application module. These are common to every test in the suite.
+ * angular module. These are common to every test in the suite.
  *
  * This may only be called once, to set up the common providers for the current test
  * suite on the current platform. If you absolutely need to change the providers,
@@ -77,7 +74,7 @@ export declare function setBaseTestProviders(platformProviders: Array<Type | Pro
  *
  * @experimental
  */
-export declare function initTestEnvironment(appModule: Type, platform: PlatformRef): void;
+export declare function initTestEnvironment(ngModule: Type, platform: PlatformRef): Injector;
 /**
  * Reset the providers for the test injector.
  *
@@ -91,8 +88,8 @@ export declare function resetBaseTestProviders(): void;
  */
 export declare function resetTestEnvironment(): void;
 /**
- * Run asynchronous precompilation for the test's AppModule. It is necessary to call this function
- * if your test is using an AppModule which has precompiled components that require an asynchronous
+ * Run asynchronous precompilation for the test's NgModule. It is necessary to call this function
+ * if your test is using an NgModule which has precompiled components that require an asynchronous
  * call, such as an XHR. Should be called once before the test case.
  *
  * @experimental
@@ -130,10 +127,9 @@ export declare class InjectSetupWrapper {
     private _moduleDef;
     constructor(_moduleDef: () => {
         providers?: any[];
-        directives?: any[];
-        pipes?: any[];
+        declarations?: any[];
+        imports?: any[];
         precompile?: any[];
-        modules?: any[];
     });
     private _addModule();
     inject(tokens: any[], fn: Function): () => any;
@@ -147,8 +143,7 @@ export declare function withProviders(providers: () => any): InjectSetupWrapper;
  */
 export declare function withModule(moduleDef: () => {
     providers?: any[];
-    directives?: any[];
-    pipes?: any[];
+    declarations?: any[];
+    imports?: any[];
     precompile?: any[];
-    modules?: any[];
 }): InjectSetupWrapper;

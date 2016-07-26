@@ -92,11 +92,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (token === undefined || token === null) {
             return '' + token;
         }
-        if (token.name) {
-            return token.name;
-        }
         if (token.overriddenName) {
             return token.overriddenName;
+        }
+        if (token.name) {
+            return token.name;
         }
         var res = token.toString();
         var newLineIndex = res.indexOf('\n');
@@ -265,6 +265,48 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function isPrimitive(obj) {
         return !isJsObject(obj);
+    }
+    /**
+     * Allows to refer to references which are not yet defined.
+     *
+     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+     * DI is declared,
+     * but not yet defined. It is also used when the `token` which we use when creating a query is not
+     * yet defined.
+     *
+     * ### Example
+     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+     * @experimental
+     */
+    function forwardRef(forwardRefFn) {
+        forwardRefFn.__forward_ref__ = forwardRef;
+        forwardRefFn.toString = function () { return stringify(this()); };
+        return forwardRefFn;
+    }
+    /**
+     * Lazily retrieves the reference value from a forwardRef.
+     *
+     * Acts as the identity function when given a non-forward-ref value.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
+     *
+     * ```typescript
+     * var ref = forwardRef(() => "refValue");
+     * expect(resolveForwardRef(ref)).toEqual("refValue");
+     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
+     * ```
+     *
+     * See: {@link forwardRef}
+     * @experimental
+     */
+    function resolveForwardRef(type) {
+        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
+            type.__forward_ref__ === forwardRef) {
+            return type();
+        }
+        else {
+            return type;
+        }
     }
     /**
      * A parameter metadata that specifies a dependency.
@@ -529,99 +571,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return HostMetadata;
     }());
     /**
-     * Declares an Application Module.
-     * @stable
-     */
-    var AppModuleMetadata = (function (_super) {
-        __extends(AppModuleMetadata, _super);
-        function AppModuleMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, providers = _b.providers, directives = _b.directives, pipes = _b.pipes, precompile = _b.precompile, modules = _b.modules;
-            _super.call(this);
-            this._providers = providers;
-            this.directives = directives;
-            this.pipes = pipes;
-            this.precompile = precompile;
-            this.modules = modules;
-        }
-        Object.defineProperty(AppModuleMetadata.prototype, "providers", {
-            /**
-             * Defines the set of injectable objects that are available in the injector
-             * of this module.
-             *
-             * ## Simple Example
-             *
-             * Here is an example of a class that can be injected:
-             *
-             * ```
-             * class Greeter {
-             *    greet(name:string) {
-             *      return 'Hello ' + name + '!';
-             *    }
-             * }
-             *
-             * @AppModule({
-             *   providers: [
-             *     Greeter
-             *   ]
-             * })
-             * class HelloWorld {
-             *   greeter:Greeter;
-             *
-             *   constructor(greeter:Greeter) {
-             *     this.greeter = greeter;
-             *   }
-             * }
-             * ```
-             */
-            get: function () { return this._providers; },
-            enumerable: true,
-            configurable: true
-        });
-        return AppModuleMetadata;
-    }(InjectableMetadata));
-    /**
-     * Allows to refer to references which are not yet defined.
-     *
-     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
-     * DI is declared,
-     * but not yet defined. It is also used when the `token` which we use when creating a query is not
-     * yet defined.
-     *
-     * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
-     * @experimental
-     */
-    function forwardRef(forwardRefFn) {
-        forwardRefFn.__forward_ref__ = forwardRef;
-        forwardRefFn.toString = function () { return stringify(this()); };
-        return forwardRefFn;
-    }
-    /**
-     * Lazily retrieves the reference value from a forwardRef.
-     *
-     * Acts as the identity function when given a non-forward-ref value.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
-     *
-     * ```typescript
-     * var ref = forwardRef(() => "refValue");
-     * expect(resolveForwardRef(ref)).toEqual("refValue");
-     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
-     * ```
-     *
-     * See: {@link forwardRef}
-     * @experimental
-     */
-    function resolveForwardRef(type) {
-        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
-            type.__forward_ref__ === forwardRef) {
-            return type();
-        }
-        else {
-            return type;
-        }
-    }
-    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -660,13 +609,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * This token can be used to create a virtual provider that will populate the
-     * `precompile` fields of components and app modules based on its `useValue`.
+     * `precompile` fields of components and ng modules based on its `useValue`.
      * All components that are referenced in the `useValue` value (either directly
      * or in a nested array or map) will be added to the `precompile` property.
      *
      * ### Example
      * The following example shows how the router can populate the `precompile`
-     * field of an AppModule based on the router configuration which refers
+     * field of an NgModule based on the router configuration which refers
      * to components.
      *
      * ```typescript
@@ -684,7 +633,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   {path: /teams', component: TeamsComp}
      * ];
      *
-     * @AppModule({
+     * @NgModule({
      *   providers: [provideRoutes(routes)]
      * })
      * class ModuleWithRoutes {}
@@ -2113,6 +2062,57 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return HostListenerMetadata;
     }());
+    /**
+     * Declares an Angular Module.
+     * @experimental
+     */
+    var NgModuleMetadata = (function (_super) {
+        __extends(NgModuleMetadata, _super);
+        function NgModuleMetadata(_a) {
+            var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, precompile = _b.precompile;
+            _super.call(this);
+            this._providers = providers;
+            this.declarations = declarations;
+            this.imports = imports;
+            this.exports = exports;
+            this.precompile = precompile;
+        }
+        Object.defineProperty(NgModuleMetadata.prototype, "providers", {
+            /**
+             * Defines the set of injectable objects that are available in the injector
+             * of this module.
+             *
+             * ## Simple Example
+             *
+             * Here is an example of a class that can be injected:
+             *
+             * ```
+             * class Greeter {
+             *    greet(name:string) {
+             *      return 'Hello ' + name + '!';
+             *    }
+             * }
+             *
+             * @NgModule({
+             *   providers: [
+             *     Greeter
+             *   ]
+             * })
+             * class HelloWorld {
+             *   greeter:Greeter;
+             *
+             *   constructor(greeter:Greeter) {
+             *     this.greeter = greeter;
+             *   }
+             * }
+             * ```
+             */
+            get: function () { return this._providers; },
+            enumerable: true,
+            configurable: true
+        });
+        return NgModuleMetadata;
+    }(InjectableMetadata));
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -3955,11 +3955,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var HostListener = makePropDecorator(HostListenerMetadata);
     /**
-     * Declares an app module.
-     * @stable
+     * Declares an ng module.
+     * @experimental
      * @Annotation
      */
-    var AppModule = makeDecorator(AppModuleMetadata);
+    var NgModule = makeDecorator(NgModuleMetadata);
     /**
      * Factory for creating {@link InjectMetadata}.
      * @stable
@@ -6901,8 +6901,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
      *
-     * Each `@AppModule` provides an own `Compiler` to its injector,
-     * that will use the directives/pipes of the app module for compilation
+     * Each `@NgModule` provides an own `Compiler` to its injector,
+     * that will use the directives/pipes of the ng module for compilation
      * of components.
      * @stable
      */
@@ -6912,6 +6912,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         Object.defineProperty(Compiler.prototype, "injector", {
             /**
              * Returns the injector with which the compiler has been created.
+             *
+             * @internal
              */
             get: function () {
                 throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
@@ -6922,27 +6924,27 @@ var __extends = (this && this.__extends) || function (d, b) {
         /**
          * Loads the template and styles of a component and returns the associated `ComponentFactory`.
          */
-        Compiler.prototype.compileComponentAsync = function (component) {
+        Compiler.prototype.compileComponentAsync = function (component, ngModule) {
+            if (ngModule === void 0) { ngModule = null; }
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
          * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
          */
-        Compiler.prototype.compileComponentSync = function (component) {
+        Compiler.prototype.compileComponentSync = function (component, ngModule) {
+            if (ngModule === void 0) { ngModule = null; }
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
         };
         /**
-         * Compiles the given App Module. All templates of the components listed in `precompile`
+         * Compiles the given NgModule. All templates of the components listed in `precompile`
          * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+         * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
          */
-        Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
+        Compiler.prototype.compileModuleSync = function (moduleType) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
         };
-        Compiler.prototype.compileAppModuleAsync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
+        Compiler.prototype.compileModuleAsync = function (moduleType) {
             throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
         };
         /**
@@ -6950,11 +6952,17 @@ var __extends = (this && this.__extends) || function (d, b) {
          */
         Compiler.prototype.clearCache = function () { };
         /**
-         * Clears the cache for the given component/appModule.
+         * Clears the cache for the given component/ngModule.
          */
         Compiler.prototype.clearCacheFor = function (type) { };
         return Compiler;
     }());
+    /**
+     * Token to provide CompilerOptions in the platform injector.
+     *
+     * @experimental
+     */
+    var CompilerOptions = new OpaqueToken('compilerOptions');
     /**
      * A factory for creating a Compiler
      *
@@ -6963,57 +6971,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     var CompilerFactory = (function () {
         function CompilerFactory() {
         }
-        CompilerFactory.mergeOptions = function (defaultOptions, newOptions) {
-            if (defaultOptions === void 0) { defaultOptions = {}; }
-            if (newOptions === void 0) { newOptions = {}; }
-            return {
-                useDebug: _firstDefined(newOptions.useDebug, defaultOptions.useDebug),
-                useJit: _firstDefined(newOptions.useJit, defaultOptions.useJit),
-                defaultEncapsulation: _firstDefined(newOptions.defaultEncapsulation, defaultOptions.defaultEncapsulation),
-                providers: _mergeArrays(defaultOptions.providers, newOptions.providers),
-                deprecatedAppProviders: _mergeArrays(defaultOptions.deprecatedAppProviders, newOptions.deprecatedAppProviders)
-            };
-        };
-        CompilerFactory.prototype.withDefaults = function (options) {
-            if (options === void 0) { options = {}; }
-            return new _DefaultApplyingCompilerFactory(this, options);
-        };
         return CompilerFactory;
     }());
-    var _DefaultApplyingCompilerFactory = (function (_super) {
-        __extends(_DefaultApplyingCompilerFactory, _super);
-        function _DefaultApplyingCompilerFactory(_delegate, _options) {
-            _super.call(this);
-            this._delegate = _delegate;
-            this._options = _options;
-        }
-        _DefaultApplyingCompilerFactory.prototype.createCompiler = function (options) {
-            if (options === void 0) { options = {}; }
-            return this._delegate.createCompiler(CompilerFactory.mergeOptions(this._options, options));
-        };
-        return _DefaultApplyingCompilerFactory;
-    }(CompilerFactory));
-    function _firstDefined() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        for (var i = 0; i < args.length; i++) {
-            if (args[i] !== undefined) {
-                return args[i];
-            }
-        }
-        return undefined;
-    }
-    function _mergeArrays() {
-        var parts = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            parts[_i - 0] = arguments[_i];
-        }
-        var result = [];
-        parts.forEach(function (part) { return result.push.apply(result, part); });
-        return result;
-    }
     /* @ts2dart_const */
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
@@ -9241,54 +9200,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return CodegenComponentFactoryResolver;
     }());
     /**
-     * Low-level service for loading {@link ComponentFactory}s, which
-     * can later be used to create and render a Component instance.
-     *
-     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
-     * AppModule}.precompile}/{@link Component}.precompile or
-     * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
-     * Use {@link AppModuleFactoryLoader} for lazy loading.
-     */
-    var ComponentResolver = (function () {
-        function ComponentResolver() {
-        }
-        return ComponentResolver;
-    }());
-    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @AppModule/@Component.precompile or ANALYZE_FOR_PRECOMPILE provider instead.';
-    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use AppModuleFactoryLoader instead.';
-    function _isComponentFactory(type) {
-        return type instanceof ComponentFactory;
-    }
-    var ReflectorComponentResolver = (function (_super) {
-        __extends(ReflectorComponentResolver, _super);
-        function ReflectorComponentResolver(_console) {
-            _super.call(this);
-            this._console = _console;
-        }
-        ReflectorComponentResolver.prototype.resolveComponent = function (component) {
-            if (isString(component)) {
-                return PromiseWrapper.reject(new BaseException("Cannot resolve component using '" + component + "'."), null);
-            }
-            this._console.warn(ComponentResolver.DynamicCompilationDeprecationMsg);
-            var metadatas = reflector.annotations(component);
-            var componentFactory = metadatas.find(_isComponentFactory);
-            if (isBlank(componentFactory)) {
-                throw new BaseException("No precompiled component " + stringify(component) + " found");
-            }
-            return PromiseWrapper.resolve(componentFactory);
-        };
-        ReflectorComponentResolver.prototype.clearCache = function () { };
-        return ReflectorComponentResolver;
-    }(ComponentResolver));
-    /** @nocollapse */
-    ReflectorComponentResolver.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ReflectorComponentResolver.ctorParameters = [
-        { type: Console, },
-    ];
-    /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
      *
@@ -9752,22 +9663,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         _testabilityGetter = getter;
     }
     var _testabilityGetter = new _NoopGetTestability();
-    /**
-     * Create an Angular zone.
-     * @experimental
-     */
-    function createNgZone(parent) {
-        // If an NgZone is already present in the parent injector,
-        // use that one. Creating the NgZone in the same injector as the
-        // application is dangerous as some services might get created before
-        // the NgZone has been created.
-        // We keep the NgZone factory in the application providers for
-        // backwards compatibility for now though.
-        if (parent) {
-            return parent;
-        }
-        return new NgZone({ enableLongStackTrace: isDevMode() });
-    }
     var _devMode = true;
     var _runModeLocked = false;
     var _platform;
@@ -9838,11 +9733,18 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    function createPlatformFactory(name, providers) {
+    function createPlatformFactory(parentPlaformFactory, name, providers) {
+        if (providers === void 0) { providers = []; }
         var marker = new OpaqueToken("Platform: " + name);
-        return function () {
+        return function (extraProviders) {
+            if (extraProviders === void 0) { extraProviders = []; }
             if (!getPlatform()) {
-                createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat({ provide: marker, useValue: true })));
+                if (parentPlaformFactory) {
+                    parentPlaformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+                }
+                else {
+                    createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                }
             }
             return assertPlatform(marker);
         };
@@ -9882,7 +9784,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return isPresent(_platform) && !_platform.disposed ? _platform : null;
     }
     /**
-     * Creates an instance of an `@AppModule` for the given platform
+     * Creates an instance of an `@NgModule` for the given platform
      * for offline compilation.
      *
      * ## Simple Example
@@ -9890,8 +9792,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```typescript
      * my_module.ts:
      *
-     * @AppModule({
-     *   modules: [BrowserModule]
+     * @NgModule({
+     *   imports: [BrowserModule]
      * })
      * class MyModule {}
      *
@@ -9909,19 +9811,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         // Note: We need to create the NgZone _before_ we instantiate the module,
         // as instantiating the module creates some providers eagerly.
         // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the AppModuleFactory.
+        // pass that as parent to the NgModuleFactory.
         var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
         var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], platform.injector);
         return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
     }
     /**
-     * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
+     * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
      * ## Simple Example
      *
      * ```typescript
-     * @AppModule({
-     *   modules: [BrowserModule]
+     * @NgModule({
+     *   imports: [BrowserModule]
      * })
      * class MyModule {}
      *
@@ -9930,10 +9832,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     function bootstrapModule(moduleType, platform, compilerOptions) {
-        if (compilerOptions === void 0) { compilerOptions = {}; }
+        if (compilerOptions === void 0) { compilerOptions = []; }
         var compilerFactory = platform.injector.get(CompilerFactory);
-        var compiler = compilerFactory.createCompiler(compilerOptions);
-        return compiler.compileAppModuleAsync(moduleType)
+        var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+        return compiler.compileModuleAsync(moduleType)
             .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
             .then(function (moduleRef) {
             var appRef = moduleRef.injector.get(ApplicationRef);
@@ -9947,10 +9849,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated Use {@link bootstrapModuleFactory} instead.
      */
     function coreBootstrap(componentFactory, injector) {
-        var console = injector.get(Console);
-        console.warn('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
-        var appRef = injector.get(ApplicationRef);
-        return appRef.bootstrap(componentFactory);
+        throw new BaseException('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
     }
     /**
      * Resolves the componentFactory for the given component,
@@ -9960,15 +9859,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated Use {@link bootstrapModule} instead.
      */
     function coreLoadAndBootstrap(componentType, injector) {
-        var console = injector.get(Console);
-        console.warn('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
-        var appRef = injector.get(ApplicationRef);
-        return appRef.run(function () {
-            var componentResolver = injector.get(ComponentResolver);
-            return PromiseWrapper
-                .all([componentResolver.resolveComponent(componentType), appRef.waitForAsyncInitializers()])
-                .then(function (arr) { return appRef.bootstrap(arr[0]); });
-        });
+        throw new BaseException('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
     }
     /**
      * The Angular platform is the entry point for Angular on a web page. Each page
@@ -10281,110 +10172,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         { type: Testability, decorators: [{ type: Optional },] },
         { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
     ];
-    var PLATFORM_CORE_PROVIDERS = 
-    /*@ts2dart_const*/ [
-        PlatformRef_,
-        /*@ts2dart_const*/ (
-        /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
-    ];
-    var APPLICATION_CORE_PROVIDERS = [
-        /* @ts2dart_Provider */ {
-            provide: NgZone,
-            useFactory: createNgZone,
-            deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
-        },
-        ApplicationRef_,
-        /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
-    ];
-    /**
-     * Represents an instance of an AppModule created via a {@link AppModuleFactory}.
-     *
-     * `AppModuleRef` provides access to the AppModule Instance as well other objects related to this
-     * AppModule Instance.
-     * @stable
-     */
-    var AppModuleRef = (function () {
-        function AppModuleRef() {
-        }
-        Object.defineProperty(AppModuleRef.prototype, "injector", {
-            /**
-             * The injector that contains all of the providers of the AppModule.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppModuleRef.prototype, "componentFactoryResolver", {
-            /**
-             * The ComponentFactoryResolver to get hold of the ComponentFactories
-             * delcared in the `precompile` property of the module.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppModuleRef.prototype, "instance", {
-            /**
-             * The AppModule instance.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        return AppModuleRef;
-    }());
-    /**
-     * @stable
-     */
-    var AppModuleFactory = (function () {
-        function AppModuleFactory(_injectorClass, _moduleype) {
-            this._injectorClass = _injectorClass;
-            this._moduleype = _moduleype;
-        }
-        Object.defineProperty(AppModuleFactory.prototype, "moduleType", {
-            get: function () { return this._moduleype; },
-            enumerable: true,
-            configurable: true
-        });
-        AppModuleFactory.prototype.create = function (parentInjector) {
-            if (parentInjector === void 0) { parentInjector = null; }
-            if (!parentInjector) {
-                parentInjector = Injector.NULL;
-            }
-            var instance = new this._injectorClass(parentInjector);
-            instance.create();
-            return instance;
-        };
-        return AppModuleFactory;
-    }());
-    var _UNDEFINED = new Object();
-    var AppModuleInjector = (function (_super) {
-        __extends(AppModuleInjector, _super);
-        function AppModuleInjector(parent, factories) {
-            _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
-            this.parent = parent;
-        }
-        AppModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
-        AppModuleInjector.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
-            if (token === Injector || token === ComponentFactoryResolver) {
-                return this;
-            }
-            var result = this.getInternal(token, _UNDEFINED);
-            return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
-        };
-        Object.defineProperty(AppModuleInjector.prototype, "injector", {
-            get: function () { return this; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppModuleInjector.prototype, "componentFactoryResolver", {
-            get: function () { return this; },
-            enumerable: true,
-            configurable: true
-        });
-        return AppModuleInjector;
-    }(CodegenComponentFactoryResolver));
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -10393,16 +10180,23 @@ var __extends = (this && this.__extends) || function (d, b) {
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Used to load app moduled factories.
-     * @experimental
+     * Low-level service for loading {@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     *
+     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
+     * NgModule}.precompile}/{@link Component}.precompile or
+     * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
+     * Use {@link NgModuleFactoryLoader} for lazy loading.
      */
-    var AppModuleFactoryLoader = (function () {
-        function AppModuleFactoryLoader() {
+    var ComponentResolver = (function () {
+        function ComponentResolver() {
         }
-        return AppModuleFactoryLoader;
+        return ComponentResolver;
     }());
+    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.precompile or ANALYZE_FOR_PRECOMPILE provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
+    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use NgModuleFactoryLoader instead.';
     /**
-     * Use ComponentResolver and ViewContainerRef directly.
+     * Use ComponentFactoryResolver and ViewContainerRef directly.
      *
      * @deprecated
      */
@@ -10418,7 +10212,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._compiler = _compiler;
         }
         DynamicComponentLoader_.prototype.loadAsRoot = function (type, overrideSelectorOrNode, injector, onDispose, projectableNodes) {
-            return this._compiler.resolveComponent(type).then(function (componentFactory) {
+            return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
                 var componentRef = componentFactory.create(injector, projectableNodes, isPresent(overrideSelectorOrNode) ? overrideSelectorOrNode : componentFactory.selector);
                 if (isPresent(onDispose)) {
                     componentRef.onDestroy(onDispose);
@@ -10429,7 +10223,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         DynamicComponentLoader_.prototype.loadNextToLocation = function (type, location, providers, projectableNodes) {
             if (providers === void 0) { providers = null; }
             if (projectableNodes === void 0) { projectableNodes = null; }
-            return this._compiler.resolveComponent(type).then(function (componentFactory) {
+            return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
                 var contextInjector = location.parentInjector;
                 var childInjector = isPresent(providers) && providers.length > 0 ?
                     ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
@@ -10445,8 +10239,113 @@ var __extends = (this && this.__extends) || function (d, b) {
     ];
     /** @nocollapse */
     DynamicComponentLoader_.ctorParameters = [
-        { type: ComponentResolver, },
+        { type: Compiler, },
     ];
+    /**
+     * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
+     *
+     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+     * NgModule Instance.
+     *
+     * @experimental
+     */
+    var NgModuleRef = (function () {
+        function NgModuleRef() {
+        }
+        Object.defineProperty(NgModuleRef.prototype, "injector", {
+            /**
+             * The injector that contains all of the providers of the NgModule.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
+            /**
+             * The ComponentFactoryResolver to get hold of the ComponentFactories
+             * delcared in the `precompile` property of the module.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleRef.prototype, "instance", {
+            /**
+             * The NgModule instance.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        return NgModuleRef;
+    }());
+    /**
+     * @experimental
+     */
+    var NgModuleFactory = (function () {
+        function NgModuleFactory(_injectorClass, _moduleype) {
+            this._injectorClass = _injectorClass;
+            this._moduleype = _moduleype;
+        }
+        Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
+            get: function () { return this._moduleype; },
+            enumerable: true,
+            configurable: true
+        });
+        NgModuleFactory.prototype.create = function (parentInjector) {
+            if (!parentInjector) {
+                parentInjector = Injector.NULL;
+            }
+            var instance = new this._injectorClass(parentInjector);
+            instance.create();
+            return instance;
+        };
+        return NgModuleFactory;
+    }());
+    var _UNDEFINED = new Object();
+    var NgModuleInjector = (function (_super) {
+        __extends(NgModuleInjector, _super);
+        function NgModuleInjector(parent, factories) {
+            _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
+            this.parent = parent;
+        }
+        NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
+        NgModuleInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+            if (token === Injector || token === ComponentFactoryResolver) {
+                return this;
+            }
+            var result = this.getInternal(token, _UNDEFINED);
+            return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
+        };
+        Object.defineProperty(NgModuleInjector.prototype, "injector", {
+            get: function () { return this; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleInjector.prototype, "componentFactoryResolver", {
+            get: function () { return this; },
+            enumerable: true,
+            configurable: true
+        });
+        return NgModuleInjector;
+    }(CodegenComponentFactoryResolver));
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Used to load ng moduled factories.
+     * @experimental
+     */
+    var NgModuleFactoryLoader = (function () {
+        function NgModuleFactoryLoader() {
+        }
+        return NgModuleFactoryLoader;
+    }());
     /**
      * An unmodifiable list of items that Angular keeps up to date when the state
      * of the application changes.
@@ -10548,14 +10447,14 @@ var __extends = (this && this.__extends) || function (d, b) {
     var _SEPARATOR = '#';
     var FACTORY_MODULE_SUFFIX = '.ngfactory';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
-    var SystemJsAppModuleLoader = (function () {
-        function SystemJsAppModuleLoader(_compiler) {
+    var SystemJsNgModuleLoader = (function () {
+        function SystemJsNgModuleLoader(_compiler) {
             this._compiler = _compiler;
         }
-        SystemJsAppModuleLoader.prototype.load = function (path) {
+        SystemJsNgModuleLoader.prototype.load = function (path) {
             return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
         };
-        SystemJsAppModuleLoader.prototype.loadAndCompile = function (path) {
+        SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
@@ -10564,9 +10463,9 @@ var __extends = (this && this.__extends) || function (d, b) {
                 .System.import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
-                .then(function (type) { return _this._compiler.compileAppModuleAsync(type); });
+                .then(function (type) { return _this._compiler.compileModuleAsync(type); });
         };
-        SystemJsAppModuleLoader.prototype.loadFactory = function (path) {
+        SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
@@ -10575,14 +10474,14 @@ var __extends = (this && this.__extends) || function (d, b) {
                 .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        return SystemJsAppModuleLoader;
+        return SystemJsNgModuleLoader;
     }());
     /** @nocollapse */
-    SystemJsAppModuleLoader.decorators = [
+    SystemJsNgModuleLoader.decorators = [
         { type: Injectable },
     ];
     /** @nocollapse */
-    SystemJsAppModuleLoader.ctorParameters = [
+    SystemJsNgModuleLoader.ctorParameters = [
         { type: Compiler, decorators: [{ type: Optional },] },
     ];
     function checkNotEmpty(value, modulePath, exportName) {
@@ -11046,7 +10945,7 @@ var __extends = (this && this.__extends) || function (d, b) {
       * ```
       *
       * @deprecated Providing platform directives via a provider is deprecated. Provide platform
-      * directives via an {@link AppModule} instead.
+      * directives via an {@link NgModule} instead.
       */
     var PLATFORM_DIRECTIVES = 
     /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
@@ -11074,23 +10973,30 @@ var __extends = (this && this.__extends) || function (d, b) {
       * ```
       *
       * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
-      * {@link AppModule} instead.
+      * {@link NgModule} instead.
       */
     var PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
     function _reflector() {
         return reflector;
     }
     // prevent missing use Dart warning.
+    var _CORE_PLATFORM_PROVIDERS = [
+        PlatformRef_, { provide: PlatformRef, useExisting: PlatformRef_ },
+        { provide: Reflector, useFactory: _reflector, deps: [] },
+        { provide: ReflectorReader, useExisting: Reflector }, TestabilityRegistry, Console
+    ];
     /**
-     * A default set of providers which should be included in any Angular platform.
+     * This platform has to be included in any other platform
+     *
      * @experimental
      */
-    var PLATFORM_COMMON_PROVIDERS = [
-        PLATFORM_CORE_PROVIDERS,
-        /*@ts2dart_Provider*/ { provide: Reflector, useFactory: _reflector, deps: [] },
-        /*@ts2dart_Provider*/ { provide: ReflectorReader, useExisting: Reflector }, TestabilityRegistry,
-        Console
-    ];
+    var corePlatform = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+    /**
+     * A default set of providers which should be included in any Angular platform.
+     *
+     * @deprecated Create platforms via `createPlatformFactory(corePlatform, ...) instead!
+     */
+    var PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
     // avoid unused import when Type union types are erased
     function _componentFactoryResolverFactory() {
         return ComponentFactoryResolver.NULL;
@@ -11101,29 +11007,51 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _keyValueDiffersFactory() {
         return defaultKeyValueDiffers;
     }
+    function createNgZone(parent) {
+        // If an NgZone is already present in the parent injector,
+        // use that one. Creating the NgZone in the same injector as the
+        // application is dangerous as some services might get created before
+        // the NgZone has been created.
+        // We keep the NgZone factory in the application providers for
+        // backwards compatibility for now though.
+        if (parent) {
+            return parent;
+        }
+        return new NgZone({ enableLongStackTrace: isDevMode() });
+    }
     /**
      * A default set of providers which should be included in any Angular
      * application, regardless of the platform it runs onto.
-     * @stable
+     *
+     * @deprecated Include `ApplicationModule` instead.
      */
-    var APPLICATION_COMMON_PROVIDERS = 
-    /*@ts2dart_const*/ [
-        APPLICATION_CORE_PROVIDERS,
-        /* @ts2dart_Provider */ { provide: ComponentResolver, useClass: ReflectorComponentResolver },
-        { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory, deps: [] },
-        APP_ID_RANDOM_PROVIDER,
-        ViewUtils,
-        /* @ts2dart_Provider */ {
-            provide: IterableDiffers,
-            useFactory: _iterableDiffersFactory,
-            deps: []
-        },
-        /* @ts2dart_Provider */ {
-            provide: KeyValueDiffers,
-            useFactory: _keyValueDiffersFactory,
-            deps: []
-        },
-        /* @ts2dart_Provider */ { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
+    var APPLICATION_COMMON_PROVIDERS = [];
+    var ApplicationModule = (function () {
+        function ApplicationModule() {
+        }
+        return ApplicationModule;
+    }());
+    /** @nocollapse */
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{
+                    providers: [
+                        {
+                            provide: NgZone,
+                            useFactory: createNgZone,
+                            deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
+                        },
+                        ApplicationRef_,
+                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                        Compiler,
+                        { provide: ComponentResolver, useExisting: Compiler },
+                        { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory },
+                        APP_ID_RANDOM_PROVIDER,
+                        ViewUtils,
+                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                        { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
+                    ]
+                },] },
     ];
     /**
      * @license
@@ -12779,12 +12707,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         LifecycleHooks: LifecycleHooks,
         LIFECYCLE_HOOKS_VALUES: LIFECYCLE_HOOKS_VALUES,
         ReflectorReader: ReflectorReader,
-        ReflectorComponentResolver: ReflectorComponentResolver,
         CodegenComponentFactoryResolver: CodegenComponentFactoryResolver,
         AppElement: AppElement,
         AppView: AppView,
         DebugAppView: DebugAppView,
-        AppModuleInjector: AppModuleInjector,
+        NgModuleInjector: NgModuleInjector,
         ViewType: ViewType,
         MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         checkBinding: checkBinding,
@@ -12861,6 +12788,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
     exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
+    exports.ApplicationModule = ApplicationModule;
     exports.wtfCreateScope = wtfCreateScope;
     exports.wtfLeave = wtfLeave;
     exports.wtfStartTimeRange = wtfStartTimeRange;
@@ -12886,8 +12814,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Output = Output;
     exports.HostBinding = HostBinding;
     exports.HostListener = HostListener;
-    exports.AppModule = AppModule;
-    exports.AppModuleMetadata = AppModuleMetadata;
+    exports.NgModule = NgModule;
     exports.ANALYZE_FOR_PRECOMPILE = ANALYZE_FOR_PRECOMPILE;
     exports.AttributeMetadata = AttributeMetadata;
     exports.ContentChildMetadata = ContentChildMetadata;
@@ -12911,6 +12838,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.OnChanges = OnChanges;
     exports.OnDestroy = OnDestroy;
     exports.OnInit = OnInit;
+    exports.NgModuleMetadata = NgModuleMetadata;
     exports.ViewMetadata = ViewMetadata;
     exports.Class = Class;
     exports.HostMetadata = HostMetadata;
@@ -12949,11 +12877,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;
-    exports.AppModuleFactory = AppModuleFactory;
-    exports.AppModuleRef = AppModuleRef;
-    exports.AppModuleFactoryLoader = AppModuleFactoryLoader;
     exports.Compiler = Compiler;
     exports.CompilerFactory = CompilerFactory;
+    exports.CompilerOptions = CompilerOptions;
     exports.ComponentStillLoadingError = ComponentStillLoadingError;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
@@ -12963,8 +12889,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.DynamicComponentLoader = DynamicComponentLoader;
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
+    exports.NgModuleFactory = NgModuleFactory;
+    exports.NgModuleRef = NgModuleRef;
+    exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
     exports.QueryList = QueryList;
-    exports.SystemJsAppModuleLoader = SystemJsAppModuleLoader;
+    exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
     exports.SystemJsCmpFactoryResolver = SystemJsCmpFactoryResolver;
     exports.SystemJsComponentResolver = SystemJsComponentResolver;
     exports.TemplateRef = TemplateRef;
@@ -12984,6 +12913,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.WrappedValue = WrappedValue;
     exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
     exports.PLATFORM_PIPES = PLATFORM_PIPES;
+    exports.corePlatform = corePlatform;
     exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
     exports.__core_private__ = __core_private__;
     exports.AUTO_STYLE = AUTO_STYLE;
