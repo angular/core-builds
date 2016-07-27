@@ -78,7 +78,9 @@ export function isStrictStringMap(obj) {
     return isStringMap(obj) && Object.getPrototypeOf(obj) === STRING_MAP_PROTO;
 }
 export function isPromise(obj) {
-    return obj instanceof _global.Promise;
+    // allow any Promise/A+ compliant thenable.
+    // It's up to the caller to ensure that obj.then conforms to the spec
+    return isPresent(obj) && isFunction(obj.then);
 }
 export function isArray(obj) {
     return Array.isArray(obj);
