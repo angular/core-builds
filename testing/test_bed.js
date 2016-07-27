@@ -140,7 +140,7 @@ var TestBed = (function () {
     TestBed.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
         if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestNgModule first!');
+            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestModule first!');
         }
         if (token === TestBed) {
             return this;
@@ -153,7 +153,7 @@ var TestBed = (function () {
     TestBed.prototype.execute = function (tokens, fn) {
         var _this = this;
         if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestNgModule first!');
+            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestModule first!');
         }
         var params = tokens.map(function (t) { return _this.get(t); });
         return lang_1.FunctionWrapper.apply(fn, params);
