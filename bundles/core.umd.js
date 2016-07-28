@@ -10469,7 +10469,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._compiler = _compiler;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
-            return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
+            var offlineMode = this._compiler instanceof Compiler;
+            return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
@@ -10499,7 +10500,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     ];
     /** @nocollapse */
     SystemJsNgModuleLoader.ctorParameters = [
-        { type: Compiler, decorators: [{ type: Optional },] },
+        { type: Compiler, },
     ];
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {

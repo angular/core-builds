@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injectable, Optional } from '../di';
+import { Injectable } from '../di';
 import { global } from '../facade/lang';
 import { Compiler } from './compiler';
 const _SEPARATOR = '#';
@@ -16,7 +16,8 @@ export class SystemJsNgModuleLoader {
         this._compiler = _compiler;
     }
     load(path) {
-        return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
+        const offlineMode = this._compiler instanceof Compiler;
+        return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     }
     loadAndCompile(path) {
         let [module, exportName] = path.split(_SEPARATOR);
@@ -44,7 +45,7 @@ SystemJsNgModuleLoader.decorators = [
 ];
 /** @nocollapse */
 SystemJsNgModuleLoader.ctorParameters = [
-    { type: Compiler, decorators: [{ type: Optional },] },
+    { type: Compiler, },
 ];
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {

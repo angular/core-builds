@@ -17,7 +17,8 @@ var SystemJsNgModuleLoader = (function () {
         this._compiler = _compiler;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
-        return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
+        var offlineMode = this._compiler instanceof compiler_1.Compiler;
+        return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
     SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
         var _this = this;
@@ -45,7 +46,7 @@ var SystemJsNgModuleLoader = (function () {
     ];
     /** @nocollapse */
     SystemJsNgModuleLoader.ctorParameters = [
-        { type: compiler_1.Compiler, decorators: [{ type: di_1.Optional },] },
+        { type: compiler_1.Compiler, },
     ];
     return SystemJsNgModuleLoader;
 }());
