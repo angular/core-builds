@@ -148,7 +148,7 @@ var TestBed = (function () {
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         var result = this._moduleRef.injector.get(token, UNDEFINED);
-        return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
+        return result === UNDEFINED ? this._compiler._injector.get(token, notFoundValue) : result;
     };
     TestBed.prototype.execute = function (tokens, fn) {
         var _this = this;

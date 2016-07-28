@@ -6921,11 +6921,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     var Compiler = (function () {
         function Compiler() {
         }
-        Object.defineProperty(Compiler.prototype, "injector", {
+        Object.defineProperty(Compiler.prototype, "_injector", {
             /**
              * Returns the injector with which the compiler has been created.
-             *
-             * @internal
              */
             get: function () {
                 throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");

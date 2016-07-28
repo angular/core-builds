@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OpaqueToken } from '../di';
+import { Injector, OpaqueToken } from '../di';
 import { BaseException } from '../facade/exceptions';
 import { ConcreteType, Type } from '../facade/lang';
 import { ViewEncapsulation } from '../metadata';
@@ -31,6 +31,10 @@ export declare class ComponentStillLoadingError extends BaseException {
  * @stable
  */
 export declare class Compiler {
+    /**
+     * Returns the injector with which the compiler has been created.
+     */
+    readonly _injector: Injector;
     /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */

@@ -141,7 +141,7 @@ export class TestBed {
         // Tests can inject things from the ng module and from the compiler,
         // but the ng module can't inject things from the compiler and vice versa.
         let result = this._moduleRef.injector.get(token, UNDEFINED);
-        return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
+        return result === UNDEFINED ? this._compiler._injector.get(token, notFoundValue) : result;
     }
     execute(tokens, fn) {
         if (!this._instantiated) {

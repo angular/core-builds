@@ -41,11 +41,9 @@ exports.ComponentStillLoadingError = ComponentStillLoadingError;
 var Compiler = (function () {
     function Compiler() {
     }
-    Object.defineProperty(Compiler.prototype, "injector", {
+    Object.defineProperty(Compiler.prototype, "_injector", {
         /**
          * Returns the injector with which the compiler has been created.
-         *
-         * @internal
          */
         get: function () {
             throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to read the injector.");
