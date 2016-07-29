@@ -10,16 +10,12 @@ import { APP_ID_RANDOM_PROVIDER } from './application_tokens';
 import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyValueDiffers } from './change_detection/change_detection';
 import { OptionalMetadata, SkipSelfMetadata } from './di';
 import { Compiler } from './linker/compiler';
-import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { ComponentResolver } from './linker/component_resolver';
 import { DynamicComponentLoader, DynamicComponentLoader_ } from './linker/dynamic_component_loader';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
 import { NgZone } from './zone/ng_zone';
 let __unused; // avoid unused import when Type union types are erased
-export function _componentFactoryResolverFactory() {
-    return ComponentFactoryResolver.NULL;
-}
 export function _iterableDiffersFactory() {
     return defaultIterableDiffers;
 }
@@ -60,7 +56,6 @@ ApplicationModule.decorators = [
                     { provide: ApplicationRef, useExisting: ApplicationRef_ },
                     Compiler,
                     { provide: ComponentResolver, useExisting: Compiler },
-                    { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory },
                     APP_ID_RANDOM_PROVIDER,
                     ViewUtils,
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for compiler
-export { Compiler, CompilerFactory, CompilerOptions, ComponentStillLoadingError } from './linker/compiler';
+export { Compiler, CompilerFactory, CompilerOptions, ComponentStillLoadingError, ModuleWithComponentFactories } from './linker/compiler';
 export { ComponentFactory, ComponentRef } from './linker/component_factory';
 export { ComponentFactoryResolver, NoComponentFactoryError } from './linker/component_factory_resolver';
 export { ComponentResolver } from './linker/component_resolver';

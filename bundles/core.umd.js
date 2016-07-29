@@ -1221,7 +1221,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * current `ElementInjector` resolves the constructor dependencies for each directive.
      *
      * Angular then resolves dependencies as follows, according to the order in which they appear in the
-     * {@link ViewMetadata}:
+     * {@link ComponentMetadata}:
      *
      * 1. Dependencies on the current element
      * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -1470,7 +1470,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * location in the current view
      * where these actions are performed.
      *
-     * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+     * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+     * the
      * `<template>` element. Thus a
      * directive in a child view cannot inject the directive that created it.
      *
@@ -1760,8 +1761,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * All template expressions and statements are then evaluated against the component instance.
      *
-     * For details on the `@View` annotation, see {@link ViewMetadata}.
-     *
      * ## Lifecycle hooks
      *
      * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -1777,7 +1776,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile, entryComponents = _b.entryComponents;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
@@ -1801,7 +1800,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.moduleId = moduleId;
             this.animations = animations;
             this.interpolation = interpolation;
-            this.entryComponents = precompile ? precompile : entryComponents;
+            this.entryComponents = entryComponents;
         }
         Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
             /**
@@ -2125,90 +2124,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return NgModuleMetadata;
     }(InjectableMetadata));
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Defines template and style encapsulation options available for Component's {@link Component}.
-     *
-     * See {@link ViewMetadata#encapsulation}.
-     * @stable
-     */
-    exports.ViewEncapsulation;
-    (function (ViewEncapsulation) {
-        /**
-         * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-         * Element and pre-processing the style rules provided via
-         * {@link ViewMetadata#styles} or {@link ViewMetadata#stylesUrls}, and adding the new Host Element
-         * attribute to all selectors.
-         *
-         * This is the default option.
-         */
-        ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-        /**
-         * Use the native encapsulation mechanism of the renderer.
-         *
-         * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-         * creating a ShadowRoot for Component's Host Element.
-         */
-        ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
-        /**
-         * Don't provide any template or style encapsulation.
-         */
-        ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
-    var VIEW_ENCAPSULATION_VALUES = [exports.ViewEncapsulation.Emulated, exports.ViewEncapsulation.Native, exports.ViewEncapsulation.None];
-    /**
-     * Metadata properties available for configuring Views.
-     *
-     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
-     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
-     * within the template.
-     *
-     * When a component is instantiated, the template is loaded into the component's shadow root, and
-     * the expressions and statements in the template are evaluated against the component.
-     *
-     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
-     *
-     * ### Example
-     *
-     * ```
-     * @Component({
-     *   selector: 'greet',
-     *   template: 'Hello {{name}}!',
-     *   directives: [GreetUser, Bold]
-     * })
-     * class Greet {
-     *   name: string;
-     *
-     *   constructor() {
-     *     this.name = 'World';
-     *   }
-     * }
-     * ```
-     * @ts2dart_const
-     *
-     * @experimental You should most likely be using ComponentMetadata instead.
-     */
-    var ViewMetadata = (function () {
-        function ViewMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
-            this.templateUrl = templateUrl;
-            this.template = template;
-            this.styleUrls = styleUrls;
-            this.styles = styles;
-            this.directives = directives;
-            this.pipes = pipes;
-            this.encapsulation = encapsulation;
-            this.animations = animations;
-            this.interpolation = interpolation;
-        }
-        return ViewMetadata;
-    }());
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -2718,6 +2633,90 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AfterViewChecked;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines template and style encapsulation options available for Component's {@link Component}.
+     *
+     * See {@link ViewMetadata#encapsulation}.
+     * @stable
+     */
+    exports.ViewEncapsulation;
+    (function (ViewEncapsulation) {
+        /**
+         * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+         * Element and pre-processing the style rules provided via
+         * {@link ViewMetadata#styles} or {@link ViewMetadata#stylesUrls}, and adding the new Host Element
+         * attribute to all selectors.
+         *
+         * This is the default option.
+         */
+        ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+        /**
+         * Use the native encapsulation mechanism of the renderer.
+         *
+         * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+         * creating a ShadowRoot for Component's Host Element.
+         */
+        ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+        /**
+         * Don't provide any template or style encapsulation.
+         */
+        ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
+    var VIEW_ENCAPSULATION_VALUES = [exports.ViewEncapsulation.Emulated, exports.ViewEncapsulation.Native, exports.ViewEncapsulation.None];
+    /**
+     * Metadata properties available for configuring Views.
+     *
+     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
+     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
+     * within the template.
+     *
+     * When a component is instantiated, the template is loaded into the component's shadow root, and
+     * the expressions and statements in the template are evaluated against the component.
+     *
+     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
+     *
+     * ### Example
+     *
+     * ```
+     * @Component({
+     *   selector: 'greet',
+     *   template: 'Hello {{name}}!',
+     *   directives: [GreetUser, Bold]
+     * })
+     * class Greet {
+     *   name: string;
+     *
+     *   constructor() {
+     *     this.name = 'World';
+     *   }
+     * }
+     * ```
+     * @ts2dart_const
+     *
+     * @deprecated Use ComponentMetadata instead.
+     */
+    var ViewMetadata = (function () {
+        function ViewMetadata(_a) {
+            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
+            this.templateUrl = templateUrl;
+            this.template = template;
+            this.styleUrls = styleUrls;
+            this.styles = styles;
+            this.directives = directives;
+            this.pipes = pipes;
+            this.encapsulation = encapsulation;
+            this.animations = animations;
+            this.interpolation = interpolation;
+        }
+        return ViewMetadata;
+    }());
     var _nextClassId = 0;
     function extractAnnotation(annotation) {
         if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
@@ -2987,7 +2986,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      * @Annotation
      */
-    var Component = makeDecorator(ComponentMetadata, function (fn) { return fn.View = View; });
+    var Component = makeDecorator(ComponentMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
     /**
      * Directives allow you to attach behavior to elements in the DOM.
@@ -3025,7 +3024,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * current `ElementInjector` resolves the constructor dependencies for each directive.
      *
      * Angular then resolves dependencies as follows, according to the order in which they appear in the
-     * {@link ViewMetadata}:
+     * {@link ComponentMetadata}:
      *
      * 1. Dependencies on the current element
      * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -3274,7 +3273,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * location in the current view
      * where these actions are performed.
      *
-     * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+     * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+     * the
      * `<template>` element. Thus a
      * directive in a child view cannot inject the directive that created it.
      *
@@ -3371,39 +3371,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var Directive = makeDecorator(DirectiveMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewMetadata.
-    /**
-     * Metadata properties available for configuring Views.
-     *
-     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
-     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
-     * within the template.
-     *
-     * When a component is instantiated, the template is loaded into the component's shadow root, and
-     * the expressions and statements in the template are evaluated against the component.
-     *
-     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
-     *
-     * ### Example
-     *
-     * ```
-     * @Component({
-     *   selector: 'greet',
-     *   template: 'Hello {{name}}!',
-     *   directives: [GreetUser, Bold]
-     * })
-     * class Greet {
-     *   name: string;
-     *
-     *   constructor() {
-     *     this.name = 'World';
-     *   }
-     * }
-     * ```
-     * @deprecated
-     * @Annotation
-     */
-    var View = makeDecorator(ViewMetadata, function (fn) { return fn.View = View; });
     /**
      * Specifies that a constant attribute value should be injected.
      *
@@ -6909,6 +6876,21 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ComponentStillLoadingError;
     }(BaseException));
     /**
+     * Combination of NgModuleFactory and ComponentFactorys.
+     *
+     * @experimental
+     */
+    var ModuleWithComponentFactories = (function () {
+        function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
+            this.ngModuleFactory = ngModuleFactory;
+            this.componentFactories = componentFactories;
+        }
+        return ModuleWithComponentFactories;
+    }());
+    function _throwError() {
+        throw new BaseException("Runtime compiler is not loaded");
+    }
+    /**
      * Low-level service for running the angular compiler duirng runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
@@ -6921,22 +6903,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     var Compiler = (function () {
         function Compiler() {
         }
-        Object.defineProperty(Compiler.prototype, "_injector", {
-            /**
-             * Returns the injector with which the compiler has been created.
-             */
-            get: function () {
-                throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
-            },
-            enumerable: true,
-            configurable: true
-        });
         /**
          * Loads the template and styles of a component and returns the associated `ComponentFactory`.
          */
         Compiler.prototype.compileComponentAsync = function (component, ngModule) {
             if (ngModule === void 0) { ngModule = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+            throw _throwError();
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
@@ -6944,18 +6916,31 @@ var __extends = (this && this.__extends) || function (d, b) {
          */
         Compiler.prototype.compileComponentSync = function (component, ngModule) {
             if (ngModule === void 0) { ngModule = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+            throw _throwError();
         };
         /**
-         * Compiles the given NgModule. All templates of the components listed in `entryComponents`
-         * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+         * Compiles the given NgModule and all of its components. All templates of the components listed
+         * in `entryComponents`
+         * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
          */
-        Compiler.prototype.compileModuleSync = function (moduleType) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
-        };
+        Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
+        /**
+         * Compiles the given NgModule and all of its components
+         */
         Compiler.prototype.compileModuleAsync = function (moduleType) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+            throw _throwError();
+        };
+        /**
+         * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
+         */
+        Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+            throw _throwError();
+        };
+        /**
+         * Same as {@link compileModuleAsync} put also creates ComponentFactories for all components.
+         */
+        Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+            throw _throwError();
         };
         /**
          * Clears all caches
@@ -11016,9 +11001,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
     // avoid unused import when Type union types are erased
-    function _componentFactoryResolverFactory() {
-        return ComponentFactoryResolver.NULL;
-    }
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }
@@ -11062,7 +11044,6 @@ var __extends = (this && this.__extends) || function (d, b) {
                         { provide: ApplicationRef, useExisting: ApplicationRef_ },
                         Compiler,
                         { provide: ComponentResolver, useExisting: Compiler },
-                        { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory },
                         APP_ID_RANDOM_PROVIDER,
                         ViewUtils,
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
@@ -12898,6 +12879,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.CompilerFactory = CompilerFactory;
     exports.CompilerOptions = CompilerOptions;
     exports.ComponentStillLoadingError = ComponentStillLoadingError;
+    exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;

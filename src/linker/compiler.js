@@ -29,6 +29,22 @@ var ComponentStillLoadingError = (function (_super) {
 }(exceptions_1.BaseException));
 exports.ComponentStillLoadingError = ComponentStillLoadingError;
 /**
+ * Combination of NgModuleFactory and ComponentFactorys.
+ *
+ * @experimental
+ */
+var ModuleWithComponentFactories = (function () {
+    function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
+        this.ngModuleFactory = ngModuleFactory;
+        this.componentFactories = componentFactories;
+    }
+    return ModuleWithComponentFactories;
+}());
+exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
+function _throwError() {
+    throw new exceptions_1.BaseException("Runtime compiler is not loaded");
+}
+/**
  * Low-level service for running the angular compiler duirng runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
@@ -41,22 +57,12 @@ exports.ComponentStillLoadingError = ComponentStillLoadingError;
 var Compiler = (function () {
     function Compiler() {
     }
-    Object.defineProperty(Compiler.prototype, "_injector", {
-        /**
-         * Returns the injector with which the compiler has been created.
-         */
-        get: function () {
-            throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to read the injector.");
-        },
-        enumerable: true,
-        configurable: true
-    });
     /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
     Compiler.prototype.compileComponentAsync = function (component, ngModule) {
         if (ngModule === void 0) { ngModule = null; }
-        throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
+        throw _throwError();
     };
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
@@ -64,18 +70,31 @@ var Compiler = (function () {
      */
     Compiler.prototype.compileComponentSync = function (component, ngModule) {
         if (ngModule === void 0) { ngModule = null; }
-        throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(component));
+        throw _throwError();
     };
     /**
-     * Compiles the given NgModule. All templates of the components listed in `entryComponents`
-     * have to be either inline or compiled before via `compileComponentAsync` /
-     * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents`
+     * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
      */
-    Compiler.prototype.compileModuleSync = function (moduleType) {
-        throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(moduleType));
-    };
+    Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
+    /**
+     * Compiles the given NgModule and all of its components
+     */
     Compiler.prototype.compileModuleAsync = function (moduleType) {
-        throw new exceptions_1.BaseException("Runtime compiler is not loaded. Tried to compile " + lang_1.stringify(moduleType));
+        throw _throwError();
+    };
+    /**
+     * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
+     */
+    Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+        throw _throwError();
+    };
+    /**
+     * Same as {@link compileModuleAsync} put also creates ComponentFactories for all components.
+     */
+    Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+        throw _throwError();
     };
     /**
      * Clears all caches

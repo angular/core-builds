@@ -7,9 +7,7 @@
  */
 import { Type } from '../src/facade/lang';
 import { IterableDiffers, KeyValueDiffers } from './change_detection/change_detection';
-import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { NgZone } from './zone/ng_zone';
-export declare function _componentFactoryResolverFactory(): ComponentFactoryResolver;
 export declare function _iterableDiffersFactory(): IterableDiffers;
 export declare function _keyValueDiffersFactory(): KeyValueDiffers;
 export declare function createNgZone(parent: NgZone): NgZone;

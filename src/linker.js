@@ -12,6 +12,7 @@ exports.Compiler = compiler_1.Compiler;
 exports.CompilerFactory = compiler_1.CompilerFactory;
 exports.CompilerOptions = compiler_1.CompilerOptions;
 exports.ComponentStillLoadingError = compiler_1.ComponentStillLoadingError;
+exports.ModuleWithComponentFactories = compiler_1.ModuleWithComponentFactories;
 var component_factory_1 = require('./linker/component_factory');
 exports.ComponentFactory = component_factory_1.ComponentFactory;
 exports.ComponentRef = component_factory_1.ComponentRef;

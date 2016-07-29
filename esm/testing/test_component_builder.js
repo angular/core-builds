@@ -5,27 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Compiler, Injectable, Injector, NgZone, OpaqueToken } from '../index';
+import { Compiler, Injectable, Injector, NgZone } from '../index';
 import { PromiseWrapper } from '../src/facade/async';
 import { IS_DART, isPresent } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { tick } from './fake_async';
-/**
- * An abstract class for inserting the root test component element in a platform independent way.
- *
- * @experimental
- */
-export class TestComponentRenderer {
-    insertRootElement(rootElementId) { }
-}
-/**
- * @experimental
- */
-export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDetect');
-/**
- * @experimental
- */
-export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
+import { ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestComponentRenderer } from './test_bed';
 var _nextRootElementId = 0;
 export class TestComponentBuilder {
     constructor(_injector) {
@@ -90,32 +75,32 @@ export class TestComponentBuilder {
     /**
      * Builds and returns a ComponentFixture.
      */
-    createAsync(rootComponentType, ngModule = null) {
+    createAsync(rootComponentType) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            let promise = compiler.compileComponentAsync(rootComponentType, ngModule);
+            let promise = compiler.compileComponentAsync(rootComponentType);
             return promise.then(componentFactory => this.createFromFactory(ngZone, componentFactory));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }
-    createFakeAsync(rootComponentType, ngModule = null) {
+    createFakeAsync(rootComponentType) {
         let result;
         let error;
-        PromiseWrapper.then(this.createAsync(rootComponentType, ngModule), (_result) => { result = _result; }, (_error) => { error = _error; });
+        PromiseWrapper.then(this.createAsync(rootComponentType), (_result) => { result = _result; }, (_error) => { error = _error; });
         tick();
         if (isPresent(error)) {
             throw error;
         }
         return result;
     }
-    createSync(rootComponentType, ngModule = null) {
+    createSync(rootComponentType) {
         let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            return this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType, ngModule));
+            return this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }

@@ -44,7 +44,7 @@ import { isPresent } from '../facade/lang';
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ViewMetadata}:
+ * {@link ComponentMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -293,7 +293,8 @@ import { isPresent } from '../facade/lang';
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+ * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+ * the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -560,8 +561,6 @@ export class DirectiveMetadata extends InjectableMetadata {
  *
  * All template expressions and statements are then evaluated against the component instance.
  *
- * For details on the `@View` annotation, see {@link ViewMetadata}.
- *
  * ## Lifecycle hooks
  *
  * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -575,9 +574,7 @@ export class DirectiveMetadata extends InjectableMetadata {
  * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, 
-        /** @deprecated use entryComponents instead! */
-        precompile, entryComponents } = {}) {
+    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents } = {}) {
         super({
             selector: selector,
             inputs: inputs,
@@ -601,7 +598,7 @@ export class ComponentMetadata extends DirectiveMetadata {
         this.moduleId = moduleId;
         this.animations = animations;
         this.interpolation = interpolation;
-        this.entryComponents = precompile ? precompile : entryComponents;
+        this.entryComponents = entryComponents;
     }
     /**
      * Defines the set of injectable objects that are visible to its view DOM children.

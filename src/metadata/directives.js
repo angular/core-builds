@@ -50,7 +50,7 @@ var lang_1 = require('../facade/lang');
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ViewMetadata}:
+ * {@link ComponentMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -299,7 +299,8 @@ var lang_1 = require('../facade/lang');
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+ * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+ * the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -590,8 +591,6 @@ exports.DirectiveMetadata = DirectiveMetadata;
  *
  * All template expressions and statements are then evaluated against the component instance.
  *
- * For details on the `@View` annotation, see {@link ViewMetadata}.
- *
  * ## Lifecycle hooks
  *
  * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -607,7 +606,7 @@ exports.DirectiveMetadata = DirectiveMetadata;
 var ComponentMetadata = (function (_super) {
     __extends(ComponentMetadata, _super);
     function ComponentMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile, entryComponents = _b.entryComponents;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
         _super.call(this, {
             selector: selector,
             inputs: inputs,
@@ -631,7 +630,7 @@ var ComponentMetadata = (function (_super) {
         this.moduleId = moduleId;
         this.animations = animations;
         this.interpolation = interpolation;
-        this.entryComponents = precompile ? precompile : entryComponents;
+        this.entryComponents = entryComponents;
     }
     Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
         /**

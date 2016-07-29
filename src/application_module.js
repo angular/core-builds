@@ -11,17 +11,12 @@ var application_tokens_1 = require('./application_tokens');
 var change_detection_1 = require('./change_detection/change_detection');
 var di_1 = require('./di');
 var compiler_1 = require('./linker/compiler');
-var component_factory_resolver_1 = require('./linker/component_factory_resolver');
 var component_resolver_1 = require('./linker/component_resolver');
 var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');
 var view_utils_1 = require('./linker/view_utils');
 var metadata_1 = require('./metadata');
 var ng_zone_1 = require('./zone/ng_zone');
 var __unused; // avoid unused import when Type union types are erased
-function _componentFactoryResolverFactory() {
-    return component_factory_resolver_1.ComponentFactoryResolver.NULL;
-}
-exports._componentFactoryResolverFactory = _componentFactoryResolverFactory;
 function _iterableDiffersFactory() {
     return change_detection_1.defaultIterableDiffers;
 }
@@ -66,7 +61,6 @@ var ApplicationModule = (function () {
                         { provide: application_ref_1.ApplicationRef, useExisting: application_ref_1.ApplicationRef_ },
                         compiler_1.Compiler,
                         { provide: component_resolver_1.ComponentResolver, useExisting: compiler_1.Compiler },
-                        { provide: component_factory_resolver_1.ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory },
                         application_tokens_1.APP_ID_RANDOM_PROVIDER,
                         view_utils_1.ViewUtils,
                         { provide: change_detection_1.IterableDiffers, useFactory: _iterableDiffersFactory },

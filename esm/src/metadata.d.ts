@@ -1,24 +1,10 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This indirection is needed to free up Component, etc symbols in the public API
- * to be used by the decorator versions of these annotations.
- */
-import { ChangeDetectionStrategy } from '../src/change_detection/change_detection';
-import { AnimationEntryMetadata } from './animation/metadata';
 import { AttributeMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildrenMetadata } from './metadata/di';
-import { ComponentMetadata, DirectiveMetadata } from './metadata/directives';
-import { ModuleWithProviders, NgModuleMetadata, SchemaMetadata } from './metadata/ng_module';
-import { ViewEncapsulation, ViewMetadata } from './metadata/view';
+import { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, PipeMetadataType } from './metadata/directives';
+import { NgModuleMetadata, NgModuleMetadataType } from './metadata/ng_module';
 export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
-export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
+export { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata, PipeMetadataType } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
-export { CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NgModuleMetadata, SchemaMetadata } from './metadata/ng_module';
+export { CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NgModuleMetadata, NgModuleMetadataType, SchemaMetadata } from './metadata/ng_module';
 export { ViewEncapsulation, ViewMetadata } from './metadata/view';
 import { TypeDecorator } from './util/decorators';
 import { Type } from '../src/facade/lang';
@@ -39,43 +25,6 @@ export interface DirectiveDecorator extends TypeDecorator {
  * @stable
  */
 export interface ComponentDecorator extends TypeDecorator {
-    /**
-     * Chain {@link ViewMetadata} annotation.
-     */
-    View(obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        renderer?: string;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
-}
-/**
- * Interface for the {@link ViewMetadata} decorator function.
- *
- * See {@link ViewMetadataFactory}.
- *
- * @experimental
- */
-export interface ViewDecorator extends TypeDecorator {
-    /**
-     * Chain {@link ViewMetadata} annotation.
-     */
-    View(obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        renderer?: string;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
 }
 /**
  * Interface for the {@link NgModuleMetadata} decorator function.
@@ -120,36 +69,8 @@ export interface NgModuleDecorator extends TypeDecorator {
  * @stable
  */
 export interface DirectiveMetadataFactory {
-    (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        queries?: {
-            [key: string]: any;
-        };
-    }): DirectiveDecorator;
-    new (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        queries?: {
-            [key: string]: any;
-        };
-    }): DirectiveMetadata;
+    (obj: DirectiveMetadataType): DirectiveDecorator;
+    new (obj: DirectiveMetadataType): DirectiveMetadata;
 }
 /**
  * {@link ComponentMetadata} factory for creating annotations, decorators or DSL.
@@ -185,130 +106,8 @@ export interface DirectiveMetadataFactory {
  * @stable
  */
 export interface ComponentMetadataFactory {
-    (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        moduleId?: string;
-        queries?: {
-            [key: string]: any;
-        };
-        viewProviders?: any[];
-        changeDetection?: ChangeDetectionStrategy;
-        templateUrl?: string;
-        template?: string;
-        styleUrls?: string[];
-        styles?: string[];
-        animations?: AnimationEntryMetadata[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        interpolation?: [string, string];
-        entryComponents?: Array<Type | any[]>;
-    }): ComponentDecorator;
-    new (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        moduleId?: string;
-        queries?: {
-            [key: string]: any;
-        };
-        viewProviders?: any[];
-        changeDetection?: ChangeDetectionStrategy;
-        templateUrl?: string;
-        template?: string;
-        styleUrls?: string[];
-        styles?: string[];
-        animations?: AnimationEntryMetadata[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        interpolation?: [string, string];
-        entryComponents?: Array<Type | any[]>;
-    }): ComponentMetadata;
-}
-/**
- * {@link ViewMetadata} factory for creating annotations, decorators or DSL.
- *
- * ### Example as TypeScript Decorator
- *
- * ```
- * import {Component, View} from '@angular/core';
- *
- * @Component({...})
- * class MyComponent {
- *   constructor() {
- *     ...
- *   }
- * }
- * ```
- *
- * ### Example as ES5 DSL
- *
- * ```
- * var MyComponent = ng
- *   .Component({...})
- *   .View({...})
- *   .Class({
- *     constructor: function() {
- *       ...
- *     }
- *   })
- * ```
- *
- * ### Example as ES5 annotation
- *
- * ```
- * var MyComponent = function() {
- *   ...
- * };
- *
- * MyComponent.annotations = [
- *   new ng.Component({...}),
- *   new ng.View({...})
- * ]
- * ```
- *
- * @experimental You should most likely use ComponentMetadataFactory instead
- */
-export interface ViewMetadataFactory {
-    (obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
-    new (obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewMetadata;
+    (obj: ComponentMetadataType): ComponentDecorator;
+    new (obj: ComponentMetadataType): ComponentMetadata;
 }
 /**
  * {@link AttributeMetadata} factory for creating annotations, decorators or DSL.
@@ -463,14 +262,8 @@ export interface ViewChildMetadataFactory {
  * @stable
  */
 export interface PipeMetadataFactory {
-    (obj: {
-        name: string;
-        pure?: boolean;
-    }): any;
-    new (obj: {
-        name: string;
-        pure?: boolean;
-    }): any;
+    (obj: PipeMetadataType): any;
+    new (obj: PipeMetadataType): any;
 }
 /**
  * {@link InputMetadata} factory for creating decorators.
@@ -514,22 +307,8 @@ export interface HostListenerMetadataFactory {
  * @experimental
  */
 export interface NgModuleMetadataFactory {
-    (obj?: {
-        providers?: any[];
-        declarations?: Array<Type | any[]>;
-        imports?: Array<Type | ModuleWithProviders | any[]>;
-        exports?: Array<Type | any[]>;
-        entryComponents?: Array<Type | any[]>;
-        schemas?: Array<SchemaMetadata | any[]>;
-    }): NgModuleDecorator;
-    new (obj?: {
-        providers?: any[];
-        declarations?: Array<Type | any[]>;
-        imports?: Array<Type | any[]>;
-        exports?: Array<Type | any[]>;
-        entryComponents?: Array<Type | any[]>;
-        schemas?: Array<SchemaMetadata | any[]>;
-    }): NgModuleMetadata;
+    (obj?: NgModuleMetadataType): NgModuleDecorator;
+    new (obj?: NgModuleMetadataType): NgModuleMetadata;
 }
 /**
  * Declare reusable UI building blocks for an application.
@@ -594,7 +373,7 @@ export declare var Component: ComponentMetadataFactory;
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ViewMetadata}:
+ * {@link ComponentMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -843,7 +622,8 @@ export declare var Component: ComponentMetadataFactory;
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+ * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+ * the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *

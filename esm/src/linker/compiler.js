@@ -20,6 +20,20 @@ export class ComponentStillLoadingError extends BaseException {
     }
 }
 /**
+ * Combination of NgModuleFactory and ComponentFactorys.
+ *
+ * @experimental
+ */
+export class ModuleWithComponentFactories {
+    constructor(ngModuleFactory, componentFactories) {
+        this.ngModuleFactory = ngModuleFactory;
+        this.componentFactories = componentFactories;
+    }
+}
+function _throwError() {
+    throw new BaseException(`Runtime compiler is not loaded`);
+}
+/**
  * Low-level service for running the angular compiler duirng runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
@@ -31,34 +45,41 @@ export class ComponentStillLoadingError extends BaseException {
  */
 export class Compiler {
     /**
-     * Returns the injector with which the compiler has been created.
-     */
-    get _injector() {
-        throw new BaseException(`Runtime compiler is not loaded. Tried to read the injector.`);
-    }
-    /**
      * Loads the template and styles of a component and returns the associated `ComponentFactory`.
      */
     compileComponentAsync(component, ngModule = null) {
-        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
+        throw _throwError();
     }
     /**
      * Compiles the given component. All templates have to be either inline or compiled via
      * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     compileComponentSync(component, ngModule = null) {
-        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(component)}`);
+        throw _throwError();
     }
     /**
-     * Compiles the given NgModule. All templates of the components listed in `entryComponents`
-     * have to be either inline or compiled before via `compileComponentAsync` /
-     * `compileModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents`
+     * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
      */
-    compileModuleSync(moduleType) {
-        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(moduleType)}`);
-    }
+    compileModuleSync(moduleType) { throw _throwError(); }
+    /**
+     * Compiles the given NgModule and all of its components
+     */
     compileModuleAsync(moduleType) {
-        throw new BaseException(`Runtime compiler is not loaded. Tried to compile ${stringify(moduleType)}`);
+        throw _throwError();
+    }
+    /**
+     * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsSync(moduleType) {
+        throw _throwError();
+    }
+    /**
+     * Same as {@link compileModuleAsync} put also creates ComponentFactories for all components.
+     */
+    compileModuleAndAllComponentsAsync(moduleType) {
+        throw _throwError();
     }
     /**
      * Clears all caches
