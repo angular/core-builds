@@ -124,7 +124,7 @@ export declare abstract class PlatformRef {
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): NgModuleRef<M>;
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
@@ -142,8 +142,8 @@ export declare abstract class PlatformRef {
      */
     bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     /**
-  *Register a listener to be called when the platform is disposed.
-  */
+     * Register a listener to be called when the platform is disposed.
+     */
     abstract registerDisposeListener(dispose: () => void): void;
     /**
      * Retrieve the platform {@link Injector}, which is the parent injector for
@@ -163,9 +163,8 @@ export declare class PlatformRef_ extends PlatformRef {
     registerDisposeListener(dispose: () => void): void;
     readonly injector: Injector;
     readonly disposed: boolean;
-    addApplication(appRef: ApplicationRef): void;
     dispose(): void;
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): NgModuleRef<M>;
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
 }
 /**
@@ -245,9 +244,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _componentFactoryResolver;
     private _testabilityRegistry;
     private _testability;
-    private _asyncInitDonePromise;
-    private _asyncInitDone;
-    constructor(_platform: PlatformRef_, _zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ExceptionHandler, _componentFactoryResolver: ComponentFactoryResolver, _testabilityRegistry: TestabilityRegistry, _testability: Testability, inits: Function[]);
+    constructor(_platform: PlatformRef_, _zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ExceptionHandler, _componentFactoryResolver: ComponentFactoryResolver, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
     registerBootstrapListener(listener: (ref: ComponentRef<any>) => void): void;
     registerDisposeListener(dispose: () => void): void;
     registerChangeDetector(changeDetector: ChangeDetectorRef): void;

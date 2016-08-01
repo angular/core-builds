@@ -9661,7 +9661,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     var _devMode = true;
     var _runModeLocked = false;
     var _platform;
-    var _inPlatformCreate = false;
     /**
      * Disable Angular's development mode, which turns off assertions and other
      * checks within the framework.
@@ -9708,19 +9707,13 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function createPlatform(injector) {
-        if (_inPlatformCreate) {
-            throw new BaseException('Already creating a platform...');
-        }
         if (isPresent(_platform) && !_platform.disposed) {
             throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
         }
-        _inPlatformCreate = true;
-        try {
-            _platform = injector.get(PlatformRef);
-        }
-        finally {
-            _inPlatformCreate = false;
-        }
+        _platform = injector.get(PlatformRef);
+        var inits = injector.get(PLATFORM_INITIALIZER, null);
+        if (isPresent(inits))
+            inits.forEach(function (init) { return init(); });
         return _platform;
     }
     /**
@@ -9872,6 +9865,26 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return PlatformRef;
     }());
+    function _callAndReportToExceptionHandler(exceptionHandler, callback) {
+        try {
+            var result = callback();
+            if (isPromise(result)) {
+                return result.catch(function (e) {
+                    exceptionHandler.call(e);
+                    // rethrow as the exception handler might not do it
+                    throw e;
+                });
+            }
+            else {
+                return result;
+            }
+        }
+        catch (e) {
+            exceptionHandler.call(e);
+            // rethrow as the exception handler might not do it
+            throw e;
+        }
+    }
     var PlatformRef_ = (function (_super) {
         __extends(PlatformRef_, _super);
         function PlatformRef_(_injector) {
@@ -9882,12 +9895,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             /** @internal */
             this._disposeListeners = [];
             this._disposed = false;
-            if (!_inPlatformCreate) {
-                throw new BaseException('Platforms have to be created via `createPlatform`!');
-            }
-            var inits = _injector.get(PLATFORM_INITIALIZER, null);
-            if (isPresent(inits))
-                inits.forEach(function (init) { return init(); });
         }
         PlatformRef_.prototype.registerDisposeListener = function (dispose) { this._disposeListeners.push(dispose); };
         Object.defineProperty(PlatformRef_.prototype, "injector", {
@@ -9900,7 +9907,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
-        PlatformRef_.prototype.addApplication = function (appRef) { this._applications.push(appRef); };
         PlatformRef_.prototype.dispose = function () {
             ListWrapper.clone(this._applications).forEach(function (app) { return app.dispose(); });
             this._disposeListeners.forEach(function (dispose) { return dispose(); });
@@ -9909,13 +9915,39 @@ var __extends = (this && this.__extends) || function (d, b) {
         /** @internal */
         PlatformRef_.prototype._applicationDisposed = function (app) { ListWrapper.remove(this._applications, app); };
         PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            var _this = this;
             // Note: We need to create the NgZone _before_ we instantiate the module,
             // as instantiating the module creates some providers eagerly.
             // So we create a mini parent injector that just contains the new NgZone and
             // pass that as parent to the NgModuleFactory.
             var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
-            var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
-            return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
+            // Attention: Don't use ApplicationRef.run here,
+            // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+            return ngZone.run(function () {
+                var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this.injector);
+                var moduleRef = moduleFactory.create(ngZoneInjector);
+                var exceptionHandler = moduleRef.injector.get(ExceptionHandler);
+                ObservableWrapper.subscribe(ngZone.onError, function (error) {
+                    exceptionHandler.call(error.error, error.stackTrace);
+                });
+                return _callAndReportToExceptionHandler(exceptionHandler, function () {
+                    var appInits = moduleRef.injector.get(APP_INITIALIZER, null);
+                    var asyncInitPromises = [];
+                    if (isPresent(appInits)) {
+                        for (var i = 0; i < appInits.length; i++) {
+                            var initResult = appInits[i]();
+                            if (isPromise(initResult)) {
+                                asyncInitPromises.push(initResult);
+                            }
+                        }
+                    }
+                    var appRef = moduleRef.injector.get(ApplicationRef);
+                    return Promise.all(asyncInitPromises).then(function () {
+                        appRef.asyncInitDone();
+                        return moduleRef;
+                    });
+                });
+            });
         };
         PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
             var _this = this;
@@ -9923,11 +9955,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var compilerFactory = this.injector.get(CompilerFactory);
             var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
             return compiler.compileModuleAsync(moduleType)
-                .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory); })
-                .then(function (moduleRef) {
-                var appRef = moduleRef.injector.get(ApplicationRef);
-                return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
-            });
+                .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory); });
         };
         return PlatformRef_;
     }(PlatformRef));
@@ -9980,7 +10008,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     var ApplicationRef_ = (function (_super) {
         __extends(ApplicationRef_, _super);
-        function ApplicationRef_(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
+        function ApplicationRef_(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability) {
             var _this = this;
             _super.call(this);
             this._platform = _platform;
@@ -10005,32 +10033,9 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._runningTick = false;
             /** @internal */
             this._enforceNoNewChanges = false;
+            /** @internal */
+            this._asyncInitDonePromise = PromiseWrapper.completer();
             this._enforceNoNewChanges = isDevMode();
-            this._asyncInitDonePromise = this.run(function () {
-                var asyncInitResults = [];
-                var asyncInitDonePromise;
-                if (isPresent(inits)) {
-                    for (var i = 0; i < inits.length; i++) {
-                        var initResult = inits[i]();
-                        if (isPromise(initResult)) {
-                            asyncInitResults.push(initResult);
-                        }
-                    }
-                }
-                if (asyncInitResults.length > 0) {
-                    asyncInitDonePromise =
-                        PromiseWrapper.all(asyncInitResults).then(function (_) { return _this._asyncInitDone = true; });
-                    _this._asyncInitDone = false;
-                }
-                else {
-                    _this._asyncInitDone = true;
-                    asyncInitDonePromise = PromiseWrapper.resolve(true);
-                }
-                return asyncInitDonePromise;
-            });
-            ObservableWrapper.subscribe(this._zone.onError, function (error) {
-                _this._exceptionHandler.call(error.error, error.stackTrace);
-            });
             ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, function (_) { _this._zone.run(function () { _this.tick(); }); });
         }
         ApplicationRef_.prototype.registerBootstrapListener = function (listener) {
@@ -10043,38 +10048,17 @@ var __extends = (this && this.__extends) || function (d, b) {
         ApplicationRef_.prototype.unregisterChangeDetector = function (changeDetector) {
             ListWrapper.remove(this._changeDetectorRefs, changeDetector);
         };
-        ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._asyncInitDonePromise; };
+        /**
+         * @internal
+         */
+        ApplicationRef_.prototype.asyncInitDone = function () { this._asyncInitDonePromise.resolve(null); };
+        ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._asyncInitDonePromise.promise; };
         ApplicationRef_.prototype.run = function (callback) {
             var _this = this;
-            var result;
-            // Note: Don't use zone.runGuarded as we want to know about
-            // the thrown exception!
-            // Note: the completer needs to be created outside
-            // of `zone.run` as Dart swallows rejected promises
-            // via the onError callback of the promise.
-            var completer = PromiseWrapper.completer();
-            this._zone.run(function () {
-                try {
-                    result = callback();
-                    if (isPromise(result)) {
-                        PromiseWrapper.then(result, function (ref) { completer.resolve(ref); }, function (err, stackTrace) {
-                            completer.reject(err, stackTrace);
-                            _this._exceptionHandler.call(err, stackTrace);
-                        });
-                    }
-                }
-                catch (e) {
-                    _this._exceptionHandler.call(e, e.stack);
-                    throw e;
-                }
-            });
-            return isPromise(result) ? completer.promise : result;
+            return this._zone.run(function () { return _callAndReportToExceptionHandler(_this._exceptionHandler, callback); });
         };
         ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
             var _this = this;
-            if (!this._asyncInitDone) {
-                throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
-            }
             return this.run(function () {
                 var componentFactory;
                 if (componentOrFactory instanceof ComponentFactory) {
@@ -10172,7 +10156,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         { type: ComponentFactoryResolver, },
         { type: TestabilityRegistry, decorators: [{ type: Optional },] },
         { type: Testability, decorators: [{ type: Optional },] },
-        { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
     ];
     /**
      * @license
@@ -11007,18 +10990,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _keyValueDiffersFactory() {
         return defaultKeyValueDiffers;
     }
-    function createNgZone(parent) {
-        // If an NgZone is already present in the parent injector,
-        // use that one. Creating the NgZone in the same injector as the
-        // application is dangerous as some services might get created before
-        // the NgZone has been created.
-        // We keep the NgZone factory in the application providers for
-        // backwards compatibility for now though.
-        if (parent) {
-            return parent;
-        }
-        return new NgZone({ enableLongStackTrace: isDevMode() });
-    }
     /**
      * A default set of providers which should be included in any Angular
      * application, regardless of the platform it runs onto.
@@ -11035,11 +11006,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     ApplicationModule.decorators = [
         { type: NgModule, args: [{
                     providers: [
-                        {
-                            provide: NgZone,
-                            useFactory: createNgZone,
-                            deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
-                        },
                         ApplicationRef_,
                         { provide: ApplicationRef, useExisting: ApplicationRef_ },
                         Compiler,

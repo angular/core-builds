@@ -11,7 +11,7 @@ import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/ex
 import { IS_DART, isBlank, isPresent, isPromise } from '../src/facade/lang';
 import { APP_INITIALIZER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
-import { Inject, Injectable, Injector, OpaqueToken, Optional, ReflectiveInjector } from './di';
+import { Injectable, Injector, OpaqueToken, Optional, ReflectiveInjector } from './di';
 import { CompilerFactory } from './linker/compiler';
 import { ComponentFactory } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -21,7 +21,6 @@ import { NgZone } from './zone/ng_zone';
 var _devMode = true;
 var _runModeLocked = false;
 var _platform;
-var _inPlatformCreate = false;
 /**
  * Disable Angular's development mode, which turns off assertions and other
  * checks within the framework.
@@ -68,19 +67,13 @@ export function isDevMode() {
  * @experimental APIs related to application bootstrap are currently under review.
  */
 export function createPlatform(injector) {
-    if (_inPlatformCreate) {
-        throw new BaseException('Already creating a platform...');
-    }
     if (isPresent(_platform) && !_platform.disposed) {
         throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
     }
-    _inPlatformCreate = true;
-    try {
-        _platform = injector.get(PlatformRef);
-    }
-    finally {
-        _inPlatformCreate = false;
-    }
+    _platform = injector.get(PlatformRef);
+    const inits = injector.get(PLATFORM_INITIALIZER, null);
+    if (isPresent(inits))
+        inits.forEach(init => init());
     return _platform;
 }
 /**
@@ -218,6 +211,26 @@ export class PlatformRef {
     ;
     get disposed() { throw unimplemented(); }
 }
+function _callAndReportToExceptionHandler(exceptionHandler, callback) {
+    try {
+        const result = callback();
+        if (isPromise(result)) {
+            return result.catch((e) => {
+                exceptionHandler.call(e);
+                // rethrow as the exception handler might not do it
+                throw e;
+            });
+        }
+        else {
+            return result;
+        }
+    }
+    catch (e) {
+        exceptionHandler.call(e);
+        // rethrow as the exception handler might not do it
+        throw e;
+    }
+}
 export class PlatformRef_ extends PlatformRef {
     constructor(_injector) {
         super();
@@ -227,17 +240,10 @@ export class PlatformRef_ extends PlatformRef {
         /** @internal */
         this._disposeListeners = [];
         this._disposed = false;
-        if (!_inPlatformCreate) {
-            throw new BaseException('Platforms have to be created via `createPlatform`!');
-        }
-        let inits = _injector.get(PLATFORM_INITIALIZER, null);
-        if (isPresent(inits))
-            inits.forEach(init => init());
     }
     registerDisposeListener(dispose) { this._disposeListeners.push(dispose); }
     get injector() { return this._injector; }
     get disposed() { return this._disposed; }
-    addApplication(appRef) { this._applications.push(appRef); }
     dispose() {
         ListWrapper.clone(this._applications).forEach((app) => app.dispose());
         this._disposeListeners.forEach((dispose) => dispose());
@@ -251,18 +257,39 @@ export class PlatformRef_ extends PlatformRef {
         // So we create a mini parent injector that just contains the new NgZone and
         // pass that as parent to the NgModuleFactory.
         const ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
-        const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
-        return ngZone.run(() => moduleFactory.create(ngZoneInjector));
+        // Attention: Don't use ApplicationRef.run here,
+        // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+        return ngZone.run(() => {
+            const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
+            const moduleRef = moduleFactory.create(ngZoneInjector);
+            const exceptionHandler = moduleRef.injector.get(ExceptionHandler);
+            ObservableWrapper.subscribe(ngZone.onError, (error) => {
+                exceptionHandler.call(error.error, error.stackTrace);
+            });
+            return _callAndReportToExceptionHandler(exceptionHandler, () => {
+                const appInits = moduleRef.injector.get(APP_INITIALIZER, null);
+                const asyncInitPromises = [];
+                if (isPresent(appInits)) {
+                    for (let i = 0; i < appInits.length; i++) {
+                        const initResult = appInits[i]();
+                        if (isPromise(initResult)) {
+                            asyncInitPromises.push(initResult);
+                        }
+                    }
+                }
+                const appRef = moduleRef.injector.get(ApplicationRef);
+                return Promise.all(asyncInitPromises).then(() => {
+                    appRef.asyncInitDone();
+                    return moduleRef;
+                });
+            });
+        });
     }
     bootstrapModule(moduleType, compilerOptions = []) {
         const compilerFactory = this.injector.get(CompilerFactory);
         const compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
         return compiler.compileModuleAsync(moduleType)
-            .then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory))
-            .then((moduleRef) => {
-            const appRef = moduleRef.injector.get(ApplicationRef);
-            return appRef.waitForAsyncInitializers().then(() => moduleRef);
-        });
+            .then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory));
     }
 }
 /** @nocollapse */
@@ -298,7 +325,7 @@ export class ApplicationRef {
     ;
 }
 export class ApplicationRef_ extends ApplicationRef {
-    constructor(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
+    constructor(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability) {
         super();
         this._platform = _platform;
         this._zone = _zone;
@@ -322,32 +349,9 @@ export class ApplicationRef_ extends ApplicationRef {
         this._runningTick = false;
         /** @internal */
         this._enforceNoNewChanges = false;
+        /** @internal */
+        this._asyncInitDonePromise = PromiseWrapper.completer();
         this._enforceNoNewChanges = isDevMode();
-        this._asyncInitDonePromise = this.run(() => {
-            var asyncInitResults = [];
-            var asyncInitDonePromise;
-            if (isPresent(inits)) {
-                for (var i = 0; i < inits.length; i++) {
-                    var initResult = inits[i]();
-                    if (isPromise(initResult)) {
-                        asyncInitResults.push(initResult);
-                    }
-                }
-            }
-            if (asyncInitResults.length > 0) {
-                asyncInitDonePromise =
-                    PromiseWrapper.all(asyncInitResults).then((_) => this._asyncInitDone = true);
-                this._asyncInitDone = false;
-            }
-            else {
-                this._asyncInitDone = true;
-                asyncInitDonePromise = PromiseWrapper.resolve(true);
-            }
-            return asyncInitDonePromise;
-        });
-        ObservableWrapper.subscribe(this._zone.onError, (error) => {
-            this._exceptionHandler.call(error.error, error.stackTrace);
-        });
         ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, (_) => { this._zone.run(() => { this.tick(); }); });
     }
     registerBootstrapListener(listener) {
@@ -360,36 +364,15 @@ export class ApplicationRef_ extends ApplicationRef {
     unregisterChangeDetector(changeDetector) {
         ListWrapper.remove(this._changeDetectorRefs, changeDetector);
     }
-    waitForAsyncInitializers() { return this._asyncInitDonePromise; }
+    /**
+     * @internal
+     */
+    asyncInitDone() { this._asyncInitDonePromise.resolve(null); }
+    waitForAsyncInitializers() { return this._asyncInitDonePromise.promise; }
     run(callback) {
-        var result;
-        // Note: Don't use zone.runGuarded as we want to know about
-        // the thrown exception!
-        // Note: the completer needs to be created outside
-        // of `zone.run` as Dart swallows rejected promises
-        // via the onError callback of the promise.
-        var completer = PromiseWrapper.completer();
-        this._zone.run(() => {
-            try {
-                result = callback();
-                if (isPromise(result)) {
-                    PromiseWrapper.then(result, (ref) => { completer.resolve(ref); }, (err, stackTrace) => {
-                        completer.reject(err, stackTrace);
-                        this._exceptionHandler.call(err, stackTrace);
-                    });
-                }
-            }
-            catch (e) {
-                this._exceptionHandler.call(e, e.stack);
-                throw e;
-            }
-        });
-        return isPromise(result) ? completer.promise : result;
+        return this._zone.run(() => _callAndReportToExceptionHandler(this._exceptionHandler, callback));
     }
     bootstrap(componentOrFactory) {
-        if (!this._asyncInitDone) {
-            throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
-        }
         return this.run(() => {
             let componentFactory;
             if (componentOrFactory instanceof ComponentFactory) {
@@ -474,6 +457,5 @@ ApplicationRef_.ctorParameters = [
     { type: ComponentFactoryResolver, },
     { type: TestabilityRegistry, decorators: [{ type: Optional },] },
     { type: Testability, decorators: [{ type: Optional },] },
-    { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
 ];
 //# sourceMappingURL=application_ref.js.map

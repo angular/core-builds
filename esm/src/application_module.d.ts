@@ -7,10 +7,8 @@
  */
 import { Type } from '../src/facade/lang';
 import { IterableDiffers, KeyValueDiffers } from './change_detection/change_detection';
-import { NgZone } from './zone/ng_zone';
 export declare function _iterableDiffersFactory(): IterableDiffers;
 export declare function _keyValueDiffersFactory(): KeyValueDiffers;
-export declare function createNgZone(parent: NgZone): NgZone;
 /**
  * A default set of providers which should be included in any Angular
  * application, regardless of the platform it runs onto.
