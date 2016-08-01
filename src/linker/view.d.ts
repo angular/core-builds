@@ -80,6 +80,7 @@ export declare abstract class AppView<T> {
     detectChangesInternal(throwOnChange: boolean): void;
     detectContentChildrenChanges(throwOnChange: boolean): void;
     detectViewChildrenChanges(throwOnChange: boolean): void;
+    markContentChildAsMoved(renderAppElement: AppElement): void;
     addToContentChildren(renderAppElement: AppElement): void;
     removeFromContentChildren(renderAppElement: AppElement): void;
     markAsCheckOnce(): void;

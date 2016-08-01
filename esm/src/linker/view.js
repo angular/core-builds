@@ -245,6 +245,7 @@ export class AppView {
             child.detectChanges(throwOnChange);
         }
     }
+    markContentChildAsMoved(renderAppElement) { this.dirtyParentQueriesInternal(); }
     addToContentChildren(renderAppElement) {
         renderAppElement.parentView.contentChildren.push(this);
         this.viewContainerElement = renderAppElement;

@@ -7023,6 +7023,55 @@ var __extends = (this && this.__extends) || function (d, b) {
                 fn(record);
             }
         };
+        DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
+            var nextIt = this._itHead;
+            var nextRemove = this._removalsHead;
+            var addRemoveOffset = 0;
+            var moveOffsets = null;
+            while (nextIt || nextRemove) {
+                // Figure out which is the next record to process
+                // Order: remove, add, move
+                var record = !nextRemove ||
+                    nextIt &&
+                        nextIt.currentIndex < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                    nextIt :
+                    nextRemove;
+                var adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+                var currentIndex = record.currentIndex;
+                // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+                if (record === nextRemove) {
+                    addRemoveOffset--;
+                    nextRemove = nextRemove._nextRemoved;
+                }
+                else {
+                    nextIt = nextIt._next;
+                    if (record.previousIndex == null) {
+                        addRemoveOffset++;
+                    }
+                    else {
+                        // INVARIANT:  currentIndex < previousIndex
+                        if (!moveOffsets)
+                            moveOffsets = [];
+                        var localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                        var localCurrentIndex = currentIndex - addRemoveOffset;
+                        if (localMovePreviousIndex != localCurrentIndex) {
+                            for (var i = 0; i < localMovePreviousIndex; i++) {
+                                var offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                                var index = offset + i;
+                                if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                    moveOffsets[i] = offset + 1;
+                                }
+                            }
+                            var previousIndex = record.previousIndex;
+                            moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                        }
+                    }
+                }
+                if (adjPreviousIndex !== currentIndex) {
+                    fn(record, adjPreviousIndex, currentIndex);
+                }
+            }
+        };
         DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
             var record;
             for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
@@ -7622,6 +7671,16 @@ var __extends = (this && this.__extends) || function (d, b) {
         _DuplicateMap.prototype.toString = function () { return '_DuplicateMap(' + stringify(this.map) + ')'; };
         return _DuplicateMap;
     }());
+    function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+        var previousIndex = item.previousIndex;
+        if (previousIndex === null)
+            return previousIndex;
+        var moveOffset = 0;
+        if (moveOffsets && previousIndex < moveOffsets.length) {
+            moveOffset = moveOffsets[previousIndex];
+        }
+        return previousIndex + addRemoveOffset + moveOffset;
+    }
     var DefaultKeyValueDifferFactory = (function () {
         function DefaultKeyValueDifferFactory() {
         }
@@ -8498,6 +8557,14 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._element.attachView(viewRef_.internalView, index);
             return wtfLeave(s, viewRef_);
         };
+        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+            var s = this._insertScope();
+            if (currentIndex == -1)
+                return;
+            var viewRef_ = viewRef;
+            this._element.moveView(viewRef_.internalView, currentIndex);
+            return wtfLeave(s, viewRef_);
+        };
         ViewContainerRef_.prototype.indexOf = function (viewRef) {
             return ListWrapper.indexOf(this._element.nestedViews, viewRef.internalView);
         };
@@ -8596,6 +8663,31 @@ var __extends = (this && this.__extends) || function (d, b) {
                 });
             }
             return result;
+        };
+        AppElement.prototype.moveView = function (view, currentIndex) {
+            var previousIndex = this.nestedViews.indexOf(view);
+            if (view.type === ViewType.COMPONENT) {
+                throw new BaseException("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            ListWrapper.removeAt(nestedViews, previousIndex);
+            ListWrapper.insert(nestedViews, currentIndex, view);
+            var refRenderNode;
+            if (currentIndex > 0) {
+                var prevView = nestedViews[currentIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.markContentChildAsMoved(this);
         };
         AppElement.prototype.attachView = function (view, viewIndex) {
             if (view.type === ViewType.COMPONENT) {
@@ -12523,6 +12615,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 child.detectChanges(throwOnChange);
             }
         };
+        AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
         AppView.prototype.addToContentChildren = function (renderAppElement) {
             renderAppElement.parentView.contentChildren.push(this);
             this.viewContainerElement = renderAppElement;

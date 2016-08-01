@@ -275,6 +275,7 @@ var AppView = (function () {
             child.detectChanges(throwOnChange);
         }
     };
+    AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
     AppView.prototype.addToContentChildren = function (renderAppElement) {
         renderAppElement.parentView.contentChildren.push(this);
         this.viewContainerElement = renderAppElement;
