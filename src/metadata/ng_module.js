@@ -27,15 +27,17 @@ exports.CUSTOM_ELEMENTS_SCHEMA = {
  */
 var NgModuleMetadata = (function (_super) {
     __extends(NgModuleMetadata, _super);
-    function NgModuleMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, providers = _b.providers, declarations = _b.declarations, imports = _b.imports, exports = _b.exports, entryComponents = _b.entryComponents, schemas = _b.schemas;
+    function NgModuleMetadata(options) {
+        if (options === void 0) { options = {}; }
+        // We cannot use destructuring of the constructor argument because `exports` is a
+        // protected symbol in CommonJS and closure tries to aggressively optimize it away.
         _super.call(this);
-        this._providers = providers;
-        this.declarations = declarations;
-        this.imports = imports;
-        this.exports = exports;
-        this.entryComponents = entryComponents;
-        this.schemas = schemas;
+        this._providers = options.providers;
+        this.declarations = options.declarations;
+        this.imports = options.imports;
+        this.exports = options.exports;
+        this.entryComponents = options.entryComponents;
+        this.schemas = options.schemas;
     }
     Object.defineProperty(NgModuleMetadata.prototype, "providers", {
         /**

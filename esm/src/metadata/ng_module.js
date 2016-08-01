@@ -20,14 +20,16 @@ export const CUSTOM_ELEMENTS_SCHEMA = {
  * @experimental
  */
 export class NgModuleMetadata extends InjectableMetadata {
-    constructor({ providers, declarations, imports, exports, entryComponents, schemas } = {}) {
+    constructor(options = {}) {
+        // We cannot use destructuring of the constructor argument because `exports` is a
+        // protected symbol in CommonJS and closure tries to aggressively optimize it away.
         super();
-        this._providers = providers;
-        this.declarations = declarations;
-        this.imports = imports;
-        this.exports = exports;
-        this.entryComponents = entryComponents;
-        this.schemas = schemas;
+        this._providers = options.providers;
+        this.declarations = options.declarations;
+        this.imports = options.imports;
+        this.exports = options.exports;
+        this.entryComponents = options.entryComponents;
+        this.schemas = options.schemas;
     }
     /**
      * Defines the set of injectable objects that are available in the injector

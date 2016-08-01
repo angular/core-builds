@@ -133,5 +133,5 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      */
     entryComponents: Array<Type | any[]>;
     schemas: Array<SchemaMetadata | any[]>;
-    constructor({providers, declarations, imports, exports, entryComponents, schemas}?: NgModuleMetadataType);
+    constructor(options?: NgModuleMetadataType);
 }
