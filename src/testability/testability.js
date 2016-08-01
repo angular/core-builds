@@ -129,7 +129,6 @@ var TestabilityRegistry = (function () {
     return TestabilityRegistry;
 }());
 exports.TestabilityRegistry = TestabilityRegistry;
-/* @ts2dart_const */
 var _NoopGetTestability = (function () {
     function _NoopGetTestability() {
     }

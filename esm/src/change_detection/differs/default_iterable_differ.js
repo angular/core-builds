@@ -8,7 +8,6 @@
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
 import { BaseException } from '../../facade/exceptions';
 import { getMapKey, isArray, isBlank, isPresent, looseIdentical, stringify } from '../../facade/lang';
-/* @ts2dart_const */
 export class DefaultIterableDifferFactory {
     constructor() {
     }

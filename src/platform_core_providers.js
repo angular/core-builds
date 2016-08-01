@@ -14,7 +14,6 @@ var testability_1 = require('./testability/testability');
 function _reflector() {
     return reflection_1.reflector;
 }
-var __unused; // prevent missing use Dart warning.
 var _CORE_PLATFORM_PROVIDERS = [
     application_ref_1.PlatformRef_, { provide: application_ref_1.PlatformRef, useExisting: application_ref_1.PlatformRef_ },
     { provide: reflection_1.Reflector, useFactory: _reflector, deps: [] },

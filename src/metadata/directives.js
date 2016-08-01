@@ -393,7 +393,6 @@ var lang_1 = require('../facade/lang');
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
- * @ts2dart_const
  * @stable
  */
 var DirectiveMetadata = (function (_super) {
@@ -600,7 +599,6 @@ exports.DirectiveMetadata = DirectiveMetadata;
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
- * @ts2dart_const
  * @stable
  */
 var ComponentMetadata = (function (_super) {
@@ -688,7 +686,6 @@ exports.ComponentMetadata = ComponentMetadata;
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
- * @ts2dart_const
  * @stable
  */
 var PipeMetadata = (function (_super) {
@@ -747,7 +744,6 @@ exports.PipeMetadata = PipeMetadata;
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 var InputMetadata = (function () {
@@ -801,7 +797,6 @@ exports.InputMetadata = InputMetadata;
  * }
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 var OutputMetadata = (function () {
@@ -845,7 +840,6 @@ exports.OutputMetadata = OutputMetadata;
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 var HostBindingMetadata = (function () {
@@ -888,7 +882,6 @@ exports.HostBindingMetadata = HostBindingMetadata;
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 var HostListenerMetadata = (function () {

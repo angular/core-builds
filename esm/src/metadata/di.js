@@ -60,7 +60,6 @@ export const ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComp
  * A decorator can inject string literal `text` like so:
  *
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
- * @ts2dart_const
  * @stable
  */
 export class AttributeMetadata extends DependencyMetadata {
@@ -184,7 +183,6 @@ export class AttributeMetadata extends DependencyMetadata {
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
- * @ts2dart_const
  * @deprecated
  */
 export class QueryMetadata extends DependencyMetadata {
@@ -234,7 +232,6 @@ export class QueryMetadata extends DependencyMetadata {
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 export class ContentChildrenMetadata extends QueryMetadata {
@@ -262,7 +259,6 @@ export class ContentChildrenMetadata extends QueryMetadata {
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 export class ContentChildMetadata extends QueryMetadata {
@@ -304,7 +300,6 @@ export class ContentChildMetadata extends QueryMetadata {
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
- * @ts2dart_const
  * @deprecated
  */
 export class ViewQueryMetadata extends QueryMetadata {
@@ -393,7 +388,6 @@ export class ViewQueryMetadata extends QueryMetadata {
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 export class ViewChildrenMetadata extends ViewQueryMetadata {
@@ -470,7 +464,6 @@ export class ViewChildrenMetadata extends ViewQueryMetadata {
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 export class ViewChildMetadata extends ViewQueryMetadata {

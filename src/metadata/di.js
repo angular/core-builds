@@ -66,7 +66,6 @@ exports.ANALYZE_FOR_ENTRY_COMPONENTS = new opaque_token_1.OpaqueToken('AnalyzeFo
  * A decorator can inject string literal `text` like so:
  *
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
- * @ts2dart_const
  * @stable
  */
 var AttributeMetadata = (function (_super) {
@@ -197,7 +196,6 @@ exports.AttributeMetadata = AttributeMetadata;
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
- * @ts2dart_const
  * @deprecated
  */
 var QueryMetadata = (function (_super) {
@@ -267,7 +265,6 @@ exports.QueryMetadata = QueryMetadata;
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 var ContentChildrenMetadata = (function (_super) {
@@ -299,7 +296,6 @@ exports.ContentChildrenMetadata = ContentChildrenMetadata;
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 var ContentChildMetadata = (function (_super) {
@@ -345,7 +341,6 @@ exports.ContentChildMetadata = ContentChildMetadata;
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
- * @ts2dart_const
  * @deprecated
  */
 var ViewQueryMetadata = (function (_super) {
@@ -442,7 +437,6 @@ exports.ViewQueryMetadata = ViewQueryMetadata;
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 var ViewChildrenMetadata = (function (_super) {
@@ -523,7 +517,6 @@ exports.ViewChildrenMetadata = ViewChildrenMetadata;
  *   }
  * }
  * ```
- * @ts2dart_const
  * @stable
  */
 var ViewChildMetadata = (function (_super) {

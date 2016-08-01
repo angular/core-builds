@@ -387,7 +387,6 @@ import { isPresent } from '../facade/lang';
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
- * @ts2dart_const
  * @stable
  */
 export class DirectiveMetadata extends InjectableMetadata {
@@ -570,7 +569,6 @@ export class DirectiveMetadata extends InjectableMetadata {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
- * @ts2dart_const
  * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
@@ -650,7 +648,6 @@ export class ComponentMetadata extends DirectiveMetadata {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
- * @ts2dart_const
  * @stable
  */
 export class PipeMetadata extends InjectableMetadata {
@@ -701,7 +698,6 @@ export class PipeMetadata extends InjectableMetadata {
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class InputMetadata {
@@ -753,7 +749,6 @@ export class InputMetadata {
  * }
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class OutputMetadata {
@@ -795,7 +790,6 @@ export class OutputMetadata {
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class HostBindingMetadata {
@@ -836,7 +830,6 @@ export class HostBindingMetadata {
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class HostListenerMetadata {

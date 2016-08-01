@@ -27,7 +27,6 @@ export interface BrowserNodeGlobal {
     encodeURI: Function;
 }
 export declare function scheduleMicroTask(fn: Function): void;
-export declare const IS_DART: boolean;
 declare var _global: BrowserNodeGlobal;
 export { _global as global };
 /**

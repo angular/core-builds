@@ -35,8 +35,7 @@ var di_1 = require('./di');
   * @deprecated Providing platform directives via a provider is deprecated. Provide platform
   * directives via an {@link NgModule} instead.
   */
-exports.PLATFORM_DIRECTIVES = 
-/*@ts2dart_const*/ new di_1.OpaqueToken('Platform Directives');
+exports.PLATFORM_DIRECTIVES = new di_1.OpaqueToken('Platform Directives');
 /**
   * A token that can be provided when bootstraping an application to make an array of pipes
   * available in every component of the application.

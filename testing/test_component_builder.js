@@ -78,7 +78,7 @@ var TestComponentBuilder = (function () {
      */
     TestComponentBuilder.prototype.createAsync = function (rootComponentType) {
         var _this = this;
-        var noNgZone = lang_1.IS_DART || this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
+        var noNgZone = this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
@@ -99,7 +99,7 @@ var TestComponentBuilder = (function () {
     };
     TestComponentBuilder.prototype.createSync = function (rootComponentType) {
         var _this = this;
-        var noNgZone = lang_1.IS_DART || this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
+        var noNgZone = this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {

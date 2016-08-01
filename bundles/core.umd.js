@@ -37,7 +37,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function scheduleMicroTask(fn) {
         Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
     }
-    var IS_DART = false;
     // Need to declare a new variable for global here since TypeScript
     // exports the original value of the symbol.
     var global$1 = globalScope;
@@ -349,7 +348,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([Engine, Car]);
      * expect(injector.get(Car).engine instanceof Engine).toBe(true);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InjectMetadata = (function () {
@@ -379,7 +377,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([Car]);
      * expect(injector.get(Car).engine).toBeNull();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var OptionalMetadata = (function () {
@@ -391,7 +388,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * `DependencyMetadata` is used by the framework to extend DI.
      * This is internal to Angular and should not be used directly.
-     * @ts2dart_const
      * @stable
      */
     var DependencyMetadata = (function () {
@@ -434,7 +430,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([NeedsService, UsefulService]);
      * expect(() => injector.get(NeedsService)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InjectableMetadata = (function () {
@@ -468,7 +463,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var child = inj.resolveAndCreateChild([NeedsDependency]);
      * expect(() => child.get(NeedsDependency)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var SelfMetadata = (function () {
@@ -501,7 +495,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var inj = Injector.resolveAndCreate([Dependency, NeedsDependency]);
      * expect(() => inj.get(NeedsDependency)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var SkipSelfMetadata = (function () {
@@ -563,7 +556,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * bootstrap(App);
      *```
-     * @ts2dart_const
      * @stable
      */
     var HostMetadata = (function () {
@@ -599,7 +591,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
      * error messages.
-     * @ts2dart_const
      * @stable
      */
     var OpaqueToken = (function () {
@@ -660,7 +651,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * A decorator can inject string literal `text` like so:
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
-     * @ts2dart_const
      * @stable
      */
     var AttributeMetadata = (function (_super) {
@@ -790,7 +780,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * The injected object is an unmodifiable live list.
      * See {@link QueryList} for more details.
-     * @ts2dart_const
      * @deprecated
      */
     var QueryMetadata = (function (_super) {
@@ -859,7 +848,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ContentChildrenMetadata = (function (_super) {
@@ -890,7 +878,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ContentChildMetadata = (function (_super) {
@@ -935,7 +922,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * The injected object is an iterable and observable live list.
      * See {@link QueryList} for more details.
-     * @ts2dart_const
      * @deprecated
      */
     var ViewQueryMetadata = (function (_super) {
@@ -1031,7 +1017,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ViewChildrenMetadata = (function (_super) {
@@ -1111,7 +1096,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ViewChildMetadata = (function (_super) {
@@ -1564,7 +1548,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
      * the instantiated
      * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
-     * @ts2dart_const
      * @stable
      */
     var DirectiveMetadata = (function (_super) {
@@ -1770,7 +1753,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example
      *
      * {@example core/ts/metadata/metadata.ts region='component'}
-     * @ts2dart_const
      * @stable
      */
     var ComponentMetadata = (function (_super) {
@@ -1857,7 +1839,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example
      *
      * {@example core/ts/metadata/metadata.ts region='pipe'}
-     * @ts2dart_const
      * @stable
      */
     var PipeMetadata = (function (_super) {
@@ -1915,7 +1896,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InputMetadata = (function () {
@@ -1968,7 +1948,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var OutputMetadata = (function () {
@@ -2011,7 +1990,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var HostBindingMetadata = (function () {
@@ -2053,7 +2031,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var HostListenerMetadata = (function () {
@@ -2700,7 +2677,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      *
      * @deprecated Use ComponentMetadata instead.
      */
@@ -5330,7 +5306,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * expect(injector.get("message")).toEqual('Hello');
      * ```
-     * @ts2dart_const
      * @deprecated
      */
     var Provider = (function () {
@@ -5385,7 +5360,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * See {@link Provider} instead.
      *
      * @deprecated
-     * @ts2dart_const
      */
     var Binding = (function (_super) {
         __extends(Binding, _super);
@@ -6822,8 +6796,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Providers that will generate a random APP_ID_TOKEN.
      * @experimental
      */
-    var APP_ID_RANDOM_PROVIDER = 
-    /*@ts2dart_const*/ /* @ts2dart_Provider */ {
+    var APP_ID_RANDOM_PROVIDER = {
         provide: APP_ID,
         useFactory: _appIdRandomProviderFactory,
         deps: []
@@ -6835,29 +6808,23 @@ var __extends = (this && this.__extends) || function (d, b) {
      * A function that will be executed when a platform is initialized.
      * @experimental
      */
-    var PLATFORM_INITIALIZER = 
-    /*@ts2dart_const*/ new OpaqueToken('Platform Initializer');
+    var PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
     /**
      * A function that will be executed when an application is initialized.
      * @experimental
      */
-    var APP_INITIALIZER = 
-    /*@ts2dart_const*/ new OpaqueToken('Application Initializer');
+    var APP_INITIALIZER = new OpaqueToken('Application Initializer');
     /**
      * A token which indicates the root directory of the application
      * @experimental
      */
-    var PACKAGE_ROOT_URL = 
-    /*@ts2dart_const*/ new OpaqueToken('Application Packages Root URL');
-    // Note: Need to rename warn as in Dart
-    // class members and imports can't use the same name.
-    var _warnImpl = warn;
+    var PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
     var Console = (function () {
         function Console() {
         }
         Console.prototype.log = function (message) { print(message); };
         // Note: for reporting errors use `DOM.logError()` as it is platform specific
-        Console.prototype.warn = function (message) { _warnImpl(message); };
+        Console.prototype.warn = function (message) { warn(message); };
         return Console;
     }());
     /** @nocollapse */
@@ -6970,7 +6937,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return CompilerFactory;
     }());
-    /* @ts2dart_const */
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
         }
@@ -7978,11 +7944,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
-     * @ts2dart_const
      * @stable
      */
     var IterableDiffers = (function () {
-        /*@ts2dart_const*/
         function IterableDiffers(factories) {
             this.factories = factories;
         }
@@ -8043,11 +8007,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
-     * @ts2dart_const
      * @stable
      */
     var KeyValueDiffers = (function () {
-        /*@ts2dart_const*/
         function KeyValueDiffers(factories) {
             this.factories = factories;
         }
@@ -8196,13 +8158,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Structural diffing for `Object`s and `Map`s.
      */
-    var keyValDiff = 
-    /*@ts2dart_const*/ [new DefaultKeyValueDifferFactory()];
+    var keyValDiff = [new DefaultKeyValueDifferFactory()];
     /**
      * Structural diffing for `Iterable` types such as `Array`s.
      */
-    var iterableDiff = 
-    /*@ts2dart_const*/ [new DefaultIterableDifferFactory()];
+    var iterableDiff = [new DefaultIterableDifferFactory()];
     var defaultIterableDiffers = new IterableDiffers(iterableDiff);
     var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
     /**
@@ -8371,7 +8331,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function endTimeRange(range) {
         trace.endTimeRange(range);
     }
-    // Change exports to const once https://github.com/angular/ts2dart/issues/150
     /**
      * True if WTF is enabled.
      */
@@ -9208,7 +9167,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     }(ComponentRef));
     /**
      * @experimental
-     * @ts2dart_const
      */
     var EMPTY_CONTEXT = new Object();
     /**
@@ -9734,7 +9692,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     ];
     /** @nocollapse */
     TestabilityRegistry.ctorParameters = [];
-    /* @ts2dart_const */
     var _NoopGetTestability = (function () {
         function _NoopGetTestability() {
         }
@@ -10172,9 +10129,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
                 _this._loadComponent(compRef);
                 if (isDevMode()) {
-                    var prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
-                        'Call enableProdMode() to enable the production mode.';
-                    _this._console.log("Angular 2 is running in the development mode. " + prodDescription);
+                    _this._console.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
                 }
                 return compRef;
             });
@@ -11027,8 +10982,7 @@ var __extends = (this && this.__extends) || function (d, b) {
       * @deprecated Providing platform directives via a provider is deprecated. Provide platform
       * directives via an {@link NgModule} instead.
       */
-    var PLATFORM_DIRECTIVES = 
-    /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
+    var PLATFORM_DIRECTIVES = new OpaqueToken('Platform Directives');
     /**
       * A token that can be provided when bootstraping an application to make an array of pipes
       * available in every component of the application.
@@ -11059,7 +11013,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _reflector() {
         return reflector;
     }
-    // prevent missing use Dart warning.
     var _CORE_PLATFORM_PROVIDERS = [
         PlatformRef_, { provide: PlatformRef, useExisting: PlatformRef_ },
         { provide: Reflector, useFactory: _reflector, deps: [] },
@@ -12186,7 +12139,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return DebugDomRenderer;
     }());
-    /* @ts2dart_const */
     var StaticNodeDebugInfo = (function () {
         function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
             this.providerTokens = providerTokens;

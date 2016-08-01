@@ -20,13 +20,11 @@ export { KeyValueDiffers } from './differs/keyvalue_differs';
 /**
  * Structural diffing for `Object`s and `Map`s.
  */
-export const keyValDiff = 
-/*@ts2dart_const*/ [new DefaultKeyValueDifferFactory()];
+export const keyValDiff = [new DefaultKeyValueDifferFactory()];
 /**
  * Structural diffing for `Iterable` types such as `Array`s.
  */
-export const iterableDiff = 
-/*@ts2dart_const*/ [new DefaultIterableDifferFactory()];
+export const iterableDiff = [new DefaultIterableDifferFactory()];
 export const defaultIterableDiffers = new IterableDiffers(iterableDiff);
 export const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 //# sourceMappingURL=change_detection.js.map

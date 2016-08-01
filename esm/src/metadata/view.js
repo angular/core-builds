@@ -63,7 +63,6 @@ export var VIEW_ENCAPSULATION_VALUES = [ViewEncapsulation.Emulated, ViewEncapsul
  *   }
  * }
  * ```
- * @ts2dart_const
  *
  * @deprecated Use ComponentMetadata instead.
  */

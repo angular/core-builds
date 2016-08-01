@@ -408,7 +408,6 @@ export interface DirectiveMetadataType {
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
- * @ts2dart_const
  * @stable
  */
 export declare class DirectiveMetadata extends InjectableMetadata implements DirectiveMetadataType {
@@ -800,7 +799,6 @@ export interface ComponentMetadataType extends DirectiveMetadataType {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
- * @ts2dart_const
  * @stable
  */
 export declare class ComponentMetadata extends DirectiveMetadata implements ComponentMetadataType {
@@ -860,8 +858,6 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
      * In CommonJS, this can always be set to `module.id`, similarly SystemJS exposes `__moduleName`
      * variable within each module.
      *
-     * In Dart, this can be determined automatically and does not need to be set.
-  
      *
      * ## Simple Example
      *
@@ -1009,7 +1005,6 @@ export interface PipeMetadataType {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
- * @ts2dart_const
  * @stable
  */
 export declare class PipeMetadata extends InjectableMetadata implements PipeMetadataType {
@@ -1057,7 +1052,6 @@ export declare class PipeMetadata extends InjectableMetadata implements PipeMeta
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export declare class InputMetadata {
@@ -1111,7 +1105,6 @@ export declare class InputMetadata {
  * }
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export declare class OutputMetadata {
@@ -1152,7 +1145,6 @@ export declare class OutputMetadata {
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export declare class HostBindingMetadata {
@@ -1192,7 +1184,6 @@ export declare class HostBindingMetadata {
  *
  * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export declare class HostListenerMetadata {

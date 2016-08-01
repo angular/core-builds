@@ -7,7 +7,7 @@
  */
 import { Compiler, Injectable, Injector, NgZone } from '../index';
 import { PromiseWrapper } from '../src/facade/async';
-import { IS_DART, isPresent } from '../src/facade/lang';
+import { isPresent } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { tick } from './fake_async';
 import { ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestComponentRenderer } from './test_bed';
@@ -76,7 +76,7 @@ export class TestComponentBuilder {
      * Builds and returns a ComponentFixture.
      */
     createAsync(rootComponentType) {
-        let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
+        let noNgZone = this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
@@ -96,7 +96,7 @@ export class TestComponentBuilder {
         return result;
     }
     createSync(rootComponentType) {
-        let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
+        let noNgZone = this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
