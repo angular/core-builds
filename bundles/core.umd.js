@@ -9977,7 +9977,10 @@ var __extends = (this && this.__extends) || function (d, b) {
             return ngZone.run(function () {
                 var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this.injector);
                 var moduleRef = moduleFactory.create(ngZoneInjector);
-                var exceptionHandler = moduleRef.injector.get(ExceptionHandler);
+                var exceptionHandler = moduleRef.injector.get(ExceptionHandler, null);
+                if (!exceptionHandler) {
+                    throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
+                }
                 ObservableWrapper.subscribe(ngZone.onError, function (error) {
                     exceptionHandler.call(error.error, error.stackTrace);
                 });
@@ -11030,7 +11033,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated Create platforms via `createPlatformFactory(corePlatform, ...) instead!
      */
     var PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
-    // avoid unused import when Type union types are erased
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }

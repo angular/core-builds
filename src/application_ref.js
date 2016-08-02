@@ -303,7 +303,10 @@ var PlatformRef_ = (function (_super) {
         return ngZone.run(function () {
             var ngZoneInjector = di_1.ReflectiveInjector.resolveAndCreate([{ provide: ng_zone_1.NgZone, useValue: ngZone }], _this.injector);
             var moduleRef = moduleFactory.create(ngZoneInjector);
-            var exceptionHandler = moduleRef.injector.get(exceptions_1.ExceptionHandler);
+            var exceptionHandler = moduleRef.injector.get(exceptions_1.ExceptionHandler, null);
+            if (!exceptionHandler) {
+                throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
+            }
             async_1.ObservableWrapper.subscribe(ngZone.onError, function (error) {
                 exceptionHandler.call(error.error, error.stackTrace);
             });

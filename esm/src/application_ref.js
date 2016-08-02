@@ -262,7 +262,10 @@ export class PlatformRef_ extends PlatformRef {
         return ngZone.run(() => {
             const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
             const moduleRef = moduleFactory.create(ngZoneInjector);
-            const exceptionHandler = moduleRef.injector.get(ExceptionHandler);
+            const exceptionHandler = moduleRef.injector.get(ExceptionHandler, null);
+            if (!exceptionHandler) {
+                throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
+            }
             ObservableWrapper.subscribe(ngZone.onError, (error) => {
                 exceptionHandler.call(error.error, error.stackTrace);
             });

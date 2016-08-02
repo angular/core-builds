@@ -13,7 +13,6 @@ import { ComponentResolver } from './linker/component_resolver';
 import { DynamicComponentLoader, DynamicComponentLoader_ } from './linker/dynamic_component_loader';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
-let __unused; // avoid unused import when Type union types are erased
 export function _iterableDiffersFactory() {
     return defaultIterableDiffers;
 }

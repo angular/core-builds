@@ -14,7 +14,6 @@ var component_resolver_1 = require('./linker/component_resolver');
 var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');
 var view_utils_1 = require('./linker/view_utils');
 var metadata_1 = require('./metadata');
-var __unused; // avoid unused import when Type union types are erased
 function _iterableDiffersFactory() {
     return change_detection_1.defaultIterableDiffers;
 }
