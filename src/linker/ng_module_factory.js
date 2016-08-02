@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var injector_1 = require('../di/injector');
 var exceptions_1 = require('../facade/exceptions');
+var lang_1 = require('../facade/lang');
 var component_factory_resolver_1 = require('./component_factory_resolver');
 /**
  * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
@@ -80,9 +81,12 @@ exports.NgModuleFactory = NgModuleFactory;
 var _UNDEFINED = new Object();
 var NgModuleInjector = (function (_super) {
     __extends(NgModuleInjector, _super);
-    function NgModuleInjector(parent, factories) {
+    function NgModuleInjector(parent, factories, bootstrapFactories) {
         _super.call(this, factories, parent.get(component_factory_resolver_1.ComponentFactoryResolver, component_factory_resolver_1.ComponentFactoryResolver.NULL));
         this.parent = parent;
+        this.bootstrapFactories = bootstrapFactories;
+        this._destroyListeners = [];
+        this._destroyed = false;
     }
     NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
     NgModuleInjector.prototype.get = function (token, notFoundValue) {
@@ -103,6 +107,15 @@ var NgModuleInjector = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    NgModuleInjector.prototype.destroy = function () {
+        if (this._destroyed) {
+            throw new exceptions_1.BaseException("The ng module " + lang_1.stringify(this.instance.constructor) + " has already been destroyed.");
+        }
+        this._destroyed = true;
+        this.destroyInternal();
+        this._destroyListeners.forEach(function (listener) { return listener(); });
+    };
+    NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
     return NgModuleInjector;
 }(component_factory_resolver_1.CodegenComponentFactoryResolver));
 exports.NgModuleInjector = NgModuleInjector;

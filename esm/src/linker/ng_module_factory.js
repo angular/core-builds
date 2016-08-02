@@ -6,7 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector, THROW_IF_NOT_FOUND } from '../di/injector';
-import { unimplemented } from '../facade/exceptions';
+import { BaseException, unimplemented } from '../facade/exceptions';
+import { stringify } from '../facade/lang';
 import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
 /**
  * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
@@ -51,9 +52,12 @@ export class NgModuleFactory {
 }
 const _UNDEFINED = new Object();
 export class NgModuleInjector extends CodegenComponentFactoryResolver {
-    constructor(parent, factories) {
+    constructor(parent, factories, bootstrapFactories) {
         super(factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
         this.parent = parent;
+        this.bootstrapFactories = bootstrapFactories;
+        this._destroyListeners = [];
+        this._destroyed = false;
     }
     create() { this.instance = this.createInternal(); }
     get(token, notFoundValue = THROW_IF_NOT_FOUND) {
@@ -65,5 +69,14 @@ export class NgModuleInjector extends CodegenComponentFactoryResolver {
     }
     get injector() { return this; }
     get componentFactoryResolver() { return this; }
+    destroy() {
+        if (this._destroyed) {
+            throw new BaseException(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
+        }
+        this._destroyed = true;
+        this.destroyInternal();
+        this._destroyListeners.forEach((listener) => listener());
+    }
+    onDestroy(callback) { this._destroyListeners.push(callback); }
 }
 //# sourceMappingURL=ng_module_factory.js.map

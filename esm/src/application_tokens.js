@@ -39,10 +39,14 @@ function _randomChar() {
  */
 export const PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
 /**
- * A function that will be executed when an application is initialized.
+ * All callbacks provided via this token will be called for every component that is bootstrapped.
+ * Signature of the callback:
+ *
+ * `(componentRef: ComponentRef) => void`.
+ *
  * @experimental
  */
-export const APP_INITIALIZER = new OpaqueToken('Application Initializer');
+export const APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
 /**
  * A token which indicates the root directory of the application
  * @experimental

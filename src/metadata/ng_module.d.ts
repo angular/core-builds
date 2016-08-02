@@ -41,6 +41,7 @@ export interface NgModuleMetadataType {
     imports?: Array<Type | ModuleWithProviders | any[]>;
     exports?: Array<Type | any[]>;
     entryComponents?: Array<Type | any[]>;
+    bootstrap?: Array<Type | any[]>;
     schemas?: Array<SchemaMetadata | any[]>;
 }
 /**
@@ -132,6 +133,12 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * {@link ComponentFactoryResolver ComponentFactoryResolver}.
      */
     entryComponents: Array<Type | any[]>;
+    /**
+     * Defines the components that should be bootstrapped when
+     * this module is bootstrapped. The components listed here
+     * will automatically be added to `entryComponents`.
+     */
+    bootstrap: Array<Type | any[]>;
     schemas: Array<SchemaMetadata | any[]>;
     constructor(options?: NgModuleMetadataType);
 }

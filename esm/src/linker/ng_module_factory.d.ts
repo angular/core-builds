@@ -31,6 +31,14 @@ export declare abstract class NgModuleRef<T> {
      * The NgModule instance.
      */
     readonly instance: T;
+    /**
+     * Destroys the module instance and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
+    /**
+     * Allows to register a callback that will be called when the module is destroyed.
+     */
+    abstract onDestroy(callback: () => void): void;
 }
 /**
  * @experimental
@@ -46,12 +54,18 @@ export declare class NgModuleFactory<T> {
 }
 export declare abstract class NgModuleInjector<T> extends CodegenComponentFactoryResolver implements Injector, NgModuleRef<T> {
     parent: Injector;
+    bootstrapFactories: ComponentFactory<any>[];
+    private _destroyListeners;
+    private _destroyed;
     instance: T;
-    constructor(parent: Injector, factories: ComponentFactory<any>[]);
+    constructor(parent: Injector, factories: ComponentFactory<any>[], bootstrapFactories: ComponentFactory<any>[]);
     create(): void;
     abstract createInternal(): T;
     get(token: any, notFoundValue?: any): any;
     abstract getInternal(token: any, notFoundValue: any): any;
     readonly injector: Injector;
     readonly componentFactoryResolver: ComponentFactoryResolver;
+    destroy(): void;
+    onDestroy(callback: () => void): void;
+    abstract destroyInternal(): void;
 }

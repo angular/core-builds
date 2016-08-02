@@ -5,11 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ObservableWrapper, PromiseWrapper } from '../src/facade/async';
+import { ObservableWrapper } from '../src/facade/async';
 import { ListWrapper } from '../src/facade/collection';
 import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/exceptions';
-import { isBlank, isPresent, isPromise } from '../src/facade/lang';
-import { APP_INITIALIZER, PLATFORM_INITIALIZER } from './application_tokens';
+import { isBlank, isPresent, isPromise, stringify } from '../src/facade/lang';
+import { ApplicationInitStatus } from './application_init';
+import { APP_BOOTSTRAP_LISTENER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
 import { Injectable, Injector, OpaqueToken, Optional, ReflectiveInjector } from './di';
 import { CompilerFactory } from './linker/compiler';
@@ -114,11 +115,19 @@ export function assertPlatform(requiredToken) {
 /**
  * Dispose the existing platform.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @deprecated Use `destroyPlatform` instead
  */
 export function disposePlatform() {
-    if (isPresent(_platform) && !_platform.disposed) {
-        _platform.dispose();
+    destroyPlatform();
+}
+/**
+ * Destroy the existing platform.
+ *
+ * @experimental APIs related to application bootstrap are currently under review.
+ */
+export function destroyPlatform() {
+    if (isPresent(_platform) && !_platform.destroyed) {
+        _platform.destroy();
     }
 }
 /**
@@ -209,7 +218,11 @@ export class PlatformRef {
      */
     get injector() { throw unimplemented(); }
     ;
+    /**
+     * @deprecated Use `destroyed` instead
+     */
     get disposed() { throw unimplemented(); }
+    get destroyed() { throw unimplemented(); }
 }
 function _callAndReportToExceptionHandler(exceptionHandler, callback) {
     try {
@@ -235,22 +248,33 @@ export class PlatformRef_ extends PlatformRef {
     constructor(_injector) {
         super();
         this._injector = _injector;
-        /** @internal */
-        this._applications = [];
-        /** @internal */
-        this._disposeListeners = [];
-        this._disposed = false;
+        this._modules = [];
+        this._destroyListeners = [];
+        this._destroyed = false;
     }
-    registerDisposeListener(dispose) { this._disposeListeners.push(dispose); }
+    /**
+     * @deprecated
+     */
+    registerDisposeListener(dispose) { this.onDestroy(dispose); }
+    onDestroy(callback) { this._destroyListeners.push(callback); }
     get injector() { return this._injector; }
-    get disposed() { return this._disposed; }
-    dispose() {
-        ListWrapper.clone(this._applications).forEach((app) => app.dispose());
-        this._disposeListeners.forEach((dispose) => dispose());
-        this._disposed = true;
+    /**
+     * @deprecated
+     */
+    get disposed() { return this.destroyed; }
+    get destroyed() { return this._destroyed; }
+    destroy() {
+        if (this._destroyed) {
+            throw new BaseException('The platform has already been destroyed!');
+        }
+        ListWrapper.clone(this._modules).forEach((app) => app.destroy());
+        this._destroyListeners.forEach((dispose) => dispose());
+        this._destroyed = true;
     }
-    /** @internal */
-    _applicationDisposed(app) { ListWrapper.remove(this._applications, app); }
+    /**
+     * @deprecated
+     */
+    dispose() { this.destroy(); }
     bootstrapModuleFactory(moduleFactory) {
         // Note: We need to create the NgZone _before_ we instantiate the module,
         // as instantiating the module creates some providers eagerly.
@@ -266,23 +290,14 @@ export class PlatformRef_ extends PlatformRef {
             if (!exceptionHandler) {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
+            moduleRef.onDestroy(() => ListWrapper.remove(this._modules, moduleRef));
             ObservableWrapper.subscribe(ngZone.onError, (error) => {
                 exceptionHandler.call(error.error, error.stackTrace);
             });
             return _callAndReportToExceptionHandler(exceptionHandler, () => {
-                const appInits = moduleRef.injector.get(APP_INITIALIZER, null);
-                const asyncInitPromises = [];
-                if (isPresent(appInits)) {
-                    for (let i = 0; i < appInits.length; i++) {
-                        const initResult = appInits[i]();
-                        if (isPromise(initResult)) {
-                            asyncInitPromises.push(initResult);
-                        }
-                    }
-                }
-                const appRef = moduleRef.injector.get(ApplicationRef);
-                return Promise.all(asyncInitPromises).then(() => {
-                    appRef.asyncInitDone();
+                const initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                return initStatus.donePromise.then(() => {
+                    this._moduleDoBootstrap(moduleRef);
                     return moduleRef;
                 });
             });
@@ -293,6 +308,19 @@ export class PlatformRef_ extends PlatformRef {
         const compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
         return compiler.compileModuleAsync(moduleType)
             .then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory));
+    }
+    _moduleDoBootstrap(moduleRef) {
+        const appRef = moduleRef.injector.get(ApplicationRef);
+        if (moduleRef.bootstrapFactories.length > 0) {
+            moduleRef.bootstrapFactories.forEach((compFactory) => appRef.bootstrap(compFactory));
+        }
+        else if (moduleRef.instance.ngDoBootstrap) {
+            moduleRef.instance.ngDoBootstrap(appRef);
+        }
+        else {
+            throw new BaseException(`The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+                `Please define one of these.`);
+        }
     }
 }
 /** @nocollapse */
@@ -313,53 +341,64 @@ PlatformRef_.ctorParameters = [
 export class ApplicationRef {
     /**
      * Retrieve the application {@link Injector}.
+     *
+     * @deprecated inject an {@link Injector} directly where needed or use {@link
+     * NgModuleRef}.injector.
      */
     get injector() { return unimplemented(); }
     ;
     /**
      * Retrieve the application {@link NgZone}.
+     *
+     * @deprecated inject {@link NgZone} instead of calling this getter.
      */
     get zone() { return unimplemented(); }
     ;
     /**
      * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
      */
     get componentTypes() { return unimplemented(); }
     ;
+    /**
+     * Get a list of components registered to this application.
+     */
+    get components() { return unimplemented(); }
+    ;
 }
 export class ApplicationRef_ extends ApplicationRef {
-    constructor(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability) {
+    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
         super();
-        this._platform = _platform;
         this._zone = _zone;
         this._console = _console;
         this._injector = _injector;
         this._exceptionHandler = _exceptionHandler;
         this._componentFactoryResolver = _componentFactoryResolver;
+        this._initStatus = _initStatus;
         this._testabilityRegistry = _testabilityRegistry;
         this._testability = _testability;
-        /** @internal */
         this._bootstrapListeners = [];
-        /** @internal */
+        /**
+         * @deprecated
+         */
         this._disposeListeners = [];
-        /** @internal */
         this._rootComponents = [];
-        /** @internal */
         this._rootComponentTypes = [];
-        /** @internal */
         this._changeDetectorRefs = [];
-        /** @internal */
         this._runningTick = false;
-        /** @internal */
         this._enforceNoNewChanges = false;
-        /** @internal */
-        this._asyncInitDonePromise = PromiseWrapper.completer();
         this._enforceNoNewChanges = isDevMode();
         ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, (_) => { this._zone.run(() => { this.tick(); }); });
     }
+    /**
+     * @deprecated
+     */
     registerBootstrapListener(listener) {
         this._bootstrapListeners.push(listener);
     }
+    /**
+     * @deprecated
+     */
     registerDisposeListener(dispose) { this._disposeListeners.push(dispose); }
     registerChangeDetector(changeDetector) {
         this._changeDetectorRefs.push(changeDetector);
@@ -368,44 +407,49 @@ export class ApplicationRef_ extends ApplicationRef {
         ListWrapper.remove(this._changeDetectorRefs, changeDetector);
     }
     /**
-     * @internal
+     * @deprecated
      */
-    asyncInitDone() { this._asyncInitDonePromise.resolve(null); }
-    waitForAsyncInitializers() { return this._asyncInitDonePromise.promise; }
+    waitForAsyncInitializers() { return this._initStatus.donePromise; }
+    /**
+     * @deprecated
+     */
     run(callback) {
         return this._zone.run(() => _callAndReportToExceptionHandler(this._exceptionHandler, callback));
     }
     bootstrap(componentOrFactory) {
-        return this.run(() => {
-            let componentFactory;
-            if (componentOrFactory instanceof ComponentFactory) {
-                componentFactory = componentOrFactory;
-            }
-            else {
-                componentFactory =
-                    this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
-            }
-            this._rootComponentTypes.push(componentFactory.componentType);
-            var compRef = componentFactory.create(this._injector, [], componentFactory.selector);
-            compRef.onDestroy(() => { this._unloadComponent(compRef); });
-            var testability = compRef.injector.get(Testability, null);
-            if (isPresent(testability)) {
-                compRef.injector.get(TestabilityRegistry)
-                    .registerApplication(compRef.location.nativeElement, testability);
-            }
-            this._loadComponent(compRef);
-            if (isDevMode()) {
-                this._console.log(`Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.`);
-            }
-            return compRef;
-        });
+        if (!this._initStatus.done) {
+            throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
+        }
+        let componentFactory;
+        if (componentOrFactory instanceof ComponentFactory) {
+            componentFactory = componentOrFactory;
+        }
+        else {
+            componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+        }
+        this._rootComponentTypes.push(componentFactory.componentType);
+        var compRef = componentFactory.create(this._injector, [], componentFactory.selector);
+        compRef.onDestroy(() => { this._unloadComponent(compRef); });
+        var testability = compRef.injector.get(Testability, null);
+        if (isPresent(testability)) {
+            compRef.injector.get(TestabilityRegistry)
+                .registerApplication(compRef.location.nativeElement, testability);
+        }
+        this._loadComponent(compRef);
+        if (isDevMode()) {
+            this._console.log(`Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.`);
+        }
+        return compRef;
     }
     /** @internal */
     _loadComponent(componentRef) {
         this._changeDetectorRefs.push(componentRef.changeDetectorRef);
         this.tick();
         this._rootComponents.push(componentRef);
-        this._bootstrapListeners.forEach((listener) => listener(componentRef));
+        // Get the listeners lazily to prevent DI cycles.
+        const listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, [])
+            .concat(this._bootstrapListeners);
+        listeners.forEach((listener) => listener(componentRef));
     }
     /** @internal */
     _unloadComponent(componentRef) {
@@ -415,7 +459,13 @@ export class ApplicationRef_ extends ApplicationRef {
         this.unregisterChangeDetector(componentRef.changeDetectorRef);
         ListWrapper.remove(this._rootComponents, componentRef);
     }
+    /**
+     * @deprecated
+     */
     get injector() { return this._injector; }
+    /**
+     * @deprecated
+     */
     get zone() { return this._zone; }
     tick() {
         if (this._runningTick) {
@@ -434,13 +484,17 @@ export class ApplicationRef_ extends ApplicationRef {
             wtfLeave(s);
         }
     }
-    dispose() {
+    ngOnDestroy() {
         // TODO(alxhub): Dispose of the NgZone.
         ListWrapper.clone(this._rootComponents).forEach((ref) => ref.destroy());
         this._disposeListeners.forEach((dispose) => dispose());
-        this._platform._applicationDisposed(this);
     }
+    /**
+     * @deprecated
+     */
+    dispose() { this.ngOnDestroy(); }
     get componentTypes() { return this._rootComponentTypes; }
+    get components() { return this._rootComponents; }
 }
 /** @internal */
 ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
@@ -450,12 +504,12 @@ ApplicationRef_.decorators = [
 ];
 /** @nocollapse */
 ApplicationRef_.ctorParameters = [
-    { type: PlatformRef_, },
     { type: NgZone, },
     { type: Console, },
     { type: Injector, },
     { type: ExceptionHandler, },
     { type: ComponentFactoryResolver, },
+    { type: ApplicationInitStatus, },
     { type: TestabilityRegistry, decorators: [{ type: Optional },] },
     { type: Testability, decorators: [{ type: Optional },] },
 ];

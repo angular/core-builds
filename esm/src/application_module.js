@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ApplicationInitStatus } from './application_init';
 import { ApplicationRef, ApplicationRef_ } from './application_ref';
 import { APP_ID_RANDOM_PROVIDER } from './application_tokens';
 import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyValueDiffers } from './change_detection/change_detection';
@@ -34,6 +35,7 @@ ApplicationModule.decorators = [
                 providers: [
                     ApplicationRef_,
                     { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                    ApplicationInitStatus,
                     Compiler,
                     { provide: ComponentResolver, useExisting: Compiler },
                     APP_ID_RANDOM_PROVIDER,

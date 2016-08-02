@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
+var application_init_1 = require('./application_init');
 var application_ref_1 = require('./application_ref');
 var application_tokens_1 = require('./application_tokens');
 var change_detection_1 = require('./change_detection/change_detection');
@@ -38,6 +39,7 @@ var ApplicationModule = (function () {
                     providers: [
                         application_ref_1.ApplicationRef_,
                         { provide: application_ref_1.ApplicationRef, useExisting: application_ref_1.ApplicationRef_ },
+                        application_init_1.ApplicationInitStatus,
                         compiler_1.Compiler,
                         { provide: component_resolver_1.ComponentResolver, useExisting: compiler_1.Compiler },
                         application_tokens_1.APP_ID_RANDOM_PROVIDER,

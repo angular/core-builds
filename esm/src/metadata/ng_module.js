@@ -29,6 +29,7 @@ export class NgModuleMetadata extends InjectableMetadata {
         this.imports = options.imports;
         this.exports = options.exports;
         this.entryComponents = options.entryComponents;
+        this.bootstrap = options.bootstrap;
         this.schemas = options.schemas;
     }
     /**
