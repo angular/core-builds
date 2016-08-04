@@ -564,35 +564,284 @@ var __extends = (this && this.__extends) || function (d, b) {
         HostMetadata.prototype.toString = function () { return "@Host()"; };
         return HostMetadata;
     }());
+    var _nextClassId = 0;
+    function extractAnnotation(annotation) {
+        if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
+            // it is a decorator, extract annotation
+            annotation = annotation.annotation;
+        }
+        return annotation;
+    }
+    function applyParams(fnOrArray, key) {
+        if (fnOrArray === Object || fnOrArray === String || fnOrArray === Function ||
+            fnOrArray === Number || fnOrArray === Array) {
+            throw new Error("Can not use native " + stringify(fnOrArray) + " as constructor");
+        }
+        if (isFunction(fnOrArray)) {
+            return fnOrArray;
+        }
+        else if (fnOrArray instanceof Array) {
+            var annotations = fnOrArray;
+            var annoLength = annotations.length - 1;
+            var fn = fnOrArray[annoLength];
+            if (!isFunction(fn)) {
+                throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
+            }
+            if (annoLength != fn.length) {
+                throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
+            }
+            var paramsAnnotations = [];
+            for (var i = 0, ii = annotations.length - 1; i < ii; i++) {
+                var paramAnnotations = [];
+                paramsAnnotations.push(paramAnnotations);
+                var annotation = annotations[i];
+                if (annotation instanceof Array) {
+                    for (var j = 0; j < annotation.length; j++) {
+                        paramAnnotations.push(extractAnnotation(annotation[j]));
+                    }
+                }
+                else if (isFunction(annotation)) {
+                    paramAnnotations.push(extractAnnotation(annotation));
+                }
+                else {
+                    paramAnnotations.push(annotation);
+                }
+            }
+            Reflect.defineMetadata('parameters', paramsAnnotations, fn);
+            return fn;
+        }
+        else {
+            throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
+        }
+    }
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
+     * Provides a way for expressing ES6 classes with parameter annotations in ES5.
      *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Creates a token that can be used in a DI Provider.
+     * ## Basic Example
      *
-     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+     * ```
+     * var Greeter = ng.Class({
+     *   constructor: function(name) {
+     *     this.name = name;
+     *   },
      *
-     * ```typescript
-     * var t = new OpaqueToken("value");
-     *
-     * var injector = Injector.resolveAndCreate([
-     *   {provide: t, useValue: "bindingValue"}
-     * ]);
-     *
-     * expect(injector.get(t)).toEqual("bindingValue");
+     *   greet: function() {
+     *     alert('Hello ' + this.name + '!');
+     *   }
+     * });
      * ```
      *
-     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
-     * caused by multiple providers using the same string as two different tokens.
+     * is equivalent to ES6:
      *
-     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
-     * error messages.
+     * ```
+     * class Greeter {
+     *   constructor(name) {
+     *     this.name = name;
+     *   }
+     *
+     *   greet() {
+     *     alert('Hello ' + this.name + '!');
+     *   }
+     * }
+     * ```
+     *
+     * or equivalent to ES5:
+     *
+     * ```
+     * var Greeter = function (name) {
+     *   this.name = name;
+     * }
+     *
+     * Greeter.prototype.greet = function () {
+     *   alert('Hello ' + this.name + '!');
+     * }
+     * ```
+     *
+     * ### Example with parameter annotations
+     *
+     * ```
+     * var MyService = ng.Class({
+     *   constructor: [String, [new Query(), QueryList], function(name, queryList) {
+     *     ...
+     *   }]
+     * });
+     * ```
+     *
+     * is equivalent to ES6:
+     *
+     * ```
+     * class MyService {
+     *   constructor(name: string, @Query() queryList: QueryList) {
+     *     ...
+     *   }
+     * }
+     * ```
+     *
+     * ### Example with inheritance
+     *
+     * ```
+     * var Shape = ng.Class({
+     *   constructor: (color) {
+     *     this.color = color;
+     *   }
+     * });
+     *
+     * var Square = ng.Class({
+     *   extends: Shape,
+     *   constructor: function(color, size) {
+     *     Shape.call(this, color);
+     *     this.size = size;
+     *   }
+     * });
+     * ```
      * @stable
      */
+    function Class(clsDef) {
+        var constructor = applyParams(clsDef.hasOwnProperty('constructor') ? clsDef.constructor : undefined, 'constructor');
+        var proto = constructor.prototype;
+        if (clsDef.hasOwnProperty('extends')) {
+            if (isFunction(clsDef.extends)) {
+                constructor.prototype = proto =
+                    Object.create(clsDef.extends.prototype);
+            }
+            else {
+                throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
+            }
+        }
+        for (var key in clsDef) {
+            if (key != 'extends' && key != 'prototype' && clsDef.hasOwnProperty(key)) {
+                proto[key] = applyParams(clsDef[key], key);
+            }
+        }
+        if (this && this.annotations instanceof Array) {
+            Reflect.defineMetadata('annotations', this.annotations, constructor);
+        }
+        if (!constructor['name']) {
+            constructor['overriddenName'] = "class" + _nextClassId++;
+        }
+        return constructor;
+    }
+    var Reflect = global$1.Reflect;
+    function makeDecorator(annotationCls, chainFn) {
+        if (chainFn === void 0) { chainFn = null; }
+        function DecoratorFactory(objOrType) {
+            var annotationInstance = new annotationCls(objOrType);
+            if (this instanceof annotationCls) {
+                return annotationInstance;
+            }
+            else {
+                var chainAnnotation = isFunction(this) && this.annotations instanceof Array ? this.annotations : [];
+                chainAnnotation.push(annotationInstance);
+                var TypeDecorator = function TypeDecorator(cls) {
+                    var annotations = Reflect.getOwnMetadata('annotations', cls) || [];
+                    annotations.push(annotationInstance);
+                    Reflect.defineMetadata('annotations', annotations, cls);
+                    return cls;
+                };
+                TypeDecorator.annotations = chainAnnotation;
+                TypeDecorator.Class = Class;
+                if (chainFn)
+                    chainFn(TypeDecorator);
+                return TypeDecorator;
+            }
+        }
+        DecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        DecoratorFactory.annotationCls = annotationCls;
+        return DecoratorFactory;
+    }
+    function makeParamDecorator(annotationCls) {
+        function ParamDecoratorFactory() {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var annotationInstance = Object.create(annotationCls.prototype);
+            annotationCls.apply(annotationInstance, args);
+            if (this instanceof annotationCls) {
+                return annotationInstance;
+            }
+            else {
+                ParamDecorator.annotation = annotationInstance;
+                return ParamDecorator;
+            }
+            function ParamDecorator(cls, unusedKey, index) {
+                var parameters = Reflect.getMetadata('parameters', cls) || [];
+                // there might be gaps if some in between parameters do not have annotations.
+                // we pad with nulls.
+                while (parameters.length <= index) {
+                    parameters.push(null);
+                }
+                parameters[index] = parameters[index] || [];
+                var annotationsForParam = parameters[index];
+                annotationsForParam.push(annotationInstance);
+                Reflect.defineMetadata('parameters', parameters, cls);
+                return cls;
+            }
+        }
+        ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        ParamDecoratorFactory.annotationCls = annotationCls;
+        return ParamDecoratorFactory;
+    }
+    function makePropDecorator(annotationCls) {
+        function PropDecoratorFactory() {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var decoratorInstance = Object.create(annotationCls.prototype);
+            annotationCls.apply(decoratorInstance, args);
+            if (this instanceof annotationCls) {
+                return decoratorInstance;
+            }
+            else {
+                return function PropDecorator(target, name) {
+                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
+                    meta[name] = meta[name] || [];
+                    meta[name].unshift(decoratorInstance);
+                    Reflect.defineMetadata('propMetadata', meta, target.constructor);
+                };
+            }
+        }
+        PropDecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        PropDecoratorFactory.annotationCls = annotationCls;
+        return PropDecoratorFactory;
+    }
+    /**
+     * Factory for creating {@link InjectMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Inject = makeParamDecorator(InjectMetadata);
+    /**
+     * Factory for creating {@link OptionalMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Optional = makeParamDecorator(OptionalMetadata);
+    /**
+     * Factory for creating {@link InjectableMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Injectable = makeDecorator(InjectableMetadata);
+    /**
+     * Factory for creating {@link SelfMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Self = makeParamDecorator(SelfMetadata);
+    /**
+     * Factory for creating {@link HostMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Host = makeParamDecorator(HostMetadata);
+    /**
+     * Factory for creating {@link SkipSelfMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var SkipSelf = makeParamDecorator(SkipSelfMetadata);
     var OpaqueToken = (function () {
         function OpaqueToken(_desc) {
             this._desc = _desc;
@@ -600,6 +849,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
         return OpaqueToken;
     }());
+    /** @nocollapse */
+    OpaqueToken.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    OpaqueToken.ctorParameters = [
+        null,
+    ];
     /**
      * This token can be used to create a virtual provider that will populate the
      * `entryComponents` fields of components and ng modules based on its `useValue`.
@@ -2696,248 +2953,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ViewMetadata;
     }());
-    var _nextClassId = 0;
-    function extractAnnotation(annotation) {
-        if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
-            // it is a decorator, extract annotation
-            annotation = annotation.annotation;
-        }
-        return annotation;
-    }
-    function applyParams(fnOrArray, key) {
-        if (fnOrArray === Object || fnOrArray === String || fnOrArray === Function ||
-            fnOrArray === Number || fnOrArray === Array) {
-            throw new Error("Can not use native " + stringify(fnOrArray) + " as constructor");
-        }
-        if (isFunction(fnOrArray)) {
-            return fnOrArray;
-        }
-        else if (fnOrArray instanceof Array) {
-            var annotations = fnOrArray;
-            var annoLength = annotations.length - 1;
-            var fn = fnOrArray[annoLength];
-            if (!isFunction(fn)) {
-                throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
-            }
-            if (annoLength != fn.length) {
-                throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
-            }
-            var paramsAnnotations = [];
-            for (var i = 0, ii = annotations.length - 1; i < ii; i++) {
-                var paramAnnotations = [];
-                paramsAnnotations.push(paramAnnotations);
-                var annotation = annotations[i];
-                if (annotation instanceof Array) {
-                    for (var j = 0; j < annotation.length; j++) {
-                        paramAnnotations.push(extractAnnotation(annotation[j]));
-                    }
-                }
-                else if (isFunction(annotation)) {
-                    paramAnnotations.push(extractAnnotation(annotation));
-                }
-                else {
-                    paramAnnotations.push(annotation);
-                }
-            }
-            Reflect.defineMetadata('parameters', paramsAnnotations, fn);
-            return fn;
-        }
-        else {
-            throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
-        }
-    }
-    /**
-     * Provides a way for expressing ES6 classes with parameter annotations in ES5.
-     *
-     * ## Basic Example
-     *
-     * ```
-     * var Greeter = ng.Class({
-     *   constructor: function(name) {
-     *     this.name = name;
-     *   },
-     *
-     *   greet: function() {
-     *     alert('Hello ' + this.name + '!');
-     *   }
-     * });
-     * ```
-     *
-     * is equivalent to ES6:
-     *
-     * ```
-     * class Greeter {
-     *   constructor(name) {
-     *     this.name = name;
-     *   }
-     *
-     *   greet() {
-     *     alert('Hello ' + this.name + '!');
-     *   }
-     * }
-     * ```
-     *
-     * or equivalent to ES5:
-     *
-     * ```
-     * var Greeter = function (name) {
-     *   this.name = name;
-     * }
-     *
-     * Greeter.prototype.greet = function () {
-     *   alert('Hello ' + this.name + '!');
-     * }
-     * ```
-     *
-     * ### Example with parameter annotations
-     *
-     * ```
-     * var MyService = ng.Class({
-     *   constructor: [String, [new Query(), QueryList], function(name, queryList) {
-     *     ...
-     *   }]
-     * });
-     * ```
-     *
-     * is equivalent to ES6:
-     *
-     * ```
-     * class MyService {
-     *   constructor(name: string, @Query() queryList: QueryList) {
-     *     ...
-     *   }
-     * }
-     * ```
-     *
-     * ### Example with inheritance
-     *
-     * ```
-     * var Shape = ng.Class({
-     *   constructor: (color) {
-     *     this.color = color;
-     *   }
-     * });
-     *
-     * var Square = ng.Class({
-     *   extends: Shape,
-     *   constructor: function(color, size) {
-     *     Shape.call(this, color);
-     *     this.size = size;
-     *   }
-     * });
-     * ```
-     * @stable
-     */
-    function Class(clsDef) {
-        var constructor = applyParams(clsDef.hasOwnProperty('constructor') ? clsDef.constructor : undefined, 'constructor');
-        var proto = constructor.prototype;
-        if (clsDef.hasOwnProperty('extends')) {
-            if (isFunction(clsDef.extends)) {
-                constructor.prototype = proto =
-                    Object.create(clsDef.extends.prototype);
-            }
-            else {
-                throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
-            }
-        }
-        for (var key in clsDef) {
-            if (key != 'extends' && key != 'prototype' && clsDef.hasOwnProperty(key)) {
-                proto[key] = applyParams(clsDef[key], key);
-            }
-        }
-        if (this && this.annotations instanceof Array) {
-            Reflect.defineMetadata('annotations', this.annotations, constructor);
-        }
-        if (!constructor['name']) {
-            constructor['overriddenName'] = "class" + _nextClassId++;
-        }
-        return constructor;
-    }
-    var Reflect = global$1.Reflect;
-    function makeDecorator(annotationCls, chainFn) {
-        if (chainFn === void 0) { chainFn = null; }
-        function DecoratorFactory(objOrType) {
-            var annotationInstance = new annotationCls(objOrType);
-            if (this instanceof annotationCls) {
-                return annotationInstance;
-            }
-            else {
-                var chainAnnotation = isFunction(this) && this.annotations instanceof Array ? this.annotations : [];
-                chainAnnotation.push(annotationInstance);
-                var TypeDecorator = function TypeDecorator(cls) {
-                    var annotations = Reflect.getOwnMetadata('annotations', cls) || [];
-                    annotations.push(annotationInstance);
-                    Reflect.defineMetadata('annotations', annotations, cls);
-                    return cls;
-                };
-                TypeDecorator.annotations = chainAnnotation;
-                TypeDecorator.Class = Class;
-                if (chainFn)
-                    chainFn(TypeDecorator);
-                return TypeDecorator;
-            }
-        }
-        DecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        DecoratorFactory.annotationCls = annotationCls;
-        return DecoratorFactory;
-    }
-    function makeParamDecorator(annotationCls) {
-        function ParamDecoratorFactory() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
-            }
-            var annotationInstance = Object.create(annotationCls.prototype);
-            annotationCls.apply(annotationInstance, args);
-            if (this instanceof annotationCls) {
-                return annotationInstance;
-            }
-            else {
-                ParamDecorator.annotation = annotationInstance;
-                return ParamDecorator;
-            }
-            function ParamDecorator(cls, unusedKey, index) {
-                var parameters = Reflect.getMetadata('parameters', cls) || [];
-                // there might be gaps if some in between parameters do not have annotations.
-                // we pad with nulls.
-                while (parameters.length <= index) {
-                    parameters.push(null);
-                }
-                parameters[index] = parameters[index] || [];
-                var annotationsForParam = parameters[index];
-                annotationsForParam.push(annotationInstance);
-                Reflect.defineMetadata('parameters', parameters, cls);
-                return cls;
-            }
-        }
-        ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        ParamDecoratorFactory.annotationCls = annotationCls;
-        return ParamDecoratorFactory;
-    }
-    function makePropDecorator(annotationCls) {
-        function PropDecoratorFactory() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
-            }
-            var decoratorInstance = Object.create(annotationCls.prototype);
-            annotationCls.apply(decoratorInstance, args);
-            if (this instanceof annotationCls) {
-                return decoratorInstance;
-            }
-            else {
-                return function PropDecorator(target, name) {
-                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
-                    meta[name] = meta[name] || [];
-                    meta[name].unshift(decoratorInstance);
-                    Reflect.defineMetadata('propMetadata', meta, target.constructor);
-                };
-            }
-        }
-        PropDecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        PropDecoratorFactory.annotationCls = annotationCls;
-        return PropDecoratorFactory;
-    }
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
     /**
      * Declare reusable UI building blocks for an application.
@@ -3918,42 +3933,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var NgModule = makeDecorator(NgModuleMetadata);
-    /**
-     * Factory for creating {@link InjectMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Inject = makeParamDecorator(InjectMetadata);
-    /**
-     * Factory for creating {@link OptionalMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Optional = makeParamDecorator(OptionalMetadata);
-    /**
-     * Factory for creating {@link InjectableMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Injectable = makeDecorator(InjectableMetadata);
-    /**
-     * Factory for creating {@link SelfMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Self = makeParamDecorator(SelfMetadata);
-    /**
-     * Factory for creating {@link HostMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Host = makeParamDecorator(HostMetadata);
-    /**
-     * Factory for creating {@link SkipSelfMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var SkipSelf = makeParamDecorator(SkipSelfMetadata);
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
