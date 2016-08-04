@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { Compiler, CompilerFactory, CompilerOptions, ComponentStillLoadingError, ModuleWithComponentFactories } from './linker/compiler';
+export { COMPILER_OPTIONS, Compiler, CompilerFactory, CompilerOptions, ComponentStillLoadingError, ModuleWithComponentFactories } from './linker/compiler';
 export { ComponentFactory, ComponentRef } from './linker/component_factory';
 export { ComponentFactoryResolver, NoComponentFactoryError } from './linker/component_factory_resolver';
 export { ComponentResolver } from './linker/component_resolver';

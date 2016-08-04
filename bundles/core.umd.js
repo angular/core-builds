@@ -6902,7 +6902,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @experimental
      */
-    var CompilerOptions = new OpaqueToken('compilerOptions');
+    var COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
     /**
      * A factory for creating a Compiler
      *
@@ -12950,9 +12950,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;
+    exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;
     exports.CompilerFactory = CompilerFactory;
-    exports.CompilerOptions = CompilerOptions;
     exports.ComponentStillLoadingError = ComponentStillLoadingError;
     exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
     exports.ComponentFactory = ComponentFactory;

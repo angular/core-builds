@@ -112,7 +112,7 @@ exports.Compiler = Compiler;
  *
  * @experimental
  */
-exports.CompilerOptions = new di_1.OpaqueToken('compilerOptions');
+exports.COMPILER_OPTIONS = new di_1.OpaqueToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *

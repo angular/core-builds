@@ -8,9 +8,9 @@
 "use strict";
 // Public API for compiler
 var compiler_1 = require('./linker/compiler');
+exports.COMPILER_OPTIONS = compiler_1.COMPILER_OPTIONS;
 exports.Compiler = compiler_1.Compiler;
 exports.CompilerFactory = compiler_1.CompilerFactory;
-exports.CompilerOptions = compiler_1.CompilerOptions;
 exports.ComponentStillLoadingError = compiler_1.ComponentStillLoadingError;
 exports.ModuleWithComponentFactories = compiler_1.ModuleWithComponentFactories;
 var component_factory_1 = require('./linker/component_factory');

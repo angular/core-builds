@@ -93,7 +93,7 @@ export declare type CompilerOptions = {
  *
  * @experimental
  */
-export declare const CompilerOptions: OpaqueToken;
+export declare const COMPILER_OPTIONS: OpaqueToken;
 /**
  * A factory for creating a Compiler
  *
