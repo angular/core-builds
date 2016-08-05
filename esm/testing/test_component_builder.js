@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Compiler, Injectable, Injector, NgZone } from '../index';
-import { PromiseWrapper } from '../src/facade/async';
 import { isPresent } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { tick } from './fake_async';
@@ -88,7 +87,8 @@ export class TestComponentBuilder {
     createFakeAsync(rootComponentType) {
         let result;
         let error;
-        PromiseWrapper.then(this.createAsync(rootComponentType), (_result) => { result = _result; }, (_error) => { error = _error; });
+        this.createAsync(rootComponentType)
+            .then((_result) => { result = _result; }, (_error) => { error = _error; });
         tick();
         if (isPresent(error)) {
             throw error;

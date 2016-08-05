@@ -1,13 +1,6 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { Type } from '../facade/lang';
-import { ReflectiveKey } from './reflective_key';
 import { Provider } from './provider';
+import { ReflectiveKey } from './reflective_key';
 /**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.

@@ -8,12 +8,12 @@
 import { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 import { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 import { NgModuleMetadata } from './metadata/ng_module';
+import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/decorators';
 export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
 export { CUSTOM_ELEMENTS_SCHEMA, NgModuleMetadata } from './metadata/ng_module';
 export { ViewEncapsulation, ViewMetadata } from './metadata/view';
-import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/decorators';
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.

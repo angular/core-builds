@@ -9,6 +9,7 @@
 var di_1 = require('./metadata/di');
 var directives_1 = require('./metadata/directives');
 var ng_module_1 = require('./metadata/ng_module');
+var decorators_1 = require('./util/decorators');
 var di_2 = require('./metadata/di');
 exports.ANALYZE_FOR_ENTRY_COMPONENTS = di_2.ANALYZE_FOR_ENTRY_COMPONENTS;
 exports.AttributeMetadata = di_2.AttributeMetadata;
@@ -41,7 +42,6 @@ exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
 var view_1 = require('./metadata/view');
 exports.ViewEncapsulation = view_1.ViewEncapsulation;
 exports.ViewMetadata = view_1.ViewMetadata;
-var decorators_1 = require('./util/decorators');
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.

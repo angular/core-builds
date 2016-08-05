@@ -11,7 +11,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var async_1 = require('../src/facade/async');
 var collection_1 = require('../src/facade/collection');
 var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
@@ -341,8 +340,8 @@ var PlatformRef_ = (function (_super) {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return collection_1.ListWrapper.remove(_this._modules, moduleRef); });
-            async_1.ObservableWrapper.subscribe(ngZone.onError, function (error) {
-                exceptionHandler.call(error.error, error.stackTrace);
+            ngZone.onError.subscribe({
+                next: function (error) { exceptionHandler.call(error.error, error.stackTrace); }
             });
             return _callAndReportToExceptionHandler(exceptionHandler, function () {
                 var initStatus = moduleRef.injector.get(application_init_1.ApplicationInitStatus);
@@ -464,7 +463,7 @@ var ApplicationRef_ = (function (_super) {
         this._runningTick = false;
         this._enforceNoNewChanges = false;
         this._enforceNoNewChanges = isDevMode();
-        async_1.ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, function (_) { _this._zone.run(function () { _this.tick(); }); });
+        this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
     }
     /**
      * @deprecated

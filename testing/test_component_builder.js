@@ -7,7 +7,6 @@
  */
 "use strict";
 var index_1 = require('../index');
-var async_1 = require('../src/facade/async');
 var lang_1 = require('../src/facade/lang');
 var component_fixture_1 = require('./component_fixture');
 var fake_async_1 = require('./fake_async');
@@ -90,7 +89,8 @@ var TestComponentBuilder = (function () {
     TestComponentBuilder.prototype.createFakeAsync = function (rootComponentType) {
         var result;
         var error;
-        async_1.PromiseWrapper.then(this.createAsync(rootComponentType), function (_result) { result = _result; }, function (_error) { error = _error; });
+        this.createAsync(rootComponentType)
+            .then(function (_result) { result = _result; }, function (_error) { error = _error; });
         fake_async_1.tick();
         if (lang_1.isPresent(error)) {
             throw error;

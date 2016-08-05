@@ -1,13 +1,13 @@
+import { Type } from '../src/facade/lang';
 import { AttributeMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildrenMetadata } from './metadata/di';
 import { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, PipeMetadataType } from './metadata/directives';
 import { NgModuleMetadata, NgModuleMetadataType } from './metadata/ng_module';
+import { TypeDecorator } from './util/decorators';
 export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 export { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata, PipeMetadataType } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
 export { CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NgModuleMetadata, NgModuleMetadataType, SchemaMetadata } from './metadata/ng_module';
 export { ViewEncapsulation, ViewMetadata } from './metadata/view';
-import { TypeDecorator } from './util/decorators';
-import { Type } from '../src/facade/lang';
 /**
  * Interface for the {@link DirectiveMetadata} decorator function.
  *
