@@ -275,57 +275,6 @@ var NumberWrapper = (function () {
 }());
 exports.NumberWrapper = NumberWrapper;
 exports.RegExp = _global.RegExp;
-var RegExpWrapper = (function () {
-    function RegExpWrapper() {
-    }
-    RegExpWrapper.create = function (regExpStr, flags) {
-        if (flags === void 0) { flags = ''; }
-        flags = flags.replace(/g/g, '');
-        return new _global.RegExp(regExpStr, flags + 'g');
-    };
-    RegExpWrapper.firstMatch = function (regExp, input) {
-        // Reset multimatch regex state
-        regExp.lastIndex = 0;
-        return regExp.exec(input);
-    };
-    RegExpWrapper.test = function (regExp, input) {
-        regExp.lastIndex = 0;
-        return regExp.test(input);
-    };
-    RegExpWrapper.matcher = function (regExp, input) {
-        // Reset regex state for the case
-        // someone did not loop over all matches
-        // last time.
-        regExp.lastIndex = 0;
-        return { re: regExp, input: input };
-    };
-    RegExpWrapper.replaceAll = function (regExp, input, replace) {
-        var c = regExp.exec(input);
-        var res = '';
-        regExp.lastIndex = 0;
-        var prev = 0;
-        while (c) {
-            res += input.substring(prev, c.index);
-            res += replace(c);
-            prev = c.index + c[0].length;
-            regExp.lastIndex = prev;
-            c = regExp.exec(input);
-        }
-        res += input.substring(prev);
-        return res;
-    };
-    return RegExpWrapper;
-}());
-exports.RegExpWrapper = RegExpWrapper;
-var RegExpMatcherWrapper = (function () {
-    function RegExpMatcherWrapper() {
-    }
-    RegExpMatcherWrapper.next = function (matcher) {
-        return matcher.re.exec(matcher.input);
-    };
-    return RegExpMatcherWrapper;
-}());
-exports.RegExpMatcherWrapper = RegExpMatcherWrapper;
 var FunctionWrapper = (function () {
     function FunctionWrapper() {
     }
