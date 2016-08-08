@@ -275,11 +275,15 @@ export class PlatformRef_ extends PlatformRef {
      */
     dispose() { this.destroy(); }
     bootstrapModuleFactory(moduleFactory) {
+        return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
+    }
+    _bootstrapModuleFactoryWithZone(moduleFactory, ngZone) {
         // Note: We need to create the NgZone _before_ we instantiate the module,
         // as instantiating the module creates some providers eagerly.
         // So we create a mini parent injector that just contains the new NgZone and
         // pass that as parent to the NgModuleFactory.
-        const ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+        if (!ngZone)
+            ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(() => {
@@ -303,10 +307,13 @@ export class PlatformRef_ extends PlatformRef {
         });
     }
     bootstrapModule(moduleType, compilerOptions = []) {
+        return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
+    }
+    _bootstrapModuleWithZone(moduleType, compilerOptions = [], ngZone) {
         const compilerFactory = this.injector.get(CompilerFactory);
         const compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
         return compiler.compileModuleAsync(moduleType)
-            .then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory));
+            .then((moduleFactory) => this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone));
     }
     _moduleDoBootstrap(moduleRef) {
         const appRef = moduleRef.injector.get(ApplicationRef);

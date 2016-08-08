@@ -200,7 +200,9 @@ export declare class PlatformRef_ extends PlatformRef {
      */
     dispose(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
+    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
     bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    private _bootstrapModuleWithZone<M>(moduleType, compilerOptions, ngZone);
     private _moduleDoBootstrap(moduleRef);
 }
 /**

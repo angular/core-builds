@@ -9947,12 +9947,16 @@ var __extends = (this && this.__extends) || function (d, b) {
          */
         PlatformRef_.prototype.dispose = function () { this.destroy(); };
         PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
+        };
+        PlatformRef_.prototype._bootstrapModuleFactoryWithZone = function (moduleFactory, ngZone) {
             var _this = this;
             // Note: We need to create the NgZone _before_ we instantiate the module,
             // as instantiating the module creates some providers eagerly.
             // So we create a mini parent injector that just contains the new NgZone and
             // pass that as parent to the NgModuleFactory.
-            var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+            if (!ngZone)
+                ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
             // Attention: Don't use ApplicationRef.run here,
             // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
             return ngZone.run(function () {
@@ -9976,12 +9980,16 @@ var __extends = (this && this.__extends) || function (d, b) {
             });
         };
         PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
+        };
+        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
             var _this = this;
             if (compilerOptions === void 0) { compilerOptions = []; }
             var compilerFactory = this.injector.get(CompilerFactory);
             var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
             return compiler.compileModuleAsync(moduleType)
-                .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory); });
+                .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
         };
         PlatformRef_.prototype._moduleDoBootstrap = function (moduleRef) {
             var appRef = moduleRef.injector.get(ApplicationRef);
