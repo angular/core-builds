@@ -10619,7 +10619,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     SystemJsCmpFactoryResolver.ctorParameters = [
         { type: Console, },
     ];
-    var EMPTY_CONTEXT$1 = new Object();
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Represents an Embedded Template that can be used to instantiate Embedded Views.
      *
@@ -10664,10 +10670,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         TemplateRef_.prototype.createEmbeddedView = function (context) {
             var view = this._viewFactory(this._appElement.parentView.viewUtils, this._appElement.parentInjector, this._appElement);
-            if (isBlank(context)) {
-                context = EMPTY_CONTEXT$1;
-            }
-            view.create(context, null, null);
+            view.create(context || {}, null, null);
             return view.ref;
         };
         Object.defineProperty(TemplateRef_.prototype, "elementRef", {
