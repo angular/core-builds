@@ -325,44 +325,6 @@ function getTestBed() {
 }
 exports.getTestBed = getTestBed;
 /**
- * @deprecated use getTestBed instead.
- */
-function getTestInjector() {
-    return getTestBed();
-}
-exports.getTestInjector = getTestInjector;
-/**
- * Set the providers that the test injector should use. These should be providers
- * common to every test in the suite.
- *
- * This may only be called once, to set up the common providers for the current test
- * suite on the current platform. If you absolutely need to change the providers,
- * first use `resetBaseTestProviders`.
- *
- * Test modules and platforms for individual platforms are available from
- * 'angular2/platform/testing/<platform_name>'.
- *
- * @deprecated Use TestBed.initTestEnvironment instead
- */
-function setBaseTestProviders(platformProviders, applicationProviders) {
-    if (platformProviders.length === 1 && typeof platformProviders[0] === 'function') {
-        platformProviders[0](applicationProviders);
-    }
-    else {
-        throw new Error("setBaseTestProviders is deprecated and only supports platformProviders that are predefined by Angular. Use 'TestBed.initTestEnvironment' instead.");
-    }
-}
-exports.setBaseTestProviders = setBaseTestProviders;
-/**
- * Reset the providers for the test injector.
- *
- * @deprecated Use TestBed.resetTestEnvironment instead.
- */
-function resetBaseTestProviders() {
-    TestBed.resetTestEnvironment();
-}
-exports.resetBaseTestProviders = resetBaseTestProviders;
-/**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
  * Example:

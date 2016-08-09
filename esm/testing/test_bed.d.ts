@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, Provider, SchemaMetadata, Type } from '../index';
+import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, SchemaMetadata, Type } from '../index';
 import { ConcreteType } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
@@ -144,30 +144,6 @@ export declare class TestBed implements Injector {
  * @experimental
  */
 export declare function getTestBed(): TestBed;
-/**
- * @deprecated use getTestBed instead.
- */
-export declare function getTestInjector(): TestBed;
-/**
- * Set the providers that the test injector should use. These should be providers
- * common to every test in the suite.
- *
- * This may only be called once, to set up the common providers for the current test
- * suite on the current platform. If you absolutely need to change the providers,
- * first use `resetBaseTestProviders`.
- *
- * Test modules and platforms for individual platforms are available from
- * 'angular2/platform/testing/<platform_name>'.
- *
- * @deprecated Use TestBed.initTestEnvironment instead
- */
-export declare function setBaseTestProviders(platformProviders: Array<Type | Provider | any[]>, applicationProviders: Array<Type | Provider | any[]>): void;
-/**
- * Reset the providers for the test injector.
- *
- * @deprecated Use TestBed.resetTestEnvironment instead.
- */
-export declare function resetBaseTestProviders(): void;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
