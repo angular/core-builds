@@ -9718,7 +9718,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return _platform;
     }
     /**
-     * Creates a fatory for a platform
+     * Creates a factory for a platform
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */

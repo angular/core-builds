@@ -87,7 +87,7 @@ function createPlatform(injector) {
 }
 exports.createPlatform = createPlatform;
 /**
- * Creates a fatory for a platform
+ * Creates a factory for a platform
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */

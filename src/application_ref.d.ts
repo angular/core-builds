@@ -52,7 +52,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  */
 export declare type PlatformFactory = (extraProviders?: any[]) => PlatformRef;
 /**
- * Creates a fatory for a platform
+ * Creates a factory for a platform
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
