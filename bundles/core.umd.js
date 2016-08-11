@@ -10505,8 +10505,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return global$1
-                .System.import(module)
+            return System.import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
                 .then(function (type) { return _this._compiler.compileModuleAsync(type); });
@@ -10515,8 +10514,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return global$1
-                .System.import(module + FACTORY_MODULE_SUFFIX)
+            return System.import(module + FACTORY_MODULE_SUFFIX)
                 .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
@@ -10551,9 +10549,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                     // Use the default export when no component is specified
                     component_1 = 'default';
                 }
-                return global$1
-                    .System.import(module)
-                    .then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
+                return System.import(module).then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
             }
             return this._resolver.resolveComponent(componentType);
         };
@@ -10579,8 +10575,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             if (isString(componentType)) {
                 this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
                 var _a = componentType.split(_SEPARATOR$1), module = _a[0], factory_1 = _a[1];
-                return global$1
-                    .System.import(module + FACTORY_MODULE_SUFFIX$1)
+                return System.import(module + FACTORY_MODULE_SUFFIX$1)
                     .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX$1]; });
             }
             return Promise.resolve(null);

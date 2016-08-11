@@ -7,7 +7,7 @@
  */
 import { Console } from '../console';
 import { Injectable } from '../di';
-import { global, isString } from '../facade/lang';
+import { isString } from '../facade/lang';
 import { ComponentResolver } from './component_resolver';
 const _SEPARATOR = '#';
 export class SystemJsComponentResolver {
@@ -23,9 +23,7 @@ export class SystemJsComponentResolver {
                 // Use the default export when no component is specified
                 component = 'default';
             }
-            return global
-                .System.import(module)
-                .then((module) => this._resolver.resolveComponent(module[component]));
+            return System.import(module).then((module) => this._resolver.resolveComponent(module[component]));
         }
         return this._resolver.resolveComponent(componentType);
     }
@@ -50,8 +48,7 @@ export class SystemJsCmpFactoryResolver {
         if (isString(componentType)) {
             this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
             let [module, factory] = componentType.split(_SEPARATOR);
-            return global
-                .System.import(module + FACTORY_MODULE_SUFFIX)
+            return System.import(module + FACTORY_MODULE_SUFFIX)
                 .then((module) => module[factory + FACTORY_CLASS_SUFFIX]);
         }
         return Promise.resolve(null);
