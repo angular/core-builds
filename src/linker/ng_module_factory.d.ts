@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di/injector';
-import { ConcreteType } from '../facade/lang';
+import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
 /**
@@ -48,8 +48,8 @@ export declare class NgModuleFactory<T> {
     private _moduleype;
     constructor(_injectorClass: {
         new (parentInjector: Injector): NgModuleInjector<T>;
-    }, _moduleype: ConcreteType<T>);
-    moduleType: ConcreteType<T>;
+    }, _moduleype: Type<T>);
+    moduleType: Type<T>;
     create(parentInjector: Injector): NgModuleRef<T>;
 }
 export declare abstract class NgModuleInjector<T> extends CodegenComponentFactoryResolver implements Injector, NgModuleRef<T> {

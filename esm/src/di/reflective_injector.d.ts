@@ -1,4 +1,4 @@
-import { Type } from '../facade/lang';
+import { Type } from '../type';
 import { Injector } from './injector';
 import { Provider } from './provider';
 import { ResolvedReflectiveProvider } from './reflective_provider';
@@ -151,7 +151,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * See {@link ReflectiveInjector#fromResolvedProviders} for more info.
      */
-    static resolve(providers: Array<Type | Provider | {
+    static resolve(providers: Array<Type<any> | Provider | {
         [k: string]: any;
     } | any[]>): ResolvedReflectiveProvider[];
     /**
@@ -180,7 +180,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#fromResolvedProviders}.
      */
-    static resolveAndCreate(providers: Array<Type | Provider | {
+    static resolveAndCreate(providers: Array<Type<any> | Provider | {
         [k: string]: any;
     } | any[]>, parent?: Injector): ReflectiveInjector;
     /**
@@ -253,7 +253,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
      */
-    resolveAndCreateChild(providers: Array<Type | Provider | {
+    resolveAndCreateChild(providers: Array<Type<any> | Provider | {
         [k: string]: any;
     } | any[]>): ReflectiveInjector;
     /**
@@ -306,7 +306,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
      * ```
      */
-    resolveAndInstantiate(provider: Type | Provider): any;
+    resolveAndInstantiate(provider: Type<any> | Provider): any;
     /**
      * Instantiates an object using a resolved provider in the context of the injector.
      *
@@ -344,9 +344,9 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
     get(token: any, notFoundValue?: any): any;
     getAt(index: number): any;
     readonly parent: Injector;
-    resolveAndCreateChild(providers: Array<Type | Provider | any[]>): ReflectiveInjector;
+    resolveAndCreateChild(providers: Array<Type<any> | Provider | any[]>): ReflectiveInjector;
     createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
-    resolveAndInstantiate(provider: Type | Provider): any;
+    resolveAndInstantiate(provider: Type<any> | Provider): any;
     instantiateResolved(provider: ResolvedReflectiveProvider): any;
     private _instantiateProvider(provider);
     private _instantiate(provider, ResolvedReflectiveFactory);

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Console } from '../console';
-import { Type } from '../facade/lang';
+import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 import { ComponentResolver } from './component_resolver';
 /**
@@ -20,7 +20,7 @@ export declare class SystemJsComponentResolver implements ComponentResolver {
     private _resolver;
     private _console;
     constructor(_resolver: ComponentResolver, _console: Console);
-    resolveComponent(componentType: string | Type): Promise<ComponentFactory<any>>;
+    resolveComponent(componentType: string | Type<any>): Promise<ComponentFactory<any>>;
     clearCache(): void;
 }
 /**
@@ -33,6 +33,6 @@ export declare class SystemJsComponentResolver implements ComponentResolver {
 export declare class SystemJsCmpFactoryResolver implements ComponentResolver {
     private _console;
     constructor(_console: Console);
-    resolveComponent(componentType: string | Type): Promise<ComponentFactory<any>>;
+    resolveComponent(componentType: string | Type<any>): Promise<ComponentFactory<any>>;
     clearCache(): void;
 }

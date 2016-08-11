@@ -1,7 +1,18 @@
-import { Type } from '../src/facade/lang';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This indirection is needed to free up Component, etc symbols in the public API
+ * to be used by the decorator versions of these annotations.
+ */
 import { AttributeMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildrenMetadata } from './metadata/di';
 import { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, PipeMetadataType } from './metadata/directives';
 import { NgModuleMetadata, NgModuleMetadataType } from './metadata/ng_module';
+import { Type } from './type';
 import { TypeDecorator } from './util/decorators';
 export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 export { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata, PipeMetadataType } from './metadata/directives';
@@ -194,11 +205,11 @@ export interface AttributeMetadataFactory {
  * @deprecated
  */
 export interface QueryMetadataFactory {
-    (selector: Type | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): ParameterDecorator;
-    new (selector: Type | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): QueryMetadata;
@@ -208,11 +219,11 @@ export interface QueryMetadataFactory {
  * @stable
  */
 export interface ContentChildrenMetadataFactory {
-    (selector: Type | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): ContentChildrenMetadata;
@@ -222,10 +233,10 @@ export interface ContentChildrenMetadataFactory {
  * @stable
  */
 export interface ContentChildMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ContentChildMetadataFactory;
 }
@@ -234,10 +245,10 @@ export interface ContentChildMetadataFactory {
  * @stable
  */
 export interface ViewChildrenMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ViewChildrenMetadata;
 }
@@ -246,10 +257,10 @@ export interface ViewChildrenMetadataFactory {
  * @stable
  */
 export interface ViewChildMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ViewChildMetadataFactory;
 }

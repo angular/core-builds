@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectableMetadata } from '../di/metadata';
-import { Type } from '../facade/lang';
+import { Type } from '../type';
 /**
  * A wrapper around a module that also includes the providers.
  *
  * @experimental
  */
 export interface ModuleWithProviders {
-    ngModule: Type;
+    ngModule: Type<any>;
     providers?: any[];
 }
 /**
@@ -37,11 +37,11 @@ export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
  */
 export interface NgModuleMetadataType {
     providers?: any[];
-    declarations?: Array<Type | any[]>;
-    imports?: Array<Type | ModuleWithProviders | any[]>;
-    exports?: Array<Type | any[]>;
-    entryComponents?: Array<Type | any[]>;
-    bootstrap?: Array<Type | any[]>;
+    declarations?: Array<Type<any> | any[]>;
+    imports?: Array<Type<any> | ModuleWithProviders | any[]>;
+    exports?: Array<Type<any> | any[]>;
+    entryComponents?: Array<Type<any> | any[]>;
+    bootstrap?: Array<Type<any> | any[]>;
     schemas?: Array<SchemaMetadata | any[]>;
 }
 /**
@@ -93,7 +93,7 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * }
      * ```
      */
-    declarations: Array<Type | any[]>;
+    declarations: Array<Type<any> | any[]>;
     /**
      * Specifies a list of modules whose exported directives/pipes
      * should be available to templates in this module.
@@ -109,7 +109,7 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * }
      * ```
      */
-    imports: Array<Type | ModuleWithProviders | any[]>;
+    imports: Array<Type<any> | ModuleWithProviders | any[]>;
     /**
      * Specifies a list of directives/pipes/module that can be used within the template
      * of any component that is part of an angular module
@@ -125,20 +125,20 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * }
      * ```
      */
-    exports: Array<Type | any[]>;
+    exports: Array<Type<any> | any[]>;
     /**
      * Defines the components that should be compiled as well when
      * this component is defined. For each components listed here,
      * Angular will create a {@link ComponentFactory ComponentFactory} and store it in the
      * {@link ComponentFactoryResolver ComponentFactoryResolver}.
      */
-    entryComponents: Array<Type | any[]>;
+    entryComponents: Array<Type<any> | any[]>;
     /**
      * Defines the components that should be bootstrapped when
      * this module is bootstrapped. The components listed here
      * will automatically be added to `entryComponents`.
      */
-    bootstrap: Array<Type | any[]>;
+    bootstrap: Array<Type<any> | any[]>;
     schemas: Array<SchemaMetadata | any[]>;
     constructor(options?: NgModuleMetadataType);
 }
