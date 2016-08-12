@@ -26,7 +26,7 @@ export * from './src/platform_directives_and_pipes';
 export * from './src/platform_core_providers';
 export { APPLICATION_COMMON_PROVIDERS, ApplicationModule } from './src/application_module';
 export { wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn } from './src/profile/profile';
-export { Type } from './src/facade/lang';
+export { Type } from './src/type';
 export { EventEmitter } from './src/facade/async';
 export { ExceptionHandler, WrappedException, BaseException } from './src/facade/exceptions';
 export * from './private_export';

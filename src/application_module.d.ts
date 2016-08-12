@@ -1,12 +1,5 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { Type } from '../src/facade/lang';
 import { IterableDiffers, KeyValueDiffers } from './change_detection/change_detection';
+import { Type } from './type';
 export declare function _iterableDiffersFactory(): IterableDiffers;
 export declare function _keyValueDiffersFactory(): KeyValueDiffers;
 /**
@@ -15,7 +8,7 @@ export declare function _keyValueDiffersFactory(): KeyValueDiffers;
  *
  * @deprecated Include `ApplicationModule` instead.
  */
-export declare const APPLICATION_COMMON_PROVIDERS: Array<Type | {
+export declare const APPLICATION_COMMON_PROVIDERS: Array<Type<any> | {
     [k: string]: any;
 } | any[]>;
 /**

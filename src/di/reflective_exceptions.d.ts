@@ -1,5 +1,5 @@
 import { BaseException, WrappedException } from '../facade/exceptions';
-import { Type } from '../facade/lang';
+import { Type } from '../type';
 import { ReflectiveInjector } from './reflective_injector';
 import { ReflectiveKey } from './reflective_key';
 /**
@@ -127,7 +127,7 @@ export declare class InvalidProviderError extends BaseException {
  * @stable
  */
 export declare class NoAnnotationError extends BaseException {
-    constructor(typeOrFunc: Type | Function, params: any[][]);
+    constructor(typeOrFunc: Type<any> | Function, params: any[][]);
     private static _genMessage(typeOrFunc, params);
 }
 /**

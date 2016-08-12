@@ -1,5 +1,4 @@
 import { ExceptionHandler } from '../src/facade/exceptions';
-import { ConcreteType, Type } from '../src/facade/lang';
 import { ApplicationInitStatus } from './application_init';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 import { Console } from './console';
@@ -9,6 +8,7 @@ import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { Testability, TestabilityRegistry } from './testability/testability';
+import { Type } from './type';
 import { NgZone } from './zone/ng_zone';
 /**
  * Disable Angular's development mode, which turns off assertions and other
@@ -96,7 +96,7 @@ export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, 
  *
  * @deprecated Use {@link bootstrapModule} instead.
  */
-export declare function coreLoadAndBootstrap(componentType: Type, injector: Injector): Promise<ComponentRef<any>>;
+export declare function coreLoadAndBootstrap(componentType: Type<any>, injector: Injector): Promise<ComponentRef<any>>;
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
@@ -147,7 +147,7 @@ export declare abstract class PlatformRef {
      * ```
      * @stable
      */
-    bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     /**
      * Register a listener to be called when the platform is disposed.
      * @deprecated Use `OnDestroy` instead
@@ -201,7 +201,7 @@ export declare class PlatformRef_ extends PlatformRef {
     dispose(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
-    bootstrapModule<M>(moduleType: ConcreteType<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     private _bootstrapModuleWithZone<M>(moduleType, compilerOptions, ngZone);
     private _moduleDoBootstrap(moduleRef);
 }
@@ -253,7 +253,7 @@ export declare abstract class ApplicationRef {
      * ### Example
      * {@example core/ts/platform/platform.ts region='longform'}
      */
-    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | ConcreteType<C>): ComponentRef<C>;
+    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
     /**
      * Retrieve the application {@link Injector}.
      *
@@ -289,7 +289,7 @@ export declare abstract class ApplicationRef {
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
      */
-    readonly componentTypes: Type[];
+    readonly componentTypes: Type<any>[];
     /**
      * Get a list of components registered to this application.
      */
@@ -333,7 +333,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
      * @deprecated
      */
     run(callback: Function): any;
-    bootstrap<C>(componentOrFactory: ComponentFactory<C> | ConcreteType<C>): ComponentRef<C>;
+    bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
     /**
      * @deprecated
      */
@@ -348,6 +348,6 @@ export declare class ApplicationRef_ extends ApplicationRef {
      * @deprecated
      */
     dispose(): void;
-    readonly componentTypes: Type[];
+    readonly componentTypes: Type<any>[];
     readonly components: ComponentRef<any>[];
 }

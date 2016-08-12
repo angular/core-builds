@@ -81,9 +81,7 @@ var Compiler = (function () {
     /**
      * Compiles the given NgModule and all of its components
      */
-    Compiler.prototype.compileModuleAsync = function (moduleType) {
-        throw _throwError();
-    };
+    Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
     /**
      * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
      */

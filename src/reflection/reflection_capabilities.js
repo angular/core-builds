@@ -7,88 +7,23 @@
  */
 "use strict";
 var lang_1 = require('../facade/lang');
+var type_1 = require('../type');
 var ReflectionCapabilities = (function () {
     function ReflectionCapabilities(reflect) {
-        this._reflect = lang_1.isPresent(reflect) ? reflect : lang_1.global.Reflect;
+        this._reflect = reflect || lang_1.global.Reflect;
     }
     ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
     ReflectionCapabilities.prototype.factory = function (t) {
-        switch (t.length) {
-            case 0:
-                return function () { return new t(); };
-            case 1:
-                return function (a1) { return new t(a1); };
-            case 2:
-                return function (a1, a2) { return new t(a1, a2); };
-            case 3:
-                return function (a1, a2, a3) { return new t(a1, a2, a3); };
-            case 4:
-                return function (a1, a2, a3, a4) { return new t(a1, a2, a3, a4); };
-            case 5:
-                return function (a1, a2, a3, a4, a5) { return new t(a1, a2, a3, a4, a5); };
-            case 6:
-                return function (a1, a2, a3, a4, a5, a6) {
-                    return new t(a1, a2, a3, a4, a5, a6);
-                };
-            case 7:
-                return function (a1, a2, a3, a4, a5, a6, a7) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7);
-                };
-            case 8:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8);
-                };
-            case 9:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-                };
-            case 10:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-                };
-            case 11:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
-                };
-            case 12:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
-                };
-            case 13:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
-                };
-            case 14:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
-                };
-            case 15:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
-                };
-            case 16:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
-                };
-            case 17:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17);
-                };
-            case 18:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18);
-                };
-            case 19:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19);
-                };
-            case 20:
-                return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) {
-                    return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
-                };
-        }
-        ;
-        throw new Error("Cannot create a factory for '" + lang_1.stringify(t) + "' because its constructor has more than 20 arguments");
+        var prototype = t.prototype;
+        return function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var instance = Object.create(prototype);
+            t.apply(instance, args);
+            return instance;
+        };
     };
     /** @internal */
     ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes /** TODO #9100 */, paramAnnotations /** TODO #9100 */) {
@@ -197,7 +132,7 @@ var ReflectionCapabilities = (function () {
     // when asked for a lifecycle interface as this is what we check in Dart.
     ReflectionCapabilities.prototype.interfaces = function (type) { return []; };
     ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcInterface, lcProperty) {
-        if (!(type instanceof lang_1.Type))
+        if (!(type instanceof type_1.Type))
             return false;
         var proto = type.prototype;
         return !!proto[lcProperty];

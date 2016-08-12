@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector, ResolvedReflectiveProvider } from '../di';
-import { Type } from '../facade/lang';
+import { Type } from '../type';
 import { Compiler } from './compiler';
 import { ComponentRef } from './component_factory';
 import { ViewContainerRef } from './view_container_ref';
@@ -64,7 +64,7 @@ export declare abstract class DynamicComponentLoader {
      * </my-app>
      * ```
      */
-    abstract loadAsRoot(type: Type, overrideSelectorOrNode: string | any, injector: Injector, onDispose?: () => void, projectableNodes?: any[][]): Promise<ComponentRef<any>>;
+    abstract loadAsRoot(type: Type<any>, overrideSelectorOrNode: string | any, injector: Injector, onDispose?: () => void, projectableNodes?: any[][]): Promise<ComponentRef<any>>;
     /**
      * Creates an instance of a Component and attaches it to the View Container found at the
      * `location` specified as {@link ViewContainerRef}.
@@ -105,11 +105,11 @@ export declare abstract class DynamicComponentLoader {
      * <child-component>Child</child-component>
      * ```
      */
-    abstract loadNextToLocation(type: Type, location: ViewContainerRef, providers?: ResolvedReflectiveProvider[], projectableNodes?: any[][]): Promise<ComponentRef<any>>;
+    abstract loadNextToLocation(type: Type<any>, location: ViewContainerRef, providers?: ResolvedReflectiveProvider[], projectableNodes?: any[][]): Promise<ComponentRef<any>>;
 }
 export declare class DynamicComponentLoader_ extends DynamicComponentLoader {
     private _compiler;
     constructor(_compiler: Compiler);
-    loadAsRoot(type: Type, overrideSelectorOrNode: string | any, injector: Injector, onDispose?: () => void, projectableNodes?: any[][]): Promise<ComponentRef<any>>;
-    loadNextToLocation(type: Type, location: ViewContainerRef, providers?: ResolvedReflectiveProvider[], projectableNodes?: any[][]): Promise<ComponentRef<any>>;
+    loadAsRoot(type: Type<any>, overrideSelectorOrNode: string | any, injector: Injector, onDispose?: () => void, projectableNodes?: any[][]): Promise<ComponentRef<any>>;
+    loadNextToLocation(type: Type<any>, location: ViewContainerRef, providers?: ResolvedReflectiveProvider[], projectableNodes?: any[][]): Promise<ComponentRef<any>>;
 }
