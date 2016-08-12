@@ -30,12 +30,6 @@ export declare class DebugNode {
     };
     readonly providerTokens: any[];
     readonly source: string;
-    /**
-     * Use injector.get(token) instead.
-     *
-     * @deprecated
-     */
-    inject(token: any): any;
 }
 /**
  * @experimental All debugging apis are currently experimental.

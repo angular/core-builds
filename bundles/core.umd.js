@@ -10834,12 +10834,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
-        /**
-         * Use injector.get(token) instead.
-         *
-         * @deprecated
-         */
-        DebugNode.prototype.inject = function (token) { return this.injector.get(token); };
         return DebugNode;
     }());
     /**

@@ -73,12 +73,6 @@ var DebugNode = (function () {
         enumerable: true,
         configurable: true
     });
-    /**
-     * Use injector.get(token) instead.
-     *
-     * @deprecated
-     */
-    DebugNode.prototype.inject = function (token) { return this.injector.get(token); };
     return DebugNode;
 }());
 exports.DebugNode = DebugNode;
