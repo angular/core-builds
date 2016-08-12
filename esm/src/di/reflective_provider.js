@@ -6,9 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ListWrapper, MapWrapper } from '../facade/collection';
-import { isArray, isBlank, isPresent } from '../facade/lang';
+import { Type, isArray, isBlank, isPresent } from '../facade/lang';
 import { reflector } from '../reflection/reflection';
-import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
 import { DependencyMetadata, HostMetadata, InjectMetadata, OptionalMetadata, SelfMetadata, SkipSelfMetadata } from './metadata';
 import { Provider, ProviderBuilder, provide } from './provider';

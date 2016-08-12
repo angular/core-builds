@@ -1,4 +1,4 @@
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 import { Provider } from './provider';
 import { ReflectiveKey } from './reflective_key';
 /**
@@ -34,7 +34,7 @@ export declare class ReflectiveDependency {
  */
 export interface ResolvedReflectiveProvider {
     /**
-     * A key, usually a `Type<any>`.
+     * A key, usually a `Type`.
      */
     key: ReflectiveKey;
     /**
@@ -97,7 +97,7 @@ export declare function resolveReflectiveProvider(provider: Provider): ResolvedR
 /**
  * Resolve a list of Providers.
  */
-export declare function resolveReflectiveProviders(providers: Array<Type<any> | Provider | {
+export declare function resolveReflectiveProviders(providers: Array<Type | Provider | {
     [k: string]: any;
 } | any[]>): ResolvedReflectiveProvider[];
 /**

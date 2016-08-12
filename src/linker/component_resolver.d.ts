@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 import { ComponentFactory } from './component_factory';
 /**
  * Low-level service for loading {@link ComponentFactory}s, which
@@ -19,6 +19,6 @@ import { ComponentFactory } from './component_factory';
 export declare abstract class ComponentResolver {
     static DynamicCompilationDeprecationMsg: string;
     static LazyLoadingDeprecationMsg: string;
-    abstract resolveComponent(component: Type<any> | string): Promise<ComponentFactory<any>>;
+    abstract resolveComponent(component: Type | string): Promise<ComponentFactory<any>>;
     abstract clearCache(): void;
 }

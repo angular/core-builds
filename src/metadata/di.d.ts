@@ -1,6 +1,6 @@
 import { DependencyMetadata } from '../di/metadata';
 import { OpaqueToken } from '../di/opaque_token';
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 /**
  * This token can be used to create a virtual provider that will populate the
  * `entryComponents` fields of components and ng modules based on its `useValue`.
@@ -180,7 +180,7 @@ export declare class QueryMetadata extends DependencyMetadata {
      * The DI token to read from an element that matches the selector.
      */
     read: any;
-    constructor(_selector: Type<any> | string, {descendants, first, read}?: {
+    constructor(_selector: Type | string, {descendants, first, read}?: {
         descendants?: boolean;
         first?: boolean;
         read?: any;
@@ -226,7 +226,7 @@ export declare class QueryMetadata extends DependencyMetadata {
  * @stable
  */
 export declare class ContentChildrenMetadata extends QueryMetadata {
-    constructor(_selector: Type<any> | string, {descendants, read}?: {
+    constructor(_selector: Type | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     });
@@ -253,7 +253,7 @@ export declare class ContentChildrenMetadata extends QueryMetadata {
  * @stable
  */
 export declare class ContentChildMetadata extends QueryMetadata {
-    constructor(_selector: Type<any> | string, {read}?: {
+    constructor(_selector: Type | string, {read}?: {
         read?: any;
     });
 }
@@ -294,7 +294,7 @@ export declare class ContentChildMetadata extends QueryMetadata {
  * @deprecated
  */
 export declare class ViewQueryMetadata extends QueryMetadata {
-    constructor(_selector: Type<any> | string, {descendants, first, read}?: {
+    constructor(_selector: Type | string, {descendants, first, read}?: {
         descendants?: boolean;
         first?: boolean;
         read?: any;
@@ -384,7 +384,7 @@ export declare class ViewQueryMetadata extends QueryMetadata {
  * @stable
  */
 export declare class ViewChildrenMetadata extends ViewQueryMetadata {
-    constructor(_selector: Type<any> | string, {read}?: {
+    constructor(_selector: Type | string, {read}?: {
         read?: any;
     });
 }
@@ -460,7 +460,7 @@ export declare class ViewChildrenMetadata extends ViewQueryMetadata {
  * @stable
  */
 export declare class ViewChildMetadata extends ViewQueryMetadata {
-    constructor(_selector: Type<any> | string, {read}?: {
+    constructor(_selector: Type | string, {read}?: {
         read?: any;
     });
 }

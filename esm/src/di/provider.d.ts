@@ -1,4 +1,4 @@
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 /**
  * Describes how the {@link Injector} should instantiate a given token.
  *
@@ -49,7 +49,7 @@ export declare class Provider {
      * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
      * ```
      */
-    useClass: Type<any>;
+    useClass: Type;
     /**
      * Binds a DI token to a value.
      *
@@ -137,7 +137,7 @@ export declare class Provider {
      */
     dependencies: Object[];
     constructor(token: any, {useClass, useValue, useExisting, useFactory, deps, multi}: {
-        useClass?: Type<any>;
+        useClass?: Type;
         useValue?: any;
         useExisting?: any;
         useFactory?: Function;
@@ -182,7 +182,7 @@ export declare class Provider {
  */
 export declare class Binding extends Provider {
     constructor(token: any, {toClass, toValue, toAlias, toFactory, deps, multi}: {
-        toClass?: Type<any>;
+        toClass?: Type;
         toValue?: any;
         toAlias?: any;
         toFactory: Function;
@@ -192,7 +192,7 @@ export declare class Binding extends Provider {
     /**
      * @deprecated
      */
-    readonly toClass: Type<any>;
+    readonly toClass: Type;
     /**
      * @deprecated
      */
@@ -255,7 +255,7 @@ export declare class ProviderBuilder {
      * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
      * ```
      */
-    toClass(type: Type<any>): Provider;
+    toClass(type: Type): Provider;
     /**
      * Binds a DI token to a value.
      *
@@ -329,7 +329,7 @@ export declare class ProviderBuilder {
  * @deprecated
  */
 export declare function provide(token: any, {useClass, useValue, useExisting, useFactory, deps, multi}: {
-    useClass?: Type<any>;
+    useClass?: Type;
     useValue?: any;
     useExisting?: any;
     useFactory?: Function;

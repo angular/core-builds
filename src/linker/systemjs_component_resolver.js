@@ -25,7 +25,9 @@ var SystemJsComponentResolver = (function () {
                 // Use the default export when no component is specified
                 component_1 = 'default';
             }
-            return System.import(module).then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
+            return lang_1.global
+                .System.import(module)
+                .then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
         }
         return this._resolver.resolveComponent(componentType);
     };
@@ -52,7 +54,8 @@ var SystemJsCmpFactoryResolver = (function () {
         if (lang_1.isString(componentType)) {
             this._console.warn(component_resolver_1.ComponentResolver.LazyLoadingDeprecationMsg);
             var _a = componentType.split(_SEPARATOR), module = _a[0], factory_1 = _a[1];
-            return System.import(module + FACTORY_MODULE_SUFFIX)
+            return lang_1.global
+                .System.import(module + FACTORY_MODULE_SUFFIX)
                 .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX]; });
         }
         return Promise.resolve(null);

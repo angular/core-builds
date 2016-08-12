@@ -7,6 +7,7 @@
  */
 "use strict";
 var di_1 = require('../di');
+var lang_1 = require('../facade/lang');
 var compiler_1 = require('./compiler');
 var _SEPARATOR = '#';
 var FACTORY_MODULE_SUFFIX = '.ngfactory';
@@ -24,7 +25,8 @@ var SystemJsNgModuleLoader = (function () {
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module)
+        return lang_1.global
+            .System.import(module)
             .then(function (module) { return module[exportName]; })
             .then(function (type) { return checkNotEmpty(type, module, exportName); })
             .then(function (type) { return _this._compiler.compileModuleAsync(type); });
@@ -33,7 +35,8 @@ var SystemJsNgModuleLoader = (function () {
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module + FACTORY_MODULE_SUFFIX)
+        return lang_1.global
+            .System.import(module + FACTORY_MODULE_SUFFIX)
             .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };

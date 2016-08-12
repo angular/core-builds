@@ -9,7 +9,6 @@
 var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
 var reflection_1 = require('../reflection/reflection');
-var type_1 = require('../type');
 var forward_ref_1 = require('./forward_ref');
 var metadata_1 = require('./metadata');
 var provider_1 = require('./provider');
@@ -152,7 +151,7 @@ function mergeResolvedReflectiveProviders(providers, normalizedProvidersMap) {
 exports.mergeResolvedReflectiveProviders = mergeResolvedReflectiveProviders;
 function _normalizeProviders(providers, res) {
     providers.forEach(function (b) {
-        if (b instanceof type_1.Type) {
+        if (b instanceof lang_1.Type) {
             res.push(provider_1.provide(b, { useClass: b }));
         }
         else if (b instanceof provider_1.Provider) {
@@ -208,7 +207,7 @@ function _extractToken(typeOrFunc /** TODO #9100 */, metadata /** TODO #9100 */ 
     var upperBoundVisibility = null;
     for (var i = 0; i < metadata.length; ++i) {
         var paramMetadata = metadata[i];
-        if (paramMetadata instanceof type_1.Type) {
+        if (paramMetadata instanceof lang_1.Type) {
             token = paramMetadata;
         }
         else if (paramMetadata instanceof metadata_1.InjectMetadata) {

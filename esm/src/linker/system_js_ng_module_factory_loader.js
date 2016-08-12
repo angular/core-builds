@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injectable } from '../di';
+import { global } from '../facade/lang';
 import { Compiler } from './compiler';
 const _SEPARATOR = '#';
 const FACTORY_MODULE_SUFFIX = '.ngfactory';
@@ -22,7 +23,8 @@ export class SystemJsNgModuleLoader {
         let [module, exportName] = path.split(_SEPARATOR);
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module)
+        return global
+            .System.import(module)
             .then((module) => module[exportName])
             .then((type) => checkNotEmpty(type, module, exportName))
             .then((type) => this._compiler.compileModuleAsync(type));
@@ -31,7 +33,8 @@ export class SystemJsNgModuleLoader {
         let [module, exportName] = path.split(_SEPARATOR);
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module + FACTORY_MODULE_SUFFIX)
+        return global
+            .System.import(module + FACTORY_MODULE_SUFFIX)
             .then((module) => module[exportName + FACTORY_CLASS_SUFFIX])
             .then((factory) => checkNotEmpty(factory, module, exportName));
     }

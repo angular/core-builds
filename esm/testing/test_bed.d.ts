@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, SchemaMetadata } from '../index';
-import { Type } from '../src/type';
+import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, SchemaMetadata, Type } from '../index';
+import { ConcreteType } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 /**
@@ -51,7 +51,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    static initTestEnvironment(ngModule: Type<any>, platform: PlatformRef): TestBed;
+    static initTestEnvironment(ngModule: Type, platform: PlatformRef): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -78,11 +78,11 @@ export declare class TestBed implements Injector {
      * as fetching urls is asynchronous.
      */
     static compileComponents(): Promise<any>;
-    static overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModuleMetadataType>): typeof TestBed;
-    static overrideComponent(component: Type<any>, override: MetadataOverride<ComponentMetadataType>): typeof TestBed;
-    static overrideDirective(directive: Type<any>, override: MetadataOverride<DirectiveMetadataType>): typeof TestBed;
-    static overridePipe(pipe: Type<any>, override: MetadataOverride<PipeMetadataType>): typeof TestBed;
-    static createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    static overrideModule(ngModule: ConcreteType<any>, override: MetadataOverride<NgModuleMetadataType>): typeof TestBed;
+    static overrideComponent(component: ConcreteType<any>, override: MetadataOverride<ComponentMetadataType>): typeof TestBed;
+    static overrideDirective(directive: ConcreteType<any>, override: MetadataOverride<DirectiveMetadataType>): typeof TestBed;
+    static overridePipe(pipe: ConcreteType<any>, override: MetadataOverride<PipeMetadataType>): typeof TestBed;
+    static createComponent<T>(component: ConcreteType<T>): ComponentFixture<T>;
     private _instantiated;
     private _compiler;
     private _moduleRef;
@@ -109,7 +109,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    initTestEnvironment(ngModule: Type<any>, platform: PlatformRef): void;
+    initTestEnvironment(ngModule: Type, platform: PlatformRef): void;
     /**
      * Reset the providers for the test injector.
      *
@@ -122,7 +122,7 @@ export declare class TestBed implements Injector {
     reset(): void;
     resetTestingModule(): void;
     platform: PlatformRef;
-    ngModule: Type<any>;
+    ngModule: Type;
     configureCompiler(config: {
         providers?: any[];
         useJit?: boolean;
@@ -134,11 +134,11 @@ export declare class TestBed implements Injector {
     private _assertNotInstantiated(methodName, methodDescription);
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function): any;
-    overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModuleMetadataType>): void;
-    overrideComponent(component: Type<any>, override: MetadataOverride<ComponentMetadataType>): void;
-    overrideDirective(directive: Type<any>, override: MetadataOverride<DirectiveMetadataType>): void;
-    overridePipe(pipe: Type<any>, override: MetadataOverride<PipeMetadataType>): void;
-    createComponent<T>(component: Type<T>): ComponentFixture<T>;
+    overrideModule(ngModule: ConcreteType<any>, override: MetadataOverride<NgModuleMetadataType>): void;
+    overrideComponent(component: ConcreteType<any>, override: MetadataOverride<ComponentMetadataType>): void;
+    overrideDirective(directive: ConcreteType<any>, override: MetadataOverride<DirectiveMetadataType>): void;
+    overridePipe(pipe: ConcreteType<any>, override: MetadataOverride<PipeMetadataType>): void;
+    createComponent<T>(component: ConcreteType<T>): ComponentFixture<T>;
 }
 /**
  * @experimental

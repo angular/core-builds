@@ -8,7 +8,7 @@
 import { AnimationEntryMetadata } from '../animation/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { InjectableMetadata } from '../di/metadata';
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 import { ViewEncapsulation } from './view';
 /**
  * Interface for creating {@link DirectiveMetadata}
@@ -769,11 +769,11 @@ export interface ComponentMetadataType extends DirectiveMetadataType {
     styleUrls?: string[];
     styles?: string[];
     animations?: AnimationEntryMetadata[];
-    directives?: Array<Type<any> | any[]>;
-    pipes?: Array<Type<any> | any[]>;
+    directives?: Array<Type | any[]>;
+    pipes?: Array<Type | any[]>;
     encapsulation?: ViewEncapsulation;
     interpolation?: [string, string];
-    entryComponents?: Array<Type<any> | any[]>;
+    entryComponents?: Array<Type | any[]>;
 }
 /**
  * Declare reusable UI building blocks for an application.
@@ -968,8 +968,8 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
      * - {@link keyframes keyframes()}
      */
     animations: AnimationEntryMetadata[];
-    directives: Array<Type<any> | any[]>;
-    pipes: Array<Type<any> | any[]>;
+    directives: Array<Type | any[]>;
+    pipes: Array<Type | any[]>;
     /**
      * Specify how the template and the styles should be encapsulated.
      * The default is {@link ViewEncapsulation#Emulated `ViewEncapsulation.Emulated`} if the view
@@ -984,7 +984,7 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
      * Angular will create a {@link ComponentFactory ComponentFactory} and store it in the
      * {@link ComponentFactoryResolver ComponentFactoryResolver}.
      */
-    entryComponents: Array<Type<any> | any[]>;
+    entryComponents: Array<Type | any[]>;
     constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents}?: ComponentMetadataType);
 }
 /**

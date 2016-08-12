@@ -66,7 +66,9 @@ export class Compiler {
     /**
      * Compiles the given NgModule and all of its components
      */
-    compileModuleAsync(moduleType) { throw _throwError(); }
+    compileModuleAsync(moduleType) {
+        throw _throwError();
+    }
     /**
      * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
      */
