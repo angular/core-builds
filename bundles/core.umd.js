@@ -11039,6 +11039,18 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @deprecated Create platforms via `createPlatformFactory(corePlatform, ...) instead!
      */
     var PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var LOCALE_ID = new OpaqueToken('LocaleId');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var TRANSLATIONS = new OpaqueToken('Translations');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var TRANSLATIONS_FORMAT = new OpaqueToken('TranslationsFormat');
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }
@@ -12808,6 +12820,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
+    exports.TRANSLATIONS = TRANSLATIONS;
+    exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
+    exports.LOCALE_ID = LOCALE_ID;
     exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
     exports.ApplicationModule = ApplicationModule;
     exports.wtfCreateScope = wtfCreateScope;
