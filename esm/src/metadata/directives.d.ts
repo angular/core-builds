@@ -16,9 +16,7 @@ import { ViewEncapsulation } from './view';
  */
 export interface DirectiveMetadataType {
     selector?: string;
-    properties?: string[];
     inputs?: string[];
-    events?: string[];
     outputs?: string[];
     host?: {
         [key: string]: string;
@@ -492,14 +490,7 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      *
      */
     readonly inputs: string[];
-    /**
-     * Use `inputs` instead
-     *
-     * @deprecated
-     */
-    readonly properties: string[];
     private _inputs;
-    private _properties;
     /**
      * Enumerates the set of event-bound output properties.
      *
@@ -546,14 +537,7 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      *
      */
     readonly outputs: string[];
-    /**
-     * Use `outputs` instead
-     *
-     * @deprecated
-     */
-    readonly events: string[];
     private _outputs;
-    private _events;
     /**
      * Specify the events, actions, properties and attributes related to the host element.
      *
@@ -754,7 +738,7 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
     queries: {
         [key: string]: any;
     };
-    constructor({selector, inputs, outputs, properties, events, host, providers, exportAs, queries}?: DirectiveMetadataType);
+    constructor({selector, inputs, outputs, host, providers, exportAs, queries}?: DirectiveMetadataType);
 }
 /**
  * Interface for creating {@link ComponentMetadataType}
@@ -985,7 +969,7 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
      * {@link ComponentFactoryResolver ComponentFactoryResolver}.
      */
     entryComponents: Array<Type<any> | any[]>;
-    constructor({selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents}?: ComponentMetadataType);
+    constructor({selector, inputs, outputs, host, exportAs, moduleId, providers, viewProviders, changeDetection, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents}?: ComponentMetadataType);
 }
 /**
  * Interface for creating {@link PipeMetadata}

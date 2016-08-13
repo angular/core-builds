@@ -390,13 +390,11 @@ import { isPresent } from '../facade/lang';
  * @stable
  */
 export class DirectiveMetadata extends InjectableMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, providers, exportAs, queries } = {}) {
+    constructor({ selector, inputs, outputs, host, providers, exportAs, queries } = {}) {
         super();
         this.selector = selector;
         this._inputs = inputs;
-        this._properties = properties;
         this._outputs = outputs;
-        this._events = events;
         this.host = host;
         this.exportAs = exportAs;
         this.queries = queries;
@@ -449,16 +447,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      * ```
      *
      */
-    get inputs() {
-        return isPresent(this._properties) && this._properties.length > 0 ? this._properties :
-            this._inputs;
-    }
-    /**
-     * Use `inputs` instead
-     *
-     * @deprecated
-     */
-    get properties() { return this.inputs; }
+    get inputs() { return this._inputs; }
     /**
      * Enumerates the set of event-bound output properties.
      *
@@ -504,15 +493,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      * ```
      *
      */
-    get outputs() {
-        return isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
-    }
-    /**
-     * Use `outputs` instead
-     *
-     * @deprecated
-     */
-    get events() { return this.outputs; }
+    get outputs() { return this._outputs; }
     /**
      * Defines the set of injectable objects that are visible to a Directive and its light DOM
      * children.
@@ -572,13 +553,11 @@ export class DirectiveMetadata extends InjectableMetadata {
  * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents } = {}) {
+    constructor({ selector, inputs, outputs, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents } = {}) {
         super({
             selector: selector,
             inputs: inputs,
             outputs: outputs,
-            properties: properties,
-            events: events,
             host: host,
             exportAs: exportAs,
             providers: providers,

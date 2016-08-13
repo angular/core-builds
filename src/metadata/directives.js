@@ -398,13 +398,11 @@ var lang_1 = require('../facade/lang');
 var DirectiveMetadata = (function (_super) {
     __extends(DirectiveMetadata, _super);
     function DirectiveMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
         _super.call(this);
         this.selector = selector;
         this._inputs = inputs;
-        this._properties = properties;
         this._outputs = outputs;
-        this._events = events;
         this.host = host;
         this.exportAs = exportAs;
         this.queries = queries;
@@ -458,20 +456,7 @@ var DirectiveMetadata = (function (_super) {
          * ```
          *
          */
-        get: function () {
-            return lang_1.isPresent(this._properties) && this._properties.length > 0 ? this._properties :
-                this._inputs;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(DirectiveMetadata.prototype, "properties", {
-        /**
-         * Use `inputs` instead
-         *
-         * @deprecated
-         */
-        get: function () { return this.inputs; },
+        get: function () { return this._inputs; },
         enumerable: true,
         configurable: true
     });
@@ -521,19 +506,7 @@ var DirectiveMetadata = (function (_super) {
          * ```
          *
          */
-        get: function () {
-            return lang_1.isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(DirectiveMetadata.prototype, "events", {
-        /**
-         * Use `outputs` instead
-         *
-         * @deprecated
-         */
-        get: function () { return this.outputs; },
+        get: function () { return this._outputs; },
         enumerable: true,
         configurable: true
     });
@@ -604,13 +577,11 @@ exports.DirectiveMetadata = DirectiveMetadata;
 var ComponentMetadata = (function (_super) {
     __extends(ComponentMetadata, _super);
     function ComponentMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
         _super.call(this, {
             selector: selector,
             inputs: inputs,
             outputs: outputs,
-            properties: properties,
-            events: events,
             host: host,
             exportAs: exportAs,
             providers: providers,
