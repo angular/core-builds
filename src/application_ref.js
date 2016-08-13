@@ -46,17 +46,6 @@ function enableProdMode() {
 }
 exports.enableProdMode = enableProdMode;
 /**
- * Locks the run mode of Angular. After this has been called,
- * it can't be changed any more. I.e. `isDevMode()` will always
- * return the same value.
- *
- * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
- */
-function lockRunMode() {
-    console.warn('lockRunMode() is deprecated and not needed any more.');
-}
-exports.lockRunMode = lockRunMode;
-/**
  * Returns whether Angular is in development mode. After called once,
  * the value is locked and won't change any more.
  *

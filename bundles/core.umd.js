@@ -9123,10 +9123,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.__isAsync = isAsync;
         }
         EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
-        /**
-         * @deprecated - use .emit(value) instead
-         */
-        EventEmitter.prototype.next = function (value) { _super.prototype.next.call(this, value); };
         EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
             var schedulerFn;
             var errorFn = function (err) { return null; };
@@ -9647,16 +9643,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             throw new BaseException('Cannot enable prod mode after platform setup.');
         }
         _devMode = false;
-    }
-    /**
-     * Locks the run mode of Angular. After this has been called,
-     * it can't be changed any more. I.e. `isDevMode()` will always
-     * return the same value.
-     *
-     * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
-     */
-    function lockRunMode() {
-        console.warn('lockRunMode() is deprecated and not needed any more.');
     }
     /**
      * Returns whether Angular is in development mode. After called once,
@@ -12801,7 +12787,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.PlatformRef = PlatformRef;
     exports.ApplicationRef = ApplicationRef;
     exports.enableProdMode = enableProdMode;
-    exports.lockRunMode = lockRunMode;
     exports.isDevMode = isDevMode;
     exports.createPlatformFactory = createPlatformFactory;
     exports.APP_ID = APP_ID;

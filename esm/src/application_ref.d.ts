@@ -22,14 +22,6 @@ import { NgZone } from './zone/ng_zone';
  */
 export declare function enableProdMode(): void;
 /**
- * Locks the run mode of Angular. After this has been called,
- * it can't be changed any more. I.e. `isDevMode()` will always
- * return the same value.
- *
- * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
- */
-export declare function lockRunMode(): void;
-/**
  * Returns whether Angular is in development mode. After called once,
  * the value is locked and won't change any more.
  *

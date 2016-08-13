@@ -27,7 +27,6 @@ exports.coreLoadAndBootstrap = application_ref_1.coreLoadAndBootstrap;
 exports.PlatformRef = application_ref_1.PlatformRef;
 exports.ApplicationRef = application_ref_1.ApplicationRef;
 exports.enableProdMode = application_ref_1.enableProdMode;
-exports.lockRunMode = application_ref_1.lockRunMode;
 exports.isDevMode = application_ref_1.isDevMode;
 exports.createPlatformFactory = application_ref_1.createPlatformFactory;
 var application_tokens_1 = require('./src/application_tokens');
