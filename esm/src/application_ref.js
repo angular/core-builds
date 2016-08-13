@@ -102,14 +102,6 @@ export function assertPlatform(requiredToken) {
     return platform;
 }
 /**
- * Dispose the existing platform.
- *
- * @deprecated Use `destroyPlatform` instead
- */
-export function disposePlatform() {
-    destroyPlatform();
-}
-/**
  * Destroy the existing platform.
  *
  * @experimental APIs related to application bootstrap are currently under review.

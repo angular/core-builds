@@ -20,7 +20,7 @@ __export(require('./src/di'));
 var application_ref_1 = require('./src/application_ref');
 exports.createPlatform = application_ref_1.createPlatform;
 exports.assertPlatform = application_ref_1.assertPlatform;
-exports.disposePlatform = application_ref_1.disposePlatform;
+exports.destroyPlatform = application_ref_1.destroyPlatform;
 exports.getPlatform = application_ref_1.getPlatform;
 exports.coreBootstrap = application_ref_1.coreBootstrap;
 exports.coreLoadAndBootstrap = application_ref_1.coreLoadAndBootstrap;

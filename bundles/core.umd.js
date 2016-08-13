@@ -9681,14 +9681,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         return platform;
     }
     /**
-     * Dispose the existing platform.
-     *
-     * @deprecated Use `destroyPlatform` instead
-     */
-    function disposePlatform() {
-        destroyPlatform();
-    }
-    /**
      * Destroy the existing platform.
      *
      * @experimental APIs related to application bootstrap are currently under review.
@@ -12751,7 +12743,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     };
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
-    exports.disposePlatform = disposePlatform;
+    exports.destroyPlatform = destroyPlatform;
     exports.getPlatform = getPlatform;
     exports.coreBootstrap = coreBootstrap;
     exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
