@@ -10,6 +10,7 @@ var application_init_1 = require('./application_init');
 var application_ref_1 = require('./application_ref');
 var application_tokens_1 = require('./application_tokens');
 var change_detection_1 = require('./change_detection/change_detection');
+var tokens_1 = require('./i18n/tokens');
 var compiler_1 = require('./linker/compiler');
 var component_resolver_1 = require('./linker/component_resolver');
 var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');
@@ -47,6 +48,7 @@ var ApplicationModule = (function () {
                         { provide: change_detection_1.IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: change_detection_1.KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                         { provide: dynamic_component_loader_1.DynamicComponentLoader, useClass: dynamic_component_loader_1.DynamicComponentLoader_ },
+                        { provide: tokens_1.LOCALE_ID, useValue: 'en_US' },
                     ]
                 },] },
     ];

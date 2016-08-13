@@ -9,6 +9,7 @@ import { ApplicationInitStatus } from './application_init';
 import { ApplicationRef, ApplicationRef_ } from './application_ref';
 import { APP_ID_RANDOM_PROVIDER } from './application_tokens';
 import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyValueDiffers } from './change_detection/change_detection';
+import { LOCALE_ID } from './i18n/tokens';
 import { Compiler } from './linker/compiler';
 import { ComponentResolver } from './linker/component_resolver';
 import { DynamicComponentLoader, DynamicComponentLoader_ } from './linker/dynamic_component_loader';
@@ -43,6 +44,7 @@ ApplicationModule.decorators = [
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                     { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                     { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
+                    { provide: LOCALE_ID, useValue: 'en_US' },
                 ]
             },] },
 ];

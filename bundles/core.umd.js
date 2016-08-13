@@ -10930,6 +10930,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                         { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
+                        { provide: LOCALE_ID, useValue: 'en_US' },
                     ]
                 },] },
     ];
