@@ -65,6 +65,10 @@ export class EventEmitter extends Subject {
         this.__isAsync = isAsync;
     }
     emit(value) { super.next(value); }
+    /**
+     * @deprecated - use .emit(value) instead
+     */
+    next(value) { super.next(value); }
     subscribe(generatorOrNext, error, complete) {
         let schedulerFn;
         let errorFn = (err) => null;

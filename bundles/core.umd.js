@@ -9123,6 +9123,10 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.__isAsync = isAsync;
         }
         EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
+        /**
+         * @deprecated - use .emit(value) instead
+         */
+        EventEmitter.prototype.next = function (value) { _super.prototype.next.call(this, value); };
         EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
             var schedulerFn;
             var errorFn = function (err) { return null; };
