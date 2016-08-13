@@ -69,21 +69,6 @@ export declare function destroyPlatform(): void;
  */
 export declare function getPlatform(): PlatformRef;
 /**
- * Shortcut for ApplicationRef.bootstrap.
- * Requires a platform to be created first.
- *
- * @deprecated Use {@link bootstrapModuleFactory} instead.
- */
-export declare function coreBootstrap<C>(componentFactory: ComponentFactory<C>, injector: Injector): ComponentRef<C>;
-/**
- * Resolves the componentFactory for the given component,
- * waits for asynchronous initializers and bootstraps the component.
- * Requires a platform to be created first.
- *
- * @deprecated Use {@link bootstrapModule} instead.
- */
-export declare function coreLoadAndBootstrap(componentType: Type<any>, injector: Injector): Promise<ComponentRef<any>>;
-/**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
@@ -136,11 +121,6 @@ export declare abstract class PlatformRef {
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     /**
      * Register a listener to be called when the platform is disposed.
-     * @deprecated Use `OnDestroy` instead
-     */
-    abstract registerDisposeListener(dispose: () => void): void;
-    /**
-     * Register a listener to be called when the platform is disposed.
      */
     abstract onDestroy(callback: () => void): void;
     /**
@@ -150,17 +130,8 @@ export declare abstract class PlatformRef {
     injector: Injector;
     /**
      * Destroy the Angular platform and all Angular applications on the page.
-     * @deprecated Use `destroy` instead
-     */
-    abstract dispose(): void;
-    /**
-     * Destroy the Angular platform and all Angular applications on the page.
      */
     abstract destroy(): void;
-    /**
-     * @deprecated Use `destroyed` instead
-     */
-    disposed: boolean;
     destroyed: boolean;
 }
 export declare class PlatformRef_ extends PlatformRef {
@@ -200,34 +171,6 @@ export declare class PlatformRef_ extends PlatformRef {
  */
 export declare abstract class ApplicationRef {
     /**
-     * Register a listener to be called each time `bootstrap()` is called to bootstrap
-     * a new root component.
-     *
-     * @deprecated Provide a callback via a multi provider for {@link APP_BOOTSTRAP_LISTENER}
-     * instead.
-     */
-    abstract registerBootstrapListener(listener: (ref: ComponentRef<any>) => void): void;
-    /**
-     * Register a listener to be called when the application is disposed.
-     *
-     * @deprecated Use `ngOnDestroy` lifecycle hook or {@link NgModuleRef}.onDestroy.
-     */
-    abstract registerDisposeListener(dispose: () => void): void;
-    /**
-     * Returns a promise that resolves when all asynchronous application initializers
-     * are done.
-     *
-     * @deprecated Use the {@link ApplicationInitStatus} class instead.
-     */
-    abstract waitForAsyncInitializers(): Promise<any>;
-    /**
-     * Runs the given callback in the zone and returns the result of the callback.
-     * Exceptions will be forwarded to the ExceptionHandler and rethrown.
-     *
-     * @deprecated Use {@link NgZone}.run instead.
-     */
-    abstract run(callback: Function): any;
-    /**
      * Bootstrap a new component at the root level of the application.
      *
      * ### Bootstrap process
@@ -240,26 +183,6 @@ export declare abstract class ApplicationRef {
      * {@example core/ts/platform/platform.ts region='longform'}
      */
     abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
-    /**
-     * Retrieve the application {@link Injector}.
-     *
-     * @deprecated inject an {@link Injector} directly where needed or use {@link
-     * NgModuleRef}.injector.
-     */
-    injector: Injector;
-    /**
-     * Retrieve the application {@link NgZone}.
-     *
-     * @deprecated inject {@link NgZone} instead of calling this getter.
-     */
-    zone: NgZone;
-    /**
-     * Dispose of this application and all of its components.
-     *
-     * @deprecated Destroy the module that was created during bootstrap instead by calling
-     * {@link NgModuleRef}.destroy.
-     */
-    abstract dispose(): void;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
      *
@@ -291,49 +214,17 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _testabilityRegistry;
     private _testability;
     private _bootstrapListeners;
-    /**
-     * @deprecated
-     */
-    private _disposeListeners;
     private _rootComponents;
     private _rootComponentTypes;
     private _changeDetectorRefs;
     private _runningTick;
     private _enforceNoNewChanges;
     constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ExceptionHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
-    /**
-     * @deprecated
-     */
-    registerBootstrapListener(listener: (ref: ComponentRef<any>) => void): void;
-    /**
-     * @deprecated
-     */
-    registerDisposeListener(dispose: () => void): void;
     registerChangeDetector(changeDetector: ChangeDetectorRef): void;
     unregisterChangeDetector(changeDetector: ChangeDetectorRef): void;
-    /**
-     * @deprecated
-     */
-    waitForAsyncInitializers(): Promise<any>;
-    /**
-     * @deprecated
-     */
-    run(callback: Function): any;
     bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
-    /**
-     * @deprecated
-     */
-    injector: Injector;
-    /**
-     * @deprecated
-     */
-    zone: NgZone;
     tick(): void;
     ngOnDestroy(): void;
-    /**
-     * @deprecated
-     */
-    dispose(): void;
     componentTypes: Type<any>[];
     components: ComponentRef<any>[];
 }

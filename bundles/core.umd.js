@@ -9634,7 +9634,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function createPlatform(injector) {
-        if (isPresent(_platform) && !_platform.disposed) {
+        if (isPresent(_platform) && !_platform.destroyed) {
             throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
         }
         _platform = injector.get(PlatformRef);
@@ -9696,26 +9696,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function getPlatform() {
-        return isPresent(_platform) && !_platform.disposed ? _platform : null;
-    }
-    /**
-     * Shortcut for ApplicationRef.bootstrap.
-     * Requires a platform to be created first.
-     *
-     * @deprecated Use {@link bootstrapModuleFactory} instead.
-     */
-    function coreBootstrap(componentFactory, injector) {
-        throw new BaseException('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
-    }
-    /**
-     * Resolves the componentFactory for the given component,
-     * waits for asynchronous initializers and bootstraps the component.
-     * Requires a platform to be created first.
-     *
-     * @deprecated Use {@link bootstrapModule} instead.
-     */
-    function coreLoadAndBootstrap(componentType, injector) {
-        throw new BaseException('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
+        return isPresent(_platform) && !_platform.destroyed ? _platform : null;
     }
     /**
      * The Angular platform is the entry point for Angular on a web page. Each page
@@ -9785,14 +9766,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             configurable: true
         });
         ;
-        Object.defineProperty(PlatformRef.prototype, "disposed", {
-            /**
-             * @deprecated Use `destroyed` instead
-             */
-            get: function () { throw unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(PlatformRef.prototype, "destroyed", {
             get: function () { throw unimplemented(); },
             enumerable: true,
@@ -9942,29 +9915,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ApplicationRef = (function () {
         function ApplicationRef() {
         }
-        Object.defineProperty(ApplicationRef.prototype, "injector", {
-            /**
-             * Retrieve the application {@link Injector}.
-             *
-             * @deprecated inject an {@link Injector} directly where needed or use {@link
-             * NgModuleRef}.injector.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        ;
-        Object.defineProperty(ApplicationRef.prototype, "zone", {
-            /**
-             * Retrieve the application {@link NgZone}.
-             *
-             * @deprecated inject {@link NgZone} instead of calling this getter.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        ;
         Object.defineProperty(ApplicationRef.prototype, "componentTypes", {
             /**
              * Get a list of component types registered to this application.
@@ -10000,10 +9950,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._testabilityRegistry = _testabilityRegistry;
             this._testability = _testability;
             this._bootstrapListeners = [];
-            /**
-             * @deprecated
-             */
-            this._disposeListeners = [];
             this._rootComponents = [];
             this._rootComponentTypes = [];
             this._changeDetectorRefs = [];
@@ -10012,32 +9958,11 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._enforceNoNewChanges = isDevMode();
             this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
         }
-        /**
-         * @deprecated
-         */
-        ApplicationRef_.prototype.registerBootstrapListener = function (listener) {
-            this._bootstrapListeners.push(listener);
-        };
-        /**
-         * @deprecated
-         */
-        ApplicationRef_.prototype.registerDisposeListener = function (dispose) { this._disposeListeners.push(dispose); };
         ApplicationRef_.prototype.registerChangeDetector = function (changeDetector) {
             this._changeDetectorRefs.push(changeDetector);
         };
         ApplicationRef_.prototype.unregisterChangeDetector = function (changeDetector) {
             ListWrapper.remove(this._changeDetectorRefs, changeDetector);
-        };
-        /**
-         * @deprecated
-         */
-        ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._initStatus.donePromise; };
-        /**
-         * @deprecated
-         */
-        ApplicationRef_.prototype.run = function (callback) {
-            var _this = this;
-            return this._zone.run(function () { return _callAndReportToExceptionHandler(_this._exceptionHandler, callback); });
         };
         ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
             var _this = this;
@@ -10083,22 +10008,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.unregisterChangeDetector(componentRef.changeDetectorRef);
             ListWrapper.remove(this._rootComponents, componentRef);
         };
-        Object.defineProperty(ApplicationRef_.prototype, "injector", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this._injector; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ApplicationRef_.prototype, "zone", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this._zone; },
-            enumerable: true,
-            configurable: true
-        });
         ApplicationRef_.prototype.tick = function () {
             if (this._runningTick) {
                 throw new BaseException('ApplicationRef.tick is called recursively');
@@ -10119,12 +10028,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         ApplicationRef_.prototype.ngOnDestroy = function () {
             // TODO(alxhub): Dispose of the NgZone.
             ListWrapper.clone(this._rootComponents).forEach(function (ref) { return ref.destroy(); });
-            this._disposeListeners.forEach(function (dispose) { return dispose(); });
         };
-        /**
-         * @deprecated
-         */
-        ApplicationRef_.prototype.dispose = function () { this.ngOnDestroy(); };
         Object.defineProperty(ApplicationRef_.prototype, "componentTypes", {
             get: function () { return this._rootComponentTypes; },
             enumerable: true,
@@ -12745,8 +12649,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
     exports.getPlatform = getPlatform;
-    exports.coreBootstrap = coreBootstrap;
-    exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
     exports.PlatformRef = PlatformRef;
     exports.ApplicationRef = ApplicationRef;
     exports.enableProdMode = enableProdMode;

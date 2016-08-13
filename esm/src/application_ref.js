@@ -57,7 +57,7 @@ export function isDevMode() {
  * @experimental APIs related to application bootstrap are currently under review.
  */
 export function createPlatform(injector) {
-    if (isPresent(_platform) && !_platform.disposed) {
+    if (isPresent(_platform) && !_platform.destroyed) {
         throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
     }
     _platform = injector.get(PlatformRef);
@@ -117,26 +117,7 @@ export function destroyPlatform() {
  * @experimental APIs related to application bootstrap are currently under review.
  */
 export function getPlatform() {
-    return isPresent(_platform) && !_platform.disposed ? _platform : null;
-}
-/**
- * Shortcut for ApplicationRef.bootstrap.
- * Requires a platform to be created first.
- *
- * @deprecated Use {@link bootstrapModuleFactory} instead.
- */
-export function coreBootstrap(componentFactory, injector) {
-    throw new BaseException('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
-}
-/**
- * Resolves the componentFactory for the given component,
- * waits for asynchronous initializers and bootstraps the component.
- * Requires a platform to be created first.
- *
- * @deprecated Use {@link bootstrapModule} instead.
- */
-export function coreLoadAndBootstrap(componentType, injector) {
-    throw new BaseException('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
+    return isPresent(_platform) && !_platform.destroyed ? _platform : null;
 }
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
@@ -199,10 +180,6 @@ export class PlatformRef {
      */
     get injector() { throw unimplemented(); }
     ;
-    /**
-     * @deprecated Use `destroyed` instead
-     */
-    get disposed() { throw unimplemented(); }
     get destroyed() { throw unimplemented(); }
 }
 function _callAndReportToExceptionHandler(exceptionHandler, callback) {
@@ -328,21 +305,6 @@ PlatformRef_.ctorParameters = [
  */
 export class ApplicationRef {
     /**
-     * Retrieve the application {@link Injector}.
-     *
-     * @deprecated inject an {@link Injector} directly where needed or use {@link
-     * NgModuleRef}.injector.
-     */
-    get injector() { return unimplemented(); }
-    ;
-    /**
-     * Retrieve the application {@link NgZone}.
-     *
-     * @deprecated inject {@link NgZone} instead of calling this getter.
-     */
-    get zone() { return unimplemented(); }
-    ;
-    /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
      */
@@ -366,10 +328,6 @@ export class ApplicationRef_ extends ApplicationRef {
         this._testabilityRegistry = _testabilityRegistry;
         this._testability = _testability;
         this._bootstrapListeners = [];
-        /**
-         * @deprecated
-         */
-        this._disposeListeners = [];
         this._rootComponents = [];
         this._rootComponentTypes = [];
         this._changeDetectorRefs = [];
@@ -378,31 +336,11 @@ export class ApplicationRef_ extends ApplicationRef {
         this._enforceNoNewChanges = isDevMode();
         this._zone.onMicrotaskEmpty.subscribe({ next: () => { this._zone.run(() => { this.tick(); }); } });
     }
-    /**
-     * @deprecated
-     */
-    registerBootstrapListener(listener) {
-        this._bootstrapListeners.push(listener);
-    }
-    /**
-     * @deprecated
-     */
-    registerDisposeListener(dispose) { this._disposeListeners.push(dispose); }
     registerChangeDetector(changeDetector) {
         this._changeDetectorRefs.push(changeDetector);
     }
     unregisterChangeDetector(changeDetector) {
         ListWrapper.remove(this._changeDetectorRefs, changeDetector);
-    }
-    /**
-     * @deprecated
-     */
-    waitForAsyncInitializers() { return this._initStatus.donePromise; }
-    /**
-     * @deprecated
-     */
-    run(callback) {
-        return this._zone.run(() => _callAndReportToExceptionHandler(this._exceptionHandler, callback));
     }
     bootstrap(componentOrFactory) {
         if (!this._initStatus.done) {
@@ -447,14 +385,6 @@ export class ApplicationRef_ extends ApplicationRef {
         this.unregisterChangeDetector(componentRef.changeDetectorRef);
         ListWrapper.remove(this._rootComponents, componentRef);
     }
-    /**
-     * @deprecated
-     */
-    get injector() { return this._injector; }
-    /**
-     * @deprecated
-     */
-    get zone() { return this._zone; }
     tick() {
         if (this._runningTick) {
             throw new BaseException('ApplicationRef.tick is called recursively');
@@ -475,12 +405,7 @@ export class ApplicationRef_ extends ApplicationRef {
     ngOnDestroy() {
         // TODO(alxhub): Dispose of the NgZone.
         ListWrapper.clone(this._rootComponents).forEach((ref) => ref.destroy());
-        this._disposeListeners.forEach((dispose) => dispose());
     }
-    /**
-     * @deprecated
-     */
-    dispose() { this.ngOnDestroy(); }
     get componentTypes() { return this._rootComponentTypes; }
     get components() { return this._rootComponents; }
 }
