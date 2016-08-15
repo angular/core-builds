@@ -5,16 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Stores error information; delivered via [NgZone.onError] stream.
- * @deprecated
- */
-export class NgZoneError {
-    constructor(error, stackTrace) {
-        this.error = error;
-        this.stackTrace = stackTrace;
-    }
-}
 export class NgZoneImpl {
     constructor({ trace, onEnter, onLeave, setMicrotask, setMacrotask, onError }) {
         this.onEnter = onEnter;
@@ -66,7 +56,7 @@ export class NgZoneImpl {
                 },
                 onHandleError: (delegate, current, target, error) => {
                     delegate.handleError(target, error);
-                    this.onError(new NgZoneError(error, error.stack));
+                    this.onError(error);
                     return false;
                 }
             });

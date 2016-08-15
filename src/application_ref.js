@@ -295,9 +295,7 @@ var PlatformRef_ = (function (_super) {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return collection_1.ListWrapper.remove(_this._modules, moduleRef); });
-            ngZone.onError.subscribe({
-                next: function (error) { exceptionHandler.call(error.error, error.stackTrace); }
-            });
+            ngZone.onError.subscribe({ next: function (error) { exceptionHandler.call(error, error ? error.stack : null); } });
             return _callAndReportToExceptionHandler(exceptionHandler, function () {
                 var initStatus = moduleRef.injector.get(application_init_1.ApplicationInitStatus);
                 return initStatus.donePromise.then(function () {

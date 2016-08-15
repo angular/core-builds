@@ -62,7 +62,7 @@ export class ComponentFixture {
                 }
             });
             this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: (error) => { throw error.error; } });
+                ngZone.onError.subscribe({ next: (error) => { throw error; } });
         }
     }
     _tick(checkNoChanges) {

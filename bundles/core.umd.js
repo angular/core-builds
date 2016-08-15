@@ -8979,17 +8979,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Stores error information; delivered via [NgZone.onError] stream.
-     * @deprecated
-     */
-    var NgZoneError = (function () {
-        function NgZoneError(error, stackTrace) {
-            this.error = error;
-            this.stackTrace = stackTrace;
-        }
-        return NgZoneError;
-    }());
     var NgZoneImpl = (function () {
         function NgZoneImpl(_a) {
             var _this = this;
@@ -9043,7 +9032,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                     },
                     onHandleError: function (delegate, current, target, error) {
                         delegate.handleError(target, error);
-                        _this.onError(new NgZoneError(error, error.stack));
+                        _this.onError(error);
                         return false;
                     }
                 });
@@ -9702,9 +9691,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                     throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
                 }
                 moduleRef.onDestroy(function () { return ListWrapper.remove(_this._modules, moduleRef); });
-                ngZone.onError.subscribe({
-                    next: function (error) { exceptionHandler.call(error.error, error.stackTrace); }
-                });
+                ngZone.onError.subscribe({ next: function (error) { exceptionHandler.call(error, error ? error.stack : null); } });
                 return _callAndReportToExceptionHandler(exceptionHandler, function () {
                     var initStatus = moduleRef.injector.get(ApplicationInitStatus);
                     return initStatus.donePromise.then(function () {
@@ -12431,7 +12418,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Host = Host;
     exports.SkipSelf = SkipSelf;
     exports.NgZone = NgZone;
-    exports.NgZoneError = NgZoneError;
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;

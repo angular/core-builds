@@ -64,7 +64,7 @@ var ComponentFixture = (function () {
                 }
             });
             this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: function (error) { throw error.error; } });
+                ngZone.onError.subscribe({ next: function (error) { throw error; } });
         }
     }
     ComponentFixture.prototype._tick = function (checkNoChanges) {

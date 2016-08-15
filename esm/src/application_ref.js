@@ -253,9 +253,7 @@ export class PlatformRef_ extends PlatformRef {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(() => ListWrapper.remove(this._modules, moduleRef));
-            ngZone.onError.subscribe({
-                next: (error) => { exceptionHandler.call(error.error, error.stackTrace); }
-            });
+            ngZone.onError.subscribe({ next: (error) => { exceptionHandler.call(error, error ? error.stack : null); } });
             return _callAndReportToExceptionHandler(exceptionHandler, () => {
                 const initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 return initStatus.donePromise.then(() => {
