@@ -114,10 +114,7 @@ export class AttributeMetadata extends DependencyMetadata {
  *  `
  * })
  * class Tabs {
- *   panes: QueryList<Pane>;
- *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-  *    this.panes = panes;
-  *  }
+ *   @ContentChildren(Pane) panes: QueryList<Pane>;
  * }
  * ```
  *
@@ -131,7 +128,7 @@ export class AttributeMetadata extends DependencyMetadata {
  *
  * @Component({ selector: 'seeker' })
  * class Seeker {
- *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+ *   @ContentChildren('findme') elList;
  * }
  * ```
  *
@@ -150,7 +147,7 @@ export class AttributeMetadata extends DependencyMetadata {
  *   selector: 'seeker'
  * })
  * class Seeker {
- *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+ *   @ContentChildren('findMe, findMeToo') elList: QueryList<ElementRef>;
  * }
  * ```
  *
@@ -170,20 +167,20 @@ export class AttributeMetadata extends DependencyMetadata {
  * ```
  *
  * When querying for items, the first container will see only `a` and `b` by default,
- * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+ * but with `ContentChildren(TextDirective, {descendants: true})` it will see `c` too.
  *
  * The queried directives are kept in a depth-first pre-order with respect to their
  * positions in the DOM.
  *
- * Query does not look deep into any subcomponent views.
+ * ContentChildren does not look deep into any subcomponent views.
  *
- * Query is updated as part of the change-detection cycle. Since change detection
+ * ContentChildren is updated as part of the change-detection cycle. Since change detection
  * happens after construction of a directive, QueryList will always be empty when observed in the
  * constructor.
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
- * @deprecated
+ * @stable
  */
 export class QueryMetadata extends DependencyMetadata {
     constructor(_selector, { descendants = false, first = false, read = null } = {}) {
@@ -267,8 +264,8 @@ export class ContentChildMetadata extends QueryMetadata {
     }
 }
 /**
- * Similar to {@link QueryMetadata}, but querying the component view, instead of
- * the content children.
+ * Similar to {@link ContentChildMetadata}, but querying the component view, instead
+ * of the content children.
  *
  * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
  *
@@ -284,14 +281,11 @@ export class ContentChildMetadata extends QueryMetadata {
  * class MyComponent {
  *   shown: boolean;
  *
- *   constructor(private @ViewQuery(Item) items:QueryList<Item>) {
+ *   constructor(private @ViewChildren(Item) items:QueryList<Item>) {
  *     items.changes.subscribe(() => console.log(items.length));
  *   }
  * }
  * ```
- *
- * Supports the same querying parameters as {@link QueryMetadata}, except
- * `descendants`. This always queries the whole view.
  *
  * As `shown` is flipped between true and false, items will contain zero of one
  * items.
@@ -300,7 +294,7 @@ export class ContentChildMetadata extends QueryMetadata {
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
- * @deprecated
+ * @stable
  */
 export class ViewQueryMetadata extends QueryMetadata {
     constructor(_selector, { descendants = false, first = false, read = null } = {}) {
@@ -310,7 +304,6 @@ export class ViewQueryMetadata extends QueryMetadata {
      * always `true` to differentiate it with {@link QueryMetadata}.
      */
     get isViewQuery() { return true; }
-    toString() { return `@ViewQuery(${stringify(this.selector)})`; }
 }
 /**
  * Declares a list of child element references.
@@ -394,6 +387,7 @@ export class ViewChildrenMetadata extends ViewQueryMetadata {
     constructor(_selector, { read = null } = {}) {
         super(_selector, { descendants: true, read: read });
     }
+    toString() { return `@ViewChildren(${stringify(this.selector)})`; }
 }
 /**
  *

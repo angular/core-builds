@@ -958,10 +958,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *  `
      * })
      * class Tabs {
-     *   panes: QueryList<Pane>;
-     *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-      *    this.panes = panes;
-      *  }
+     *   @ContentChildren(Pane) panes: QueryList<Pane>;
      * }
      * ```
      *
@@ -975,7 +972,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @Component({ selector: 'seeker' })
      * class Seeker {
-     *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+     *   @ContentChildren('findme') elList;
      * }
      * ```
      *
@@ -994,7 +991,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   selector: 'seeker'
      * })
      * class Seeker {
-     *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+     *   @ContentChildren('findMe, findMeToo') elList: QueryList<ElementRef>;
      * }
      * ```
      *
@@ -1014,20 +1011,20 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```
      *
      * When querying for items, the first container will see only `a` and `b` by default,
-     * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+     * but with `ContentChildren(TextDirective, {descendants: true})` it will see `c` too.
      *
      * The queried directives are kept in a depth-first pre-order with respect to their
      * positions in the DOM.
      *
-     * Query does not look deep into any subcomponent views.
+     * ContentChildren does not look deep into any subcomponent views.
      *
-     * Query is updated as part of the change-detection cycle. Since change detection
+     * ContentChildren is updated as part of the change-detection cycle. Since change detection
      * happens after construction of a directive, QueryList will always be empty when observed in the
      * constructor.
      *
      * The injected object is an unmodifiable live list.
      * See {@link QueryList} for more details.
-     * @deprecated
+     * @stable
      */
     var QueryMetadata = (function (_super) {
         __extends(QueryMetadata, _super);
@@ -1136,8 +1133,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ContentChildMetadata;
     }(QueryMetadata));
     /**
-     * Similar to {@link QueryMetadata}, but querying the component view, instead of
-     * the content children.
+     * Similar to {@link ContentChildMetadata}, but querying the component view, instead
+     * of the content children.
      *
      * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
      *
@@ -1153,14 +1150,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class MyComponent {
      *   shown: boolean;
      *
-     *   constructor(private @ViewQuery(Item) items:QueryList<Item>) {
+     *   constructor(private @ViewChildren(Item) items:QueryList<Item>) {
      *     items.changes.subscribe(() => console.log(items.length));
      *   }
      * }
      * ```
-     *
-     * Supports the same querying parameters as {@link QueryMetadata}, except
-     * `descendants`. This always queries the whole view.
      *
      * As `shown` is flipped between true and false, items will contain zero of one
      * items.
@@ -1169,7 +1163,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * The injected object is an iterable and observable live list.
      * See {@link QueryList} for more details.
-     * @deprecated
+     * @stable
      */
     var ViewQueryMetadata = (function (_super) {
         __extends(ViewQueryMetadata, _super);
@@ -1185,7 +1179,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
-        ViewQueryMetadata.prototype.toString = function () { return "@ViewQuery(" + stringify(this.selector) + ")"; };
         return ViewQueryMetadata;
     }(QueryMetadata));
     /**
@@ -1272,6 +1265,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
             _super.call(this, _selector, { descendants: true, read: read });
         }
+        ViewChildrenMetadata.prototype.toString = function () { return "@ViewChildren(" + stringify(this.selector) + ")"; };
         return ViewChildrenMetadata;
     }(ViewQueryMetadata));
     /**
@@ -3346,117 +3340,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var Attribute = makeParamDecorator(AttributeMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from QueryMetadata.
-    /**
-     * Declares an injectable parameter to be a live list of directives or variable
-     * bindings from the content children of a directive.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/lY9m8HLy7z06vDoUaSN2?p=preview))
-     *
-     * Assume that `<tabs>` component would like to get a list its children `<pane>`
-     * components as shown in this example:
-     *
-     * ```html
-     * <tabs>
-     *   <pane title="Overview">...</pane>
-     *   <pane *ngFor="let o of objects" [title]="o.title">{{o.text}}</pane>
-     * </tabs>
-     * ```
-     *
-     * The preferred solution is to query for `Pane` directives using this decorator.
-     *
-     * ```javascript
-     * @Component({
-     *   selector: 'pane',
-     *   inputs: ['title']
-     * })
-     * class Pane {
-     *   title:string;
-     * }
-     *
-     * @Component({
-     *  selector: 'tabs',
-     *  template: `
-     *    <ul>
-     *      <li *ngFor="let pane of panes">{{pane.title}}</li>
-     *    </ul>
-     *    <ng-content></ng-content>
-     *  `
-     * })
-     * class Tabs {
-     *   panes: QueryList<Pane>;
-     *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-     *     this.panes = panes;
-     *   }
-     * }
-     * ```
-     *
-     * A query can look for variable bindings by passing in a string with desired binding symbol.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/sT2j25cH1dURAyBRCKx1?p=preview))
-     * ```html
-     * <seeker>
-     *   <div #findme>...</div>
-     * </seeker>
-     *
-     * @Component({ selector: 'seeker' })
-     * class seeker {
-     *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
-     * }
-     * ```
-     *
-     * In this case the object that is injected depend on the type of the variable
-     * binding. It can be an ElementRef, a directive or a component.
-     *
-     * Passing in a comma separated list of variable bindings will query for all of them.
-     *
-     * ```html
-     * <seeker>
-     *   <div #findMe>...</div>
-     *   <div #findMeToo>...</div>
-     * </seeker>
-     *
-     *  @Component({
-     *   selector: 'seeker'
-     * })
-     * class Seeker {
-     *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
-     * }
-     * ```
-     *
-     * Configure whether query looks for direct children or all descendants
-     * of the querying element, by using the `descendants` parameter.
-     * It is set to `false` by default.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/wtGeB977bv7qvA5FTYl9?p=preview))
-     * ```html
-     * <container #first>
-     *   <item>a</item>
-     *   <item>b</item>
-     *   <container #second>
-     *     <item>c</item>
-     *   </container>
-     * </container>
-     * ```
-     *
-     * When querying for items, the first container will see only `a` and `b` by default,
-     * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
-     *
-     * The queried directives are kept in a depth-first pre-order with respect to their
-     * positions in the DOM.
-     *
-     * Query does not look deep into any subcomponent views.
-     *
-     * Query is updated as part of the change-detection cycle. Since change detection
-     * happens after construction of a directive, QueryList will always be empty when observed in the
-     * constructor.
-     *
-     * The injected object is an unmodifiable live list.
-     * See {@link QueryList} for more details.
-     * @deprecated
-     * @Annotation
-     */
-    var Query = makeParamDecorator(QueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
     /**
      * Configures a content query.
@@ -3671,45 +3554,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var ViewChild = makePropDecorator(ViewChildMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewQueryMetadata.
-    /**
-     * Similar to {@link QueryMetadata}, but querying the component view, instead of
-     * the content children.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
-     *
-     * ```javascript
-     * @Component({
-     *   ...,
-     *   template: `
-     *     <item> a </item>
-     *     <item> b </item>
-     *     <item> c </item>
-     *   `
-     * })
-     * class MyComponent {
-     *   shown: boolean;
-     *
-     *   constructor(private @Query(Item) items:QueryList<Item>) {
-     *     items.changes.subscribe(() => console.log(items.length));
-     *   }
-     * }
-     * ```
-     *
-     * Supports the same querying parameters as {@link QueryMetadata}, except
-     * `descendants`. This always queries the whole view.
-     *
-     * As `shown` is flipped between true and false, items will contain zero of one
-     * items.
-     *
-     * Specifies that a {@link QueryList} should be injected.
-     *
-     * The injected object is an iterable and observable live list.
-     * See {@link QueryList} for more details.
-     * @deprecated
-     * @Annotation
-     */
-    var ViewQuery = makeParamDecorator(ViewQueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
     /**
      * Declare reusable pipe function.
@@ -4646,7 +4490,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      *
      * var injector = Injector.resolveAndCreate([A]);
-  
+
      * try {
      *   injector.get(A);
      * } catch (e) {
@@ -12518,12 +12362,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Component = Component;
     exports.Directive = Directive;
     exports.Attribute = Attribute;
-    exports.Query = Query;
     exports.ContentChildren = ContentChildren;
     exports.ContentChild = ContentChild;
     exports.ViewChildren = ViewChildren;
     exports.ViewChild = ViewChild;
-    exports.ViewQuery = ViewQuery;
     exports.Pipe = Pipe;
     exports.Input = Input;
     exports.Output = Output;

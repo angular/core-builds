@@ -127,10 +127,7 @@ exports.AttributeMetadata = AttributeMetadata;
  *  `
  * })
  * class Tabs {
- *   panes: QueryList<Pane>;
- *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-  *    this.panes = panes;
-  *  }
+ *   @ContentChildren(Pane) panes: QueryList<Pane>;
  * }
  * ```
  *
@@ -144,7 +141,7 @@ exports.AttributeMetadata = AttributeMetadata;
  *
  * @Component({ selector: 'seeker' })
  * class Seeker {
- *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+ *   @ContentChildren('findme') elList;
  * }
  * ```
  *
@@ -163,7 +160,7 @@ exports.AttributeMetadata = AttributeMetadata;
  *   selector: 'seeker'
  * })
  * class Seeker {
- *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+ *   @ContentChildren('findMe, findMeToo') elList: QueryList<ElementRef>;
  * }
  * ```
  *
@@ -183,20 +180,20 @@ exports.AttributeMetadata = AttributeMetadata;
  * ```
  *
  * When querying for items, the first container will see only `a` and `b` by default,
- * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+ * but with `ContentChildren(TextDirective, {descendants: true})` it will see `c` too.
  *
  * The queried directives are kept in a depth-first pre-order with respect to their
  * positions in the DOM.
  *
- * Query does not look deep into any subcomponent views.
+ * ContentChildren does not look deep into any subcomponent views.
  *
- * Query is updated as part of the change-detection cycle. Since change detection
+ * ContentChildren is updated as part of the change-detection cycle. Since change detection
  * happens after construction of a directive, QueryList will always be empty when observed in the
  * constructor.
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
- * @deprecated
+ * @stable
  */
 var QueryMetadata = (function (_super) {
     __extends(QueryMetadata, _super);
@@ -308,8 +305,8 @@ var ContentChildMetadata = (function (_super) {
 }(QueryMetadata));
 exports.ContentChildMetadata = ContentChildMetadata;
 /**
- * Similar to {@link QueryMetadata}, but querying the component view, instead of
- * the content children.
+ * Similar to {@link ContentChildMetadata}, but querying the component view, instead
+ * of the content children.
  *
  * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
  *
@@ -325,14 +322,11 @@ exports.ContentChildMetadata = ContentChildMetadata;
  * class MyComponent {
  *   shown: boolean;
  *
- *   constructor(private @ViewQuery(Item) items:QueryList<Item>) {
+ *   constructor(private @ViewChildren(Item) items:QueryList<Item>) {
  *     items.changes.subscribe(() => console.log(items.length));
  *   }
  * }
  * ```
- *
- * Supports the same querying parameters as {@link QueryMetadata}, except
- * `descendants`. This always queries the whole view.
  *
  * As `shown` is flipped between true and false, items will contain zero of one
  * items.
@@ -341,7 +335,7 @@ exports.ContentChildMetadata = ContentChildMetadata;
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
- * @deprecated
+ * @stable
  */
 var ViewQueryMetadata = (function (_super) {
     __extends(ViewQueryMetadata, _super);
@@ -357,7 +351,6 @@ var ViewQueryMetadata = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ViewQueryMetadata.prototype.toString = function () { return "@ViewQuery(" + lang_1.stringify(this.selector) + ")"; };
     return ViewQueryMetadata;
 }(QueryMetadata));
 exports.ViewQueryMetadata = ViewQueryMetadata;
@@ -445,6 +438,7 @@ var ViewChildrenMetadata = (function (_super) {
         var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
         _super.call(this, _selector, { descendants: true, read: read });
     }
+    ViewChildrenMetadata.prototype.toString = function () { return "@ViewChildren(" + lang_1.stringify(this.selector) + ")"; };
     return ViewChildrenMetadata;
 }(ViewQueryMetadata));
 exports.ViewChildrenMetadata = ViewChildrenMetadata;
