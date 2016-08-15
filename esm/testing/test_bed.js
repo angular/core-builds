@@ -150,10 +150,6 @@ export class TestBed {
         this.platform = null;
         this.ngModule = null;
     }
-    /**
-     * @deprecated use `resetTestingModule` instead
-     */
-    reset() { this.resetTestingModule(); }
     resetTestingModule() {
         this._compiler = null;
         this._moduleOverrides = [];

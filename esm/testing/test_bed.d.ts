@@ -116,10 +116,6 @@ export declare class TestBed implements Injector {
      * @experimental
      */
     resetTestEnvironment(): void;
-    /**
-     * @deprecated use `resetTestingModule` instead
-     */
-    reset(): void;
     resetTestingModule(): void;
     platform: PlatformRef;
     ngModule: Type<any>;

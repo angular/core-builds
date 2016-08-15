@@ -155,10 +155,6 @@ var TestBed = (function () {
         this.platform = null;
         this.ngModule = null;
     };
-    /**
-     * @deprecated use `resetTestingModule` instead
-     */
-    TestBed.prototype.reset = function () { this.resetTestingModule(); };
     TestBed.prototype.resetTestingModule = function () {
         this._compiler = null;
         this._moduleOverrides = [];
