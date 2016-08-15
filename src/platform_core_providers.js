@@ -25,10 +25,4 @@ var _CORE_PLATFORM_PROVIDERS = [
  * @experimental
  */
 exports.platformCore = application_ref_1.createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
-/**
- * A default set of providers which should be included in any Angular platform.
- *
- * @deprecated Create platforms via `createPlatformFactory(corePlatform, ...) instead!
- */
-exports.PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
 //# sourceMappingURL=platform_core_providers.js.map

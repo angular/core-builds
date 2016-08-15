@@ -9727,9 +9727,9 @@ var __extends = (this && this.__extends) || function (d, b) {
          *
          * main.ts:
          * import {MyModuleNgFactory} from './my_module.ngfactory';
-         * import {browserPlatform} from '@angular/platform-browser';
+         * import {platformBrowser} from '@angular/platform-browser';
          *
-         * let moduleRef = browserPlatform().bootstrapModuleFactory(MyModuleNgFactory);
+         * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
          * ```
          *
          * @experimental APIs related to application bootstrap are currently under review.
@@ -9748,7 +9748,7 @@ var __extends = (this && this.__extends) || function (d, b) {
          * })
          * class MyModule {}
          *
-         * let moduleRef = browserPlatform().bootstrapModule(MyModule);
+         * let moduleRef = platformBrowser().bootstrapModule(MyModule);
          * ```
          * @stable
          */
@@ -10810,62 +10810,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function removeDebugNodeFromIndex(node) {
         _nativeNodeToDebugNode.delete(node.nativeNode);
     }
-    /**
-      * A token that can be provided when bootstrapping an application to make an array of directives
-      * available in every component of the application.
-      *
-      * ### Example
-      *
-      * ```typescript
-      * import {PLATFORM_DIRECTIVES} from '@angular/core';
-      * import {OtherDirective} from './myDirectives';
-      *
-      * @Component({
-      *   selector: 'my-component',
-      *   template: `
-      *     <!-- can use other directive even though the component does not list it in `directives` -->
-      *     <other-directive></other-directive>
-      *   `
-      * })
-      * export class MyComponent {
-      *   ...
-      * }
-      *
-      * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective],
-      multi:true}]);
-      * ```
-      *
-      * @deprecated Providing platform directives via a provider is deprecated. Provide platform
-      * directives via an {@link NgModule} instead.
-      */
-    var PLATFORM_DIRECTIVES = new OpaqueToken('Platform Directives');
-    /**
-      * A token that can be provided when bootstraping an application to make an array of pipes
-      * available in every component of the application.
-      *
-      * ### Example
-      *
-      * ```typescript
-      * import {PLATFORM_PIPES} from '@angular/core';
-      * import {OtherPipe} from './myPipe';
-      *
-      * @Component({
-      *   selector: 'my-component',
-      *   template: `
-      *     {{123 | other-pipe}}
-      *   `
-      * })
-      * export class MyComponent {
-      *   ...
-      * }
-      *
-      * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
-      * ```
-      *
-      * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
-      * {@link NgModule} instead.
-      */
-    var PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
     function _reflector() {
         return reflector;
     }
@@ -10880,12 +10824,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
-    /**
-     * A default set of providers which should be included in any Angular platform.
-     *
-     * @deprecated Create platforms via `createPlatformFactory(corePlatform, ...) instead!
-     */
-    var PLATFORM_COMMON_PROVIDERS = _CORE_PLATFORM_PROVIDERS;
     /**
      * @experimental i18n support is experimental.
      */
@@ -12794,10 +12732,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.KeyValueDiffers = KeyValueDiffers;
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;
-    exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
-    exports.PLATFORM_PIPES = PLATFORM_PIPES;
     exports.platformCore = platformCore;
-    exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
     exports.__core_private__ = __core_private__;
     exports.AUTO_STYLE = AUTO_STYLE;
     exports.AnimationEntryMetadata = AnimationEntryMetadata;

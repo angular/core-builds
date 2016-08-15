@@ -45,7 +45,6 @@ exports.asNativeElements = debug_node_1.asNativeElements;
 exports.getDebugNode = debug_node_1.getDebugNode;
 __export(require('./src/testability/testability'));
 __export(require('./src/change_detection'));
-__export(require('./src/platform_directives_and_pipes'));
 __export(require('./src/platform_core_providers'));
 var tokens_1 = require('./src/i18n/tokens');
 exports.TRANSLATIONS = tokens_1.TRANSLATIONS;
