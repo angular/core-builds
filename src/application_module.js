@@ -13,7 +13,6 @@ var change_detection_1 = require('./change_detection/change_detection');
 var tokens_1 = require('./i18n/tokens');
 var compiler_1 = require('./linker/compiler');
 var component_resolver_1 = require('./linker/component_resolver');
-var dynamic_component_loader_1 = require('./linker/dynamic_component_loader');
 var view_utils_1 = require('./linker/view_utils');
 var metadata_1 = require('./metadata');
 function _iterableDiffersFactory() {
@@ -47,7 +46,6 @@ var ApplicationModule = (function () {
                         view_utils_1.ViewUtils,
                         { provide: change_detection_1.IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: change_detection_1.KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        { provide: dynamic_component_loader_1.DynamicComponentLoader, useClass: dynamic_component_loader_1.DynamicComponentLoader_ },
                         { provide: tokens_1.LOCALE_ID, useValue: 'en_US' },
                     ]
                 },] },

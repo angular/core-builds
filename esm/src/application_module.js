@@ -12,7 +12,6 @@ import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyVal
 import { LOCALE_ID } from './i18n/tokens';
 import { Compiler } from './linker/compiler';
 import { ComponentResolver } from './linker/component_resolver';
-import { DynamicComponentLoader, DynamicComponentLoader_ } from './linker/dynamic_component_loader';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
 export function _iterableDiffersFactory() {
@@ -43,7 +42,6 @@ ApplicationModule.decorators = [
                     ViewUtils,
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                     { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                    { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
                     { provide: LOCALE_ID, useValue: 'en_US' },
                 ]
             },] },

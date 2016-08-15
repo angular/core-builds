@@ -10082,52 +10082,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.entryComponents or ANALYZE_FOR_ENTRY_COMPONENTS provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
     ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use NgModuleFactoryLoader instead.';
     /**
-     * Use ComponentFactoryResolver and ViewContainerRef directly.
-     *
-     * @deprecated
-     */
-    var DynamicComponentLoader = (function () {
-        function DynamicComponentLoader() {
-        }
-        return DynamicComponentLoader;
-    }());
-    var DynamicComponentLoader_ = (function (_super) {
-        __extends(DynamicComponentLoader_, _super);
-        function DynamicComponentLoader_(_compiler) {
-            _super.call(this);
-            this._compiler = _compiler;
-        }
-        DynamicComponentLoader_.prototype.loadAsRoot = function (type, overrideSelectorOrNode, injector, onDispose, projectableNodes) {
-            return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
-                var componentRef = componentFactory.create(injector, projectableNodes, isPresent(overrideSelectorOrNode) ? overrideSelectorOrNode : componentFactory.selector);
-                if (isPresent(onDispose)) {
-                    componentRef.onDestroy(onDispose);
-                }
-                return componentRef;
-            });
-        };
-        DynamicComponentLoader_.prototype.loadNextToLocation = function (type, location, providers, projectableNodes) {
-            if (providers === void 0) { providers = null; }
-            if (projectableNodes === void 0) { projectableNodes = null; }
-            return this._compiler.compileComponentAsync(type).then(function (componentFactory) {
-                var contextInjector = location.parentInjector;
-                var childInjector = isPresent(providers) && providers.length > 0 ?
-                    ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
-                    contextInjector;
-                return location.createComponent(componentFactory, location.length, childInjector, projectableNodes);
-            });
-        };
-        return DynamicComponentLoader_;
-    }(DynamicComponentLoader));
-    /** @nocollapse */
-    DynamicComponentLoader_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    DynamicComponentLoader_.ctorParameters = [
-        { type: Compiler, },
-    ];
-    /**
      * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
      *
      * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
@@ -10810,7 +10764,6 @@ var __extends = (this && this.__extends) || function (d, b) {
                         ViewUtils,
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
                         { provide: LOCALE_ID, useValue: 'en_US' },
                     ]
                 },] },
@@ -12650,7 +12603,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ComponentFactoryResolver = ComponentFactoryResolver;
     exports.NoComponentFactoryError = NoComponentFactoryError;
     exports.ComponentResolver = ComponentResolver;
-    exports.DynamicComponentLoader = DynamicComponentLoader;
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
     exports.NgModuleFactory = NgModuleFactory;
