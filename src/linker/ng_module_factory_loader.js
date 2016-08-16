@@ -7,7 +7,7 @@
  */
 "use strict";
 /**
- * Used to load ng moduled factories.
+ * Used to load ng module factories.
  * @experimental
  */
 var NgModuleFactoryLoader = (function () {

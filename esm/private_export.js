@@ -16,7 +16,6 @@ import * as change_detection_util from './src/change_detection/change_detection_
 import * as constants from './src/change_detection/constants';
 import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
-import * as provider_util from './src/di/provider_util';
 import * as reflective_provider from './src/di/reflective_provider';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as debug_context from './src/linker/debug_context';
@@ -65,8 +64,6 @@ export var __core_private__ = {
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
     makeDecorator: decorators.makeDecorator,
     DebugDomRootRenderer: debug.DebugDomRootRenderer,
-    createProvider: provider_util.createProvider,
-    isProviderLiteral: provider_util.isProviderLiteral,
     EMPTY_ARRAY: view_utils.EMPTY_ARRAY,
     EMPTY_MAP: view_utils.EMPTY_MAP,
     pureProxy1: view_utils.pureProxy1,

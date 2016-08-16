@@ -11,8 +11,6 @@ import { reflector } from '../reflection/reflection';
 import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
 import { DependencyMetadata, HostMetadata, InjectMetadata, OptionalMetadata, SelfMetadata, SkipSelfMetadata } from './metadata';
-import { Provider, ProviderBuilder, provide } from './provider';
-import { createProvider, isProviderLiteral } from './provider_util';
 import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_exceptions';
 import { ReflectiveKey } from './reflective_key';
 /**
@@ -41,7 +39,8 @@ export class ResolvedReflectiveProvider_ {
     get resolvedFactory() { return this.resolvedFactories[0]; }
 }
 /**
- * An internal resolved representation of a factory function created by resolving {@link Provider}.
+ * An internal resolved representation of a factory function created by resolving {@link
+ * Provider}.
  * @experimental
  */
 export class ResolvedReflectiveFactory {
@@ -61,7 +60,7 @@ export class ResolvedReflectiveFactory {
 /**
  * Resolve a single provider.
  */
-export function resolveReflectiveFactory(provider) {
+function resolveReflectiveFactory(provider) {
     var factoryFn;
     var resolvedDeps;
     if (isPresent(provider.useClass)) {
@@ -75,7 +74,7 @@ export function resolveReflectiveFactory(provider) {
     }
     else if (isPresent(provider.useFactory)) {
         factoryFn = provider.useFactory;
-        resolvedDeps = constructDependencies(provider.useFactory, provider.dependencies);
+        resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
     }
     else {
         factoryFn = () => provider.useValue;
@@ -89,8 +88,8 @@ export function resolveReflectiveFactory(provider) {
  * {@link Injector} internally only uses {@link ResolvedProvider}, {@link Provider} contains
  * convenience provider syntax.
  */
-export function resolveReflectiveProvider(provider) {
-    return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.token), [resolveReflectiveFactory(provider)], provider.multi);
+function resolveReflectiveProvider(provider) {
+    return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)], provider.multi);
 }
 /**
  * Resolve a list of Providers.
@@ -138,19 +137,13 @@ export function mergeResolvedReflectiveProviders(providers, normalizedProvidersM
 function _normalizeProviders(providers, res) {
     providers.forEach(b => {
         if (b instanceof Type) {
-            res.push(provide(b, { useClass: b }));
+            res.push({ provide: b, useClass: b });
         }
-        else if (b instanceof Provider) {
+        else if (b && typeof b == 'object' && b.hasOwnProperty('provide')) {
             res.push(b);
-        }
-        else if (isProviderLiteral(b)) {
-            res.push(createProvider(b));
         }
         else if (b instanceof Array) {
             _normalizeProviders(b, res);
-        }
-        else if (b instanceof ProviderBuilder) {
-            throw new InvalidProviderError(b.token);
         }
         else {
             throw new InvalidProviderError(b);

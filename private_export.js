@@ -17,7 +17,6 @@ var change_detection_util = require('./src/change_detection/change_detection_uti
 var constants = require('./src/change_detection/constants');
 var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
-var provider_util = require('./src/di/provider_util');
 var reflective_provider = require('./src/di/reflective_provider');
 var component_factory_resolver = require('./src/linker/component_factory_resolver');
 var debug_context = require('./src/linker/debug_context');
@@ -66,8 +65,6 @@ exports.__core_private__ = {
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
     makeDecorator: decorators.makeDecorator,
     DebugDomRootRenderer: debug.DebugDomRootRenderer,
-    createProvider: provider_util.createProvider,
-    isProviderLiteral: provider_util.isProviderLiteral,
     EMPTY_ARRAY: view_utils.EMPTY_ARRAY,
     EMPTY_MAP: view_utils.EMPTY_MAP,
     pureProxy1: view_utils.pureProxy1,

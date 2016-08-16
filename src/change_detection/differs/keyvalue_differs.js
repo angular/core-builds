@@ -48,7 +48,8 @@ var KeyValueDiffers = (function () {
      * ```
      */
     KeyValueDiffers.extend = function (factories) {
-        return new di_1.Provider(KeyValueDiffers, {
+        return {
+            provide: KeyValueDiffers,
             useFactory: function (parent) {
                 if (lang_1.isBlank(parent)) {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
@@ -60,7 +61,7 @@ var KeyValueDiffers = (function () {
             },
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[KeyValueDiffers, new di_1.SkipSelfMetadata(), new di_1.OptionalMetadata()]]
-        });
+        };
     };
     KeyValueDiffers.prototype.find = function (kv) {
         var factory = this.factories.find(function (f) { return f.supports(kv); });

@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Provider } from './index';
 import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
@@ -17,7 +16,6 @@ import * as change_detection_util from './src/change_detection/change_detection_
 import * as constants from './src/change_detection/constants';
 import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
-import * as provider_util from './src/di/provider_util';
 import * as reflective_provider from './src/di/reflective_provider';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as debug_context from './src/linker/debug_context';
@@ -77,8 +75,6 @@ export declare namespace __core_private_types__ {
     var makeDecorator: typeof decorators.makeDecorator;
     type DebugDomRootRenderer = debug.DebugDomRootRenderer;
     var DebugDomRootRenderer: typeof debug.DebugDomRootRenderer;
-    var createProvider: typeof provider_util.createProvider;
-    var isProviderLiteral: typeof provider_util.isProviderLiteral;
     var EMPTY_ARRAY: typeof view_utils.EMPTY_ARRAY;
     var EMPTY_MAP: typeof view_utils.EMPTY_MAP;
     var pureProxy1: typeof view_utils.pureProxy1;
@@ -153,8 +149,6 @@ export declare var __core_private__: {
     ReflectionCapabilities: typeof reflection_capabilities.ReflectionCapabilities;
     makeDecorator: (annotationCls: any, chainFn?: (fn: Function) => void) => (...args: any[]) => (cls: any) => any;
     DebugDomRootRenderer: typeof debug.DebugDomRootRenderer;
-    createProvider: (obj: any) => Provider;
-    isProviderLiteral: (obj: any) => boolean;
     EMPTY_ARRAY: any[];
     EMPTY_MAP: {};
     pureProxy1: <P0, R>(fn: (p0: P0) => R) => (p0: P0) => R;

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Used to load ng moduled factories.
+ * Used to load ng module factories.
  * @experimental
  */
 export class NgModuleFactoryLoader {

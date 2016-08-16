@@ -65,9 +65,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function isFunction(obj) {
         return typeof obj === 'function';
     }
-    function isType(obj) {
-        return isFunction(obj);
-    }
     function isPromise(obj) {
         // allow any Promise/A+ compliant thenable.
         // It's up to the caller to ensure that obj.then conforms to the spec
@@ -221,9 +218,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
     function getMapKey(value) {
         return value;
-    }
-    function normalizeBool(obj) {
-        return isBlank(obj) ? false : obj;
     }
     function isJsObject(o) {
         return o !== null && (typeof o === 'function' || typeof o === 'object');
@@ -4631,8 +4625,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```typescript
      * expect(() => Injector.resolveAndCreate([
-     *   new Provider("Strings", {useValue: "string1", multi: true}),
-     *   new Provider("Strings", {useValue: "string2", multi: false})
+     *   { provide: "Strings", useValue: "string1", multi: true},
+     *   { provide: "Strings", useValue: "string2", multi: false}
      * ])).toThrowError();
      * ```
      */
@@ -5058,280 +5052,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var reflector = new Reflector(new ReflectionCapabilities());
     /**
-     * Describes how the {@link Injector} should instantiate a given token.
-     *
-     * See {@link provide}.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/GNAyj6K6PfYg2NBzgwZ5?p%3Dpreview&p=preview))
-     *
-     * ```javascript
-     * var injector = Injector.resolveAndCreate([
-     *   new Provider("message", { useValue: 'Hello' })
-     * ]);
-     *
-     * expect(injector.get("message")).toEqual('Hello');
-     * ```
-     * @deprecated
-     */
-    var Provider = (function () {
-        function Provider(token, _a) {
-            var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
-            this.token = token;
-            this.useClass = useClass;
-            this.useValue = useValue;
-            this.useExisting = useExisting;
-            this.useFactory = useFactory;
-            this.dependencies = deps;
-            this._multi = multi;
-        }
-        Object.defineProperty(Provider.prototype, "multi", {
-            // TODO: Provide a full working example after alpha38 is released.
-            /**
-             * Creates multiple providers matching the same token (a multi-provider).
-             *
-             * Multi-providers are used for creating pluggable service, where the system comes
-             * with some default providers, and the user can register additional providers.
-             * The combination of the default providers and the additional providers will be
-             * used to drive the behavior of the system.
-             *
-             * ### Example
-             *
-             * ```typescript
-             * var injector = Injector.resolveAndCreate([
-             *   new Provider("Strings", { useValue: "String1", multi: true}),
-             *   new Provider("Strings", { useValue: "String2", multi: true})
-             * ]);
-             *
-             * expect(injector.get("Strings")).toEqual(["String1", "String2"]);
-             * ```
-             *
-             * Multi-providers and regular providers cannot be mixed. The following
-             * will throw an exception:
-             *
-             * ```typescript
-             * var injector = Injector.resolveAndCreate([
-             *   new Provider("Strings", { useValue: "String1", multi: true }),
-             *   new Provider("Strings", { useValue: "String2"})
-             * ]);
-             * ```
-             */
-            get: function () { return normalizeBool(this._multi); },
-            enumerable: true,
-            configurable: true
-        });
-        return Provider;
-    }());
-    /**
-     * See {@link Provider} instead.
-     *
-     * @deprecated
-     */
-    var Binding = (function (_super) {
-        __extends(Binding, _super);
-        function Binding(token, _a) {
-            var toClass = _a.toClass, toValue = _a.toValue, toAlias = _a.toAlias, toFactory = _a.toFactory, deps = _a.deps, multi = _a.multi;
-            _super.call(this, token, {
-                useClass: toClass,
-                useValue: toValue,
-                useExisting: toAlias,
-                useFactory: toFactory,
-                deps: deps,
-                multi: multi
-            });
-        }
-        Object.defineProperty(Binding.prototype, "toClass", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useClass; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toAlias", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useExisting; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toFactory", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useFactory; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toValue", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useValue; },
-            enumerable: true,
-            configurable: true
-        });
-        return Binding;
-    }(Provider));
-    /**
-     * Creates a {@link Provider}.
-     *
-     * To construct a {@link Provider}, bind a `token` to either a class, a value, a factory function,
-     * or
-     * to an existing `token`.
-     * See {@link ProviderBuilder} for more details.
-     *
-     * The `token` is most commonly a class or {@link OpaqueToken}.
-     *
-     * @deprecated
-     */
-    function bind(token) {
-        return new ProviderBuilder(token);
-    }
-    /**
-     * Helper class for the {@link bind} function.
-     * @deprecated
-     */
-    var ProviderBuilder = (function () {
-        function ProviderBuilder(token) {
-            this.token = token;
-        }
-        /**
-         * Binds a DI token to a class.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/ZpBCSYqv6e2ud5KXLdxQ?p=preview))
-         *
-         * Because `toAlias` and `toClass` are often confused, the example contains
-         * both use cases for easy comparison.
-         *
-         * ```typescript
-         * class Vehicle {}
-         *
-         * class Car extends Vehicle {}
-         *
-         * var injectorClass = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useClass: Car}
-         * ]);
-         * var injectorAlias = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useExisting: Car}
-         * ]);
-         *
-         * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
-         * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
-         *
-         * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
-         * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
-         * ```
-         */
-        ProviderBuilder.prototype.toClass = function (type) {
-            if (!isType(type)) {
-                throw new BaseException("Trying to create a class provider but \"" + stringify(type) + "\" is not a class!");
-            }
-            return new Provider(this.token, { useClass: type });
-        };
-        /**
-         * Binds a DI token to a value.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/G024PFHmDL0cJFgfZK8O?p=preview))
-         *
-         * ```typescript
-         * var injector = Injector.resolveAndCreate([
-         *   {provide: 'message', useValue: 'Hello'}
-         * ]);
-         *
-         * expect(injector.get('message')).toEqual('Hello');
-         * ```
-         */
-        ProviderBuilder.prototype.toValue = function (value) { return new Provider(this.token, { useValue: value }); };
-        /**
-         * Binds a DI token to an existing token.
-         *
-         * Angular will return the same instance as if the provided token was used. (This is
-         * in contrast to `useClass` where a separate instance of `useClass` will be returned.)
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/uBaoF2pN5cfc5AfZapNw?p=preview))
-         *
-         * Because `toAlias` and `toClass` are often confused, the example contains
-         * both use cases for easy comparison.
-         *
-         * ```typescript
-         * class Vehicle {}
-         *
-         * class Car extends Vehicle {}
-         *
-         * var injectorAlias = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useExisting: Car}
-         * ]);
-         * var injectorClass = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useClass: Car})
-         * ]);
-         *
-         * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
-         * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
-         *
-         * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
-         * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
-         * ```
-         */
-        ProviderBuilder.prototype.toAlias = function (aliasToken) {
-            if (isBlank(aliasToken)) {
-                throw new BaseException("Can not alias " + stringify(this.token) + " to a blank value!");
-            }
-            return new Provider(this.token, { useExisting: aliasToken });
-        };
-        /**
-         * Binds a DI token to a function which computes the value.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/OejNIfTT3zb1iBxaIYOb?p=preview))
-         *
-         * ```typescript
-         * var injector = Injector.resolveAndCreate([
-         *   {provide: Number, useFactory: () => { return 1+2; }},
-         *   {provide: String, useFactory: (v) => { return "Value: " + v; }, deps: [Number]}
-         * ]);
-         *
-         * expect(injector.get(Number)).toEqual(3);
-         * expect(injector.get(String)).toEqual('Value: 3');
-         * ```
-         */
-        ProviderBuilder.prototype.toFactory = function (factory, dependencies) {
-            if (!isFunction(factory)) {
-                throw new BaseException("Trying to create a factory provider but \"" + stringify(factory) + "\" is not a function!");
-            }
-            return new Provider(this.token, { useFactory: factory, deps: dependencies });
-        };
-        return ProviderBuilder;
-    }());
-    /**
-     * Creates a {@link Provider}.
-     *
-     * See {@link Provider} for more details.
-     *
-     * <!-- TODO: improve the docs -->
-     * @deprecated
-     */
-    function provide(token, _a) {
-        var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
-        return new Provider(token, {
-            useClass: useClass,
-            useValue: useValue,
-            useExisting: useExisting,
-            useFactory: useFactory,
-            deps: deps,
-            multi: multi
-        });
-    }
-    function isProviderLiteral(obj) {
-        return obj && typeof obj == 'object' && obj.provide;
-    }
-    function createProvider(obj) {
-        return new Provider(obj.provide, obj);
-    }
-    /**
      * `Dependency` is used by the framework to extend DI.
      * This is internal to Angular and should not be used directly.
      */
@@ -5363,7 +5083,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ResolvedReflectiveProvider_;
     }());
     /**
-     * An internal resolved representation of a factory function created by resolving {@link Provider}.
+     * An internal resolved representation of a factory function created by resolving {@link
+     * Provider}.
      * @experimental
      */
     var ResolvedReflectiveFactory = (function () {
@@ -5398,7 +5119,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         else if (isPresent(provider.useFactory)) {
             factoryFn = provider.useFactory;
-            resolvedDeps = constructDependencies(provider.useFactory, provider.dependencies);
+            resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
         }
         else {
             factoryFn = function () { return provider.useValue; };
@@ -5413,7 +5134,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * convenience provider syntax.
      */
     function resolveReflectiveProvider(provider) {
-        return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.token), [resolveReflectiveFactory(provider)], provider.multi);
+        return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)], provider.multi);
     }
     /**
      * Resolve a list of Providers.
@@ -5461,19 +5182,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _normalizeProviders(providers, res) {
         providers.forEach(function (b) {
             if (b instanceof Type) {
-                res.push(provide(b, { useClass: b }));
+                res.push({ provide: b, useClass: b });
             }
-            else if (b instanceof Provider) {
+            else if (b && typeof b == 'object' && b.hasOwnProperty('provide')) {
                 res.push(b);
-            }
-            else if (isProviderLiteral(b)) {
-                res.push(createProvider(b));
             }
             else if (b instanceof Array) {
                 _normalizeProviders(b, res);
-            }
-            else if (b instanceof ProviderBuilder) {
-                throw new InvalidProviderError(b.token);
             }
             else {
                 throw new InvalidProviderError(b);
@@ -6012,9 +5727,7 @@ var __extends = (this && this.__extends) || function (d, b) {
          * because it needs to resolve the passed-in providers first.
          * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
          */
-        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) {
-            return unimplemented();
-        };
+        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return unimplemented(); };
         /**
          * Creates a child injector from previously resolved providers.
          *
@@ -7613,7 +7326,8 @@ var __extends = (this && this.__extends) || function (d, b) {
          * ```
          */
         IterableDiffers.extend = function (factories) {
-            return new Provider(IterableDiffers, {
+            return {
+                provide: IterableDiffers,
                 useFactory: function (parent) {
                     if (isBlank(parent)) {
                         // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
@@ -7625,7 +7339,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[IterableDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-            });
+            };
         };
         IterableDiffers.prototype.find = function (iterable) {
             var factory = this.factories.find(function (f) { return f.supports(iterable); });
@@ -7676,7 +7390,8 @@ var __extends = (this && this.__extends) || function (d, b) {
          * ```
          */
         KeyValueDiffers.extend = function (factories) {
-            return new Provider(KeyValueDiffers, {
+            return {
+                provide: KeyValueDiffers,
                 useFactory: function (parent) {
                     if (isBlank(parent)) {
                         // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
@@ -7688,7 +7403,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[KeyValueDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-            });
+            };
         };
         KeyValueDiffers.prototype.find = function (kv) {
             var factory = this.factories.find(function (f) { return f.supports(kv); });
@@ -10021,7 +9736,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Used to load ng moduled factories.
+     * Used to load ng module factories.
      * @experimental
      */
     var NgModuleFactoryLoader = (function () {
@@ -12276,8 +11991,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
-        createProvider: createProvider,
-        isProviderLiteral: isProviderLiteral,
         EMPTY_ARRAY: EMPTY_ARRAY,
         EMPTY_MAP: EMPTY_MAP,
         pureProxy1: pureProxy1,
@@ -12396,11 +12109,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.resolveForwardRef = resolveForwardRef;
     exports.Injector = Injector;
     exports.ReflectiveInjector = ReflectiveInjector;
-    exports.Binding = Binding;
-    exports.ProviderBuilder = ProviderBuilder;
-    exports.bind = bind;
-    exports.Provider = Provider;
-    exports.provide = provide;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
     exports.ReflectiveKey = ReflectiveKey;
     exports.NoProviderError = NoProviderError;
