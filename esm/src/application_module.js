@@ -11,7 +11,6 @@ import { APP_ID_RANDOM_PROVIDER } from './application_tokens';
 import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyValueDiffers } from './change_detection/change_detection';
 import { LOCALE_ID } from './i18n/tokens';
 import { Compiler } from './linker/compiler';
-import { ComponentResolver } from './linker/component_resolver';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
 export function _iterableDiffersFactory() {
@@ -37,7 +36,6 @@ ApplicationModule.decorators = [
                     { provide: ApplicationRef, useExisting: ApplicationRef_ },
                     ApplicationInitStatus,
                     Compiler,
-                    { provide: ComponentResolver, useExisting: Compiler },
                     APP_ID_RANDOM_PROVIDER,
                     ViewUtils,
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },

@@ -9574,29 +9574,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         { type: Testability, decorators: [{ type: Optional },] },
     ];
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Low-level service for loading {@link ComponentFactory}s, which
-     * can later be used to create and render a Component instance.
-     *
-     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
-     * NgModule}.entryComponents}/{@link Component}.entryComponents or
-     * {@link ANALYZE_FOR_ENTRY_COMPONENTS} provider for dynamic component creation.
-     * Use {@link NgModuleFactoryLoader} for lazy loading.
-     */
-    var ComponentResolver = (function () {
-        function ComponentResolver() {
-        }
-        return ComponentResolver;
-    }());
-    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.entryComponents or ANALYZE_FOR_ENTRY_COMPONENTS provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
-    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use NgModuleFactoryLoader instead.';
-    /**
      * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
      *
      * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
@@ -10274,7 +10251,6 @@ var __extends = (this && this.__extends) || function (d, b) {
                         { provide: ApplicationRef, useExisting: ApplicationRef_ },
                         ApplicationInitStatus,
                         Compiler,
-                        { provide: ComponentResolver, useExisting: Compiler },
                         APP_ID_RANDOM_PROVIDER,
                         ViewUtils,
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
@@ -12107,7 +12083,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;
     exports.NoComponentFactoryError = NoComponentFactoryError;
-    exports.ComponentResolver = ComponentResolver;
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
     exports.NgModuleFactory = NgModuleFactory;

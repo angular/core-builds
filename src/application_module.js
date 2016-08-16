@@ -12,7 +12,6 @@ var application_tokens_1 = require('./application_tokens');
 var change_detection_1 = require('./change_detection/change_detection');
 var tokens_1 = require('./i18n/tokens');
 var compiler_1 = require('./linker/compiler');
-var component_resolver_1 = require('./linker/component_resolver');
 var view_utils_1 = require('./linker/view_utils');
 var metadata_1 = require('./metadata');
 function _iterableDiffersFactory() {
@@ -41,7 +40,6 @@ var ApplicationModule = (function () {
                         { provide: application_ref_1.ApplicationRef, useExisting: application_ref_1.ApplicationRef_ },
                         application_init_1.ApplicationInitStatus,
                         compiler_1.Compiler,
-                        { provide: component_resolver_1.ComponentResolver, useExisting: compiler_1.Compiler },
                         application_tokens_1.APP_ID_RANDOM_PROVIDER,
                         view_utils_1.ViewUtils,
                         { provide: change_detection_1.IterableDiffers, useFactory: _iterableDiffersFactory },
