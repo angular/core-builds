@@ -21,16 +21,7 @@ if (_global.beforeEach) {
         fake_async_1.resetFakeAsyncZone();
     });
 }
-/**
- * Allows overriding default providers of the test injector,
- * which are defined in test_injector.js
- *
- * @deprecated Use `TestBed.configureTestingModule instead.
- */
-function addProviders(providers) {
-    if (!providers)
-        return;
-    test_bed_1.TestBed.configureTestingModule({ providers: providers });
-}
-exports.addProviders = addProviders;
+// TODO(juliemr): remove this, only used because we need to export something to have compilation
+// work.
+exports.__core_private_testing_placeholder__ = '';
 //# sourceMappingURL=testing.js.map

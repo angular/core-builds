@@ -175,10 +175,6 @@ export declare class InjectSetupWrapper {
     inject(tokens: any[], fn: Function): () => any;
 }
 /**
- * @deprecated Use `TestBed.configureTestingModule instead.
- */
-export declare function withProviders(providers: () => any): InjectSetupWrapper;
-/**
  * @experimental
  */
 export declare function withModule(moduleDef: TestModuleMetadata): InjectSetupWrapper;

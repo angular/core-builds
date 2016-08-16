@@ -365,12 +365,6 @@ export class InjectSetupWrapper {
         };
     }
 }
-/**
- * @deprecated Use `TestBed.configureTestingModule instead.
- */
-export function withProviders(providers) {
-    return new InjectSetupWrapper(() => { return { providers: providers() }; });
-}
 export function withModule(moduleDef, fn = null) {
     if (fn) {
         return () => {

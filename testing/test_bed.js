@@ -386,13 +386,6 @@ var InjectSetupWrapper = (function () {
     return InjectSetupWrapper;
 }());
 exports.InjectSetupWrapper = InjectSetupWrapper;
-/**
- * @deprecated Use `TestBed.configureTestingModule instead.
- */
-function withProviders(providers) {
-    return new InjectSetupWrapper(function () { return { providers: providers() }; });
-}
-exports.withProviders = withProviders;
 function withModule(moduleDef, fn) {
     if (fn === void 0) { fn = null; }
     if (fn) {
