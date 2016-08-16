@@ -11,6 +11,6 @@ var test_component_builder = require('./testing/test_component_builder');
 exports.__core_private_testing__ = {
     TestingCompiler: test_compiler.TestingCompiler,
     TestingCompilerFactory: test_compiler.TestingCompilerFactory,
-    TestComponentBuilder: test_component_builder.TestComponentBuilder
+    TestComponentBuilder: test_component_builder.TestComponentBuilder,
 };
 //# sourceMappingURL=private_export_testing.js.map

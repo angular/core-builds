@@ -11949,6 +11949,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         interpolate: interpolate,
         ViewUtils: ViewUtils,
         VIEW_ENCAPSULATION_VALUES: VIEW_ENCAPSULATION_VALUES,
+        ViewMetadata: ViewMetadata,
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
         devModeEqual: devModeEqual,
@@ -12066,7 +12067,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.OnInit = OnInit;
     exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
     exports.NgModuleMetadata = NgModuleMetadata;
-    exports.ViewMetadata = ViewMetadata;
     exports.Class = Class;
     exports.HostMetadata = HostMetadata;
     exports.InjectMetadata = InjectMetadata;

@@ -13,7 +13,7 @@ export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, 
 export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
 export { CUSTOM_ELEMENTS_SCHEMA, NgModuleMetadata } from './metadata/ng_module';
-export { ViewEncapsulation, ViewMetadata } from './metadata/view';
+export { ViewEncapsulation } from './metadata/view';
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.

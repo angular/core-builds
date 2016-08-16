@@ -60,6 +60,8 @@ export declare namespace __core_private_types__ {
     var interpolate: typeof view_utils.interpolate;
     var ViewUtils: typeof view_utils.ViewUtils;
     var VIEW_ENCAPSULATION_VALUES: typeof metadata_view.VIEW_ENCAPSULATION_VALUES;
+    type ViewMetadata = metadata_view.ViewMetadata;
+    var ViewMetadata: typeof metadata_view.ViewMetadata;
     var DebugContext: typeof debug_context.DebugContext;
     var StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     var devModeEqual: typeof change_detection_util.devModeEqual;
@@ -136,6 +138,7 @@ export declare var __core_private__: {
     interpolate: (valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string) => string;
     ViewUtils: typeof view_utils.ViewUtils;
     VIEW_ENCAPSULATION_VALUES: metadata_view.ViewEncapsulation[];
+    ViewMetadata: typeof metadata_view.ViewMetadata;
     DebugContext: typeof debug_context.DebugContext;
     StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     devModeEqual: (a: any, b: any) => boolean;

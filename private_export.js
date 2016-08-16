@@ -54,6 +54,7 @@ exports.__core_private__ = {
     interpolate: view_utils.interpolate,
     ViewUtils: view_utils.ViewUtils,
     VIEW_ENCAPSULATION_VALUES: metadata_view.VIEW_ENCAPSULATION_VALUES,
+    ViewMetadata: metadata_view.ViewMetadata,
     DebugContext: debug_context.DebugContext,
     StaticNodeDebugInfo: debug_context.StaticNodeDebugInfo,
     devModeEqual: change_detection_util.devModeEqual,

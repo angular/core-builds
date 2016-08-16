@@ -45,7 +45,6 @@ exports.CUSTOM_ELEMENTS_SCHEMA = ng_module_2.CUSTOM_ELEMENTS_SCHEMA;
 exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
 var view_1 = require('./metadata/view');
 exports.ViewEncapsulation = view_1.ViewEncapsulation;
-exports.ViewMetadata = view_1.ViewMetadata;
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.
