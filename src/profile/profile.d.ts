@@ -10,7 +10,7 @@ export { WtfScopeFn } from './wtf_impl';
 /**
  * True if WTF is enabled.
  */
-export declare const wtfEnabled: boolean;
+export declare var wtfEnabled: boolean;
 /**
  * Create trace scope.
  *

@@ -11,13 +11,13 @@ import { OpaqueToken } from '../di/opaque_token';
 import { StringWrapper, isString, stringify } from '../facade/lang';
 /**
  * This token can be used to create a virtual provider that will populate the
- * `entryComponents` fields of components and ng modules based on its `useValue`.
+ * `precompile` fields of components and app modules based on its `useValue`.
  * All components that are referenced in the `useValue` value (either directly
- * or in a nested array or map) will be added to the `entryComponents` property.
+ * or in a nested array or map) will be added to the `precompile` property.
  *
  * ### Example
- * The following example shows how the router can populate the `entryComponents`
- * field of an NgModule based on the router configuration which refers
+ * The following example shows how the router can populate the `precompile`
+ * field of an AppModule based on the router configuration which refers
  * to components.
  *
  * ```typescript
@@ -25,7 +25,7 @@ import { StringWrapper, isString, stringify } from '../facade/lang';
  * function provideRoutes(routes) {
  *   return [
  *     {provide: ROUTES, useValue: routes},
- *     {provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: routes, multi: true}
+ *     {provide: ANALYZE_FOR_PRECOMPILE, useValue: routes, multi: true}
  *   ];
  * }
  *
@@ -35,7 +35,7 @@ import { StringWrapper, isString, stringify } from '../facade/lang';
  *   {path: /teams', component: TeamsComp}
  * ];
  *
- * @NgModule({
+ * @AppModule({
  *   providers: [provideRoutes(routes)]
  * })
  * class ModuleWithRoutes {}
@@ -43,7 +43,7 @@ import { StringWrapper, isString, stringify } from '../facade/lang';
  *
  * @experimental
  */
-export const ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
+export const ANALYZE_FOR_PRECOMPILE = new OpaqueToken('AnalyzeForPrecompile');
 /**
  * Specifies that a constant attribute value should be injected.
  *
@@ -60,6 +60,7 @@ export const ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComp
  * A decorator can inject string literal `text` like so:
  *
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
+ * @ts2dart_const
  * @stable
  */
 export class AttributeMetadata extends DependencyMetadata {
@@ -114,7 +115,10 @@ export class AttributeMetadata extends DependencyMetadata {
  *  `
  * })
  * class Tabs {
- *   @ContentChildren(Pane) panes: QueryList<Pane>;
+ *   panes: QueryList<Pane>;
+ *   constructor(@Query(Pane) panes:QueryList<Pane>) {
+  *    this.panes = panes;
+  *  }
  * }
  * ```
  *
@@ -128,7 +132,7 @@ export class AttributeMetadata extends DependencyMetadata {
  *
  * @Component({ selector: 'seeker' })
  * class Seeker {
- *   @ContentChildren('findme') elList;
+ *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
  * }
  * ```
  *
@@ -147,7 +151,7 @@ export class AttributeMetadata extends DependencyMetadata {
  *   selector: 'seeker'
  * })
  * class Seeker {
- *   @ContentChildren('findMe, findMeToo') elList: QueryList<ElementRef>;
+ *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
  * }
  * ```
  *
@@ -167,20 +171,21 @@ export class AttributeMetadata extends DependencyMetadata {
  * ```
  *
  * When querying for items, the first container will see only `a` and `b` by default,
- * but with `ContentChildren(TextDirective, {descendants: true})` it will see `c` too.
+ * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
  *
  * The queried directives are kept in a depth-first pre-order with respect to their
  * positions in the DOM.
  *
- * ContentChildren does not look deep into any subcomponent views.
+ * Query does not look deep into any subcomponent views.
  *
- * ContentChildren is updated as part of the change-detection cycle. Since change detection
+ * Query is updated as part of the change-detection cycle. Since change detection
  * happens after construction of a directive, QueryList will always be empty when observed in the
  * constructor.
  *
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
- * @stable
+ * @ts2dart_const
+ * @deprecated
  */
 export class QueryMetadata extends DependencyMetadata {
     constructor(_selector, { descendants = false, first = false, read = null } = {}) {
@@ -229,6 +234,7 @@ export class QueryMetadata extends DependencyMetadata {
  *   }
  * }
  * ```
+ * @ts2dart_const
  * @stable
  */
 export class ContentChildrenMetadata extends QueryMetadata {
@@ -256,6 +262,7 @@ export class ContentChildrenMetadata extends QueryMetadata {
  *   }
  * }
  * ```
+ * @ts2dart_const
  * @stable
  */
 export class ContentChildMetadata extends QueryMetadata {
@@ -264,8 +271,8 @@ export class ContentChildMetadata extends QueryMetadata {
     }
 }
 /**
- * Similar to {@link ContentChildMetadata}, but querying the component view, instead
- * of the content children.
+ * Similar to {@link QueryMetadata}, but querying the component view, instead of
+ * the content children.
  *
  * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
  *
@@ -281,11 +288,14 @@ export class ContentChildMetadata extends QueryMetadata {
  * class MyComponent {
  *   shown: boolean;
  *
- *   constructor(private @ViewChildren(Item) items:QueryList<Item>) {
+ *   constructor(private @ViewQuery(Item) items:QueryList<Item>) {
  *     items.changes.subscribe(() => console.log(items.length));
  *   }
  * }
  * ```
+ *
+ * Supports the same querying parameters as {@link QueryMetadata}, except
+ * `descendants`. This always queries the whole view.
  *
  * As `shown` is flipped between true and false, items will contain zero of one
  * items.
@@ -294,7 +304,8 @@ export class ContentChildMetadata extends QueryMetadata {
  *
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
- * @stable
+ * @ts2dart_const
+ * @deprecated
  */
 export class ViewQueryMetadata extends QueryMetadata {
     constructor(_selector, { descendants = false, first = false, read = null } = {}) {
@@ -304,6 +315,7 @@ export class ViewQueryMetadata extends QueryMetadata {
      * always `true` to differentiate it with {@link QueryMetadata}.
      */
     get isViewQuery() { return true; }
+    toString() { return `@ViewQuery(${stringify(this.selector)})`; }
 }
 /**
  * Declares a list of child element references.
@@ -381,13 +393,13 @@ export class ViewQueryMetadata extends QueryMetadata {
  *   }
  * }
  * ```
+ * @ts2dart_const
  * @stable
  */
 export class ViewChildrenMetadata extends ViewQueryMetadata {
     constructor(_selector, { read = null } = {}) {
         super(_selector, { descendants: true, read: read });
     }
-    toString() { return `@ViewChildren(${stringify(this.selector)})`; }
 }
 /**
  *
@@ -458,6 +470,7 @@ export class ViewChildrenMetadata extends ViewQueryMetadata {
  *   }
  * }
  * ```
+ * @ts2dart_const
  * @stable
  */
 export class ViewChildMetadata extends ViewQueryMetadata {

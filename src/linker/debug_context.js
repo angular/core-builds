@@ -9,6 +9,7 @@
 var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
 var view_type_1 = require('./view_type');
+/* @ts2dart_const */
 var StaticNodeDebugInfo = (function () {
     function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
         this.providerTokens = providerTokens;

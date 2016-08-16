@@ -5,15 +5,17 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OptionalMetadata, SkipSelfMetadata } from '../../di';
+import { OptionalMetadata, Provider, SkipSelfMetadata } from '../../di';
 import { ListWrapper } from '../../facade/collection';
 import { BaseException } from '../../facade/exceptions';
 import { getTypeNameForDebugging, isBlank, isPresent } from '../../facade/lang';
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ * @ts2dart_const
  * @stable
  */
 export class IterableDiffers {
+    /*@ts2dart_const*/
     constructor(factories) {
         this.factories = factories;
     }
@@ -47,8 +49,7 @@ export class IterableDiffers {
      * ```
      */
     static extend(factories) {
-        return {
-            provide: IterableDiffers,
+        return new Provider(IterableDiffers, {
             useFactory: (parent) => {
                 if (isBlank(parent)) {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
@@ -60,7 +61,7 @@ export class IterableDiffers {
             },
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[IterableDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-        };
+        });
     }
     find(iterable) {
         var factory = this.factories.find(f => f.supports(iterable));

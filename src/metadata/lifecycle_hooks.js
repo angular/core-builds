@@ -70,6 +70,8 @@ exports.LIFECYCLE_HOOKS_VALUES = [
  * export class App {
  *   value = 0;
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -116,7 +118,9 @@ exports.OnChanges = OnChanges;
  * export class App {
  *   hasChild = true;
  * }
- * ```
+ *
+ * bootstrap(App).catch(err => console.error(err));
+ *  ```
  * @stable
  */
 var OnInit = (function () {
@@ -233,6 +237,8 @@ exports.DoCheck = DoCheck;
  * export class App {
  *   hasChild = true;
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  *
  *
@@ -339,6 +345,8 @@ exports.OnDestroy = OnDestroy;
  * })
  * export class App {
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -390,6 +398,8 @@ exports.AfterContentInit = AfterContentInit;
  * export class App {
  *   hasContent = true;
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -440,6 +450,8 @@ exports.AfterContentChecked = AfterContentChecked;
  * })
  * export class App {
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -493,6 +505,8 @@ exports.AfterViewInit = AfterViewInit;
  * })
  * export class App {
  * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */

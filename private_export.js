@@ -17,11 +17,13 @@ var change_detection_util = require('./src/change_detection/change_detection_uti
 var constants = require('./src/change_detection/constants');
 var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
+var provider_util = require('./src/di/provider_util');
 var reflective_provider = require('./src/di/reflective_provider');
+var app_module_factory = require('./src/linker/app_module_factory');
 var component_factory_resolver = require('./src/linker/component_factory_resolver');
+var component_resolver = require('./src/linker/component_resolver');
 var debug_context = require('./src/linker/debug_context');
 var element = require('./src/linker/element');
-var ng_module_factory = require('./src/linker/ng_module_factory');
 var template_ref = require('./src/linker/template_ref');
 var view = require('./src/linker/view');
 var view_type = require('./src/linker/view_type');
@@ -42,11 +44,12 @@ exports.__core_private__ = {
     LifecycleHooks: lifecycle_hooks.LifecycleHooks,
     LIFECYCLE_HOOKS_VALUES: lifecycle_hooks.LIFECYCLE_HOOKS_VALUES,
     ReflectorReader: reflector_reader.ReflectorReader,
+    ReflectorComponentResolver: component_resolver.ReflectorComponentResolver,
     CodegenComponentFactoryResolver: component_factory_resolver.CodegenComponentFactoryResolver,
     AppElement: element.AppElement,
     AppView: view.AppView,
     DebugAppView: view.DebugAppView,
-    NgModuleInjector: ng_module_factory.NgModuleInjector,
+    AppModuleInjector: app_module_factory.AppModuleInjector,
     ViewType: view_type.ViewType,
     MAX_INTERPOLATION_VALUES: view_utils.MAX_INTERPOLATION_VALUES,
     checkBinding: view_utils.checkBinding,
@@ -54,7 +57,6 @@ exports.__core_private__ = {
     interpolate: view_utils.interpolate,
     ViewUtils: view_utils.ViewUtils,
     VIEW_ENCAPSULATION_VALUES: metadata_view.VIEW_ENCAPSULATION_VALUES,
-    ViewMetadata: metadata_view.ViewMetadata,
     DebugContext: debug_context.DebugContext,
     StaticNodeDebugInfo: debug_context.StaticNodeDebugInfo,
     devModeEqual: change_detection_util.devModeEqual,
@@ -66,6 +68,8 @@ exports.__core_private__ = {
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
     makeDecorator: decorators.makeDecorator,
     DebugDomRootRenderer: debug.DebugDomRootRenderer,
+    createProvider: provider_util.createProvider,
+    isProviderLiteral: provider_util.isProviderLiteral,
     EMPTY_ARRAY: view_utils.EMPTY_ARRAY,
     EMPTY_MAP: view_utils.EMPTY_MAP,
     pureProxy1: view_utils.pureProxy1,

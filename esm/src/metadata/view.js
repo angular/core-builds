@@ -63,8 +63,9 @@ export var VIEW_ENCAPSULATION_VALUES = [ViewEncapsulation.Emulated, ViewEncapsul
  *   }
  * }
  * ```
+ * @ts2dart_const
  *
- * @deprecated Use ComponentMetadata instead.
+ * @experimental You should most likely be using ComponentMetadata instead.
  */
 export class ViewMetadata {
     constructor({ templateUrl, template, directives, pipes, encapsulation, styles, styleUrls, animations, interpolation } = {}) {

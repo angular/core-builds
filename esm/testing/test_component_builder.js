@@ -5,11 +5,27 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Compiler, Injectable, Injector, NgZone } from '../index';
-import { isPresent } from '../src/facade/lang';
+import { Compiler, Injectable, Injector, NgZone, OpaqueToken } from '../index';
+import { PromiseWrapper } from '../src/facade/async';
+import { IS_DART, isPresent } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 import { tick } from './fake_async';
-import { ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestComponentRenderer } from './test_bed';
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
+ */
+export class TestComponentRenderer {
+    insertRootElement(rootElementId) { }
+}
+/**
+ * @experimental
+ */
+export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDetect');
+/**
+ * @experimental
+ */
+export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
 var _nextRootElementId = 0;
 export class TestComponentBuilder {
     constructor(_injector) {
@@ -75,7 +91,7 @@ export class TestComponentBuilder {
      * Builds and returns a ComponentFixture.
      */
     createAsync(rootComponentType) {
-        let noNgZone = this._injector.get(ComponentFixtureNoNgZone, false);
+        let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
@@ -87,8 +103,7 @@ export class TestComponentBuilder {
     createFakeAsync(rootComponentType) {
         let result;
         let error;
-        this.createAsync(rootComponentType)
-            .then((_result) => { result = _result; }, (_error) => { error = _error; });
+        PromiseWrapper.then(this.createAsync(rootComponentType), (_result) => { result = _result; }, (_error) => { error = _error; });
         tick();
         if (isPresent(error)) {
             throw error;
@@ -96,11 +111,11 @@ export class TestComponentBuilder {
         return result;
     }
     createSync(rootComponentType) {
-        let noNgZone = this._injector.get(ComponentFixtureNoNgZone, false);
+        let noNgZone = IS_DART || this._injector.get(ComponentFixtureNoNgZone, false);
         let ngZone = noNgZone ? null : this._injector.get(NgZone, null);
         let compiler = this._injector.get(Compiler);
         let initComponent = () => {
-            return this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType));
+            return this.createFromFactory(ngZone, this._injector.get(Compiler).compileComponentSync(rootComponentType));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     }

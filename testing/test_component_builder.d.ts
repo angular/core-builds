@@ -5,15 +5,28 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AnimationEntryMetadata, ComponentFactory, Injector, NgZone } from '../index';
-import { ViewMetadata } from '../src/metadata/view';
-import { Type } from '../src/type';
+import { AnimationEntryMetadata, ComponentFactory, Injector, NgZone, OpaqueToken, ViewMetadata } from '../index';
+import { ConcreteType, Type } from '../src/facade/lang';
 import { ComponentFixture } from './component_fixture';
 /**
- * Builds a ComponentFixture for use in component level tests.
+ * An abstract class for inserting the root test component element in a platform independent way.
  *
- * @deprecated Use `TestBed.configureTestModule` / `TestBed.override...` / `TestBed.createComponent`
- * instead.
+ * @experimental
+ */
+export declare class TestComponentRenderer {
+    insertRootElement(rootElementId: string): void;
+}
+/**
+ * @experimental
+ */
+export declare var ComponentFixtureAutoDetect: OpaqueToken;
+/**
+ * @experimental
+ */
+export declare var ComponentFixtureNoNgZone: OpaqueToken;
+/**
+ * Builds a ComponentFixture for use in component level tests.
+ * @stable
  */
 export declare class TestComponentBuilder {
     protected _injector: Injector;
@@ -22,15 +35,15 @@ export declare class TestComponentBuilder {
      * Overrides only the html of a {@link ComponentMetadata}.
      * All the other properties of the component's {@link ViewMetadata} are preserved.
      */
-    overrideTemplate(componentType: Type<any>, template: string): TestComponentBuilder;
+    overrideTemplate(componentType: Type, template: string): TestComponentBuilder;
     /**
      * Overrides a component's {@link ViewMetadata}.
      */
-    overrideView(componentType: Type<any>, view: ViewMetadata): TestComponentBuilder;
+    overrideView(componentType: Type, view: ViewMetadata): TestComponentBuilder;
     /**
      * Overrides the directives from the component {@link ViewMetadata}.
      */
-    overrideDirective(componentType: Type<any>, from: Type<any>, to: Type<any>): TestComponentBuilder;
+    overrideDirective(componentType: Type, from: Type, to: Type): TestComponentBuilder;
     /**
      * Overrides one or more injectables configured via `providers` metadata property of a directive
      * or
@@ -41,7 +54,7 @@ export declare class TestComponentBuilder {
      * duplicated providers to
      * be overridden.
      */
-    overrideProviders(type: Type<any>, providers: any[]): TestComponentBuilder;
+    overrideProviders(type: Type, providers: any[]): TestComponentBuilder;
     /**
      * Overrides one or more injectables configured via `providers` metadata property of a directive
      * or
@@ -52,13 +65,13 @@ export declare class TestComponentBuilder {
      * duplicated providers to
      * be overridden.
      */
-    overrideViewProviders(type: Type<any>, providers: any[]): TestComponentBuilder;
-    overrideAnimations(componentType: Type<any>, animations: AnimationEntryMetadata[]): TestComponentBuilder;
+    overrideViewProviders(type: Type, providers: any[]): TestComponentBuilder;
+    overrideAnimations(componentType: Type, animations: AnimationEntryMetadata[]): TestComponentBuilder;
     protected createFromFactory<C>(ngZone: NgZone, componentFactory: ComponentFactory<C>): ComponentFixture<C>;
     /**
      * Builds and returns a ComponentFixture.
      */
-    createAsync<T>(rootComponentType: Type<T>): Promise<ComponentFixture<T>>;
-    createFakeAsync<T>(rootComponentType: Type<T>): ComponentFixture<T>;
-    createSync<T>(rootComponentType: Type<T>): ComponentFixture<T>;
+    createAsync<T>(rootComponentType: ConcreteType<T>): Promise<ComponentFixture<T>>;
+    createFakeAsync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
+    createSync<T>(rootComponentType: ConcreteType<T>): ComponentFixture<T>;
 }

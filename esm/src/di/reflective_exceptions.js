@@ -230,8 +230,8 @@ export class OutOfBoundsError extends BaseException {
  *
  * ```typescript
  * expect(() => Injector.resolveAndCreate([
- *   { provide: "Strings", useValue: "string1", multi: true},
- *   { provide: "Strings", useValue: "string2", multi: false}
+ *   new Provider("Strings", {useValue: "string1", multi: true}),
+ *   new Provider("Strings", {useValue: "string2", multi: false})
  * ])).toThrowError();
  * ```
  */

@@ -39,11 +39,13 @@ exports.KeyValueDiffers = keyvalue_differs_2.KeyValueDiffers;
 /**
  * Structural diffing for `Object`s and `Map`s.
  */
-exports.keyValDiff = [new default_keyvalue_differ_1.DefaultKeyValueDifferFactory()];
+exports.keyValDiff = 
+/*@ts2dart_const*/ [new default_keyvalue_differ_1.DefaultKeyValueDifferFactory()];
 /**
  * Structural diffing for `Iterable` types such as `Array`s.
  */
-exports.iterableDiff = [new default_iterable_differ_1.DefaultIterableDifferFactory()];
+exports.iterableDiff = 
+/*@ts2dart_const*/ [new default_iterable_differ_1.DefaultIterableDifferFactory()];
 exports.defaultIterableDiffers = new iterable_differs_1.IterableDiffers(exports.iterableDiff);
 exports.defaultKeyValueDiffers = new keyvalue_differs_1.KeyValueDiffers(exports.keyValDiff);
 //# sourceMappingURL=change_detection.js.map

@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { getDebugNode } from '../index';
+import { ObservableWrapper, PromiseCompleter, PromiseWrapper } from '../src/facade/async';
 import { BaseException } from '../src/facade/exceptions';
 import { scheduleMicroTask } from '../src/facade/lang';
 /**
@@ -16,7 +17,7 @@ import { scheduleMicroTask } from '../src/facade/lang';
 export class ComponentFixture {
     constructor(componentRef, ngZone, autoDetect) {
         this._isStable = true;
-        this._promise = null;
+        this._completer = null;
         this._onUnstableSubscription = null;
         this._onStableSubscription = null;
         this._onMicrotaskEmptySubscription = null;
@@ -31,38 +32,29 @@ export class ComponentFixture {
         this._autoDetect = autoDetect;
         if (ngZone != null) {
             this._onUnstableSubscription =
-                ngZone.onUnstable.subscribe({ next: () => { this._isStable = false; } });
-            this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
-                next: () => {
+                ObservableWrapper.subscribe(ngZone.onUnstable, (_) => { this._isStable = false; });
+            this._onMicrotaskEmptySubscription =
+                ObservableWrapper.subscribe(ngZone.onMicrotaskEmpty, (_) => {
                     if (this._autoDetect) {
                         // Do a change detection run with checkNoChanges set to true to check
                         // there are no changes on the second run.
                         this.detectChanges(true);
                     }
-                }
-            });
-            this._onStableSubscription = ngZone.onStable.subscribe({
-                next: () => {
-                    this._isStable = true;
-                    // Check whether there is a pending whenStable() completer to resolve.
-                    if (this._promise !== null) {
-                        // If so check whether there are no pending macrotasks before resolving.
-                        // Do this check in the next tick so that ngZone gets a chance to update the state of
-                        // pending macrotasks.
-                        scheduleMicroTask(() => {
-                            if (!this.ngZone.hasPendingMacrotasks) {
-                                if (this._promise !== null) {
-                                    this._resolve(true);
-                                    this._resolve = null;
-                                    this._promise = null;
-                                }
-                            }
-                        });
+                });
+            this._onStableSubscription = ObservableWrapper.subscribe(ngZone.onStable, (_) => {
+                this._isStable = true;
+                // Check whether there are no pending macrotasks in a microtask so that ngZone gets a chance
+                // to update the state of pending macrotasks.
+                scheduleMicroTask(() => {
+                    if (!this.ngZone.hasPendingMacrotasks) {
+                        if (this._completer != null) {
+                            this._completer.resolve(true);
+                            this._completer = null;
+                        }
                     }
-                }
+                });
             });
-            this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: (error) => { throw error; } });
+            this._onErrorSubscription = ObservableWrapper.subscribe(ngZone.onError, (error) => { throw error.error; });
         }
     }
     _tick(checkNoChanges) {
@@ -114,14 +106,14 @@ export class ComponentFixture {
      */
     whenStable() {
         if (this.isStable()) {
-            return Promise.resolve(false);
+            return PromiseWrapper.resolve(false);
         }
-        else if (this._promise !== null) {
-            return this._promise;
+        else if (this._completer !== null) {
+            return this._completer.promise;
         }
         else {
-            this._promise = new Promise(res => { this._resolve = res; });
-            return this._promise;
+            this._completer = new PromiseCompleter();
+            return this._completer.promise;
         }
     }
     /**
@@ -130,19 +122,19 @@ export class ComponentFixture {
     destroy() {
         this.componentRef.destroy();
         if (this._onUnstableSubscription != null) {
-            this._onUnstableSubscription.unsubscribe();
+            ObservableWrapper.dispose(this._onUnstableSubscription);
             this._onUnstableSubscription = null;
         }
         if (this._onStableSubscription != null) {
-            this._onStableSubscription.unsubscribe();
+            ObservableWrapper.dispose(this._onStableSubscription);
             this._onStableSubscription = null;
         }
         if (this._onMicrotaskEmptySubscription != null) {
-            this._onMicrotaskEmptySubscription.unsubscribe();
+            ObservableWrapper.dispose(this._onMicrotaskEmptySubscription);
             this._onMicrotaskEmptySubscription = null;
         }
         if (this._onErrorSubscription != null) {
-            this._onErrorSubscription.unsubscribe();
+            ObservableWrapper.dispose(this._onErrorSubscription);
             this._onErrorSubscription = null;
         }
     }

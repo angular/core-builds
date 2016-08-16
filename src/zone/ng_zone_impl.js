@@ -6,6 +6,18 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
+/**
+ * Stores error information; delivered via [NgZone.onError] stream.
+ * @deprecated
+ */
+var NgZoneError = (function () {
+    function NgZoneError(error, stackTrace) {
+        this.error = error;
+        this.stackTrace = stackTrace;
+    }
+    return NgZoneError;
+}());
+exports.NgZoneError = NgZoneError;
 var NgZoneImpl = (function () {
     function NgZoneImpl(_a) {
         var _this = this;
@@ -59,7 +71,7 @@ var NgZoneImpl = (function () {
                 },
                 onHandleError: function (delegate, current, target, error) {
                     delegate.handleError(target, error);
-                    _this.onError(error);
+                    _this.onError(new NgZoneError(error, error.stack));
                     return false;
                 }
             });

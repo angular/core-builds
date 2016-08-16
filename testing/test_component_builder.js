@@ -7,10 +7,30 @@
  */
 "use strict";
 var index_1 = require('../index');
+var async_1 = require('../src/facade/async');
 var lang_1 = require('../src/facade/lang');
 var component_fixture_1 = require('./component_fixture');
 var fake_async_1 = require('./fake_async');
-var test_bed_1 = require('./test_bed');
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
+ */
+var TestComponentRenderer = (function () {
+    function TestComponentRenderer() {
+    }
+    TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
+    return TestComponentRenderer;
+}());
+exports.TestComponentRenderer = TestComponentRenderer;
+/**
+ * @experimental
+ */
+exports.ComponentFixtureAutoDetect = new index_1.OpaqueToken('ComponentFixtureAutoDetect');
+/**
+ * @experimental
+ */
+exports.ComponentFixtureNoNgZone = new index_1.OpaqueToken('ComponentFixtureNoNgZone');
 var _nextRootElementId = 0;
 var TestComponentBuilder = (function () {
     function TestComponentBuilder(_injector) {
@@ -66,10 +86,10 @@ var TestComponentBuilder = (function () {
     };
     TestComponentBuilder.prototype.createFromFactory = function (ngZone, componentFactory) {
         var rootElId = "root" + _nextRootElementId++;
-        var testComponentRenderer = this._injector.get(test_bed_1.TestComponentRenderer);
+        var testComponentRenderer = this._injector.get(TestComponentRenderer);
         testComponentRenderer.insertRootElement(rootElId);
         var componentRef = componentFactory.create(this._injector, [], "#" + rootElId);
-        var autoDetect = this._injector.get(test_bed_1.ComponentFixtureAutoDetect, false);
+        var autoDetect = this._injector.get(exports.ComponentFixtureAutoDetect, false);
         return new component_fixture_1.ComponentFixture(componentRef, ngZone, autoDetect);
     };
     /**
@@ -77,7 +97,7 @@ var TestComponentBuilder = (function () {
      */
     TestComponentBuilder.prototype.createAsync = function (rootComponentType) {
         var _this = this;
-        var noNgZone = this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
+        var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
@@ -89,8 +109,7 @@ var TestComponentBuilder = (function () {
     TestComponentBuilder.prototype.createFakeAsync = function (rootComponentType) {
         var result;
         var error;
-        this.createAsync(rootComponentType)
-            .then(function (_result) { result = _result; }, function (_error) { error = _error; });
+        async_1.PromiseWrapper.then(this.createAsync(rootComponentType), function (_result) { result = _result; }, function (_error) { error = _error; });
         fake_async_1.tick();
         if (lang_1.isPresent(error)) {
             throw error;
@@ -99,11 +118,11 @@ var TestComponentBuilder = (function () {
     };
     TestComponentBuilder.prototype.createSync = function (rootComponentType) {
         var _this = this;
-        var noNgZone = this._injector.get(test_bed_1.ComponentFixtureNoNgZone, false);
+        var noNgZone = lang_1.IS_DART || this._injector.get(exports.ComponentFixtureNoNgZone, false);
         var ngZone = noNgZone ? null : this._injector.get(index_1.NgZone, null);
         var compiler = this._injector.get(index_1.Compiler);
         var initComponent = function () {
-            return _this.createFromFactory(ngZone, compiler.compileComponentSync(rootComponentType));
+            return _this.createFromFactory(ngZone, _this._injector.get(index_1.Compiler).compileComponentSync(rootComponentType));
         };
         return ngZone == null ? initComponent() : ngZone.run(initComponent);
     };

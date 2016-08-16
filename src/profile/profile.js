@@ -7,6 +7,7 @@
  */
 "use strict";
 var wtf_impl_1 = require('./wtf_impl');
+// Change exports to const once https://github.com/angular/ts2dart/issues/150
 /**
  * True if WTF is enabled.
  */

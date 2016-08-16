@@ -460,7 +460,9 @@ export class ReflectiveInjector {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
      */
-    resolveAndCreateChild(providers) { return unimplemented(); }
+    resolveAndCreateChild(providers) {
+        return unimplemented();
+    }
     /**
      * Creates a child injector from previously resolved providers.
      *

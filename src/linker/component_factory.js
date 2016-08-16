@@ -125,6 +125,7 @@ var ComponentRef_ = (function (_super) {
 exports.ComponentRef_ = ComponentRef_;
 /**
  * @experimental
+ * @ts2dart_const
  */
 var EMPTY_CONTEXT = new Object();
 /**

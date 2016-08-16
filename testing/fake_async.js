@@ -8,20 +8,6 @@
 "use strict";
 var index_1 = require('../index');
 var _FakeAsyncTestZoneSpecType = Zone['FakeAsyncTestZoneSpec'];
-var _fakeAsyncZone = null;
-var _fakeAsyncTestZoneSpec = null;
-/**
- * Clears out the shared fake async zone for a test.
- * To be called in a global `beforeEach`.
- *
- * @experimental
- */
-function resetFakeAsyncZone() {
-    _fakeAsyncZone = null;
-    _fakeAsyncTestZoneSpec = null;
-}
-exports.resetFakeAsyncZone = resetFakeAsyncZone;
-var _inFakeAsyncCall = false;
 /**
  * Wraps a function to be executed in the fakeAsync zone:
  * - microtasks are manually executed by calling `flushMicrotasks()`,
@@ -41,48 +27,38 @@ var _inFakeAsyncCall = false;
  * @experimental
  */
 function fakeAsync(fn) {
+    if (Zone.current.get('FakeAsyncTestZoneSpec') != null) {
+        throw new index_1.BaseException('fakeAsync() calls can not be nested');
+    }
+    var fakeAsyncTestZoneSpec = new _FakeAsyncTestZoneSpecType();
+    var fakeAsyncZone = Zone.current.fork(fakeAsyncTestZoneSpec);
     return function () {
         var args = []; /** TODO #9100 */
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i - 0] = arguments[_i];
         }
-        if (_inFakeAsyncCall) {
-            throw new index_1.BaseException('fakeAsync() calls can not be nested');
-        }
-        _inFakeAsyncCall = true;
-        try {
-            if (!_fakeAsyncZone) {
-                if (Zone.current.get('FakeAsyncTestZoneSpec') != null) {
-                    throw new index_1.BaseException('fakeAsync() calls can not be nested');
-                }
-                _fakeAsyncTestZoneSpec = new _FakeAsyncTestZoneSpecType();
-                _fakeAsyncZone = Zone.current.fork(_fakeAsyncTestZoneSpec);
-            }
-            var res = _fakeAsyncZone.run(function () {
-                var res = fn.apply(void 0, args);
-                flushMicrotasks();
-                return res;
-            });
-            if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                throw new index_1.BaseException((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
-                    "periodic timer(s) still in the queue.");
-            }
-            if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
-                throw new index_1.BaseException(_fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
-            }
+        var res = fakeAsyncZone.run(function () {
+            var res = fn.apply(void 0, args);
+            flushMicrotasks();
             return res;
+        });
+        if (fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
+            throw new index_1.BaseException((fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
+                "periodic timer(s) still in the queue.");
         }
-        finally {
-            _inFakeAsyncCall = false;
+        if (fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
+            throw new index_1.BaseException(fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
         }
+        return res;
     };
 }
 exports.fakeAsync = fakeAsync;
 function _getFakeAsyncZoneSpec() {
-    if (_fakeAsyncTestZoneSpec == null) {
+    var zoneSpec = Zone.current.get('FakeAsyncTestZoneSpec');
+    if (zoneSpec == null) {
         throw new Error('The code should be running in the fakeAsync zone to call this function');
     }
-    return _fakeAsyncTestZoneSpec;
+    return zoneSpec;
 }
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.

@@ -27,7 +27,8 @@ exports._appIdRandomProviderFactory = _appIdRandomProviderFactory;
  * Providers that will generate a random APP_ID_TOKEN.
  * @experimental
  */
-exports.APP_ID_RANDOM_PROVIDER = {
+exports.APP_ID_RANDOM_PROVIDER = 
+/*@ts2dart_const*/ /* @ts2dart_Provider */ {
     provide: exports.APP_ID,
     useFactory: _appIdRandomProviderFactory,
     deps: []
@@ -39,19 +40,18 @@ function _randomChar() {
  * A function that will be executed when a platform is initialized.
  * @experimental
  */
-exports.PLATFORM_INITIALIZER = new di_1.OpaqueToken('Platform Initializer');
+exports.PLATFORM_INITIALIZER = 
+/*@ts2dart_const*/ new di_1.OpaqueToken('Platform Initializer');
 /**
- * All callbacks provided via this token will be called for every component that is bootstrapped.
- * Signature of the callback:
- *
- * `(componentRef: ComponentRef) => void`.
- *
+ * A function that will be executed when an application is initialized.
  * @experimental
  */
-exports.APP_BOOTSTRAP_LISTENER = new di_1.OpaqueToken('appBootstrapListener');
+exports.APP_INITIALIZER = 
+/*@ts2dart_const*/ new di_1.OpaqueToken('Application Initializer');
 /**
  * A token which indicates the root directory of the application
  * @experimental
  */
-exports.PACKAGE_ROOT_URL = new di_1.OpaqueToken('Application Packages Root URL');
+exports.PACKAGE_ROOT_URL = 
+/*@ts2dart_const*/ new di_1.OpaqueToken('Application Packages Root URL');
 //# sourceMappingURL=application_tokens.js.map

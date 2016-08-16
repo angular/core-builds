@@ -5,19 +5,20 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AnimationGroupPlayer } from '../animation/animation_group_player';
-import { ViewAnimationMap } from '../animation/view_animation_map';
-import { ChangeDetectorStatus } from '../change_detection/change_detection';
+import { ObservableWrapper } from '../facade/async';
 import { ListWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
-import { wtfCreateScope, wtfLeave } from '../profile/profile';
-import { DebugContext } from './debug_context';
 import { AppElement } from './element';
-import { ElementInjector } from './element_injector';
-import { ExpressionChangedAfterItHasBeenCheckedException, ViewDestroyedException, ViewWrappedException } from './exceptions';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
 import { ensureSlotCount, flattenNestedViewRenderNodes } from './view_utils';
+import { ChangeDetectorStatus } from '../change_detection/change_detection';
+import { wtfCreateScope, wtfLeave } from '../profile/profile';
+import { ExpressionChangedAfterItHasBeenCheckedException, ViewDestroyedException, ViewWrappedException } from './exceptions';
+import { DebugContext } from './debug_context';
+import { ElementInjector } from './element_injector';
+import { AnimationGroupPlayer } from '../animation/animation_group_player';
+import { ViewAnimationMap } from '../animation/view_animation_map';
 var _scope_check = wtfCreateScope(`AppView#check(ascii id)`);
 /**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -162,7 +163,7 @@ export class AppView {
             this.disposables[i]();
         }
         for (var i = 0; i < this.subscriptions.length; i++) {
-            this.subscriptions[i].unsubscribe();
+            ObservableWrapper.dispose(this.subscriptions[i]);
         }
         this.destroyInternal();
         this.dirtyParentQueriesInternal();
@@ -244,7 +245,6 @@ export class AppView {
             child.detectChanges(throwOnChange);
         }
     }
-    markContentChildAsMoved(renderAppElement) { this.dirtyParentQueriesInternal(); }
     addToContentChildren(renderAppElement) {
         renderAppElement.parentView.contentChildren.push(this);
         this.viewContainerElement = renderAppElement;

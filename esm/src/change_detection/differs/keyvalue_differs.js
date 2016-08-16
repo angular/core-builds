@@ -5,15 +5,17 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OptionalMetadata, SkipSelfMetadata } from '../../di';
+import { OptionalMetadata, Provider, SkipSelfMetadata } from '../../di';
 import { ListWrapper } from '../../facade/collection';
 import { BaseException } from '../../facade/exceptions';
 import { isBlank, isPresent } from '../../facade/lang';
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ * @ts2dart_const
  * @stable
  */
 export class KeyValueDiffers {
+    /*@ts2dart_const*/
     constructor(factories) {
         this.factories = factories;
     }
@@ -47,8 +49,7 @@ export class KeyValueDiffers {
      * ```
      */
     static extend(factories) {
-        return {
-            provide: KeyValueDiffers,
+        return new Provider(KeyValueDiffers, {
             useFactory: (parent) => {
                 if (isBlank(parent)) {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
@@ -60,7 +61,7 @@ export class KeyValueDiffers {
             },
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[KeyValueDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-        };
+        });
     }
     find(kv) {
         var factory = this.factories.find(f => f.supports(kv));

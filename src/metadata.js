@@ -6,16 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-/**
- * This indirection is needed to free up Component, etc symbols in the public API
- * to be used by the decorator versions of these annotations.
- */
+var app_module_1 = require('./metadata/app_module');
 var di_1 = require('./metadata/di');
 var directives_1 = require('./metadata/directives');
-var ng_module_1 = require('./metadata/ng_module');
-var decorators_1 = require('./util/decorators');
+var view_1 = require('./metadata/view');
+var app_module_2 = require('./metadata/app_module');
+exports.AppModuleMetadata = app_module_2.AppModuleMetadata;
 var di_2 = require('./metadata/di');
-exports.ANALYZE_FOR_ENTRY_COMPONENTS = di_2.ANALYZE_FOR_ENTRY_COMPONENTS;
+exports.ANALYZE_FOR_PRECOMPILE = di_2.ANALYZE_FOR_PRECOMPILE;
 exports.AttributeMetadata = di_2.AttributeMetadata;
 exports.ContentChildMetadata = di_2.ContentChildMetadata;
 exports.ContentChildrenMetadata = di_2.ContentChildrenMetadata;
@@ -40,11 +38,10 @@ exports.DoCheck = lifecycle_hooks_1.DoCheck;
 exports.OnChanges = lifecycle_hooks_1.OnChanges;
 exports.OnDestroy = lifecycle_hooks_1.OnDestroy;
 exports.OnInit = lifecycle_hooks_1.OnInit;
-var ng_module_2 = require('./metadata/ng_module');
-exports.CUSTOM_ELEMENTS_SCHEMA = ng_module_2.CUSTOM_ELEMENTS_SCHEMA;
-exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
-var view_1 = require('./metadata/view');
-exports.ViewEncapsulation = view_1.ViewEncapsulation;
+var view_2 = require('./metadata/view');
+exports.ViewEncapsulation = view_2.ViewEncapsulation;
+exports.ViewMetadata = view_2.ViewMetadata;
+var decorators_1 = require('./util/decorators');
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.
@@ -72,7 +69,7 @@ exports.ViewEncapsulation = view_1.ViewEncapsulation;
  * @stable
  * @Annotation
  */
-exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
+exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata, function (fn) { return fn.View = View; });
 // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
 /**
  * Directives allow you to attach behavior to elements in the DOM.
@@ -110,7 +107,7 @@ exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ComponentMetadata}:
+ * {@link ViewMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -359,8 +356,7 @@ exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
- * the
+ * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -457,6 +453,39 @@ exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
  * @Annotation
  */
 exports.Directive = decorators_1.makeDecorator(directives_1.DirectiveMetadata);
+// TODO(alexeagle): remove the duplication of this doc. It is copied from ViewMetadata.
+/**
+ * Metadata properties available for configuring Views.
+ *
+ * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
+ * `@View` annotation specifies the HTML template to use, and lists the directives that are active
+ * within the template.
+ *
+ * When a component is instantiated, the template is loaded into the component's shadow root, and
+ * the expressions and statements in the template are evaluated against the component.
+ *
+ * For details on the `@Component` annotation, see {@link ComponentMetadata}.
+ *
+ * ### Example
+ *
+ * ```
+ * @Component({
+ *   selector: 'greet',
+ *   template: 'Hello {{name}}!',
+ *   directives: [GreetUser, Bold]
+ * })
+ * class Greet {
+ *   name: string;
+ *
+ *   constructor() {
+ *     this.name = 'World';
+ *   }
+ * }
+ * ```
+ * @deprecated
+ * @Annotation
+ */
+var View = decorators_1.makeDecorator(view_1.ViewMetadata, function (fn) { return fn.View = View; });
 /**
  * Specifies that a constant attribute value should be injected.
  *
@@ -477,6 +506,117 @@ exports.Directive = decorators_1.makeDecorator(directives_1.DirectiveMetadata);
  * @Annotation
  */
 exports.Attribute = decorators_1.makeParamDecorator(di_1.AttributeMetadata);
+// TODO(alexeagle): remove the duplication of this doc. It is copied from QueryMetadata.
+/**
+ * Declares an injectable parameter to be a live list of directives or variable
+ * bindings from the content children of a directive.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/lY9m8HLy7z06vDoUaSN2?p=preview))
+ *
+ * Assume that `<tabs>` component would like to get a list its children `<pane>`
+ * components as shown in this example:
+ *
+ * ```html
+ * <tabs>
+ *   <pane title="Overview">...</pane>
+ *   <pane *ngFor="let o of objects" [title]="o.title">{{o.text}}</pane>
+ * </tabs>
+ * ```
+ *
+ * The preferred solution is to query for `Pane` directives using this decorator.
+ *
+ * ```javascript
+ * @Component({
+ *   selector: 'pane',
+ *   inputs: ['title']
+ * })
+ * class Pane {
+ *   title:string;
+ * }
+ *
+ * @Component({
+ *  selector: 'tabs',
+ *  template: `
+ *    <ul>
+ *      <li *ngFor="let pane of panes">{{pane.title}}</li>
+ *    </ul>
+ *    <ng-content></ng-content>
+ *  `
+ * })
+ * class Tabs {
+ *   panes: QueryList<Pane>;
+ *   constructor(@Query(Pane) panes:QueryList<Pane>) {
+ *     this.panes = panes;
+ *   }
+ * }
+ * ```
+ *
+ * A query can look for variable bindings by passing in a string with desired binding symbol.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/sT2j25cH1dURAyBRCKx1?p=preview))
+ * ```html
+ * <seeker>
+ *   <div #findme>...</div>
+ * </seeker>
+ *
+ * @Component({ selector: 'seeker' })
+ * class seeker {
+ *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+ * }
+ * ```
+ *
+ * In this case the object that is injected depend on the type of the variable
+ * binding. It can be an ElementRef, a directive or a component.
+ *
+ * Passing in a comma separated list of variable bindings will query for all of them.
+ *
+ * ```html
+ * <seeker>
+ *   <div #findMe>...</div>
+ *   <div #findMeToo>...</div>
+ * </seeker>
+ *
+ *  @Component({
+ *   selector: 'seeker'
+ * })
+ * class Seeker {
+ *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+ * }
+ * ```
+ *
+ * Configure whether query looks for direct children or all descendants
+ * of the querying element, by using the `descendants` parameter.
+ * It is set to `false` by default.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/wtGeB977bv7qvA5FTYl9?p=preview))
+ * ```html
+ * <container #first>
+ *   <item>a</item>
+ *   <item>b</item>
+ *   <container #second>
+ *     <item>c</item>
+ *   </container>
+ * </container>
+ * ```
+ *
+ * When querying for items, the first container will see only `a` and `b` by default,
+ * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+ *
+ * The queried directives are kept in a depth-first pre-order with respect to their
+ * positions in the DOM.
+ *
+ * Query does not look deep into any subcomponent views.
+ *
+ * Query is updated as part of the change-detection cycle. Since change detection
+ * happens after construction of a directive, QueryList will always be empty when observed in the
+ * constructor.
+ *
+ * The injected object is an unmodifiable live list.
+ * See {@link QueryList} for more details.
+ * @deprecated
+ * @Annotation
+ */
+exports.Query = decorators_1.makeParamDecorator(di_1.QueryMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
 /**
  * Configures a content query.
@@ -691,6 +831,45 @@ exports.ViewChildren = decorators_1.makePropDecorator(di_1.ViewChildrenMetadata)
  * @Annotation
  */
 exports.ViewChild = decorators_1.makePropDecorator(di_1.ViewChildMetadata);
+// TODO(alexeagle): remove the duplication of this doc. It is copied from ViewQueryMetadata.
+/**
+ * Similar to {@link QueryMetadata}, but querying the component view, instead of
+ * the content children.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
+ *
+ * ```javascript
+ * @Component({
+ *   ...,
+ *   template: `
+ *     <item> a </item>
+ *     <item> b </item>
+ *     <item> c </item>
+ *   `
+ * })
+ * class MyComponent {
+ *   shown: boolean;
+ *
+ *   constructor(private @Query(Item) items:QueryList<Item>) {
+ *     items.changes.subscribe(() => console.log(items.length));
+ *   }
+ * }
+ * ```
+ *
+ * Supports the same querying parameters as {@link QueryMetadata}, except
+ * `descendants`. This always queries the whole view.
+ *
+ * As `shown` is flipped between true and false, items will contain zero of one
+ * items.
+ *
+ * Specifies that a {@link QueryList} should be injected.
+ *
+ * The injected object is an iterable and observable live list.
+ * See {@link QueryList} for more details.
+ * @deprecated
+ * @Annotation
+ */
+exports.ViewQuery = decorators_1.makeParamDecorator(di_1.ViewQueryMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
 /**
  * Declare reusable pipe function.
@@ -740,6 +919,8 @@ exports.Pipe = decorators_1.makeDecorator(directives_1.PipeMetadata);
  *   directives: [BankAccount]
  * })
  * class App {}
+ *
+ * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -784,6 +965,7 @@ exports.Input = decorators_1.makePropDecorator(directives_1.InputMetadata);
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
+ * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -821,6 +1003,8 @@ exports.Output = decorators_1.makePropDecorator(directives_1.OutputMetadata);
  * class App {
  *   prop;
  * }
+ *
+ * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -857,15 +1041,17 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
  *   directives: [CountClicks]
  * })
  * class App {}
+ *
+ * bootstrap(App);
  * ```
  * @stable
  * @Annotation
  */
 exports.HostListener = decorators_1.makePropDecorator(directives_1.HostListenerMetadata);
 /**
- * Declares an ng module.
- * @experimental
+ * Declares an app module.
+ * @stable
  * @Annotation
  */
-exports.NgModule = decorators_1.makeDecorator(ng_module_1.NgModuleMetadata);
+exports.AppModule = decorators_1.makeDecorator(app_module_1.AppModuleMetadata);
 //# sourceMappingURL=metadata.js.map

@@ -7,6 +7,7 @@
  */
 "use strict";
 var decorators_1 = require('../di/decorators');
+var async_1 = require('../facade/async');
 var collection_1 = require('../facade/collection');
 var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
@@ -32,21 +33,17 @@ var Testability = (function () {
     /** @internal */
     Testability.prototype._watchAngularEvents = function () {
         var _this = this;
-        this._ngZone.onUnstable.subscribe({
-            next: function () {
-                _this._didWork = true;
-                _this._isZoneStable = false;
-            }
+        async_1.ObservableWrapper.subscribe(this._ngZone.onUnstable, function (_) {
+            _this._didWork = true;
+            _this._isZoneStable = false;
         });
         this._ngZone.runOutsideAngular(function () {
-            _this._ngZone.onStable.subscribe({
-                next: function () {
-                    ng_zone_1.NgZone.assertNotInAngularZone();
-                    lang_1.scheduleMicroTask(function () {
-                        _this._isZoneStable = true;
-                        _this._runCallbacksIfReady();
-                    });
-                }
+            async_1.ObservableWrapper.subscribe(_this._ngZone.onStable, function (_) {
+                ng_zone_1.NgZone.assertNotInAngularZone();
+                lang_1.scheduleMicroTask(function () {
+                    _this._isZoneStable = true;
+                    _this._runCallbacksIfReady();
+                });
             });
         });
     };
@@ -132,6 +129,7 @@ var TestabilityRegistry = (function () {
     return TestabilityRegistry;
 }());
 exports.TestabilityRegistry = TestabilityRegistry;
+/* @ts2dart_const */
 var _NoopGetTestability = (function () {
     function _NoopGetTestability() {
     }

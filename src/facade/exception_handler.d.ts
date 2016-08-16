@@ -15,10 +15,8 @@
  *   }
  * }
  *
- * @NgModule({
- *   providers: [{provide: ExceptionHandler, useClass: MyExceptionHandler}]
- * })
- * class MyModule {}
+ * bootstrap(MyApp, [{provide: ExceptionHandler, useClass: MyExceptionHandler}])
+ *
  * ```
  * @stable
  */

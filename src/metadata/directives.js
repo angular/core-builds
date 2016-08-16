@@ -50,7 +50,7 @@ var lang_1 = require('../facade/lang');
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ComponentMetadata}:
+ * {@link ViewMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -299,8 +299,7 @@ var lang_1 = require('../facade/lang');
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
- * the
+ * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -393,16 +392,19 @@ var lang_1 = require('../facade/lang');
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
+ * @ts2dart_const
  * @stable
  */
 var DirectiveMetadata = (function (_super) {
     __extends(DirectiveMetadata, _super);
     function DirectiveMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
         _super.call(this);
         this.selector = selector;
         this._inputs = inputs;
+        this._properties = properties;
         this._outputs = outputs;
+        this._events = events;
         this.host = host;
         this.exportAs = exportAs;
         this.queries = queries;
@@ -451,10 +453,25 @@ var DirectiveMetadata = (function (_super) {
          *   directives: [BankAccount]
          * })
          * class App {}
+         *
+         * bootstrap(App);
          * ```
          *
          */
-        get: function () { return this._inputs; },
+        get: function () {
+            return lang_1.isPresent(this._properties) && this._properties.length > 0 ? this._properties :
+                this._inputs;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DirectiveMetadata.prototype, "properties", {
+        /**
+         * Use `inputs` instead
+         *
+         * @deprecated
+         */
+        get: function () { return this.inputs; },
         enumerable: true,
         configurable: true
     });
@@ -500,10 +517,23 @@ var DirectiveMetadata = (function (_super) {
          *   everySecond() { console.log('second'); }
          *   everyFiveSeconds() { console.log('five seconds'); }
          * }
+         * bootstrap(App);
          * ```
          *
          */
-        get: function () { return this._outputs; },
+        get: function () {
+            return lang_1.isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DirectiveMetadata.prototype, "events", {
+        /**
+         * Use `outputs` instead
+         *
+         * @deprecated
+         */
+        get: function () { return this.outputs; },
         enumerable: true,
         configurable: true
     });
@@ -560,6 +590,8 @@ exports.DirectiveMetadata = DirectiveMetadata;
  *
  * All template expressions and statements are then evaluated against the component instance.
  *
+ * For details on the `@View` annotation, see {@link ViewMetadata}.
+ *
  * ## Lifecycle hooks
  *
  * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -569,16 +601,19 @@ exports.DirectiveMetadata = DirectiveMetadata;
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
+ * @ts2dart_const
  * @stable
  */
 var ComponentMetadata = (function (_super) {
     __extends(ComponentMetadata, _super);
     function ComponentMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile;
         _super.call(this, {
             selector: selector,
             inputs: inputs,
             outputs: outputs,
+            properties: properties,
+            events: events,
             host: host,
             exportAs: exportAs,
             providers: providers,
@@ -596,7 +631,7 @@ var ComponentMetadata = (function (_super) {
         this.moduleId = moduleId;
         this.animations = animations;
         this.interpolation = interpolation;
-        this.entryComponents = entryComponents;
+        this.precompile = precompile;
     }
     Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
         /**
@@ -654,6 +689,7 @@ exports.ComponentMetadata = ComponentMetadata;
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
+ * @ts2dart_const
  * @stable
  */
 var PipeMetadata = (function (_super) {
@@ -709,7 +745,10 @@ exports.PipeMetadata = PipeMetadata;
  *   directives: [BankAccount]
  * })
  * class App {}
+ *
+ * bootstrap(App);
  * ```
+ * @ts2dart_const
  * @stable
  */
 var InputMetadata = (function () {
@@ -761,7 +800,9 @@ exports.InputMetadata = InputMetadata;
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
+ * bootstrap(App);
  * ```
+ * @ts2dart_const
  * @stable
  */
 var OutputMetadata = (function () {
@@ -802,7 +843,10 @@ exports.OutputMetadata = OutputMetadata;
  * class App {
  *   prop;
  * }
+ *
+ * bootstrap(App);
  * ```
+ * @ts2dart_const
  * @stable
  */
 var HostBindingMetadata = (function () {
@@ -842,7 +886,10 @@ exports.HostBindingMetadata = HostBindingMetadata;
  *   directives: [CountClicks]
  * })
  * class App {}
+ *
+ * bootstrap(App);
  * ```
+ * @ts2dart_const
  * @stable
  */
 var HostListenerMetadata = (function () {

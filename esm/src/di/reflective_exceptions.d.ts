@@ -1,5 +1,5 @@
 import { BaseException, WrappedException } from '../facade/exceptions';
-import { Type } from '../type';
+import { Type } from '../facade/lang';
 import { ReflectiveInjector } from './reflective_injector';
 import { ReflectiveKey } from './reflective_key';
 /**
@@ -127,7 +127,7 @@ export declare class InvalidProviderError extends BaseException {
  * @stable
  */
 export declare class NoAnnotationError extends BaseException {
-    constructor(typeOrFunc: Type<any> | Function, params: any[][]);
+    constructor(typeOrFunc: Type | Function, params: any[][]);
     private static _genMessage(typeOrFunc, params);
 }
 /**
@@ -154,8 +154,8 @@ export declare class OutOfBoundsError extends BaseException {
  *
  * ```typescript
  * expect(() => Injector.resolveAndCreate([
- *   { provide: "Strings", useValue: "string1", multi: true},
- *   { provide: "Strings", useValue: "string2", multi: false}
+ *   new Provider("Strings", {useValue: "string1", multi: true}),
+ *   new Provider("Strings", {useValue: "string2", multi: false})
  * ])).toThrowError();
  * ```
  */

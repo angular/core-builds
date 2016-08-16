@@ -1,4 +1,11 @@
-import { Type } from '../type';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { Type } from '../facade/lang';
 /**
  * An interface that a function passed into {@link forwardRef} has to implement.
  *
@@ -22,7 +29,7 @@ export interface ForwardRefFn {
  * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
  * @experimental
  */
-export declare function forwardRef(forwardRefFn: ForwardRefFn): Type<any>;
+export declare function forwardRef(forwardRefFn: ForwardRefFn): Type;
 /**
  * Lazily retrieves the reference value from a forwardRef.
  *
