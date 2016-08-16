@@ -8,7 +8,6 @@
 import { StringMapWrapper } from '../facade/collection';
 import { isBlank, isPresent } from '../facade/lang';
 import { ViewType } from './view_type';
-/* @ts2dart_const */
 export class StaticNodeDebugInfo {
     constructor(providerTokens, componentToken, refTokens) {
         this.providerTokens = providerTokens;

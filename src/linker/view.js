@@ -11,20 +11,19 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var async_1 = require('../facade/async');
+var animation_group_player_1 = require('../animation/animation_group_player');
+var view_animation_map_1 = require('../animation/view_animation_map');
+var change_detection_1 = require('../change_detection/change_detection');
 var collection_1 = require('../facade/collection');
 var lang_1 = require('../facade/lang');
+var profile_1 = require('../profile/profile');
+var debug_context_1 = require('./debug_context');
 var element_1 = require('./element');
+var element_injector_1 = require('./element_injector');
+var exceptions_1 = require('./exceptions');
 var view_ref_1 = require('./view_ref');
 var view_type_1 = require('./view_type');
 var view_utils_1 = require('./view_utils');
-var change_detection_1 = require('../change_detection/change_detection');
-var profile_1 = require('../profile/profile');
-var exceptions_1 = require('./exceptions');
-var debug_context_1 = require('./debug_context');
-var element_injector_1 = require('./element_injector');
-var animation_group_player_1 = require('../animation/animation_group_player');
-var view_animation_map_1 = require('../animation/view_animation_map');
 var _scope_check = profile_1.wtfCreateScope("AppView#check(ascii id)");
 /**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -176,7 +175,7 @@ var AppView = (function () {
             this.disposables[i]();
         }
         for (var i = 0; i < this.subscriptions.length; i++) {
-            async_1.ObservableWrapper.dispose(this.subscriptions[i]);
+            this.subscriptions[i].unsubscribe();
         }
         this.destroyInternal();
         this.dirtyParentQueriesInternal();
@@ -275,6 +274,7 @@ var AppView = (function () {
             child.detectChanges(throwOnChange);
         }
     };
+    AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
     AppView.prototype.addToContentChildren = function (renderAppElement) {
         renderAppElement.parentView.contentChildren.push(this);
         this.viewContainerElement = renderAppElement;

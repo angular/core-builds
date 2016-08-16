@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { BaseException } from '../facade/exceptions';
-import { ConcreteType } from '../facade/lang';
+import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 /**
  * @stable
@@ -20,7 +20,7 @@ export declare class NoComponentFactoryError extends BaseException {
  */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
-    abstract resolveComponentFactory<T>(component: ConcreteType<T>): ComponentFactory<T>;
+    abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
 }
 export declare class CodegenComponentFactoryResolver implements ComponentFactoryResolver {
     private _parent;

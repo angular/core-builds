@@ -6,5 +6,5 @@
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for Zone
-export { NgZone, NgZoneError } from './zone/ng_zone';
+export { NgZone } from './zone/ng_zone';
 //# sourceMappingURL=zone.js.map

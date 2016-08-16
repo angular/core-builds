@@ -479,9 +479,7 @@ var ReflectiveInjector = (function () {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
      */
-    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) {
-        return exceptions_1.unimplemented();
-    };
+    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return exceptions_1.unimplemented(); };
     /**
      * Creates a child injector from previously resolved providers.
      *

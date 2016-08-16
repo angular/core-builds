@@ -1,13 +1,5 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { Type } from '../facade/lang';
-import { ReflectiveKey } from './reflective_key';
 import { Provider } from './provider';
+import { ReflectiveKey } from './reflective_key';
 /**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
@@ -31,7 +23,7 @@ export declare class ReflectiveDependency {
  * ### Example ([live demo](http://plnkr.co/edit/RfEnhh8kUEI0G3qsnIeT?p%3Dpreview&p=preview))
  *
  * ```typescript
- * var resolvedProviders = Injector.resolve([new Provider('message', {useValue: 'Hello'})]);
+ * var resolvedProviders = Injector.resolve([{ provide: 'message', useValue: 'Hello' }]);
  * var injector = Injector.fromResolvedProviders(resolvedProviders);
  *
  * expect(injector.get('message')).toEqual('Hello');
@@ -41,7 +33,7 @@ export declare class ReflectiveDependency {
  */
 export interface ResolvedReflectiveProvider {
     /**
-     * A key, usually a `Type`.
+     * A key, usually a `Type<any>`.
      */
     key: ReflectiveKey;
     /**
@@ -68,7 +60,8 @@ export declare class ResolvedReflectiveProvider_ implements ResolvedReflectiveBi
     readonly resolvedFactory: ResolvedReflectiveFactory;
 }
 /**
- * An internal resolved representation of a factory function created by resolving {@link Provider}.
+ * An internal resolved representation of a factory function created by resolving {@link
+ * Provider}.
  * @experimental
  */
 export declare class ResolvedReflectiveFactory {
@@ -91,22 +84,9 @@ export declare class ResolvedReflectiveFactory {
         dependencies: ReflectiveDependency[]);
 }
 /**
- * Resolve a single provider.
- */
-export declare function resolveReflectiveFactory(provider: Provider): ResolvedReflectiveFactory;
-/**
- * Converts the {@link Provider} into {@link ResolvedProvider}.
- *
- * {@link Injector} internally only uses {@link ResolvedProvider}, {@link Provider} contains
- * convenience provider syntax.
- */
-export declare function resolveReflectiveProvider(provider: Provider): ResolvedReflectiveProvider;
-/**
  * Resolve a list of Providers.
  */
-export declare function resolveReflectiveProviders(providers: Array<Type | Provider | {
-    [k: string]: any;
-} | any[]>): ResolvedReflectiveProvider[];
+export declare function resolveReflectiveProviders(providers: Provider[]): ResolvedReflectiveProvider[];
 /**
  * Merges a list of ResolvedProviders into a list where
  * each key is contained exactly once and multi providers

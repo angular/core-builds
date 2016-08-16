@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Provider } from './index';
 import { ANY_STATE as ANY_STATE_, DEFAULT_STATE as DEFAULT_STATE_, EMPTY_STATE as EMPTY_STATE_, FILL_STYLE_FLAG as FILL_STYLE_FLAG_ } from './src/animation/animation_constants';
 import { AnimationGroupPlayer as AnimationGroupPlayer_ } from './src/animation/animation_group_player';
 import { AnimationKeyframe as AnimationKeyframe_ } from './src/animation/animation_keyframe';
@@ -17,13 +16,11 @@ import * as change_detection_util from './src/change_detection/change_detection_
 import * as constants from './src/change_detection/constants';
 import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
-import * as provider_util from './src/di/provider_util';
 import * as reflective_provider from './src/di/reflective_provider';
-import * as app_module_factory from './src/linker/app_module_factory';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
-import * as component_resolver from './src/linker/component_resolver';
 import * as debug_context from './src/linker/debug_context';
 import * as element from './src/linker/element';
+import * as ng_module_factory from './src/linker/ng_module_factory';
 import * as template_ref from './src/linker/template_ref';
 import * as view from './src/linker/view';
 import * as view_type from './src/linker/view_type';
@@ -48,12 +45,11 @@ export declare namespace __core_private_types__ {
     var LIFECYCLE_HOOKS_VALUES: typeof lifecycle_hooks.LIFECYCLE_HOOKS_VALUES;
     type ReflectorReader = reflector_reader.ReflectorReader;
     var ReflectorReader: typeof reflector_reader.ReflectorReader;
-    var ReflectorComponentResolver: typeof component_resolver.ReflectorComponentResolver;
     var CodegenComponentFactoryResolver: typeof component_factory_resolver.CodegenComponentFactoryResolver;
     type AppElement = element.AppElement;
     var AppElement: typeof element.AppElement;
     var AppView: typeof view.AppView;
-    var AppModuleInjector: typeof app_module_factory.AppModuleInjector;
+    var NgModuleInjector: typeof ng_module_factory.NgModuleInjector;
     type DebugAppView<T> = view.DebugAppView<T>;
     var DebugAppView: typeof view.DebugAppView;
     type ViewType = view_type.ViewType;
@@ -64,6 +60,8 @@ export declare namespace __core_private_types__ {
     var interpolate: typeof view_utils.interpolate;
     var ViewUtils: typeof view_utils.ViewUtils;
     var VIEW_ENCAPSULATION_VALUES: typeof metadata_view.VIEW_ENCAPSULATION_VALUES;
+    type ViewMetadata = metadata_view.ViewMetadata;
+    var ViewMetadata: typeof metadata_view.ViewMetadata;
     var DebugContext: typeof debug_context.DebugContext;
     var StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     var devModeEqual: typeof change_detection_util.devModeEqual;
@@ -79,8 +77,6 @@ export declare namespace __core_private_types__ {
     var makeDecorator: typeof decorators.makeDecorator;
     type DebugDomRootRenderer = debug.DebugDomRootRenderer;
     var DebugDomRootRenderer: typeof debug.DebugDomRootRenderer;
-    var createProvider: typeof provider_util.createProvider;
-    var isProviderLiteral: typeof provider_util.isProviderLiteral;
     var EMPTY_ARRAY: typeof view_utils.EMPTY_ARRAY;
     var EMPTY_MAP: typeof view_utils.EMPTY_MAP;
     var pureProxy1: typeof view_utils.pureProxy1;
@@ -130,12 +126,11 @@ export declare var __core_private__: {
     LifecycleHooks: typeof lifecycle_hooks.LifecycleHooks;
     LIFECYCLE_HOOKS_VALUES: lifecycle_hooks.LifecycleHooks[];
     ReflectorReader: typeof reflector_reader.ReflectorReader;
-    ReflectorComponentResolver: typeof component_resolver.ReflectorComponentResolver;
     CodegenComponentFactoryResolver: typeof component_factory_resolver.CodegenComponentFactoryResolver;
     AppElement: typeof element.AppElement;
     AppView: typeof view.AppView;
     DebugAppView: typeof view.DebugAppView;
-    AppModuleInjector: typeof app_module_factory.AppModuleInjector;
+    NgModuleInjector: typeof ng_module_factory.NgModuleInjector;
     ViewType: typeof view_type.ViewType;
     MAX_INTERPOLATION_VALUES: number;
     checkBinding: (throwOnChange: boolean, oldValue: any, newValue: any) => boolean;
@@ -143,6 +138,7 @@ export declare var __core_private__: {
     interpolate: (valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string) => string;
     ViewUtils: typeof view_utils.ViewUtils;
     VIEW_ENCAPSULATION_VALUES: metadata_view.ViewEncapsulation[];
+    ViewMetadata: typeof metadata_view.ViewMetadata;
     DebugContext: typeof debug_context.DebugContext;
     StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     devModeEqual: (a: any, b: any) => boolean;
@@ -156,8 +152,6 @@ export declare var __core_private__: {
     ReflectionCapabilities: typeof reflection_capabilities.ReflectionCapabilities;
     makeDecorator: (annotationCls: any, chainFn?: (fn: Function) => void) => (...args: any[]) => (cls: any) => any;
     DebugDomRootRenderer: typeof debug.DebugDomRootRenderer;
-    createProvider: (obj: any) => Provider;
-    isProviderLiteral: (obj: any) => boolean;
     EMPTY_ARRAY: any[];
     EMPTY_MAP: {};
     pureProxy1: <P0, R>(fn: (p0: P0) => R) => (p0: P0) => R;

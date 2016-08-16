@@ -44,7 +44,7 @@ import { isPresent } from '../facade/lang';
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ViewMetadata}:
+ * {@link ComponentMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -293,7 +293,8 @@ import { isPresent } from '../facade/lang';
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+ * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+ * the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -386,17 +387,14 @@ import { isPresent } from '../facade/lang';
  * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
- * @ts2dart_const
  * @stable
  */
 export class DirectiveMetadata extends InjectableMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, providers, exportAs, queries } = {}) {
+    constructor({ selector, inputs, outputs, host, providers, exportAs, queries } = {}) {
         super();
         this.selector = selector;
         this._inputs = inputs;
-        this._properties = properties;
         this._outputs = outputs;
-        this._events = events;
         this.host = host;
         this.exportAs = exportAs;
         this.queries = queries;
@@ -444,21 +442,10 @@ export class DirectiveMetadata extends InjectableMetadata {
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      *
      */
-    get inputs() {
-        return isPresent(this._properties) && this._properties.length > 0 ? this._properties :
-            this._inputs;
-    }
-    /**
-     * Use `inputs` instead
-     *
-     * @deprecated
-     */
-    get properties() { return this.inputs; }
+    get inputs() { return this._inputs; }
     /**
      * Enumerates the set of event-bound output properties.
      *
@@ -500,19 +487,10 @@ export class DirectiveMetadata extends InjectableMetadata {
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
      *
      */
-    get outputs() {
-        return isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
-    }
-    /**
-     * Use `outputs` instead
-     *
-     * @deprecated
-     */
-    get events() { return this.outputs; }
+    get outputs() { return this._outputs; }
     /**
      * Defines the set of injectable objects that are visible to a Directive and its light DOM
      * children.
@@ -560,8 +538,6 @@ export class DirectiveMetadata extends InjectableMetadata {
  *
  * All template expressions and statements are then evaluated against the component instance.
  *
- * For details on the `@View` annotation, see {@link ViewMetadata}.
- *
  * ## Lifecycle hooks
  *
  * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -571,17 +547,14 @@ export class DirectiveMetadata extends InjectableMetadata {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
- * @ts2dart_const
  * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, properties, events, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, precompile } = {}) {
+    constructor({ selector, inputs, outputs, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents } = {}) {
         super({
             selector: selector,
             inputs: inputs,
             outputs: outputs,
-            properties: properties,
-            events: events,
             host: host,
             exportAs: exportAs,
             providers: providers,
@@ -599,7 +572,7 @@ export class ComponentMetadata extends DirectiveMetadata {
         this.moduleId = moduleId;
         this.animations = animations;
         this.interpolation = interpolation;
-        this.precompile = precompile;
+        this.entryComponents = entryComponents;
     }
     /**
      * Defines the set of injectable objects that are visible to its view DOM children.
@@ -651,7 +624,6 @@ export class ComponentMetadata extends DirectiveMetadata {
  * ### Example
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
- * @ts2dart_const
  * @stable
  */
 export class PipeMetadata extends InjectableMetadata {
@@ -699,10 +671,7 @@ export class PipeMetadata extends InjectableMetadata {
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class InputMetadata {
@@ -752,9 +721,7 @@ export class InputMetadata {
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class OutputMetadata {
@@ -793,10 +760,7 @@ export class OutputMetadata {
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class HostBindingMetadata {
@@ -834,10 +798,7 @@ export class HostBindingMetadata {
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
- * @ts2dart_const
  * @stable
  */
 export class HostListenerMetadata {

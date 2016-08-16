@@ -12,11 +12,9 @@ var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * @ts2dart_const
  * @stable
  */
 var IterableDiffers = (function () {
-    /*@ts2dart_const*/
     function IterableDiffers(factories) {
         this.factories = factories;
     }
@@ -50,7 +48,8 @@ var IterableDiffers = (function () {
      * ```
      */
     IterableDiffers.extend = function (factories) {
-        return new di_1.Provider(IterableDiffers, {
+        return {
+            provide: IterableDiffers,
             useFactory: function (parent) {
                 if (lang_1.isBlank(parent)) {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
@@ -62,7 +61,7 @@ var IterableDiffers = (function () {
             },
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[IterableDiffers, new di_1.SkipSelfMetadata(), new di_1.OptionalMetadata()]]
-        });
+        };
     };
     IterableDiffers.prototype.find = function (iterable) {
         var factory = this.factories.find(function (f) { return f.supports(iterable); });

@@ -9,10 +9,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Subject'), require('rxjs/observable/PromiseObservable'), require('rxjs/operator/toPromise'), require('rxjs/Observable')) :
-        typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/observable/PromiseObservable', 'rxjs/operator/toPromise', 'rxjs/Observable'], factory) :
-            (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}), global.Rx, global.Rx, global.Rx.Observable.prototype, global.Rx));
-}(this, function (exports, rxjs_Subject, rxjs_observable_PromiseObservable, rxjs_operator_toPromise, rxjs_Observable) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Subject'), require('rxjs/Observable')) :
+        typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
+            (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}), global.Rx, global.Rx));
+}(this, function (exports, rxjs_Subject, rxjs_Observable) {
     'use strict';
     /**
      * @license
@@ -37,19 +37,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function scheduleMicroTask(fn) {
         Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
     }
-    var IS_DART = false;
     // Need to declare a new variable for global here since TypeScript
     // exports the original value of the symbol.
     var global$1 = globalScope;
-    /**
-     * Runtime representation a type that a Component or other object is instances of.
-     *
-     * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
-     * the `MyCustomComponent` constructor function.
-     *
-     * @stable
-     */
-    var Type = Function;
     function getTypeNameForDebugging(type) {
         if (type['name']) {
             return type['name'];
@@ -75,16 +65,14 @@ var __extends = (this && this.__extends) || function (d, b) {
     function isFunction(obj) {
         return typeof obj === 'function';
     }
-    function isType(obj) {
-        return isFunction(obj);
-    }
     function isPromise(obj) {
-        return obj instanceof global$1.Promise;
+        // allow any Promise/A+ compliant thenable.
+        // It's up to the caller to ensure that obj.then conforms to the spec
+        return isPresent(obj) && isFunction(obj.then);
     }
     function isArray(obj) {
         return Array.isArray(obj);
     }
-    function noop() { }
     function stringify(token) {
         if (typeof token === 'string') {
             return token;
@@ -92,11 +80,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (token === undefined || token === null) {
             return '' + token;
         }
-        if (token.name) {
-            return token.name;
-        }
         if (token.overriddenName) {
             return token.overriddenName;
+        }
+        if (token.name) {
+            return token.name;
         }
         var res = token.toString();
         var newLineIndex = res.indexOf('\n');
@@ -231,9 +219,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function getMapKey(value) {
         return value;
     }
-    function normalizeBool(obj) {
-        return isBlank(obj) ? false : obj;
-    }
     function isJsObject(o) {
         return o !== null && (typeof o === 'function' || typeof o === 'object');
     }
@@ -265,6 +250,48 @@ var __extends = (this && this.__extends) || function (d, b) {
     }
     function isPrimitive(obj) {
         return !isJsObject(obj);
+    }
+    /**
+     * Allows to refer to references which are not yet defined.
+     *
+     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
+     * DI is declared,
+     * but not yet defined. It is also used when the `token` which we use when creating a query is not
+     * yet defined.
+     *
+     * ### Example
+     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+     * @experimental
+     */
+    function forwardRef(forwardRefFn) {
+        forwardRefFn.__forward_ref__ = forwardRef;
+        forwardRefFn.toString = function () { return stringify(this()); };
+        return forwardRefFn;
+    }
+    /**
+     * Lazily retrieves the reference value from a forwardRef.
+     *
+     * Acts as the identity function when given a non-forward-ref value.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
+     *
+     * ```typescript
+     * var ref = forwardRef(() => "refValue");
+     * expect(resolveForwardRef(ref)).toEqual("refValue");
+     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
+     * ```
+     *
+     * See: {@link forwardRef}
+     * @experimental
+     */
+    function resolveForwardRef(type) {
+        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
+            type.__forward_ref__ === forwardRef) {
+            return type();
+        }
+        else {
+            return type;
+        }
     }
     /**
      * A parameter metadata that specifies a dependency.
@@ -305,7 +332,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([Engine, Car]);
      * expect(injector.get(Car).engine instanceof Engine).toBe(true);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InjectMetadata = (function () {
@@ -335,7 +361,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([Car]);
      * expect(injector.get(Car).engine).toBeNull();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var OptionalMetadata = (function () {
@@ -347,7 +372,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * `DependencyMetadata` is used by the framework to extend DI.
      * This is internal to Angular and should not be used directly.
-     * @ts2dart_const
      * @stable
      */
     var DependencyMetadata = (function () {
@@ -390,7 +414,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var injector = Injector.resolveAndCreate([NeedsService, UsefulService]);
      * expect(() => injector.get(NeedsService)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InjectableMetadata = (function () {
@@ -424,7 +447,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var child = inj.resolveAndCreateChild([NeedsDependency]);
      * expect(() => child.get(NeedsDependency)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var SelfMetadata = (function () {
@@ -457,7 +479,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * var inj = Injector.resolveAndCreate([Dependency, NeedsDependency]);
      * expect(() => inj.get(NeedsDependency)).toThrowError();
      * ```
-     * @ts2dart_const
      * @stable
      */
     var SkipSelfMetadata = (function () {
@@ -516,10 +537,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * class App {
      * }
-     *
-     * bootstrap(App);
      *```
-     * @ts2dart_const
      * @stable
      */
     var HostMetadata = (function () {
@@ -528,129 +546,284 @@ var __extends = (this && this.__extends) || function (d, b) {
         HostMetadata.prototype.toString = function () { return "@Host()"; };
         return HostMetadata;
     }());
-    /**
-     * Declares an Application Module.
-     * @stable
-     */
-    var AppModuleMetadata = (function (_super) {
-        __extends(AppModuleMetadata, _super);
-        function AppModuleMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, providers = _b.providers, directives = _b.directives, pipes = _b.pipes, precompile = _b.precompile, modules = _b.modules;
-            _super.call(this);
-            this._providers = providers;
-            this.directives = directives;
-            this.pipes = pipes;
-            this.precompile = precompile;
-            this.modules = modules;
+    var _nextClassId = 0;
+    function extractAnnotation(annotation) {
+        if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
+            // it is a decorator, extract annotation
+            annotation = annotation.annotation;
         }
-        Object.defineProperty(AppModuleMetadata.prototype, "providers", {
-            /**
-             * Defines the set of injectable objects that are available in the injector
-             * of this module.
-             *
-             * ## Simple Example
-             *
-             * Here is an example of a class that can be injected:
-             *
-             * ```
-             * class Greeter {
-             *    greet(name:string) {
-             *      return 'Hello ' + name + '!';
-             *    }
-             * }
-             *
-             * @AppModule({
-             *   providers: [
-             *     Greeter
-             *   ]
-             * })
-             * class HelloWorld {
-             *   greeter:Greeter;
-             *
-             *   constructor(greeter:Greeter) {
-             *     this.greeter = greeter;
-             *   }
-             * }
-             * ```
-             */
-            get: function () { return this._providers; },
-            enumerable: true,
-            configurable: true
-        });
-        return AppModuleMetadata;
-    }(InjectableMetadata));
-    /**
-     * Allows to refer to references which are not yet defined.
-     *
-     * For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of
-     * DI is declared,
-     * but not yet defined. It is also used when the `token` which we use when creating a query is not
-     * yet defined.
-     *
-     * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
-     * @experimental
-     */
-    function forwardRef(forwardRefFn) {
-        forwardRefFn.__forward_ref__ = forwardRef;
-        forwardRefFn.toString = function () { return stringify(this()); };
-        return forwardRefFn;
+        return annotation;
     }
-    /**
-     * Lazily retrieves the reference value from a forwardRef.
-     *
-     * Acts as the identity function when given a non-forward-ref value.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
-     *
-     * ```typescript
-     * var ref = forwardRef(() => "refValue");
-     * expect(resolveForwardRef(ref)).toEqual("refValue");
-     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
-     * ```
-     *
-     * See: {@link forwardRef}
-     * @experimental
-     */
-    function resolveForwardRef(type) {
-        if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
-            type.__forward_ref__ === forwardRef) {
-            return type();
+    function applyParams(fnOrArray, key) {
+        if (fnOrArray === Object || fnOrArray === String || fnOrArray === Function ||
+            fnOrArray === Number || fnOrArray === Array) {
+            throw new Error("Can not use native " + stringify(fnOrArray) + " as constructor");
+        }
+        if (isFunction(fnOrArray)) {
+            return fnOrArray;
+        }
+        else if (fnOrArray instanceof Array) {
+            var annotations = fnOrArray;
+            var annoLength = annotations.length - 1;
+            var fn = fnOrArray[annoLength];
+            if (!isFunction(fn)) {
+                throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
+            }
+            if (annoLength != fn.length) {
+                throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
+            }
+            var paramsAnnotations = [];
+            for (var i = 0, ii = annotations.length - 1; i < ii; i++) {
+                var paramAnnotations = [];
+                paramsAnnotations.push(paramAnnotations);
+                var annotation = annotations[i];
+                if (annotation instanceof Array) {
+                    for (var j = 0; j < annotation.length; j++) {
+                        paramAnnotations.push(extractAnnotation(annotation[j]));
+                    }
+                }
+                else if (isFunction(annotation)) {
+                    paramAnnotations.push(extractAnnotation(annotation));
+                }
+                else {
+                    paramAnnotations.push(annotation);
+                }
+            }
+            Reflect.defineMetadata('parameters', paramsAnnotations, fn);
+            return fn;
         }
         else {
-            return type;
+            throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
         }
     }
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
+     * Provides a way for expressing ES6 classes with parameter annotations in ES5.
      *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * Creates a token that can be used in a DI Provider.
+     * ## Basic Example
      *
-     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+     * ```
+     * var Greeter = ng.Class({
+     *   constructor: function(name) {
+     *     this.name = name;
+     *   },
      *
-     * ```typescript
-     * var t = new OpaqueToken("value");
-     *
-     * var injector = Injector.resolveAndCreate([
-     *   {provide: t, useValue: "bindingValue"}
-     * ]);
-     *
-     * expect(injector.get(t)).toEqual("bindingValue");
+     *   greet: function() {
+     *     alert('Hello ' + this.name + '!');
+     *   }
+     * });
      * ```
      *
-     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
-     * caused by multiple providers using the same string as two different tokens.
+     * is equivalent to ES6:
      *
-     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
-     * error messages.
-     * @ts2dart_const
+     * ```
+     * class Greeter {
+     *   constructor(name) {
+     *     this.name = name;
+     *   }
+     *
+     *   greet() {
+     *     alert('Hello ' + this.name + '!');
+     *   }
+     * }
+     * ```
+     *
+     * or equivalent to ES5:
+     *
+     * ```
+     * var Greeter = function (name) {
+     *   this.name = name;
+     * }
+     *
+     * Greeter.prototype.greet = function () {
+     *   alert('Hello ' + this.name + '!');
+     * }
+     * ```
+     *
+     * ### Example with parameter annotations
+     *
+     * ```
+     * var MyService = ng.Class({
+     *   constructor: [String, [new Query(), QueryList], function(name, queryList) {
+     *     ...
+     *   }]
+     * });
+     * ```
+     *
+     * is equivalent to ES6:
+     *
+     * ```
+     * class MyService {
+     *   constructor(name: string, @Query() queryList: QueryList) {
+     *     ...
+     *   }
+     * }
+     * ```
+     *
+     * ### Example with inheritance
+     *
+     * ```
+     * var Shape = ng.Class({
+     *   constructor: (color) {
+     *     this.color = color;
+     *   }
+     * });
+     *
+     * var Square = ng.Class({
+     *   extends: Shape,
+     *   constructor: function(color, size) {
+     *     Shape.call(this, color);
+     *     this.size = size;
+     *   }
+     * });
+     * ```
      * @stable
      */
+    function Class(clsDef) {
+        var constructor = applyParams(clsDef.hasOwnProperty('constructor') ? clsDef.constructor : undefined, 'constructor');
+        var proto = constructor.prototype;
+        if (clsDef.hasOwnProperty('extends')) {
+            if (isFunction(clsDef.extends)) {
+                constructor.prototype = proto =
+                    Object.create(clsDef.extends.prototype);
+            }
+            else {
+                throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
+            }
+        }
+        for (var key in clsDef) {
+            if (key != 'extends' && key != 'prototype' && clsDef.hasOwnProperty(key)) {
+                proto[key] = applyParams(clsDef[key], key);
+            }
+        }
+        if (this && this.annotations instanceof Array) {
+            Reflect.defineMetadata('annotations', this.annotations, constructor);
+        }
+        if (!constructor['name']) {
+            constructor['overriddenName'] = "class" + _nextClassId++;
+        }
+        return constructor;
+    }
+    var Reflect = global$1.Reflect;
+    function makeDecorator(annotationCls, chainFn) {
+        if (chainFn === void 0) { chainFn = null; }
+        function DecoratorFactory(objOrType) {
+            var annotationInstance = new annotationCls(objOrType);
+            if (this instanceof annotationCls) {
+                return annotationInstance;
+            }
+            else {
+                var chainAnnotation = isFunction(this) && this.annotations instanceof Array ? this.annotations : [];
+                chainAnnotation.push(annotationInstance);
+                var TypeDecorator = function TypeDecorator(cls) {
+                    var annotations = Reflect.getOwnMetadata('annotations', cls) || [];
+                    annotations.push(annotationInstance);
+                    Reflect.defineMetadata('annotations', annotations, cls);
+                    return cls;
+                };
+                TypeDecorator.annotations = chainAnnotation;
+                TypeDecorator.Class = Class;
+                if (chainFn)
+                    chainFn(TypeDecorator);
+                return TypeDecorator;
+            }
+        }
+        DecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        DecoratorFactory.annotationCls = annotationCls;
+        return DecoratorFactory;
+    }
+    function makeParamDecorator(annotationCls) {
+        function ParamDecoratorFactory() {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var annotationInstance = Object.create(annotationCls.prototype);
+            annotationCls.apply(annotationInstance, args);
+            if (this instanceof annotationCls) {
+                return annotationInstance;
+            }
+            else {
+                ParamDecorator.annotation = annotationInstance;
+                return ParamDecorator;
+            }
+            function ParamDecorator(cls, unusedKey, index) {
+                var parameters = Reflect.getMetadata('parameters', cls) || [];
+                // there might be gaps if some in between parameters do not have annotations.
+                // we pad with nulls.
+                while (parameters.length <= index) {
+                    parameters.push(null);
+                }
+                parameters[index] = parameters[index] || [];
+                var annotationsForParam = parameters[index];
+                annotationsForParam.push(annotationInstance);
+                Reflect.defineMetadata('parameters', parameters, cls);
+                return cls;
+            }
+        }
+        ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        ParamDecoratorFactory.annotationCls = annotationCls;
+        return ParamDecoratorFactory;
+    }
+    function makePropDecorator(annotationCls) {
+        function PropDecoratorFactory() {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var decoratorInstance = Object.create(annotationCls.prototype);
+            annotationCls.apply(decoratorInstance, args);
+            if (this instanceof annotationCls) {
+                return decoratorInstance;
+            }
+            else {
+                return function PropDecorator(target, name) {
+                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
+                    meta[name] = meta[name] || [];
+                    meta[name].unshift(decoratorInstance);
+                    Reflect.defineMetadata('propMetadata', meta, target.constructor);
+                };
+            }
+        }
+        PropDecoratorFactory.prototype = Object.create(annotationCls.prototype);
+        PropDecoratorFactory.annotationCls = annotationCls;
+        return PropDecoratorFactory;
+    }
+    /**
+     * Factory for creating {@link InjectMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Inject = makeParamDecorator(InjectMetadata);
+    /**
+     * Factory for creating {@link OptionalMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Optional = makeParamDecorator(OptionalMetadata);
+    /**
+     * Factory for creating {@link InjectableMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Injectable = makeDecorator(InjectableMetadata);
+    /**
+     * Factory for creating {@link SelfMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Self = makeParamDecorator(SelfMetadata);
+    /**
+     * Factory for creating {@link HostMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var Host = makeParamDecorator(HostMetadata);
+    /**
+     * Factory for creating {@link SkipSelfMetadata}.
+     * @stable
+     * @Annotation
+     */
+    var SkipSelf = makeParamDecorator(SkipSelfMetadata);
     var OpaqueToken = (function () {
         function OpaqueToken(_desc) {
             this._desc = _desc;
@@ -658,15 +831,23 @@ var __extends = (this && this.__extends) || function (d, b) {
         OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
         return OpaqueToken;
     }());
+    /** @nocollapse */
+    OpaqueToken.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    OpaqueToken.ctorParameters = [
+        null,
+    ];
     /**
      * This token can be used to create a virtual provider that will populate the
-     * `precompile` fields of components and app modules based on its `useValue`.
+     * `entryComponents` fields of components and ng modules based on its `useValue`.
      * All components that are referenced in the `useValue` value (either directly
-     * or in a nested array or map) will be added to the `precompile` property.
+     * or in a nested array or map) will be added to the `entryComponents` property.
      *
      * ### Example
-     * The following example shows how the router can populate the `precompile`
-     * field of an AppModule based on the router configuration which refers
+     * The following example shows how the router can populate the `entryComponents`
+     * field of an NgModule based on the router configuration which refers
      * to components.
      *
      * ```typescript
@@ -674,7 +855,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * function provideRoutes(routes) {
      *   return [
      *     {provide: ROUTES, useValue: routes},
-     *     {provide: ANALYZE_FOR_PRECOMPILE, useValue: routes, multi: true}
+     *     {provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: routes, multi: true}
      *   ];
      * }
      *
@@ -684,7 +865,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   {path: /teams', component: TeamsComp}
      * ];
      *
-     * @AppModule({
+     * @NgModule({
      *   providers: [provideRoutes(routes)]
      * })
      * class ModuleWithRoutes {}
@@ -692,7 +873,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @experimental
      */
-    var ANALYZE_FOR_PRECOMPILE = new OpaqueToken('AnalyzeForPrecompile');
+    var ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
     /**
      * Specifies that a constant attribute value should be injected.
      *
@@ -709,7 +890,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * A decorator can inject string literal `text` like so:
      *
      * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
-     * @ts2dart_const
      * @stable
      */
     var AttributeMetadata = (function (_super) {
@@ -770,10 +950,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *  `
      * })
      * class Tabs {
-     *   panes: QueryList<Pane>;
-     *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-      *    this.panes = panes;
-      *  }
+     *   @ContentChildren(Pane) panes: QueryList<Pane>;
      * }
      * ```
      *
@@ -787,7 +964,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @Component({ selector: 'seeker' })
      * class Seeker {
-     *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+     *   @ContentChildren('findme') elList;
      * }
      * ```
      *
@@ -806,7 +983,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   selector: 'seeker'
      * })
      * class Seeker {
-     *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+     *   @ContentChildren('findMe, findMeToo') elList: QueryList<ElementRef>;
      * }
      * ```
      *
@@ -826,21 +1003,20 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```
      *
      * When querying for items, the first container will see only `a` and `b` by default,
-     * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+     * but with `ContentChildren(TextDirective, {descendants: true})` it will see `c` too.
      *
      * The queried directives are kept in a depth-first pre-order with respect to their
      * positions in the DOM.
      *
-     * Query does not look deep into any subcomponent views.
+     * ContentChildren does not look deep into any subcomponent views.
      *
-     * Query is updated as part of the change-detection cycle. Since change detection
+     * ContentChildren is updated as part of the change-detection cycle. Since change detection
      * happens after construction of a directive, QueryList will always be empty when observed in the
      * constructor.
      *
      * The injected object is an unmodifiable live list.
      * See {@link QueryList} for more details.
-     * @ts2dart_const
-     * @deprecated
+     * @stable
      */
     var QueryMetadata = (function (_super) {
         __extends(QueryMetadata, _super);
@@ -908,7 +1084,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ContentChildrenMetadata = (function (_super) {
@@ -939,7 +1114,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ContentChildMetadata = (function (_super) {
@@ -951,8 +1125,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ContentChildMetadata;
     }(QueryMetadata));
     /**
-     * Similar to {@link QueryMetadata}, but querying the component view, instead of
-     * the content children.
+     * Similar to {@link ContentChildMetadata}, but querying the component view, instead
+     * of the content children.
      *
      * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
      *
@@ -968,14 +1142,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class MyComponent {
      *   shown: boolean;
      *
-     *   constructor(private @ViewQuery(Item) items:QueryList<Item>) {
+     *   constructor(private @ViewChildren(Item) items:QueryList<Item>) {
      *     items.changes.subscribe(() => console.log(items.length));
      *   }
      * }
      * ```
-     *
-     * Supports the same querying parameters as {@link QueryMetadata}, except
-     * `descendants`. This always queries the whole view.
      *
      * As `shown` is flipped between true and false, items will contain zero of one
      * items.
@@ -984,8 +1155,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * The injected object is an iterable and observable live list.
      * See {@link QueryList} for more details.
-     * @ts2dart_const
-     * @deprecated
+     * @stable
      */
     var ViewQueryMetadata = (function (_super) {
         __extends(ViewQueryMetadata, _super);
@@ -1001,7 +1171,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
-        ViewQueryMetadata.prototype.toString = function () { return "@ViewQuery(" + stringify(this.selector) + ")"; };
         return ViewQueryMetadata;
     }(QueryMetadata));
     /**
@@ -1080,7 +1249,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ViewChildrenMetadata = (function (_super) {
@@ -1089,6 +1257,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
             _super.call(this, _selector, { descendants: true, read: read });
         }
+        ViewChildrenMetadata.prototype.toString = function () { return "@ViewChildren(" + stringify(this.selector) + ")"; };
         return ViewChildrenMetadata;
     }(ViewQueryMetadata));
     /**
@@ -1160,7 +1329,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      * ```
-     * @ts2dart_const
      * @stable
      */
     var ViewChildMetadata = (function (_super) {
@@ -1270,7 +1438,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * current `ElementInjector` resolves the constructor dependencies for each directive.
      *
      * Angular then resolves dependencies as follows, according to the order in which they appear in the
-     * {@link ViewMetadata}:
+     * {@link ComponentMetadata}:
      *
      * 1. Dependencies on the current element
      * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -1519,7 +1687,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * location in the current view
      * where these actions are performed.
      *
-     * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+     * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+     * the
      * `<template>` element. Thus a
      * directive in a child view cannot inject the directive that created it.
      *
@@ -1612,19 +1781,16 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Note also that although the `<li></li>` template still exists inside the `<template></template>`,
      * the instantiated
      * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
-     * @ts2dart_const
      * @stable
      */
     var DirectiveMetadata = (function (_super) {
         __extends(DirectiveMetadata, _super);
         function DirectiveMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
             _super.call(this);
             this.selector = selector;
             this._inputs = inputs;
-            this._properties = properties;
             this._outputs = outputs;
-            this._events = events;
             this.host = host;
             this.exportAs = exportAs;
             this.queries = queries;
@@ -1673,25 +1839,10 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   directives: [BankAccount]
              * })
              * class App {}
-             *
-             * bootstrap(App);
              * ```
              *
              */
-            get: function () {
-                return isPresent(this._properties) && this._properties.length > 0 ? this._properties :
-                    this._inputs;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DirectiveMetadata.prototype, "properties", {
-            /**
-             * Use `inputs` instead
-             *
-             * @deprecated
-             */
-            get: function () { return this.inputs; },
+            get: function () { return this._inputs; },
             enumerable: true,
             configurable: true
         });
@@ -1737,23 +1888,10 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   everySecond() { console.log('second'); }
              *   everyFiveSeconds() { console.log('five seconds'); }
              * }
-             * bootstrap(App);
              * ```
              *
              */
-            get: function () {
-                return isPresent(this._events) && this._events.length > 0 ? this._events : this._outputs;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DirectiveMetadata.prototype, "events", {
-            /**
-             * Use `outputs` instead
-             *
-             * @deprecated
-             */
-            get: function () { return this.outputs; },
+            get: function () { return this._outputs; },
             enumerable: true,
             configurable: true
         });
@@ -1809,8 +1947,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * All template expressions and statements are then evaluated against the component instance.
      *
-     * For details on the `@View` annotation, see {@link ViewMetadata}.
-     *
      * ## Lifecycle hooks
      *
      * When the component class implements some {@linkDocs guide/lifecycle-hooks} the
@@ -1820,19 +1956,16 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example
      *
      * {@example core/ts/metadata/metadata.ts region='component'}
-     * @ts2dart_const
      * @stable
      */
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, properties = _b.properties, events = _b.events, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, precompile = _b.precompile;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
                 outputs: outputs,
-                properties: properties,
-                events: events,
                 host: host,
                 exportAs: exportAs,
                 providers: providers,
@@ -1850,7 +1983,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.moduleId = moduleId;
             this.animations = animations;
             this.interpolation = interpolation;
-            this.precompile = precompile;
+            this.entryComponents = entryComponents;
         }
         Object.defineProperty(ComponentMetadata.prototype, "viewProviders", {
             /**
@@ -1907,7 +2040,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ### Example
      *
      * {@example core/ts/metadata/metadata.ts region='pipe'}
-     * @ts2dart_const
      * @stable
      */
     var PipeMetadata = (function (_super) {
@@ -1962,10 +2094,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var InputMetadata = (function () {
@@ -2016,9 +2145,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var OutputMetadata = (function () {
@@ -2058,10 +2185,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class App {
      *   prop;
      * }
-     *
-     * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var HostBindingMetadata = (function () {
@@ -2100,10 +2224,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [CountClicks]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
-     * @ts2dart_const
      * @stable
      */
     var HostListenerMetadata = (function () {
@@ -2114,89 +2235,69 @@ var __extends = (this && this.__extends) || function (d, b) {
         return HostListenerMetadata;
     }());
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
+     * Defines a schema that will allow any property on elements with a `-` in their name,
+     * which is the common rule for custom elements.
      *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * @experimental
      */
+    var CUSTOM_ELEMENTS_SCHEMA = {
+        name: 'custom-elements'
+    };
     /**
-     * Defines template and style encapsulation options available for Component's {@link Component}.
-     *
-     * See {@link ViewMetadata#encapsulation}.
-     * @stable
+     * Declares an Angular Module.
+     * @experimental
      */
-    exports.ViewEncapsulation;
-    (function (ViewEncapsulation) {
-        /**
-         * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-         * Element and pre-processing the style rules provided via
-         * {@link ViewMetadata#styles} or {@link ViewMetadata#stylesUrls}, and adding the new Host Element
-         * attribute to all selectors.
-         *
-         * This is the default option.
-         */
-        ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
-        /**
-         * Use the native encapsulation mechanism of the renderer.
-         *
-         * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-         * creating a ShadowRoot for Component's Host Element.
-         */
-        ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
-        /**
-         * Don't provide any template or style encapsulation.
-         */
-        ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
-    })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
-    var VIEW_ENCAPSULATION_VALUES = [exports.ViewEncapsulation.Emulated, exports.ViewEncapsulation.Native, exports.ViewEncapsulation.None];
-    /**
-     * Metadata properties available for configuring Views.
-     *
-     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
-     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
-     * within the template.
-     *
-     * When a component is instantiated, the template is loaded into the component's shadow root, and
-     * the expressions and statements in the template are evaluated against the component.
-     *
-     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
-     *
-     * ### Example
-     *
-     * ```
-     * @Component({
-     *   selector: 'greet',
-     *   template: 'Hello {{name}}!',
-     *   directives: [GreetUser, Bold]
-     * })
-     * class Greet {
-     *   name: string;
-     *
-     *   constructor() {
-     *     this.name = 'World';
-     *   }
-     * }
-     * ```
-     * @ts2dart_const
-     *
-     * @experimental You should most likely be using ComponentMetadata instead.
-     */
-    var ViewMetadata = (function () {
-        function ViewMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
-            this.templateUrl = templateUrl;
-            this.template = template;
-            this.styleUrls = styleUrls;
-            this.styles = styles;
-            this.directives = directives;
-            this.pipes = pipes;
-            this.encapsulation = encapsulation;
-            this.animations = animations;
-            this.interpolation = interpolation;
+    var NgModuleMetadata = (function (_super) {
+        __extends(NgModuleMetadata, _super);
+        function NgModuleMetadata(options) {
+            if (options === void 0) { options = {}; }
+            // We cannot use destructuring of the constructor argument because `exports` is a
+            // protected symbol in CommonJS and closure tries to aggressively optimize it away.
+            _super.call(this);
+            this._providers = options.providers;
+            this.declarations = options.declarations;
+            this.imports = options.imports;
+            this.exports = options.exports;
+            this.entryComponents = options.entryComponents;
+            this.bootstrap = options.bootstrap;
+            this.schemas = options.schemas;
         }
-        return ViewMetadata;
-    }());
+        Object.defineProperty(NgModuleMetadata.prototype, "providers", {
+            /**
+             * Defines the set of injectable objects that are available in the injector
+             * of this module.
+             *
+             * ## Simple Example
+             *
+             * Here is an example of a class that can be injected:
+             *
+             * ```
+             * class Greeter {
+             *    greet(name:string) {
+             *      return 'Hello ' + name + '!';
+             *    }
+             * }
+             *
+             * @NgModule({
+             *   providers: [
+             *     Greeter
+             *   ]
+             * })
+             * class HelloWorld {
+             *   greeter:Greeter;
+             *
+             *   constructor(greeter:Greeter) {
+             *     this.greeter = greeter;
+             *   }
+             * }
+             * ```
+             */
+            get: function () { return this._providers; },
+            enumerable: true,
+            configurable: true
+        });
+        return NgModuleMetadata;
+    }(InjectableMetadata));
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -2268,8 +2369,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   value = 0;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2315,9 +2414,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasChild = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
-     *  ```
+     * ```
      * @stable
      */
     var OnInit = (function () {
@@ -2432,8 +2529,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasChild = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      *
      *
@@ -2539,8 +2634,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2591,8 +2684,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasContent = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2642,8 +2733,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2696,8 +2785,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2706,248 +2793,89 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AfterViewChecked;
     }());
-    var _nextClassId = 0;
-    function extractAnnotation(annotation) {
-        if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
-            // it is a decorator, extract annotation
-            annotation = annotation.annotation;
-        }
-        return annotation;
-    }
-    function applyParams(fnOrArray, key) {
-        if (fnOrArray === Object || fnOrArray === String || fnOrArray === Function ||
-            fnOrArray === Number || fnOrArray === Array) {
-            throw new Error("Can not use native " + stringify(fnOrArray) + " as constructor");
-        }
-        if (isFunction(fnOrArray)) {
-            return fnOrArray;
-        }
-        else if (fnOrArray instanceof Array) {
-            var annotations = fnOrArray;
-            var annoLength = annotations.length - 1;
-            var fn = fnOrArray[annoLength];
-            if (!isFunction(fn)) {
-                throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
-            }
-            if (annoLength != fn.length) {
-                throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
-            }
-            var paramsAnnotations = [];
-            for (var i = 0, ii = annotations.length - 1; i < ii; i++) {
-                var paramAnnotations = [];
-                paramsAnnotations.push(paramAnnotations);
-                var annotation = annotations[i];
-                if (annotation instanceof Array) {
-                    for (var j = 0; j < annotation.length; j++) {
-                        paramAnnotations.push(extractAnnotation(annotation[j]));
-                    }
-                }
-                else if (isFunction(annotation)) {
-                    paramAnnotations.push(extractAnnotation(annotation));
-                }
-                else {
-                    paramAnnotations.push(annotation);
-                }
-            }
-            Reflect.defineMetadata('parameters', paramsAnnotations, fn);
-            return fn;
-        }
-        else {
-            throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
-        }
-    }
     /**
-     * Provides a way for expressing ES6 classes with parameter annotations in ES5.
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
      *
-     * ## Basic Example
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Defines template and style encapsulation options available for Component's {@link Component}.
      *
-     * ```
-     * var Greeter = ng.Class({
-     *   constructor: function(name) {
-     *     this.name = name;
-     *   },
-     *
-     *   greet: function() {
-     *     alert('Hello ' + this.name + '!');
-     *   }
-     * });
-     * ```
-     *
-     * is equivalent to ES6:
-     *
-     * ```
-     * class Greeter {
-     *   constructor(name) {
-     *     this.name = name;
-     *   }
-     *
-     *   greet() {
-     *     alert('Hello ' + this.name + '!');
-     *   }
-     * }
-     * ```
-     *
-     * or equivalent to ES5:
-     *
-     * ```
-     * var Greeter = function (name) {
-     *   this.name = name;
-     * }
-     *
-     * Greeter.prototype.greet = function () {
-     *   alert('Hello ' + this.name + '!');
-     * }
-     * ```
-     *
-     * ### Example with parameter annotations
-     *
-     * ```
-     * var MyService = ng.Class({
-     *   constructor: [String, [new Query(), QueryList], function(name, queryList) {
-     *     ...
-     *   }]
-     * });
-     * ```
-     *
-     * is equivalent to ES6:
-     *
-     * ```
-     * class MyService {
-     *   constructor(name: string, @Query() queryList: QueryList) {
-     *     ...
-     *   }
-     * }
-     * ```
-     *
-     * ### Example with inheritance
-     *
-     * ```
-     * var Shape = ng.Class({
-     *   constructor: (color) {
-     *     this.color = color;
-     *   }
-     * });
-     *
-     * var Square = ng.Class({
-     *   extends: Shape,
-     *   constructor: function(color, size) {
-     *     Shape.call(this, color);
-     *     this.size = size;
-     *   }
-     * });
-     * ```
+     * See {@link ViewMetadata#encapsulation}.
      * @stable
      */
-    function Class(clsDef) {
-        var constructor = applyParams(clsDef.hasOwnProperty('constructor') ? clsDef.constructor : undefined, 'constructor');
-        var proto = constructor.prototype;
-        if (clsDef.hasOwnProperty('extends')) {
-            if (isFunction(clsDef.extends)) {
-                constructor.prototype = proto =
-                    Object.create(clsDef.extends.prototype);
-            }
-            else {
-                throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
-            }
+    exports.ViewEncapsulation;
+    (function (ViewEncapsulation) {
+        /**
+         * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+         * Element and pre-processing the style rules provided via
+         * {@link ViewMetadata#styles} or {@link ViewMetadata#stylesUrls}, and adding the new Host Element
+         * attribute to all selectors.
+         *
+         * This is the default option.
+         */
+        ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
+        /**
+         * Use the native encapsulation mechanism of the renderer.
+         *
+         * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+         * creating a ShadowRoot for Component's Host Element.
+         */
+        ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
+        /**
+         * Don't provide any template or style encapsulation.
+         */
+        ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
+    var VIEW_ENCAPSULATION_VALUES = [exports.ViewEncapsulation.Emulated, exports.ViewEncapsulation.Native, exports.ViewEncapsulation.None];
+    /**
+     * Metadata properties available for configuring Views.
+     *
+     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
+     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
+     * within the template.
+     *
+     * When a component is instantiated, the template is loaded into the component's shadow root, and
+     * the expressions and statements in the template are evaluated against the component.
+     *
+     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
+     *
+     * ### Example
+     *
+     * ```
+     * @Component({
+     *   selector: 'greet',
+     *   template: 'Hello {{name}}!',
+     *   directives: [GreetUser, Bold]
+     * })
+     * class Greet {
+     *   name: string;
+     *
+     *   constructor() {
+     *     this.name = 'World';
+     *   }
+     * }
+     * ```
+     *
+     * @deprecated Use ComponentMetadata instead.
+     */
+    var ViewMetadata = (function () {
+        function ViewMetadata(_a) {
+            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
+            this.templateUrl = templateUrl;
+            this.template = template;
+            this.styleUrls = styleUrls;
+            this.styles = styles;
+            this.directives = directives;
+            this.pipes = pipes;
+            this.encapsulation = encapsulation;
+            this.animations = animations;
+            this.interpolation = interpolation;
         }
-        for (var key in clsDef) {
-            if (key != 'extends' && key != 'prototype' && clsDef.hasOwnProperty(key)) {
-                proto[key] = applyParams(clsDef[key], key);
-            }
-        }
-        if (this && this.annotations instanceof Array) {
-            Reflect.defineMetadata('annotations', this.annotations, constructor);
-        }
-        if (!constructor['name']) {
-            constructor['overriddenName'] = "class" + _nextClassId++;
-        }
-        return constructor;
-    }
-    var Reflect = global$1.Reflect;
-    function makeDecorator(annotationCls, chainFn) {
-        if (chainFn === void 0) { chainFn = null; }
-        function DecoratorFactory(objOrType) {
-            var annotationInstance = new annotationCls(objOrType);
-            if (this instanceof annotationCls) {
-                return annotationInstance;
-            }
-            else {
-                var chainAnnotation = isFunction(this) && this.annotations instanceof Array ? this.annotations : [];
-                chainAnnotation.push(annotationInstance);
-                var TypeDecorator = function TypeDecorator(cls) {
-                    var annotations = Reflect.getOwnMetadata('annotations', cls) || [];
-                    annotations.push(annotationInstance);
-                    Reflect.defineMetadata('annotations', annotations, cls);
-                    return cls;
-                };
-                TypeDecorator.annotations = chainAnnotation;
-                TypeDecorator.Class = Class;
-                if (chainFn)
-                    chainFn(TypeDecorator);
-                return TypeDecorator;
-            }
-        }
-        DecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        DecoratorFactory.annotationCls = annotationCls;
-        return DecoratorFactory;
-    }
-    function makeParamDecorator(annotationCls) {
-        function ParamDecoratorFactory() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
-            }
-            var annotationInstance = Object.create(annotationCls.prototype);
-            annotationCls.apply(annotationInstance, args);
-            if (this instanceof annotationCls) {
-                return annotationInstance;
-            }
-            else {
-                ParamDecorator.annotation = annotationInstance;
-                return ParamDecorator;
-            }
-            function ParamDecorator(cls, unusedKey, index) {
-                var parameters = Reflect.getMetadata('parameters', cls) || [];
-                // there might be gaps if some in between parameters do not have annotations.
-                // we pad with nulls.
-                while (parameters.length <= index) {
-                    parameters.push(null);
-                }
-                parameters[index] = parameters[index] || [];
-                var annotationsForParam = parameters[index];
-                annotationsForParam.push(annotationInstance);
-                Reflect.defineMetadata('parameters', parameters, cls);
-                return cls;
-            }
-        }
-        ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        ParamDecoratorFactory.annotationCls = annotationCls;
-        return ParamDecoratorFactory;
-    }
-    function makePropDecorator(annotationCls) {
-        function PropDecoratorFactory() {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
-            }
-            var decoratorInstance = Object.create(annotationCls.prototype);
-            annotationCls.apply(decoratorInstance, args);
-            if (this instanceof annotationCls) {
-                return decoratorInstance;
-            }
-            else {
-                return function PropDecorator(target, name) {
-                    var meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
-                    meta[name] = meta[name] || [];
-                    meta[name].unshift(decoratorInstance);
-                    Reflect.defineMetadata('propMetadata', meta, target.constructor);
-                };
-            }
-        }
-        PropDecoratorFactory.prototype = Object.create(annotationCls.prototype);
-        PropDecoratorFactory.annotationCls = annotationCls;
-        return PropDecoratorFactory;
-    }
+        return ViewMetadata;
+    }());
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
     /**
      * Declare reusable UI building blocks for an application.
@@ -2975,7 +2903,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      * @Annotation
      */
-    var Component = makeDecorator(ComponentMetadata, function (fn) { return fn.View = View; });
+    var Component = makeDecorator(ComponentMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
     /**
      * Directives allow you to attach behavior to elements in the DOM.
@@ -3013,7 +2941,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * current `ElementInjector` resolves the constructor dependencies for each directive.
      *
      * Angular then resolves dependencies as follows, according to the order in which they appear in the
-     * {@link ViewMetadata}:
+     * {@link ComponentMetadata}:
      *
      * 1. Dependencies on the current element
      * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -3262,7 +3190,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      * location in the current view
      * where these actions are performed.
      *
-     * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+     * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+     * the
      * `<template>` element. Thus a
      * directive in a child view cannot inject the directive that created it.
      *
@@ -3359,39 +3288,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var Directive = makeDecorator(DirectiveMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewMetadata.
-    /**
-     * Metadata properties available for configuring Views.
-     *
-     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
-     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
-     * within the template.
-     *
-     * When a component is instantiated, the template is loaded into the component's shadow root, and
-     * the expressions and statements in the template are evaluated against the component.
-     *
-     * For details on the `@Component` annotation, see {@link ComponentMetadata}.
-     *
-     * ### Example
-     *
-     * ```
-     * @Component({
-     *   selector: 'greet',
-     *   template: 'Hello {{name}}!',
-     *   directives: [GreetUser, Bold]
-     * })
-     * class Greet {
-     *   name: string;
-     *
-     *   constructor() {
-     *     this.name = 'World';
-     *   }
-     * }
-     * ```
-     * @deprecated
-     * @Annotation
-     */
-    var View = makeDecorator(ViewMetadata, function (fn) { return fn.View = View; });
     /**
      * Specifies that a constant attribute value should be injected.
      *
@@ -3412,117 +3308,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var Attribute = makeParamDecorator(AttributeMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from QueryMetadata.
-    /**
-     * Declares an injectable parameter to be a live list of directives or variable
-     * bindings from the content children of a directive.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/lY9m8HLy7z06vDoUaSN2?p=preview))
-     *
-     * Assume that `<tabs>` component would like to get a list its children `<pane>`
-     * components as shown in this example:
-     *
-     * ```html
-     * <tabs>
-     *   <pane title="Overview">...</pane>
-     *   <pane *ngFor="let o of objects" [title]="o.title">{{o.text}}</pane>
-     * </tabs>
-     * ```
-     *
-     * The preferred solution is to query for `Pane` directives using this decorator.
-     *
-     * ```javascript
-     * @Component({
-     *   selector: 'pane',
-     *   inputs: ['title']
-     * })
-     * class Pane {
-     *   title:string;
-     * }
-     *
-     * @Component({
-     *  selector: 'tabs',
-     *  template: `
-     *    <ul>
-     *      <li *ngFor="let pane of panes">{{pane.title}}</li>
-     *    </ul>
-     *    <ng-content></ng-content>
-     *  `
-     * })
-     * class Tabs {
-     *   panes: QueryList<Pane>;
-     *   constructor(@Query(Pane) panes:QueryList<Pane>) {
-     *     this.panes = panes;
-     *   }
-     * }
-     * ```
-     *
-     * A query can look for variable bindings by passing in a string with desired binding symbol.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/sT2j25cH1dURAyBRCKx1?p=preview))
-     * ```html
-     * <seeker>
-     *   <div #findme>...</div>
-     * </seeker>
-     *
-     * @Component({ selector: 'seeker' })
-     * class seeker {
-     *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
-     * }
-     * ```
-     *
-     * In this case the object that is injected depend on the type of the variable
-     * binding. It can be an ElementRef, a directive or a component.
-     *
-     * Passing in a comma separated list of variable bindings will query for all of them.
-     *
-     * ```html
-     * <seeker>
-     *   <div #findMe>...</div>
-     *   <div #findMeToo>...</div>
-     * </seeker>
-     *
-     *  @Component({
-     *   selector: 'seeker'
-     * })
-     * class Seeker {
-     *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
-     * }
-     * ```
-     *
-     * Configure whether query looks for direct children or all descendants
-     * of the querying element, by using the `descendants` parameter.
-     * It is set to `false` by default.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/wtGeB977bv7qvA5FTYl9?p=preview))
-     * ```html
-     * <container #first>
-     *   <item>a</item>
-     *   <item>b</item>
-     *   <container #second>
-     *     <item>c</item>
-     *   </container>
-     * </container>
-     * ```
-     *
-     * When querying for items, the first container will see only `a` and `b` by default,
-     * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
-     *
-     * The queried directives are kept in a depth-first pre-order with respect to their
-     * positions in the DOM.
-     *
-     * Query does not look deep into any subcomponent views.
-     *
-     * Query is updated as part of the change-detection cycle. Since change detection
-     * happens after construction of a directive, QueryList will always be empty when observed in the
-     * constructor.
-     *
-     * The injected object is an unmodifiable live list.
-     * See {@link QueryList} for more details.
-     * @deprecated
-     * @Annotation
-     */
-    var Query = makeParamDecorator(QueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
     /**
      * Configures a content query.
@@ -3737,45 +3522,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var ViewChild = makePropDecorator(ViewChildMetadata);
-    // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewQueryMetadata.
-    /**
-     * Similar to {@link QueryMetadata}, but querying the component view, instead of
-     * the content children.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
-     *
-     * ```javascript
-     * @Component({
-     *   ...,
-     *   template: `
-     *     <item> a </item>
-     *     <item> b </item>
-     *     <item> c </item>
-     *   `
-     * })
-     * class MyComponent {
-     *   shown: boolean;
-     *
-     *   constructor(private @Query(Item) items:QueryList<Item>) {
-     *     items.changes.subscribe(() => console.log(items.length));
-     *   }
-     * }
-     * ```
-     *
-     * Supports the same querying parameters as {@link QueryMetadata}, except
-     * `descendants`. This always queries the whole view.
-     *
-     * As `shown` is flipped between true and false, items will contain zero of one
-     * items.
-     *
-     * Specifies that a {@link QueryList} should be injected.
-     *
-     * The injected object is an iterable and observable live list.
-     * See {@link QueryList} for more details.
-     * @deprecated
-     * @Annotation
-     */
-    var ViewQuery = makeParamDecorator(ViewQueryMetadata);
     // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
     /**
      * Declare reusable pipe function.
@@ -3825,8 +3571,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3871,7 +3615,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3909,8 +3652,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class App {
      *   prop;
      * }
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3947,55 +3688,17 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [CountClicks]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
      */
     var HostListener = makePropDecorator(HostListenerMetadata);
     /**
-     * Declares an app module.
-     * @stable
+     * Declares an ng module.
+     * @experimental
      * @Annotation
      */
-    var AppModule = makeDecorator(AppModuleMetadata);
-    /**
-     * Factory for creating {@link InjectMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Inject = makeParamDecorator(InjectMetadata);
-    /**
-     * Factory for creating {@link OptionalMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Optional = makeParamDecorator(OptionalMetadata);
-    /**
-     * Factory for creating {@link InjectableMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Injectable = makeDecorator(InjectableMetadata);
-    /**
-     * Factory for creating {@link SelfMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Self = makeParamDecorator(SelfMetadata);
-    /**
-     * Factory for creating {@link HostMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var Host = makeParamDecorator(HostMetadata);
-    /**
-     * Factory for creating {@link SkipSelfMetadata}.
-     * @stable
-     * @Annotation
-     */
-    var SkipSelf = makeParamDecorator(SkipSelfMetadata);
+    var NgModule = makeDecorator(NgModuleMetadata);
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -4425,8 +4128,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      *
-     * bootstrap(MyApp, [{provide: ExceptionHandler, useClass: MyExceptionHandler}])
-     *
+     * @NgModule({
+     *   providers: [{provide: ExceptionHandler, useClass: MyExceptionHandler}]
+     * })
+     * class MyModule {}
      * ```
      * @stable
      */
@@ -4748,7 +4453,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * }
      *
      * var injector = Injector.resolveAndCreate([A]);
-  
+
      * try {
      *   injector.get(A);
      * } catch (e) {
@@ -4889,8 +4594,8 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```typescript
      * expect(() => Injector.resolveAndCreate([
-     *   new Provider("Strings", {useValue: "string1", multi: true}),
-     *   new Provider("Strings", {useValue: "string2", multi: false})
+     *   { provide: "Strings", useValue: "string1", multi: true},
+     *   { provide: "Strings", useValue: "string2", multi: false}
      * ])).toThrowError();
      * ```
      */
@@ -4978,58 +4683,38 @@ var __extends = (this && this.__extends) || function (d, b) {
         return KeyRegistry;
     }());
     var _globalKeyRegistry = new KeyRegistry();
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Runtime representation a type that a Component or other object is instances of.
+     *
+     * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
+     * the `MyCustomComponent` constructor function.
+     *
+     * @stable
+     */
+    var Type = Function;
     var ReflectionCapabilities = (function () {
         function ReflectionCapabilities(reflect) {
-            this._reflect = isPresent(reflect) ? reflect : global$1.Reflect;
+            this._reflect = reflect || global$1.Reflect;
         }
         ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
         ReflectionCapabilities.prototype.factory = function (t) {
-            switch (t.length) {
-                case 0:
-                    return function () { return new t(); };
-                case 1:
-                    return function (a1) { return new t(a1); };
-                case 2:
-                    return function (a1, a2) { return new t(a1, a2); };
-                case 3:
-                    return function (a1, a2, a3) { return new t(a1, a2, a3); };
-                case 4:
-                    return function (a1, a2, a3, a4) { return new t(a1, a2, a3, a4); };
-                case 5:
-                    return function (a1, a2, a3, a4, a5) { return new t(a1, a2, a3, a4, a5); };
-                case 6:
-                    return function (a1, a2, a3, a4, a5, a6) { return new t(a1, a2, a3, a4, a5, a6); };
-                case 7:
-                    return function (a1, a2, a3, a4, a5, a6, a7) { return new t(a1, a2, a3, a4, a5, a6, a7); };
-                case 8:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8) { return new t(a1, a2, a3, a4, a5, a6, a7, a8); };
-                case 9:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9); };
-                case 10:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10); };
-                case 11:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11); };
-                case 12:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12); };
-                case 13:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13); };
-                case 14:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14); };
-                case 15:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15); };
-                case 16:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16); };
-                case 17:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17); };
-                case 18:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18); };
-                case 19:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19); };
-                case 20:
-                    return function (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) { return new t(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20); };
-            }
-            ;
-            throw new Error("Cannot create a factory for '" + stringify(t) + "' because its constructor has more than 20 arguments");
+            var prototype = t.prototype;
+            return function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i - 0] = arguments[_i];
+                }
+                var instance = Object.create(prototype);
+                t.apply(instance, args);
+                return instance;
+            };
         };
         /** @internal */
         ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes /** TODO #9100 */, paramAnnotations /** TODO #9100 */) {
@@ -5336,282 +5021,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var reflector = new Reflector(new ReflectionCapabilities());
     /**
-     * Describes how the {@link Injector} should instantiate a given token.
-     *
-     * See {@link provide}.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/GNAyj6K6PfYg2NBzgwZ5?p%3Dpreview&p=preview))
-     *
-     * ```javascript
-     * var injector = Injector.resolveAndCreate([
-     *   new Provider("message", { useValue: 'Hello' })
-     * ]);
-     *
-     * expect(injector.get("message")).toEqual('Hello');
-     * ```
-     * @ts2dart_const
-     * @deprecated
-     */
-    var Provider = (function () {
-        function Provider(token, _a) {
-            var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
-            this.token = token;
-            this.useClass = useClass;
-            this.useValue = useValue;
-            this.useExisting = useExisting;
-            this.useFactory = useFactory;
-            this.dependencies = deps;
-            this._multi = multi;
-        }
-        Object.defineProperty(Provider.prototype, "multi", {
-            // TODO: Provide a full working example after alpha38 is released.
-            /**
-             * Creates multiple providers matching the same token (a multi-provider).
-             *
-             * Multi-providers are used for creating pluggable service, where the system comes
-             * with some default providers, and the user can register additional providers.
-             * The combination of the default providers and the additional providers will be
-             * used to drive the behavior of the system.
-             *
-             * ### Example
-             *
-             * ```typescript
-             * var injector = Injector.resolveAndCreate([
-             *   new Provider("Strings", { useValue: "String1", multi: true}),
-             *   new Provider("Strings", { useValue: "String2", multi: true})
-             * ]);
-             *
-             * expect(injector.get("Strings")).toEqual(["String1", "String2"]);
-             * ```
-             *
-             * Multi-providers and regular providers cannot be mixed. The following
-             * will throw an exception:
-             *
-             * ```typescript
-             * var injector = Injector.resolveAndCreate([
-             *   new Provider("Strings", { useValue: "String1", multi: true }),
-             *   new Provider("Strings", { useValue: "String2"})
-             * ]);
-             * ```
-             */
-            get: function () { return normalizeBool(this._multi); },
-            enumerable: true,
-            configurable: true
-        });
-        return Provider;
-    }());
-    /**
-     * See {@link Provider} instead.
-     *
-     * @deprecated
-     * @ts2dart_const
-     */
-    var Binding = (function (_super) {
-        __extends(Binding, _super);
-        function Binding(token, _a) {
-            var toClass = _a.toClass, toValue = _a.toValue, toAlias = _a.toAlias, toFactory = _a.toFactory, deps = _a.deps, multi = _a.multi;
-            _super.call(this, token, {
-                useClass: toClass,
-                useValue: toValue,
-                useExisting: toAlias,
-                useFactory: toFactory,
-                deps: deps,
-                multi: multi
-            });
-        }
-        Object.defineProperty(Binding.prototype, "toClass", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useClass; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toAlias", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useExisting; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toFactory", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useFactory; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Binding.prototype, "toValue", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.useValue; },
-            enumerable: true,
-            configurable: true
-        });
-        return Binding;
-    }(Provider));
-    /**
-     * Creates a {@link Provider}.
-     *
-     * To construct a {@link Provider}, bind a `token` to either a class, a value, a factory function,
-     * or
-     * to an existing `token`.
-     * See {@link ProviderBuilder} for more details.
-     *
-     * The `token` is most commonly a class or {@link OpaqueToken}.
-     *
-     * @deprecated
-     */
-    function bind(token) {
-        return new ProviderBuilder(token);
-    }
-    /**
-     * Helper class for the {@link bind} function.
-     * @deprecated
-     */
-    var ProviderBuilder = (function () {
-        function ProviderBuilder(token) {
-            this.token = token;
-        }
-        /**
-         * Binds a DI token to a class.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/ZpBCSYqv6e2ud5KXLdxQ?p=preview))
-         *
-         * Because `toAlias` and `toClass` are often confused, the example contains
-         * both use cases for easy comparison.
-         *
-         * ```typescript
-         * class Vehicle {}
-         *
-         * class Car extends Vehicle {}
-         *
-         * var injectorClass = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useClass: Car}
-         * ]);
-         * var injectorAlias = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useExisting: Car}
-         * ]);
-         *
-         * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
-         * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
-         *
-         * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
-         * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
-         * ```
-         */
-        ProviderBuilder.prototype.toClass = function (type) {
-            if (!isType(type)) {
-                throw new BaseException("Trying to create a class provider but \"" + stringify(type) + "\" is not a class!");
-            }
-            return new Provider(this.token, { useClass: type });
-        };
-        /**
-         * Binds a DI token to a value.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/G024PFHmDL0cJFgfZK8O?p=preview))
-         *
-         * ```typescript
-         * var injector = Injector.resolveAndCreate([
-         *   {provide: 'message', useValue: 'Hello'}
-         * ]);
-         *
-         * expect(injector.get('message')).toEqual('Hello');
-         * ```
-         */
-        ProviderBuilder.prototype.toValue = function (value) { return new Provider(this.token, { useValue: value }); };
-        /**
-         * Binds a DI token to an existing token.
-         *
-         * Angular will return the same instance as if the provided token was used. (This is
-         * in contrast to `useClass` where a separate instance of `useClass` will be returned.)
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/uBaoF2pN5cfc5AfZapNw?p=preview))
-         *
-         * Because `toAlias` and `toClass` are often confused, the example contains
-         * both use cases for easy comparison.
-         *
-         * ```typescript
-         * class Vehicle {}
-         *
-         * class Car extends Vehicle {}
-         *
-         * var injectorAlias = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useExisting: Car}
-         * ]);
-         * var injectorClass = Injector.resolveAndCreate([
-         *   Car,
-         *   {provide: Vehicle, useClass: Car})
-         * ]);
-         *
-         * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
-         * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
-         *
-         * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
-         * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
-         * ```
-         */
-        ProviderBuilder.prototype.toAlias = function (aliasToken) {
-            if (isBlank(aliasToken)) {
-                throw new BaseException("Can not alias " + stringify(this.token) + " to a blank value!");
-            }
-            return new Provider(this.token, { useExisting: aliasToken });
-        };
-        /**
-         * Binds a DI token to a function which computes the value.
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/OejNIfTT3zb1iBxaIYOb?p=preview))
-         *
-         * ```typescript
-         * var injector = Injector.resolveAndCreate([
-         *   {provide: Number, useFactory: () => { return 1+2; }},
-         *   {provide: String, useFactory: (v) => { return "Value: " + v; }, deps: [Number]}
-         * ]);
-         *
-         * expect(injector.get(Number)).toEqual(3);
-         * expect(injector.get(String)).toEqual('Value: 3');
-         * ```
-         */
-        ProviderBuilder.prototype.toFactory = function (factory, dependencies) {
-            if (!isFunction(factory)) {
-                throw new BaseException("Trying to create a factory provider but \"" + stringify(factory) + "\" is not a function!");
-            }
-            return new Provider(this.token, { useFactory: factory, deps: dependencies });
-        };
-        return ProviderBuilder;
-    }());
-    /**
-     * Creates a {@link Provider}.
-     *
-     * See {@link Provider} for more details.
-     *
-     * <!-- TODO: improve the docs -->
-     * @deprecated
-     */
-    function provide(token, _a) {
-        var useClass = _a.useClass, useValue = _a.useValue, useExisting = _a.useExisting, useFactory = _a.useFactory, deps = _a.deps, multi = _a.multi;
-        return new Provider(token, {
-            useClass: useClass,
-            useValue: useValue,
-            useExisting: useExisting,
-            useFactory: useFactory,
-            deps: deps,
-            multi: multi
-        });
-    }
-    function isProviderLiteral(obj) {
-        return obj && typeof obj == 'object' && obj.provide;
-    }
-    function createProvider(obj) {
-        return new Provider(obj.provide, obj);
-    }
-    /**
      * `Dependency` is used by the framework to extend DI.
      * This is internal to Angular and should not be used directly.
      */
@@ -5643,7 +5052,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ResolvedReflectiveProvider_;
     }());
     /**
-     * An internal resolved representation of a factory function created by resolving {@link Provider}.
+     * An internal resolved representation of a factory function created by resolving {@link
+     * Provider}.
      * @experimental
      */
     var ResolvedReflectiveFactory = (function () {
@@ -5678,7 +5088,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         else if (isPresent(provider.useFactory)) {
             factoryFn = provider.useFactory;
-            resolvedDeps = constructDependencies(provider.useFactory, provider.dependencies);
+            resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
         }
         else {
             factoryFn = function () { return provider.useValue; };
@@ -5693,7 +5103,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * convenience provider syntax.
      */
     function resolveReflectiveProvider(provider) {
-        return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.token), [resolveReflectiveFactory(provider)], provider.multi);
+        return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)], provider.multi);
     }
     /**
      * Resolve a list of Providers.
@@ -5741,19 +5151,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _normalizeProviders(providers, res) {
         providers.forEach(function (b) {
             if (b instanceof Type) {
-                res.push(provide(b, { useClass: b }));
+                res.push({ provide: b, useClass: b });
             }
-            else if (b instanceof Provider) {
+            else if (b && typeof b == 'object' && b.hasOwnProperty('provide')) {
                 res.push(b);
-            }
-            else if (isProviderLiteral(b)) {
-                res.push(createProvider(b));
             }
             else if (b instanceof Array) {
                 _normalizeProviders(b, res);
-            }
-            else if (b instanceof ProviderBuilder) {
-                throw new InvalidProviderError(b.token);
             }
             else {
                 throw new InvalidProviderError(b);
@@ -6292,9 +5696,7 @@ var __extends = (this && this.__extends) || function (d, b) {
          * because it needs to resolve the passed-in providers first.
          * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
          */
-        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) {
-            return unimplemented();
-        };
+        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return unimplemented(); };
         /**
          * Creates a child injector from previously resolved providers.
          *
@@ -6647,182 +6049,48 @@ var __extends = (this && this.__extends) || function (d, b) {
         return res;
     }
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * A function that will be executed when an application is initialized.
+     * @experimental
      */
-    var PromiseCompleter = (function () {
-        function PromiseCompleter() {
+    var APP_INITIALIZER = new OpaqueToken('Application Initializer');
+    var ApplicationInitStatus = (function () {
+        function ApplicationInitStatus(appInits) {
             var _this = this;
-            this.promise = new Promise(function (res, rej) {
-                _this.resolve = res;
-                _this.reject = rej;
-            });
-        }
-        return PromiseCompleter;
-    }());
-    var PromiseWrapper = (function () {
-        function PromiseWrapper() {
-        }
-        PromiseWrapper.resolve = function (obj) { return Promise.resolve(obj); };
-        PromiseWrapper.reject = function (obj, _) { return Promise.reject(obj); };
-        // Note: We can't rename this method into `catch`, as this is not a valid
-        // method name in Dart.
-        PromiseWrapper.catchError = function (promise, onError) {
-            return promise.catch(onError);
-        };
-        PromiseWrapper.all = function (promises) {
-            if (promises.length == 0)
-                return Promise.resolve([]);
-            return Promise.all(promises);
-        };
-        PromiseWrapper.then = function (promise, success, rejection) {
-            return promise.then(success, rejection);
-        };
-        PromiseWrapper.wrap = function (computation) {
-            return new Promise(function (res, rej) {
-                try {
-                    res(computation());
-                }
-                catch (e) {
-                    rej(e);
-                }
-            });
-        };
-        PromiseWrapper.scheduleMicrotask = function (computation) {
-            PromiseWrapper.then(PromiseWrapper.resolve(null), computation, function (_) { });
-        };
-        PromiseWrapper.completer = function () { return new PromiseCompleter(); };
-        return PromiseWrapper;
-    }());
-    var ObservableWrapper = (function () {
-        function ObservableWrapper() {
-        }
-        // TODO(vsavkin): when we use rxnext, try inferring the generic type from the first arg
-        ObservableWrapper.subscribe = function (emitter, onNext, onError, onComplete) {
-            if (onComplete === void 0) { onComplete = function () { }; }
-            onError = (typeof onError === 'function') && onError || noop;
-            onComplete = (typeof onComplete === 'function') && onComplete || noop;
-            return emitter.subscribe({ next: onNext, error: onError, complete: onComplete });
-        };
-        ObservableWrapper.isObservable = function (obs) { return !!obs.subscribe; };
-        /**
-         * Returns whether `obs` has any subscribers listening to events.
-         */
-        ObservableWrapper.hasSubscribers = function (obs) { return obs.observers.length > 0; };
-        ObservableWrapper.dispose = function (subscription) { subscription.unsubscribe(); };
-        /**
-         * @deprecated - use callEmit() instead
-         */
-        ObservableWrapper.callNext = function (emitter, value) { emitter.emit(value); };
-        ObservableWrapper.callEmit = function (emitter, value) { emitter.emit(value); };
-        ObservableWrapper.callError = function (emitter, error) { emitter.error(error); };
-        ObservableWrapper.callComplete = function (emitter) { emitter.complete(); };
-        ObservableWrapper.fromPromise = function (promise) {
-            return rxjs_observable_PromiseObservable.PromiseObservable.create(promise);
-        };
-        ObservableWrapper.toPromise = function (obj) { return rxjs_operator_toPromise.toPromise.call(obj); };
-        return ObservableWrapper;
-    }());
-    /**
-     * Use by directives and components to emit custom Events.
-     *
-     * ### Examples
-     *
-     * In the following example, `Zippy` alternatively emits `open` and `close` events when its
-     * title gets clicked:
-     *
-     * ```
-     * @Component({
-     *   selector: 'zippy',
-     *   template: `
-     *   <div class="zippy">
-     *     <div (click)="toggle()">Toggle</div>
-     *     <div [hidden]="!visible">
-     *       <ng-content></ng-content>
-     *     </div>
-     *  </div>`})
-     * export class Zippy {
-     *   visible: boolean = true;
-     *   @Output() open: EventEmitter<any> = new EventEmitter();
-     *   @Output() close: EventEmitter<any> = new EventEmitter();
-     *
-     *   toggle() {
-     *     this.visible = !this.visible;
-     *     if (this.visible) {
-     *       this.open.emit(null);
-     *     } else {
-     *       this.close.emit(null);
-     *     }
-     *   }
-     * }
-     * ```
-     *
-     * The events payload can be accessed by the parameter `$event` on the components output event
-     * handler:
-     *
-     * ```
-     * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
-     * ```
-     *
-     * Uses Rx.Observable but provides an adapter to make it work as specified here:
-     * https://github.com/jhusain/observable-spec
-     *
-     * Once a reference implementation of the spec is available, switch to it.
-     * @stable
-     */
-    var EventEmitter = (function (_super) {
-        __extends(EventEmitter, _super);
-        /**
-         * Creates an instance of [EventEmitter], which depending on [isAsync],
-         * delivers events synchronously or asynchronously.
-         */
-        function EventEmitter(isAsync) {
-            if (isAsync === void 0) { isAsync = false; }
-            _super.call(this);
-            this.__isAsync = isAsync;
-        }
-        EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
-        /**
-         * @deprecated - use .emit(value) instead
-         */
-        EventEmitter.prototype.next = function (value) { _super.prototype.next.call(this, value); };
-        EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
-            var schedulerFn;
-            var errorFn = function (err) { return null; };
-            var completeFn = function () { return null; };
-            if (generatorOrNext && typeof generatorOrNext === 'object') {
-                schedulerFn = this.__isAsync ? function (value /** TODO #9100 */) {
-                    setTimeout(function () { return generatorOrNext.next(value); });
-                } : function (value /** TODO #9100 */) { generatorOrNext.next(value); };
-                if (generatorOrNext.error) {
-                    errorFn = this.__isAsync ? function (err) { setTimeout(function () { return generatorOrNext.error(err); }); } :
-                        function (err) { generatorOrNext.error(err); };
-                }
-                if (generatorOrNext.complete) {
-                    completeFn = this.__isAsync ? function () { setTimeout(function () { return generatorOrNext.complete(); }); } :
-                        function () { generatorOrNext.complete(); };
+            this._done = false;
+            var asyncInitPromises = [];
+            if (appInits) {
+                for (var i = 0; i < appInits.length; i++) {
+                    var initResult = appInits[i]();
+                    if (isPromise(initResult)) {
+                        asyncInitPromises.push(initResult);
+                    }
                 }
             }
-            else {
-                schedulerFn = this.__isAsync ? function (value /** TODO #9100 */) {
-                    setTimeout(function () { return generatorOrNext(value); });
-                } : function (value /** TODO #9100 */) { generatorOrNext(value); };
-                if (error) {
-                    errorFn =
-                        this.__isAsync ? function (err) { setTimeout(function () { return error(err); }); } : function (err) { error(err); };
-                }
-                if (complete) {
-                    completeFn =
-                        this.__isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
-                }
+            this._donePromise = Promise.all(asyncInitPromises).then(function () { _this._done = true; });
+            if (asyncInitPromises.length === 0) {
+                this._done = true;
             }
-            return _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
-        };
-        return EventEmitter;
-    }(rxjs_Subject.Subject));
+        }
+        Object.defineProperty(ApplicationInitStatus.prototype, "done", {
+            get: function () { return this._done; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ApplicationInitStatus.prototype, "donePromise", {
+            get: function () { return this._donePromise; },
+            enumerable: true,
+            configurable: true
+        });
+        return ApplicationInitStatus;
+    }());
+    /** @nocollapse */
+    ApplicationInitStatus.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ApplicationInitStatus.ctorParameters = [
+        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+    ];
     /**
      * A DI Token representing a unique string id assigned to the application by Angular and used
      * primarily for prefixing application attributes and CSS styles when
@@ -6841,8 +6109,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Providers that will generate a random APP_ID_TOKEN.
      * @experimental
      */
-    var APP_ID_RANDOM_PROVIDER = 
-    /*@ts2dart_const*/ /* @ts2dart_Provider */ {
+    var APP_ID_RANDOM_PROVIDER = {
         provide: APP_ID,
         useFactory: _appIdRandomProviderFactory,
         deps: []
@@ -6854,29 +6121,27 @@ var __extends = (this && this.__extends) || function (d, b) {
      * A function that will be executed when a platform is initialized.
      * @experimental
      */
-    var PLATFORM_INITIALIZER = 
-    /*@ts2dart_const*/ new OpaqueToken('Platform Initializer');
+    var PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
     /**
-     * A function that will be executed when an application is initialized.
+     * All callbacks provided via this token will be called for every component that is bootstrapped.
+     * Signature of the callback:
+     *
+     * `(componentRef: ComponentRef) => void`.
+     *
      * @experimental
      */
-    var APP_INITIALIZER = 
-    /*@ts2dart_const*/ new OpaqueToken('Application Initializer');
+    var APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
     /**
      * A token which indicates the root directory of the application
      * @experimental
      */
-    var PACKAGE_ROOT_URL = 
-    /*@ts2dart_const*/ new OpaqueToken('Application Packages Root URL');
-    // Note: Need to rename warn as in Dart
-    // class members and imports can't use the same name.
-    var _warnImpl = warn;
+    var PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
     var Console = (function () {
         function Console() {
         }
         Console.prototype.log = function (message) { print(message); };
         // Note: for reporting errors use `DOM.logError()` as it is platform specific
-        Console.prototype.warn = function (message) { _warnImpl(message); };
+        Console.prototype.warn = function (message) { warn(message); };
         return Console;
     }());
     /** @nocollapse */
@@ -6897,64 +6162,86 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ComponentStillLoadingError;
     }(BaseException));
     /**
+     * Combination of NgModuleFactory and ComponentFactorys.
+     *
+     * @experimental
+     */
+    var ModuleWithComponentFactories = (function () {
+        function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
+            this.ngModuleFactory = ngModuleFactory;
+            this.componentFactories = componentFactories;
+        }
+        return ModuleWithComponentFactories;
+    }());
+    function _throwError() {
+        throw new BaseException("Runtime compiler is not loaded");
+    }
+    /**
      * Low-level service for running the angular compiler duirng runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
      *
-     * Each `@AppModule` provides an own `Compiler` to its injector,
-     * that will use the directives/pipes of the app module for compilation
+     * Each `@NgModule` provides an own `Compiler` to its injector,
+     * that will use the directives/pipes of the ng module for compilation
      * of components.
      * @stable
      */
     var Compiler = (function () {
         function Compiler() {
         }
-        Object.defineProperty(Compiler.prototype, "injector", {
-            /**
-             * Returns the injector with which the compiler has been created.
-             */
-            get: function () {
-                throw new BaseException("Runtime compiler is not loaded. Tried to read the injector.");
-            },
-            enumerable: true,
-            configurable: true
-        });
         /**
          * Loads the template and styles of a component and returns the associated `ComponentFactory`.
          */
-        Compiler.prototype.compileComponentAsync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        Compiler.prototype.compileComponentAsync = function (component, ngModule) {
+            if (ngModule === void 0) { ngModule = null; }
+            throw _throwError();
         };
         /**
          * Compiles the given component. All templates have to be either inline or compiled via
          * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
          */
-        Compiler.prototype.compileComponentSync = function (component) {
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(component));
+        Compiler.prototype.compileComponentSync = function (component, ngModule) {
+            if (ngModule === void 0) { ngModule = null; }
+            throw _throwError();
         };
         /**
-         * Compiles the given App Module. All templates of the components listed in `precompile`
-         * have to be either inline or compiled before via `compileComponentAsync` /
-         * `compileAppModuleAsync`. Otherwise throws a {@link ComponentStillLoadingError}.
+         * Compiles the given NgModule and all of its components. All templates of the components listed
+         * in `entryComponents`
+         * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
          */
-        Compiler.prototype.compileAppModuleSync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
+        /**
+         * Compiles the given NgModule and all of its components
+         */
+        Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
+        /**
+         * Same as {@link compileModuleSync} put also creates ComponentFactories for all components.
+         */
+        Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+            throw _throwError();
         };
-        Compiler.prototype.compileAppModuleAsync = function (moduleType, metadata) {
-            if (metadata === void 0) { metadata = null; }
-            throw new BaseException("Runtime compiler is not loaded. Tried to compile " + stringify(moduleType));
+        /**
+         * Same as {@link compileModuleAsync} put also creates ComponentFactories for all components.
+         */
+        Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+            throw _throwError();
         };
         /**
          * Clears all caches
          */
         Compiler.prototype.clearCache = function () { };
         /**
-         * Clears the cache for the given component/appModule.
+         * Clears the cache for the given component/ngModule.
          */
         Compiler.prototype.clearCacheFor = function (type) { };
         return Compiler;
     }());
+    /**
+     * Token to provide CompilerOptions in the platform injector.
+     *
+     * @experimental
+     */
+    var COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
     /**
      * A factory for creating a Compiler
      *
@@ -6963,58 +6250,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     var CompilerFactory = (function () {
         function CompilerFactory() {
         }
-        CompilerFactory.mergeOptions = function (defaultOptions, newOptions) {
-            if (defaultOptions === void 0) { defaultOptions = {}; }
-            if (newOptions === void 0) { newOptions = {}; }
-            return {
-                useDebug: _firstDefined(newOptions.useDebug, defaultOptions.useDebug),
-                useJit: _firstDefined(newOptions.useJit, defaultOptions.useJit),
-                defaultEncapsulation: _firstDefined(newOptions.defaultEncapsulation, defaultOptions.defaultEncapsulation),
-                providers: _mergeArrays(defaultOptions.providers, newOptions.providers),
-                deprecatedAppProviders: _mergeArrays(defaultOptions.deprecatedAppProviders, newOptions.deprecatedAppProviders)
-            };
-        };
-        CompilerFactory.prototype.withDefaults = function (options) {
-            if (options === void 0) { options = {}; }
-            return new _DefaultApplyingCompilerFactory(this, options);
-        };
         return CompilerFactory;
     }());
-    var _DefaultApplyingCompilerFactory = (function (_super) {
-        __extends(_DefaultApplyingCompilerFactory, _super);
-        function _DefaultApplyingCompilerFactory(_delegate, _options) {
-            _super.call(this);
-            this._delegate = _delegate;
-            this._options = _options;
-        }
-        _DefaultApplyingCompilerFactory.prototype.createCompiler = function (options) {
-            if (options === void 0) { options = {}; }
-            return this._delegate.createCompiler(CompilerFactory.mergeOptions(this._options, options));
-        };
-        return _DefaultApplyingCompilerFactory;
-    }(CompilerFactory));
-    function _firstDefined() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        for (var i = 0; i < args.length; i++) {
-            if (args[i] !== undefined) {
-                return args[i];
-            }
-        }
-        return undefined;
-    }
-    function _mergeArrays() {
-        var parts = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            parts[_i - 0] = arguments[_i];
-        }
-        var result = [];
-        parts.forEach(function (part) { return result.push.apply(result, part); });
-        return result;
-    }
-    /* @ts2dart_const */
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
         }
@@ -7065,6 +6302,55 @@ var __extends = (this && this.__extends) || function (d, b) {
             var record;
             for (record = this._itHead; record !== null; record = record._next) {
                 fn(record);
+            }
+        };
+        DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
+            var nextIt = this._itHead;
+            var nextRemove = this._removalsHead;
+            var addRemoveOffset = 0;
+            var moveOffsets = null;
+            while (nextIt || nextRemove) {
+                // Figure out which is the next record to process
+                // Order: remove, add, move
+                var record = !nextRemove ||
+                    nextIt &&
+                        nextIt.currentIndex < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                    nextIt :
+                    nextRemove;
+                var adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+                var currentIndex = record.currentIndex;
+                // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
+                if (record === nextRemove) {
+                    addRemoveOffset--;
+                    nextRemove = nextRemove._nextRemoved;
+                }
+                else {
+                    nextIt = nextIt._next;
+                    if (record.previousIndex == null) {
+                        addRemoveOffset++;
+                    }
+                    else {
+                        // INVARIANT:  currentIndex < previousIndex
+                        if (!moveOffsets)
+                            moveOffsets = [];
+                        var localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                        var localCurrentIndex = currentIndex - addRemoveOffset;
+                        if (localMovePreviousIndex != localCurrentIndex) {
+                            for (var i = 0; i < localMovePreviousIndex; i++) {
+                                var offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                                var index = offset + i;
+                                if (localCurrentIndex <= index && index < localMovePreviousIndex) {
+                                    moveOffsets[i] = offset + 1;
+                                }
+                            }
+                            var previousIndex = record.previousIndex;
+                            moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
+                        }
+                    }
+                }
+                if (adjPreviousIndex !== currentIndex) {
+                    fn(record, adjPreviousIndex, currentIndex);
+                }
             }
         };
         DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
@@ -7666,6 +6952,16 @@ var __extends = (this && this.__extends) || function (d, b) {
         _DuplicateMap.prototype.toString = function () { return '_DuplicateMap(' + stringify(this.map) + ')'; };
         return _DuplicateMap;
     }());
+    function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
+        var previousIndex = item.previousIndex;
+        if (previousIndex === null)
+            return previousIndex;
+        var moveOffset = 0;
+        if (moveOffsets && previousIndex < moveOffsets.length) {
+            moveOffset = moveOffsets[previousIndex];
+        }
+        return previousIndex + addRemoveOffset + moveOffset;
+    }
     var DefaultKeyValueDifferFactory = (function () {
         function DefaultKeyValueDifferFactory() {
         }
@@ -7963,11 +7259,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
-     * @ts2dart_const
      * @stable
      */
     var IterableDiffers = (function () {
-        /*@ts2dart_const*/
         function IterableDiffers(factories) {
             this.factories = factories;
         }
@@ -8001,7 +7295,8 @@ var __extends = (this && this.__extends) || function (d, b) {
          * ```
          */
         IterableDiffers.extend = function (factories) {
-            return new Provider(IterableDiffers, {
+            return {
+                provide: IterableDiffers,
                 useFactory: function (parent) {
                     if (isBlank(parent)) {
                         // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
@@ -8013,7 +7308,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[IterableDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-            });
+            };
         };
         IterableDiffers.prototype.find = function (iterable) {
             var factory = this.factories.find(function (f) { return f.supports(iterable); });
@@ -8028,11 +7323,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     /**
      * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
-     * @ts2dart_const
      * @stable
      */
     var KeyValueDiffers = (function () {
-        /*@ts2dart_const*/
         function KeyValueDiffers(factories) {
             this.factories = factories;
         }
@@ -8066,7 +7359,8 @@ var __extends = (this && this.__extends) || function (d, b) {
          * ```
          */
         KeyValueDiffers.extend = function (factories) {
-            return new Provider(KeyValueDiffers, {
+            return {
+                provide: KeyValueDiffers,
                 useFactory: function (parent) {
                     if (isBlank(parent)) {
                         // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
@@ -8078,7 +7372,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 },
                 // Dependency technically isn't optional, but we can provide a better error message this way.
                 deps: [[KeyValueDiffers, new SkipSelfMetadata(), new OptionalMetadata()]]
-            });
+            };
         };
         KeyValueDiffers.prototype.find = function (kv) {
             var factory = this.factories.find(function (f) { return f.supports(kv); });
@@ -8181,13 +7475,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * Structural diffing for `Object`s and `Map`s.
      */
-    var keyValDiff = 
-    /*@ts2dart_const*/ [new DefaultKeyValueDifferFactory()];
+    var keyValDiff = [new DefaultKeyValueDifferFactory()];
     /**
      * Structural diffing for `Iterable` types such as `Array`s.
      */
-    var iterableDiff = 
-    /*@ts2dart_const*/ [new DefaultIterableDifferFactory()];
+    var iterableDiff = [new DefaultIterableDifferFactory()];
     var defaultIterableDiffers = new IterableDiffers(iterableDiff);
     var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
     /**
@@ -8356,7 +7648,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function endTimeRange(range) {
         trace.endTimeRange(range);
     }
-    // Change exports to const once https://github.com/angular/ts2dart/issues/150
     /**
      * True if WTF is enabled.
      */
@@ -8542,6 +7833,14 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._element.attachView(viewRef_.internalView, index);
             return wtfLeave(s, viewRef_);
         };
+        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+            var s = this._insertScope();
+            if (currentIndex == -1)
+                return;
+            var viewRef_ = viewRef;
+            this._element.moveView(viewRef_.internalView, currentIndex);
+            return wtfLeave(s, viewRef_);
+        };
         ViewContainerRef_.prototype.indexOf = function (viewRef) {
             return ListWrapper.indexOf(this._element.nestedViews, viewRef.internalView);
         };
@@ -8640,6 +7939,31 @@ var __extends = (this && this.__extends) || function (d, b) {
                 });
             }
             return result;
+        };
+        AppElement.prototype.moveView = function (view, currentIndex) {
+            var previousIndex = this.nestedViews.indexOf(view);
+            if (view.type === ViewType.COMPONENT) {
+                throw new BaseException("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            ListWrapper.removeAt(nestedViews, previousIndex);
+            ListWrapper.insert(nestedViews, currentIndex, view);
+            var refRenderNode;
+            if (currentIndex > 0) {
+                var prevView = nestedViews[currentIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.markContentChildAsMoved(this);
         };
         AppElement.prototype.attachView = function (view, viewIndex) {
             if (view.type === ViewType.COMPONENT) {
@@ -9160,7 +8484,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     }(ComponentRef));
     /**
      * @experimental
-     * @ts2dart_const
      */
     var EMPTY_CONTEXT = new Object();
     /**
@@ -9241,53 +8564,98 @@ var __extends = (this && this.__extends) || function (d, b) {
         return CodegenComponentFactoryResolver;
     }());
     /**
-     * Low-level service for loading {@link ComponentFactory}s, which
-     * can later be used to create and render a Component instance.
+     * Use by directives and components to emit custom Events.
      *
-     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
-     * AppModule}.precompile}/{@link Component}.precompile or
-     * {@link ANALYZE_FOR_PRECOMPILE} provider for dynamic component creation.
-     * Use {@link AppModuleFactoryLoader} for lazy loading.
+     * ### Examples
+     *
+     * In the following example, `Zippy` alternatively emits `open` and `close` events when its
+     * title gets clicked:
+     *
+     * ```
+     * @Component({
+     *   selector: 'zippy',
+     *   template: `
+     *   <div class="zippy">
+     *     <div (click)="toggle()">Toggle</div>
+     *     <div [hidden]="!visible">
+     *       <ng-content></ng-content>
+     *     </div>
+     *  </div>`})
+     * export class Zippy {
+     *   visible: boolean = true;
+     *   @Output() open: EventEmitter<any> = new EventEmitter();
+     *   @Output() close: EventEmitter<any> = new EventEmitter();
+     *
+     *   toggle() {
+     *     this.visible = !this.visible;
+     *     if (this.visible) {
+     *       this.open.emit(null);
+     *     } else {
+     *       this.close.emit(null);
+     *     }
+     *   }
+     * }
+     * ```
+     *
+     * The events payload can be accessed by the parameter `$event` on the components output event
+     * handler:
+     *
+     * ```
+     * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
+     * ```
+     *
+     * Uses Rx.Observable but provides an adapter to make it work as specified here:
+     * https://github.com/jhusain/observable-spec
+     *
+     * Once a reference implementation of the spec is available, switch to it.
+     * @stable
      */
-    var ComponentResolver = (function () {
-        function ComponentResolver() {
-        }
-        return ComponentResolver;
-    }());
-    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @AppModule/@Component.precompile or ANALYZE_FOR_PRECOMPILE provider instead.';
-    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use AppModuleFactoryLoader instead.';
-    function _isComponentFactory(type) {
-        return type instanceof ComponentFactory;
-    }
-    var ReflectorComponentResolver = (function (_super) {
-        __extends(ReflectorComponentResolver, _super);
-        function ReflectorComponentResolver(_console) {
+    var EventEmitter = (function (_super) {
+        __extends(EventEmitter, _super);
+        /**
+         * Creates an instance of [EventEmitter], which depending on [isAsync],
+         * delivers events synchronously or asynchronously.
+         */
+        function EventEmitter(isAsync) {
+            if (isAsync === void 0) { isAsync = false; }
             _super.call(this);
-            this._console = _console;
+            this.__isAsync = isAsync;
         }
-        ReflectorComponentResolver.prototype.resolveComponent = function (component) {
-            if (isString(component)) {
-                return PromiseWrapper.reject(new BaseException("Cannot resolve component using '" + component + "'."), null);
+        EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
+        EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
+            var schedulerFn;
+            var errorFn = function (err) { return null; };
+            var completeFn = function () { return null; };
+            if (generatorOrNext && typeof generatorOrNext === 'object') {
+                schedulerFn = this.__isAsync ? function (value /** TODO #9100 */) {
+                    setTimeout(function () { return generatorOrNext.next(value); });
+                } : function (value /** TODO #9100 */) { generatorOrNext.next(value); };
+                if (generatorOrNext.error) {
+                    errorFn = this.__isAsync ? function (err) { setTimeout(function () { return generatorOrNext.error(err); }); } :
+                        function (err) { generatorOrNext.error(err); };
+                }
+                if (generatorOrNext.complete) {
+                    completeFn = this.__isAsync ? function () { setTimeout(function () { return generatorOrNext.complete(); }); } :
+                        function () { generatorOrNext.complete(); };
+                }
             }
-            this._console.warn(ComponentResolver.DynamicCompilationDeprecationMsg);
-            var metadatas = reflector.annotations(component);
-            var componentFactory = metadatas.find(_isComponentFactory);
-            if (isBlank(componentFactory)) {
-                throw new BaseException("No precompiled component " + stringify(component) + " found");
+            else {
+                schedulerFn = this.__isAsync ? function (value /** TODO #9100 */) {
+                    setTimeout(function () { return generatorOrNext(value); });
+                } : function (value /** TODO #9100 */) { generatorOrNext(value); };
+                if (error) {
+                    errorFn =
+                        this.__isAsync ? function (err) { setTimeout(function () { return error(err); }); } : function (err) { error(err); };
+                }
+                if (complete) {
+                    completeFn =
+                        this.__isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
+                }
             }
-            return PromiseWrapper.resolve(componentFactory);
+            return _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
         };
-        ReflectorComponentResolver.prototype.clearCache = function () { };
-        return ReflectorComponentResolver;
-    }(ComponentResolver));
-    /** @nocollapse */
-    ReflectorComponentResolver.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ReflectorComponentResolver.ctorParameters = [
-        { type: Console, },
-    ];
+        return EventEmitter;
+    }(rxjs_Subject.Subject));
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -9295,17 +8663,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * Stores error information; delivered via [NgZone.onError] stream.
-     * @deprecated
-     */
-    var NgZoneError = (function () {
-        function NgZoneError(error, stackTrace) {
-            this.error = error;
-            this.stackTrace = stackTrace;
-        }
-        return NgZoneError;
-    }());
     var NgZoneImpl = (function () {
         function NgZoneImpl(_a) {
             var _this = this;
@@ -9359,7 +8716,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                     },
                     onHandleError: function (delegate, current, target, error) {
                         delegate.handleError(target, error);
-                        _this.onError(new NgZoneError(error, error.stack));
+                        _this.onError(error);
                         return false;
                     }
                 });
@@ -9640,17 +8997,21 @@ var __extends = (this && this.__extends) || function (d, b) {
         /** @internal */
         Testability.prototype._watchAngularEvents = function () {
             var _this = this;
-            ObservableWrapper.subscribe(this._ngZone.onUnstable, function (_) {
-                _this._didWork = true;
-                _this._isZoneStable = false;
+            this._ngZone.onUnstable.subscribe({
+                next: function () {
+                    _this._didWork = true;
+                    _this._isZoneStable = false;
+                }
             });
             this._ngZone.runOutsideAngular(function () {
-                ObservableWrapper.subscribe(_this._ngZone.onStable, function (_) {
-                    NgZone.assertNotInAngularZone();
-                    scheduleMicroTask(function () {
-                        _this._isZoneStable = true;
-                        _this._runCallbacksIfReady();
-                    });
+                _this._ngZone.onStable.subscribe({
+                    next: function () {
+                        NgZone.assertNotInAngularZone();
+                        scheduleMicroTask(function () {
+                            _this._isZoneStable = true;
+                            _this._runCallbacksIfReady();
+                        });
+                    }
                 });
             });
         };
@@ -9734,7 +9095,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     ];
     /** @nocollapse */
     TestabilityRegistry.ctorParameters = [];
-    /* @ts2dart_const */
     var _NoopGetTestability = (function () {
         function _NoopGetTestability() {
         }
@@ -9752,26 +9112,9 @@ var __extends = (this && this.__extends) || function (d, b) {
         _testabilityGetter = getter;
     }
     var _testabilityGetter = new _NoopGetTestability();
-    /**
-     * Create an Angular zone.
-     * @experimental
-     */
-    function createNgZone(parent) {
-        // If an NgZone is already present in the parent injector,
-        // use that one. Creating the NgZone in the same injector as the
-        // application is dangerous as some services might get created before
-        // the NgZone has been created.
-        // We keep the NgZone factory in the application providers for
-        // backwards compatibility for now though.
-        if (parent) {
-            return parent;
-        }
-        return new NgZone({ enableLongStackTrace: isDevMode() });
-    }
     var _devMode = true;
     var _runModeLocked = false;
     var _platform;
-    var _inPlatformCreate = false;
     /**
      * Disable Angular's development mode, which turns off assertions and other
      * checks within the framework.
@@ -9788,16 +9131,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             throw new BaseException('Cannot enable prod mode after platform setup.');
         }
         _devMode = false;
-    }
-    /**
-     * Locks the run mode of Angular. After this has been called,
-     * it can't be changed any more. I.e. `isDevMode()` will always
-     * return the same value.
-     *
-     * @deprecated This is a noop now. {@link isDevMode} automatically locks the run mode on first call.
-     */
-    function lockRunMode() {
-        console.warn('lockRunMode() is deprecated and not needed any more.');
     }
     /**
      * Returns whether Angular is in development mode. After called once,
@@ -9818,31 +9151,32 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function createPlatform(injector) {
-        if (_inPlatformCreate) {
-            throw new BaseException('Already creating a platform...');
-        }
-        if (isPresent(_platform) && !_platform.disposed) {
+        if (isPresent(_platform) && !_platform.destroyed) {
             throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
         }
-        _inPlatformCreate = true;
-        try {
-            _platform = injector.get(PlatformRef);
-        }
-        finally {
-            _inPlatformCreate = false;
-        }
+        _platform = injector.get(PlatformRef);
+        var inits = injector.get(PLATFORM_INITIALIZER, null);
+        if (isPresent(inits))
+            inits.forEach(function (init) { return init(); });
         return _platform;
     }
     /**
-     * Creates a fatory for a platform
+     * Creates a factory for a platform
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    function createPlatformFactory(name, providers) {
+    function createPlatformFactory(parentPlaformFactory, name, providers) {
+        if (providers === void 0) { providers = []; }
         var marker = new OpaqueToken("Platform: " + name);
-        return function () {
+        return function (extraProviders) {
+            if (extraProviders === void 0) { extraProviders = []; }
             if (!getPlatform()) {
-                createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat({ provide: marker, useValue: true })));
+                if (parentPlaformFactory) {
+                    parentPlaformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+                }
+                else {
+                    createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                }
             }
             return assertPlatform(marker);
         };
@@ -9864,13 +9198,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         return platform;
     }
     /**
-     * Dispose the existing platform.
+     * Destroy the existing platform.
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    function disposePlatform() {
-        if (isPresent(_platform) && !_platform.disposed) {
-            _platform.dispose();
+    function destroyPlatform() {
+        if (isPresent(_platform) && !_platform.destroyed) {
+            _platform.destroy();
         }
     }
     /**
@@ -9879,96 +9213,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function getPlatform() {
-        return isPresent(_platform) && !_platform.disposed ? _platform : null;
-    }
-    /**
-     * Creates an instance of an `@AppModule` for the given platform
-     * for offline compilation.
-     *
-     * ## Simple Example
-     *
-     * ```typescript
-     * my_module.ts:
-     *
-     * @AppModule({
-     *   modules: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * main.ts:
-     * import {MyModuleNgFactory} from './my_module.ngfactory';
-     * import {bootstrapModuleFactory} from '@angular/core';
-     * import {browserPlatform} from '@angular/platform-browser';
-     *
-     * let moduleRef = bootstrapModuleFactory(MyModuleNgFactory, browserPlatform());
-     * ```
-     *
-     * @experimental APIs related to application bootstrap are currently under review.
-     */
-    function bootstrapModuleFactory(moduleFactory, platform) {
-        // Note: We need to create the NgZone _before_ we instantiate the module,
-        // as instantiating the module creates some providers eagerly.
-        // So we create a mini parent injector that just contains the new NgZone and
-        // pass that as parent to the AppModuleFactory.
-        var ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
-        var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], platform.injector);
-        return ngZone.run(function () { return moduleFactory.create(ngZoneInjector); });
-    }
-    /**
-     * Creates an instance of an `@AppModule` for a given platform using the given runtime compiler.
-     *
-     * ## Simple Example
-     *
-     * ```typescript
-     * @AppModule({
-     *   modules: [BrowserModule]
-     * })
-     * class MyModule {}
-     *
-     * let moduleRef = bootstrapModule(MyModule, browserPlatform());
-     * ```
-     * @stable
-     */
-    function bootstrapModule(moduleType, platform, compilerOptions) {
-        if (compilerOptions === void 0) { compilerOptions = {}; }
-        var compilerFactory = platform.injector.get(CompilerFactory);
-        var compiler = compilerFactory.createCompiler(compilerOptions);
-        return compiler.compileAppModuleAsync(moduleType)
-            .then(function (moduleFactory) { return bootstrapModuleFactory(moduleFactory, platform); })
-            .then(function (moduleRef) {
-            var appRef = moduleRef.injector.get(ApplicationRef);
-            return appRef.waitForAsyncInitializers().then(function () { return moduleRef; });
-        });
-    }
-    /**
-     * Shortcut for ApplicationRef.bootstrap.
-     * Requires a platform to be created first.
-     *
-     * @deprecated Use {@link bootstrapModuleFactory} instead.
-     */
-    function coreBootstrap(componentFactory, injector) {
-        var console = injector.get(Console);
-        console.warn('coreBootstrap is deprecated. Use bootstrapModuleFactory instead.');
-        var appRef = injector.get(ApplicationRef);
-        return appRef.bootstrap(componentFactory);
-    }
-    /**
-     * Resolves the componentFactory for the given component,
-     * waits for asynchronous initializers and bootstraps the component.
-     * Requires a platform to be created first.
-     *
-     * @deprecated Use {@link bootstrapModule} instead.
-     */
-    function coreLoadAndBootstrap(componentType, injector) {
-        var console = injector.get(Console);
-        console.warn('coreLoadAndBootstrap is deprecated. Use bootstrapModule instead.');
-        var appRef = injector.get(ApplicationRef);
-        return appRef.run(function () {
-            var componentResolver = injector.get(ComponentResolver);
-            return PromiseWrapper
-                .all([componentResolver.resolveComponent(componentType), appRef.waitForAsyncInitializers()])
-                .then(function (arr) { return appRef.bootstrap(arr[0]); });
-        });
+        return isPresent(_platform) && !_platform.destroyed ? _platform : null;
     }
     /**
      * The Angular platform is the entry point for Angular on a web page. Each page
@@ -9983,6 +9228,51 @@ var __extends = (this && this.__extends) || function (d, b) {
     var PlatformRef = (function () {
         function PlatformRef() {
         }
+        /**
+         * Creates an instance of an `@NgModule` for the given platform
+         * for offline compilation.
+         *
+         * ## Simple Example
+         *
+         * ```typescript
+         * my_module.ts:
+         *
+         * @NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * main.ts:
+         * import {MyModuleNgFactory} from './my_module.ngfactory';
+         * import {platformBrowser} from '@angular/platform-browser';
+         *
+         * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+         * ```
+         *
+         * @experimental APIs related to application bootstrap are currently under review.
+         */
+        PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            throw unimplemented();
+        };
+        /**
+         * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
+         *
+         * ## Simple Example
+         *
+         * ```typescript
+         * @NgModule({
+         *   imports: [BrowserModule]
+         * })
+         * class MyModule {}
+         *
+         * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+         * ```
+         * @stable
+         */
+        PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            throw unimplemented();
+        };
         Object.defineProperty(PlatformRef.prototype, "injector", {
             /**
              * Retrieve the platform {@link Injector}, which is the parent injector for
@@ -9993,49 +9283,133 @@ var __extends = (this && this.__extends) || function (d, b) {
             configurable: true
         });
         ;
-        Object.defineProperty(PlatformRef.prototype, "disposed", {
+        Object.defineProperty(PlatformRef.prototype, "destroyed", {
             get: function () { throw unimplemented(); },
             enumerable: true,
             configurable: true
         });
         return PlatformRef;
     }());
+    function _callAndReportToExceptionHandler(exceptionHandler, callback) {
+        try {
+            var result = callback();
+            if (isPromise(result)) {
+                return result.catch(function (e) {
+                    exceptionHandler.call(e);
+                    // rethrow as the exception handler might not do it
+                    throw e;
+                });
+            }
+            else {
+                return result;
+            }
+        }
+        catch (e) {
+            exceptionHandler.call(e);
+            // rethrow as the exception handler might not do it
+            throw e;
+        }
+    }
     var PlatformRef_ = (function (_super) {
         __extends(PlatformRef_, _super);
         function PlatformRef_(_injector) {
             _super.call(this);
             this._injector = _injector;
-            /** @internal */
-            this._applications = [];
-            /** @internal */
-            this._disposeListeners = [];
-            this._disposed = false;
-            if (!_inPlatformCreate) {
-                throw new BaseException('Platforms have to be created via `createPlatform`!');
-            }
-            var inits = _injector.get(PLATFORM_INITIALIZER, null);
-            if (isPresent(inits))
-                inits.forEach(function (init) { return init(); });
+            this._modules = [];
+            this._destroyListeners = [];
+            this._destroyed = false;
         }
-        PlatformRef_.prototype.registerDisposeListener = function (dispose) { this._disposeListeners.push(dispose); };
+        /**
+         * @deprecated
+         */
+        PlatformRef_.prototype.registerDisposeListener = function (dispose) { this.onDestroy(dispose); };
+        PlatformRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
         Object.defineProperty(PlatformRef_.prototype, "injector", {
             get: function () { return this._injector; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(PlatformRef_.prototype, "disposed", {
-            get: function () { return this._disposed; },
+            /**
+             * @deprecated
+             */
+            get: function () { return this.destroyed; },
             enumerable: true,
             configurable: true
         });
-        PlatformRef_.prototype.addApplication = function (appRef) { this._applications.push(appRef); };
-        PlatformRef_.prototype.dispose = function () {
-            ListWrapper.clone(this._applications).forEach(function (app) { return app.dispose(); });
-            this._disposeListeners.forEach(function (dispose) { return dispose(); });
-            this._disposed = true;
+        Object.defineProperty(PlatformRef_.prototype, "destroyed", {
+            get: function () { return this._destroyed; },
+            enumerable: true,
+            configurable: true
+        });
+        PlatformRef_.prototype.destroy = function () {
+            if (this._destroyed) {
+                throw new BaseException('The platform has already been destroyed!');
+            }
+            ListWrapper.clone(this._modules).forEach(function (app) { return app.destroy(); });
+            this._destroyListeners.forEach(function (dispose) { return dispose(); });
+            this._destroyed = true;
         };
-        /** @internal */
-        PlatformRef_.prototype._applicationDisposed = function (app) { ListWrapper.remove(this._applications, app); };
+        /**
+         * @deprecated
+         */
+        PlatformRef_.prototype.dispose = function () { this.destroy(); };
+        PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
+        };
+        PlatformRef_.prototype._bootstrapModuleFactoryWithZone = function (moduleFactory, ngZone) {
+            var _this = this;
+            // Note: We need to create the NgZone _before_ we instantiate the module,
+            // as instantiating the module creates some providers eagerly.
+            // So we create a mini parent injector that just contains the new NgZone and
+            // pass that as parent to the NgModuleFactory.
+            if (!ngZone)
+                ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+            // Attention: Don't use ApplicationRef.run here,
+            // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+            return ngZone.run(function () {
+                var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this.injector);
+                var moduleRef = moduleFactory.create(ngZoneInjector);
+                var exceptionHandler = moduleRef.injector.get(ExceptionHandler, null);
+                if (!exceptionHandler) {
+                    throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
+                }
+                moduleRef.onDestroy(function () { return ListWrapper.remove(_this._modules, moduleRef); });
+                ngZone.onError.subscribe({ next: function (error) { exceptionHandler.call(error, error ? error.stack : null); } });
+                return _callAndReportToExceptionHandler(exceptionHandler, function () {
+                    var initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                    return initStatus.donePromise.then(function () {
+                        _this._moduleDoBootstrap(moduleRef);
+                        return moduleRef;
+                    });
+                });
+            });
+        };
+        PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
+        };
+        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
+            var _this = this;
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            var compilerFactory = this.injector.get(CompilerFactory);
+            var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+            return compiler.compileModuleAsync(moduleType)
+                .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
+        };
+        PlatformRef_.prototype._moduleDoBootstrap = function (moduleRef) {
+            var appRef = moduleRef.injector.get(ApplicationRef);
+            if (moduleRef.bootstrapFactories.length > 0) {
+                moduleRef.bootstrapFactories.forEach(function (compFactory) { return appRef.bootstrap(compFactory); });
+            }
+            else if (moduleRef.instance.ngDoBootstrap) {
+                moduleRef.instance.ngDoBootstrap(appRef);
+            }
+            else {
+                throw new BaseException(("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
+                    "Please define one of these.");
+            }
+        };
         return PlatformRef_;
     }(PlatformRef));
     /** @nocollapse */
@@ -10056,27 +9430,19 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ApplicationRef = (function () {
         function ApplicationRef() {
         }
-        Object.defineProperty(ApplicationRef.prototype, "injector", {
-            /**
-             * Retrieve the application {@link Injector}.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        ;
-        Object.defineProperty(ApplicationRef.prototype, "zone", {
-            /**
-             * Retrieve the application {@link NgZone}.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        ;
         Object.defineProperty(ApplicationRef.prototype, "componentTypes", {
             /**
              * Get a list of component types registered to this application.
+             * This list is populated even before the component is created.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ApplicationRef.prototype, "components", {
+            /**
+             * Get a list of components registered to this application.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
@@ -10087,133 +9453,67 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     var ApplicationRef_ = (function (_super) {
         __extends(ApplicationRef_, _super);
-        function ApplicationRef_(_platform, _zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _testabilityRegistry, _testability, inits) {
+        function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
             var _this = this;
             _super.call(this);
-            this._platform = _platform;
             this._zone = _zone;
             this._console = _console;
             this._injector = _injector;
             this._exceptionHandler = _exceptionHandler;
             this._componentFactoryResolver = _componentFactoryResolver;
+            this._initStatus = _initStatus;
             this._testabilityRegistry = _testabilityRegistry;
             this._testability = _testability;
-            /** @internal */
             this._bootstrapListeners = [];
-            /** @internal */
-            this._disposeListeners = [];
-            /** @internal */
             this._rootComponents = [];
-            /** @internal */
             this._rootComponentTypes = [];
-            /** @internal */
             this._changeDetectorRefs = [];
-            /** @internal */
             this._runningTick = false;
-            /** @internal */
             this._enforceNoNewChanges = false;
             this._enforceNoNewChanges = isDevMode();
-            this._asyncInitDonePromise = this.run(function () {
-                var asyncInitResults = [];
-                var asyncInitDonePromise;
-                if (isPresent(inits)) {
-                    for (var i = 0; i < inits.length; i++) {
-                        var initResult = inits[i]();
-                        if (isPromise(initResult)) {
-                            asyncInitResults.push(initResult);
-                        }
-                    }
-                }
-                if (asyncInitResults.length > 0) {
-                    asyncInitDonePromise =
-                        PromiseWrapper.all(asyncInitResults).then(function (_) { return _this._asyncInitDone = true; });
-                    _this._asyncInitDone = false;
-                }
-                else {
-                    _this._asyncInitDone = true;
-                    asyncInitDonePromise = PromiseWrapper.resolve(true);
-                }
-                return asyncInitDonePromise;
-            });
-            ObservableWrapper.subscribe(this._zone.onError, function (error) {
-                _this._exceptionHandler.call(error.error, error.stackTrace);
-            });
-            ObservableWrapper.subscribe(this._zone.onMicrotaskEmpty, function (_) { _this._zone.run(function () { _this.tick(); }); });
+            this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
         }
-        ApplicationRef_.prototype.registerBootstrapListener = function (listener) {
-            this._bootstrapListeners.push(listener);
-        };
-        ApplicationRef_.prototype.registerDisposeListener = function (dispose) { this._disposeListeners.push(dispose); };
         ApplicationRef_.prototype.registerChangeDetector = function (changeDetector) {
             this._changeDetectorRefs.push(changeDetector);
         };
         ApplicationRef_.prototype.unregisterChangeDetector = function (changeDetector) {
             ListWrapper.remove(this._changeDetectorRefs, changeDetector);
         };
-        ApplicationRef_.prototype.waitForAsyncInitializers = function () { return this._asyncInitDonePromise; };
-        ApplicationRef_.prototype.run = function (callback) {
-            var _this = this;
-            var result;
-            // Note: Don't use zone.runGuarded as we want to know about
-            // the thrown exception!
-            // Note: the completer needs to be created outside
-            // of `zone.run` as Dart swallows rejected promises
-            // via the onError callback of the promise.
-            var completer = PromiseWrapper.completer();
-            this._zone.run(function () {
-                try {
-                    result = callback();
-                    if (isPromise(result)) {
-                        PromiseWrapper.then(result, function (ref) { completer.resolve(ref); }, function (err, stackTrace) {
-                            completer.reject(err, stackTrace);
-                            _this._exceptionHandler.call(err, stackTrace);
-                        });
-                    }
-                }
-                catch (e) {
-                    _this._exceptionHandler.call(e, e.stack);
-                    throw e;
-                }
-            });
-            return isPromise(result) ? completer.promise : result;
-        };
         ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
             var _this = this;
-            if (!this._asyncInitDone) {
-                throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Wait for them using waitForAsyncInitializers().');
+            if (!this._initStatus.done) {
+                throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
             }
-            return this.run(function () {
-                var componentFactory;
-                if (componentOrFactory instanceof ComponentFactory) {
-                    componentFactory = componentOrFactory;
-                }
-                else {
-                    componentFactory =
-                        _this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
-                }
-                _this._rootComponentTypes.push(componentFactory.componentType);
-                var compRef = componentFactory.create(_this._injector, [], componentFactory.selector);
-                compRef.onDestroy(function () { _this._unloadComponent(compRef); });
-                var testability = compRef.injector.get(Testability, null);
-                if (isPresent(testability)) {
-                    compRef.injector.get(TestabilityRegistry)
-                        .registerApplication(compRef.location.nativeElement, testability);
-                }
-                _this._loadComponent(compRef);
-                if (isDevMode()) {
-                    var prodDescription = IS_DART ? 'Production mode is disabled in Dart.' :
-                        'Call enableProdMode() to enable the production mode.';
-                    _this._console.log("Angular 2 is running in the development mode. " + prodDescription);
-                }
-                return compRef;
-            });
+            var componentFactory;
+            if (componentOrFactory instanceof ComponentFactory) {
+                componentFactory = componentOrFactory;
+            }
+            else {
+                componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+            }
+            this._rootComponentTypes.push(componentFactory.componentType);
+            var compRef = componentFactory.create(this._injector, [], componentFactory.selector);
+            compRef.onDestroy(function () { _this._unloadComponent(compRef); });
+            var testability = compRef.injector.get(Testability, null);
+            if (isPresent(testability)) {
+                compRef.injector.get(TestabilityRegistry)
+                    .registerApplication(compRef.location.nativeElement, testability);
+            }
+            this._loadComponent(compRef);
+            if (isDevMode()) {
+                this._console.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
+            }
+            return compRef;
         };
         /** @internal */
         ApplicationRef_.prototype._loadComponent = function (componentRef) {
             this._changeDetectorRefs.push(componentRef.changeDetectorRef);
             this.tick();
             this._rootComponents.push(componentRef);
-            this._bootstrapListeners.forEach(function (listener) { return listener(componentRef); });
+            // Get the listeners lazily to prevent DI cycles.
+            var listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, [])
+                .concat(this._bootstrapListeners);
+            listeners.forEach(function (listener) { return listener(componentRef); });
         };
         /** @internal */
         ApplicationRef_.prototype._unloadComponent = function (componentRef) {
@@ -10223,16 +9523,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.unregisterChangeDetector(componentRef.changeDetectorRef);
             ListWrapper.remove(this._rootComponents, componentRef);
         };
-        Object.defineProperty(ApplicationRef_.prototype, "injector", {
-            get: function () { return this._injector; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ApplicationRef_.prototype, "zone", {
-            get: function () { return this._zone; },
-            enumerable: true,
-            configurable: true
-        });
         ApplicationRef_.prototype.tick = function () {
             if (this._runningTick) {
                 throw new BaseException('ApplicationRef.tick is called recursively');
@@ -10250,14 +9540,17 @@ var __extends = (this && this.__extends) || function (d, b) {
                 wtfLeave(s);
             }
         };
-        ApplicationRef_.prototype.dispose = function () {
+        ApplicationRef_.prototype.ngOnDestroy = function () {
             // TODO(alxhub): Dispose of the NgZone.
             ListWrapper.clone(this._rootComponents).forEach(function (ref) { return ref.destroy(); });
-            this._disposeListeners.forEach(function (dispose) { return dispose(); });
-            this._platform._applicationDisposed(this);
         };
         Object.defineProperty(ApplicationRef_.prototype, "componentTypes", {
             get: function () { return this._rootComponentTypes; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ApplicationRef_.prototype, "components", {
+            get: function () { return this._rootComponents; },
             enumerable: true,
             configurable: true
         });
@@ -10271,83 +9564,90 @@ var __extends = (this && this.__extends) || function (d, b) {
     ];
     /** @nocollapse */
     ApplicationRef_.ctorParameters = [
-        { type: PlatformRef_, },
         { type: NgZone, },
         { type: Console, },
         { type: Injector, },
         { type: ExceptionHandler, },
         { type: ComponentFactoryResolver, },
+        { type: ApplicationInitStatus, },
         { type: TestabilityRegistry, decorators: [{ type: Optional },] },
         { type: Testability, decorators: [{ type: Optional },] },
-        { type: Array, decorators: [{ type: Optional }, { type: Inject, args: [APP_INITIALIZER,] },] },
-    ];
-    var PLATFORM_CORE_PROVIDERS = 
-    /*@ts2dart_const*/ [
-        PlatformRef_,
-        /*@ts2dart_const*/ (
-        /* @ts2dart_Provider */ { provide: PlatformRef, useExisting: PlatformRef_ })
-    ];
-    var APPLICATION_CORE_PROVIDERS = [
-        /* @ts2dart_Provider */ {
-            provide: NgZone,
-            useFactory: createNgZone,
-            deps: [[new SkipSelfMetadata(), new OptionalMetadata(), NgZone]]
-        },
-        ApplicationRef_,
-        /* @ts2dart_Provider */ { provide: ApplicationRef, useExisting: ApplicationRef_ },
     ];
     /**
-     * Represents an instance of an AppModule created via a {@link AppModuleFactory}.
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
      *
-     * `AppModuleRef` provides access to the AppModule Instance as well other objects related to this
-     * AppModule Instance.
-     * @stable
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
      */
-    var AppModuleRef = (function () {
-        function AppModuleRef() {
+    /**
+     * Low-level service for loading {@link ComponentFactory}s, which
+     * can later be used to create and render a Component instance.
+     *
+     * @deprecated Use {@link ComponentFactoryResolver} together with {@link
+     * NgModule}.entryComponents}/{@link Component}.entryComponents or
+     * {@link ANALYZE_FOR_ENTRY_COMPONENTS} provider for dynamic component creation.
+     * Use {@link NgModuleFactoryLoader} for lazy loading.
+     */
+    var ComponentResolver = (function () {
+        function ComponentResolver() {
         }
-        Object.defineProperty(AppModuleRef.prototype, "injector", {
+        return ComponentResolver;
+    }());
+    ComponentResolver.DynamicCompilationDeprecationMsg = 'ComponentResolver is deprecated for dynamic compilation. Use ComponentFactoryResolver together with @NgModule/@Component.entryComponents or ANALYZE_FOR_ENTRY_COMPONENTS provider instead. For runtime compile only, you can also use Compiler.compileComponentSync/Async.';
+    ComponentResolver.LazyLoadingDeprecationMsg = 'ComponentResolver is deprecated for lazy loading. Use NgModuleFactoryLoader instead.';
+    /**
+     * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
+     *
+     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+     * NgModule Instance.
+     *
+     * @experimental
+     */
+    var NgModuleRef = (function () {
+        function NgModuleRef() {
+        }
+        Object.defineProperty(NgModuleRef.prototype, "injector", {
             /**
-             * The injector that contains all of the providers of the AppModule.
+             * The injector that contains all of the providers of the NgModule.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(AppModuleRef.prototype, "componentFactoryResolver", {
+        Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
             /**
              * The ComponentFactoryResolver to get hold of the ComponentFactories
-             * delcared in the `precompile` property of the module.
+             * delcared in the `entryComponents` property of the module.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(AppModuleRef.prototype, "instance", {
+        Object.defineProperty(NgModuleRef.prototype, "instance", {
             /**
-             * The AppModule instance.
+             * The NgModule instance.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
             configurable: true
         });
-        return AppModuleRef;
+        return NgModuleRef;
     }());
     /**
-     * @stable
+     * @experimental
      */
-    var AppModuleFactory = (function () {
-        function AppModuleFactory(_injectorClass, _moduleype) {
+    var NgModuleFactory = (function () {
+        function NgModuleFactory(_injectorClass, _moduleype) {
             this._injectorClass = _injectorClass;
             this._moduleype = _moduleype;
         }
-        Object.defineProperty(AppModuleFactory.prototype, "moduleType", {
+        Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
             get: function () { return this._moduleype; },
             enumerable: true,
             configurable: true
         });
-        AppModuleFactory.prototype.create = function (parentInjector) {
-            if (parentInjector === void 0) { parentInjector = null; }
+        NgModuleFactory.prototype.create = function (parentInjector) {
             if (!parentInjector) {
                 parentInjector = Injector.NULL;
             }
@@ -10355,17 +9655,20 @@ var __extends = (this && this.__extends) || function (d, b) {
             instance.create();
             return instance;
         };
-        return AppModuleFactory;
+        return NgModuleFactory;
     }());
     var _UNDEFINED = new Object();
-    var AppModuleInjector = (function (_super) {
-        __extends(AppModuleInjector, _super);
-        function AppModuleInjector(parent, factories) {
+    var NgModuleInjector = (function (_super) {
+        __extends(NgModuleInjector, _super);
+        function NgModuleInjector(parent, factories, bootstrapFactories) {
             _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
             this.parent = parent;
+            this.bootstrapFactories = bootstrapFactories;
+            this._destroyListeners = [];
+            this._destroyed = false;
         }
-        AppModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
-        AppModuleInjector.prototype.get = function (token, notFoundValue) {
+        NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
+        NgModuleInjector.prototype.get = function (token, notFoundValue) {
             if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
             if (token === Injector || token === ComponentFactoryResolver) {
                 return this;
@@ -10373,17 +9676,26 @@ var __extends = (this && this.__extends) || function (d, b) {
             var result = this.getInternal(token, _UNDEFINED);
             return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
         };
-        Object.defineProperty(AppModuleInjector.prototype, "injector", {
+        Object.defineProperty(NgModuleInjector.prototype, "injector", {
             get: function () { return this; },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(AppModuleInjector.prototype, "componentFactoryResolver", {
+        Object.defineProperty(NgModuleInjector.prototype, "componentFactoryResolver", {
             get: function () { return this; },
             enumerable: true,
             configurable: true
         });
-        return AppModuleInjector;
+        NgModuleInjector.prototype.destroy = function () {
+            if (this._destroyed) {
+                throw new BaseException("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
+            }
+            this._destroyed = true;
+            this.destroyInternal();
+            this._destroyListeners.forEach(function (listener) { return listener(); });
+        };
+        NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
+        return NgModuleInjector;
     }(CodegenComponentFactoryResolver));
     /**
      * @license
@@ -10393,60 +9705,14 @@ var __extends = (this && this.__extends) || function (d, b) {
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Used to load app moduled factories.
+     * Used to load ng module factories.
      * @experimental
      */
-    var AppModuleFactoryLoader = (function () {
-        function AppModuleFactoryLoader() {
+    var NgModuleFactoryLoader = (function () {
+        function NgModuleFactoryLoader() {
         }
-        return AppModuleFactoryLoader;
+        return NgModuleFactoryLoader;
     }());
-    /**
-     * Use ComponentResolver and ViewContainerRef directly.
-     *
-     * @deprecated
-     */
-    var DynamicComponentLoader = (function () {
-        function DynamicComponentLoader() {
-        }
-        return DynamicComponentLoader;
-    }());
-    var DynamicComponentLoader_ = (function (_super) {
-        __extends(DynamicComponentLoader_, _super);
-        function DynamicComponentLoader_(_compiler) {
-            _super.call(this);
-            this._compiler = _compiler;
-        }
-        DynamicComponentLoader_.prototype.loadAsRoot = function (type, overrideSelectorOrNode, injector, onDispose, projectableNodes) {
-            return this._compiler.resolveComponent(type).then(function (componentFactory) {
-                var componentRef = componentFactory.create(injector, projectableNodes, isPresent(overrideSelectorOrNode) ? overrideSelectorOrNode : componentFactory.selector);
-                if (isPresent(onDispose)) {
-                    componentRef.onDestroy(onDispose);
-                }
-                return componentRef;
-            });
-        };
-        DynamicComponentLoader_.prototype.loadNextToLocation = function (type, location, providers, projectableNodes) {
-            if (providers === void 0) { providers = null; }
-            if (projectableNodes === void 0) { projectableNodes = null; }
-            return this._compiler.resolveComponent(type).then(function (componentFactory) {
-                var contextInjector = location.parentInjector;
-                var childInjector = isPresent(providers) && providers.length > 0 ?
-                    ReflectiveInjector.fromResolvedProviders(providers, contextInjector) :
-                    contextInjector;
-                return location.createComponent(componentFactory, location.length, childInjector, projectableNodes);
-            });
-        };
-        return DynamicComponentLoader_;
-    }(DynamicComponentLoader));
-    /** @nocollapse */
-    DynamicComponentLoader_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    DynamicComponentLoader_.ctorParameters = [
-        { type: ComponentResolver, },
-    ];
     /**
      * An unmodifiable list of items that Angular keeps up to date when the state
      * of the application changes.
@@ -10548,42 +9814,41 @@ var __extends = (this && this.__extends) || function (d, b) {
     var _SEPARATOR = '#';
     var FACTORY_MODULE_SUFFIX = '.ngfactory';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
-    var SystemJsAppModuleLoader = (function () {
-        function SystemJsAppModuleLoader(_compiler) {
+    var SystemJsNgModuleLoader = (function () {
+        function SystemJsNgModuleLoader(_compiler) {
             this._compiler = _compiler;
         }
-        SystemJsAppModuleLoader.prototype.load = function (path) {
-            return this._compiler ? this.loadAndCompile(path) : this.loadFactory(path);
+        SystemJsNgModuleLoader.prototype.load = function (path) {
+            var offlineMode = this._compiler instanceof Compiler;
+            return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
         };
-        SystemJsAppModuleLoader.prototype.loadAndCompile = function (path) {
+        SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return global$1
-                .System.import(module)
+            return System.import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
-                .then(function (type) { return _this._compiler.compileAppModuleAsync(type); });
+                .then(function (type) { return _this._compiler.compileModuleAsync(type); });
         };
-        SystemJsAppModuleLoader.prototype.loadFactory = function (path) {
+        SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return global$1
-                .System.import(module + FACTORY_MODULE_SUFFIX)
+            return System.import(module + FACTORY_MODULE_SUFFIX)
                 .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        return SystemJsAppModuleLoader;
+        return SystemJsNgModuleLoader;
     }());
     /** @nocollapse */
-    SystemJsAppModuleLoader.decorators = [
+    SystemJsNgModuleLoader.decorators = [
         { type: Injectable },
     ];
     /** @nocollapse */
-    SystemJsAppModuleLoader.ctorParameters = [
-        { type: Compiler, decorators: [{ type: Optional },] },
+    SystemJsNgModuleLoader.ctorParameters = [
+        { type: Compiler, },
     ];
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
@@ -10591,67 +9856,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return value;
     }
-    var _SEPARATOR$1 = '#';
-    var SystemJsComponentResolver = (function () {
-        function SystemJsComponentResolver(_resolver, _console) {
-            this._resolver = _resolver;
-            this._console = _console;
-        }
-        SystemJsComponentResolver.prototype.resolveComponent = function (componentType) {
-            var _this = this;
-            if (isString(componentType)) {
-                this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
-                var _a = componentType.split(_SEPARATOR$1), module = _a[0], component_1 = _a[1];
-                if (component_1 === void (0)) {
-                    // Use the default export when no component is specified
-                    component_1 = 'default';
-                }
-                return global$1
-                    .System.import(module)
-                    .then(function (module) { return _this._resolver.resolveComponent(module[component_1]); });
-            }
-            return this._resolver.resolveComponent(componentType);
-        };
-        SystemJsComponentResolver.prototype.clearCache = function () { };
-        return SystemJsComponentResolver;
-    }());
-    /** @nocollapse */
-    SystemJsComponentResolver.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    SystemJsComponentResolver.ctorParameters = [
-        { type: ComponentResolver, },
-        { type: Console, },
-    ];
-    var FACTORY_MODULE_SUFFIX$1 = '.ngfactory';
-    var FACTORY_CLASS_SUFFIX$1 = 'NgFactory';
-    var SystemJsCmpFactoryResolver = (function () {
-        function SystemJsCmpFactoryResolver(_console) {
-            this._console = _console;
-        }
-        SystemJsCmpFactoryResolver.prototype.resolveComponent = function (componentType) {
-            if (isString(componentType)) {
-                this._console.warn(ComponentResolver.LazyLoadingDeprecationMsg);
-                var _a = componentType.split(_SEPARATOR$1), module = _a[0], factory_1 = _a[1];
-                return global$1
-                    .System.import(module + FACTORY_MODULE_SUFFIX$1)
-                    .then(function (module) { return module[factory_1 + FACTORY_CLASS_SUFFIX$1]; });
-            }
-            return Promise.resolve(null);
-        };
-        SystemJsCmpFactoryResolver.prototype.clearCache = function () { };
-        return SystemJsCmpFactoryResolver;
-    }());
-    /** @nocollapse */
-    SystemJsCmpFactoryResolver.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    SystemJsCmpFactoryResolver.ctorParameters = [
-        { type: Console, },
-    ];
-    var EMPTY_CONTEXT$1 = new Object();
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     /**
      * Represents an Embedded Template that can be used to instantiate Embedded Views.
      *
@@ -10696,10 +9907,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         TemplateRef_.prototype.createEmbeddedView = function (context) {
             var view = this._viewFactory(this._appElement.parentView.viewUtils, this._appElement.parentInjector, this._appElement);
-            if (isBlank(context)) {
-                context = EMPTY_CONTEXT$1;
-            }
-            view.create(context, null, null);
+            view.create(context || {}, null, null);
             return view.ref;
         };
         Object.defineProperty(TemplateRef_.prototype, "elementRef", {
@@ -10891,12 +10099,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
-        /**
-         * Use injector.get(token) instead.
-         *
-         * @deprecated
-         */
-        DebugNode.prototype.inject = function (token) { return this.injector.get(token); };
         return DebugNode;
     }());
     /**
@@ -11020,81 +10222,32 @@ var __extends = (this && this.__extends) || function (d, b) {
     function removeDebugNodeFromIndex(node) {
         _nativeNodeToDebugNode.delete(node.nativeNode);
     }
-    /**
-      * A token that can be provided when bootstrapping an application to make an array of directives
-      * available in every component of the application.
-      *
-      * ### Example
-      *
-      * ```typescript
-      * import {PLATFORM_DIRECTIVES} from '@angular/core';
-      * import {OtherDirective} from './myDirectives';
-      *
-      * @Component({
-      *   selector: 'my-component',
-      *   template: `
-      *     <!-- can use other directive even though the component does not list it in `directives` -->
-      *     <other-directive></other-directive>
-      *   `
-      * })
-      * export class MyComponent {
-      *   ...
-      * }
-      *
-      * bootstrap(MyComponent, [{provide: PLATFORM_DIRECTIVES, useValue: [OtherDirective],
-      multi:true}]);
-      * ```
-      *
-      * @deprecated Providing platform directives via a provider is deprecated. Provide platform
-      * directives via an {@link AppModule} instead.
-      */
-    var PLATFORM_DIRECTIVES = 
-    /*@ts2dart_const*/ new OpaqueToken('Platform Directives');
-    /**
-      * A token that can be provided when bootstraping an application to make an array of pipes
-      * available in every component of the application.
-      *
-      * ### Example
-      *
-      * ```typescript
-      * import {PLATFORM_PIPES} from '@angular/core';
-      * import {OtherPipe} from './myPipe';
-      *
-      * @Component({
-      *   selector: 'my-component',
-      *   template: `
-      *     {{123 | other-pipe}}
-      *   `
-      * })
-      * export class MyComponent {
-      *   ...
-      * }
-      *
-      * bootstrap(MyComponent, [{provide: PLATFORM_PIPES, useValue: [OtherPipe], multi:true}]);
-      * ```
-      *
-      * @deprecated Providing platform pipes via a provider is deprecated. Provide platform pipes via an
-      * {@link AppModule} instead.
-      */
-    var PLATFORM_PIPES = new OpaqueToken('Platform Pipes');
     function _reflector() {
         return reflector;
     }
-    // prevent missing use Dart warning.
+    var _CORE_PLATFORM_PROVIDERS = [
+        PlatformRef_, { provide: PlatformRef, useExisting: PlatformRef_ },
+        { provide: Reflector, useFactory: _reflector, deps: [] },
+        { provide: ReflectorReader, useExisting: Reflector }, TestabilityRegistry, Console
+    ];
     /**
-     * A default set of providers which should be included in any Angular platform.
+     * This platform has to be included in any other platform
+     *
      * @experimental
      */
-    var PLATFORM_COMMON_PROVIDERS = [
-        PLATFORM_CORE_PROVIDERS,
-        /*@ts2dart_Provider*/ { provide: Reflector, useFactory: _reflector, deps: [] },
-        /*@ts2dart_Provider*/ { provide: ReflectorReader, useExisting: Reflector }, TestabilityRegistry,
-        Console
-    ];
-    // avoid unused import when Type union types are erased
-    function _componentFactoryResolverFactory() {
-        return ComponentFactoryResolver.NULL;
-    }
+    var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var LOCALE_ID = new OpaqueToken('LocaleId');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var TRANSLATIONS = new OpaqueToken('Translations');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var TRANSLATIONS_FORMAT = new OpaqueToken('TranslationsFormat');
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }
@@ -11104,26 +10257,31 @@ var __extends = (this && this.__extends) || function (d, b) {
     /**
      * A default set of providers which should be included in any Angular
      * application, regardless of the platform it runs onto.
-     * @stable
+     *
+     * @deprecated Include `ApplicationModule` instead.
      */
-    var APPLICATION_COMMON_PROVIDERS = 
-    /*@ts2dart_const*/ [
-        APPLICATION_CORE_PROVIDERS,
-        /* @ts2dart_Provider */ { provide: ComponentResolver, useClass: ReflectorComponentResolver },
-        { provide: ComponentFactoryResolver, useFactory: _componentFactoryResolverFactory, deps: [] },
-        APP_ID_RANDOM_PROVIDER,
-        ViewUtils,
-        /* @ts2dart_Provider */ {
-            provide: IterableDiffers,
-            useFactory: _iterableDiffersFactory,
-            deps: []
-        },
-        /* @ts2dart_Provider */ {
-            provide: KeyValueDiffers,
-            useFactory: _keyValueDiffersFactory,
-            deps: []
-        },
-        /* @ts2dart_Provider */ { provide: DynamicComponentLoader, useClass: DynamicComponentLoader_ },
+    var APPLICATION_COMMON_PROVIDERS = [];
+    var ApplicationModule = (function () {
+        function ApplicationModule() {
+        }
+        return ApplicationModule;
+    }());
+    /** @nocollapse */
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{
+                    providers: [
+                        ApplicationRef_,
+                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                        ApplicationInitStatus,
+                        Compiler,
+                        { provide: ComponentResolver, useExisting: Compiler },
+                        APP_ID_RANDOM_PROVIDER,
+                        ViewUtils,
+                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                        { provide: LOCALE_ID, useValue: 'en_US' },
+                    ]
+                },] },
     ];
     /**
      * @license
@@ -12199,7 +11357,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return DebugDomRenderer;
     }());
-    /* @ts2dart_const */
     var StaticNodeDebugInfo = (function () {
         function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
             this.providerTokens = providerTokens;
@@ -12309,27 +11466,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return DebugContext;
     }());
-    var _UNDEFINED$1 = new Object();
-    var ElementInjector = (function (_super) {
-        __extends(ElementInjector, _super);
-        function ElementInjector(_view, _nodeIndex) {
-            _super.call(this);
-            this._view = _view;
-            this._nodeIndex = _nodeIndex;
-        }
-        ElementInjector.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
-            var result = _UNDEFINED$1;
-            if (result === _UNDEFINED$1) {
-                result = this._view.injectorGet(token, this._nodeIndex, _UNDEFINED$1);
-            }
-            if (result === _UNDEFINED$1) {
-                result = this._view.parentInjector.get(token, notFoundValue);
-            }
-            return result;
-        };
-        return ElementInjector;
-    }(Injector));
     var ViewAnimationMap = (function () {
         function ViewAnimationMap() {
             this._map = new Map$1();
@@ -12378,6 +11514,27 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ViewAnimationMap;
     }());
+    var _UNDEFINED$1 = new Object();
+    var ElementInjector = (function (_super) {
+        __extends(ElementInjector, _super);
+        function ElementInjector(_view, _nodeIndex) {
+            _super.call(this);
+            this._view = _view;
+            this._nodeIndex = _nodeIndex;
+        }
+        ElementInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+            var result = _UNDEFINED$1;
+            if (result === _UNDEFINED$1) {
+                result = this._view.injectorGet(token, this._nodeIndex, _UNDEFINED$1);
+            }
+            if (result === _UNDEFINED$1) {
+                result = this._view.parentInjector.get(token, notFoundValue);
+            }
+            return result;
+        };
+        return ElementInjector;
+    }(Injector));
     var _scope_check = wtfCreateScope("AppView#check(ascii id)");
     /**
      * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -12529,7 +11686,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 this.disposables[i]();
             }
             for (var i = 0; i < this.subscriptions.length; i++) {
-                ObservableWrapper.dispose(this.subscriptions[i]);
+                this.subscriptions[i].unsubscribe();
             }
             this.destroyInternal();
             this.dirtyParentQueriesInternal();
@@ -12628,6 +11785,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 child.detectChanges(throwOnChange);
             }
         };
+        AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
         AppView.prototype.addToContentChildren = function (renderAppElement) {
             renderAppElement.parentView.contentChildren.push(this);
             this.viewContainerElement = renderAppElement;
@@ -12779,12 +11937,11 @@ var __extends = (this && this.__extends) || function (d, b) {
         LifecycleHooks: LifecycleHooks,
         LIFECYCLE_HOOKS_VALUES: LIFECYCLE_HOOKS_VALUES,
         ReflectorReader: ReflectorReader,
-        ReflectorComponentResolver: ReflectorComponentResolver,
         CodegenComponentFactoryResolver: CodegenComponentFactoryResolver,
         AppElement: AppElement,
         AppView: AppView,
         DebugAppView: DebugAppView,
-        AppModuleInjector: AppModuleInjector,
+        NgModuleInjector: NgModuleInjector,
         ViewType: ViewType,
         MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         checkBinding: checkBinding,
@@ -12792,6 +11949,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         interpolate: interpolate,
         ViewUtils: ViewUtils,
         VIEW_ENCAPSULATION_VALUES: VIEW_ENCAPSULATION_VALUES,
+        ViewMetadata: ViewMetadata,
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
         devModeEqual: devModeEqual,
@@ -12803,8 +11961,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
-        createProvider: createProvider,
-        isProviderLiteral: isProviderLiteral,
         EMPTY_ARRAY: EMPTY_ARRAY,
         EMPTY_MAP: EMPTY_MAP,
         pureProxy1: pureProxy1,
@@ -12840,27 +11996,28 @@ var __extends = (this && this.__extends) || function (d, b) {
     };
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
-    exports.disposePlatform = disposePlatform;
+    exports.destroyPlatform = destroyPlatform;
     exports.getPlatform = getPlatform;
-    exports.bootstrapModuleFactory = bootstrapModuleFactory;
-    exports.bootstrapModule = bootstrapModule;
-    exports.coreBootstrap = coreBootstrap;
-    exports.coreLoadAndBootstrap = coreLoadAndBootstrap;
     exports.PlatformRef = PlatformRef;
     exports.ApplicationRef = ApplicationRef;
     exports.enableProdMode = enableProdMode;
-    exports.lockRunMode = lockRunMode;
     exports.isDevMode = isDevMode;
     exports.createPlatformFactory = createPlatformFactory;
     exports.APP_ID = APP_ID;
-    exports.APP_INITIALIZER = APP_INITIALIZER;
     exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
     exports.PLATFORM_INITIALIZER = PLATFORM_INITIALIZER;
+    exports.APP_BOOTSTRAP_LISTENER = APP_BOOTSTRAP_LISTENER;
+    exports.APP_INITIALIZER = APP_INITIALIZER;
+    exports.ApplicationInitStatus = ApplicationInitStatus;
     exports.DebugElement = DebugElement;
     exports.DebugNode = DebugNode;
     exports.asNativeElements = asNativeElements;
     exports.getDebugNode = getDebugNode;
+    exports.TRANSLATIONS = TRANSLATIONS;
+    exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
+    exports.LOCALE_ID = LOCALE_ID;
     exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
+    exports.ApplicationModule = ApplicationModule;
     exports.wtfCreateScope = wtfCreateScope;
     exports.wtfLeave = wtfLeave;
     exports.wtfStartTimeRange = wtfStartTimeRange;
@@ -12875,20 +12032,17 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Component = Component;
     exports.Directive = Directive;
     exports.Attribute = Attribute;
-    exports.Query = Query;
     exports.ContentChildren = ContentChildren;
     exports.ContentChild = ContentChild;
     exports.ViewChildren = ViewChildren;
     exports.ViewChild = ViewChild;
-    exports.ViewQuery = ViewQuery;
     exports.Pipe = Pipe;
     exports.Input = Input;
     exports.Output = Output;
     exports.HostBinding = HostBinding;
     exports.HostListener = HostListener;
-    exports.AppModule = AppModule;
-    exports.AppModuleMetadata = AppModuleMetadata;
-    exports.ANALYZE_FOR_PRECOMPILE = ANALYZE_FOR_PRECOMPILE;
+    exports.NgModule = NgModule;
+    exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
     exports.AttributeMetadata = AttributeMetadata;
     exports.ContentChildMetadata = ContentChildMetadata;
     exports.ContentChildrenMetadata = ContentChildrenMetadata;
@@ -12911,7 +12065,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.OnChanges = OnChanges;
     exports.OnDestroy = OnDestroy;
     exports.OnInit = OnInit;
-    exports.ViewMetadata = ViewMetadata;
+    exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
+    exports.NgModuleMetadata = NgModuleMetadata;
     exports.Class = Class;
     exports.HostMetadata = HostMetadata;
     exports.InjectMetadata = InjectMetadata;
@@ -12923,11 +12078,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.resolveForwardRef = resolveForwardRef;
     exports.Injector = Injector;
     exports.ReflectiveInjector = ReflectiveInjector;
-    exports.Binding = Binding;
-    exports.ProviderBuilder = ProviderBuilder;
-    exports.bind = bind;
-    exports.Provider = Provider;
-    exports.provide = provide;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
     exports.ReflectiveKey = ReflectiveKey;
     exports.NoProviderError = NoProviderError;
@@ -12945,28 +12095,26 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.Host = Host;
     exports.SkipSelf = SkipSelf;
     exports.NgZone = NgZone;
-    exports.NgZoneError = NgZoneError;
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
     exports.RootRenderer = RootRenderer;
-    exports.AppModuleFactory = AppModuleFactory;
-    exports.AppModuleRef = AppModuleRef;
-    exports.AppModuleFactoryLoader = AppModuleFactoryLoader;
+    exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;
     exports.CompilerFactory = CompilerFactory;
     exports.ComponentStillLoadingError = ComponentStillLoadingError;
+    exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
     exports.ComponentFactory = ComponentFactory;
     exports.ComponentRef = ComponentRef;
     exports.ComponentFactoryResolver = ComponentFactoryResolver;
     exports.NoComponentFactoryError = NoComponentFactoryError;
     exports.ComponentResolver = ComponentResolver;
-    exports.DynamicComponentLoader = DynamicComponentLoader;
     exports.ElementRef = ElementRef;
     exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
+    exports.NgModuleFactory = NgModuleFactory;
+    exports.NgModuleRef = NgModuleRef;
+    exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
     exports.QueryList = QueryList;
-    exports.SystemJsAppModuleLoader = SystemJsAppModuleLoader;
-    exports.SystemJsCmpFactoryResolver = SystemJsCmpFactoryResolver;
-    exports.SystemJsComponentResolver = SystemJsComponentResolver;
+    exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
     exports.TemplateRef = TemplateRef;
     exports.ViewContainerRef = ViewContainerRef;
     exports.EmbeddedViewRef = EmbeddedViewRef;
@@ -12982,9 +12130,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.KeyValueDiffers = KeyValueDiffers;
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;
-    exports.PLATFORM_DIRECTIVES = PLATFORM_DIRECTIVES;
-    exports.PLATFORM_PIPES = PLATFORM_PIPES;
-    exports.PLATFORM_COMMON_PROVIDERS = PLATFORM_COMMON_PROVIDERS;
+    exports.platformCore = platformCore;
     exports.__core_private__ = __core_private__;
     exports.AUTO_STYLE = AUTO_STYLE;
     exports.AnimationEntryMetadata = AnimationEntryMetadata;

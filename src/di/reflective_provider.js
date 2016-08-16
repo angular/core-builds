@@ -6,15 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var lang_1 = require('../facade/lang');
 var collection_1 = require('../facade/collection');
+var lang_1 = require('../facade/lang');
 var reflection_1 = require('../reflection/reflection');
-var reflective_key_1 = require('./reflective_key');
+var type_1 = require('../type');
+var forward_ref_1 = require('./forward_ref');
 var metadata_1 = require('./metadata');
 var reflective_exceptions_1 = require('./reflective_exceptions');
-var forward_ref_1 = require('./forward_ref');
-var provider_1 = require('./provider');
-var provider_util_1 = require('./provider_util');
+var reflective_key_1 = require('./reflective_key');
 /**
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
@@ -49,7 +48,8 @@ var ResolvedReflectiveProvider_ = (function () {
 }());
 exports.ResolvedReflectiveProvider_ = ResolvedReflectiveProvider_;
 /**
- * An internal resolved representation of a factory function created by resolving {@link Provider}.
+ * An internal resolved representation of a factory function created by resolving {@link
+ * Provider}.
  * @experimental
  */
 var ResolvedReflectiveFactory = (function () {
@@ -85,7 +85,7 @@ function resolveReflectiveFactory(provider) {
     }
     else if (lang_1.isPresent(provider.useFactory)) {
         factoryFn = provider.useFactory;
-        resolvedDeps = constructDependencies(provider.useFactory, provider.dependencies);
+        resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
     }
     else {
         factoryFn = function () { return provider.useValue; };
@@ -93,7 +93,6 @@ function resolveReflectiveFactory(provider) {
     }
     return new ResolvedReflectiveFactory(factoryFn, resolvedDeps);
 }
-exports.resolveReflectiveFactory = resolveReflectiveFactory;
 /**
  * Converts the {@link Provider} into {@link ResolvedProvider}.
  *
@@ -101,9 +100,8 @@ exports.resolveReflectiveFactory = resolveReflectiveFactory;
  * convenience provider syntax.
  */
 function resolveReflectiveProvider(provider) {
-    return new ResolvedReflectiveProvider_(reflective_key_1.ReflectiveKey.get(provider.token), [resolveReflectiveFactory(provider)], provider.multi);
+    return new ResolvedReflectiveProvider_(reflective_key_1.ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)], provider.multi);
 }
-exports.resolveReflectiveProvider = resolveReflectiveProvider;
 /**
  * Resolve a list of Providers.
  */
@@ -151,20 +149,14 @@ function mergeResolvedReflectiveProviders(providers, normalizedProvidersMap) {
 exports.mergeResolvedReflectiveProviders = mergeResolvedReflectiveProviders;
 function _normalizeProviders(providers, res) {
     providers.forEach(function (b) {
-        if (b instanceof lang_1.Type) {
-            res.push(provider_1.provide(b, { useClass: b }));
+        if (b instanceof type_1.Type) {
+            res.push({ provide: b, useClass: b });
         }
-        else if (b instanceof provider_1.Provider) {
+        else if (b && typeof b == 'object' && b.hasOwnProperty('provide')) {
             res.push(b);
-        }
-        else if (provider_util_1.isProviderLiteral(b)) {
-            res.push(provider_util_1.createProvider(b));
         }
         else if (b instanceof Array) {
             _normalizeProviders(b, res);
-        }
-        else if (b instanceof provider_1.ProviderBuilder) {
-            throw new reflective_exceptions_1.InvalidProviderError(b.token);
         }
         else {
             throw new reflective_exceptions_1.InvalidProviderError(b);
@@ -207,7 +199,7 @@ function _extractToken(typeOrFunc /** TODO #9100 */, metadata /** TODO #9100 */ 
     var upperBoundVisibility = null;
     for (var i = 0; i < metadata.length; ++i) {
         var paramMetadata = metadata[i];
-        if (paramMetadata instanceof lang_1.Type) {
+        if (paramMetadata instanceof type_1.Type) {
             token = paramMetadata;
         }
         else if (paramMetadata instanceof metadata_1.InjectMetadata) {

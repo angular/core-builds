@@ -9,19 +9,16 @@
  * This indirection is needed to free up Component, etc symbols in the public API
  * to be used by the decorator versions of these annotations.
  */
-import { ChangeDetectionStrategy } from '../src/change_detection/change_detection';
-import { AnimationEntryMetadata } from './animation/metadata';
-import { AppModuleMetadata } from './metadata/app_module';
-import { AttributeMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildrenMetadata } from './metadata/di';
-import { ComponentMetadata, DirectiveMetadata } from './metadata/directives';
-import { ViewEncapsulation, ViewMetadata } from './metadata/view';
-export { AppModuleMetadata } from './metadata/app_module';
-export { ANALYZE_FOR_PRECOMPILE, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
-export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
-export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
-export { ViewEncapsulation, ViewMetadata } from './metadata/view';
+import { AttributeMetadata, ContentChildrenMetadata, ViewChildrenMetadata } from './metadata/di';
+import { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, PipeMetadataType } from './metadata/directives';
+import { NgModuleMetadata, NgModuleMetadataType } from './metadata/ng_module';
+import { Type } from './type';
 import { TypeDecorator } from './util/decorators';
-import { Type } from '../src/facade/lang';
+export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+export { ComponentMetadata, ComponentMetadataType, DirectiveMetadata, DirectiveMetadataType, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata, PipeMetadataType } from './metadata/directives';
+export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
+export { CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NgModuleMetadata, NgModuleMetadataType, SchemaMetadata } from './metadata/ng_module';
+export { ViewEncapsulation } from './metadata/view';
 /**
  * Interface for the {@link DirectiveMetadata} decorator function.
  *
@@ -39,52 +36,15 @@ export interface DirectiveDecorator extends TypeDecorator {
  * @stable
  */
 export interface ComponentDecorator extends TypeDecorator {
-    /**
-     * Chain {@link ViewMetadata} annotation.
-     */
-    View(obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        renderer?: string;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
 }
 /**
- * Interface for the {@link ViewMetadata} decorator function.
+ * Interface for the {@link NgModuleMetadata} decorator function.
  *
- * See {@link ViewMetadataFactory}.
- *
- * @experimental
- */
-export interface ViewDecorator extends TypeDecorator {
-    /**
-     * Chain {@link ViewMetadata} annotation.
-     */
-    View(obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        renderer?: string;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
-}
-/**
- * Interface for the {@link AppModuleMetadata} decorator function.
- *
- * See {@link AppModuleMetadataFactory}.
+ * See {@link NgModuleMetadataFactory}.
  *
  * @stable
  */
-export interface AppModuleDecorator extends TypeDecorator {
+export interface NgModuleDecorator extends TypeDecorator {
 }
 /**
  * {@link DirectiveMetadata} factory for creating annotations, decorators or DSL.
@@ -120,36 +80,8 @@ export interface AppModuleDecorator extends TypeDecorator {
  * @stable
  */
 export interface DirectiveMetadataFactory {
-    (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        queries?: {
-            [key: string]: any;
-        };
-    }): DirectiveDecorator;
-    new (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        queries?: {
-            [key: string]: any;
-        };
-    }): DirectiveMetadata;
+    (obj: DirectiveMetadataType): DirectiveDecorator;
+    new (obj: DirectiveMetadataType): DirectiveMetadata;
 }
 /**
  * {@link ComponentMetadata} factory for creating annotations, decorators or DSL.
@@ -185,130 +117,8 @@ export interface DirectiveMetadataFactory {
  * @stable
  */
 export interface ComponentMetadataFactory {
-    (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        moduleId?: string;
-        queries?: {
-            [key: string]: any;
-        };
-        viewProviders?: any[];
-        changeDetection?: ChangeDetectionStrategy;
-        templateUrl?: string;
-        template?: string;
-        styleUrls?: string[];
-        styles?: string[];
-        animations?: AnimationEntryMetadata[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        interpolation?: [string, string];
-        precompile?: Array<Type | any[]>;
-    }): ComponentDecorator;
-    new (obj: {
-        selector?: string;
-        inputs?: string[];
-        outputs?: string[];
-        properties?: string[];
-        events?: string[];
-        host?: {
-            [key: string]: string;
-        };
-        providers?: any[];
-        exportAs?: string;
-        moduleId?: string;
-        queries?: {
-            [key: string]: any;
-        };
-        viewProviders?: any[];
-        changeDetection?: ChangeDetectionStrategy;
-        templateUrl?: string;
-        template?: string;
-        styleUrls?: string[];
-        styles?: string[];
-        animations?: AnimationEntryMetadata[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        interpolation?: [string, string];
-        precompile?: Array<Type | any[]>;
-    }): ComponentMetadata;
-}
-/**
- * {@link ViewMetadata} factory for creating annotations, decorators or DSL.
- *
- * ### Example as TypeScript Decorator
- *
- * ```
- * import {Component, View} from '@angular/core';
- *
- * @Component({...})
- * class MyComponent {
- *   constructor() {
- *     ...
- *   }
- * }
- * ```
- *
- * ### Example as ES5 DSL
- *
- * ```
- * var MyComponent = ng
- *   .Component({...})
- *   .View({...})
- *   .Class({
- *     constructor: function() {
- *       ...
- *     }
- *   })
- * ```
- *
- * ### Example as ES5 annotation
- *
- * ```
- * var MyComponent = function() {
- *   ...
- * };
- *
- * MyComponent.annotations = [
- *   new ng.Component({...}),
- *   new ng.View({...})
- * ]
- * ```
- *
- * @experimental You should most likely use ComponentMetadataFactory instead
- */
-export interface ViewMetadataFactory {
-    (obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewDecorator;
-    new (obj: {
-        templateUrl?: string;
-        template?: string;
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        encapsulation?: ViewEncapsulation;
-        styles?: string[];
-        styleUrls?: string[];
-        animations?: AnimationEntryMetadata[];
-        interpolation?: [string, string];
-    }): ViewMetadata;
+    (obj: ComponentMetadataType): ComponentDecorator;
+    new (obj: ComponentMetadataType): ComponentMetadata;
 }
 /**
  * {@link AttributeMetadata} factory for creating annotations, decorators or DSL.
@@ -351,69 +161,15 @@ export interface AttributeMetadataFactory {
     new (name: string): AttributeMetadata;
 }
 /**
- * {@link QueryMetadata} factory for creating annotations, decorators or DSL.
- *
- * ### Example as TypeScript Decorator
- *
- * ```
- * import {Query, QueryList, Component} from '@angular/core';
- *
- * @Component({...})
- * class MyComponent {
- *   constructor(@Query(SomeType) queryList: QueryList<SomeType>) {
- *     ...
- *   }
- * }
- * ```
- *
- * ### Example as ES5 DSL
- *
- * ```
- * var MyComponent = ng
- *   .Component({...})
- *   .Class({
- *     constructor: [new ng.Query(SomeType), function(queryList) {
- *       ...
- *     }]
- *   })
- * ```
- *
- * ### Example as ES5 annotation
- *
- * ```
- * var MyComponent = function(queryList) {
- *   ...
- * };
- *
- * MyComponent.annotations = [
- *   new ng.Component({...})
- * ]
- * MyComponent.parameters = [
- *   [new ng.Query(SomeType)]
- * ]
- * ```
- * @deprecated
- */
-export interface QueryMetadataFactory {
-    (selector: Type | string, {descendants, read}?: {
-        descendants?: boolean;
-        read?: any;
-    }): ParameterDecorator;
-    new (selector: Type | string, {descendants, read}?: {
-        descendants?: boolean;
-        read?: any;
-    }): QueryMetadata;
-}
-/**
  * Factory for {@link ContentChildren}.
  * @stable
  */
 export interface ContentChildrenMetadataFactory {
-    (selector: Type | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
         read?: any;
     }): ContentChildrenMetadata;
@@ -423,10 +179,10 @@ export interface ContentChildrenMetadataFactory {
  * @stable
  */
 export interface ContentChildMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ContentChildMetadataFactory;
 }
@@ -435,10 +191,10 @@ export interface ContentChildMetadataFactory {
  * @stable
  */
 export interface ViewChildrenMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ViewChildrenMetadata;
 }
@@ -447,10 +203,10 @@ export interface ViewChildrenMetadataFactory {
  * @stable
  */
 export interface ViewChildMetadataFactory {
-    (selector: Type | string, {read}?: {
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
-    new (selector: Type | string, {read}?: {
+    new (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): ViewChildMetadataFactory;
 }
@@ -463,14 +219,8 @@ export interface ViewChildMetadataFactory {
  * @stable
  */
 export interface PipeMetadataFactory {
-    (obj: {
-        name: string;
-        pure?: boolean;
-    }): any;
-    new (obj: {
-        name: string;
-        pure?: boolean;
-    }): any;
+    (obj: PipeMetadataType): any;
+    new (obj: PipeMetadataType): any;
 }
 /**
  * {@link InputMetadata} factory for creating decorators.
@@ -509,25 +259,13 @@ export interface HostListenerMetadataFactory {
     new (eventName: string, args?: string[]): any;
 }
 /**
- * {@link AppModuleMetadata} factory for creating annotations, decorators or DSL.
+ * {@link NgModuleMetadata} factory for creating annotations, decorators or DSL.
  *
- * @stable
+ * @experimental
  */
-export interface AppModuleMetadataFactory {
-    (obj: {
-        providers?: any[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        precompile?: Array<Type | any[]>;
-        modules?: Array<Type | any[]>;
-    }): AppModuleDecorator;
-    new (obj: {
-        providers?: any[];
-        directives?: Array<Type | any[]>;
-        pipes?: Array<Type | any[]>;
-        precompile?: Array<Type | any[]>;
-        modules?: Array<Type | any[]>;
-    }): AppModuleMetadata;
+export interface NgModuleMetadataFactory {
+    (obj?: NgModuleMetadataType): NgModuleDecorator;
+    new (obj?: NgModuleMetadataType): NgModuleMetadata;
 }
 /**
  * Declare reusable UI building blocks for an application.
@@ -592,7 +330,7 @@ export declare var Component: ComponentMetadataFactory;
  * current `ElementInjector` resolves the constructor dependencies for each directive.
  *
  * Angular then resolves dependencies as follows, according to the order in which they appear in the
- * {@link ViewMetadata}:
+ * {@link ComponentMetadata}:
  *
  * 1. Dependencies on the current element
  * 2. Dependencies on element injectors and their parents until it encounters a Shadow DOM boundary
@@ -841,7 +579,8 @@ export declare var Component: ComponentMetadataFactory;
  * location in the current view
  * where these actions are performed.
  *
- * Views are always created as children of the current {@link ViewMetadata}, and as siblings of the
+ * Views are always created as children of the current {@link ComponentMetadata}, and as siblings of
+ * the
  * `<template>` element. Thus a
  * directive in a child view cannot inject the directive that created it.
  *
@@ -958,116 +697,6 @@ export declare var Directive: DirectiveMetadataFactory;
  * @Annotation
  */
 export declare var Attribute: AttributeMetadataFactory;
-/**
- * Declares an injectable parameter to be a live list of directives or variable
- * bindings from the content children of a directive.
- *
- * ### Example ([live demo](http://plnkr.co/edit/lY9m8HLy7z06vDoUaSN2?p=preview))
- *
- * Assume that `<tabs>` component would like to get a list its children `<pane>`
- * components as shown in this example:
- *
- * ```html
- * <tabs>
- *   <pane title="Overview">...</pane>
- *   <pane *ngFor="let o of objects" [title]="o.title">{{o.text}}</pane>
- * </tabs>
- * ```
- *
- * The preferred solution is to query for `Pane` directives using this decorator.
- *
- * ```javascript
- * @Component({
- *   selector: 'pane',
- *   inputs: ['title']
- * })
- * class Pane {
- *   title:string;
- * }
- *
- * @Component({
- *  selector: 'tabs',
- *  template: `
- *    <ul>
- *      <li *ngFor="let pane of panes">{{pane.title}}</li>
- *    </ul>
- *    <ng-content></ng-content>
- *  `
- * })
- * class Tabs {
- *   panes: QueryList<Pane>;
- *   constructor(@Query(Pane) panes:QueryList<Pane>) {
- *     this.panes = panes;
- *   }
- * }
- * ```
- *
- * A query can look for variable bindings by passing in a string with desired binding symbol.
- *
- * ### Example ([live demo](http://plnkr.co/edit/sT2j25cH1dURAyBRCKx1?p=preview))
- * ```html
- * <seeker>
- *   <div #findme>...</div>
- * </seeker>
- *
- * @Component({ selector: 'seeker' })
- * class seeker {
- *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
- * }
- * ```
- *
- * In this case the object that is injected depend on the type of the variable
- * binding. It can be an ElementRef, a directive or a component.
- *
- * Passing in a comma separated list of variable bindings will query for all of them.
- *
- * ```html
- * <seeker>
- *   <div #findMe>...</div>
- *   <div #findMeToo>...</div>
- * </seeker>
- *
- *  @Component({
- *   selector: 'seeker'
- * })
- * class Seeker {
- *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
- * }
- * ```
- *
- * Configure whether query looks for direct children or all descendants
- * of the querying element, by using the `descendants` parameter.
- * It is set to `false` by default.
- *
- * ### Example ([live demo](http://plnkr.co/edit/wtGeB977bv7qvA5FTYl9?p=preview))
- * ```html
- * <container #first>
- *   <item>a</item>
- *   <item>b</item>
- *   <container #second>
- *     <item>c</item>
- *   </container>
- * </container>
- * ```
- *
- * When querying for items, the first container will see only `a` and `b` by default,
- * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
- *
- * The queried directives are kept in a depth-first pre-order with respect to their
- * positions in the DOM.
- *
- * Query does not look deep into any subcomponent views.
- *
- * Query is updated as part of the change-detection cycle. Since change detection
- * happens after construction of a directive, QueryList will always be empty when observed in the
- * constructor.
- *
- * The injected object is an unmodifiable live list.
- * See {@link QueryList} for more details.
- * @deprecated
- * @Annotation
- */
-export declare var Query: QueryMetadataFactory;
 /**
  * Configures a content query.
  *
@@ -1279,44 +908,6 @@ export declare var ViewChildren: ViewChildrenMetadataFactory;
  */
 export declare var ViewChild: ViewChildMetadataFactory;
 /**
- * Similar to {@link QueryMetadata}, but querying the component view, instead of
- * the content children.
- *
- * ### Example ([live demo](http://plnkr.co/edit/eNsFHDf7YjyM6IzKxM1j?p=preview))
- *
- * ```javascript
- * @Component({
- *   ...,
- *   template: `
- *     <item> a </item>
- *     <item> b </item>
- *     <item> c </item>
- *   `
- * })
- * class MyComponent {
- *   shown: boolean;
- *
- *   constructor(private @Query(Item) items:QueryList<Item>) {
- *     items.changes.subscribe(() => console.log(items.length));
- *   }
- * }
- * ```
- *
- * Supports the same querying parameters as {@link QueryMetadata}, except
- * `descendants`. This always queries the whole view.
- *
- * As `shown` is flipped between true and false, items will contain zero of one
- * items.
- *
- * Specifies that a {@link QueryList} should be injected.
- *
- * The injected object is an iterable and observable live list.
- * See {@link QueryList} for more details.
- * @deprecated
- * @Annotation
- */
-export declare var ViewQuery: QueryMetadataFactory;
-/**
  * Declare reusable pipe function.
  *
  * ### Example
@@ -1363,8 +954,6 @@ export declare var Pipe: PipeMetadataFactory;
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -1408,7 +997,6 @@ export declare var Input: InputMetadataFactory;
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -1445,8 +1033,6 @@ export declare var Output: OutputMetadataFactory;
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -1482,16 +1068,14 @@ export declare var HostBinding: HostBindingMetadataFactory;
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
  */
 export declare var HostListener: HostListenerMetadataFactory;
 /**
- * Declares an app module.
- * @stable
+ * Declares an ng module.
+ * @experimental
  * @Annotation
  */
-export declare var AppModule: AppModuleMetadataFactory;
+export declare var NgModule: NgModuleMetadataFactory;

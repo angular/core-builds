@@ -11,7 +11,30 @@ var collection_1 = require('../src/facade/collection');
 var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 var async_test_completer_1 = require('./async_test_completer');
+var component_fixture_1 = require('./component_fixture');
+var test_compiler_1 = require('./test_compiler');
 var UNDEFINED = new Object();
+/**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
+ */
+var TestComponentRenderer = (function () {
+    function TestComponentRenderer() {
+    }
+    TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
+    return TestComponentRenderer;
+}());
+exports.TestComponentRenderer = TestComponentRenderer;
+var _nextRootElementId = 0;
+/**
+ * @experimental
+ */
+exports.ComponentFixtureAutoDetect = new index_1.OpaqueToken('ComponentFixtureAutoDetect');
+/**
+ * @experimental
+ */
+exports.ComponentFixtureNoNgZone = new index_1.OpaqueToken('ComponentFixtureNoNgZone');
 /**
  * @experimental
  */
@@ -20,142 +43,268 @@ var TestBed = (function () {
         this._instantiated = false;
         this._compiler = null;
         this._moduleRef = null;
-        this._appModuleFactory = null;
-        this._compilerProviders = [];
-        this._compilerUseJit = true;
+        this._moduleWithComponentFactories = null;
+        this._compilerOptions = [];
+        this._moduleOverrides = [];
+        this._componentOverrides = [];
+        this._directiveOverrides = [];
+        this._pipeOverrides = [];
         this._providers = [];
-        this._directives = [];
-        this._pipes = [];
-        this._modules = [];
-        this._precompile = [];
+        this._declarations = [];
+        this._imports = [];
+        this._schemas = [];
         this.platform = null;
-        this.appModule = null;
+        this.ngModule = null;
     }
-    TestBed.prototype.reset = function () {
+    /**
+     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+     * angular module. These are common to every test in the suite.
+     *
+     * This may only be called once, to set up the common providers for the current test
+     * suite on the current platform. If you absolutely need to change the providers,
+     * first use `resetTestEnvironment`.
+     *
+     * Test modules and platforms for individual platforms are available from
+     * 'angular2/platform/testing/<platform_name>'.
+     *
+     * @experimental
+     */
+    TestBed.initTestEnvironment = function (ngModule, platform) {
+        var testBed = getTestBed();
+        getTestBed().initTestEnvironment(ngModule, platform);
+        return testBed;
+    };
+    /**
+     * Reset the providers for the test injector.
+     *
+     * @experimental
+     */
+    TestBed.resetTestEnvironment = function () { getTestBed().resetTestEnvironment(); };
+    TestBed.resetTestingModule = function () {
+        getTestBed().resetTestingModule();
+        return TestBed;
+    };
+    /**
+     * Allows overriding default compiler providers and settings
+     * which are defined in test_injector.js
+     */
+    TestBed.configureCompiler = function (config) {
+        getTestBed().configureCompiler(config);
+        return TestBed;
+    };
+    /**
+     * Allows overriding default providers, directives, pipes, modules of the test injector,
+     * which are defined in test_injector.js
+     */
+    TestBed.configureTestingModule = function (moduleDef) {
+        getTestBed().configureTestingModule(moduleDef);
+        return TestBed;
+    };
+    /**
+     * Compile components with a `templateUrl` for the test's NgModule.
+     * It is necessary to call this function
+     * as fetching urls is asynchronous.
+     */
+    TestBed.compileComponents = function () { return getTestBed().compileComponents(); };
+    TestBed.overrideModule = function (ngModule, override) {
+        getTestBed().overrideModule(ngModule, override);
+        return TestBed;
+    };
+    TestBed.overrideComponent = function (component, override) {
+        getTestBed().overrideComponent(component, override);
+        return TestBed;
+    };
+    TestBed.overrideDirective = function (directive, override) {
+        getTestBed().overrideDirective(directive, override);
+        return TestBed;
+    };
+    TestBed.overridePipe = function (pipe, override) {
+        getTestBed().overridePipe(pipe, override);
+        return TestBed;
+    };
+    TestBed.createComponent = function (component) {
+        return getTestBed().createComponent(component);
+    };
+    /**
+     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+     * angular module. These are common to every test in the suite.
+     *
+     * This may only be called once, to set up the common providers for the current test
+     * suite on the current platform. If you absolutely need to change the providers,
+     * first use `resetTestEnvironment`.
+     *
+     * Test modules and platforms for individual platforms are available from
+     * 'angular2/platform/testing/<platform_name>'.
+     *
+     * @experimental
+     */
+    TestBed.prototype.initTestEnvironment = function (ngModule, platform) {
+        if (this.platform || this.ngModule) {
+            throw new exceptions_1.BaseException('Cannot set base providers because it has already been called');
+        }
+        this.platform = platform;
+        this.ngModule = ngModule;
+    };
+    /**
+     * Reset the providers for the test injector.
+     *
+     * @experimental
+     */
+    TestBed.prototype.resetTestEnvironment = function () {
+        this.resetTestingModule();
+        this.platform = null;
+        this.ngModule = null;
+    };
+    TestBed.prototype.resetTestingModule = function () {
         this._compiler = null;
+        this._moduleOverrides = [];
+        this._componentOverrides = [];
+        this._directiveOverrides = [];
+        this._pipeOverrides = [];
         this._moduleRef = null;
-        this._appModuleFactory = null;
-        this._compilerProviders = [];
-        this._compilerUseJit = true;
+        this._moduleWithComponentFactories = null;
+        this._compilerOptions = [];
         this._providers = [];
-        this._directives = [];
-        this._pipes = [];
-        this._modules = [];
-        this._precompile = [];
+        this._declarations = [];
+        this._imports = [];
+        this._schemas = [];
         this._instantiated = false;
     };
     TestBed.prototype.configureCompiler = function (config) {
-        if (this._instantiated) {
-            throw new exceptions_1.BaseException('Cannot add configuration after test injector is instantiated');
-        }
-        if (config.providers) {
-            this._compilerProviders = collection_1.ListWrapper.concat(this._compilerProviders, config.providers);
-        }
-        if (config.useJit !== undefined) {
-            this._compilerUseJit = config.useJit;
-        }
+        this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
+        this._compilerOptions.push(config);
     };
-    TestBed.prototype.configureModule = function (moduleDef) {
-        if (this._instantiated) {
-            throw new exceptions_1.BaseException('Cannot add configuration after test injector is instantiated');
-        }
+    TestBed.prototype.configureTestingModule = function (moduleDef) {
+        this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
             this._providers = collection_1.ListWrapper.concat(this._providers, moduleDef.providers);
         }
-        if (moduleDef.directives) {
-            this._directives = collection_1.ListWrapper.concat(this._directives, moduleDef.directives);
+        if (moduleDef.declarations) {
+            this._declarations = collection_1.ListWrapper.concat(this._declarations, moduleDef.declarations);
         }
-        if (moduleDef.pipes) {
-            this._pipes = collection_1.ListWrapper.concat(this._pipes, moduleDef.pipes);
+        if (moduleDef.imports) {
+            this._imports = collection_1.ListWrapper.concat(this._imports, moduleDef.imports);
         }
-        if (moduleDef.precompile) {
-            this._precompile = collection_1.ListWrapper.concat(this._precompile, moduleDef.precompile);
-        }
-        if (moduleDef.modules) {
-            this._modules = collection_1.ListWrapper.concat(this._modules, moduleDef.modules);
+        if (moduleDef.schemas) {
+            this._schemas = collection_1.ListWrapper.concat(this._schemas, moduleDef.schemas);
         }
     };
-    TestBed.prototype.createAppModuleFactory = function () {
+    TestBed.prototype.compileComponents = function () {
         var _this = this;
-        if (this._instantiated) {
-            throw new exceptions_1.BaseException('Cannot run precompilation when the test AppModule has already been instantiated. ' +
-                'Make sure you are not using `inject` before `doAsyncPrecompilation`.');
+        if (this._moduleWithComponentFactories || this._instantiated) {
+            return Promise.resolve(null);
         }
-        if (this._appModuleFactory) {
-            return Promise.resolve(this._appModuleFactory);
-        }
-        var moduleMeta = this._createCompilerAndModuleMeta();
-        return this._compiler.compileAppModuleAsync(_NoopModule, moduleMeta)
-            .then(function (appModuleFactory) {
-            _this._appModuleFactory = appModuleFactory;
-            return appModuleFactory;
+        var moduleType = this._createCompilerAndModule();
+        return this._compiler.compileModuleAndAllComponentsAsync(moduleType)
+            .then(function (moduleAndComponentFactories) {
+            _this._moduleWithComponentFactories = moduleAndComponentFactories;
         });
     };
-    TestBed.prototype.initTestAppModule = function () {
+    TestBed.prototype._initIfNeeded = function () {
         if (this._instantiated) {
             return;
         }
-        if (this._appModuleFactory) {
-            this._createFromModuleFactory(this._appModuleFactory);
+        if (!this._moduleWithComponentFactories) {
+            try {
+                var moduleType = this._createCompilerAndModule();
+                this._moduleWithComponentFactories =
+                    this._compiler.compileModuleAndAllComponentsSync(moduleType);
+            }
+            catch (e) {
+                if (e instanceof index_1.ComponentStillLoadingError) {
+                    throw new Error(("This test module uses the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but they were never compiled. ") +
+                        "Please call \"TestBed.compileComponents\" before your test.");
+                }
+                else {
+                    throw e;
+                }
+            }
         }
-        else {
-            var moduleMeta = this._createCompilerAndModuleMeta();
-            this._createFromModuleFactory(this._compiler.compileAppModuleSync(_NoopModule, moduleMeta));
-        }
-    };
-    /**
-     * @internal
-     */
-    TestBed.prototype._createInjectorAsync = function () {
-        var _this = this;
-        if (this._instantiated) {
-            return Promise.resolve(this);
-        }
-        var moduleMeta = this._createCompilerAndModuleMeta();
-        return this._compiler.compileAppModuleAsync(_NoopModule, moduleMeta)
-            .then(function (appModuleFactory) { return _this._createFromModuleFactory(appModuleFactory); });
-    };
-    TestBed.prototype._createCompilerAndModuleMeta = function () {
-        var compilerFactory = this.platform.injector.get(index_1.CompilerFactory);
-        this._compiler = compilerFactory.createCompiler({
-            providers: this._compilerProviders,
-            useJit: this._compilerUseJit,
-            deprecatedAppProviders: this._providers
-        });
-        var moduleMeta = new index_1.AppModuleMetadata({
-            providers: this._providers.concat([{ provide: TestBed, useValue: this }]),
-            modules: this._modules.concat([this.appModule]),
-            directives: this._directives,
-            pipes: this._pipes,
-            precompile: this._precompile
-        });
-        return moduleMeta;
-    };
-    TestBed.prototype._createFromModuleFactory = function (appModuleFactory) {
-        this._moduleRef = appModuleFactory.create(this.platform.injector);
+        this._moduleRef =
+            this._moduleWithComponentFactories.ngModuleFactory.create(this.platform.injector);
         this._instantiated = true;
-        return this;
+    };
+    TestBed.prototype._createCompilerAndModule = function () {
+        var _this = this;
+        var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
+        var declarations = this._declarations;
+        var imports = [this.ngModule, this._imports];
+        var schemas = this._schemas;
+        var DynamicTestModule = (function () {
+            function DynamicTestModule() {
+            }
+            /** @nocollapse */
+            DynamicTestModule.decorators = [
+                { type: index_1.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+            ];
+            return DynamicTestModule;
+        }());
+        var compilerFactory = this.platform.injector.get(test_compiler_1.TestingCompilerFactory);
+        this._compiler =
+            compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
+        this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
+        this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
+        this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
+        this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
+        return DynamicTestModule;
+    };
+    TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
+        if (this._instantiated) {
+            throw new exceptions_1.BaseException(("Cannot " + methodDescription + " when the test module has already been instantiated. ") +
+                ("Make sure you are not using `inject` before `" + methodName + "`."));
+        }
     };
     TestBed.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
-        if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestAppModule first!');
-        }
+        this._initIfNeeded();
         if (token === TestBed) {
             return this;
         }
-        // Tests can inject things from the app module and from the compiler,
-        // but the app module can't inject things from the compiler and vice versa.
+        // Tests can inject things from the ng module and from the compiler,
+        // but the ng module can't inject things from the compiler and vice versa.
         var result = this._moduleRef.injector.get(token, UNDEFINED);
         return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
     };
     TestBed.prototype.execute = function (tokens, fn) {
         var _this = this;
-        if (!this._instantiated) {
-            throw new exceptions_1.BaseException('Illegal state: The test bed\'s injector has not yet been created. Call initTestAppModule first!');
-        }
+        this._initIfNeeded();
         var params = tokens.map(function (t) { return _this.get(t); });
         return lang_1.FunctionWrapper.apply(fn, params);
+    };
+    TestBed.prototype.overrideModule = function (ngModule, override) {
+        this._assertNotInstantiated('overrideModule', 'override module metadata');
+        this._moduleOverrides.push([ngModule, override]);
+    };
+    TestBed.prototype.overrideComponent = function (component, override) {
+        this._assertNotInstantiated('overrideComponent', 'override component metadata');
+        this._componentOverrides.push([component, override]);
+    };
+    TestBed.prototype.overrideDirective = function (directive, override) {
+        this._assertNotInstantiated('overrideDirective', 'override directive metadata');
+        this._directiveOverrides.push([directive, override]);
+    };
+    TestBed.prototype.overridePipe = function (pipe, override) {
+        this._assertNotInstantiated('overridePipe', 'override pipe metadata');
+        this._pipeOverrides.push([pipe, override]);
+    };
+    TestBed.prototype.createComponent = function (component) {
+        var _this = this;
+        this._initIfNeeded();
+        var componentFactory = this._moduleWithComponentFactories.componentFactories.find(function (compFactory) { return compFactory.componentType === component; });
+        if (!componentFactory) {
+            throw new exceptions_1.BaseException("Cannot create the component " + lang_1.stringify(component) + " as it was not imported into the testing module!");
+        }
+        var noNgZone = this.get(exports.ComponentFixtureNoNgZone, false);
+        var autoDetect = this.get(exports.ComponentFixtureAutoDetect, false);
+        var ngZone = noNgZone ? null : this.get(index_1.NgZone, null);
+        var testComponentRenderer = this.get(TestComponentRenderer);
+        var rootElId = "root" + _nextRootElementId++;
+        testComponentRenderer.insertRootElement(rootElId);
+        var initComponent = function () {
+            var componentRef = componentFactory.create(_this, [], "#" + rootElId);
+            return new component_fixture_1.ComponentFixture(componentRef, ngZone, autoDetect);
+        };
+        return ngZone == null ? initComponent() : ngZone.run(initComponent);
     };
     return TestBed;
 }());
@@ -171,96 +320,6 @@ function getTestBed() {
     return _testBed;
 }
 exports.getTestBed = getTestBed;
-/**
- * @deprecated use getTestBed instead.
- */
-function getTestInjector() {
-    return getTestBed();
-}
-exports.getTestInjector = getTestInjector;
-/**
- * Set the providers that the test injector should use. These should be providers
- * common to every test in the suite.
- *
- * This may only be called once, to set up the common providers for the current test
- * suite on the current platform. If you absolutely need to change the providers,
- * first use `resetBaseTestProviders`.
- *
- * Test modules and platforms for individual platforms are available from
- * 'angular2/platform/testing/<platform_name>'.
- *
- * @deprecated Use initTestEnvironment instead
- */
-function setBaseTestProviders(platformProviders, applicationProviders) {
-    // Create a platform based on the Platform Providers.
-    var platformRef = index_1.createPlatform(index_1.ReflectiveInjector.resolveAndCreate(platformProviders));
-    var TestAppModule = (function () {
-        function TestAppModule() {
-        }
-        /** @nocollapse */
-        TestAppModule.decorators = [
-            { type: index_1.AppModule, args: [{ providers: applicationProviders },] },
-        ];
-        return TestAppModule;
-    }());
-    initTestEnvironment(TestAppModule, platformRef);
-}
-exports.setBaseTestProviders = setBaseTestProviders;
-/**
- * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
- * application module. These are common to every test in the suite.
- *
- * This may only be called once, to set up the common providers for the current test
- * suite on the current platform. If you absolutely need to change the providers,
- * first use `resetTestEnvironment`.
- *
- * Test modules and platforms for individual platforms are available from
- * 'angular2/platform/testing/<platform_name>'.
- *
- * @experimental
- */
-function initTestEnvironment(appModule, platform) {
-    var testBed = getTestBed();
-    if (testBed.platform || testBed.appModule) {
-        throw new exceptions_1.BaseException('Cannot set base providers because it has already been called');
-    }
-    testBed.platform = platform;
-    testBed.appModule = appModule;
-}
-exports.initTestEnvironment = initTestEnvironment;
-/**
- * Reset the providers for the test injector.
- *
- * @deprecated Use resetTestEnvironment instead.
- */
-function resetBaseTestProviders() {
-    resetTestEnvironment();
-}
-exports.resetBaseTestProviders = resetBaseTestProviders;
-/**
- * Reset the providers for the test injector.
- *
- * @experimental
- */
-function resetTestEnvironment() {
-    var testBed = getTestBed();
-    testBed.platform = null;
-    testBed.appModule = null;
-    testBed.reset();
-}
-exports.resetTestEnvironment = resetTestEnvironment;
-/**
- * Run asynchronous precompilation for the test's AppModule. It is necessary to call this function
- * if your test is using an AppModule which has precompiled components that require an asynchronous
- * call, such as an XHR. Should be called once before the test case.
- *
- * @experimental
- */
-function doAsyncPrecompilation() {
-    var testBed = getTestBed();
-    return testBed.createAppModuleFactory();
-}
-exports.doAsyncPrecompilation = doAsyncPrecompilation;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
@@ -289,9 +348,10 @@ function inject(tokens, fn) {
     var testBed = getTestBed();
     if (tokens.indexOf(async_test_completer_1.AsyncTestCompleter) >= 0) {
         return function () {
-            // Return an async test method that returns a Promise if AsyncTestCompleter is one of the
+            // Return an async test method that returns a Promise if AsyncTestCompleter is one of
+            // the
             // injected tokens.
-            return testBed._createInjectorAsync().then(function () {
+            return testBed.compileComponents().then(function () {
                 var completer = testBed.get(async_test_completer_1.AsyncTestCompleter);
                 testBed.execute(tokens, fn);
                 return completer.promise;
@@ -299,21 +359,7 @@ function inject(tokens, fn) {
         };
     }
     else {
-        return function () {
-            try {
-                testBed.initTestAppModule();
-            }
-            catch (e) {
-                if (e instanceof index_1.ComponentStillLoadingError) {
-                    throw new Error(("This test module precompiles the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but precompilation was never done. ") +
-                        "Please call \"doAsyncPrecompilation\" before \"inject\".");
-                }
-                else {
-                    throw e;
-                }
-            }
-            return testBed.execute(tokens, fn);
-        };
+        return function () { return testBed.execute(tokens, fn); };
     }
 }
 exports.inject = inject;
@@ -327,7 +373,7 @@ var InjectSetupWrapper = (function () {
     InjectSetupWrapper.prototype._addModule = function () {
         var moduleDef = this._moduleDef();
         if (moduleDef) {
-            getTestBed().configureModule(moduleDef);
+            getTestBed().configureTestingModule(moduleDef);
         }
     };
     InjectSetupWrapper.prototype.inject = function (tokens, fn) {
@@ -340,25 +386,18 @@ var InjectSetupWrapper = (function () {
     return InjectSetupWrapper;
 }());
 exports.InjectSetupWrapper = InjectSetupWrapper;
-/**
- * @experimental
- */
-function withProviders(providers) {
-    return new InjectSetupWrapper(function () { {
-        return { providers: providers() };
-    } });
-}
-exports.withProviders = withProviders;
-/**
- * @experimental
- */
-function withModule(moduleDef) {
-    return new InjectSetupWrapper(moduleDef);
+function withModule(moduleDef, fn) {
+    if (fn === void 0) { fn = null; }
+    if (fn) {
+        return function () {
+            var testBed = getTestBed();
+            if (moduleDef) {
+                testBed.configureTestingModule(moduleDef);
+            }
+            return fn();
+        };
+    }
+    return new InjectSetupWrapper(function () { return moduleDef; });
 }
 exports.withModule = withModule;
-var _NoopModule = (function () {
-    function _NoopModule() {
-    }
-    return _NoopModule;
-}());
 //# sourceMappingURL=test_bed.js.map

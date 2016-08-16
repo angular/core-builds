@@ -12,11 +12,9 @@ var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- * @ts2dart_const
  * @stable
  */
 var KeyValueDiffers = (function () {
-    /*@ts2dart_const*/
     function KeyValueDiffers(factories) {
         this.factories = factories;
     }
@@ -50,7 +48,8 @@ var KeyValueDiffers = (function () {
      * ```
      */
     KeyValueDiffers.extend = function (factories) {
-        return new di_1.Provider(KeyValueDiffers, {
+        return {
+            provide: KeyValueDiffers,
             useFactory: function (parent) {
                 if (lang_1.isBlank(parent)) {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
@@ -62,7 +61,7 @@ var KeyValueDiffers = (function () {
             },
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[KeyValueDiffers, new di_1.SkipSelfMetadata(), new di_1.OptionalMetadata()]]
-        });
+        };
     };
     KeyValueDiffers.prototype.find = function (kv) {
         var factory = this.factories.find(function (f) { return f.supports(kv); });

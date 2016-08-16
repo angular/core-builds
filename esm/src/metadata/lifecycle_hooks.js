@@ -69,8 +69,6 @@ export var LIFECYCLE_HOOKS_VALUES = [
  * export class App {
  *   value = 0;
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -113,9 +111,7 @@ export class OnChanges {
  * export class App {
  *   hasChild = true;
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
- *  ```
+ * ```
  * @stable
  */
 export class OnInit {
@@ -224,8 +220,6 @@ export class DoCheck {
  * export class App {
  *   hasChild = true;
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  *
  *
@@ -328,8 +322,6 @@ export class OnDestroy {
  * })
  * export class App {
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -377,8 +369,6 @@ export class AfterContentInit {
  * export class App {
  *   hasContent = true;
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -425,8 +415,6 @@ export class AfterContentChecked {
  * })
  * export class App {
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
@@ -476,8 +464,6 @@ export class AfterViewInit {
  * })
  * export class App {
  * }
- *
- * bootstrap(App).catch(err => console.error(err));
  * ```
  * @stable
  */
