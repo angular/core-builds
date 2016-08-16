@@ -741,8 +741,6 @@ exports.Pipe = decorators_1.makeDecorator(directives_1.PipeMetadata);
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -787,7 +785,6 @@ exports.Input = decorators_1.makePropDecorator(directives_1.InputMetadata);
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -825,8 +822,6 @@ exports.Output = decorators_1.makePropDecorator(directives_1.OutputMetadata);
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -863,8 +858,6 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation

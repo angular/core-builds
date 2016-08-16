@@ -37,8 +37,10 @@ var _ArrayLogger = (function () {
  *   }
  * }
  *
- * bootstrap(MyApp, [{provide: ExceptionHandler, useClass: MyExceptionHandler}])
- *
+ * @NgModule({
+ *   providers: [{provide: ExceptionHandler, useClass: MyExceptionHandler}]
+ * })
+ * class MyModule {}
  * ```
  * @stable
  */

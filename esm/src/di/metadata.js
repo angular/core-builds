@@ -232,8 +232,6 @@ export class SkipSelfMetadata {
  * })
  * class App {
  * }
- *
- * bootstrap(App);
  *```
  * @stable
  */

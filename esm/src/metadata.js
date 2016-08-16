@@ -709,8 +709,6 @@ export var Pipe = makeDecorator(PipeMetadata);
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -755,7 +753,6 @@ export var Input = makePropDecorator(InputMetadata);
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -793,8 +790,6 @@ export var Output = makePropDecorator(OutputMetadata);
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -831,8 +826,6 @@ export var HostBinding = makePropDecorator(HostBindingMetadata);
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation

@@ -451,8 +451,6 @@ var DirectiveMetadata = (function (_super) {
          *   directives: [BankAccount]
          * })
          * class App {}
-         *
-         * bootstrap(App);
          * ```
          *
          */
@@ -502,7 +500,6 @@ var DirectiveMetadata = (function (_super) {
          *   everySecond() { console.log('second'); }
          *   everyFiveSeconds() { console.log('five seconds'); }
          * }
-         * bootstrap(App);
          * ```
          *
          */
@@ -712,8 +709,6 @@ exports.PipeMetadata = PipeMetadata;
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -766,7 +761,6 @@ exports.InputMetadata = InputMetadata;
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -808,8 +802,6 @@ exports.OutputMetadata = OutputMetadata;
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -850,8 +842,6 @@ exports.HostBindingMetadata = HostBindingMetadata;
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  */

@@ -537,8 +537,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * class App {
      * }
-     *
-     * bootstrap(App);
      *```
      * @stable
      */
@@ -1841,8 +1839,6 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   directives: [BankAccount]
              * })
              * class App {}
-             *
-             * bootstrap(App);
              * ```
              *
              */
@@ -1892,7 +1888,6 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   everySecond() { console.log('second'); }
              *   everyFiveSeconds() { console.log('five seconds'); }
              * }
-             * bootstrap(App);
              * ```
              *
              */
@@ -2099,8 +2094,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      */
@@ -2152,7 +2145,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
      * @stable
      */
@@ -2193,8 +2185,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class App {
      *   prop;
      * }
-     *
-     * bootstrap(App);
      * ```
      * @stable
      */
@@ -2234,8 +2224,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [CountClicks]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      */
@@ -2381,8 +2369,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   value = 0;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2428,9 +2414,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasChild = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
-     *  ```
+     * ```
      * @stable
      */
     var OnInit = (function () {
@@ -2545,8 +2529,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasChild = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      *
      *
@@ -2652,8 +2634,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2704,8 +2684,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * export class App {
      *   hasContent = true;
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2755,8 +2733,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -2809,8 +2785,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * })
      * export class App {
      * }
-     *
-     * bootstrap(App).catch(err => console.error(err));
      * ```
      * @stable
      */
@@ -3597,8 +3571,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3643,7 +3615,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3681,8 +3652,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      * class App {
      *   prop;
      * }
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -3719,8 +3688,6 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   directives: [CountClicks]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      * @stable
      * @Annotation
@@ -4161,8 +4128,10 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   }
      * }
      *
-     * bootstrap(MyApp, [{provide: ExceptionHandler, useClass: MyExceptionHandler}])
-     *
+     * @NgModule({
+     *   providers: [{provide: ExceptionHandler, useClass: MyExceptionHandler}]
+     * })
+     * class MyModule {}
      * ```
      * @stable
      */

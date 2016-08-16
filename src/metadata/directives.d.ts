@@ -484,8 +484,6 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      *   directives: [BankAccount]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      *
      */
@@ -532,7 +530,6 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      *   everySecond() { console.log('second'); }
      *   everyFiveSeconds() { console.log('five seconds'); }
      * }
-     * bootstrap(App);
      * ```
      *
      */
@@ -582,8 +579,6 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      *   directives: [CountClicks]
      * })
      * class App {}
-     *
-     * bootstrap(App);
      * ```
      *
      * ## Host Property Bindings
@@ -620,8 +615,6 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      * class App {
      *   prop;
      * }
-     *
-     * bootstrap(App);
      * ```
      *
      * ## Attributes
@@ -1033,8 +1026,6 @@ export declare class PipeMetadata extends InjectableMetadata implements PipeMeta
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -1087,7 +1078,6 @@ export declare class InputMetadata {
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -1126,8 +1116,6 @@ export declare class OutputMetadata {
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  */
@@ -1165,8 +1153,6 @@ export declare class HostBindingMetadata {
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  */

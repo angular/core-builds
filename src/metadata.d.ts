@@ -954,8 +954,6 @@ export declare var Pipe: PipeMetadataFactory;
  *   directives: [BankAccount]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -999,7 +997,6 @@ export declare var Input: InputMetadataFactory;
  *   everySecond() { console.log('second'); }
  *   everyFiveSeconds() { console.log('five seconds'); }
  * }
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -1036,8 +1033,6 @@ export declare var Output: OutputMetadataFactory;
  * class App {
  *   prop;
  * }
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation
@@ -1073,8 +1068,6 @@ export declare var HostBinding: HostBindingMetadataFactory;
  *   directives: [CountClicks]
  * })
  * class App {}
- *
- * bootstrap(App);
  * ```
  * @stable
  * @Annotation

@@ -257,8 +257,6 @@ exports.SkipSelfMetadata = SkipSelfMetadata;
  * })
  * class App {
  * }
- *
- * bootstrap(App);
  *```
  * @stable
  */
