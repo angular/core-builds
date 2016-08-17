@@ -122,6 +122,10 @@ var TestBed = (function () {
         getTestBed().overridePipe(pipe, override);
         return TestBed;
     };
+    TestBed.get = function (token, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
+        return getTestBed().get(token, notFoundValue);
+    };
     TestBed.createComponent = function (component) {
         return getTestBed().createComponent(component);
     };

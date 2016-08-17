@@ -117,6 +117,9 @@ export class TestBed {
         getTestBed().overridePipe(pipe, override);
         return TestBed;
     }
+    static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
+        return getTestBed().get(token, notFoundValue);
+    }
     static createComponent(component) {
         return getTestBed().createComponent(component);
     }
