@@ -9319,21 +9319,9 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._destroyListeners = [];
             this._destroyed = false;
         }
-        /**
-         * @deprecated
-         */
-        PlatformRef_.prototype.registerDisposeListener = function (dispose) { this.onDestroy(dispose); };
         PlatformRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
         Object.defineProperty(PlatformRef_.prototype, "injector", {
             get: function () { return this._injector; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(PlatformRef_.prototype, "disposed", {
-            /**
-             * @deprecated
-             */
-            get: function () { return this.destroyed; },
             enumerable: true,
             configurable: true
         });
@@ -9350,10 +9338,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this._destroyListeners.forEach(function (dispose) { return dispose(); });
             this._destroyed = true;
         };
-        /**
-         * @deprecated
-         */
-        PlatformRef_.prototype.dispose = function () { this.destroy(); };
         PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
             return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
         };
@@ -10231,13 +10215,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _keyValueDiffersFactory() {
         return defaultKeyValueDiffers;
     }
-    /**
-     * A default set of providers which should be included in any Angular
-     * application, regardless of the platform it runs onto.
-     *
-     * @deprecated Include `ApplicationModule` instead.
-     */
-    var APPLICATION_COMMON_PROVIDERS = [];
     var ApplicationModule = (function () {
         function ApplicationModule() {
         }
@@ -11992,7 +11969,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.TRANSLATIONS = TRANSLATIONS;
     exports.TRANSLATIONS_FORMAT = TRANSLATIONS_FORMAT;
     exports.LOCALE_ID = LOCALE_ID;
-    exports.APPLICATION_COMMON_PROVIDERS = APPLICATION_COMMON_PROVIDERS;
     exports.ApplicationModule = ApplicationModule;
     exports.wtfCreateScope = wtfCreateScope;
     exports.wtfLeave = wtfLeave;

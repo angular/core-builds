@@ -51,7 +51,6 @@ exports.TRANSLATIONS = tokens_1.TRANSLATIONS;
 exports.TRANSLATIONS_FORMAT = tokens_1.TRANSLATIONS_FORMAT;
 exports.LOCALE_ID = tokens_1.LOCALE_ID;
 var application_module_1 = require('./src/application_module');
-exports.APPLICATION_COMMON_PROVIDERS = application_module_1.APPLICATION_COMMON_PROVIDERS;
 exports.ApplicationModule = application_module_1.ApplicationModule;
 var profile_1 = require('./src/profile/profile');
 exports.wtfCreateScope = profile_1.wtfCreateScope;

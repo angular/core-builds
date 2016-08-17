@@ -22,13 +22,6 @@ function _keyValueDiffersFactory() {
     return change_detection_1.defaultKeyValueDiffers;
 }
 exports._keyValueDiffersFactory = _keyValueDiffersFactory;
-/**
- * A default set of providers which should be included in any Angular
- * application, regardless of the platform it runs onto.
- *
- * @deprecated Include `ApplicationModule` instead.
- */
-exports.APPLICATION_COMMON_PROVIDERS = [];
 var ApplicationModule = (function () {
     function ApplicationModule() {
     }

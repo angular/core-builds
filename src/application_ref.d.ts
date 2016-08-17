@@ -140,22 +140,10 @@ export declare class PlatformRef_ extends PlatformRef {
     private _destroyListeners;
     private _destroyed;
     constructor(_injector: Injector);
-    /**
-     * @deprecated
-     */
-    registerDisposeListener(dispose: () => void): void;
     onDestroy(callback: () => void): void;
     injector: Injector;
-    /**
-     * @deprecated
-     */
-    disposed: boolean;
     destroyed: boolean;
     destroy(): void;
-    /**
-     * @deprecated
-     */
-    dispose(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;

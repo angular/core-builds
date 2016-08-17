@@ -210,16 +210,8 @@ export class PlatformRef_ extends PlatformRef {
         this._destroyListeners = [];
         this._destroyed = false;
     }
-    /**
-     * @deprecated
-     */
-    registerDisposeListener(dispose) { this.onDestroy(dispose); }
     onDestroy(callback) { this._destroyListeners.push(callback); }
     get injector() { return this._injector; }
-    /**
-     * @deprecated
-     */
-    get disposed() { return this.destroyed; }
     get destroyed() { return this._destroyed; }
     destroy() {
         if (this._destroyed) {
@@ -229,10 +221,6 @@ export class PlatformRef_ extends PlatformRef {
         this._destroyListeners.forEach((dispose) => dispose());
         this._destroyed = true;
     }
-    /**
-     * @deprecated
-     */
-    dispose() { this.destroy(); }
     bootstrapModuleFactory(moduleFactory) {
         return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
     }
