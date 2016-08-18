@@ -5640,6 +5640,12 @@ var __extends = (this && this.__extends) || function (d, b) {
             if (parent === void 0) { parent = null; }
             return new ReflectiveInjector_(ReflectiveProtoInjector.fromResolvedProviders(providers), parent);
         };
+        /**
+         * @deprecated
+         */
+        ReflectiveInjector.fromResolvedBindings = function (providers) {
+            return ReflectiveInjector.fromResolvedProviders(providers);
+        };
         Object.defineProperty(ReflectiveInjector.prototype, "parent", {
             /**
              * Parent of this injector.

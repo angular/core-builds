@@ -409,6 +409,12 @@ export class ReflectiveInjector {
         return new ReflectiveInjector_(ReflectiveProtoInjector.fromResolvedProviders(providers), parent);
     }
     /**
+     * @deprecated
+     */
+    static fromResolvedBindings(providers) {
+        return ReflectiveInjector.fromResolvedProviders(providers);
+    }
+    /**
      * Parent of this injector.
      *
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
