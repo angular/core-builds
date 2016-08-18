@@ -203,10 +203,6 @@ export declare abstract class ReflectiveInjector implements Injector {
      */
     static fromResolvedProviders(providers: ResolvedReflectiveProvider[], parent?: Injector): ReflectiveInjector;
     /**
-     * @deprecated
-     */
-    static fromResolvedBindings(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
-    /**
      * Parent of this injector.
      *
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
