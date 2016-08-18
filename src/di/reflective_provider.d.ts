@@ -45,14 +45,7 @@ export interface ResolvedReflectiveProvider {
      */
     multiProvider: boolean;
 }
-/**
- * See {@link ResolvedReflectiveProvider} instead.
- *
- * @deprecated
- */
-export interface ResolvedReflectiveBinding extends ResolvedReflectiveProvider {
-}
-export declare class ResolvedReflectiveProvider_ implements ResolvedReflectiveBinding {
+export declare class ResolvedReflectiveProvider_ implements ResolvedReflectiveProvider {
     key: ReflectiveKey;
     resolvedFactories: ResolvedReflectiveFactory[];
     multiProvider: boolean;
