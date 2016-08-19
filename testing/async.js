@@ -63,7 +63,7 @@ function runInTestZone(fn, finishCallback, failCallback) {
     var ProxyZoneSpec = Zone['ProxyZoneSpec'];
     if (ProxyZoneSpec === undefined) {
         throw new Error('ProxyZoneSpec is needed for the async() test helper but could not be found. ' +
-            'Please make sure that your environment includes zone.js/dist/proxy-zone.js');
+            'Please make sure that your environment includes zone.js/dist/proxy.js');
     }
     var proxyZoneSpec = ProxyZoneSpec.get();
     ProxyZoneSpec.assertPresent();
