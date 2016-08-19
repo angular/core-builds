@@ -7,8 +7,8 @@
  */
 "use strict";
 var index_1 = require('../index');
-var _FakeAsyncTestZoneSpecType = Zone['FakeAsyncTestZoneSpec'];
-var _fakeAsyncZone = null;
+var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -17,8 +17,8 @@ var _fakeAsyncTestZoneSpec = null;
  * @experimental
  */
 function resetFakeAsyncZone() {
-    _fakeAsyncZone = null;
     _fakeAsyncTestZoneSpec = null;
+    ProxyZoneSpec.assertPresent().resetDelegate();
 }
 exports.resetFakeAsyncZone = resetFakeAsyncZone;
 var _inFakeAsyncCall = false;
@@ -42,27 +42,32 @@ var _inFakeAsyncCall = false;
  */
 function fakeAsync(fn) {
     return function () {
-        var args = []; /** TODO #9100 */
+        var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i - 0] = arguments[_i];
         }
+        var proxyZoneSpec = ProxyZoneSpec.assertPresent();
         if (_inFakeAsyncCall) {
             throw new index_1.BaseException('fakeAsync() calls can not be nested');
         }
         _inFakeAsyncCall = true;
         try {
-            if (!_fakeAsyncZone) {
-                if (Zone.current.get('FakeAsyncTestZoneSpec') != null) {
+            if (!_fakeAsyncTestZoneSpec) {
+                if (proxyZoneSpec.getDelegate() instanceof FakeAsyncTestZoneSpec) {
                     throw new index_1.BaseException('fakeAsync() calls can not be nested');
                 }
-                _fakeAsyncTestZoneSpec = new _FakeAsyncTestZoneSpecType();
-                _fakeAsyncZone = Zone.current.fork(_fakeAsyncTestZoneSpec);
+                _fakeAsyncTestZoneSpec = new FakeAsyncTestZoneSpec();
             }
-            var res = _fakeAsyncZone.run(function () {
-                var res = fn.apply(void 0, args);
+            var res = void 0;
+            var lastProxyZoneSpec = proxyZoneSpec.getDelegate();
+            proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
+            try {
+                res = fn.apply(void 0, args);
                 flushMicrotasks();
-                return res;
-            });
+            }
+            finally {
+                proxyZoneSpec.setDelegate(lastProxyZoneSpec);
+            }
             if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
                 throw new index_1.BaseException((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
                     "periodic timer(s) still in the queue.");
