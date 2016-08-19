@@ -42,6 +42,7 @@ exports.OnDestroy = lifecycle_hooks_1.OnDestroy;
 exports.OnInit = lifecycle_hooks_1.OnInit;
 var ng_module_2 = require('./metadata/ng_module');
 exports.CUSTOM_ELEMENTS_SCHEMA = ng_module_2.CUSTOM_ELEMENTS_SCHEMA;
+exports.NO_ERRORS_SCHEMA = ng_module_2.NO_ERRORS_SCHEMA;
 exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
 var view_1 = require('./metadata/view');
 exports.ViewEncapsulation = view_1.ViewEncapsulation;

@@ -22,6 +22,14 @@ exports.CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
 };
 /**
+ * Defines a schema that will allow any property on any element.
+ *
+ * @experimental
+ */
+exports.NO_ERRORS_SCHEMA = {
+    name: 'no-errors-schema'
+};
+/**
  * Declares an Angular Module.
  * @experimental
  */

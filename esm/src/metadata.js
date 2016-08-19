@@ -12,7 +12,7 @@ import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/dec
 export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
 export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
 export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
-export { CUSTOM_ELEMENTS_SCHEMA, NgModuleMetadata } from './metadata/ng_module';
+export { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModuleMetadata } from './metadata/ng_module';
 export { ViewEncapsulation } from './metadata/view';
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**

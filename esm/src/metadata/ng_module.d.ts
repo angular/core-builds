@@ -32,6 +32,12 @@ export interface SchemaMetadata {
  */
 export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
+ * Defines a schema that will allow any property on any element.
+ *
+ * @experimental
+ */
+export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
+/**
  * Interface for creating {@link NgModuleMetadata}
  * @experimental
  */

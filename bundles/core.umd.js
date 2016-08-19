@@ -2244,6 +2244,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         name: 'custom-elements'
     };
     /**
+     * Defines a schema that will allow any property on any element.
+     *
+     * @experimental
+     */
+    var NO_ERRORS_SCHEMA = {
+        name: 'no-errors-schema'
+    };
+    /**
      * Declares an Angular Module.
      * @experimental
      */
@@ -12012,6 +12020,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.OnDestroy = OnDestroy;
     exports.OnInit = OnInit;
     exports.CUSTOM_ELEMENTS_SCHEMA = CUSTOM_ELEMENTS_SCHEMA;
+    exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
     exports.NgModuleMetadata = NgModuleMetadata;
     exports.Class = Class;
     exports.HostMetadata = HostMetadata;
