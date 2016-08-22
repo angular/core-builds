@@ -13,7 +13,8 @@ var AnimationSequencePlayer = (function () {
         var _this = this;
         this._players = _players;
         this._currentIndex = 0;
-        this._subscriptions = [];
+        this._onDoneFns = [];
+        this._onStartFns = [];
         this._finished = false;
         this._started = false;
         this.parentPlayer = null;
@@ -47,18 +48,23 @@ var AnimationSequencePlayer = (function () {
             if (!lang_1.isPresent(this.parentPlayer)) {
                 this.destroy();
             }
-            this._subscriptions.forEach(function (subscription) { return subscription(); });
-            this._subscriptions = [];
+            this._onDoneFns.forEach(function (fn) { return fn(); });
+            this._onDoneFns = [];
         }
     };
     AnimationSequencePlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
-    AnimationSequencePlayer.prototype.onDone = function (fn) { this._subscriptions.push(fn); };
+    AnimationSequencePlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
+    AnimationSequencePlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
     AnimationSequencePlayer.prototype.play = function () {
         if (!lang_1.isPresent(this.parentPlayer)) {
             this.init();
         }
-        this._started = true;
+        if (!this.hasStarted()) {
+            this._onStartFns.forEach(function (fn) { return fn(); });
+            this._onStartFns = [];
+            this._started = true;
+        }
         this._activePlayer.play();
     };
     AnimationSequencePlayer.prototype.pause = function () { this._activePlayer.pause(); };

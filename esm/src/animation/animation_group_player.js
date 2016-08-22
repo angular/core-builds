@@ -10,7 +10,8 @@ import { Math } from '../facade/math';
 export class AnimationGroupPlayer {
     constructor(_players) {
         this._players = _players;
-        this._subscriptions = [];
+        this._onDoneFns = [];
+        this._onStartFns = [];
         this._finished = false;
         this._started = false;
         this.parentPlayer = null;
@@ -36,18 +37,23 @@ export class AnimationGroupPlayer {
             if (!isPresent(this.parentPlayer)) {
                 this.destroy();
             }
-            this._subscriptions.forEach(subscription => subscription());
-            this._subscriptions = [];
+            this._onDoneFns.forEach(fn => fn());
+            this._onDoneFns = [];
         }
     }
     init() { this._players.forEach(player => player.init()); }
-    onDone(fn) { this._subscriptions.push(fn); }
+    onStart(fn) { this._onStartFns.push(fn); }
+    onDone(fn) { this._onDoneFns.push(fn); }
     hasStarted() { return this._started; }
     play() {
         if (!isPresent(this.parentPlayer)) {
             this.init();
         }
-        this._started = true;
+        if (!this.hasStarted()) {
+            this._onStartFns.forEach(fn => fn());
+            this._onStartFns = [];
+            this._started = true;
+        }
         this._players.forEach(player => player.play());
     }
     pause() { this._players.forEach(player => player.pause()); }

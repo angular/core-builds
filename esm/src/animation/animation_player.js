@@ -18,20 +18,28 @@ export class AnimationPlayer {
 }
 export class NoOpAnimationPlayer {
     constructor() {
-        this._subscriptions = [];
+        this._onDoneFns = [];
+        this._onStartFns = [];
         this._started = false;
         this.parentPlayer = null;
         scheduleMicroTask(() => this._onFinish());
     }
     /** @internal */
     _onFinish() {
-        this._subscriptions.forEach(entry => { entry(); });
-        this._subscriptions = [];
+        this._onDoneFns.forEach(fn => fn());
+        this._onDoneFns = [];
     }
-    onDone(fn) { this._subscriptions.push(fn); }
+    onStart(fn) { this._onStartFns.push(fn); }
+    onDone(fn) { this._onDoneFns.push(fn); }
     hasStarted() { return this._started; }
     init() { }
-    play() { this._started = true; }
+    play() {
+        if (!this.hasStarted()) {
+            this._onStartFns.forEach(fn => fn());
+            this._onStartFns = [];
+        }
+        this._started = true;
+    }
     pause() { }
     restart() { }
     finish() { this._onFinish(); }

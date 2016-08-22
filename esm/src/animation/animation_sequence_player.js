@@ -11,7 +11,8 @@ export class AnimationSequencePlayer {
     constructor(_players) {
         this._players = _players;
         this._currentIndex = 0;
-        this._subscriptions = [];
+        this._onDoneFns = [];
+        this._onStartFns = [];
         this._finished = false;
         this._started = false;
         this.parentPlayer = null;
@@ -44,18 +45,23 @@ export class AnimationSequencePlayer {
             if (!isPresent(this.parentPlayer)) {
                 this.destroy();
             }
-            this._subscriptions.forEach(subscription => subscription());
-            this._subscriptions = [];
+            this._onDoneFns.forEach(fn => fn());
+            this._onDoneFns = [];
         }
     }
     init() { this._players.forEach(player => player.init()); }
-    onDone(fn) { this._subscriptions.push(fn); }
+    onStart(fn) { this._onStartFns.push(fn); }
+    onDone(fn) { this._onDoneFns.push(fn); }
     hasStarted() { return this._started; }
     play() {
         if (!isPresent(this.parentPlayer)) {
             this.init();
         }
-        this._started = true;
+        if (!this.hasStarted()) {
+            this._onStartFns.forEach(fn => fn());
+            this._onStartFns = [];
+            this._started = true;
+        }
         this._activePlayer.play();
     }
     pause() { this._activePlayer.pause(); }
