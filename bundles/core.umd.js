@@ -10339,6 +10339,21 @@ var __extends = (this && this.__extends) || function (d, b) {
         return AnimationKeyframe;
     }());
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var AnimationOutput = (function () {
+        function AnimationOutput(name, phase, fullPropertyName) {
+            this.name = name;
+            this.phase = phase;
+            this.fullPropertyName = fullPropertyName;
+        }
+        return AnimationOutput;
+    }());
+    /**
      * @experimental Animation support is experimental.
      */
     var AnimationPlayer = (function () {
@@ -11529,6 +11544,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.viewContainerElement = null;
             this.numberOfChecks = 0;
             this.animationPlayers = new ViewAnimationMap();
+            this._animationListeners = new Map();
             this.ref = new ViewRef_(this);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
                 this.renderer = viewUtils.renderComponent(componentType);
@@ -11554,10 +11570,21 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
             }
         };
-        AppView.prototype.queueAnimation = function (element, animationName, player) {
+        AppView.prototype.queueAnimation = function (element, animationName, player, fromState, toState) {
             var _this = this;
+            var actualAnimationDetected = !(player instanceof NoOpAnimationPlayer);
+            var animationData = {
+                'fromState': fromState,
+                'toState': toState,
+                'running': actualAnimationDetected
+            };
             this.animationPlayers.set(element, animationName, player);
-            player.onDone(function () { _this.animationPlayers.remove(element, animationName); });
+            player.onDone(function () {
+                // TODO: make this into a datastructure for done|start
+                _this.triggerAnimationOutput(element, animationName, 'done', animationData);
+                _this.animationPlayers.remove(element, animationName);
+            });
+            player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', animationData); });
         };
         AppView.prototype.triggerQueuedAnimations = function () {
             this.animationPlayers.getAllPlayers().forEach(function (player) {
@@ -11565,6 +11592,28 @@ var __extends = (this && this.__extends) || function (d, b) {
                     player.play();
                 }
             });
+        };
+        AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, animationData) {
+            var listeners = this._animationListeners.get(element);
+            if (isPresent(listeners) && listeners.length) {
+                for (var i = 0; i < listeners.length; i++) {
+                    var listener = listeners[i];
+                    // we check for both the name in addition to the phase in the event
+                    // that there may be more than one @trigger on the same element
+                    if (listener.output.name == animationName && listener.output.phase == phase) {
+                        listener.handler(animationData);
+                        break;
+                    }
+                }
+            }
+        };
+        AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
+            var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
+            var animations = this._animationListeners.get(element);
+            if (!isPresent(animations)) {
+                this._animationListeners.set(element, animations = []);
+            }
+            animations.push(entry);
         };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
@@ -11893,6 +11942,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return lastNode;
     }
+    var _AnimationOutputWithHandler = (function () {
+        function _AnimationOutputWithHandler(output, handler) {
+            this.output = output;
+            this.handler = handler;
+        }
+        return _AnimationOutputWithHandler;
+    }());
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -11964,6 +12020,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
+        AnimationOutput: AnimationOutput,
         ANY_STATE: ANY_STATE,
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,

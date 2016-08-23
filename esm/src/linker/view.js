@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AnimationGroupPlayer } from '../animation/animation_group_player';
+import { NoOpAnimationPlayer } from '../animation/animation_player';
 import { ViewAnimationMap } from '../animation/view_animation_map';
 import { ChangeDetectorStatus } from '../change_detection/change_detection';
 import { ListWrapper } from '../facade/collection';
@@ -37,6 +38,7 @@ export class AppView {
         this.viewContainerElement = null;
         this.numberOfChecks = 0;
         this.animationPlayers = new ViewAnimationMap();
+        this._animationListeners = new Map();
         this.ref = new ViewRef_(this);
         if (type === ViewType.COMPONENT || type === ViewType.HOST) {
             this.renderer = viewUtils.renderComponent(componentType);
@@ -57,9 +59,20 @@ export class AppView {
             }
         }
     }
-    queueAnimation(element, animationName, player) {
+    queueAnimation(element, animationName, player, fromState, toState) {
+        var actualAnimationDetected = !(player instanceof NoOpAnimationPlayer);
+        var animationData = {
+            'fromState': fromState,
+            'toState': toState,
+            'running': actualAnimationDetected
+        };
         this.animationPlayers.set(element, animationName, player);
-        player.onDone(() => { this.animationPlayers.remove(element, animationName); });
+        player.onDone(() => {
+            // TODO: make this into a datastructure for done|start
+            this.triggerAnimationOutput(element, animationName, 'done', animationData);
+            this.animationPlayers.remove(element, animationName);
+        });
+        player.onStart(() => { this.triggerAnimationOutput(element, animationName, 'start', animationData); });
     }
     triggerQueuedAnimations() {
         this.animationPlayers.getAllPlayers().forEach(player => {
@@ -67,6 +80,28 @@ export class AppView {
                 player.play();
             }
         });
+    }
+    triggerAnimationOutput(element, animationName, phase, animationData) {
+        var listeners = this._animationListeners.get(element);
+        if (isPresent(listeners) && listeners.length) {
+            for (let i = 0; i < listeners.length; i++) {
+                let listener = listeners[i];
+                // we check for both the name in addition to the phase in the event
+                // that there may be more than one @trigger on the same element
+                if (listener.output.name == animationName && listener.output.phase == phase) {
+                    listener.handler(animationData);
+                    break;
+                }
+            }
+        }
+    }
+    registerAnimationOutput(element, outputEvent, eventHandler) {
+        var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
+        var animations = this._animationListeners.get(element);
+        if (!isPresent(animations)) {
+            this._animationListeners.set(element, animations = []);
+        }
+        animations.push(entry);
     }
     create(context, givenProjectableNodes, rootSelectorOrNode) {
         this.context = context;
@@ -372,5 +407,11 @@ function _findLastRenderNode(node) {
         lastNode = node;
     }
     return lastNode;
+}
+class _AnimationOutputWithHandler {
+    constructor(output, handler) {
+        this.output = output;
+        this.handler = handler;
+    }
 }
 //# sourceMappingURL=view.js.map

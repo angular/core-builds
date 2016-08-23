@@ -9,6 +9,7 @@
 var animation_constants_1 = require('./src/animation/animation_constants');
 var animation_group_player_1 = require('./src/animation/animation_group_player');
 var animation_keyframe_1 = require('./src/animation/animation_keyframe');
+var animation_output_1 = require('./src/animation/animation_output');
 var animation_player_1 = require('./src/animation/animation_player');
 var animation_sequence_player_1 = require('./src/animation/animation_sequence_player');
 var animationUtils = require('./src/animation/animation_style_util');
@@ -94,6 +95,7 @@ exports.__core_private__ = {
     renderStyles: animationUtils.renderStyles,
     collectAndResolveStyles: animationUtils.collectAndResolveStyles,
     AnimationStyles: animation_styles_1.AnimationStyles,
+    AnimationOutput: animation_output_1.AnimationOutput,
     ANY_STATE: animation_constants_1.ANY_STATE,
     DEFAULT_STATE: animation_constants_1.DEFAULT_STATE,
     EMPTY_STATE: animation_constants_1.EMPTY_STATE,

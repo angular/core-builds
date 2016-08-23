@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var animation_group_player_1 = require('../animation/animation_group_player');
+var animation_player_1 = require('../animation/animation_player');
 var view_animation_map_1 = require('../animation/view_animation_map');
 var change_detection_1 = require('../change_detection/change_detection');
 var collection_1 = require('../facade/collection');
@@ -43,6 +44,7 @@ var AppView = (function () {
         this.viewContainerElement = null;
         this.numberOfChecks = 0;
         this.animationPlayers = new view_animation_map_1.ViewAnimationMap();
+        this._animationListeners = new Map();
         this.ref = new view_ref_1.ViewRef_(this);
         if (type === view_type_1.ViewType.COMPONENT || type === view_type_1.ViewType.HOST) {
             this.renderer = viewUtils.renderComponent(componentType);
@@ -68,10 +70,21 @@ var AppView = (function () {
             }
         }
     };
-    AppView.prototype.queueAnimation = function (element, animationName, player) {
+    AppView.prototype.queueAnimation = function (element, animationName, player, fromState, toState) {
         var _this = this;
+        var actualAnimationDetected = !(player instanceof animation_player_1.NoOpAnimationPlayer);
+        var animationData = {
+            'fromState': fromState,
+            'toState': toState,
+            'running': actualAnimationDetected
+        };
         this.animationPlayers.set(element, animationName, player);
-        player.onDone(function () { _this.animationPlayers.remove(element, animationName); });
+        player.onDone(function () {
+            // TODO: make this into a datastructure for done|start
+            _this.triggerAnimationOutput(element, animationName, 'done', animationData);
+            _this.animationPlayers.remove(element, animationName);
+        });
+        player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', animationData); });
     };
     AppView.prototype.triggerQueuedAnimations = function () {
         this.animationPlayers.getAllPlayers().forEach(function (player) {
@@ -79,6 +92,28 @@ var AppView = (function () {
                 player.play();
             }
         });
+    };
+    AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, animationData) {
+        var listeners = this._animationListeners.get(element);
+        if (lang_1.isPresent(listeners) && listeners.length) {
+            for (var i = 0; i < listeners.length; i++) {
+                var listener = listeners[i];
+                // we check for both the name in addition to the phase in the event
+                // that there may be more than one @trigger on the same element
+                if (listener.output.name == animationName && listener.output.phase == phase) {
+                    listener.handler(animationData);
+                    break;
+                }
+            }
+        }
+    };
+    AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
+        var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
+        var animations = this._animationListeners.get(element);
+        if (!lang_1.isPresent(animations)) {
+            this._animationListeners.set(element, animations = []);
+        }
+        animations.push(entry);
     };
     AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
         this.context = context;
@@ -409,4 +444,11 @@ function _findLastRenderNode(node) {
     }
     return lastNode;
 }
+var _AnimationOutputWithHandler = (function () {
+    function _AnimationOutputWithHandler(output, handler) {
+        this.output = output;
+        this.handler = handler;
+    }
+    return _AnimationOutputWithHandler;
+}());
 //# sourceMappingURL=view.js.map
