@@ -438,8 +438,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      *   selector: 'app',
      *   template: `
      *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
-     *   `,
-     *   directives: [BankAccount]
+     *   `
      * })
      * class App {}
      * ```
@@ -480,8 +479,7 @@ export class DirectiveMetadata extends InjectableMetadata {
      *   template: `
      *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
      *     </interval-dir>
-     *   `,
-     *   directives: [IntervalDir]
+     *   `
      * })
      * class App {
      *   everySecond() { console.log('second'); }
@@ -550,7 +548,7 @@ export class DirectiveMetadata extends InjectableMetadata {
  * @stable
  */
 export class ComponentMetadata extends DirectiveMetadata {
-    constructor({ selector, inputs, outputs, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, directives, pipes, encapsulation, interpolation, entryComponents } = {}) {
+    constructor({ selector, inputs, outputs, host, exportAs, moduleId, providers, viewProviders, changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template, styleUrls, styles, animations, encapsulation, interpolation, entryComponents } = {}) {
         super({
             selector: selector,
             inputs: inputs,
@@ -566,8 +564,6 @@ export class ComponentMetadata extends DirectiveMetadata {
         this.template = template;
         this.styleUrls = styleUrls;
         this.styles = styles;
-        this.directives = directives;
-        this.pipes = pipes;
         this.encapsulation = encapsulation;
         this.moduleId = moduleId;
         this.animations = animations;
@@ -604,8 +600,7 @@ export class ComponentMetadata extends DirectiveMetadata {
      *   viewProviders: [
      *     Greeter
      *   ],
-     *   template: `<needs-greeter></needs-greeter>`,
-     *   directives: [NeedsGreeter]
+     *   template: `<needs-greeter></needs-greeter>`
      * })
      * class HelloWorld {
      * }
@@ -667,9 +662,9 @@ export class PipeMetadata extends InjectableMetadata {
  *   selector: 'app',
  *   template: `
  *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
- *   `,
- *   directives: [BankAccount]
+ *   `
  * })
+ *
  * class App {}
  * ```
  * @stable
@@ -714,8 +709,7 @@ export class InputMetadata {
  *   template: `
  *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
  *     </interval-dir>
- *   `,
- *   directives: [IntervalDir]
+ *   `
  * })
  * class App {
  *   everySecond() { console.log('second'); }
@@ -754,8 +748,7 @@ export class OutputMetadata {
  *
  * @Component({
  *   selector: 'app',
- *   template: `<input [(ngModel)]="prop">`,
- *   directives: [FORM_DIRECTIVES, NgModelStatus]
+ *   template: `<input [(ngModel)]="prop">`
  * })
  * class App {
  *   prop;
@@ -794,8 +787,7 @@ export class HostBindingMetadata {
  *
  * @Component({
  *   selector: 'app',
- *   template: `<button counting>Increment</button>`,
- *   directives: [CountClicks]
+ *   template: `<button counting>Increment</button>`
  * })
  * class App {}
  * ```

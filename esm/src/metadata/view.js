@@ -67,13 +67,11 @@ export var VIEW_ENCAPSULATION_VALUES = [ViewEncapsulation.Emulated, ViewEncapsul
  * @deprecated Use ComponentMetadata instead.
  */
 export class ViewMetadata {
-    constructor({ templateUrl, template, directives, pipes, encapsulation, styles, styleUrls, animations, interpolation } = {}) {
+    constructor({ templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation } = {}) {
         this.templateUrl = templateUrl;
         this.template = template;
         this.styleUrls = styleUrls;
         this.styles = styles;
-        this.directives = directives;
-        this.pipes = pipes;
         this.encapsulation = encapsulation;
         this.animations = animations;
         this.interpolation = interpolation;

@@ -1835,8 +1835,7 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   selector: 'app',
              *   template: `
              *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
-             *   `,
-             *   directives: [BankAccount]
+             *   `
              * })
              * class App {}
              * ```
@@ -1881,8 +1880,7 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   template: `
              *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
              *     </interval-dir>
-             *   `,
-             *   directives: [IntervalDir]
+             *   `
              * })
              * class App {
              *   everySecond() { console.log('second'); }
@@ -1961,7 +1959,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentMetadata = (function (_super) {
         __extends(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
+            var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
             _super.call(this, {
                 selector: selector,
                 inputs: inputs,
@@ -1977,8 +1975,6 @@ var __extends = (this && this.__extends) || function (d, b) {
             this.template = template;
             this.styleUrls = styleUrls;
             this.styles = styles;
-            this.directives = directives;
-            this.pipes = pipes;
             this.encapsulation = encapsulation;
             this.moduleId = moduleId;
             this.animations = animations;
@@ -2016,8 +2012,7 @@ var __extends = (this && this.__extends) || function (d, b) {
              *   viewProviders: [
              *     Greeter
              *   ],
-             *   template: `<needs-greeter></needs-greeter>`,
-             *   directives: [NeedsGreeter]
+             *   template: `<needs-greeter></needs-greeter>`
              * })
              * class HelloWorld {
              * }
@@ -2090,9 +2085,9 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   selector: 'app',
      *   template: `
      *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
-     *   `,
-     *   directives: [BankAccount]
+     *   `
      * })
+     *
      * class App {}
      * ```
      * @stable
@@ -2138,8 +2133,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *   template: `
      *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
      *     </interval-dir>
-     *   `,
-     *   directives: [IntervalDir]
+     *   `
      * })
      * class App {
      *   everySecond() { console.log('second'); }
@@ -2179,8 +2173,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @Component({
      *   selector: 'app',
-     *   template: `<input [(ngModel)]="prop">`,
-     *   directives: [FORM_DIRECTIVES, NgModelStatus]
+     *   template: `<input [(ngModel)]="prop">`
      * })
      * class App {
      *   prop;
@@ -2220,8 +2213,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * @Component({
      *   selector: 'app',
-     *   template: `<button counting>Increment</button>`,
-     *   directives: [CountClicks]
+     *   template: `<button counting>Increment</button>`
      * })
      * class App {}
      * ```
@@ -2871,13 +2863,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      */
     var ViewMetadata = (function () {
         function ViewMetadata(_a) {
-            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
+            var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
             this.templateUrl = templateUrl;
             this.template = template;
             this.styleUrls = styleUrls;
             this.styles = styles;
-            this.directives = directives;
-            this.pipes = pipes;
             this.encapsulation = encapsulation;
             this.animations = animations;
             this.interpolation = interpolation;
@@ -6179,7 +6169,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         throw new BaseException("Runtime compiler is not loaded");
     }
     /**
-     * Low-level service for running the angular compiler duirng runtime
+     * Low-level service for running the angular compiler during runtime
      * to create {@link ComponentFactory}s, which
      * can later be used to create and render a Component instance.
      *
@@ -6191,21 +6181,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     var Compiler = (function () {
         function Compiler() {
         }
-        /**
-         * Loads the template and styles of a component and returns the associated `ComponentFactory`.
-         */
-        Compiler.prototype.compileComponentAsync = function (component, ngModule) {
-            if (ngModule === void 0) { ngModule = null; }
-            throw _throwError();
-        };
-        /**
-         * Compiles the given component. All templates have to be either inline or compiled via
-         * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
-         */
-        Compiler.prototype.compileComponentSync = function (component, ngModule) {
-            if (ngModule === void 0) { ngModule = null; }
-            throw _throwError();
-        };
         /**
          * Compiles the given NgModule and all of its components. All templates of the components listed
          * in `entryComponents`
@@ -9375,11 +9350,22 @@ var __extends = (this && this.__extends) || function (d, b) {
             if (compilerOptions === void 0) { compilerOptions = []; }
             return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
         };
-        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
+        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone, componentFactoryCallback) {
             var _this = this;
             if (compilerOptions === void 0) { compilerOptions = []; }
             var compilerFactory = this.injector.get(CompilerFactory);
             var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+            // ugly internal api hack: generate host component factories for all declared components and
+            // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
+            // factories.
+            if (componentFactoryCallback) {
+                return compiler.compileModuleAndAllComponentsAsync(moduleType)
+                    .then(function (_a) {
+                    var ngModuleFactory = _a.ngModuleFactory, componentFactories = _a.componentFactories;
+                    componentFactoryCallback(componentFactories);
+                    return _this._bootstrapModuleFactoryWithZone(ngModuleFactory, ngZone);
+                });
+            }
             return compiler.compileModuleAsync(moduleType)
                 .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
         };
@@ -9581,7 +9567,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
             /**
              * The ComponentFactoryResolver to get hold of the ComponentFactories
-             * delcared in the `entryComponents` property of the module.
+             * declared in the `entryComponents` property of the module.
              */
             get: function () { return unimplemented(); },
             enumerable: true,
@@ -9601,12 +9587,12 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var NgModuleFactory = (function () {
-        function NgModuleFactory(_injectorClass, _moduleype) {
+        function NgModuleFactory(_injectorClass, _moduleType) {
             this._injectorClass = _injectorClass;
-            this._moduleype = _moduleype;
+            this._moduleType = _moduleType;
         }
         Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
-            get: function () { return this._moduleype; },
+            get: function () { return this._moduleType; },
             enumerable: true,
             configurable: true
         });

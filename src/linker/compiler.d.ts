@@ -31,7 +31,7 @@ export declare class ModuleWithComponentFactories<T> {
     constructor(ngModuleFactory: NgModuleFactory<T>, componentFactories: ComponentFactory<any>[]);
 }
 /**
- * Low-level service for running the angular compiler duirng runtime
+ * Low-level service for running the angular compiler during runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
  *
@@ -41,15 +41,6 @@ export declare class ModuleWithComponentFactories<T> {
  * @stable
  */
 export declare class Compiler {
-    /**
-     * Loads the template and styles of a component and returns the associated `ComponentFactory`.
-     */
-    compileComponentAsync<T>(component: Type<T>, ngModule?: Type<any>): Promise<ComponentFactory<T>>;
-    /**
-     * Compiles the given component. All templates have to be either inline or compiled via
-     * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
-     */
-    compileComponentSync<T>(component: Type<T>, ngModule?: Type<any>): ComponentFactory<T>;
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents`

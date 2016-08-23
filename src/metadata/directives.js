@@ -447,8 +447,7 @@ var DirectiveMetadata = (function (_super) {
          *   selector: 'app',
          *   template: `
          *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
-         *   `,
-         *   directives: [BankAccount]
+         *   `
          * })
          * class App {}
          * ```
@@ -493,8 +492,7 @@ var DirectiveMetadata = (function (_super) {
          *   template: `
          *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
          *     </interval-dir>
-         *   `,
-         *   directives: [IntervalDir]
+         *   `
          * })
          * class App {
          *   everySecond() { console.log('second'); }
@@ -574,7 +572,7 @@ exports.DirectiveMetadata = DirectiveMetadata;
 var ComponentMetadata = (function (_super) {
     __extends(ComponentMetadata, _super);
     function ComponentMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, directives = _b.directives, pipes = _b.pipes, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
+        var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? constants_1.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
         _super.call(this, {
             selector: selector,
             inputs: inputs,
@@ -590,8 +588,6 @@ var ComponentMetadata = (function (_super) {
         this.template = template;
         this.styleUrls = styleUrls;
         this.styles = styles;
-        this.directives = directives;
-        this.pipes = pipes;
         this.encapsulation = encapsulation;
         this.moduleId = moduleId;
         this.animations = animations;
@@ -629,8 +625,7 @@ var ComponentMetadata = (function (_super) {
          *   viewProviders: [
          *     Greeter
          *   ],
-         *   template: `<needs-greeter></needs-greeter>`,
-         *   directives: [NeedsGreeter]
+         *   template: `<needs-greeter></needs-greeter>`
          * })
          * class HelloWorld {
          * }
@@ -705,9 +700,9 @@ exports.PipeMetadata = PipeMetadata;
  *   selector: 'app',
  *   template: `
  *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
- *   `,
- *   directives: [BankAccount]
+ *   `
  * })
+ *
  * class App {}
  * ```
  * @stable
@@ -754,8 +749,7 @@ exports.InputMetadata = InputMetadata;
  *   template: `
  *     <interval-dir (everySecond)="everySecond()" (everyFiveSeconds)="everyFiveSeconds()">
  *     </interval-dir>
- *   `,
- *   directives: [IntervalDir]
+ *   `
  * })
  * class App {
  *   everySecond() { console.log('second'); }
@@ -796,8 +790,7 @@ exports.OutputMetadata = OutputMetadata;
  *
  * @Component({
  *   selector: 'app',
- *   template: `<input [(ngModel)]="prop">`,
- *   directives: [FORM_DIRECTIVES, NgModelStatus]
+ *   template: `<input [(ngModel)]="prop">`
  * })
  * class App {
  *   prop;
@@ -838,8 +831,7 @@ exports.HostBindingMetadata = HostBindingMetadata;
  *
  * @Component({
  *   selector: 'app',
- *   template: `<button counting>Increment</button>`,
- *   directives: [CountClicks]
+ *   template: `<button counting>Increment</button>`
  * })
  * class App {}
  * ```

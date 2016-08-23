@@ -24,7 +24,7 @@ export declare abstract class NgModuleRef<T> {
     injector: Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
-     * delcared in the `entryComponents` property of the module.
+     * declared in the `entryComponents` property of the module.
      */
     componentFactoryResolver: ComponentFactoryResolver;
     /**
@@ -45,10 +45,10 @@ export declare abstract class NgModuleRef<T> {
  */
 export declare class NgModuleFactory<T> {
     private _injectorClass;
-    private _moduleype;
+    private _moduleType;
     constructor(_injectorClass: {
         new (parentInjector: Injector): NgModuleInjector<T>;
-    }, _moduleype: Type<T>);
+    }, _moduleType: Type<T>);
     moduleType: Type<T>;
     create(parentInjector: Injector): NgModuleRef<T>;
 }

@@ -24,7 +24,7 @@ export class NgModuleRef {
     get injector() { return unimplemented(); }
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
-     * delcared in the `entryComponents` property of the module.
+     * declared in the `entryComponents` property of the module.
      */
     get componentFactoryResolver() { return unimplemented(); }
     /**
@@ -36,11 +36,11 @@ export class NgModuleRef {
  * @experimental
  */
 export class NgModuleFactory {
-    constructor(_injectorClass, _moduleype) {
+    constructor(_injectorClass, _moduleType) {
         this._injectorClass = _injectorClass;
-        this._moduleype = _moduleype;
+        this._moduleType = _moduleType;
     }
-    get moduleType() { return this._moduleype; }
+    get moduleType() { return this._moduleType; }
     create(parentInjector) {
         if (!parentInjector) {
             parentInjector = Injector.NULL;

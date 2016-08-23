@@ -37,7 +37,7 @@ var NgModuleRef = (function () {
     Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
         /**
          * The ComponentFactoryResolver to get hold of the ComponentFactories
-         * delcared in the `entryComponents` property of the module.
+         * declared in the `entryComponents` property of the module.
          */
         get: function () { return exceptions_1.unimplemented(); },
         enumerable: true,
@@ -58,12 +58,12 @@ exports.NgModuleRef = NgModuleRef;
  * @experimental
  */
 var NgModuleFactory = (function () {
-    function NgModuleFactory(_injectorClass, _moduleype) {
+    function NgModuleFactory(_injectorClass, _moduleType) {
         this._injectorClass = _injectorClass;
-        this._moduleype = _moduleype;
+        this._moduleType = _moduleType;
     }
     Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
-        get: function () { return this._moduleype; },
+        get: function () { return this._moduleType; },
         enumerable: true,
         configurable: true
     });

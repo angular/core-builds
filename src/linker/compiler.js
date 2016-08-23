@@ -45,7 +45,7 @@ function _throwError() {
     throw new exceptions_1.BaseException("Runtime compiler is not loaded");
 }
 /**
- * Low-level service for running the angular compiler duirng runtime
+ * Low-level service for running the angular compiler during runtime
  * to create {@link ComponentFactory}s, which
  * can later be used to create and render a Component instance.
  *
@@ -57,21 +57,6 @@ function _throwError() {
 var Compiler = (function () {
     function Compiler() {
     }
-    /**
-     * Loads the template and styles of a component and returns the associated `ComponentFactory`.
-     */
-    Compiler.prototype.compileComponentAsync = function (component, ngModule) {
-        if (ngModule === void 0) { ngModule = null; }
-        throw _throwError();
-    };
-    /**
-     * Compiles the given component. All templates have to be either inline or compiled via
-     * `compileComponentAsync` before. Otherwise throws a {@link ComponentStillLoadingError}.
-     */
-    Compiler.prototype.compileComponentSync = function (component, ngModule) {
-        if (ngModule === void 0) { ngModule = null; }
-        throw _throwError();
-    };
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents`

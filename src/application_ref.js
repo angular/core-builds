@@ -293,11 +293,22 @@ var PlatformRef_ = (function (_super) {
         if (compilerOptions === void 0) { compilerOptions = []; }
         return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
     };
-    PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
+    PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone, componentFactoryCallback) {
         var _this = this;
         if (compilerOptions === void 0) { compilerOptions = []; }
         var compilerFactory = this.injector.get(compiler_1.CompilerFactory);
         var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+        // ugly internal api hack: generate host component factories for all declared components and
+        // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
+        // factories.
+        if (componentFactoryCallback) {
+            return compiler.compileModuleAndAllComponentsAsync(moduleType)
+                .then(function (_a) {
+                var ngModuleFactory = _a.ngModuleFactory, componentFactories = _a.componentFactories;
+                componentFactoryCallback(componentFactories);
+                return _this._bootstrapModuleFactoryWithZone(ngModuleFactory, ngZone);
+            });
+        }
         return compiler.compileModuleAsync(moduleType)
             .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
     };
