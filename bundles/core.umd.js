@@ -698,8 +698,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (this && this.annotations instanceof Array) {
             Reflect.defineMetadata('annotations', this.annotations, constructor);
         }
-        var constructorName = constructor['name'];
-        if (!constructorName || constructorName === 'constructor') {
+        if (!constructor['name']) {
             constructor['overriddenName'] = "class" + _nextClassId++;
         }
         return constructor;
