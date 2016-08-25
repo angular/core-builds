@@ -53,6 +53,7 @@ var TestBed = (function () {
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
+        this._activeFixtures = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -173,6 +174,8 @@ var TestBed = (function () {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
+        this._activeFixtures.forEach(function (fixture) { return fixture.destroy(); });
+        this._activeFixtures = [];
     };
     TestBed.prototype.configureCompiler = function (config) {
         this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
@@ -308,7 +311,9 @@ var TestBed = (function () {
             var componentRef = componentFactory.create(_this, [], "#" + rootElId);
             return new component_fixture_1.ComponentFixture(componentRef, ngZone, autoDetect);
         };
-        return ngZone == null ? initComponent() : ngZone.run(initComponent);
+        var fixture = ngZone == null ? initComponent() : ngZone.run(initComponent);
+        this._activeFixtures.push(fixture);
+        return fixture;
     };
     return TestBed;
 }());

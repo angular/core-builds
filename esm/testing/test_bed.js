@@ -48,6 +48,7 @@ export class TestBed {
         this._declarations = [];
         this._imports = [];
         this._schemas = [];
+        this._activeFixtures = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -167,6 +168,8 @@ export class TestBed {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
+        this._activeFixtures.forEach((fixture) => fixture.destroy());
+        this._activeFixtures = [];
     }
     configureCompiler(config) {
         this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
@@ -294,7 +297,9 @@ export class TestBed {
             var componentRef = componentFactory.create(this, [], `#${rootElId}`);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
-        return ngZone == null ? initComponent() : ngZone.run(initComponent);
+        const fixture = ngZone == null ? initComponent() : ngZone.run(initComponent);
+        this._activeFixtures.push(fixture);
+        return fixture;
     }
 }
 var _testBed = null;

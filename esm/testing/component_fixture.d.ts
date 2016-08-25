@@ -42,6 +42,7 @@ export declare class ComponentFixture<T> {
     ngZone: NgZone;
     private _autoDetect;
     private _isStable;
+    private _isDestroyed;
     private _resolve;
     private _promise;
     private _onUnstableSubscription;

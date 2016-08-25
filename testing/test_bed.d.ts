@@ -97,6 +97,7 @@ export declare class TestBed implements Injector {
     private _declarations;
     private _imports;
     private _schemas;
+    private _activeFixtures;
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
