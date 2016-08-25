@@ -43,7 +43,7 @@ var ViewUtils = (function () {
     ViewUtils.ctorParameters = [
         { type: api_1.RootRenderer, },
         { type: undefined, decorators: [{ type: decorators_1.Inject, args: [application_tokens_1.APP_ID,] },] },
-        { type: security_1.SanitizationService, },
+        { type: security_1.Sanitizer, },
     ];
     return ViewUtils;
 }());

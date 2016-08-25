@@ -13,7 +13,7 @@ import { ListWrapper } from '../facade/collection';
 import { BaseException } from '../facade/exceptions';
 import { isBlank, isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
-import { SanitizationService } from '../security';
+import { Sanitizer } from '../security';
 import { AppElement } from './element';
 import { ExpressionChangedAfterItHasBeenCheckedException } from './exceptions';
 export class ViewUtils {
@@ -43,7 +43,7 @@ ViewUtils.decorators = [
 ViewUtils.ctorParameters = [
     { type: RootRenderer, },
     { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
-    { type: SanitizationService, },
+    { type: Sanitizer, },
 ];
 export function flattenNestedViewRenderNodes(nodes) {
     return _flattenNestedViewRenderNodes(nodes, []);

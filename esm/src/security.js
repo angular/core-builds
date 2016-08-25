@@ -10,7 +10,7 @@
  * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
  * handled.
  *
- * See DomSanitizationService for more details on security in Angular applications.
+ * See DomSanitizer for more details on security in Angular applications.
  *
  * @stable
  */
@@ -24,10 +24,10 @@ export var SecurityContext;
     SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
 })(SecurityContext || (SecurityContext = {}));
 /**
- * SanitizationService is used by the views to sanitize potentially dangerous values.
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
  * @stable
  */
-export class SanitizationService {
+export class Sanitizer {
 }
 //# sourceMappingURL=security.js.map

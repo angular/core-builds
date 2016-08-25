@@ -72,6 +72,6 @@ exports.AnimationTransitionEvent = animation_transition_event_1.AnimationTransit
 var animation_player_1 = require('./src/animation/animation_player');
 exports.AnimationPlayer = animation_player_1.AnimationPlayer;
 var security_1 = require('./src/security');
-exports.SanitizationService = security_1.SanitizationService;
+exports.Sanitizer = security_1.Sanitizer;
 exports.SecurityContext = security_1.SecurityContext;
 //# sourceMappingURL=index.js.map

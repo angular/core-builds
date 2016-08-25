@@ -11,7 +11,7 @@
  * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
  * handled.
  *
- * See DomSanitizationService for more details on security in Angular applications.
+ * See DomSanitizer for more details on security in Angular applications.
  *
  * @stable
  */
@@ -25,14 +25,14 @@
 })(exports.SecurityContext || (exports.SecurityContext = {}));
 var SecurityContext = exports.SecurityContext;
 /**
- * SanitizationService is used by the views to sanitize potentially dangerous values.
+ * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
  * @stable
  */
-var SanitizationService = (function () {
-    function SanitizationService() {
+var Sanitizer = (function () {
+    function Sanitizer() {
     }
-    return SanitizationService;
+    return Sanitizer;
 }());
-exports.SanitizationService = SanitizationService;
+exports.Sanitizer = Sanitizer;
 //# sourceMappingURL=security.js.map

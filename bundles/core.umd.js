@@ -7548,7 +7548,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * like `innerHTML` that could cause Cross Site Scripting (XSS) security bugs when improperly
      * handled.
      *
-     * See DomSanitizationService for more details on security in Angular applications.
+     * See DomSanitizer for more details on security in Angular applications.
      *
      * @stable
      */
@@ -7562,14 +7562,14 @@ var __extends = (this && this.__extends) || function (d, b) {
         SecurityContext[SecurityContext["RESOURCE_URL"] = 5] = "RESOURCE_URL";
     })(exports.SecurityContext || (exports.SecurityContext = {}));
     /**
-     * SanitizationService is used by the views to sanitize potentially dangerous values.
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
      *
      * @stable
      */
-    var SanitizationService = (function () {
-        function SanitizationService() {
+    var Sanitizer = (function () {
+        function Sanitizer() {
         }
-        return SanitizationService;
+        return Sanitizer;
     }());
     /**
      * @license
@@ -8081,7 +8081,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     ViewUtils.ctorParameters = [
         { type: RootRenderer, },
         { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
-        { type: SanitizationService, },
+        { type: Sanitizer, },
     ];
     function flattenNestedViewRenderNodes(nodes) {
         return _flattenNestedViewRenderNodes(nodes, []);
@@ -12111,7 +12111,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.BaseException = BaseException;
     exports.AnimationTransitionEvent = AnimationTransitionEvent;
     exports.AnimationPlayer = AnimationPlayer;
-    exports.SanitizationService = SanitizationService;
+    exports.Sanitizer = Sanitizer;
     exports.Component = Component;
     exports.Directive = Directive;
     exports.Attribute = Attribute;
