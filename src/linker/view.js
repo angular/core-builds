@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var animation_group_player_1 = require('../animation/animation_group_player');
-var animation_player_1 = require('../animation/animation_player');
+var animation_transition_event_1 = require('../animation/animation_transition_event');
 var view_animation_map_1 = require('../animation/view_animation_map');
 var change_detection_1 = require('../change_detection/change_detection');
 var collection_1 = require('../facade/collection');
@@ -70,21 +70,16 @@ var AppView = (function () {
             }
         }
     };
-    AppView.prototype.queueAnimation = function (element, animationName, player, fromState, toState) {
+    AppView.prototype.queueAnimation = function (element, animationName, player, totalTime, fromState, toState) {
         var _this = this;
-        var actualAnimationDetected = !(player instanceof animation_player_1.NoOpAnimationPlayer);
-        var animationData = {
-            'fromState': fromState,
-            'toState': toState,
-            'running': actualAnimationDetected
-        };
+        var event = new animation_transition_event_1.AnimationTransitionEvent({ 'fromState': fromState, 'toState': toState, 'totalTime': totalTime });
         this.animationPlayers.set(element, animationName, player);
         player.onDone(function () {
             // TODO: make this into a datastructure for done|start
-            _this.triggerAnimationOutput(element, animationName, 'done', animationData);
+            _this.triggerAnimationOutput(element, animationName, 'done', event);
             _this.animationPlayers.remove(element, animationName);
         });
-        player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', animationData); });
+        player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', event); });
     };
     AppView.prototype.triggerQueuedAnimations = function () {
         this.animationPlayers.getAllPlayers().forEach(function (player) {
@@ -93,7 +88,7 @@ var AppView = (function () {
             }
         });
     };
-    AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, animationData) {
+    AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, event) {
         var listeners = this._animationListeners.get(element);
         if (lang_1.isPresent(listeners) && listeners.length) {
             for (var i = 0; i < listeners.length; i++) {
@@ -101,7 +96,7 @@ var AppView = (function () {
                 // we check for both the name in addition to the phase in the event
                 // that there may be more than one @trigger on the same element
                 if (listener.output.name == animationName && listener.output.phase == phase) {
-                    listener.handler(animationData);
+                    listener.handler(event);
                     break;
                 }
             }

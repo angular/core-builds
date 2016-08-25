@@ -31,6 +31,7 @@ export { EventEmitter } from './src/facade/async';
 export { ExceptionHandler, WrappedException, BaseException } from './src/facade/exceptions';
 export * from './private_export';
 export * from './src/animation/metadata';
+export { AnimationTransitionEvent } from './src/animation/animation_transition_event';
 export { AnimationPlayer } from './src/animation/animation_player';
 export { SanitizationService, SecurityContext } from './src/security';
 //# sourceMappingURL=index.js.map

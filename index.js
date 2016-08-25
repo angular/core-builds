@@ -67,6 +67,8 @@ exports.WrappedException = exceptions_1.WrappedException;
 exports.BaseException = exceptions_1.BaseException;
 __export(require('./private_export'));
 __export(require('./src/animation/metadata'));
+var animation_transition_event_1 = require('./src/animation/animation_transition_event');
+exports.AnimationTransitionEvent = animation_transition_event_1.AnimationTransitionEvent;
 var animation_player_1 = require('./src/animation/animation_player');
 exports.AnimationPlayer = animation_player_1.AnimationPlayer;
 var security_1 = require('./src/security');

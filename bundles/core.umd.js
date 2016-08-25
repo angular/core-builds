@@ -11465,6 +11465,53 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return DebugContext;
     }());
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * An instance of this class is returned as an event parameter when an animation
+     * callback is captured for an animation either during the start or done phase.
+     *
+     * ```typescript
+     * @Component({
+     *   host: {
+     *     '[@myAnimationTrigger]': 'someExpression',
+     *     '(@myAnimationTrigger.start)': 'captureStartEvent($event)',
+     *     '(@myAnimationTrigger.done)': 'captureDoneEvent($event)',
+     *   },
+     *   animations: [
+     *     trigger("myAnimationTrigger", [
+     *        // ...
+     *     ])
+     *   ]
+     * })
+     * class MyComponent {
+     *   someExpression: any = false;
+     *   captureStartEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     *
+     *   captureDoneEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     * }
+     * ```
+     *
+     * @experimental Animation support is experimental.
+     */
+    var AnimationTransitionEvent = (function () {
+        function AnimationTransitionEvent(_a) {
+            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime;
+            this.fromState = fromState;
+            this.toState = toState;
+            this.totalTime = totalTime;
+        }
+        return AnimationTransitionEvent;
+    }());
     var ViewAnimationMap = (function () {
         function ViewAnimationMap() {
             this._map = new Map$1();
@@ -11579,21 +11626,16 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
             }
         };
-        AppView.prototype.queueAnimation = function (element, animationName, player, fromState, toState) {
+        AppView.prototype.queueAnimation = function (element, animationName, player, totalTime, fromState, toState) {
             var _this = this;
-            var actualAnimationDetected = !(player instanceof NoOpAnimationPlayer);
-            var animationData = {
-                'fromState': fromState,
-                'toState': toState,
-                'running': actualAnimationDetected
-            };
+            var event = new AnimationTransitionEvent({ 'fromState': fromState, 'toState': toState, 'totalTime': totalTime });
             this.animationPlayers.set(element, animationName, player);
             player.onDone(function () {
                 // TODO: make this into a datastructure for done|start
-                _this.triggerAnimationOutput(element, animationName, 'done', animationData);
+                _this.triggerAnimationOutput(element, animationName, 'done', event);
                 _this.animationPlayers.remove(element, animationName);
             });
-            player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', animationData); });
+            player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', event); });
         };
         AppView.prototype.triggerQueuedAnimations = function () {
             this.animationPlayers.getAllPlayers().forEach(function (player) {
@@ -11602,7 +11644,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                 }
             });
         };
-        AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, animationData) {
+        AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, event) {
             var listeners = this._animationListeners.get(element);
             if (isPresent(listeners) && listeners.length) {
                 for (var i = 0; i < listeners.length; i++) {
@@ -11610,7 +11652,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                     // we check for both the name in addition to the phase in the event
                     // that there may be more than one @trigger on the same element
                     if (listener.output.name == animationName && listener.output.phase == phase) {
-                        listener.handler(animationData);
+                        listener.handler(event);
                         break;
                     }
                 }
@@ -12067,6 +12109,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.ExceptionHandler = ExceptionHandler;
     exports.WrappedException = WrappedException;
     exports.BaseException = BaseException;
+    exports.AnimationTransitionEvent = AnimationTransitionEvent;
     exports.AnimationPlayer = AnimationPlayer;
     exports.SanitizationService = SanitizationService;
     exports.Component = Component;

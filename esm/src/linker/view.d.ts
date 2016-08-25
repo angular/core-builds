@@ -1,5 +1,6 @@
 import { AnimationOutput } from '../animation/animation_output';
 import { AnimationPlayer } from '../animation/animation_player';
+import { AnimationTransitionEvent } from '../animation/animation_transition_event';
 import { ViewAnimationMap } from '../animation/view_animation_map';
 import { ChangeDetectorRef, ChangeDetectorStatus } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
@@ -39,11 +40,9 @@ export declare abstract class AppView<T> {
     constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentInjector: Injector, declarationAppElement: AppElement, cdMode: ChangeDetectorStatus);
     readonly destroyed: boolean;
     cancelActiveAnimation(element: any, animationName: string, removeAllAnimations?: boolean): void;
-    queueAnimation(element: any, animationName: string, player: AnimationPlayer, fromState: string, toState: string): void;
+    queueAnimation(element: any, animationName: string, player: AnimationPlayer, totalTime: number, fromState: string, toState: string): void;
     triggerQueuedAnimations(): void;
-    triggerAnimationOutput(element: any, animationName: string, phase: string, animationData: {
-        [key: string]: any;
-    }): void;
+    triggerAnimationOutput(element: any, animationName: string, phase: string, event: AnimationTransitionEvent): void;
     registerAnimationOutput(element: any, outputEvent: AnimationOutput, eventHandler: Function): void;
     create(context: T, givenProjectableNodes: Array<any | any[]>, rootSelectorOrNode: string | any): AppElement;
     /**
