@@ -5,16 +5,16 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectableMetadata } from '../di/metadata';
+import { InjectableMetadata, Provider } from '../di';
 import { Type } from '../type';
 /**
  * A wrapper around a module that also includes the providers.
  *
- * @experimental
+ * @stable
  */
 export interface ModuleWithProviders {
     ngModule: Type<any>;
-    providers?: any[];
+    providers?: Provider[];
 }
 /**
  * Interface for schema definitions in @NgModules.
@@ -28,7 +28,7 @@ export interface SchemaMetadata {
  * Defines a schema that will allow any property on elements with a `-` in their name,
  * which is the common rule for custom elements.
  *
- * @experimental
+ * @stable
  */
 export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
@@ -39,10 +39,10 @@ export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 /**
  * Interface for creating {@link NgModuleMetadata}
- * @experimental
+ * @stable
  */
 export interface NgModuleMetadataType {
-    providers?: any[];
+    providers?: Provider[];
     declarations?: Array<Type<any> | any[]>;
     imports?: Array<Type<any> | ModuleWithProviders | any[]>;
     exports?: Array<Type<any> | any[]>;
@@ -52,7 +52,7 @@ export interface NgModuleMetadataType {
 }
 /**
  * Declares an Angular Module.
- * @experimental
+ * @stable
  */
 export declare class NgModuleMetadata extends InjectableMetadata implements NgModuleMetadataType {
     /**
@@ -84,7 +84,7 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * }
      * ```
      */
-    readonly providers: any[];
+    readonly providers: Provider[];
     private _providers;
     /**
      * Specifies a list of directives/pipes that belong to this module.

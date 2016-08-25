@@ -5,12 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectableMetadata } from '../di/metadata';
+import { InjectableMetadata } from '../di';
 /**
  * Defines a schema that will allow any property on elements with a `-` in their name,
  * which is the common rule for custom elements.
  *
- * @experimental
+ * @stable
  */
 export const CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
@@ -25,7 +25,7 @@ export const NO_ERRORS_SCHEMA = {
 };
 /**
  * Declares an Angular Module.
- * @experimental
+ * @stable
  */
 export class NgModuleMetadata extends InjectableMetadata {
     constructor(options = {}) {

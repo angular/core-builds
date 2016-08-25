@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { InjectableMetadata } from '../di/metadata';
+import { InjectableMetadata } from '../di';
 import { isPresent } from '../facade/lang';
 /**
  * Directives allow you to attach behavior to elements in the DOM.

@@ -833,7 +833,7 @@ export var HostBinding = makePropDecorator(HostBindingMetadata);
 export var HostListener = makePropDecorator(HostListenerMetadata);
 /**
  * Declares an ng module.
- * @experimental
+ * @stable
  * @Annotation
  */
 export var NgModule = makeDecorator(NgModuleMetadata);

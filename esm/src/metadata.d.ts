@@ -261,7 +261,7 @@ export interface HostListenerMetadataFactory {
 /**
  * {@link NgModuleMetadata} factory for creating annotations, decorators or DSL.
  *
- * @experimental
+ * @stable
  */
 export interface NgModuleMetadataFactory {
     (obj?: NgModuleMetadataType): NgModuleDecorator;
@@ -1075,7 +1075,7 @@ export declare var HostBinding: HostBindingMetadataFactory;
 export declare var HostListener: HostListenerMetadataFactory;
 /**
  * Declares an ng module.
- * @experimental
+ * @stable
  * @Annotation
  */
 export declare var NgModule: NgModuleMetadataFactory;

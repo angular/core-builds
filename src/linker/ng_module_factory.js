@@ -21,7 +21,7 @@ var component_factory_resolver_1 = require('./component_factory_resolver');
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
  * NgModule Instance.
  *
- * @experimental
+ * @stable
  */
 var NgModuleRef = (function () {
     function NgModuleRef() {

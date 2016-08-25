@@ -29,7 +29,7 @@ var _platform;
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export function enableProdMode() {
     if (_runModeLocked) {
@@ -127,7 +127,7 @@ export function getPlatform() {
  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
  * explicitly by calling {@link createPlatform}().
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export class PlatformRef {
     /**
@@ -297,7 +297,7 @@ PlatformRef_.ctorParameters = [
  *
  * For more about Angular applications, see the documentation for {@link bootstrap}.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export class ApplicationRef {
     /**

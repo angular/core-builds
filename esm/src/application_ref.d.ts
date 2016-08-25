@@ -2,7 +2,7 @@ import { ExceptionHandler } from '../src/facade/exceptions';
 import { ApplicationInitStatus } from './application_init';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 import { Console } from './console';
-import { Injector } from './di';
+import { Injector, Provider } from './di';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -18,7 +18,7 @@ import { NgZone } from './zone/ng_zone';
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare function enableProdMode(): void;
 /**
@@ -42,13 +42,13 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  *
  * @experimental
  */
-export declare type PlatformFactory = (extraProviders?: any[]) => PlatformRef;
+export declare type PlatformFactory = (extraProviders?: Provider[]) => PlatformRef;
 /**
  * Creates a factory for a platform
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(parentPlaformFactory: PlatformFactory, name: string, providers?: any[]): PlatformFactory;
+export declare function createPlatformFactory(parentPlaformFactory: PlatformFactory, name: string, providers?: Provider[]): PlatformFactory;
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.
@@ -76,7 +76,7 @@ export declare function getPlatform(): PlatformRef;
  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
  * explicitly by calling {@link createPlatform}().
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare abstract class PlatformRef {
     /**
@@ -155,7 +155,7 @@ export declare class PlatformRef_ extends PlatformRef {
  *
  * For more about Angular applications, see the documentation for {@link bootstrap}.
  *
- * @experimental APIs related to application bootstrap are currently under review.
+ * @stable
  */
 export declare abstract class ApplicationRef {
     /**

@@ -11,12 +11,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var metadata_1 = require('../di/metadata');
+var di_1 = require('../di');
 /**
  * Defines a schema that will allow any property on elements with a `-` in their name,
  * which is the common rule for custom elements.
  *
- * @experimental
+ * @stable
  */
 exports.CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
@@ -31,7 +31,7 @@ exports.NO_ERRORS_SCHEMA = {
 };
 /**
  * Declares an Angular Module.
- * @experimental
+ * @stable
  */
 var NgModuleMetadata = (function (_super) {
     __extends(NgModuleMetadata, _super);
@@ -83,6 +83,6 @@ var NgModuleMetadata = (function (_super) {
         configurable: true
     });
     return NgModuleMetadata;
-}(metadata_1.InjectableMetadata));
+}(di_1.InjectableMetadata));
 exports.NgModuleMetadata = NgModuleMetadata;
 //# sourceMappingURL=ng_module.js.map

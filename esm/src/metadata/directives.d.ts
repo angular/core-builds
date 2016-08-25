@@ -7,12 +7,12 @@
  */
 import { AnimationEntryMetadata } from '../animation/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
-import { InjectableMetadata } from '../di/metadata';
+import { InjectableMetadata, Provider } from '../di';
 import { Type } from '../type';
 import { ViewEncapsulation } from './view';
 /**
  * Interface for creating {@link DirectiveMetadata}
- * @experimental
+ * @stable
  */
 export interface DirectiveMetadataType {
     selector?: string;
@@ -666,7 +666,7 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
      * }
      * ```
      */
-    readonly providers: any[];
+    readonly providers: Provider[];
     private _providers;
     /**
      * Defines the name that can be used in the template to assign this directive to a variable.
@@ -729,7 +729,7 @@ export declare class DirectiveMetadata extends InjectableMetadata implements Dir
 }
 /**
  * Interface for creating {@link ComponentMetadataType}
- * @experimental
+ * @stable
  */
 export interface ComponentMetadataType extends DirectiveMetadataType {
     changeDetection?: ChangeDetectionStrategy;
@@ -818,7 +818,7 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
      *
      * ```
      */
-    readonly viewProviders: any[];
+    readonly viewProviders: Provider[];
     private _viewProviders;
     /**
      * The module id of the module that contains the component.
@@ -955,7 +955,7 @@ export declare class ComponentMetadata extends DirectiveMetadata implements Comp
 }
 /**
  * Interface for creating {@link PipeMetadata}
- * @experimental
+ * @stable
  */
 export interface PipeMetadataType {
     name: string;

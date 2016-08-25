@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var constants_1 = require('../change_detection/constants');
-var metadata_1 = require('../di/metadata');
+var di_1 = require('../di');
 var lang_1 = require('../facade/lang');
 /**
  * Directives allow you to attach behavior to elements in the DOM.
@@ -541,7 +541,7 @@ var DirectiveMetadata = (function (_super) {
         configurable: true
     });
     return DirectiveMetadata;
-}(metadata_1.InjectableMetadata));
+}(di_1.InjectableMetadata));
 exports.DirectiveMetadata = DirectiveMetadata;
 /**
  * Declare reusable UI building blocks for an application.
@@ -665,7 +665,7 @@ var PipeMetadata = (function (_super) {
         configurable: true
     });
     return PipeMetadata;
-}(metadata_1.InjectableMetadata));
+}(di_1.InjectableMetadata));
 exports.PipeMetadata = PipeMetadata;
 /**
  * Declares a data-bound input property.

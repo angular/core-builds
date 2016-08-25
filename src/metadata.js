@@ -865,7 +865,7 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
 exports.HostListener = decorators_1.makePropDecorator(directives_1.HostListenerMetadata);
 /**
  * Declares an ng module.
- * @experimental
+ * @stable
  * @Annotation
  */
 exports.NgModule = decorators_1.makeDecorator(ng_module_1.NgModuleMetadata);
