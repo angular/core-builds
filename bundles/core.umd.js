@@ -698,7 +698,8 @@ var __extends = (this && this.__extends) || function (d, b) {
         if (this && this.annotations instanceof Array) {
             Reflect.defineMetadata('annotations', this.annotations, constructor);
         }
-        if (!constructor['name']) {
+        var constructorName = constructor['name'];
+        if (!constructorName || constructorName === 'constructor') {
             constructor['overriddenName'] = "class" + _nextClassId++;
         }
         return constructor;
@@ -9761,11 +9762,27 @@ var __extends = (this && this.__extends) || function (d, b) {
         return QueryList;
     }());
     var _SEPARATOR = '#';
-    var FACTORY_MODULE_SUFFIX = '.ngfactory';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
+    /**
+     * Configuration for SystemJsNgModuleLoader.
+     * token.
+     *
+     * @experimental
+     */
+    var SystemJsNgModuleLoaderConfig = (function () {
+        function SystemJsNgModuleLoaderConfig() {
+        }
+        return SystemJsNgModuleLoaderConfig;
+    }());
+    var DEFAULT_CONFIG = {
+        factoryPathPrefix: '',
+        factoryPathSuffix: '.ngfactory',
+    };
     var SystemJsNgModuleLoader = (function () {
-        function SystemJsNgModuleLoader(_compiler) {
+        function SystemJsNgModuleLoader(_compiler, config) {
             this._compiler = _compiler;
+            this._system = function () { return System; };
+            this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
             var offlineMode = this._compiler instanceof Compiler;
@@ -9776,17 +9793,22 @@ var __extends = (this && this.__extends) || function (d, b) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return System.import(module)
+            return this._system()
+                .import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
                 .then(function (type) { return _this._compiler.compileModuleAsync(type); });
         };
         SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
-            if (exportName === undefined)
+            var factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+            if (exportName === undefined) {
                 exportName = 'default';
-            return System.import(module + FACTORY_MODULE_SUFFIX)
-                .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
+                factoryClassSuffix = '';
+            }
+            return this._system()
+                .import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+                .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
         return SystemJsNgModuleLoader;
@@ -9798,6 +9820,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     /** @nocollapse */
     SystemJsNgModuleLoader.ctorParameters = [
         { type: Compiler, },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
     ];
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
@@ -12132,6 +12155,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.NgModuleFactoryLoader = NgModuleFactoryLoader;
     exports.QueryList = QueryList;
     exports.SystemJsNgModuleLoader = SystemJsNgModuleLoader;
+    exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
     exports.TemplateRef = TemplateRef;
     exports.ViewContainerRef = ViewContainerRef;
     exports.EmbeddedViewRef = EmbeddedViewRef;

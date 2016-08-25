@@ -32,6 +32,7 @@ var query_list_1 = require('./linker/query_list');
 exports.QueryList = query_list_1.QueryList;
 var system_js_ng_module_factory_loader_1 = require('./linker/system_js_ng_module_factory_loader');
 exports.SystemJsNgModuleLoader = system_js_ng_module_factory_loader_1.SystemJsNgModuleLoader;
+exports.SystemJsNgModuleLoaderConfig = system_js_ng_module_factory_loader_1.SystemJsNgModuleLoaderConfig;
 var template_ref_1 = require('./linker/template_ref');
 exports.TemplateRef = template_ref_1.TemplateRef;
 var view_container_ref_1 = require('./linker/view_container_ref');

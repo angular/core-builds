@@ -158,7 +158,8 @@ export function Class(clsDef) {
     if (this && this.annotations instanceof Array) {
         Reflect.defineMetadata('annotations', this.annotations, constructor);
     }
-    if (!constructor['name']) {
+    const constructorName = constructor['name'];
+    if (!constructorName || constructorName === 'constructor') {
         constructor['overriddenName'] = `class${_nextClassId++}`;
     }
     return constructor;

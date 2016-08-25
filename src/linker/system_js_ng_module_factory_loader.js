@@ -9,11 +9,28 @@
 var di_1 = require('../di');
 var compiler_1 = require('./compiler');
 var _SEPARATOR = '#';
-var FACTORY_MODULE_SUFFIX = '.ngfactory';
 var FACTORY_CLASS_SUFFIX = 'NgFactory';
+/**
+ * Configuration for SystemJsNgModuleLoader.
+ * token.
+ *
+ * @experimental
+ */
+var SystemJsNgModuleLoaderConfig = (function () {
+    function SystemJsNgModuleLoaderConfig() {
+    }
+    return SystemJsNgModuleLoaderConfig;
+}());
+exports.SystemJsNgModuleLoaderConfig = SystemJsNgModuleLoaderConfig;
+var DEFAULT_CONFIG = {
+    factoryPathPrefix: '',
+    factoryPathSuffix: '.ngfactory',
+};
 var SystemJsNgModuleLoader = (function () {
-    function SystemJsNgModuleLoader(_compiler) {
+    function SystemJsNgModuleLoader(_compiler, config) {
         this._compiler = _compiler;
+        this._system = function () { return System; };
+        this._config = config || DEFAULT_CONFIG;
     }
     SystemJsNgModuleLoader.prototype.load = function (path) {
         var offlineMode = this._compiler instanceof compiler_1.Compiler;
@@ -24,17 +41,22 @@ var SystemJsNgModuleLoader = (function () {
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module)
+        return this._system()
+            .import(module)
             .then(function (module) { return module[exportName]; })
             .then(function (type) { return checkNotEmpty(type, module, exportName); })
             .then(function (type) { return _this._compiler.compileModuleAsync(type); });
     };
     SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
-        if (exportName === undefined)
+        var factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+        if (exportName === undefined) {
             exportName = 'default';
-        return System.import(module + FACTORY_MODULE_SUFFIX)
-            .then(function (module) { return module[exportName + FACTORY_CLASS_SUFFIX]; })
+            factoryClassSuffix = '';
+        }
+        return this._system()
+            .import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+            .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
     /** @nocollapse */
@@ -44,6 +66,7 @@ var SystemJsNgModuleLoader = (function () {
     /** @nocollapse */
     SystemJsNgModuleLoader.ctorParameters = [
         { type: compiler_1.Compiler, },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: di_1.Optional },] },
     ];
     return SystemJsNgModuleLoader;
 }());

@@ -5,14 +5,27 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injectable } from '../di';
+import { Injectable, Optional } from '../di';
 import { Compiler } from './compiler';
 const _SEPARATOR = '#';
-const FACTORY_MODULE_SUFFIX = '.ngfactory';
 const FACTORY_CLASS_SUFFIX = 'NgFactory';
+/**
+ * Configuration for SystemJsNgModuleLoader.
+ * token.
+ *
+ * @experimental
+ */
+export class SystemJsNgModuleLoaderConfig {
+}
+const DEFAULT_CONFIG = {
+    factoryPathPrefix: '',
+    factoryPathSuffix: '.ngfactory',
+};
 export class SystemJsNgModuleLoader {
-    constructor(_compiler) {
+    constructor(_compiler, config) {
         this._compiler = _compiler;
+        this._system = () => System;
+        this._config = config || DEFAULT_CONFIG;
     }
     load(path) {
         const offlineMode = this._compiler instanceof Compiler;
@@ -22,17 +35,22 @@ export class SystemJsNgModuleLoader {
         let [module, exportName] = path.split(_SEPARATOR);
         if (exportName === undefined)
             exportName = 'default';
-        return System.import(module)
+        return this._system()
+            .import(module)
             .then((module) => module[exportName])
             .then((type) => checkNotEmpty(type, module, exportName))
             .then((type) => this._compiler.compileModuleAsync(type));
     }
     loadFactory(path) {
         let [module, exportName] = path.split(_SEPARATOR);
-        if (exportName === undefined)
+        let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+        if (exportName === undefined) {
             exportName = 'default';
-        return System.import(module + FACTORY_MODULE_SUFFIX)
-            .then((module) => module[exportName + FACTORY_CLASS_SUFFIX])
+            factoryClassSuffix = '';
+        }
+        return this._system()
+            .import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+            .then((module) => module[exportName + factoryClassSuffix])
             .then((factory) => checkNotEmpty(factory, module, exportName));
     }
 }
@@ -43,6 +61,7 @@ SystemJsNgModuleLoader.decorators = [
 /** @nocollapse */
 SystemJsNgModuleLoader.ctorParameters = [
     { type: Compiler, },
+    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
 ];
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
