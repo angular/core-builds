@@ -139,7 +139,7 @@ function _normalizeProviders(providers, res) {
         if (b instanceof Type) {
             res.push({ provide: b, useClass: b });
         }
-        else if (b && typeof b == 'object' && b.hasOwnProperty('provide')) {
+        else if (b && typeof b == 'object' && b.provide !== undefined) {
             res.push(b);
         }
         else if (b instanceof Array) {
