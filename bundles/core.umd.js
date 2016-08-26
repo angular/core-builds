@@ -251,7 +251,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * yet defined.
      *
      * ### Example
-     * {@example core/di/ts/forward_ref/forward_ref.ts region='forward_ref'}
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
      * @experimental
      */
     function forwardRef(forwardRefFn) {
@@ -266,11 +266,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ### Example ([live demo](http://plnkr.co/edit/GU72mJrk1fiodChcmiDR?p=preview))
      *
-     * ```typescript
-     * var ref = forwardRef(() => "refValue");
-     * expect(resolveForwardRef(ref)).toEqual("refValue");
-     * expect(resolveForwardRef("regularValue")).toEqual("regularValue");
-     * ```
+     * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='resolve_forward_ref'}
      *
      * See: {@link forwardRef}
      * @experimental
