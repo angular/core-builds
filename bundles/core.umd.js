@@ -10243,7 +10243,7 @@ var __extends = (this && this.__extends) || function (d, b) {
                         ViewUtils,
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        { provide: LOCALE_ID, useValue: 'en_US' },
+                        { provide: LOCALE_ID, useValue: 'en-US' },
                     ]
                 },] },
     ];

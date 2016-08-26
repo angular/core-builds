@@ -37,7 +37,7 @@ var ApplicationModule = (function () {
                         view_utils_1.ViewUtils,
                         { provide: change_detection_1.IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: change_detection_1.KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        { provide: tokens_1.LOCALE_ID, useValue: 'en_US' },
+                        { provide: tokens_1.LOCALE_ID, useValue: 'en-US' },
                     ]
                 },] },
     ];
