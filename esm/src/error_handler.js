@@ -31,11 +31,11 @@
  */
 export class ErrorHandler {
     constructor(rethrowError = true) {
-        this.rethrowError = rethrowError;
         /**
          * @internal
          */
         this._console = console;
+        this.rethrowError = rethrowError;
     }
     handleError(error) {
         var originalError = this._findOriginalError(error);

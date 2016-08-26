@@ -23,7 +23,6 @@
  * @stable
  */
 export declare class ErrorHandler {
-    private rethrowError;
     constructor(rethrowError?: boolean);
     handleError(error: any): void;
 }

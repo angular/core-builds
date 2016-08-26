@@ -5884,11 +5884,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ErrorHandler = (function () {
         function ErrorHandler(rethrowError) {
             if (rethrowError === void 0) { rethrowError = true; }
-            this.rethrowError = rethrowError;
             /**
              * @internal
              */
             this._console = console;
+            this.rethrowError = rethrowError;
         }
         ErrorHandler.prototype.handleError = function (error) {
             var originalError = this._findOriginalError(error);
