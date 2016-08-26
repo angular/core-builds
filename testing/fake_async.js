@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var index_1 = require('../index');
 var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
 var ProxyZoneSpec = Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
@@ -48,13 +47,13 @@ function fakeAsync(fn) {
         }
         var proxyZoneSpec = ProxyZoneSpec.assertPresent();
         if (_inFakeAsyncCall) {
-            throw new index_1.BaseException('fakeAsync() calls can not be nested');
+            throw new Error('fakeAsync() calls can not be nested');
         }
         _inFakeAsyncCall = true;
         try {
             if (!_fakeAsyncTestZoneSpec) {
                 if (proxyZoneSpec.getDelegate() instanceof FakeAsyncTestZoneSpec) {
-                    throw new index_1.BaseException('fakeAsync() calls can not be nested');
+                    throw new Error('fakeAsync() calls can not be nested');
                 }
                 _fakeAsyncTestZoneSpec = new FakeAsyncTestZoneSpec();
             }
@@ -69,11 +68,11 @@ function fakeAsync(fn) {
                 proxyZoneSpec.setDelegate(lastProxyZoneSpec);
             }
             if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                throw new index_1.BaseException((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
+                throw new Error((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
                     "periodic timer(s) still in the queue.");
             }
             if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
-                throw new index_1.BaseException(_fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
+                throw new Error(_fakeAsyncTestZoneSpec.pendingTimers.length + " timer(s) still in the queue.");
             }
             return res;
         }

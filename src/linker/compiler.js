@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var di_1 = require('../di');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 /**
  * Indicates that a component is still being loaded in a synchronous compile.
@@ -26,7 +26,7 @@ var ComponentStillLoadingError = (function (_super) {
         this.compType = compType;
     }
     return ComponentStillLoadingError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.ComponentStillLoadingError = ComponentStillLoadingError;
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
@@ -42,7 +42,7 @@ var ModuleWithComponentFactories = (function () {
 }());
 exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
 function _throwError() {
-    throw new exceptions_1.BaseException("Runtime compiler is not loaded");
+    throw new Error("Runtime compiler is not loaded");
 }
 /**
  * Low-level service for running the angular compiler during runtime

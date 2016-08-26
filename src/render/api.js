@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 /**
  * @experimental
  */
@@ -27,32 +27,32 @@ var RenderDebugInfo = (function () {
     function RenderDebugInfo() {
     }
     Object.defineProperty(RenderDebugInfo.prototype, "injector", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(RenderDebugInfo.prototype, "component", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(RenderDebugInfo.prototype, "providerTokens", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(RenderDebugInfo.prototype, "references", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(RenderDebugInfo.prototype, "context", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(RenderDebugInfo.prototype, "source", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });

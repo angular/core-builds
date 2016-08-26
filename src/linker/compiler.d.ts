@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { OpaqueToken } from '../di';
-import { BaseException } from '../facade/exceptions';
+import { BaseError } from '../facade/errors';
 import { ViewEncapsulation } from '../metadata';
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
@@ -16,7 +16,7 @@ import { NgModuleFactory } from './ng_module_factory';
  *
  * @stable
  */
-export declare class ComponentStillLoadingError extends BaseException {
+export declare class ComponentStillLoadingError extends BaseError {
     compType: Type<any>;
     constructor(compType: Type<any>);
 }

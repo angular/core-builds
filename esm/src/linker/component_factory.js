@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 import { isBlank } from '../facade/lang';
 import { ViewUtils } from './view_utils';
 /**

@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 function findFirstClosedCycle(keys) {
     var res = [];
@@ -40,7 +40,7 @@ function constructResolvingPath(keys) {
 var AbstractProviderError = (function (_super) {
     __extends(AbstractProviderError, _super);
     function AbstractProviderError(injector, key, constructResolvingMessage) {
-        _super.call(this, 'DI Exception');
+        _super.call(this, 'DI Error');
         this.keys = [key];
         this.injectors = [injector];
         this.constructResolvingMessage = constructResolvingMessage;
@@ -57,7 +57,7 @@ var AbstractProviderError = (function (_super) {
         configurable: true
     });
     return AbstractProviderError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.AbstractProviderError = AbstractProviderError;
 /**
  * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
@@ -142,7 +142,7 @@ exports.CyclicDependencyError = CyclicDependencyError;
 var InstantiationError = (function (_super) {
     __extends(InstantiationError, _super);
     function InstantiationError(injector, originalException, originalStack, key) {
-        _super.call(this, 'DI Exception', originalException, originalStack, null);
+        _super.call(this, 'DI Error', originalException);
         this.keys = [key];
         this.injectors = [injector];
     }
@@ -150,10 +150,10 @@ var InstantiationError = (function (_super) {
         this.injectors.push(injector);
         this.keys.push(key);
     };
-    Object.defineProperty(InstantiationError.prototype, "wrapperMessage", {
+    Object.defineProperty(InstantiationError.prototype, "message", {
         get: function () {
             var first = lang_1.stringify(collection_1.ListWrapper.first(this.keys).token);
-            return "Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
+            return this.originalError.message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
         },
         enumerable: true,
         configurable: true
@@ -169,7 +169,7 @@ var InstantiationError = (function (_super) {
         configurable: true
     });
     return InstantiationError;
-}(exceptions_1.WrappedException));
+}(errors_1.WrappedError));
 exports.InstantiationError = InstantiationError;
 /**
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}
@@ -188,7 +188,7 @@ var InvalidProviderError = (function (_super) {
         _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
     }
     return InvalidProviderError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.InvalidProviderError = InvalidProviderError;
 /**
  * Thrown when the class has no annotation information.
@@ -241,7 +241,7 @@ var NoAnnotationError = (function (_super) {
             lang_1.stringify(typeOrFunc) + '\' is decorated with Injectable.';
     };
     return NoAnnotationError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.NoAnnotationError = NoAnnotationError;
 /**
  * Thrown when getting an object by index.
@@ -263,7 +263,7 @@ var OutOfBoundsError = (function (_super) {
         _super.call(this, "Index " + index + " is out-of-bounds.");
     }
     return OutOfBoundsError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.OutOfBoundsError = OutOfBoundsError;
 // TODO: add a working example after alpha38 is released
 /**
@@ -285,6 +285,6 @@ var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
             provider2.toString());
     }
     return MixingMultiProvidersWithRegularProvidersError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.MixingMultiProvidersWithRegularProvidersError = MixingMultiProvidersWithRegularProvidersError;
-//# sourceMappingURL=reflective_exceptions.js.map
+//# sourceMappingURL=reflective_errors.js.map

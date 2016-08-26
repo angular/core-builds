@@ -6,10 +6,10 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ListWrapper } from '../facade/collection';
-import { BaseException, unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 import { Injector, THROW_IF_NOT_FOUND } from './injector';
 import { SelfMetadata, SkipSelfMetadata } from './metadata';
-import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_exceptions';
+import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 import { resolveReflectiveProviders } from './reflective_provider';
 var __unused; // avoid unused import when Type union types are erased
@@ -715,7 +715,7 @@ export class ReflectiveInjector_ {
                     obj = factory(d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19);
                     break;
                 default:
-                    throw new BaseException(`Cannot instantiate '${provider.key.displayName}' because it has more than 20 dependencies`);
+                    throw new Error(`Cannot instantiate '${provider.key.displayName}' because it has more than 20 dependencies`);
             }
         }
         catch (e) {

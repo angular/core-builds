@@ -18,6 +18,7 @@ import * as constants from './src/change_detection/constants';
 import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
 import * as reflective_provider from './src/di/reflective_provider';
+import { ComponentStillLoadingError } from './src/linker/compiler';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as debug_context from './src/linker/debug_context';
 import * as element from './src/linker/element';
@@ -98,6 +99,7 @@ export var __core_private__ = {
     ANY_STATE: ANY_STATE_,
     DEFAULT_STATE: DEFAULT_STATE_,
     EMPTY_STATE: EMPTY_STATE_,
-    FILL_STYLE_FLAG: FILL_STYLE_FLAG_
+    FILL_STYLE_FLAG: FILL_STYLE_FLAG_,
+    ComponentStillLoadingError: ComponentStillLoadingError
 };
 //# sourceMappingURL=private_export.js.map

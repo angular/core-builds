@@ -8,7 +8,6 @@
 "use strict";
 var di_1 = require('../../di');
 var collection_1 = require('../../facade/collection');
-var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
@@ -55,7 +54,7 @@ var IterableDiffers = (function () {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
                     // to
                     // bootstrap(), which would override default pipes instead of extending them.
-                    throw new exceptions_1.BaseException('Cannot extend IterableDiffers without a parent injector');
+                    throw new Error('Cannot extend IterableDiffers without a parent injector');
                 }
                 return IterableDiffers.create(factories, parent);
             },
@@ -69,7 +68,7 @@ var IterableDiffers = (function () {
             return factory;
         }
         else {
-            throw new exceptions_1.BaseException("Cannot find a differ supporting object '" + iterable + "' of type '" + lang_1.getTypeNameForDebugging(iterable) + "'");
+            throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + lang_1.getTypeNameForDebugging(iterable) + "'");
         }
     };
     return IterableDiffers;

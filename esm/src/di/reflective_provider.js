@@ -11,7 +11,7 @@ import { reflector } from '../reflection/reflection';
 import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
 import { DependencyMetadata, HostMetadata, InjectMetadata, OptionalMetadata, SelfMetadata, SkipSelfMetadata } from './metadata';
-import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_exceptions';
+import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 /**
  * `Dependency` is used by the framework to extend DI.

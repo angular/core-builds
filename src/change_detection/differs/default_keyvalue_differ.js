@@ -7,7 +7,6 @@
  */
 "use strict";
 var collection_1 = require('../../facade/collection');
-var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 var DefaultKeyValueDifferFactory = (function () {
     function DefaultKeyValueDifferFactory() {
@@ -72,7 +71,7 @@ var DefaultKeyValueDiffer = (function () {
             map = new Map();
         }
         else if (!(map instanceof Map || lang_1.isJsObject(map))) {
-            throw new exceptions_1.BaseException("Error trying to diff '" + map + "'");
+            throw new Error("Error trying to diff '" + map + "'");
         }
         return this.check(map) ? this : null;
     };

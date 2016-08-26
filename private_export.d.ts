@@ -18,6 +18,7 @@ import * as constants from './src/change_detection/constants';
 import * as console from './src/console';
 import * as debug from './src/debug/debug_renderer';
 import * as reflective_provider from './src/di/reflective_provider';
+import { ComponentStillLoadingError } from './src/linker/compiler';
 import * as component_factory_resolver from './src/linker/component_factory_resolver';
 import * as debug_context from './src/linker/debug_context';
 import * as element from './src/linker/element';
@@ -100,6 +101,7 @@ export interface __core_private_types__ {
     DEFAULT_STATE: typeof DEFAULT_STATE_;
     EMPTY_STATE: typeof EMPTY_STATE_;
     FILL_STYLE_FLAG: typeof FILL_STYLE_FLAG_;
+    ComponentStillLoadingError: typeof ComponentStillLoadingError;
 }
 export declare var __core_private__: {
     isDefaultChangeDetectionStrategy: (changeDetectionStrategy: constants.ChangeDetectionStrategy) => boolean;
@@ -194,4 +196,5 @@ export declare var __core_private__: {
     DEFAULT_STATE: string;
     EMPTY_STATE: string;
     FILL_STYLE_FLAG: string;
+    ComponentStillLoadingError: typeof ComponentStillLoadingError;
 };

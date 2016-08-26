@@ -104,6 +104,6 @@ export declare class DebugAppView<T> extends AppView<T> {
     detectChanges(throwOnChange: boolean): void;
     private _resetDebug();
     debug(nodeIndex: number, rowNum: number, colNum: number): DebugContext;
-    private _rethrowWithContext(e, stack);
+    private _rethrowWithContext(e);
     eventHandler(cb: Function): Function;
 }

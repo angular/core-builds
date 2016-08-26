@@ -1,4 +1,4 @@
-import { BaseException, WrappedException } from '../facade/exceptions';
+import { BaseError, WrappedError } from '../facade/errors';
 import { Type } from '../type';
 import { ReflectiveInjector } from './reflective_injector';
 import { ReflectiveKey } from './reflective_key';
@@ -6,7 +6,7 @@ import { ReflectiveKey } from './reflective_key';
  * Base class for all errors arising from misconfigured providers.
  * @stable
  */
-export declare class AbstractProviderError extends BaseException {
+export declare class AbstractProviderError extends BaseError {
     constructor(injector: ReflectiveInjector, key: ReflectiveKey, constructResolvingMessage: Function);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
     readonly context: any;
@@ -76,10 +76,10 @@ export declare class CyclicDependencyError extends AbstractProviderError {
  * ```
  * @stable
  */
-export declare class InstantiationError extends WrappedException {
+export declare class InstantiationError extends WrappedError {
     constructor(injector: ReflectiveInjector, originalException: any, originalStack: any, key: ReflectiveKey);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
-    readonly wrapperMessage: string;
+    readonly message: string;
     readonly causeKey: ReflectiveKey;
     readonly context: any;
 }
@@ -94,7 +94,7 @@ export declare class InstantiationError extends WrappedException {
  * ```
  * @stable
  */
-export declare class InvalidProviderError extends BaseException {
+export declare class InvalidProviderError extends BaseError {
     constructor(provider: any);
 }
 /**
@@ -126,7 +126,7 @@ export declare class InvalidProviderError extends BaseException {
  * ```
  * @stable
  */
-export declare class NoAnnotationError extends BaseException {
+export declare class NoAnnotationError extends BaseError {
     constructor(typeOrFunc: Type<any> | Function, params: any[][]);
     private static _genMessage(typeOrFunc, params);
 }
@@ -144,7 +144,7 @@ export declare class NoAnnotationError extends BaseException {
  * ```
  * @stable
  */
-export declare class OutOfBoundsError extends BaseException {
+export declare class OutOfBoundsError extends BaseError {
     constructor(index: number);
 }
 /**
@@ -159,6 +159,6 @@ export declare class OutOfBoundsError extends BaseException {
  * ])).toThrowError();
  * ```
  */
-export declare class MixingMultiProvidersWithRegularProvidersError extends BaseException {
+export declare class MixingMultiProvidersWithRegularProvidersError extends BaseError {
     constructor(provider1: any, provider2: any);
 }

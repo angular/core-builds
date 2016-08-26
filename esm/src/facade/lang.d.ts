@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 export interface BrowserNodeGlobal {
     Object: typeof Object;
     Array: typeof Array;
@@ -67,12 +60,6 @@ export declare class StringJoiner {
     parts: string[];
     constructor(parts?: string[]);
     add(part: string): void;
-    toString(): string;
-}
-export declare class NumberParseError extends Error {
-    message: string;
-    name: string;
-    constructor(message: string);
     toString(): string;
 }
 export declare class NumberWrapper {

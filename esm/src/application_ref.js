@@ -5,8 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ErrorHandler } from '../src/error_handler';
 import { ListWrapper } from '../src/facade/collection';
-import { BaseException, ExceptionHandler, unimplemented } from '../src/facade/exceptions';
+import { unimplemented } from '../src/facade/errors';
 import { isBlank, isPresent, isPromise, stringify } from '../src/facade/lang';
 import { ApplicationInitStatus } from './application_init';
 import { APP_BOOTSTRAP_LISTENER, PLATFORM_INITIALIZER } from './application_tokens';
@@ -33,8 +34,7 @@ var _platform;
  */
 export function enableProdMode() {
     if (_runModeLocked) {
-        // Cannot use BaseException as that ends up importing from facade/lang.
-        throw new BaseException('Cannot enable prod mode after platform setup.');
+        throw new Error('Cannot enable prod mode after platform setup.');
     }
     _devMode = false;
 }
@@ -58,7 +58,7 @@ export function isDevMode() {
  */
 export function createPlatform(injector) {
     if (isPresent(_platform) && !_platform.destroyed) {
-        throw new BaseException('There can be only one platform. Destroy the previous one to create a new one.');
+        throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
     }
     _platform = injector.get(PlatformRef);
     const inits = injector.get(PLATFORM_INITIALIZER, null);
@@ -94,10 +94,10 @@ export function createPlatformFactory(parentPlaformFactory, name, providers = []
 export function assertPlatform(requiredToken) {
     var platform = getPlatform();
     if (isBlank(platform)) {
-        throw new BaseException('No platform exists!');
+        throw new Error('No platform exists!');
     }
     if (isPresent(platform) && isBlank(platform.injector.get(requiredToken, null))) {
-        throw new BaseException('A platform with a different configuration has been created. Please destroy it first.');
+        throw new Error('A platform with a different configuration has been created. Please destroy it first.');
     }
     return platform;
 }
@@ -182,12 +182,12 @@ export class PlatformRef {
     ;
     get destroyed() { throw unimplemented(); }
 }
-function _callAndReportToExceptionHandler(exceptionHandler, callback) {
+function _callAndReportToExceptionHandler(errorHandler, callback) {
     try {
         const result = callback();
         if (isPromise(result)) {
             return result.catch((e) => {
-                exceptionHandler.call(e);
+                errorHandler.handleError(e);
                 // rethrow as the exception handler might not do it
                 throw e;
             });
@@ -197,7 +197,7 @@ function _callAndReportToExceptionHandler(exceptionHandler, callback) {
         }
     }
     catch (e) {
-        exceptionHandler.call(e);
+        errorHandler.handleError(e);
         // rethrow as the exception handler might not do it
         throw e;
     }
@@ -215,7 +215,7 @@ export class PlatformRef_ extends PlatformRef {
     get destroyed() { return this._destroyed; }
     destroy() {
         if (this._destroyed) {
-            throw new BaseException('The platform has already been destroyed!');
+            throw new Error('The platform has already been destroyed!');
         }
         ListWrapper.clone(this._modules).forEach((app) => app.destroy());
         this._destroyListeners.forEach((dispose) => dispose());
@@ -236,12 +236,12 @@ export class PlatformRef_ extends PlatformRef {
         return ngZone.run(() => {
             const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
             const moduleRef = moduleFactory.create(ngZoneInjector);
-            const exceptionHandler = moduleRef.injector.get(ExceptionHandler, null);
+            const exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(() => ListWrapper.remove(this._modules, moduleRef));
-            ngZone.onError.subscribe({ next: (error) => { exceptionHandler.call(error, error ? error.stack : null); } });
+            ngZone.onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } });
             return _callAndReportToExceptionHandler(exceptionHandler, () => {
                 const initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 return initStatus.donePromise.then(() => {
@@ -279,7 +279,7 @@ export class PlatformRef_ extends PlatformRef {
             moduleRef.instance.ngDoBootstrap(appRef);
         }
         else {
-            throw new BaseException(`The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
+            throw new Error(`The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
                 `Please define one of these.`);
         }
     }
@@ -340,7 +340,7 @@ export class ApplicationRef_ extends ApplicationRef {
     }
     bootstrap(componentOrFactory) {
         if (!this._initStatus.done) {
-            throw new BaseException('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
         let componentFactory;
         if (componentOrFactory instanceof ComponentFactory) {
@@ -383,7 +383,7 @@ export class ApplicationRef_ extends ApplicationRef {
     }
     tick() {
         if (this._runningTick) {
-            throw new BaseException('ApplicationRef.tick is called recursively');
+            throw new Error('ApplicationRef.tick is called recursively');
         }
         var s = ApplicationRef_._tickScope();
         try {
@@ -416,7 +416,7 @@ ApplicationRef_.ctorParameters = [
     { type: NgZone, },
     { type: Console, },
     { type: Injector, },
-    { type: ExceptionHandler, },
+    { type: ErrorHandler, },
     { type: ComponentFactoryResolver, },
     { type: ApplicationInitStatus, },
     { type: TestabilityRegistry, decorators: [{ type: Optional },] },

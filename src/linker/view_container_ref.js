@@ -7,7 +7,7 @@
  */
 "use strict";
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 var profile_1 = require('../profile/profile');
 /**
@@ -36,17 +36,17 @@ var ViewContainerRef = (function () {
          * Anchor element that specifies the location of this container in the containing View.
          * <!-- TODO: rename to anchorElement -->
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewContainerRef.prototype, "injector", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -54,7 +54,7 @@ var ViewContainerRef = (function () {
         /**
          * Returns the number of Views currently attached to this container.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });

@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentStillLoadingError, Injector, NgModule, NgZone, OpaqueToken } from '../index';
+import { Injector, NgModule, NgZone, OpaqueToken } from '../index';
 import { ListWrapper } from '../src/facade/collection';
-import { BaseException } from '../src/facade/exceptions';
 import { FunctionWrapper, stringify } from '../src/facade/lang';
 import { AsyncTestCompleter } from './async_test_completer';
 import { ComponentFixture } from './component_fixture';
@@ -139,7 +138,7 @@ export class TestBed {
      */
     initTestEnvironment(ngModule, platform) {
         if (this.platform || this.ngModule) {
-            throw new BaseException('Cannot set base providers because it has already been called');
+            throw new Error('Cannot set base providers because it has already been called');
         }
         this.platform = platform;
         this.ngModule = ngModule;
@@ -211,7 +210,7 @@ export class TestBed {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType);
             }
             catch (e) {
-                if (e instanceof ComponentStillLoadingError) {
+                if (e.compType) {
                     throw new Error(`This test module uses the component ${stringify(e.compType)} which is using a "templateUrl", but they were never compiled. ` +
                         `Please call "TestBed.compileComponents" before your test.`);
                 }
@@ -246,7 +245,7 @@ export class TestBed {
     }
     _assertNotInstantiated(methodName, methodDescription) {
         if (this._instantiated) {
-            throw new BaseException(`Cannot ${methodDescription} when the test module has already been instantiated. ` +
+            throw new Error(`Cannot ${methodDescription} when the test module has already been instantiated. ` +
                 `Make sure you are not using \`inject\` before \`${methodName}\`.`);
         }
     }
@@ -285,7 +284,7 @@ export class TestBed {
         this._initIfNeeded();
         const componentFactory = this._moduleWithComponentFactories.componentFactories.find((compFactory) => compFactory.componentType === component);
         if (!componentFactory) {
-            throw new BaseException(`Cannot create the component ${stringify(component)} as it was not imported into the testing module!`);
+            throw new Error(`Cannot create the component ${stringify(component)} as it was not imported into the testing module!`);
         }
         const noNgZone = this.get(ComponentFixtureNoNgZone, false);
         const autoDetect = this.get(ComponentFixtureAutoDetect, false);

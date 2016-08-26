@@ -5,11 +5,10 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export { COMPILER_OPTIONS, Compiler, CompilerFactory, CompilerOptions, ComponentStillLoadingError, ModuleWithComponentFactories } from './linker/compiler';
+export { COMPILER_OPTIONS, Compiler, CompilerFactory, CompilerOptions, ModuleWithComponentFactories } from './linker/compiler';
 export { ComponentFactory, ComponentRef } from './linker/component_factory';
-export { ComponentFactoryResolver, NoComponentFactoryError } from './linker/component_factory_resolver';
+export { ComponentFactoryResolver } from './linker/component_factory_resolver';
 export { ElementRef } from './linker/element_ref';
-export { ExpressionChangedAfterItHasBeenCheckedException } from './linker/exceptions';
 export { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 export { NgModuleFactoryLoader } from './linker/ng_module_factory_loader';
 export { QueryList } from './linker/query_list';

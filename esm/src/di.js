@@ -18,6 +18,5 @@ export { Injector } from './di/injector';
 export { ReflectiveInjector } from './di/reflective_injector';
 export { ResolvedReflectiveFactory } from './di/reflective_provider';
 export { ReflectiveKey } from './di/reflective_key';
-export { NoProviderError, AbstractProviderError, CyclicDependencyError, InstantiationError, InvalidProviderError, NoAnnotationError, OutOfBoundsError } from './di/reflective_exceptions';
 export { OpaqueToken } from './di/opaque_token';
 //# sourceMappingURL=di.js.map

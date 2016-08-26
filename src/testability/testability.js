@@ -8,7 +8,6 @@
 "use strict";
 var decorators_1 = require('../di/decorators');
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 var ng_zone_1 = require('../zone/ng_zone');
 var Testability = (function () {
@@ -58,7 +57,7 @@ var Testability = (function () {
     Testability.prototype.decreasePendingRequestCount = function () {
         this._pendingCount -= 1;
         if (this._pendingCount < 0) {
-            throw new exceptions_1.BaseException('pending async requests below zero');
+            throw new Error('pending async requests below zero');
         }
         this._runCallbacksIfReady();
         return this._pendingCount;

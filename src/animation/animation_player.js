@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 /**
  * @experimental Animation support is experimental.
@@ -15,10 +14,8 @@ var AnimationPlayer = (function () {
     function AnimationPlayer() {
     }
     Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
-        get: function () { throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class'); },
-        set: function (player) {
-            throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class');
-        },
+        get: function () { throw new Error('NOT IMPLEMENTED: Base Class'); },
+        set: function (player) { throw new Error('NOT IMPLEMENTED: Base Class'); },
         enumerable: true,
         configurable: true
     });

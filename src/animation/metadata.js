@@ -11,7 +11,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 /**
  * @experimental Animation support is experimental.
@@ -144,7 +143,7 @@ var AnimationWithStepsMetadata = (function (_super) {
         _super.call(this);
     }
     Object.defineProperty(AnimationWithStepsMetadata.prototype, "steps", {
-        get: function () { throw new exceptions_1.BaseException('NOT IMPLEMENTED: Base Class'); },
+        get: function () { throw new Error('NOT IMPLEMENTED: Base Class'); },
         enumerable: true,
         configurable: true
     });

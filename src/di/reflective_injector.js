@@ -7,10 +7,10 @@
  */
 "use strict";
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var injector_1 = require('./injector');
 var metadata_1 = require('./metadata');
-var reflective_exceptions_1 = require('./reflective_exceptions');
+var reflective_errors_1 = require('./reflective_errors');
 var reflective_key_1 = require('./reflective_key');
 var reflective_provider_1 = require('./reflective_provider');
 var __unused; // avoid unused import when Type union types are erased
@@ -102,7 +102,7 @@ var ReflectiveProtoInjectorInlineStrategy = (function () {
             return this.provider8;
         if (index == 9)
             return this.provider9;
-        throw new reflective_exceptions_1.OutOfBoundsError(index);
+        throw new reflective_errors_1.OutOfBoundsError(index);
     };
     ReflectiveProtoInjectorInlineStrategy.prototype.createInjectorStrategy = function (injector) {
         return new ReflectiveInjectorInlineStrategy(injector, this);
@@ -121,7 +121,7 @@ var ReflectiveProtoInjectorDynamicStrategy = (function () {
     }
     ReflectiveProtoInjectorDynamicStrategy.prototype.getProviderAtIndex = function (index) {
         if (index < 0 || index >= this.providers.length) {
-            throw new reflective_exceptions_1.OutOfBoundsError(index);
+            throw new reflective_errors_1.OutOfBoundsError(index);
         }
         return this.providers[index];
     };
@@ -252,7 +252,7 @@ var ReflectiveInjectorInlineStrategy = (function () {
             return this.obj8;
         if (index == 9)
             return this.obj9;
-        throw new reflective_exceptions_1.OutOfBoundsError(index);
+        throw new reflective_errors_1.OutOfBoundsError(index);
     };
     ReflectiveInjectorInlineStrategy.prototype.getMaxNumberOfObjects = function () { return _MAX_CONSTRUCTION_COUNTER; };
     return ReflectiveInjectorInlineStrategy;
@@ -283,7 +283,7 @@ var ReflectiveInjectorDynamicStrategy = (function () {
     };
     ReflectiveInjectorDynamicStrategy.prototype.getObjAtIndex = function (index) {
         if (index < 0 || index >= this.objs.length) {
-            throw new reflective_exceptions_1.OutOfBoundsError(index);
+            throw new reflective_errors_1.OutOfBoundsError(index);
         }
         return this.objs[index];
     };
@@ -438,7 +438,7 @@ var ReflectiveInjector = (function () {
          * expect(child.parent).toBe(parent);
          * ```
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -473,7 +473,7 @@ var ReflectiveInjector = (function () {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
      */
-    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return exceptions_1.unimplemented(); };
+    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return errors_1.unimplemented(); };
     /**
      * Creates a child injector from previously resolved providers.
      *
@@ -500,7 +500,7 @@ var ReflectiveInjector = (function () {
      * ```
      */
     ReflectiveInjector.prototype.createChildFromResolved = function (providers) {
-        return exceptions_1.unimplemented();
+        return errors_1.unimplemented();
     };
     /**
      * Resolves a provider and instantiates an object in the context of the injector.
@@ -526,7 +526,7 @@ var ReflectiveInjector = (function () {
      * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
      * ```
      */
-    ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { return exceptions_1.unimplemented(); };
+    ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { return errors_1.unimplemented(); };
     /**
      * Instantiates an object using a resolved provider in the context of the injector.
      *
@@ -551,7 +551,7 @@ var ReflectiveInjector = (function () {
      * expect(car).not.toBe(injector.instantiateResolved(carProvider));
      * ```
      */
-    ReflectiveInjector.prototype.instantiateResolved = function (provider) { return exceptions_1.unimplemented(); };
+    ReflectiveInjector.prototype.instantiateResolved = function (provider) { return errors_1.unimplemented(); };
     return ReflectiveInjector;
 }());
 exports.ReflectiveInjector = ReflectiveInjector;
@@ -612,7 +612,7 @@ var ReflectiveInjector_ = (function () {
     /** @internal */
     ReflectiveInjector_.prototype._new = function (provider) {
         if (this._constructionCounter++ > this._strategy.getMaxNumberOfObjects()) {
-            throw new reflective_exceptions_1.CyclicDependencyError(this, provider.key);
+            throw new reflective_errors_1.CyclicDependencyError(this, provider.key);
         }
         return this._instantiateProvider(provider);
     };
@@ -675,7 +675,7 @@ var ReflectiveInjector_ = (function () {
             d19 = length > 19 ? this._getByReflectiveDependency(provider, deps[19]) : null;
         }
         catch (e) {
-            if (e instanceof reflective_exceptions_1.AbstractProviderError || e instanceof reflective_exceptions_1.InstantiationError) {
+            if (e instanceof reflective_errors_1.AbstractProviderError || e instanceof reflective_errors_1.InstantiationError) {
                 e.addKey(this, provider.key);
             }
             throw e;
@@ -747,11 +747,11 @@ var ReflectiveInjector_ = (function () {
                     obj = factory(d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19);
                     break;
                 default:
-                    throw new exceptions_1.BaseException("Cannot instantiate '" + provider.key.displayName + "' because it has more than 20 dependencies");
+                    throw new Error("Cannot instantiate '" + provider.key.displayName + "' because it has more than 20 dependencies");
             }
         }
         catch (e) {
-            throw new reflective_exceptions_1.InstantiationError(this, e, e.stack, provider.key);
+            throw new reflective_errors_1.InstantiationError(this, e, e.stack, provider.key);
         }
         return obj;
     };
@@ -775,7 +775,7 @@ var ReflectiveInjector_ = (function () {
             return notFoundValue;
         }
         else {
-            throw new reflective_exceptions_1.NoProviderError(this, key);
+            throw new reflective_errors_1.NoProviderError(this, key);
         }
     };
     /** @internal */

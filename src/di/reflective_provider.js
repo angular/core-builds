@@ -12,7 +12,7 @@ var reflection_1 = require('../reflection/reflection');
 var type_1 = require('../type');
 var forward_ref_1 = require('./forward_ref');
 var metadata_1 = require('./metadata');
-var reflective_exceptions_1 = require('./reflective_exceptions');
+var reflective_errors_1 = require('./reflective_errors');
 var reflective_key_1 = require('./reflective_key');
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -122,7 +122,7 @@ function mergeResolvedReflectiveProviders(providers, normalizedProvidersMap) {
         var existing = normalizedProvidersMap.get(provider.key.id);
         if (lang_1.isPresent(existing)) {
             if (provider.multiProvider !== existing.multiProvider) {
-                throw new reflective_exceptions_1.MixingMultiProvidersWithRegularProvidersError(existing, provider);
+                throw new reflective_errors_1.MixingMultiProvidersWithRegularProvidersError(existing, provider);
             }
             if (provider.multiProvider) {
                 for (var j = 0; j < provider.resolvedFactories.length; j++) {
@@ -159,7 +159,7 @@ function _normalizeProviders(providers, res) {
             _normalizeProviders(b, res);
         }
         else {
-            throw new reflective_exceptions_1.InvalidProviderError(b);
+            throw new reflective_errors_1.InvalidProviderError(b);
         }
     });
     return res;
@@ -179,7 +179,7 @@ function _dependenciesFor(typeOrFunc) {
     if (lang_1.isBlank(params))
         return [];
     if (params.some(lang_1.isBlank)) {
-        throw new reflective_exceptions_1.NoAnnotationError(typeOrFunc, params);
+        throw new reflective_errors_1.NoAnnotationError(typeOrFunc, params);
     }
     return params.map(function (p) { return _extractToken(typeOrFunc, p, params); });
 }
@@ -229,7 +229,7 @@ function _extractToken(typeOrFunc /** TODO #9100 */, metadata /** TODO #9100 */ 
         return _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps);
     }
     else {
-        throw new reflective_exceptions_1.NoAnnotationError(typeOrFunc, params);
+        throw new reflective_errors_1.NoAnnotationError(typeOrFunc, params);
     }
 }
 function _createDependency(token /** TODO #9100 */, optional /** TODO #9100 */, lowerBoundVisibility /** TODO #9100 */, upperBoundVisibility /** TODO #9100 */, depProps /** TODO #9100 */) {

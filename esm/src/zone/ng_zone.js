@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { EventEmitter } from '../facade/async';
-import { BaseException } from '../facade/exceptions';
 import { NgZoneImpl } from './ng_zone_impl';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -122,12 +121,12 @@ export class NgZone {
     static isInAngularZone() { return NgZoneImpl.isInAngularZone(); }
     static assertInAngularZone() {
         if (!NgZoneImpl.isInAngularZone()) {
-            throw new BaseException('Expected to be in Angular Zone, but it is not!');
+            throw new Error('Expected to be in Angular Zone, but it is not!');
         }
     }
     static assertNotInAngularZone() {
         if (NgZoneImpl.isInAngularZone()) {
-            throw new BaseException('Expected to not be in Angular Zone, but it is!');
+            throw new Error('Expected to not be in Angular Zone, but it is!');
         }
     }
     _checkStable() {

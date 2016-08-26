@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ListWrapper } from '../facade/collection';
-import { BaseException, WrappedException } from '../facade/exceptions';
+import { BaseError, WrappedError } from '../facade/errors';
 import { isBlank, stringify } from '../facade/lang';
 function findFirstClosedCycle(keys) {
     var res = [];
@@ -31,9 +31,9 @@ function constructResolvingPath(keys) {
  * Base class for all errors arising from misconfigured providers.
  * @stable
  */
-export class AbstractProviderError extends BaseException {
+export class AbstractProviderError extends BaseError {
     constructor(injector, key, constructResolvingMessage) {
-        super('DI Exception');
+        super('DI Error');
         this.keys = [key];
         this.injectors = [injector];
         this.constructResolvingMessage = constructResolvingMessage;
@@ -120,9 +120,9 @@ export class CyclicDependencyError extends AbstractProviderError {
  * ```
  * @stable
  */
-export class InstantiationError extends WrappedException {
+export class InstantiationError extends WrappedError {
     constructor(injector, originalException, originalStack, key) {
-        super('DI Exception', originalException, originalStack, null);
+        super('DI Error', originalException);
         this.keys = [key];
         this.injectors = [injector];
     }
@@ -130,9 +130,9 @@ export class InstantiationError extends WrappedException {
         this.injectors.push(injector);
         this.keys.push(key);
     }
-    get wrapperMessage() {
+    get message() {
         var first = stringify(ListWrapper.first(this.keys).token);
-        return `Error during instantiation of ${first}!${constructResolvingPath(this.keys)}.`;
+        return `${this.originalError.message}: Error during instantiation of ${first}!${constructResolvingPath(this.keys)}.`;
     }
     get causeKey() { return this.keys[0]; }
     get context() { return this.injectors[this.injectors.length - 1].debugContext(); }
@@ -148,7 +148,7 @@ export class InstantiationError extends WrappedException {
  * ```
  * @stable
  */
-export class InvalidProviderError extends BaseException {
+export class InvalidProviderError extends BaseError {
     constructor(provider) {
         super(`Invalid provider - only instances of Provider and Type are allowed, got: ${provider}`);
     }
@@ -182,7 +182,7 @@ export class InvalidProviderError extends BaseException {
  * ```
  * @stable
  */
-export class NoAnnotationError extends BaseException {
+export class NoAnnotationError extends BaseError {
     constructor(typeOrFunc, params) {
         super(NoAnnotationError._genMessage(typeOrFunc, params));
     }
@@ -217,7 +217,7 @@ export class NoAnnotationError extends BaseException {
  * ```
  * @stable
  */
-export class OutOfBoundsError extends BaseException {
+export class OutOfBoundsError extends BaseError {
     constructor(index) {
         super(`Index ${index} is out-of-bounds.`);
     }
@@ -235,10 +235,10 @@ export class OutOfBoundsError extends BaseException {
  * ])).toThrowError();
  * ```
  */
-export class MixingMultiProvidersWithRegularProvidersError extends BaseException {
+export class MixingMultiProvidersWithRegularProvidersError extends BaseError {
     constructor(provider1, provider2) {
         super('Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
             provider2.toString());
     }
 }
-//# sourceMappingURL=reflective_exceptions.js.map
+//# sourceMappingURL=reflective_errors.js.map

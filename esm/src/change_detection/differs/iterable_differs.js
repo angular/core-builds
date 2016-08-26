@@ -7,7 +7,6 @@
  */
 import { OptionalMetadata, SkipSelfMetadata } from '../../di';
 import { ListWrapper } from '../../facade/collection';
-import { BaseException } from '../../facade/exceptions';
 import { getTypeNameForDebugging, isBlank, isPresent } from '../../facade/lang';
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
@@ -54,7 +53,7 @@ export class IterableDiffers {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
                     // to
                     // bootstrap(), which would override default pipes instead of extending them.
-                    throw new BaseException('Cannot extend IterableDiffers without a parent injector');
+                    throw new Error('Cannot extend IterableDiffers without a parent injector');
                 }
                 return IterableDiffers.create(factories, parent);
             },
@@ -68,7 +67,7 @@ export class IterableDiffers {
             return factory;
         }
         else {
-            throw new BaseException(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
         }
     }
 }

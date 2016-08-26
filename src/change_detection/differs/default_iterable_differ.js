@@ -7,7 +7,6 @@
  */
 "use strict";
 var collection_1 = require('../../facade/collection');
-var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 var DefaultIterableDifferFactory = (function () {
     function DefaultIterableDifferFactory() {
@@ -145,7 +144,7 @@ var DefaultIterableDiffer = (function () {
         if (lang_1.isBlank(collection))
             collection = [];
         if (!collection_1.isListLikeIterable(collection)) {
-            throw new exceptions_1.BaseException("Error trying to diff '" + collection + "'");
+            throw new Error("Error trying to diff '" + collection + "'");
         }
         if (this.check(collection)) {
             return this;

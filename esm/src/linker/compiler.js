@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { OpaqueToken } from '../di';
-import { BaseException } from '../facade/exceptions';
+import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
  * Indicates that a component is still being loaded in a synchronous compile.
  *
  * @stable
  */
-export class ComponentStillLoadingError extends BaseException {
+export class ComponentStillLoadingError extends BaseError {
     constructor(compType) {
         super(`Can't compile synchronously as ${stringify(compType)} is still being loaded!`);
         this.compType = compType;
@@ -31,7 +31,7 @@ export class ModuleWithComponentFactories {
     }
 }
 function _throwError() {
-    throw new BaseException(`Runtime compiler is not loaded`);
+    throw new Error(`Runtime compiler is not loaded`);
 }
 /**
  * Low-level service for running the angular compiler during runtime

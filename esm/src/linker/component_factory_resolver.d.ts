@@ -5,13 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseException } from '../facade/exceptions';
+import { BaseError } from '../facade/errors';
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 /**
  * @stable
  */
-export declare class NoComponentFactoryError extends BaseException {
+export declare class NoComponentFactoryError extends BaseError {
     component: Function;
     constructor(component: Function);
 }

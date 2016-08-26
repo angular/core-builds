@@ -6,11 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var globalScope;
 if (typeof window === 'undefined') {
     if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
@@ -211,16 +206,6 @@ var StringJoiner = (function () {
     return StringJoiner;
 }());
 exports.StringJoiner = StringJoiner;
-var NumberParseError = (function (_super) {
-    __extends(NumberParseError, _super);
-    function NumberParseError(message) {
-        _super.call(this);
-        this.message = message;
-    }
-    NumberParseError.prototype.toString = function () { return this.message; };
-    return NumberParseError;
-}(Error));
-exports.NumberParseError = NumberParseError;
 var NumberWrapper = (function () {
     function NumberWrapper() {
     }
@@ -229,7 +214,7 @@ var NumberWrapper = (function () {
     NumberWrapper.parseIntAutoRadix = function (text) {
         var result = parseInt(text);
         if (isNaN(result)) {
-            throw new NumberParseError('Invalid integer literal when parsing ' + text);
+            throw new Error('Invalid integer literal when parsing ' + text);
         }
         return result;
     };
@@ -250,7 +235,7 @@ var NumberWrapper = (function () {
                 return result;
             }
         }
-        throw new NumberParseError('Invalid integer literal when parsing ' + text + ' in base ' + radix);
+        throw new Error('Invalid integer literal when parsing ' + text + ' in base ' + radix);
     };
     // TODO: NaN is a valid literal but is returned by parseFloat to indicate an error.
     NumberWrapper.parseFloat = function (text) { return parseFloat(text); };

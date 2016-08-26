@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseException } from '../facade/exceptions';
 import { NumberWrapper, isArray, isPresent, isString } from '../facade/lang';
 /**
  * @experimental Animation support is experimental.
@@ -110,7 +109,7 @@ export class AnimationWithStepsMetadata extends AnimationMetadata {
     constructor() {
         super();
     }
-    get steps() { throw new BaseException('NOT IMPLEMENTED: Base Class'); }
+    get steps() { throw new Error('NOT IMPLEMENTED: Base Class'); }
 }
 /**
  * Metadata representing the entry of animations.

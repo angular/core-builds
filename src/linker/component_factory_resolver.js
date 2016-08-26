@@ -11,7 +11,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 /**
  * @stable
@@ -23,7 +23,7 @@ var NoComponentFactoryError = (function (_super) {
         this.component = component;
     }
     return NoComponentFactoryError;
-}(exceptions_1.BaseException));
+}(errors_1.BaseError));
 exports.NoComponentFactoryError = NoComponentFactoryError;
 var _NullComponentFactoryResolver = (function () {
     function _NullComponentFactoryResolver() {

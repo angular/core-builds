@@ -5,14 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseException, unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 const _THROW_IF_NOT_FOUND = new Object();
 export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 class _NullInjector {
     get(token, notFoundValue = _THROW_IF_NOT_FOUND) {
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
-            throw new BaseException(`No provider for ${stringify(token)}!`);
+            throw new Error(`No provider for ${stringify(token)}!`);
         }
         return notFoundValue;
     }

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectorStatus } from '../change_detection/constants';
-import { unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 /**
  * @stable
  */

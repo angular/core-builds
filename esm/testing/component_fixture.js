@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { getDebugNode } from '../index';
-import { BaseException } from '../src/facade/exceptions';
 import { scheduleMicroTask } from '../src/facade/lang';
 /**
  * Fixture for debugging and testing a component.
@@ -97,7 +96,7 @@ export class ComponentFixture {
      */
     autoDetectChanges(autoDetect = true) {
         if (this.ngZone == null) {
-            throw new BaseException('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
+            throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
         }
         this._autoDetect = autoDetect;
         this.detectChanges();

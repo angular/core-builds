@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
-import { BaseException } from '../../facade/exceptions';
 import { getMapKey, isArray, isBlank, isPresent, looseIdentical, stringify } from '../../facade/lang';
 export class DefaultIterableDifferFactory {
     constructor() {
@@ -134,7 +133,7 @@ export class DefaultIterableDiffer {
         if (isBlank(collection))
             collection = [];
         if (!isListLikeIterable(collection)) {
-            throw new BaseException(`Error trying to diff '${collection}'`);
+            throw new Error(`Error trying to diff '${collection}'`);
         }
         if (this.check(collection)) {
             return this;

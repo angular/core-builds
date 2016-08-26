@@ -7,7 +7,6 @@
  */
 "use strict";
 var async_1 = require('../facade/async');
-var exceptions_1 = require('../facade/exceptions');
 var ng_zone_impl_1 = require('./ng_zone_impl');
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -125,12 +124,12 @@ var NgZone = (function () {
     NgZone.isInAngularZone = function () { return ng_zone_impl_1.NgZoneImpl.isInAngularZone(); };
     NgZone.assertInAngularZone = function () {
         if (!ng_zone_impl_1.NgZoneImpl.isInAngularZone()) {
-            throw new exceptions_1.BaseException('Expected to be in Angular Zone, but it is not!');
+            throw new Error('Expected to be in Angular Zone, but it is not!');
         }
     };
     NgZone.assertNotInAngularZone = function () {
         if (ng_zone_impl_1.NgZoneImpl.isInAngularZone()) {
-            throw new exceptions_1.BaseException('Expected to not be in Angular Zone, but it is!');
+            throw new Error('Expected to not be in Angular Zone, but it is!');
         }
     };
     NgZone.prototype._checkStable = function () {

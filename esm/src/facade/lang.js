@@ -173,20 +173,13 @@ export class StringJoiner {
     add(part) { this.parts.push(part); }
     toString() { return this.parts.join(''); }
 }
-export class NumberParseError extends Error {
-    constructor(message) {
-        super();
-        this.message = message;
-    }
-    toString() { return this.message; }
-}
 export class NumberWrapper {
     static toFixed(n, fractionDigits) { return n.toFixed(fractionDigits); }
     static equal(a, b) { return a === b; }
     static parseIntAutoRadix(text) {
         var result = parseInt(text);
         if (isNaN(result)) {
-            throw new NumberParseError('Invalid integer literal when parsing ' + text);
+            throw new Error('Invalid integer literal when parsing ' + text);
         }
         return result;
     }
@@ -207,7 +200,7 @@ export class NumberWrapper {
                 return result;
             }
         }
-        throw new NumberParseError('Invalid integer literal when parsing ' + text + ' in base ' + radix);
+        throw new Error('Invalid integer literal when parsing ' + text + ' in base ' + radix);
     }
     // TODO: NaN is a valid literal but is returned by parseFloat to indicate an error.
     static parseFloat(text) { return parseFloat(text); }

@@ -8,7 +8,6 @@
 "use strict";
 var index_1 = require('../index');
 var collection_1 = require('../src/facade/collection');
-var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 var async_test_completer_1 = require('./async_test_completer');
 var component_fixture_1 = require('./component_fixture');
@@ -145,7 +144,7 @@ var TestBed = (function () {
      */
     TestBed.prototype.initTestEnvironment = function (ngModule, platform) {
         if (this.platform || this.ngModule) {
-            throw new exceptions_1.BaseException('Cannot set base providers because it has already been called');
+            throw new Error('Cannot set base providers because it has already been called');
         }
         this.platform = platform;
         this.ngModule = ngModule;
@@ -218,7 +217,7 @@ var TestBed = (function () {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType);
             }
             catch (e) {
-                if (e instanceof index_1.ComponentStillLoadingError) {
+                if (e.compType) {
                     throw new Error(("This test module uses the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but they were never compiled. ") +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
@@ -257,7 +256,7 @@ var TestBed = (function () {
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
-            throw new exceptions_1.BaseException(("Cannot " + methodDescription + " when the test module has already been instantiated. ") +
+            throw new Error(("Cannot " + methodDescription + " when the test module has already been instantiated. ") +
                 ("Make sure you are not using `inject` before `" + methodName + "`."));
         }
     };
@@ -299,7 +298,7 @@ var TestBed = (function () {
         this._initIfNeeded();
         var componentFactory = this._moduleWithComponentFactories.componentFactories.find(function (compFactory) { return compFactory.componentType === component; });
         if (!componentFactory) {
-            throw new exceptions_1.BaseException("Cannot create the component " + lang_1.stringify(component) + " as it was not imported into the testing module!");
+            throw new Error("Cannot create the component " + lang_1.stringify(component) + " as it was not imported into the testing module!");
         }
         var noNgZone = this.get(exports.ComponentFixtureNoNgZone, false);
         var autoDetect = this.get(exports.ComponentFixtureAutoDetect, false);

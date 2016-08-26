@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 var forward_ref_1 = require('./forward_ref');
 /**
@@ -33,7 +32,7 @@ var ReflectiveKey = (function () {
         this.token = token;
         this.id = id;
         if (lang_1.isBlank(token)) {
-            throw new exceptions_1.BaseException('Token must be defined!');
+            throw new Error('Token must be defined!');
         }
     }
     Object.defineProperty(ReflectiveKey.prototype, "displayName", {

@@ -7,7 +7,6 @@
  */
 "use strict";
 var index_1 = require('../index');
-var exceptions_1 = require('../src/facade/exceptions');
 var lang_1 = require('../src/facade/lang');
 /**
  * Fixture for debugging and testing a component.
@@ -102,7 +101,7 @@ var ComponentFixture = (function () {
     ComponentFixture.prototype.autoDetectChanges = function (autoDetect) {
         if (autoDetect === void 0) { autoDetect = true; }
         if (this.ngZone == null) {
-            throw new exceptions_1.BaseException('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
+            throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
         }
         this._autoDetect = autoDetect;
         this.detectChanges();

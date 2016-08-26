@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var change_detection_util_1 = require('../change_detection/change_detection_util');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 /**
  * An error thrown if application changes model breaking the top-down data flow.
  *
@@ -40,16 +40,16 @@ var exceptions_1 = require('../facade/exceptions');
  *
  *   set prop(v) {
  *     // this updates the parent property, which is disallowed during change detection
- *     // this will result in ExpressionChangedAfterItHasBeenCheckedException
+ *     // this will result in ExpressionChangedAfterItHasBeenCheckedError
  *     this.parent.parentProp = "updated";
  *   }
  * }
  * ```
  * @stable
  */
-var ExpressionChangedAfterItHasBeenCheckedException = (function (_super) {
-    __extends(ExpressionChangedAfterItHasBeenCheckedException, _super);
-    function ExpressionChangedAfterItHasBeenCheckedException(oldValue, currValue, context) {
+var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
+    __extends(ExpressionChangedAfterItHasBeenCheckedError, _super);
+    function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
         var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
         if (oldValue === change_detection_util_1.UNINITIALIZED) {
             msg +=
@@ -58,9 +58,9 @@ var ExpressionChangedAfterItHasBeenCheckedException = (function (_super) {
         }
         _super.call(this, msg);
     }
-    return ExpressionChangedAfterItHasBeenCheckedException;
-}(exceptions_1.BaseException));
-exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfterItHasBeenCheckedException;
+    return ExpressionChangedAfterItHasBeenCheckedError;
+}(errors_1.BaseError));
+exports.ExpressionChangedAfterItHasBeenCheckedError = ExpressionChangedAfterItHasBeenCheckedError;
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
  *
@@ -68,14 +68,15 @@ exports.ExpressionChangedAfterItHasBeenCheckedException = ExpressionChangedAfter
  * be useful for debugging.
  * @stable
  */
-var ViewWrappedException = (function (_super) {
-    __extends(ViewWrappedException, _super);
-    function ViewWrappedException(originalException, originalStack, context) {
-        _super.call(this, "Error in " + context.source, originalException, originalStack, context);
+var ViewWrappedError = (function (_super) {
+    __extends(ViewWrappedError, _super);
+    function ViewWrappedError(originalError, context) {
+        _super.call(this, "Error in " + context.source, originalError);
+        this.context = context;
     }
-    return ViewWrappedException;
-}(exceptions_1.WrappedException));
-exports.ViewWrappedException = ViewWrappedException;
+    return ViewWrappedError;
+}(errors_1.WrappedError));
+exports.ViewWrappedError = ViewWrappedError;
 /**
  * Thrown when a destroyed view is used.
  *
@@ -84,12 +85,12 @@ exports.ViewWrappedException = ViewWrappedException;
  * This is an internal Angular error.
  * @stable
  */
-var ViewDestroyedException = (function (_super) {
-    __extends(ViewDestroyedException, _super);
-    function ViewDestroyedException(details) {
+var ViewDestroyedError = (function (_super) {
+    __extends(ViewDestroyedError, _super);
+    function ViewDestroyedError(details) {
         _super.call(this, "Attempt to use a destroyed view: " + details);
     }
-    return ViewDestroyedException;
-}(exceptions_1.BaseException));
-exports.ViewDestroyedException = ViewDestroyedException;
-//# sourceMappingURL=exceptions.js.map
+    return ViewDestroyedError;
+}(errors_1.BaseError));
+exports.ViewDestroyedError = ViewDestroyedError;
+//# sourceMappingURL=errors.js.map

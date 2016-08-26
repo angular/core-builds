@@ -11,12 +11,11 @@ var change_detection_1 = require('../change_detection/change_detection');
 var change_detection_util_1 = require('../change_detection/change_detection_util');
 var decorators_1 = require('../di/decorators');
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 var api_1 = require('../render/api');
 var security_1 = require('../security');
 var element_1 = require('./element');
-var exceptions_2 = require('./exceptions');
+var errors_1 = require('./errors');
 var ViewUtils = (function () {
     function ViewUtils(_renderer, _appId, sanitizer) {
         this._renderer = _renderer;
@@ -121,7 +120,7 @@ function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6,
                 c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
                 c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
         default:
-            throw new exceptions_1.BaseException("Does not support more than 9 expressions");
+            throw new Error("Does not support more than 9 expressions");
     }
 }
 exports.interpolate = interpolate;
@@ -131,7 +130,7 @@ function _toStringWithNull(v) {
 function checkBinding(throwOnChange, oldValue, newValue) {
     if (throwOnChange) {
         if (!change_detection_1.devModeEqual(oldValue, newValue)) {
-            throw new exceptions_2.ExpressionChangedAfterItHasBeenCheckedException(oldValue, newValue, null);
+            throw new errors_1.ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue);
         }
         return false;
     }

@@ -19,6 +19,7 @@ var constants = require('./src/change_detection/constants');
 var console = require('./src/console');
 var debug = require('./src/debug/debug_renderer');
 var reflective_provider = require('./src/di/reflective_provider');
+var compiler_1 = require('./src/linker/compiler');
 var component_factory_resolver = require('./src/linker/component_factory_resolver');
 var debug_context = require('./src/linker/debug_context');
 var element = require('./src/linker/element');
@@ -99,6 +100,7 @@ exports.__core_private__ = {
     ANY_STATE: animation_constants_1.ANY_STATE,
     DEFAULT_STATE: animation_constants_1.DEFAULT_STATE,
     EMPTY_STATE: animation_constants_1.EMPTY_STATE,
-    FILL_STYLE_FLAG: animation_constants_1.FILL_STYLE_FLAG
+    FILL_STYLE_FLAG: animation_constants_1.FILL_STYLE_FLAG,
+    ComponentStillLoadingError: compiler_1.ComponentStillLoadingError
 };
 //# sourceMappingURL=private_export.js.map

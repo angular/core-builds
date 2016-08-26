@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StringMapWrapper } from '../../facade/collection';
-import { BaseException } from '../../facade/exceptions';
 import { isJsObject, looseIdentical, stringify } from '../../facade/lang';
 export class DefaultKeyValueDifferFactory {
     constructor() {
@@ -65,7 +64,7 @@ export class DefaultKeyValueDiffer {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            throw new BaseException(`Error trying to diff '${map}'`);
+            throw new Error(`Error trying to diff '${map}'`);
         }
         return this.check(map) ? this : null;
     }

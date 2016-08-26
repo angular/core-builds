@@ -8,7 +8,6 @@
 "use strict";
 var di_1 = require('../../di');
 var collection_1 = require('../../facade/collection');
-var exceptions_1 = require('../../facade/exceptions');
 var lang_1 = require('../../facade/lang');
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
@@ -55,7 +54,7 @@ var KeyValueDiffers = (function () {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
                     // to
                     // bootstrap(), which would override default pipes instead of extending them.
-                    throw new exceptions_1.BaseException('Cannot extend KeyValueDiffers without a parent injector');
+                    throw new Error('Cannot extend KeyValueDiffers without a parent injector');
                 }
                 return KeyValueDiffers.create(factories, parent);
             },
@@ -69,7 +68,7 @@ var KeyValueDiffers = (function () {
             return factory;
         }
         else {
-            throw new exceptions_1.BaseException("Cannot find a differ supporting object '" + kv + "'");
+            throw new Error("Cannot find a differ supporting object '" + kv + "'");
         }
     };
     return KeyValueDiffers;

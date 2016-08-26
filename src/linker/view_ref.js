@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var constants_1 = require('../change_detection/constants');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 /**
  * @stable
  */
@@ -20,7 +20,7 @@ var ViewRef = (function () {
     function ViewRef() {
     }
     Object.defineProperty(ViewRef.prototype, "destroyed", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -87,12 +87,12 @@ var EmbeddedViewRef = (function (_super) {
         _super.apply(this, arguments);
     }
     Object.defineProperty(EmbeddedViewRef.prototype, "context", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(EmbeddedViewRef.prototype, "rootNodes", {
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });

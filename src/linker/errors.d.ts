@@ -1,4 +1,5 @@
-import { BaseException, WrappedException } from '../facade/exceptions';
+import { BaseError, WrappedError } from '../facade/errors';
+import { DebugContext } from './debug_context';
 /**
  * An error thrown if application changes model breaking the top-down data flow.
  *
@@ -26,15 +27,15 @@ import { BaseException, WrappedException } from '../facade/exceptions';
  *
  *   set prop(v) {
  *     // this updates the parent property, which is disallowed during change detection
- *     // this will result in ExpressionChangedAfterItHasBeenCheckedException
+ *     // this will result in ExpressionChangedAfterItHasBeenCheckedError
  *     this.parent.parentProp = "updated";
  *   }
  * }
  * ```
  * @stable
  */
-export declare class ExpressionChangedAfterItHasBeenCheckedException extends BaseException {
-    constructor(oldValue: any, currValue: any, context: any);
+export declare class ExpressionChangedAfterItHasBeenCheckedError extends BaseError {
+    constructor(oldValue: any, currValue: any);
 }
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
@@ -43,8 +44,12 @@ export declare class ExpressionChangedAfterItHasBeenCheckedException extends Bas
  * be useful for debugging.
  * @stable
  */
-export declare class ViewWrappedException extends WrappedException {
-    constructor(originalException: any, originalStack: any, context: any);
+export declare class ViewWrappedError extends WrappedError {
+    /**
+     * DebugContext
+     */
+    context: DebugContext;
+    constructor(originalError: any, context: DebugContext);
 }
 /**
  * Thrown when a destroyed view is used.
@@ -54,6 +59,6 @@ export declare class ViewWrappedException extends WrappedException {
  * This is an internal Angular error.
  * @stable
  */
-export declare class ViewDestroyedException extends BaseException {
+export declare class ViewDestroyedError extends BaseError {
     constructor(details: string);
 }

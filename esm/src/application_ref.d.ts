@@ -1,4 +1,11 @@
-import { ExceptionHandler } from '../src/facade/exceptions';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { ErrorHandler } from '../src/error_handler';
 import { ApplicationInitStatus } from './application_init';
 import { ChangeDetectorRef } from './change_detection/change_detector_ref';
 import { Console } from './console';
@@ -207,7 +214,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _changeDetectorRefs;
     private _runningTick;
     private _enforceNoNewChanges;
-    constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ExceptionHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
+    constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
     registerChangeDetector(changeDetector: ChangeDetectorRef): void;
     unregisterChangeDetector(changeDetector: ChangeDetectorRef): void;
     bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;

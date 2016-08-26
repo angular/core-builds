@@ -7,7 +7,6 @@
  */
 import { Injectable } from '../di/decorators';
 import { Map, MapWrapper } from '../facade/collection';
-import { BaseException } from '../facade/exceptions';
 import { scheduleMicroTask } from '../facade/lang';
 import { NgZone } from '../zone/ng_zone';
 export class Testability {
@@ -56,7 +55,7 @@ export class Testability {
     decreasePendingRequestCount() {
         this._pendingCount -= 1;
         if (this._pendingCount < 0) {
-            throw new BaseException('pending async requests below zero');
+            throw new Error('pending async requests below zero');
         }
         this._runCallbacksIfReady();
         return this._pendingCount;

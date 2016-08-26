@@ -11,8 +11,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var error_handler_1 = require('../src/error_handler');
 var collection_1 = require('../src/facade/collection');
-var exceptions_1 = require('../src/facade/exceptions');
+var errors_1 = require('../src/facade/errors');
 var lang_1 = require('../src/facade/lang');
 var application_init_1 = require('./application_init');
 var application_tokens_1 = require('./application_tokens');
@@ -39,8 +40,7 @@ var _platform;
  */
 function enableProdMode() {
     if (_runModeLocked) {
-        // Cannot use BaseException as that ends up importing from facade/lang.
-        throw new exceptions_1.BaseException('Cannot enable prod mode after platform setup.');
+        throw new Error('Cannot enable prod mode after platform setup.');
     }
     _devMode = false;
 }
@@ -66,7 +66,7 @@ exports.isDevMode = isDevMode;
  */
 function createPlatform(injector) {
     if (lang_1.isPresent(_platform) && !_platform.destroyed) {
-        throw new exceptions_1.BaseException('There can be only one platform. Destroy the previous one to create a new one.');
+        throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
     }
     _platform = injector.get(PlatformRef);
     var inits = injector.get(application_tokens_1.PLATFORM_INITIALIZER, null);
@@ -106,10 +106,10 @@ exports.createPlatformFactory = createPlatformFactory;
 function assertPlatform(requiredToken) {
     var platform = getPlatform();
     if (lang_1.isBlank(platform)) {
-        throw new exceptions_1.BaseException('No platform exists!');
+        throw new Error('No platform exists!');
     }
     if (lang_1.isPresent(platform) && lang_1.isBlank(platform.injector.get(requiredToken, null))) {
-        throw new exceptions_1.BaseException('A platform with a different configuration has been created. Please destroy it first.');
+        throw new Error('A platform with a different configuration has been created. Please destroy it first.');
     }
     return platform;
 }
@@ -171,7 +171,7 @@ var PlatformRef = (function () {
      * @experimental APIs related to application bootstrap are currently under review.
      */
     PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
-        throw exceptions_1.unimplemented();
+        throw errors_1.unimplemented();
     };
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
@@ -190,32 +190,32 @@ var PlatformRef = (function () {
      */
     PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
         if (compilerOptions === void 0) { compilerOptions = []; }
-        throw exceptions_1.unimplemented();
+        throw errors_1.unimplemented();
     };
     Object.defineProperty(PlatformRef.prototype, "injector", {
         /**
          * Retrieve the platform {@link Injector}, which is the parent injector for
          * every Angular application on the page and provides singleton providers.
          */
-        get: function () { throw exceptions_1.unimplemented(); },
+        get: function () { throw errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     ;
     Object.defineProperty(PlatformRef.prototype, "destroyed", {
-        get: function () { throw exceptions_1.unimplemented(); },
+        get: function () { throw errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
     return PlatformRef;
 }());
 exports.PlatformRef = PlatformRef;
-function _callAndReportToExceptionHandler(exceptionHandler, callback) {
+function _callAndReportToExceptionHandler(errorHandler, callback) {
     try {
         var result = callback();
         if (lang_1.isPromise(result)) {
             return result.catch(function (e) {
-                exceptionHandler.call(e);
+                errorHandler.handleError(e);
                 // rethrow as the exception handler might not do it
                 throw e;
             });
@@ -225,7 +225,7 @@ function _callAndReportToExceptionHandler(exceptionHandler, callback) {
         }
     }
     catch (e) {
-        exceptionHandler.call(e);
+        errorHandler.handleError(e);
         // rethrow as the exception handler might not do it
         throw e;
     }
@@ -252,7 +252,7 @@ var PlatformRef_ = (function (_super) {
     });
     PlatformRef_.prototype.destroy = function () {
         if (this._destroyed) {
-            throw new exceptions_1.BaseException('The platform has already been destroyed!');
+            throw new Error('The platform has already been destroyed!');
         }
         collection_1.ListWrapper.clone(this._modules).forEach(function (app) { return app.destroy(); });
         this._destroyListeners.forEach(function (dispose) { return dispose(); });
@@ -274,12 +274,12 @@ var PlatformRef_ = (function (_super) {
         return ngZone.run(function () {
             var ngZoneInjector = di_1.ReflectiveInjector.resolveAndCreate([{ provide: ng_zone_1.NgZone, useValue: ngZone }], _this.injector);
             var moduleRef = moduleFactory.create(ngZoneInjector);
-            var exceptionHandler = moduleRef.injector.get(exceptions_1.ExceptionHandler, null);
+            var exceptionHandler = moduleRef.injector.get(error_handler_1.ErrorHandler, null);
             if (!exceptionHandler) {
                 throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return collection_1.ListWrapper.remove(_this._modules, moduleRef); });
-            ngZone.onError.subscribe({ next: function (error) { exceptionHandler.call(error, error ? error.stack : null); } });
+            ngZone.onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } });
             return _callAndReportToExceptionHandler(exceptionHandler, function () {
                 var initStatus = moduleRef.injector.get(application_init_1.ApplicationInitStatus);
                 return initStatus.donePromise.then(function () {
@@ -321,7 +321,7 @@ var PlatformRef_ = (function (_super) {
             moduleRef.instance.ngDoBootstrap(appRef);
         }
         else {
-            throw new exceptions_1.BaseException(("The module " + lang_1.stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
+            throw new Error(("The module " + lang_1.stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
                 "Please define one of these.");
         }
     };
@@ -351,7 +351,7 @@ var ApplicationRef = (function () {
          * Get a list of component types registered to this application.
          * This list is populated even before the component is created.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -360,7 +360,7 @@ var ApplicationRef = (function () {
         /**
          * Get a list of components registered to this application.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -399,7 +399,7 @@ var ApplicationRef_ = (function (_super) {
     ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
         var _this = this;
         if (!this._initStatus.done) {
-            throw new exceptions_1.BaseException('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
+            throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
         var componentFactory;
         if (componentOrFactory instanceof component_factory_1.ComponentFactory) {
@@ -442,7 +442,7 @@ var ApplicationRef_ = (function (_super) {
     };
     ApplicationRef_.prototype.tick = function () {
         if (this._runningTick) {
-            throw new exceptions_1.BaseException('ApplicationRef.tick is called recursively');
+            throw new Error('ApplicationRef.tick is called recursively');
         }
         var s = ApplicationRef_._tickScope();
         try {
@@ -482,7 +482,7 @@ var ApplicationRef_ = (function (_super) {
         { type: ng_zone_1.NgZone, },
         { type: console_1.Console, },
         { type: di_1.Injector, },
-        { type: exceptions_1.ExceptionHandler, },
+        { type: error_handler_1.ErrorHandler, },
         { type: component_factory_resolver_1.ComponentFactoryResolver, },
         { type: application_init_1.ApplicationInitStatus, },
         { type: testability_1.TestabilityRegistry, decorators: [{ type: di_1.Optional },] },

@@ -12,7 +12,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 var reflector_reader_1 = require('./reflector_reader');
 /**
@@ -63,7 +62,7 @@ var Reflector = (function (_super) {
     Reflector.prototype.listUnusedKeys = function () {
         var _this = this;
         if (this._usedKeys == null) {
-            throw new exceptions_1.BaseException('Usage tracking is disabled');
+            throw new Error('Usage tracking is disabled');
         }
         var allTypes = collection_1.MapWrapper.keys(this._injectableInfo);
         return allTypes.filter(function (key) { return !collection_1.SetWrapper.has(_this._usedKeys, key); });

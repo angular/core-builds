@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var injector_1 = require('../di/injector');
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 var component_factory_resolver_1 = require('./component_factory_resolver');
 /**
@@ -30,7 +30,7 @@ var NgModuleRef = (function () {
         /**
          * The injector that contains all of the providers of the NgModule.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -39,7 +39,7 @@ var NgModuleRef = (function () {
          * The ComponentFactoryResolver to get hold of the ComponentFactories
          * declared in the `entryComponents` property of the module.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -47,7 +47,7 @@ var NgModuleRef = (function () {
         /**
          * The NgModule instance.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -109,7 +109,7 @@ var NgModuleInjector = (function (_super) {
     });
     NgModuleInjector.prototype.destroy = function () {
         if (this._destroyed) {
-            throw new exceptions_1.BaseException("The ng module " + lang_1.stringify(this.instance.constructor) + " has already been destroyed.");
+            throw new Error("The ng module " + lang_1.stringify(this.instance.constructor) + " has already been destroyed.");
         }
         this._destroyed = true;
         this.destroyInternal();

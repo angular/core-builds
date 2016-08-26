@@ -11,7 +11,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 var view_utils_1 = require('./view_utils');
 /**
@@ -29,7 +29,7 @@ var ComponentRef = (function () {
         /**
          * Location of the Host Element of this Component Instance.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -37,7 +37,7 @@ var ComponentRef = (function () {
         /**
          * The injector on which the component instance exists.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -45,7 +45,7 @@ var ComponentRef = (function () {
         /**
          * The instance of the Component.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -54,7 +54,7 @@ var ComponentRef = (function () {
         /**
          * The {@link ViewRef} of the Host View of this Component instance.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -63,7 +63,7 @@ var ComponentRef = (function () {
         /**
          * The {@link ChangeDetectorRef} of the Component instance.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });
@@ -71,7 +71,7 @@ var ComponentRef = (function () {
         /**
          * The component type.
          */
-        get: function () { return exceptions_1.unimplemented(); },
+        get: function () { return errors_1.unimplemented(); },
         enumerable: true,
         configurable: true
     });

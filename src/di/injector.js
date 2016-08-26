@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 "use strict";
-var exceptions_1 = require('../facade/exceptions');
+var errors_1 = require('../facade/errors');
 var lang_1 = require('../facade/lang');
 var _THROW_IF_NOT_FOUND = new Object();
 exports.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
@@ -16,7 +16,7 @@ var _NullInjector = (function () {
     _NullInjector.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
-            throw new exceptions_1.BaseException("No provider for " + lang_1.stringify(token) + "!");
+            throw new Error("No provider for " + lang_1.stringify(token) + "!");
         }
         return notFoundValue;
     };
@@ -52,7 +52,7 @@ var Injector = (function () {
      * expect(injector.get(Injector)).toBe(injector);
      * ```
      */
-    Injector.prototype.get = function (token, notFoundValue) { return exceptions_1.unimplemented(); };
+    Injector.prototype.get = function (token, notFoundValue) { return errors_1.unimplemented(); };
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new _NullInjector();
     return Injector;

@@ -7,7 +7,6 @@
  */
 "use strict";
 var collection_1 = require('../facade/collection');
-var exceptions_1 = require('../facade/exceptions');
 var lang_1 = require('../facade/lang');
 var element_ref_1 = require('./element_ref');
 var view_container_ref_1 = require('./view_container_ref');
@@ -65,7 +64,7 @@ var AppElement = (function () {
     AppElement.prototype.moveView = function (view, currentIndex) {
         var previousIndex = this.nestedViews.indexOf(view);
         if (view.type === view_type_1.ViewType.COMPONENT) {
-            throw new exceptions_1.BaseException("Component views can't be moved!");
+            throw new Error("Component views can't be moved!");
         }
         var nestedViews = this.nestedViews;
         if (nestedViews == null) {
@@ -89,7 +88,7 @@ var AppElement = (function () {
     };
     AppElement.prototype.attachView = function (view, viewIndex) {
         if (view.type === view_type_1.ViewType.COMPONENT) {
-            throw new exceptions_1.BaseException("Component views can't be moved!");
+            throw new Error("Component views can't be moved!");
         }
         var nestedViews = this.nestedViews;
         if (nestedViews == null) {
@@ -113,7 +112,7 @@ var AppElement = (function () {
     AppElement.prototype.detachView = function (viewIndex) {
         var view = collection_1.ListWrapper.removeAt(this.nestedViews, viewIndex);
         if (view.type === view_type_1.ViewType.COMPONENT) {
-            throw new exceptions_1.BaseException("Component views can't be moved!");
+            throw new Error("Component views can't be moved!");
         }
         view.detach();
         view.removeFromContentChildren(this);

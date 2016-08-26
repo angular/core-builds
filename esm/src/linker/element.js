@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ListWrapper } from '../facade/collection';
-import { BaseException } from '../facade/exceptions';
 import { isPresent } from '../facade/lang';
 import { ElementRef } from './element_ref';
 import { ViewContainerRef_ } from './view_container_ref';
@@ -48,7 +47,7 @@ export class AppElement {
     moveView(view, currentIndex) {
         var previousIndex = this.nestedViews.indexOf(view);
         if (view.type === ViewType.COMPONENT) {
-            throw new BaseException(`Component views can't be moved!`);
+            throw new Error(`Component views can't be moved!`);
         }
         var nestedViews = this.nestedViews;
         if (nestedViews == null) {
@@ -72,7 +71,7 @@ export class AppElement {
     }
     attachView(view, viewIndex) {
         if (view.type === ViewType.COMPONENT) {
-            throw new BaseException(`Component views can't be moved!`);
+            throw new Error(`Component views can't be moved!`);
         }
         var nestedViews = this.nestedViews;
         if (nestedViews == null) {
@@ -96,7 +95,7 @@ export class AppElement {
     detachView(viewIndex) {
         var view = ListWrapper.removeAt(this.nestedViews, viewIndex);
         if (view.type === ViewType.COMPONENT) {
-            throw new BaseException(`Component views can't be moved!`);
+            throw new Error(`Component views can't be moved!`);
         }
         view.detach();
         view.removeFromContentChildren(this);

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Compiler } from '../index';
-import { unimplemented } from '../src/facade/exceptions';
+import { unimplemented } from '../src/facade/errors';
 /**
  * Special interface to the compiler only used by testing
  *

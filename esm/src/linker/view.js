@@ -15,7 +15,7 @@ import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { DebugContext } from './debug_context';
 import { AppElement } from './element';
 import { ElementInjector } from './element_injector';
-import { ExpressionChangedAfterItHasBeenCheckedException, ViewDestroyedException, ViewWrappedException } from './exceptions';
+import { ExpressionChangedAfterItHasBeenCheckedError, ViewDestroyedError, ViewWrappedError } from './errors';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
 import { ensureSlotCount, flattenNestedViewRenderNodes } from './view_utils';
@@ -297,7 +297,7 @@ export class AppView {
         }
     }
     eventHandler(cb) { return cb; }
-    throwDestroyedError(details) { throw new ViewDestroyedException(details); }
+    throwDestroyedError(details) { throw new ViewDestroyedError(details); }
 }
 export class DebugAppView extends AppView {
     constructor(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode, staticNodeDebugInfos) {
@@ -311,7 +311,7 @@ export class DebugAppView extends AppView {
             return super.create(context, givenProjectableNodes, rootSelectorOrNode);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     }
@@ -321,7 +321,7 @@ export class DebugAppView extends AppView {
             return super.injectorGet(token, nodeIndex, notFoundResult);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     }
@@ -331,7 +331,7 @@ export class DebugAppView extends AppView {
             super.detach();
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     }
@@ -341,7 +341,7 @@ export class DebugAppView extends AppView {
             super.destroyLocal();
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     }
@@ -351,7 +351,7 @@ export class DebugAppView extends AppView {
             super.detectChanges(throwOnChange);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     }
@@ -359,13 +359,13 @@ export class DebugAppView extends AppView {
     debug(nodeIndex, rowNum, colNum) {
         return this._currentDebugContext = new DebugContext(this, nodeIndex, rowNum, colNum);
     }
-    _rethrowWithContext(e, stack) {
-        if (!(e instanceof ViewWrappedException)) {
-            if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedException)) {
+    _rethrowWithContext(e) {
+        if (!(e instanceof ViewWrappedError)) {
+            if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedError)) {
                 this.cdMode = ChangeDetectorStatus.Errored;
             }
             if (isPresent(this._currentDebugContext)) {
-                throw new ViewWrappedException(e, stack, this._currentDebugContext);
+                throw new ViewWrappedError(e, this._currentDebugContext);
             }
         }
     }
@@ -377,7 +377,7 @@ export class DebugAppView extends AppView {
                 return superHandler(event);
             }
             catch (e) {
-                this._rethrowWithContext(e, e.stack);
+                this._rethrowWithContext(e);
                 throw e;
             }
         };

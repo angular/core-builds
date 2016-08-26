@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ListWrapper } from '../facade/collection';
-import { unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 /**

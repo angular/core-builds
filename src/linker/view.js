@@ -21,7 +21,7 @@ var profile_1 = require('../profile/profile');
 var debug_context_1 = require('./debug_context');
 var element_1 = require('./element');
 var element_injector_1 = require('./element_injector');
-var exceptions_1 = require('./exceptions');
+var errors_1 = require('./errors');
 var view_ref_1 = require('./view_ref');
 var view_type_1 = require('./view_type');
 var view_utils_1 = require('./view_utils');
@@ -327,7 +327,7 @@ var AppView = (function () {
         }
     };
     AppView.prototype.eventHandler = function (cb) { return cb; };
-    AppView.prototype.throwDestroyedError = function (details) { throw new exceptions_1.ViewDestroyedException(details); };
+    AppView.prototype.throwDestroyedError = function (details) { throw new errors_1.ViewDestroyedError(details); };
     return AppView;
 }());
 exports.AppView = AppView;
@@ -344,7 +344,7 @@ var DebugAppView = (function (_super) {
             return _super.prototype.create.call(this, context, givenProjectableNodes, rootSelectorOrNode);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     };
@@ -354,7 +354,7 @@ var DebugAppView = (function (_super) {
             return _super.prototype.injectorGet.call(this, token, nodeIndex, notFoundResult);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     };
@@ -364,7 +364,7 @@ var DebugAppView = (function (_super) {
             _super.prototype.detach.call(this);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     };
@@ -374,7 +374,7 @@ var DebugAppView = (function (_super) {
             _super.prototype.destroyLocal.call(this);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     };
@@ -384,7 +384,7 @@ var DebugAppView = (function (_super) {
             _super.prototype.detectChanges.call(this, throwOnChange);
         }
         catch (e) {
-            this._rethrowWithContext(e, e.stack);
+            this._rethrowWithContext(e);
             throw e;
         }
     };
@@ -392,13 +392,13 @@ var DebugAppView = (function (_super) {
     DebugAppView.prototype.debug = function (nodeIndex, rowNum, colNum) {
         return this._currentDebugContext = new debug_context_1.DebugContext(this, nodeIndex, rowNum, colNum);
     };
-    DebugAppView.prototype._rethrowWithContext = function (e, stack) {
-        if (!(e instanceof exceptions_1.ViewWrappedException)) {
-            if (!(e instanceof exceptions_1.ExpressionChangedAfterItHasBeenCheckedException)) {
+    DebugAppView.prototype._rethrowWithContext = function (e) {
+        if (!(e instanceof errors_1.ViewWrappedError)) {
+            if (!(e instanceof errors_1.ExpressionChangedAfterItHasBeenCheckedError)) {
                 this.cdMode = change_detection_1.ChangeDetectorStatus.Errored;
             }
             if (lang_1.isPresent(this._currentDebugContext)) {
-                throw new exceptions_1.ViewWrappedException(e, stack, this._currentDebugContext);
+                throw new errors_1.ViewWrappedError(e, this._currentDebugContext);
             }
         }
     };
@@ -411,7 +411,7 @@ var DebugAppView = (function (_super) {
                 return superHandler(event);
             }
             catch (e) {
-                _this._rethrowWithContext(e, e.stack);
+                _this._rethrowWithContext(e);
                 throw e;
             }
         };

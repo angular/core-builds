@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector, THROW_IF_NOT_FOUND } from '../di/injector';
-import { BaseException, unimplemented } from '../facade/exceptions';
+import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
 /**
@@ -71,7 +71,7 @@ export class NgModuleInjector extends CodegenComponentFactoryResolver {
     get componentFactoryResolver() { return this; }
     destroy() {
         if (this._destroyed) {
-            throw new BaseException(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
+            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
         }
         this._destroyed = true;
         this.destroyInternal();

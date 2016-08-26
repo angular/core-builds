@@ -5,12 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseException } from '../facade/exceptions';
+import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
  * @stable
  */
-export class NoComponentFactoryError extends BaseException {
+export class NoComponentFactoryError extends BaseError {
     constructor(component) {
         super(`No component factory found for ${stringify(component)}`);
         this.component = component;
