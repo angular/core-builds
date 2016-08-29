@@ -154,6 +154,8 @@ var ReflectionCapabilities = (function () {
         // Runtime type
         return "./" + lang_1.stringify(type);
     };
+    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { return runtime; };
+    ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
     return ReflectionCapabilities;
 }());
 exports.ReflectionCapabilities = ReflectionCapabilities;

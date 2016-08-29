@@ -2352,6 +2352,8 @@ var __extends = (this && this.__extends) || function (d, b) {
             // Runtime type
             return "./" + stringify(type);
         };
+        ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { return runtime; };
+        ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
         return ReflectionCapabilities;
     }());
     function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
@@ -2519,6 +2521,12 @@ var __extends = (this && this.__extends) || function (d, b) {
         /** @internal */
         Reflector.prototype._containsReflectionInfo = function (typeOrFunc) { return this._injectableInfo.has(typeOrFunc); };
         Reflector.prototype.importUri = function (type) { return this.reflectionCapabilities.importUri(type); };
+        Reflector.prototype.resolveIdentifier = function (name, moduleUrl, runtime) {
+            return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+        };
+        Reflector.prototype.resolveEnum = function (identifier, name) {
+            return this.reflectionCapabilities.resolveEnum(identifier, name);
+        };
         return Reflector;
     }(ReflectorReader));
     function _mergeMaps(target, config) {

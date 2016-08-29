@@ -164,6 +164,12 @@ var Reflector = (function (_super) {
     /** @internal */
     Reflector.prototype._containsReflectionInfo = function (typeOrFunc) { return this._injectableInfo.has(typeOrFunc); };
     Reflector.prototype.importUri = function (type) { return this.reflectionCapabilities.importUri(type); };
+    Reflector.prototype.resolveIdentifier = function (name, moduleUrl, runtime) {
+        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+    };
+    Reflector.prototype.resolveEnum = function (identifier, name) {
+        return this.reflectionCapabilities.resolveEnum(identifier, name);
+    };
     return Reflector;
 }(reflector_reader_1.ReflectorReader));
 exports.Reflector = Reflector;

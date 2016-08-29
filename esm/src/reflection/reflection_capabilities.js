@@ -148,6 +148,8 @@ export class ReflectionCapabilities {
         // Runtime type
         return `./${stringify(type)}`;
     }
+    resolveIdentifier(name, moduleUrl, runtime) { return runtime; }
+    resolveEnum(enumIdentifier, name) { return enumIdentifier[name]; }
 }
 function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
     if (!decoratorInvocations) {

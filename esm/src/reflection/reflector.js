@@ -154,6 +154,12 @@ export class Reflector extends ReflectorReader {
     /** @internal */
     _containsReflectionInfo(typeOrFunc) { return this._injectableInfo.has(typeOrFunc); }
     importUri(type) { return this.reflectionCapabilities.importUri(type); }
+    resolveIdentifier(name, moduleUrl, runtime) {
+        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+    }
+    resolveEnum(identifier, name) {
+        return this.reflectionCapabilities.resolveEnum(identifier, name);
+    }
 }
 function _mergeMaps(target, config) {
     StringMapWrapper.forEach(config, (v, k) => target.set(k, v));
