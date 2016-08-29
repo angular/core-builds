@@ -20,7 +20,7 @@ export * from './src/zone';
 export * from './src/render';
 export * from './src/linker';
 export { DebugElement, DebugNode, asNativeElements, getDebugNode } from './src/debug/debug_node';
-export * from './src/testability/testability';
+export { Testability, TestabilityRegistry, setTestabilityGetter } from './src/testability/testability';
 export * from './src/change_detection';
 export * from './src/platform_core_providers';
 export { TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID } from './src/i18n/tokens';
