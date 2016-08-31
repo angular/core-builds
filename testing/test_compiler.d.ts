@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Compiler, CompilerOptions, ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, PipeMetadataType } from '../index';
-import { Type } from '../src/type';
+import { Compiler, CompilerOptions, ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, PipeMetadataType, Type } from '@angular/core';
 import { MetadataOverride } from './metadata_override';
 /**
  * Special interface to the compiler only used by testing

@@ -5,14 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var change_detection_util_1 = require('../change_detection/change_detection_util');
-var errors_1 = require('../facade/errors');
+import { UNINITIALIZED } from '../change_detection/change_detection_util';
+import { BaseError, WrappedError } from '../facade/errors';
 /**
  * An error thrown if application changes model breaking the top-down data flow.
  *
@@ -47,11 +46,11 @@ var errors_1 = require('../facade/errors');
  * ```
  * @stable
  */
-var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
+export var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
     __extends(ExpressionChangedAfterItHasBeenCheckedError, _super);
     function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
         var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (oldValue === change_detection_util_1.UNINITIALIZED) {
+        if (oldValue === UNINITIALIZED) {
             msg +=
                 " It seems like the view has been created after its parent and its children have been dirty checked." +
                     " Has it been created in a change detection hook ?";
@@ -59,8 +58,7 @@ var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
         _super.call(this, msg);
     }
     return ExpressionChangedAfterItHasBeenCheckedError;
-}(errors_1.BaseError));
-exports.ExpressionChangedAfterItHasBeenCheckedError = ExpressionChangedAfterItHasBeenCheckedError;
+}(BaseError));
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
  *
@@ -68,15 +66,14 @@ exports.ExpressionChangedAfterItHasBeenCheckedError = ExpressionChangedAfterItHa
  * be useful for debugging.
  * @stable
  */
-var ViewWrappedError = (function (_super) {
+export var ViewWrappedError = (function (_super) {
     __extends(ViewWrappedError, _super);
     function ViewWrappedError(originalError, context) {
         _super.call(this, "Error in " + context.source, originalError);
         this.context = context;
     }
     return ViewWrappedError;
-}(errors_1.WrappedError));
-exports.ViewWrappedError = ViewWrappedError;
+}(WrappedError));
 /**
  * Thrown when a destroyed view is used.
  *
@@ -85,12 +82,11 @@ exports.ViewWrappedError = ViewWrappedError;
  * This is an internal Angular error.
  * @stable
  */
-var ViewDestroyedError = (function (_super) {
+export var ViewDestroyedError = (function (_super) {
     __extends(ViewDestroyedError, _super);
     function ViewDestroyedError(details) {
         _super.call(this, "Attempt to use a destroyed view: " + details);
     }
     return ViewDestroyedError;
-}(errors_1.BaseError));
-exports.ViewDestroyedError = ViewDestroyedError;
+}(BaseError));
 //# sourceMappingURL=errors.js.map

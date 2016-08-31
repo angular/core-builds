@@ -3,17 +3,12 @@
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Subject'), require('rxjs/Observable')) :
-        typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
-            (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}), global.Rx, global.Rx));
-}(this, function (exports, rxjs_Subject, rxjs_Observable) {
-    'use strict';
+    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
+    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx));
+}(this, function (exports,rxjs_Subject,rxjs_Observable) { 'use strict';
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -242,6 +237,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function isPrimitive(obj) {
         return !isJsObject(obj);
     }
+
     /**
      * Allows to refer to references which are not yet defined.
      *
@@ -280,6 +276,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             return type;
         }
     }
+
     /**
      * A parameter metadata that specifies a dependency.
      *
@@ -533,6 +530,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         HostMetadata.prototype.toString = function () { return "@Host()"; };
         return HostMetadata;
     }());
+
     var _nextClassId = 0;
     function extractAnnotation(annotation) {
         if (isFunction(annotation) && annotation.hasOwnProperty('annotation')) {
@@ -776,6 +774,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         PropDecoratorFactory.annotationCls = annotationCls;
         return PropDecoratorFactory;
     }
+
     /**
      * Factory for creating {@link InjectMetadata}.
      * @stable
@@ -812,21 +811,57 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var SkipSelf = makeParamDecorator(SkipSelfMetadata);
+
+    /**
+     * Creates a token that can be used in a DI Provider.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+     *
+     * ```typescript
+     * var t = new OpaqueToken("value");
+     *
+     * var injector = Injector.resolveAndCreate([
+     *   {provide: t, useValue: "bindingValue"}
+     * ]);
+     *
+     * expect(injector.get(t)).toEqual("bindingValue");
+     * ```
+     *
+     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
+     * caused by multiple providers using the same string as two different tokens.
+     *
+     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
+     * error messages.
+     * @stable
+     */
+    // so that metadata is gathered for this class
     var OpaqueToken = (function () {
         function OpaqueToken(_desc) {
             this._desc = _desc;
         }
         OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
+        OpaqueToken.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        OpaqueToken.ctorParameters = [
+            null,
+        ];
         return OpaqueToken;
     }());
-    /** @nocollapse */
-    OpaqueToken.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    OpaqueToken.ctorParameters = [
-        null,
-    ];
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * This token can be used to create a virtual provider that will populate the
      * `entryComponents` fields of components and ng modules based on its `useValue`.
@@ -1327,6 +1362,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ViewChildMetadata;
     }(ViewQueryMetadata));
+
     /**
      * Describes within the change detector which strategy will be used the next time change
      * detection is triggered.
@@ -1390,6 +1426,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return isBlank(changeDetectionStrategy) ||
             changeDetectionStrategy === exports.ChangeDetectionStrategy.Default;
     }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -1397,6 +1434,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var __extends$2 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     function unimplemented() {
         throw new Error('unimplemented');
     }
@@ -1404,7 +1446,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var BaseError = (function (_super) {
-        __extends(BaseError, _super);
+        __extends$2(BaseError, _super);
         function BaseError(message) {
             // Errors don't use current this, instead they create a new instance.
             // We have to do forward all of our api to the nativeInstance.
@@ -1435,7 +1477,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var WrappedError = (function (_super) {
-        __extends(WrappedError, _super);
+        __extends$2(WrappedError, _super);
         function WrappedError(message, error) {
             _super.call(this, message + " caused by: " + (error instanceof Error ? error.message : error));
             this.originalError = error;
@@ -1450,6 +1492,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return WrappedError;
     }(BaseError));
+
     var _THROW_IF_NOT_FOUND = new Object();
     var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     var _NullInjector = (function () {
@@ -1495,10 +1538,11 @@ var __extends = (this && this.__extends) || function (d, b) {
          * ```
          */
         Injector.prototype.get = function (token, notFoundValue) { return unimplemented(); };
+        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+        Injector.NULL = new _NullInjector();
         return Injector;
     }());
-    Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-    Injector.NULL = new _NullInjector();
+
     var Map$1 = global$1.Map;
     var Set = global$1.Set;
     // Safari and Internet Explorer do not support the iterable parameter to the
@@ -1851,6 +1895,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         SetWrapper.delete = function (m, k) { m.delete(k); };
         return SetWrapper;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$3 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     function findFirstClosedCycle(keys) {
         var res = [];
         for (var i = 0; i < keys.length; ++i) {
@@ -1875,7 +1932,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var AbstractProviderError = (function (_super) {
-        __extends(AbstractProviderError, _super);
+        __extends$3(AbstractProviderError, _super);
         function AbstractProviderError(injector, key, constructResolvingMessage) {
             _super.call(this, 'DI Error');
             this.keys = [key];
@@ -1911,7 +1968,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var NoProviderError = (function (_super) {
-        __extends(NoProviderError, _super);
+        __extends$3(NoProviderError, _super);
         function NoProviderError(injector, key) {
             _super.call(this, injector, key, function (keys) {
                 var first = stringify(ListWrapper.first(keys).token);
@@ -1938,7 +1995,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var CyclicDependencyError = (function (_super) {
-        __extends(CyclicDependencyError, _super);
+        __extends$3(CyclicDependencyError, _super);
         function CyclicDependencyError(injector, key) {
             _super.call(this, injector, key, function (keys) {
                 return "Cannot instantiate cyclic dependency!" + constructResolvingPath(keys);
@@ -1974,7 +2031,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var InstantiationError = (function (_super) {
-        __extends(InstantiationError, _super);
+        __extends$3(InstantiationError, _super);
         function InstantiationError(injector, originalException, originalStack, key) {
             _super.call(this, 'DI Error', originalException);
             this.keys = [key];
@@ -2016,7 +2073,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var InvalidProviderError = (function (_super) {
-        __extends(InvalidProviderError, _super);
+        __extends$3(InvalidProviderError, _super);
         function InvalidProviderError(provider) {
             _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
         }
@@ -2052,7 +2109,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var NoAnnotationError = (function (_super) {
-        __extends(NoAnnotationError, _super);
+        __extends$3(NoAnnotationError, _super);
         function NoAnnotationError(typeOrFunc, params) {
             _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
         }
@@ -2089,7 +2146,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var OutOfBoundsError = (function (_super) {
-        __extends(OutOfBoundsError, _super);
+        __extends$3(OutOfBoundsError, _super);
         function OutOfBoundsError(index) {
             _super.call(this, "Index " + index + " is out-of-bounds.");
         }
@@ -2109,13 +2166,14 @@ var __extends = (this && this.__extends) || function (d, b) {
      * ```
      */
     var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
-        __extends(MixingMultiProvidersWithRegularProvidersError, _super);
+        __extends$3(MixingMultiProvidersWithRegularProvidersError, _super);
         function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
             _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
                 provider2.toString());
         }
         return MixingMultiProvidersWithRegularProvidersError;
     }(BaseError));
+
     /**
      * A unique object used for retrieving items from the {@link ReflectiveInjector}.
      *
@@ -2192,6 +2250,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return KeyRegistry;
     }());
     var _globalKeyRegistry = new KeyRegistry();
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -2208,6 +2267,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var Type = Function;
+
     var ReflectionCapabilities = (function () {
         function ReflectionCapabilities(reflect) {
             this._reflect = reflect || global$1.Reflect;
@@ -2262,7 +2322,9 @@ var __extends = (this && this.__extends) || function (d, b) {
             if (isPresent(typeOrFunc.ctorParameters)) {
                 var ctorParameters = typeOrFunc.ctorParameters;
                 var paramTypes_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && ctorParam.type; });
-                var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
+                var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) {
+                    return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
+                });
                 return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
             }
             // API for metadata created by invoking the decorators.
@@ -2369,6 +2431,7 @@ var __extends = (this && this.__extends) || function (d, b) {
             return annotation;
         });
     }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -2385,12 +2448,25 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ReflectorReader;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$4 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Provides access to reflection data about symbols. Used internally by Angular
      * to power dependency injection and compilation.
      */
     var Reflector = (function (_super) {
-        __extends(Reflector, _super);
+        __extends$4(Reflector, _super);
         function Reflector(reflectionCapabilities) {
             _super.call(this);
             /** @internal */
@@ -2532,11 +2608,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _mergeMaps(target, config) {
         StringMapWrapper.forEach(config, function (v, k) { return target.set(k, v); });
     }
+
     /**
      * The {@link Reflector} used internally in Angular to access metadata
      * about symbols.
      */
     var reflector = new Reflector(new ReflectionCapabilities());
+
     /**
      * `Dependency` is used by the framework to extend DI.
      * This is internal to Angular and should not be used directly.
@@ -2752,6 +2830,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function _createDependency(token /** TODO #9100 */, optional /** TODO #9100 */, lowerBoundVisibility /** TODO #9100 */, upperBoundVisibility /** TODO #9100 */, depProps /** TODO #9100 */) {
         return new ReflectiveDependency(ReflectiveKey.get(token), optional, lowerBoundVisibility, upperBoundVisibility, depProps);
     }
+
     // avoid unused import when Type union types are erased
     // Threshold for the dynamic version
     var _MAX_CONSTRUCTION_COUNTER = 10;
@@ -3559,6 +3638,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return res;
     }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$1 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Directives allow you to attach behavior to elements in the DOM.
      *
@@ -3941,7 +4033,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var DirectiveMetadata = (function (_super) {
-        __extends(DirectiveMetadata, _super);
+        __extends$1(DirectiveMetadata, _super);
         function DirectiveMetadata(_a) {
             var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, providers = _b.providers, exportAs = _b.exportAs, queries = _b.queries;
             _super.call(this);
@@ -4114,7 +4206,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var ComponentMetadata = (function (_super) {
-        __extends(ComponentMetadata, _super);
+        __extends$1(ComponentMetadata, _super);
         function ComponentMetadata(_a) {
             var _b = _a === void 0 ? {} : _a, selector = _b.selector, inputs = _b.inputs, outputs = _b.outputs, host = _b.host, exportAs = _b.exportAs, moduleId = _b.moduleId, providers = _b.providers, viewProviders = _b.viewProviders, _c = _b.changeDetection, changeDetection = _c === void 0 ? exports.ChangeDetectionStrategy.Default : _c, queries = _b.queries, templateUrl = _b.templateUrl, template = _b.template, styleUrls = _b.styleUrls, styles = _b.styles, animations = _b.animations, encapsulation = _b.encapsulation, interpolation = _b.interpolation, entryComponents = _b.entryComponents;
             _super.call(this, {
@@ -4195,7 +4287,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var PipeMetadata = (function (_super) {
-        __extends(PipeMetadata, _super);
+        __extends$1(PipeMetadata, _super);
         function PipeMetadata(_a) {
             var name = _a.name, pure = _a.pure;
             _super.call(this);
@@ -4383,6 +4475,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return HostListenerMetadata;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$5 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Defines a schema that will allow any property on elements with a `-` in their name,
      * which is the common rule for custom elements.
@@ -4405,7 +4510,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var NgModuleMetadata = (function (_super) {
-        __extends(NgModuleMetadata, _super);
+        __extends$5(NgModuleMetadata, _super);
         function NgModuleMetadata(options) {
             if (options === void 0) { options = {}; }
             // We cannot use destructuring of the constructor argument because `exports` is a
@@ -4455,6 +4560,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return NgModuleMetadata;
     }(InjectableMetadata));
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -4950,6 +5056,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AfterViewChecked;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -5031,6 +5138,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ViewMetadata;
     }());
+
     // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
     /**
      * Declare reusable UI building blocks for an application.
@@ -5854,6 +5962,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @Annotation
      */
     var NgModule = makeDecorator(NgModuleMetadata);
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -5872,7 +5981,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      *
      * ```javascript
      *
-     * class MyExceptionHandler implements ErrorHandler {
+     * class MyErrorHandler implements ErrorHandler {
      *   call(error, stackTrace = null, reason = null) {
      *     // do something with the exception
      *   }
@@ -5953,11 +6062,17 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ErrorHandler;
     }());
+
     /**
      * A function that will be executed when an application is initialized.
      * @experimental
      */
     var APP_INITIALIZER = new OpaqueToken('Application Initializer');
+    /**
+     * A class that reflects the state of running {@link APP_INITIALIZER}s.
+     *
+     * @experimental
+     */
     var ApplicationInitStatus = (function () {
         function ApplicationInitStatus(appInits) {
             var _this = this;
@@ -5986,16 +6101,16 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
+        ApplicationInitStatus.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        ApplicationInitStatus.ctorParameters = [
+            { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+        ];
         return ApplicationInitStatus;
     }());
-    /** @nocollapse */
-    ApplicationInitStatus.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ApplicationInitStatus.ctorParameters = [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
-    ];
+
     /**
      * A DI Token representing a unique string id assigned to the application by Angular and used
      * primarily for prefixing application attributes and CSS styles when
@@ -6041,25 +6156,40 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
+
     var Console = (function () {
         function Console() {
         }
         Console.prototype.log = function (message) { print(message); };
         // Note: for reporting errors use `DOM.logError()` as it is platform specific
         Console.prototype.warn = function (message) { warn(message); };
+        Console.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        Console.ctorParameters = [];
         return Console;
     }());
-    /** @nocollapse */
-    Console.decorators = [
-        { type: Injectable },
-    ];
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$7 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Indicates that a component is still being loaded in a synchronous compile.
      *
      * @stable
      */
     var ComponentStillLoadingError = (function (_super) {
-        __extends(ComponentStillLoadingError, _super);
+        __extends$7(ComponentStillLoadingError, _super);
         function ComponentStillLoadingError(compType) {
             _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
             this.compType = compType;
@@ -6142,6 +6272,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return CompilerFactory;
     }());
+
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
         }
@@ -6852,6 +6983,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return previousIndex + addRemoveOffset + moveOffset;
     }
+
     var DefaultKeyValueDifferFactory = (function () {
         function DefaultKeyValueDifferFactory() {
         }
@@ -7147,6 +7279,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return KeyValueChangeRecord;
     }());
+
     /**
      * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
      * @stable
@@ -7211,6 +7344,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return IterableDiffers;
     }());
+
     /**
      * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
      * @stable
@@ -7275,6 +7409,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return KeyValueDiffers;
     }());
+
     var UNINITIALIZED = {
         toString: function () { return 'CD_INIT_VALUE'; }
     };
@@ -7347,6 +7482,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         SimpleChange.prototype.isFirstChange = function () { return this.previousValue === UNINITIALIZED; };
         return SimpleChange;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -7362,6 +7498,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ChangeDetectorRef;
     }());
+
     /**
      * Structural diffing for `Object`s and `Map`s.
      */
@@ -7372,6 +7509,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     var iterableDiff = [new DefaultIterableDifferFactory()];
     var defaultIterableDiffers = new IterableDiffers(iterableDiff);
     var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
     /**
      * @experimental
      */
@@ -7448,6 +7586,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return RootRenderer;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -7483,6 +7622,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return Sanitizer;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -7511,6 +7651,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return ElementRef;
     }());
+
     var trace;
     var events;
     function detectWTF() {
@@ -7538,6 +7679,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function endTimeRange(range) {
         trace.endTimeRange(range);
     }
+
     /**
      * True if WTF is enabled.
      */
@@ -7607,6 +7749,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
+
     /**
      * Represents a container where one or more Views can be attached.
      *
@@ -7761,6 +7904,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ViewContainerRef_;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -7780,6 +7924,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         // inside of a COMPONENT view
         ViewType[ViewType["EMBEDDED"] = 2] = "EMBEDDED";
     })(ViewType || (ViewType = {}));
+
     /**
      * An AppElement is created for elements that have a ViewContainerRef,
      * a nested component or a <template> element to keep data around
@@ -7889,6 +8034,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return AppElement;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$9 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * An error thrown if application changes model breaking the top-down data flow.
      *
@@ -7924,7 +8082,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
-        __extends(ExpressionChangedAfterItHasBeenCheckedError, _super);
+        __extends$9(ExpressionChangedAfterItHasBeenCheckedError, _super);
         function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
             var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
             if (oldValue === UNINITIALIZED) {
@@ -7944,7 +8102,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var ViewWrappedError = (function (_super) {
-        __extends(ViewWrappedError, _super);
+        __extends$9(ViewWrappedError, _super);
         function ViewWrappedError(originalError, context) {
             _super.call(this, "Error in " + context.source, originalError);
             this.context = context;
@@ -7960,12 +8118,13 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var ViewDestroyedError = (function (_super) {
-        __extends(ViewDestroyedError, _super);
+        __extends$9(ViewDestroyedError, _super);
         function ViewDestroyedError(details) {
             _super.call(this, "Attempt to use a destroyed view: " + details);
         }
         return ViewDestroyedError;
     }(BaseError));
+
     var ViewUtils = (function () {
         function ViewUtils(_renderer, _appId, sanitizer) {
             this._renderer = _renderer;
@@ -7984,18 +8143,17 @@ var __extends = (this && this.__extends) || function (d, b) {
         ViewUtils.prototype.renderComponent = function (renderComponentType) {
             return this._renderer.renderComponent(renderComponentType);
         };
+        ViewUtils.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        ViewUtils.ctorParameters = [
+            { type: RootRenderer, },
+            { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
+            { type: Sanitizer, },
+        ];
         return ViewUtils;
     }());
-    /** @nocollapse */
-    ViewUtils.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ViewUtils.ctorParameters = [
-        { type: RootRenderer, },
-        { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
-        { type: Sanitizer, },
-    ];
     function flattenNestedViewRenderNodes(nodes) {
         return _flattenNestedViewRenderNodes(nodes, []);
     }
@@ -8266,6 +8424,19 @@ var __extends = (this && this.__extends) || function (d, b) {
             return result;
         };
     }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$8 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Represents an instance of a Component created via a {@link ComponentFactory}.
      *
@@ -8330,7 +8501,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ComponentRef;
     }());
     var ComponentRef_ = (function (_super) {
-        __extends(ComponentRef_, _super);
+        __extends$8(ComponentRef_, _super);
         function ComponentRef_(_hostElement, _componentType) {
             _super.call(this);
             this._hostElement = _hostElement;
@@ -8408,11 +8579,24 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ComponentFactory;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$10 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * @stable
      */
     var NoComponentFactoryError = (function (_super) {
-        __extends(NoComponentFactoryError, _super);
+        __extends$10(NoComponentFactoryError, _super);
         function NoComponentFactoryError(component) {
             _super.call(this, "No component factory found for " + stringify(component));
             this.component = component;
@@ -8433,9 +8617,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ComponentFactoryResolver = (function () {
         function ComponentFactoryResolver() {
         }
+        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
         return ComponentFactoryResolver;
     }());
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     var CodegenComponentFactoryResolver = (function () {
         function CodegenComponentFactoryResolver(factories, _parent) {
             this._parent = _parent;
@@ -8454,6 +8638,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return CodegenComponentFactoryResolver;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$11 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Use by directives and components to emit custom Events.
      *
@@ -8502,7 +8699,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @stable
      */
     var EventEmitter = (function (_super) {
-        __extends(EventEmitter, _super);
+        __extends$11(EventEmitter, _super);
         /**
          * Creates an instance of [EventEmitter], which depending on [isAsync],
          * delivers events synchronously or asynchronously.
@@ -8547,6 +8744,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return EventEmitter;
     }(rxjs_Subject.Subject));
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -8625,6 +8823,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         ;
         return NgZoneImpl;
     }());
+
     /**
      * An injectable service for executing work inside or outside of the Angular zone.
      *
@@ -8867,6 +9066,13 @@ var __extends = (this && this.__extends) || function (d, b) {
         NgZone.prototype.runOutsideAngular = function (fn) { return this._zoneImpl.runOuter(fn); };
         return NgZone;
     }());
+
+    /**
+     * The Testability service provides testing hooks that can be accessed from
+     * the browser and by services such as Protractor. Each bootstrapped Angular
+     * application on the page will have an instance of Testability.
+     * @experimental
+     */
     var Testability = (function () {
         function Testability(_ngZone) {
             this._ngZone = _ngZone;
@@ -8952,16 +9158,19 @@ var __extends = (this && this.__extends) || function (d, b) {
             // TODO(juliemr): implement.
             return [];
         };
+        Testability.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        Testability.ctorParameters = [
+            { type: NgZone, },
+        ];
         return Testability;
     }());
-    /** @nocollapse */
-    Testability.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    Testability.ctorParameters = [
-        { type: NgZone, },
-    ];
+    /**
+     * A global registry of {@link Testability} instances for specific elements.
+     * @experimental
+     */
     var TestabilityRegistry = (function () {
         function TestabilityRegistry() {
             /** @internal */
@@ -8978,14 +9187,13 @@ var __extends = (this && this.__extends) || function (d, b) {
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
+        TestabilityRegistry.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        TestabilityRegistry.ctorParameters = [];
         return TestabilityRegistry;
     }());
-    /** @nocollapse */
-    TestabilityRegistry.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    TestabilityRegistry.ctorParameters = [];
     var _NoopGetTestability = (function () {
         function _NoopGetTestability() {
         }
@@ -9003,6 +9211,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         _testabilityGetter = getter;
     }
     var _testabilityGetter = new _NoopGetTestability();
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$6 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     var _devMode = true;
     var _runModeLocked = false;
     var _platform;
@@ -9180,7 +9401,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return PlatformRef;
     }());
-    function _callAndReportToExceptionHandler(errorHandler, callback) {
+    function _callAndReportToErrorHandler(errorHandler, callback) {
         try {
             var result = callback();
             if (isPromise(result)) {
@@ -9201,7 +9422,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
     }
     var PlatformRef_ = (function (_super) {
-        __extends(PlatformRef_, _super);
+        __extends$6(PlatformRef_, _super);
         function PlatformRef_(_injector) {
             _super.call(this);
             this._injector = _injector;
@@ -9246,11 +9467,11 @@ var __extends = (this && this.__extends) || function (d, b) {
                 var moduleRef = moduleFactory.create(ngZoneInjector);
                 var exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
                 if (!exceptionHandler) {
-                    throw new Error('No ExceptionHandler. Is platform module (BrowserModule) included?');
+                    throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
                 }
                 moduleRef.onDestroy(function () { return ListWrapper.remove(_this._modules, moduleRef); });
                 ngZone.onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } });
-                return _callAndReportToExceptionHandler(exceptionHandler, function () {
+                return _callAndReportToErrorHandler(exceptionHandler, function () {
                     var initStatus = moduleRef.injector.get(ApplicationInitStatus);
                     return initStatus.donePromise.then(function () {
                         _this._moduleDoBootstrap(moduleRef);
@@ -9295,16 +9516,15 @@ var __extends = (this && this.__extends) || function (d, b) {
                     "Please define one of these.");
             }
         };
+        PlatformRef_.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        PlatformRef_.ctorParameters = [
+            { type: Injector, },
+        ];
         return PlatformRef_;
     }(PlatformRef));
-    /** @nocollapse */
-    PlatformRef_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    PlatformRef_.ctorParameters = [
-        { type: Injector, },
-    ];
     /**
      * A reference to an Angular application running on a page.
      *
@@ -9337,7 +9557,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return ApplicationRef;
     }());
     var ApplicationRef_ = (function (_super) {
-        __extends(ApplicationRef_, _super);
+        __extends$6(ApplicationRef_, _super);
         function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
             var _this = this;
             _super.call(this);
@@ -9439,25 +9659,37 @@ var __extends = (this && this.__extends) || function (d, b) {
             enumerable: true,
             configurable: true
         });
+        /** @internal */
+        ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+        ApplicationRef_.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        ApplicationRef_.ctorParameters = [
+            { type: NgZone, },
+            { type: Console, },
+            { type: Injector, },
+            { type: ErrorHandler, },
+            { type: ComponentFactoryResolver, },
+            { type: ApplicationInitStatus, },
+            { type: TestabilityRegistry, decorators: [{ type: Optional },] },
+            { type: Testability, decorators: [{ type: Optional },] },
+        ];
         return ApplicationRef_;
     }(ApplicationRef));
-    /** @internal */
-    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    /** @nocollapse */
-    ApplicationRef_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ApplicationRef_.ctorParameters = [
-        { type: NgZone, },
-        { type: Console, },
-        { type: Injector, },
-        { type: ErrorHandler, },
-        { type: ComponentFactoryResolver, },
-        { type: ApplicationInitStatus, },
-        { type: TestabilityRegistry, decorators: [{ type: Optional },] },
-        { type: Testability, decorators: [{ type: Optional },] },
-    ];
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$12 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
      *
@@ -9521,7 +9753,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     }());
     var _UNDEFINED = new Object();
     var NgModuleInjector = (function (_super) {
-        __extends(NgModuleInjector, _super);
+        __extends$12(NgModuleInjector, _super);
         function NgModuleInjector(parent, factories, bootstrapFactories) {
             _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
             this.parent = parent;
@@ -9559,6 +9791,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
         return NgModuleInjector;
     }(CodegenComponentFactoryResolver));
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -9575,6 +9808,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return NgModuleFactoryLoader;
     }());
+
     /**
      * An unmodifiable list of items that Angular keeps up to date when the state
      * of the application changes.
@@ -9673,6 +9907,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return QueryList;
     }());
+
     var _SEPARATOR = '#';
     var FACTORY_CLASS_SUFFIX = 'NgFactory';
     /**
@@ -9690,6 +9925,10 @@ var __extends = (this && this.__extends) || function (d, b) {
         factoryPathPrefix: '',
         factoryPathSuffix: '.ngfactory',
     };
+    /**
+     * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
+     * @experimental
+     */
     var SystemJsNgModuleLoader = (function () {
         function SystemJsNgModuleLoader(_compiler, config) {
             this._compiler = _compiler;
@@ -9723,23 +9962,23 @@ var __extends = (this && this.__extends) || function (d, b) {
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
+        SystemJsNgModuleLoader.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        SystemJsNgModuleLoader.ctorParameters = [
+            { type: Compiler, },
+            { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+        ];
         return SystemJsNgModuleLoader;
     }());
-    /** @nocollapse */
-    SystemJsNgModuleLoader.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    SystemJsNgModuleLoader.ctorParameters = [
-        { type: Compiler, },
-        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
-    ];
     function checkNotEmpty(value, modulePath, exportName) {
         if (!value) {
             throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
         }
         return value;
     }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -9747,6 +9986,11 @@ var __extends = (this && this.__extends) || function (d, b) {
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var __extends$13 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * Represents an Embedded Template that can be used to instantiate Embedded Views.
      *
@@ -9783,7 +10027,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return TemplateRef;
     }());
     var TemplateRef_ = (function (_super) {
-        __extends(TemplateRef_, _super);
+        __extends$13(TemplateRef_, _super);
         function TemplateRef_(_appElement, _viewFactory) {
             _super.call(this);
             this._appElement = _appElement;
@@ -9801,6 +10045,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return TemplateRef_;
     }(TemplateRef));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$14 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * @stable
      */
@@ -9869,7 +10126,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var EmbeddedViewRef = (function (_super) {
-        __extends(EmbeddedViewRef, _super);
+        __extends$14(EmbeddedViewRef, _super);
         function EmbeddedViewRef() {
             _super.apply(this, arguments);
         }
@@ -9924,6 +10181,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         ViewRef_.prototype.destroy = function () { this._view.destroy(); };
         return ViewRef_;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$15 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     var EventListener = (function () {
         function EventListener(name, callback) {
             this.name = name;
@@ -9989,7 +10259,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental All debugging apis are currently experimental.
      */
     var DebugElement = (function (_super) {
-        __extends(DebugElement, _super);
+        __extends$15(DebugElement, _super);
         function DebugElement(nativeNode, parent, _debugInfo) {
             _super.call(this, nativeNode, parent, _debugInfo);
             this.properties = {};
@@ -10106,6 +10376,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function removeDebugNodeFromIndex(node) {
         _nativeNodeToDebugNode.delete(node.nativeNode);
     }
+
     function _reflector() {
         return reflector;
     }
@@ -10120,6 +10391,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental
      */
     var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+
     /**
      * @experimental i18n support is experimental.
      */
@@ -10132,33 +10404,42 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental i18n support is experimental.
      */
     var TRANSLATIONS_FORMAT = new OpaqueToken('TranslationsFormat');
+
     function _iterableDiffersFactory() {
         return defaultIterableDiffers;
     }
     function _keyValueDiffersFactory() {
         return defaultKeyValueDiffers;
     }
+    /**
+     * This module includes the providers of @angular/core that are needed
+     * to bootstrap components via `ApplicationRef`.
+     *
+     * @experimental
+     */
     var ApplicationModule = (function () {
         function ApplicationModule() {
         }
+        ApplicationModule.decorators = [
+            { type: NgModule, args: [{
+                        providers: [
+                            ApplicationRef_,
+                            { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                            ApplicationInitStatus,
+                            Compiler,
+                            APP_ID_RANDOM_PROVIDER,
+                            ViewUtils,
+                            { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                            { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                            { provide: LOCALE_ID, useValue: 'en-US' },
+                        ]
+                    },] },
+        ];
+        /** @nocollapse */
+        ApplicationModule.ctorParameters = [];
         return ApplicationModule;
     }());
-    /** @nocollapse */
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{
-                    providers: [
-                        ApplicationRef_,
-                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                        ApplicationInitStatus,
-                        Compiler,
-                        APP_ID_RANDOM_PROVIDER,
-                        ViewUtils,
-                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        { provide: LOCALE_ID, useValue: 'en-US' },
-                    ]
-                },] },
-    ];
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -10170,7 +10451,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     var ANY_STATE = '*';
     var DEFAULT_STATE = '*';
     var EMPTY_STATE = 'void';
+
     var Math$1 = global$1.Math;
+
     var AnimationGroupPlayer = (function () {
         function AnimationGroupPlayer(_players) {
             var _this = this;
@@ -10245,6 +10528,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return AnimationGroupPlayer;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -10259,6 +10543,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationKeyframe;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -10274,6 +10559,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationOutput;
     }());
+
     /**
      * @experimental Animation support is experimental.
      */
@@ -10322,6 +10608,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
         return NoOpAnimationPlayer;
     }());
+
     var AnimationSequencePlayer = (function () {
         function AnimationSequencePlayer(_players) {
             var _this = this;
@@ -10401,6 +10688,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
         return AnimationSequencePlayer;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$16 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      * @experimental Animation support is experimental.
      */
@@ -10435,7 +10735,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
-        __extends(AnimationStateDeclarationMetadata, _super);
+        __extends$16(AnimationStateDeclarationMetadata, _super);
         function AnimationStateDeclarationMetadata(stateNameExpr, styles) {
             _super.call(this);
             this.stateNameExpr = stateNameExpr;
@@ -10451,7 +10751,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationStateTransitionMetadata = (function (_super) {
-        __extends(AnimationStateTransitionMetadata, _super);
+        __extends$16(AnimationStateTransitionMetadata, _super);
         function AnimationStateTransitionMetadata(stateChangeExpr, steps) {
             _super.call(this);
             this.stateChangeExpr = stateChangeExpr;
@@ -10475,7 +10775,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
-        __extends(AnimationKeyframesSequenceMetadata, _super);
+        __extends$16(AnimationKeyframesSequenceMetadata, _super);
         function AnimationKeyframesSequenceMetadata(steps) {
             _super.call(this);
             this.steps = steps;
@@ -10490,7 +10790,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationStyleMetadata = (function (_super) {
-        __extends(AnimationStyleMetadata, _super);
+        __extends$16(AnimationStyleMetadata, _super);
         function AnimationStyleMetadata(styles, offset) {
             if (offset === void 0) { offset = null; }
             _super.call(this);
@@ -10507,7 +10807,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationAnimateMetadata = (function (_super) {
-        __extends(AnimationAnimateMetadata, _super);
+        __extends$16(AnimationAnimateMetadata, _super);
         function AnimationAnimateMetadata(timings, styles) {
             _super.call(this);
             this.timings = timings;
@@ -10519,7 +10819,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationWithStepsMetadata = (function (_super) {
-        __extends(AnimationWithStepsMetadata, _super);
+        __extends$16(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
             _super.call(this);
         }
@@ -10538,7 +10838,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationSequenceMetadata = (function (_super) {
-        __extends(AnimationSequenceMetadata, _super);
+        __extends$16(AnimationSequenceMetadata, _super);
         function AnimationSequenceMetadata(_steps) {
             _super.call(this);
             this._steps = _steps;
@@ -10558,7 +10858,7 @@ var __extends = (this && this.__extends) || function (d, b) {
      * @experimental Animation support is experimental.
      */
     var AnimationGroupMetadata = (function (_super) {
-        __extends(AnimationGroupMetadata, _super);
+        __extends$16(AnimationGroupMetadata, _super);
         function AnimationGroupMetadata(_steps) {
             _super.call(this);
             this._steps = _steps;
@@ -11044,6 +11344,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function trigger(name, animation) {
         return new AnimationEntryMetadata(name, animation);
     }
+
     function prepareFinalAnimationStyles(previousStyles, newStyles, nullValue) {
         if (nullValue === void 0) { nullValue = null; }
         var finalStyles = {};
@@ -11131,6 +11432,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return finalStyles;
     }
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -11144,6 +11446,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationStyles;
     }());
+
     var DebugDomRootRenderer = (function () {
         function DebugDomRootRenderer(_delegate) {
             this._delegate = _delegate;
@@ -11266,6 +11569,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return DebugDomRenderer;
     }());
+
     var StaticNodeDebugInfo = (function () {
         function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
             this.providerTokens = providerTokens;
@@ -11375,6 +11679,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         });
         return DebugContext;
     }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -11422,6 +11727,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return AnimationTransitionEvent;
     }());
+
     var ViewAnimationMap = (function () {
         function ViewAnimationMap() {
             this._map = new Map$1();
@@ -11470,9 +11776,22 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ViewAnimationMap;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$18 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     var _UNDEFINED$1 = new Object();
     var ElementInjector = (function (_super) {
-        __extends(ElementInjector, _super);
+        __extends$18(ElementInjector, _super);
         function ElementInjector(_view, _nodeIndex) {
             _super.call(this);
             this._view = _view;
@@ -11491,6 +11810,19 @@ var __extends = (this && this.__extends) || function (d, b) {
         };
         return ElementInjector;
     }(Injector));
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$17 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     var _scope_check = wtfCreateScope("AppView#check(ascii id)");
     /**
      * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -11797,7 +12129,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         return AppView;
     }());
     var DebugAppView = (function (_super) {
-        __extends(DebugAppView, _super);
+        __extends$17(DebugAppView, _super);
         function DebugAppView(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode, staticNodeDebugInfos) {
             _super.call(this, clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode);
             this.staticNodeDebugInfos = staticNodeDebugInfos;
@@ -11910,17 +12242,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         }
         return _AnimationOutputWithHandler;
     }());
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * This is here because DART requires it. It is noop in JS.
-     */
-    function wtfInit() { }
+
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorStatus: ChangeDetectorStatus,
@@ -11949,7 +12271,6 @@ var __extends = (this && this.__extends) || function (d, b) {
         ValueUnwrapper: ValueUnwrapper,
         RenderDebugInfo: RenderDebugInfo,
         TemplateRef_: TemplateRef_,
-        wtfInit: wtfInit,
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
@@ -11988,6 +12309,7 @@ var __extends = (this && this.__extends) || function (d, b) {
         FILL_STYLE_FLAG: FILL_STYLE_FLAG,
         ComponentStillLoadingError: ComponentStillLoadingError
     };
+
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -12135,4 +12457,5 @@ var __extends = (this && this.__extends) || function (d, b) {
     exports.keyframes = keyframes;
     exports.transition = transition;
     exports.trigger = trigger;
+
 }));

@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 /**
  * An instance of this class is returned as an event parameter when an animation
  * callback is captured for an animation either during the start or done phase.
@@ -37,7 +36,7 @@
  *
  * @experimental Animation support is experimental.
  */
-var AnimationTransitionEvent = (function () {
+export var AnimationTransitionEvent = (function () {
     function AnimationTransitionEvent(_a) {
         var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime;
         this.fromState = fromState;
@@ -46,5 +45,4 @@ var AnimationTransitionEvent = (function () {
     }
     return AnimationTransitionEvent;
 }());
-exports.AnimationTransitionEvent = AnimationTransitionEvent;
 //# sourceMappingURL=animation_transition_event.js.map

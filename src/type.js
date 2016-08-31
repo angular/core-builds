@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 /**
  * Runtime representation a type that a Component or other object is instances of.
  *
@@ -14,5 +13,5 @@
  *
  * @stable
  */
-exports.Type = Function;
+export var Type = Function;
 //# sourceMappingURL=type.js.map

@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
 var ProxyZoneSpec = Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
@@ -15,11 +14,10 @@ var _fakeAsyncTestZoneSpec = null;
  *
  * @experimental
  */
-function resetFakeAsyncZone() {
+export function resetFakeAsyncZone() {
     _fakeAsyncTestZoneSpec = null;
     ProxyZoneSpec.assertPresent().resetDelegate();
 }
-exports.resetFakeAsyncZone = resetFakeAsyncZone;
 var _inFakeAsyncCall = false;
 /**
  * Wraps a function to be executed in the fakeAsync zone:
@@ -39,7 +37,7 @@ var _inFakeAsyncCall = false;
  *
  * @experimental
  */
-function fakeAsync(fn) {
+export function fakeAsync(fn) {
     return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -78,10 +76,10 @@ function fakeAsync(fn) {
         }
         finally {
             _inFakeAsyncCall = false;
+            resetFakeAsyncZone();
         }
     };
 }
-exports.fakeAsync = fakeAsync;
 function _getFakeAsyncZoneSpec() {
     if (_fakeAsyncTestZoneSpec == null) {
         throw new Error('The code should be running in the fakeAsync zone to call this function');
@@ -100,29 +98,26 @@ function _getFakeAsyncZoneSpec() {
  *
  * @experimental
  */
-function tick(millis) {
+export function tick(millis) {
     if (millis === void 0) { millis = 0; }
     _getFakeAsyncZoneSpec().tick(millis);
 }
-exports.tick = tick;
 /**
  * Discard all remaining periodic tasks.
  *
  * @experimental
  */
-function discardPeriodicTasks() {
+export function discardPeriodicTasks() {
     var zoneSpec = _getFakeAsyncZoneSpec();
     var pendingTimers = zoneSpec.pendingPeriodicTimers;
     zoneSpec.pendingPeriodicTimers.length = 0;
 }
-exports.discardPeriodicTasks = discardPeriodicTasks;
 /**
  * Flush any pending microtasks.
  *
  * @experimental
  */
-function flushMicrotasks() {
+export function flushMicrotasks() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
 }
-exports.flushMicrotasks = flushMicrotasks;
 //# sourceMappingURL=fake_async.js.map

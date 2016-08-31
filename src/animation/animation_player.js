@@ -5,12 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var lang_1 = require('../facade/lang');
+import { scheduleMicroTask } from '../facade/lang';
 /**
  * @experimental Animation support is experimental.
  */
-var AnimationPlayer = (function () {
+export var AnimationPlayer = (function () {
     function AnimationPlayer() {
     }
     Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
@@ -21,15 +20,14 @@ var AnimationPlayer = (function () {
     });
     return AnimationPlayer;
 }());
-exports.AnimationPlayer = AnimationPlayer;
-var NoOpAnimationPlayer = (function () {
+export var NoOpAnimationPlayer = (function () {
     function NoOpAnimationPlayer() {
         var _this = this;
         this._onDoneFns = [];
         this._onStartFns = [];
         this._started = false;
         this.parentPlayer = null;
-        lang_1.scheduleMicroTask(function () { return _this._onFinish(); });
+        scheduleMicroTask(function () { return _this._onFinish(); });
     }
     /** @internal */
     NoOpAnimationPlayer.prototype._onFinish = function () {
@@ -56,5 +54,4 @@ var NoOpAnimationPlayer = (function () {
     NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
     return NoOpAnimationPlayer;
 }());
-exports.NoOpAnimationPlayer = NoOpAnimationPlayer;
 //# sourceMappingURL=animation_player.js.map

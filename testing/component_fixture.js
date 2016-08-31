@@ -5,15 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var index_1 = require('../index');
-var lang_1 = require('../src/facade/lang');
+import { getDebugNode } from '@angular/core';
+import { scheduleMicroTask } from './facade/lang';
 /**
  * Fixture for debugging and testing a component.
  *
  * @stable
  */
-var ComponentFixture = (function () {
+export var ComponentFixture = (function () {
     function ComponentFixture(componentRef, ngZone, autoDetect) {
         var _this = this;
         this._isStable = true;
@@ -25,7 +24,7 @@ var ComponentFixture = (function () {
         this._onErrorSubscription = null;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
-        this.debugElement = index_1.getDebugNode(this.elementRef.nativeElement);
+        this.debugElement = getDebugNode(this.elementRef.nativeElement);
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
@@ -51,7 +50,7 @@ var ComponentFixture = (function () {
                         // If so check whether there are no pending macrotasks before resolving.
                         // Do this check in the next tick so that ngZone gets a chance to update the state of
                         // pending macrotasks.
-                        lang_1.scheduleMicroTask(function () {
+                        scheduleMicroTask(function () {
                             if (!_this.ngZone.hasPendingMacrotasks) {
                                 if (_this._promise !== null) {
                                     _this._resolve(true);
@@ -157,5 +156,4 @@ var ComponentFixture = (function () {
     };
     return ComponentFixture;
 }());
-exports.ComponentFixture = ComponentFixture;
 //# sourceMappingURL=component_fixture.js.map

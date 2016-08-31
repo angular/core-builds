@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var async_1 = require('../facade/async');
-var ng_zone_impl_1 = require('./ng_zone_impl');
+import { EventEmitter } from '../facade/async';
+import { NgZoneImpl } from './ng_zone_impl';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
  *
@@ -80,7 +79,7 @@ var ng_zone_impl_1 = require('./ng_zone_impl');
  * ```
  * @experimental
  */
-var NgZone = (function () {
+export var NgZone = (function () {
     function NgZone(_a) {
         var _this = this;
         var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
@@ -91,14 +90,14 @@ var NgZone = (function () {
         /** @internal */
         this._nesting = 0;
         /** @internal */
-        this._onUnstable = new async_1.EventEmitter(false);
+        this._onUnstable = new EventEmitter(false);
         /** @internal */
-        this._onMicrotaskEmpty = new async_1.EventEmitter(false);
+        this._onMicrotaskEmpty = new EventEmitter(false);
         /** @internal */
-        this._onStable = new async_1.EventEmitter(false);
+        this._onStable = new EventEmitter(false);
         /** @internal */
-        this._onErrorEvents = new async_1.EventEmitter(false);
-        this._zoneImpl = new ng_zone_impl_1.NgZoneImpl({
+        this._onErrorEvents = new EventEmitter(false);
+        this._zoneImpl = new NgZoneImpl({
             trace: enableLongStackTrace,
             onEnter: function () {
                 // console.log('ZONE.enter', this._nesting, this._isStable);
@@ -121,14 +120,14 @@ var NgZone = (function () {
             onError: function (error) { return _this._onErrorEvents.emit(error); }
         });
     }
-    NgZone.isInAngularZone = function () { return ng_zone_impl_1.NgZoneImpl.isInAngularZone(); };
+    NgZone.isInAngularZone = function () { return NgZoneImpl.isInAngularZone(); };
     NgZone.assertInAngularZone = function () {
-        if (!ng_zone_impl_1.NgZoneImpl.isInAngularZone()) {
+        if (!NgZoneImpl.isInAngularZone()) {
             throw new Error('Expected to be in Angular Zone, but it is not!');
         }
     };
     NgZone.assertNotInAngularZone = function () {
-        if (ng_zone_impl_1.NgZoneImpl.isInAngularZone()) {
+        if (NgZoneImpl.isInAngularZone()) {
             throw new Error('Expected to not be in Angular Zone, but it is!');
         }
     };
@@ -250,5 +249,4 @@ var NgZone = (function () {
     NgZone.prototype.runOutsideAngular = function (fn) { return this._zoneImpl.runOuter(fn); };
     return NgZone;
 }());
-exports.NgZone = NgZone;
 //# sourceMappingURL=ng_zone.js.map

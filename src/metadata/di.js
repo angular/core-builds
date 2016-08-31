@@ -5,16 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var forward_ref_1 = require('../di/forward_ref');
-var metadata_1 = require('../di/metadata');
-var opaque_token_1 = require('../di/opaque_token');
-var lang_1 = require('../facade/lang');
+import { resolveForwardRef } from '../di/forward_ref';
+import { DependencyMetadata } from '../di/metadata';
+import { OpaqueToken } from '../di/opaque_token';
+import { StringWrapper, isString, stringify } from '../facade/lang';
 /**
  * This token can be used to create a virtual provider that will populate the
  * `entryComponents` fields of components and ng modules based on its `useValue`.
@@ -49,7 +48,7 @@ var lang_1 = require('../facade/lang');
  *
  * @experimental
  */
-exports.ANALYZE_FOR_ENTRY_COMPONENTS = new opaque_token_1.OpaqueToken('AnalyzeForEntryComponents');
+export var ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
 /**
  * Specifies that a constant attribute value should be injected.
  *
@@ -68,7 +67,7 @@ exports.ANALYZE_FOR_ENTRY_COMPONENTS = new opaque_token_1.OpaqueToken('AnalyzeFo
  * {@example core/ts/metadata/metadata.ts region='attributeMetadata'}
  * @stable
  */
-var AttributeMetadata = (function (_super) {
+export var AttributeMetadata = (function (_super) {
     __extends(AttributeMetadata, _super);
     function AttributeMetadata(attributeName) {
         _super.call(this);
@@ -86,10 +85,9 @@ var AttributeMetadata = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    AttributeMetadata.prototype.toString = function () { return "@Attribute(" + lang_1.stringify(this.attributeName) + ")"; };
+    AttributeMetadata.prototype.toString = function () { return "@Attribute(" + stringify(this.attributeName) + ")"; };
     return AttributeMetadata;
-}(metadata_1.DependencyMetadata));
-exports.AttributeMetadata = AttributeMetadata;
+}(DependencyMetadata));
 /**
  * Declares an injectable parameter to be a live list of directives or variable
  * bindings from the content children of a directive.
@@ -195,7 +193,7 @@ exports.AttributeMetadata = AttributeMetadata;
  * See {@link QueryList} for more details.
  * @stable
  */
-var QueryMetadata = (function (_super) {
+export var QueryMetadata = (function (_super) {
     __extends(QueryMetadata, _super);
     function QueryMetadata(_selector, _a) {
         var _b = _a === void 0 ? {} : _a, _c = _b.descendants, descendants = _c === void 0 ? false : _c, _d = _b.first, first = _d === void 0 ? false : _d, _e = _b.read, read = _e === void 0 ? null : _e;
@@ -217,7 +215,7 @@ var QueryMetadata = (function (_super) {
         /**
          * what this is querying for.
          */
-        get: function () { return forward_ref_1.resolveForwardRef(this._selector); },
+        get: function () { return resolveForwardRef(this._selector); },
         enumerable: true,
         configurable: true
     });
@@ -225,7 +223,7 @@ var QueryMetadata = (function (_super) {
         /**
          * whether this is querying for a variable binding or a directive.
          */
-        get: function () { return lang_1.isString(this.selector); },
+        get: function () { return isString(this.selector); },
         enumerable: true,
         configurable: true
     });
@@ -234,14 +232,13 @@ var QueryMetadata = (function (_super) {
          * returns a list of variable bindings this is querying for.
          * Only applicable if this is a variable bindings query.
          */
-        get: function () { return lang_1.StringWrapper.split(this.selector, /\s*,\s*/g); },
+        get: function () { return StringWrapper.split(this.selector, /\s*,\s*/g); },
         enumerable: true,
         configurable: true
     });
-    QueryMetadata.prototype.toString = function () { return "@Query(" + lang_1.stringify(this.selector) + ")"; };
+    QueryMetadata.prototype.toString = function () { return "@Query(" + stringify(this.selector) + ")"; };
     return QueryMetadata;
-}(metadata_1.DependencyMetadata));
-exports.QueryMetadata = QueryMetadata;
+}(DependencyMetadata));
 // TODO: add an example after ContentChildren and ViewChildren are in master
 /**
  * Configures a content query.
@@ -264,7 +261,7 @@ exports.QueryMetadata = QueryMetadata;
  * ```
  * @stable
  */
-var ContentChildrenMetadata = (function (_super) {
+export var ContentChildrenMetadata = (function (_super) {
     __extends(ContentChildrenMetadata, _super);
     function ContentChildrenMetadata(_selector, _a) {
         var _b = _a === void 0 ? {} : _a, _c = _b.descendants, descendants = _c === void 0 ? false : _c, _d = _b.read, read = _d === void 0 ? null : _d;
@@ -272,7 +269,6 @@ var ContentChildrenMetadata = (function (_super) {
     }
     return ContentChildrenMetadata;
 }(QueryMetadata));
-exports.ContentChildrenMetadata = ContentChildrenMetadata;
 // TODO: add an example after ContentChild and ViewChild are in master
 /**
  * Configures a content query.
@@ -295,7 +291,7 @@ exports.ContentChildrenMetadata = ContentChildrenMetadata;
  * ```
  * @stable
  */
-var ContentChildMetadata = (function (_super) {
+export var ContentChildMetadata = (function (_super) {
     __extends(ContentChildMetadata, _super);
     function ContentChildMetadata(_selector, _a) {
         var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
@@ -303,7 +299,6 @@ var ContentChildMetadata = (function (_super) {
     }
     return ContentChildMetadata;
 }(QueryMetadata));
-exports.ContentChildMetadata = ContentChildMetadata;
 /**
  * Similar to {@link ContentChildMetadata}, but querying the component view, instead
  * of the content children.
@@ -337,7 +332,7 @@ exports.ContentChildMetadata = ContentChildMetadata;
  * See {@link QueryList} for more details.
  * @stable
  */
-var ViewQueryMetadata = (function (_super) {
+export var ViewQueryMetadata = (function (_super) {
     __extends(ViewQueryMetadata, _super);
     function ViewQueryMetadata(_selector, _a) {
         var _b = _a === void 0 ? {} : _a, _c = _b.descendants, descendants = _c === void 0 ? false : _c, _d = _b.first, first = _d === void 0 ? false : _d, _e = _b.read, read = _e === void 0 ? null : _e;
@@ -353,7 +348,6 @@ var ViewQueryMetadata = (function (_super) {
     });
     return ViewQueryMetadata;
 }(QueryMetadata));
-exports.ViewQueryMetadata = ViewQueryMetadata;
 /**
  * Declares a list of child element references.
  *
@@ -432,16 +426,15 @@ exports.ViewQueryMetadata = ViewQueryMetadata;
  * ```
  * @stable
  */
-var ViewChildrenMetadata = (function (_super) {
+export var ViewChildrenMetadata = (function (_super) {
     __extends(ViewChildrenMetadata, _super);
     function ViewChildrenMetadata(_selector, _a) {
         var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
         _super.call(this, _selector, { descendants: true, read: read });
     }
-    ViewChildrenMetadata.prototype.toString = function () { return "@ViewChildren(" + lang_1.stringify(this.selector) + ")"; };
+    ViewChildrenMetadata.prototype.toString = function () { return "@ViewChildren(" + stringify(this.selector) + ")"; };
     return ViewChildrenMetadata;
 }(ViewQueryMetadata));
-exports.ViewChildrenMetadata = ViewChildrenMetadata;
 /**
  *
  * Declares a reference of child element.
@@ -513,7 +506,7 @@ exports.ViewChildrenMetadata = ViewChildrenMetadata;
  * ```
  * @stable
  */
-var ViewChildMetadata = (function (_super) {
+export var ViewChildMetadata = (function (_super) {
     __extends(ViewChildMetadata, _super);
     function ViewChildMetadata(_selector, _a) {
         var _b = (_a === void 0 ? {} : _a).read, read = _b === void 0 ? null : _b;
@@ -521,5 +514,4 @@ var ViewChildMetadata = (function (_super) {
     }
     return ViewChildMetadata;
 }(ViewQueryMetadata));
-exports.ViewChildMetadata = ViewChildMetadata;
 //# sourceMappingURL=di.js.map

@@ -5,35 +5,16 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 // Public API for compiler
-var compiler_1 = require('./linker/compiler');
-exports.COMPILER_OPTIONS = compiler_1.COMPILER_OPTIONS;
-exports.Compiler = compiler_1.Compiler;
-exports.CompilerFactory = compiler_1.CompilerFactory;
-exports.ModuleWithComponentFactories = compiler_1.ModuleWithComponentFactories;
-var component_factory_1 = require('./linker/component_factory');
-exports.ComponentFactory = component_factory_1.ComponentFactory;
-exports.ComponentRef = component_factory_1.ComponentRef;
-var component_factory_resolver_1 = require('./linker/component_factory_resolver');
-exports.ComponentFactoryResolver = component_factory_resolver_1.ComponentFactoryResolver;
-var element_ref_1 = require('./linker/element_ref');
-exports.ElementRef = element_ref_1.ElementRef;
-var ng_module_factory_1 = require('./linker/ng_module_factory');
-exports.NgModuleFactory = ng_module_factory_1.NgModuleFactory;
-exports.NgModuleRef = ng_module_factory_1.NgModuleRef;
-var ng_module_factory_loader_1 = require('./linker/ng_module_factory_loader');
-exports.NgModuleFactoryLoader = ng_module_factory_loader_1.NgModuleFactoryLoader;
-var query_list_1 = require('./linker/query_list');
-exports.QueryList = query_list_1.QueryList;
-var system_js_ng_module_factory_loader_1 = require('./linker/system_js_ng_module_factory_loader');
-exports.SystemJsNgModuleLoader = system_js_ng_module_factory_loader_1.SystemJsNgModuleLoader;
-exports.SystemJsNgModuleLoaderConfig = system_js_ng_module_factory_loader_1.SystemJsNgModuleLoaderConfig;
-var template_ref_1 = require('./linker/template_ref');
-exports.TemplateRef = template_ref_1.TemplateRef;
-var view_container_ref_1 = require('./linker/view_container_ref');
-exports.ViewContainerRef = view_container_ref_1.ViewContainerRef;
-var view_ref_1 = require('./linker/view_ref');
-exports.EmbeddedViewRef = view_ref_1.EmbeddedViewRef;
-exports.ViewRef = view_ref_1.ViewRef;
+export { COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories } from './linker/compiler';
+export { ComponentFactory, ComponentRef } from './linker/component_factory';
+export { ComponentFactoryResolver } from './linker/component_factory_resolver';
+export { ElementRef } from './linker/element_ref';
+export { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
+export { NgModuleFactoryLoader } from './linker/ng_module_factory_loader';
+export { QueryList } from './linker/query_list';
+export { SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig } from './linker/system_js_ng_module_factory_loader';
+export { TemplateRef } from './linker/template_ref';
+export { ViewContainerRef } from './linker/view_container_ref';
+export { EmbeddedViewRef, ViewRef } from './linker/view_ref';
 //# sourceMappingURL=linker.js.map

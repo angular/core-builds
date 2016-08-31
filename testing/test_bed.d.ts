@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, SchemaMetadata } from '../index';
-import { Type } from '../src/type';
+import { ComponentMetadataType, DirectiveMetadataType, Injector, NgModuleMetadataType, OpaqueToken, PipeMetadataType, PlatformRef, SchemaMetadata, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 /**

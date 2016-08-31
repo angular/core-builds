@@ -5,10 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var lang_1 = require('../facade/lang');
-var animation_player_1 = require('./animation_player');
-var AnimationSequencePlayer = (function () {
+import { isPresent, scheduleMicroTask } from '../facade/lang';
+import { NoOpAnimationPlayer } from './animation_player';
+export var AnimationSequencePlayer = (function () {
     function AnimationSequencePlayer(_players) {
         var _this = this;
         this._players = _players;
@@ -26,11 +25,11 @@ var AnimationSequencePlayer = (function () {
         if (this._finished)
             return;
         if (this._players.length == 0) {
-            this._activePlayer = new animation_player_1.NoOpAnimationPlayer();
-            lang_1.scheduleMicroTask(function () { return _this._onFinish(); });
+            this._activePlayer = new NoOpAnimationPlayer();
+            scheduleMicroTask(function () { return _this._onFinish(); });
         }
         else if (this._currentIndex >= this._players.length) {
-            this._activePlayer = new animation_player_1.NoOpAnimationPlayer();
+            this._activePlayer = new NoOpAnimationPlayer();
             this._onFinish();
         }
         else {
@@ -45,7 +44,7 @@ var AnimationSequencePlayer = (function () {
     AnimationSequencePlayer.prototype._onFinish = function () {
         if (!this._finished) {
             this._finished = true;
-            if (!lang_1.isPresent(this.parentPlayer)) {
+            if (!isPresent(this.parentPlayer)) {
                 this.destroy();
             }
             this._onDoneFns.forEach(function (fn) { return fn(); });
@@ -57,7 +56,7 @@ var AnimationSequencePlayer = (function () {
     AnimationSequencePlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
     AnimationSequencePlayer.prototype.play = function () {
-        if (!lang_1.isPresent(this.parentPlayer)) {
+        if (!isPresent(this.parentPlayer)) {
             this.init();
         }
         if (!this.hasStarted()) {
@@ -87,5 +86,4 @@ var AnimationSequencePlayer = (function () {
     AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
     return AnimationSequencePlayer;
 }());
-exports.AnimationSequencePlayer = AnimationSequencePlayer;
 //# sourceMappingURL=animation_sequence_player.js.map

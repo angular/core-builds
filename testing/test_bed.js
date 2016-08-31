@@ -5,39 +5,37 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var index_1 = require('../index');
-var collection_1 = require('../src/facade/collection');
-var lang_1 = require('../src/facade/lang');
-var async_test_completer_1 = require('./async_test_completer');
-var component_fixture_1 = require('./component_fixture');
-var test_compiler_1 = require('./test_compiler');
+import { Injector, NgModule, NgZone, OpaqueToken } from '@angular/core';
+import { AsyncTestCompleter } from './async_test_completer';
+import { ComponentFixture } from './component_fixture';
+import { ListWrapper } from './facade/collection';
+import { FunctionWrapper, stringify } from './facade/lang';
+import { TestingCompilerFactory } from './test_compiler';
 var UNDEFINED = new Object();
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
  *
  * @experimental
  */
-var TestComponentRenderer = (function () {
+export var TestComponentRenderer = (function () {
     function TestComponentRenderer() {
     }
     TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
     return TestComponentRenderer;
 }());
-exports.TestComponentRenderer = TestComponentRenderer;
 var _nextRootElementId = 0;
 /**
  * @experimental
  */
-exports.ComponentFixtureAutoDetect = new index_1.OpaqueToken('ComponentFixtureAutoDetect');
+export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDetect');
 /**
  * @experimental
  */
-exports.ComponentFixtureNoNgZone = new index_1.OpaqueToken('ComponentFixtureNoNgZone');
+export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
 /**
  * @experimental
  */
-var TestBed = (function () {
+export var TestBed = (function () {
     function TestBed() {
         this._instantiated = false;
         this._compiler = null;
@@ -123,7 +121,7 @@ var TestBed = (function () {
         return TestBed;
     };
     TestBed.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
     };
     TestBed.createComponent = function (component) {
@@ -183,16 +181,16 @@ var TestBed = (function () {
     TestBed.prototype.configureTestingModule = function (moduleDef) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
-            this._providers = collection_1.ListWrapper.concat(this._providers, moduleDef.providers);
+            this._providers = ListWrapper.concat(this._providers, moduleDef.providers);
         }
         if (moduleDef.declarations) {
-            this._declarations = collection_1.ListWrapper.concat(this._declarations, moduleDef.declarations);
+            this._declarations = ListWrapper.concat(this._declarations, moduleDef.declarations);
         }
         if (moduleDef.imports) {
-            this._imports = collection_1.ListWrapper.concat(this._imports, moduleDef.imports);
+            this._imports = ListWrapper.concat(this._imports, moduleDef.imports);
         }
         if (moduleDef.schemas) {
-            this._schemas = collection_1.ListWrapper.concat(this._schemas, moduleDef.schemas);
+            this._schemas = ListWrapper.concat(this._schemas, moduleDef.schemas);
         }
     };
     TestBed.prototype.compileComponents = function () {
@@ -218,7 +216,7 @@ var TestBed = (function () {
             }
             catch (e) {
                 if (e.compType) {
-                    throw new Error(("This test module uses the component " + lang_1.stringify(e.compType) + " which is using a \"templateUrl\", but they were never compiled. ") +
+                    throw new Error(("This test module uses the component " + stringify(e.compType) + " which is using a \"templateUrl\", but they were never compiled. ") +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -239,13 +237,14 @@ var TestBed = (function () {
         var DynamicTestModule = (function () {
             function DynamicTestModule() {
             }
-            /** @nocollapse */
             DynamicTestModule.decorators = [
-                { type: index_1.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
             ];
+            /** @nocollapse */
+            DynamicTestModule.ctorParameters = [];
             return DynamicTestModule;
         }());
-        var compilerFactory = this.platform.injector.get(test_compiler_1.TestingCompilerFactory);
+        var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler =
             compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
@@ -261,7 +260,7 @@ var TestBed = (function () {
         }
     };
     TestBed.prototype.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = index_1.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         this._initIfNeeded();
         if (token === TestBed) {
             return this;
@@ -275,7 +274,7 @@ var TestBed = (function () {
         var _this = this;
         this._initIfNeeded();
         var params = tokens.map(function (t) { return _this.get(t); });
-        return lang_1.FunctionWrapper.apply(fn, params);
+        return FunctionWrapper.apply(fn, params);
     };
     TestBed.prototype.overrideModule = function (ngModule, override) {
         this._assertNotInstantiated('overrideModule', 'override module metadata');
@@ -298,17 +297,17 @@ var TestBed = (function () {
         this._initIfNeeded();
         var componentFactory = this._moduleWithComponentFactories.componentFactories.find(function (compFactory) { return compFactory.componentType === component; });
         if (!componentFactory) {
-            throw new Error("Cannot create the component " + lang_1.stringify(component) + " as it was not imported into the testing module!");
+            throw new Error("Cannot create the component " + stringify(component) + " as it was not imported into the testing module!");
         }
-        var noNgZone = this.get(exports.ComponentFixtureNoNgZone, false);
-        var autoDetect = this.get(exports.ComponentFixtureAutoDetect, false);
-        var ngZone = noNgZone ? null : this.get(index_1.NgZone, null);
+        var noNgZone = this.get(ComponentFixtureNoNgZone, false);
+        var autoDetect = this.get(ComponentFixtureAutoDetect, false);
+        var ngZone = noNgZone ? null : this.get(NgZone, null);
         var testComponentRenderer = this.get(TestComponentRenderer);
         var rootElId = "root" + _nextRootElementId++;
         testComponentRenderer.insertRootElement(rootElId);
         var initComponent = function () {
             var componentRef = componentFactory.create(_this, [], "#" + rootElId);
-            return new component_fixture_1.ComponentFixture(componentRef, ngZone, autoDetect);
+            return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         var fixture = ngZone == null ? initComponent() : ngZone.run(initComponent);
         this._activeFixtures.push(fixture);
@@ -316,18 +315,16 @@ var TestBed = (function () {
     };
     return TestBed;
 }());
-exports.TestBed = TestBed;
 var _testBed = null;
 /**
  * @experimental
  */
-function getTestBed() {
+export function getTestBed() {
     if (_testBed == null) {
         _testBed = new TestBed();
     }
     return _testBed;
 }
-exports.getTestBed = getTestBed;
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
  *
@@ -352,15 +349,15 @@ exports.getTestBed = getTestBed;
  *
  * @stable
  */
-function inject(tokens, fn) {
+export function inject(tokens, fn) {
     var testBed = getTestBed();
-    if (tokens.indexOf(async_test_completer_1.AsyncTestCompleter) >= 0) {
+    if (tokens.indexOf(AsyncTestCompleter) >= 0) {
         return function () {
             // Return an async test method that returns a Promise if AsyncTestCompleter is one of
             // the
             // injected tokens.
             return testBed.compileComponents().then(function () {
-                var completer = testBed.get(async_test_completer_1.AsyncTestCompleter);
+                var completer = testBed.get(AsyncTestCompleter);
                 testBed.execute(tokens, fn);
                 return completer.promise;
             });
@@ -370,11 +367,10 @@ function inject(tokens, fn) {
         return function () { return testBed.execute(tokens, fn); };
     }
 }
-exports.inject = inject;
 /**
  * @experimental
  */
-var InjectSetupWrapper = (function () {
+export var InjectSetupWrapper = (function () {
     function InjectSetupWrapper(_moduleDef) {
         this._moduleDef = _moduleDef;
     }
@@ -393,8 +389,7 @@ var InjectSetupWrapper = (function () {
     };
     return InjectSetupWrapper;
 }());
-exports.InjectSetupWrapper = InjectSetupWrapper;
-function withModule(moduleDef, fn) {
+export function withModule(moduleDef, fn) {
     if (fn === void 0) { fn = null; }
     if (fn) {
         return function () {
@@ -407,5 +402,4 @@ function withModule(moduleDef, fn) {
     }
     return new InjectSetupWrapper(function () { return moduleDef; });
 }
-exports.withModule = withModule;
 //# sourceMappingURL=test_bed.js.map

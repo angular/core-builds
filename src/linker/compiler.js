@@ -5,42 +5,39 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var di_1 = require('../di');
-var errors_1 = require('../facade/errors');
-var lang_1 = require('../facade/lang');
+import { OpaqueToken } from '../di';
+import { BaseError } from '../facade/errors';
+import { stringify } from '../facade/lang';
 /**
  * Indicates that a component is still being loaded in a synchronous compile.
  *
  * @stable
  */
-var ComponentStillLoadingError = (function (_super) {
+export var ComponentStillLoadingError = (function (_super) {
     __extends(ComponentStillLoadingError, _super);
     function ComponentStillLoadingError(compType) {
-        _super.call(this, "Can't compile synchronously as " + lang_1.stringify(compType) + " is still being loaded!");
+        _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
         this.compType = compType;
     }
     return ComponentStillLoadingError;
-}(errors_1.BaseError));
-exports.ComponentStillLoadingError = ComponentStillLoadingError;
+}(BaseError));
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * @experimental
  */
-var ModuleWithComponentFactories = (function () {
+export var ModuleWithComponentFactories = (function () {
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
     }
     return ModuleWithComponentFactories;
 }());
-exports.ModuleWithComponentFactories = ModuleWithComponentFactories;
 function _throwError() {
     throw new Error("Runtime compiler is not loaded");
 }
@@ -54,7 +51,7 @@ function _throwError() {
  * of components.
  * @stable
  */
-var Compiler = (function () {
+export var Compiler = (function () {
     function Compiler() {
     }
     /**
@@ -89,22 +86,20 @@ var Compiler = (function () {
     Compiler.prototype.clearCacheFor = function (type) { };
     return Compiler;
 }());
-exports.Compiler = Compiler;
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
  * @experimental
  */
-exports.COMPILER_OPTIONS = new di_1.OpaqueToken('compilerOptions');
+export var COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *
  * @experimental
  */
-var CompilerFactory = (function () {
+export var CompilerFactory = (function () {
     function CompilerFactory() {
     }
     return CompilerFactory;
 }());
-exports.CompilerFactory = CompilerFactory;
 //# sourceMappingURL=compiler.js.map

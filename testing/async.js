@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 var _global = (typeof window === 'undefined' ? global : window);
 /**
  * Wraps a test function in an asynchronous test zone. The test will automatically
@@ -24,7 +23,7 @@ var _global = (typeof window === 'undefined' ? global : window);
  *
  * @stable
  */
-function async(fn) {
+export function async(fn) {
     // If we're running using the Jasmine test framework, adapt to call the 'done'
     // function when asynchronous activity is finished.
     if (_global.jasmine) {
@@ -52,7 +51,6 @@ function async(fn) {
         runInTestZone(fn, finishCallback, failCallback);
     }); };
 }
-exports.async = async;
 function runInTestZone(fn, finishCallback, failCallback) {
     var currentZone = Zone.current;
     var AsyncTestZoneSpec = Zone['AsyncTestZoneSpec'];

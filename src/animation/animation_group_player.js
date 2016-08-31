@@ -5,10 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var lang_1 = require('../facade/lang');
-var math_1 = require('../facade/math');
-var AnimationGroupPlayer = (function () {
+import { isPresent, scheduleMicroTask } from '../facade/lang';
+import { Math } from '../facade/math';
+export var AnimationGroupPlayer = (function () {
     function AnimationGroupPlayer(_players) {
         var _this = this;
         this._players = _players;
@@ -20,7 +19,7 @@ var AnimationGroupPlayer = (function () {
         var count = 0;
         var total = this._players.length;
         if (total == 0) {
-            lang_1.scheduleMicroTask(function () { return _this._onFinish(); });
+            scheduleMicroTask(function () { return _this._onFinish(); });
         }
         else {
             this._players.forEach(function (player) {
@@ -36,7 +35,7 @@ var AnimationGroupPlayer = (function () {
     AnimationGroupPlayer.prototype._onFinish = function () {
         if (!this._finished) {
             this._finished = true;
-            if (!lang_1.isPresent(this.parentPlayer)) {
+            if (!isPresent(this.parentPlayer)) {
                 this.destroy();
             }
             this._onDoneFns.forEach(function (fn) { return fn(); });
@@ -48,7 +47,7 @@ var AnimationGroupPlayer = (function () {
     AnimationGroupPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
     AnimationGroupPlayer.prototype.play = function () {
-        if (!lang_1.isPresent(this.parentPlayer)) {
+        if (!isPresent(this.parentPlayer)) {
             this.init();
         }
         if (!this.hasStarted()) {
@@ -76,11 +75,10 @@ var AnimationGroupPlayer = (function () {
         var min = 0;
         this._players.forEach(function (player) {
             var p = player.getPosition();
-            min = math_1.Math.min(p, min);
+            min = Math.min(p, min);
         });
         return min;
     };
     return AnimationGroupPlayer;
 }());
-exports.AnimationGroupPlayer = AnimationGroupPlayer;
 //# sourceMappingURL=animation_group_player.js.map

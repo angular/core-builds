@@ -45,17 +45,11 @@ export declare function isDevMode(): boolean;
  */
 export declare function createPlatform(injector: Injector): PlatformRef;
 /**
- * Factory for a platform.
- *
- * @experimental
- */
-export declare type PlatformFactory = (extraProviders?: Provider[]) => PlatformRef;
-/**
  * Creates a factory for a platform
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(parentPlaformFactory: PlatformFactory, name: string, providers?: Provider[]): PlatformFactory;
+export declare function createPlatformFactory(parentPlaformFactory: (extraProviders?: Provider[]) => PlatformRef, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
 /**
  * Checks that there currently is a platform
  * which contains the given token as a provider.

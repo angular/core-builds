@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
 /**
  * Provides a hook for centralized exception handling.
  *
@@ -17,7 +16,7 @@
  *
  * ```javascript
  *
- * class MyExceptionHandler implements ErrorHandler {
+ * class MyErrorHandler implements ErrorHandler {
  *   call(error, stackTrace = null, reason = null) {
  *     // do something with the exception
  *   }
@@ -30,7 +29,7 @@
  * ```
  * @stable
  */
-var ErrorHandler = (function () {
+export var ErrorHandler = (function () {
     function ErrorHandler(rethrowError) {
         if (rethrowError === void 0) { rethrowError = true; }
         /**
@@ -98,5 +97,4 @@ var ErrorHandler = (function () {
     };
     return ErrorHandler;
 }());
-exports.ErrorHandler = ErrorHandler;
 //# sourceMappingURL=error_handler.js.map

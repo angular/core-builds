@@ -5,8 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var lang_1 = require('../facade/lang');
+import { isFunction, stringify } from '../facade/lang';
 /**
  * Allows to refer to references which are not yet defined.
  *
@@ -19,12 +18,11 @@ var lang_1 = require('../facade/lang');
  * {@example core/di/ts/forward_ref/forward_ref_spec.ts region='forward_ref'}
  * @experimental
  */
-function forwardRef(forwardRefFn) {
+export function forwardRef(forwardRefFn) {
     forwardRefFn.__forward_ref__ = forwardRef;
-    forwardRefFn.toString = function () { return lang_1.stringify(this()); };
+    forwardRefFn.toString = function () { return stringify(this()); };
     return forwardRefFn;
 }
-exports.forwardRef = forwardRef;
 /**
  * Lazily retrieves the reference value from a forwardRef.
  *
@@ -37,8 +35,8 @@ exports.forwardRef = forwardRef;
  * See: {@link forwardRef}
  * @experimental
  */
-function resolveForwardRef(type) {
-    if (lang_1.isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
+export function resolveForwardRef(type) {
+    if (isFunction(type) && type.hasOwnProperty('__forward_ref__') &&
         type.__forward_ref__ === forwardRef) {
         return type();
     }
@@ -46,5 +44,4 @@ function resolveForwardRef(type) {
         return type;
     }
 }
-exports.resolveForwardRef = resolveForwardRef;
 //# sourceMappingURL=forward_ref.js.map

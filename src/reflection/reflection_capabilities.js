@@ -5,12 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-var lang_1 = require('../facade/lang');
-var type_1 = require('../type');
-var ReflectionCapabilities = (function () {
+import { global, isFunction, isPresent, stringify } from '../facade/lang';
+import { Type } from '../type';
+export var ReflectionCapabilities = (function () {
     function ReflectionCapabilities(reflect) {
-        this._reflect = reflect || lang_1.global.Reflect;
+        this._reflect = reflect || global.Reflect;
     }
     ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
     ReflectionCapabilities.prototype.factory = function (t) {
@@ -47,7 +46,7 @@ var ReflectionCapabilities = (function () {
             else {
                 result[i] = [];
             }
-            if (lang_1.isPresent(paramAnnotations) && lang_1.isPresent(paramAnnotations[i])) {
+            if (isPresent(paramAnnotations) && isPresent(paramAnnotations[i])) {
                 result[i] = result[i].concat(paramAnnotations[i]);
             }
         }
@@ -55,11 +54,11 @@ var ReflectionCapabilities = (function () {
     };
     ReflectionCapabilities.prototype.parameters = function (typeOrFunc) {
         // Prefer the direct API.
-        if (lang_1.isPresent(typeOrFunc.parameters)) {
+        if (isPresent(typeOrFunc.parameters)) {
             return typeOrFunc.parameters;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (lang_1.isPresent(typeOrFunc.ctorParameters)) {
+        if (isPresent(typeOrFunc.ctorParameters)) {
             var ctorParameters = typeOrFunc.ctorParameters;
             var paramTypes_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && ctorParam.type; });
             var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) {
@@ -68,10 +67,10 @@ var ReflectionCapabilities = (function () {
             return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
         }
         // API for metadata created by invoking the decorators.
-        if (lang_1.isPresent(this._reflect) && lang_1.isPresent(this._reflect.getMetadata)) {
+        if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
             var paramAnnotations = this._reflect.getMetadata('parameters', typeOrFunc);
             var paramTypes = this._reflect.getMetadata('design:paramtypes', typeOrFunc);
-            if (lang_1.isPresent(paramTypes) || lang_1.isPresent(paramAnnotations)) {
+            if (isPresent(paramTypes) || isPresent(paramAnnotations)) {
                 return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
             }
         }
@@ -82,36 +81,36 @@ var ReflectionCapabilities = (function () {
     };
     ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
         // Prefer the direct API.
-        if (lang_1.isPresent(typeOrFunc.annotations)) {
+        if (isPresent(typeOrFunc.annotations)) {
             var annotations = typeOrFunc.annotations;
-            if (lang_1.isFunction(annotations) && annotations.annotations) {
+            if (isFunction(annotations) && annotations.annotations) {
                 annotations = annotations.annotations;
             }
             return annotations;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (lang_1.isPresent(typeOrFunc.decorators)) {
+        if (isPresent(typeOrFunc.decorators)) {
             return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
         }
         // API for metadata created by invoking the decorators.
-        if (lang_1.isPresent(this._reflect) && lang_1.isPresent(this._reflect.getMetadata)) {
+        if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
             var annotations = this._reflect.getMetadata('annotations', typeOrFunc);
-            if (lang_1.isPresent(annotations))
+            if (isPresent(annotations))
                 return annotations;
         }
         return [];
     };
     ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
         // Prefer the direct API.
-        if (lang_1.isPresent(typeOrFunc.propMetadata)) {
+        if (isPresent(typeOrFunc.propMetadata)) {
             var propMetadata = typeOrFunc.propMetadata;
-            if (lang_1.isFunction(propMetadata) && propMetadata.propMetadata) {
+            if (isFunction(propMetadata) && propMetadata.propMetadata) {
                 propMetadata = propMetadata.propMetadata;
             }
             return propMetadata;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (lang_1.isPresent(typeOrFunc.propDecorators)) {
+        if (isPresent(typeOrFunc.propDecorators)) {
             var propDecorators_1 = typeOrFunc.propDecorators;
             var propMetadata_1 = {};
             Object.keys(propDecorators_1).forEach(function (prop) {
@@ -120,9 +119,9 @@ var ReflectionCapabilities = (function () {
             return propMetadata_1;
         }
         // API for metadata created by invoking the decorators.
-        if (lang_1.isPresent(this._reflect) && lang_1.isPresent(this._reflect.getMetadata)) {
+        if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
             var propMetadata = this._reflect.getMetadata('propMetadata', typeOrFunc);
-            if (lang_1.isPresent(propMetadata))
+            if (isPresent(propMetadata))
                 return propMetadata;
         }
         return {};
@@ -132,7 +131,7 @@ var ReflectionCapabilities = (function () {
     // when asked for a lifecycle interface as this is what we check in Dart.
     ReflectionCapabilities.prototype.interfaces = function (type) { return []; };
     ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcInterface, lcProperty) {
-        if (!(type instanceof type_1.Type))
+        if (!(type instanceof Type))
             return false;
         var proto = type.prototype;
         return !!proto[lcProperty];
@@ -152,13 +151,12 @@ var ReflectionCapabilities = (function () {
             return type['filePath'];
         }
         // Runtime type
-        return "./" + lang_1.stringify(type);
+        return "./" + stringify(type);
     };
     ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { return runtime; };
     ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
     return ReflectionCapabilities;
 }());
-exports.ReflectionCapabilities = ReflectionCapabilities;
 function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
     if (!decoratorInvocations) {
         return [];

@@ -5,47 +5,15 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-"use strict";
-/**
- * This indirection is needed to free up Component, etc symbols in the public API
- * to be used by the decorator versions of these annotations.
- */
-var di_1 = require('./metadata/di');
-var directives_1 = require('./metadata/directives');
-var ng_module_1 = require('./metadata/ng_module');
-var decorators_1 = require('./util/decorators');
-var di_2 = require('./metadata/di');
-exports.ANALYZE_FOR_ENTRY_COMPONENTS = di_2.ANALYZE_FOR_ENTRY_COMPONENTS;
-exports.AttributeMetadata = di_2.AttributeMetadata;
-exports.ContentChildMetadata = di_2.ContentChildMetadata;
-exports.ContentChildrenMetadata = di_2.ContentChildrenMetadata;
-exports.QueryMetadata = di_2.QueryMetadata;
-exports.ViewChildMetadata = di_2.ViewChildMetadata;
-exports.ViewChildrenMetadata = di_2.ViewChildrenMetadata;
-exports.ViewQueryMetadata = di_2.ViewQueryMetadata;
-var directives_2 = require('./metadata/directives');
-exports.ComponentMetadata = directives_2.ComponentMetadata;
-exports.DirectiveMetadata = directives_2.DirectiveMetadata;
-exports.HostBindingMetadata = directives_2.HostBindingMetadata;
-exports.HostListenerMetadata = directives_2.HostListenerMetadata;
-exports.InputMetadata = directives_2.InputMetadata;
-exports.OutputMetadata = directives_2.OutputMetadata;
-exports.PipeMetadata = directives_2.PipeMetadata;
-var lifecycle_hooks_1 = require('./metadata/lifecycle_hooks');
-exports.AfterContentChecked = lifecycle_hooks_1.AfterContentChecked;
-exports.AfterContentInit = lifecycle_hooks_1.AfterContentInit;
-exports.AfterViewChecked = lifecycle_hooks_1.AfterViewChecked;
-exports.AfterViewInit = lifecycle_hooks_1.AfterViewInit;
-exports.DoCheck = lifecycle_hooks_1.DoCheck;
-exports.OnChanges = lifecycle_hooks_1.OnChanges;
-exports.OnDestroy = lifecycle_hooks_1.OnDestroy;
-exports.OnInit = lifecycle_hooks_1.OnInit;
-var ng_module_2 = require('./metadata/ng_module');
-exports.CUSTOM_ELEMENTS_SCHEMA = ng_module_2.CUSTOM_ELEMENTS_SCHEMA;
-exports.NO_ERRORS_SCHEMA = ng_module_2.NO_ERRORS_SCHEMA;
-exports.NgModuleMetadata = ng_module_2.NgModuleMetadata;
-var view_1 = require('./metadata/view');
-exports.ViewEncapsulation = view_1.ViewEncapsulation;
+import { AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, ViewChildMetadata, ViewChildrenMetadata } from './metadata/di';
+import { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
+import { NgModuleMetadata } from './metadata/ng_module';
+import { makeDecorator, makeParamDecorator, makePropDecorator } from './util/decorators';
+export { ANALYZE_FOR_ENTRY_COMPONENTS, AttributeMetadata, ContentChildMetadata, ContentChildrenMetadata, QueryMetadata, ViewChildMetadata, ViewChildrenMetadata, ViewQueryMetadata } from './metadata/di';
+export { ComponentMetadata, DirectiveMetadata, HostBindingMetadata, HostListenerMetadata, InputMetadata, OutputMetadata, PipeMetadata } from './metadata/directives';
+export { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit } from './metadata/lifecycle_hooks';
+export { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModuleMetadata } from './metadata/ng_module';
+export { ViewEncapsulation } from './metadata/view';
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ComponentMetadata.
 /**
  * Declare reusable UI building blocks for an application.
@@ -73,7 +41,7 @@ exports.ViewEncapsulation = view_1.ViewEncapsulation;
  * @stable
  * @Annotation
  */
-exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
+export var Component = makeDecorator(ComponentMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from DirectiveMetadata.
 /**
  * Directives allow you to attach behavior to elements in the DOM.
@@ -457,7 +425,7 @@ exports.Component = decorators_1.makeDecorator(directives_1.ComponentMetadata);
  * @stable
  * @Annotation
  */
-exports.Directive = decorators_1.makeDecorator(directives_1.DirectiveMetadata);
+export var Directive = makeDecorator(DirectiveMetadata);
 /**
  * Specifies that a constant attribute value should be injected.
  *
@@ -477,7 +445,7 @@ exports.Directive = decorators_1.makeDecorator(directives_1.DirectiveMetadata);
  * @stable
  * @Annotation
  */
-exports.Attribute = decorators_1.makeParamDecorator(di_1.AttributeMetadata);
+export var Attribute = makeParamDecorator(AttributeMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildrenMetadata.
 /**
  * Configures a content query.
@@ -501,7 +469,7 @@ exports.Attribute = decorators_1.makeParamDecorator(di_1.AttributeMetadata);
  * @stable
  * @Annotation
  */
-exports.ContentChildren = decorators_1.makePropDecorator(di_1.ContentChildrenMetadata);
+export var ContentChildren = makePropDecorator(ContentChildrenMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ContentChildMetadata.
 /**
  * Configures a content query.
@@ -534,7 +502,7 @@ exports.ContentChildren = decorators_1.makePropDecorator(di_1.ContentChildrenMet
  * @stable
  * @Annotation
  */
-exports.ContentChild = decorators_1.makePropDecorator(di_1.ContentChildMetadata);
+export var ContentChild = makePropDecorator(ContentChildMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildrenMetadata.
 /**
  * Declares a list of child element references.
@@ -617,7 +585,7 @@ exports.ContentChild = decorators_1.makePropDecorator(di_1.ContentChildMetadata)
  * @stable
  * @Annotation
  */
-exports.ViewChildren = decorators_1.makePropDecorator(di_1.ViewChildrenMetadata);
+export var ViewChildren = makePropDecorator(ViewChildrenMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from ViewChildMetadata.
 /**
  * Declares a reference to a child element.
@@ -691,7 +659,7 @@ exports.ViewChildren = decorators_1.makePropDecorator(di_1.ViewChildrenMetadata)
  * @stable
  * @Annotation
  */
-exports.ViewChild = decorators_1.makePropDecorator(di_1.ViewChildMetadata);
+export var ViewChild = makePropDecorator(ViewChildMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from PipeMetadata.
 /**
  * Declare reusable pipe function.
@@ -702,7 +670,7 @@ exports.ViewChild = decorators_1.makePropDecorator(di_1.ViewChildMetadata);
  * @stable
  * @Annotation
  */
-exports.Pipe = decorators_1.makeDecorator(directives_1.PipeMetadata);
+export var Pipe = makeDecorator(PipeMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from InputMetadata.
 /**
  * Declares a data-bound input property.
@@ -745,7 +713,7 @@ exports.Pipe = decorators_1.makeDecorator(directives_1.PipeMetadata);
  * @stable
  * @Annotation
  */
-exports.Input = decorators_1.makePropDecorator(directives_1.InputMetadata);
+export var Input = makePropDecorator(InputMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from OutputMetadata.
 /**
  * Declares an event-bound output property.
@@ -789,7 +757,7 @@ exports.Input = decorators_1.makePropDecorator(directives_1.InputMetadata);
  * @stable
  * @Annotation
  */
-exports.Output = decorators_1.makePropDecorator(directives_1.OutputMetadata);
+export var Output = makePropDecorator(OutputMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from HostBindingMetadata.
 /**
  * Declares a host property binding.
@@ -826,7 +794,7 @@ exports.Output = decorators_1.makePropDecorator(directives_1.OutputMetadata);
  * @stable
  * @Annotation
  */
-exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMetadata);
+export var HostBinding = makePropDecorator(HostBindingMetadata);
 // TODO(alexeagle): remove the duplication of this doc. It is copied from HostListenerMetadata.
 /**
  * Declares a host listener.
@@ -862,11 +830,11 @@ exports.HostBinding = decorators_1.makePropDecorator(directives_1.HostBindingMet
  * @stable
  * @Annotation
  */
-exports.HostListener = decorators_1.makePropDecorator(directives_1.HostListenerMetadata);
+export var HostListener = makePropDecorator(HostListenerMetadata);
 /**
  * Declares an ng module.
  * @stable
  * @Annotation
  */
-exports.NgModule = decorators_1.makeDecorator(ng_module_1.NgModuleMetadata);
+export var NgModule = makeDecorator(NgModuleMetadata);
 //# sourceMappingURL=metadata.js.map
