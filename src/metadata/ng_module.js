@@ -12,8 +12,10 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 import { InjectableMetadata } from '../di';
 /**
- * Defines a schema that will allow any property on elements with a `-` in their name,
- * which is the common rule for custom elements.
+ * Defines a schema that will allow:
+ * - any non-angular elements with a `-` in their name,
+ * - any properties on elements with a `-` in their name which is the common rule for custom
+ * elements.
  *
  * @stable
  */
