@@ -51,6 +51,7 @@ export interface NgModuleMetadataType {
     entryComponents?: Array<Type<any> | any[]>;
     bootstrap?: Array<Type<any> | any[]>;
     schemas?: Array<SchemaMetadata | any[]>;
+    id?: string;
 }
 /**
  * Declares an Angular Module.
@@ -160,5 +161,11 @@ export declare class NgModuleMetadata extends InjectableMetadata implements NgMo
      * allowed elements (and its properties) securely escape inputs.
      */
     schemas: Array<SchemaMetadata | any[]>;
+    /**
+     * An opaque ID for this module, e.g. a name or a path. Used to identify modules in
+     * `getModuleFactory`. If left `undefined`, the `NgModule` will not be registered with
+     * `getModuleFactory`.
+     */
+    id: string;
     constructor(options?: NgModuleMetadataType);
 }

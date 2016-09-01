@@ -48,6 +48,7 @@ export var NgModuleMetadata = (function (_super) {
         this.entryComponents = options.entryComponents;
         this.bootstrap = options.bootstrap;
         this.schemas = options.schemas;
+        this.id = options.id;
     }
     Object.defineProperty(NgModuleMetadata.prototype, "providers", {
         /**
