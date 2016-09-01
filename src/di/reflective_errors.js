@@ -50,11 +50,6 @@ export var AbstractProviderError = (function (_super) {
         this.keys.push(key);
         this.message = this.constructResolvingMessage(this.keys);
     };
-    Object.defineProperty(AbstractProviderError.prototype, "context", {
-        get: function () { return this.injectors[this.injectors.length - 1].debugContext(); },
-        enumerable: true,
-        configurable: true
-    });
     return AbstractProviderError;
 }(BaseError));
 /**
@@ -156,11 +151,6 @@ export var InstantiationError = (function (_super) {
     });
     Object.defineProperty(InstantiationError.prototype, "causeKey", {
         get: function () { return this.keys[0]; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(InstantiationError.prototype, "context", {
-        get: function () { return this.injectors[this.injectors.length - 1].debugContext(); },
         enumerable: true,
         configurable: true
     });

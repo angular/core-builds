@@ -693,6 +693,9 @@
     function makeDecorator(annotationCls, chainFn) {
         if (chainFn === void 0) { chainFn = null; }
         function DecoratorFactory(objOrType) {
+            if (!(Reflect && Reflect.getMetadata)) {
+                throw 'reflect-metadata shim is required when using class decorators';
+            }
             var annotationInstance = new annotationCls(objOrType);
             if (this instanceof annotationCls) {
                 return annotationInstance;
@@ -1945,11 +1948,6 @@
             this.keys.push(key);
             this.message = this.constructResolvingMessage(this.keys);
         };
-        Object.defineProperty(AbstractProviderError.prototype, "context", {
-            get: function () { return this.injectors[this.injectors.length - 1].debugContext(); },
-            enumerable: true,
-            configurable: true
-        });
         return AbstractProviderError;
     }(BaseError));
     /**
@@ -2051,11 +2049,6 @@
         });
         Object.defineProperty(InstantiationError.prototype, "causeKey", {
             get: function () { return this.keys[0]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(InstantiationError.prototype, "context", {
-            get: function () { return this.injectors[this.injectors.length - 1].debugContext(); },
             enumerable: true,
             configurable: true
         });
@@ -3256,10 +3249,6 @@
             configurable: true
         });
         /**
-         * @internal
-         */
-        ReflectiveInjector.prototype.debugContext = function () { return null; };
-        /**
          * Resolves an array of providers and creates a child injector from those providers.
          *
          * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
@@ -3371,20 +3360,14 @@
         /**
          * Private
          */
-        function ReflectiveInjector_(_proto /* ProtoInjector */, _parent, _debugContext) {
+        function ReflectiveInjector_(_proto /* ProtoInjector */, _parent) {
             if (_parent === void 0) { _parent = null; }
-            if (_debugContext === void 0) { _debugContext = null; }
-            this._debugContext = _debugContext;
             /** @internal */
             this._constructionCounter = 0;
             this._proto = _proto;
             this._parent = _parent;
             this._strategy = _proto._strategy.createInjectorStrategy(this);
         }
-        /**
-         * @internal
-         */
-        ReflectiveInjector_.prototype.debugContext = function () { return this._debugContext(); };
         ReflectiveInjector_.prototype.get = function (token, notFoundValue) {
             if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
             return this._getByKey(ReflectiveKey.get(token), null, null, notFoundValue);

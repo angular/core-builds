@@ -324,12 +324,11 @@ export declare abstract class ReflectiveInjector implements Injector {
     abstract get(token: any, notFoundValue?: any): any;
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
-    private _debugContext;
     private _strategy;
     /**
      * Private
      */
-    constructor(_proto: any, _parent?: Injector, _debugContext?: Function);
+    constructor(_proto: any, _parent?: Injector);
     get(token: any, notFoundValue?: any): any;
     getAt(index: number): any;
     parent: Injector;

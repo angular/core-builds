@@ -165,16 +165,12 @@ export function Class(clsDef) {
     return constructor;
 }
 var Reflect = global.Reflect;
-// Throw statement at top-level is disallowed by closure compiler in ES6 input.
-// Wrap in an IIFE as a work-around.
-(function checkReflect() {
-    if (!(Reflect && Reflect.getMetadata)) {
-        throw 'reflect-metadata shim is required when using class decorators';
-    }
-})();
 export function makeDecorator(annotationCls, chainFn) {
     if (chainFn === void 0) { chainFn = null; }
     function DecoratorFactory(objOrType) {
+        if (!(Reflect && Reflect.getMetadata)) {
+            throw 'reflect-metadata shim is required when using class decorators';
+        }
         var annotationInstance = new annotationCls(objOrType);
         if (this instanceof annotationCls) {
             return annotationInstance;

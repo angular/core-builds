@@ -9,7 +9,6 @@ import { ReflectiveKey } from './reflective_key';
 export declare class AbstractProviderError extends BaseError {
     constructor(injector: ReflectiveInjector, key: ReflectiveKey, constructResolvingMessage: Function);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
-    context: any;
 }
 /**
  * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
@@ -81,7 +80,6 @@ export declare class InstantiationError extends WrappedError {
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
     message: string;
     causeKey: ReflectiveKey;
-    context: any;
 }
 /**
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}

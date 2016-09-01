@@ -437,10 +437,6 @@ export var ReflectiveInjector = (function () {
         configurable: true
     });
     /**
-     * @internal
-     */
-    ReflectiveInjector.prototype.debugContext = function () { return null; };
-    /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
@@ -552,20 +548,14 @@ export var ReflectiveInjector_ = (function () {
     /**
      * Private
      */
-    function ReflectiveInjector_(_proto /* ProtoInjector */, _parent, _debugContext) {
+    function ReflectiveInjector_(_proto /* ProtoInjector */, _parent) {
         if (_parent === void 0) { _parent = null; }
-        if (_debugContext === void 0) { _debugContext = null; }
-        this._debugContext = _debugContext;
         /** @internal */
         this._constructionCounter = 0;
         this._proto = _proto;
         this._parent = _parent;
         this._strategy = _proto._strategy.createInjectorStrategy(this);
     }
-    /**
-     * @internal
-     */
-    ReflectiveInjector_.prototype.debugContext = function () { return this._debugContext(); };
     ReflectiveInjector_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
         return this._getByKey(ReflectiveKey.get(token), null, null, notFoundValue);
