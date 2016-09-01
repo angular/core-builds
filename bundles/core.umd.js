@@ -1294,8 +1294,8 @@
      *
      * - If the argument is a type, a directive or a component with the type will be bound.
      *
-     If the argument is a string, the string is interpreted as a selector. An element containing the
-     matching template variable (e.g. `#child`) will be bound.
+     * If the argument is a string, the string is interpreted as a selector. An element containing the
+     * matching template variable (e.g. `#child`) will be bound.
      *
      * In either case, `@ViewChild()` assigns the first (looking from above) element if there are
      multiple matches.
@@ -5648,8 +5648,7 @@
      *     <child-cmp></child-cmp>
      *     <child-cmp></child-cmp>
      *     <child-cmp></child-cmp>
-     *   `,
-     *   directives: [ChildCmp]
+     *   `
      * })
      * class SomeCmp {
      *   @ViewChildren(ChildCmp) children:QueryList<ChildCmp>;
@@ -5678,8 +5677,7 @@
      *     <child-cmp #child1></child-cmp>
      *     <child-cmp #child2></child-cmp>
      *     <child-cmp #child3></child-cmp>
-     *   `,
-     *   directives: [ChildCmp]
+     *   `
      * })
      * class SomeCmp {
      *   @ViewChildren('child1,child2,child3') children:QueryList<ChildCmp>;
@@ -5727,8 +5725,7 @@
      *
      * @Component({
      *   selector: 'some-cmp',
-     *   template: '<child-cmp></child-cmp>',
-     *   directives: [ChildCmp]
+     *   template: '<child-cmp></child-cmp>'
      * })
      * class SomeCmp {
      *   @ViewChild(ChildCmp) child:ChildCmp;
@@ -5753,8 +5750,7 @@
      *
      * @Component({
      *   selector: 'some-cmp',
-     *   template: '<child-cmp #child></child-cmp>',
-     *   directives: [ChildCmp]
+     *   template: '<child-cmp #child></child-cmp>'
      * })
      * class SomeCmp {
      *   @ViewChild('child') child:ChildCmp;

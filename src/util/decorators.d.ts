@@ -35,7 +35,6 @@ export interface ClassDefinition {
  * ```
  * var MyClass = ng
  *   .Component({...})
- *   .View({...})
  *   .Class({...});
  * ```
  *
@@ -43,7 +42,6 @@ export interface ClassDefinition {
  *
  * ```
  * @ng.Component({...})
- * @ng.View({...})
  * class MyClass {...}
  * ```
  * @stable

@@ -786,8 +786,7 @@ export declare var ContentChild: ContentChildMetadataFactory;
  *     <child-cmp></child-cmp>
  *     <child-cmp></child-cmp>
  *     <child-cmp></child-cmp>
- *   `,
- *   directives: [ChildCmp]
+ *   `
  * })
  * class SomeCmp {
  *   @ViewChildren(ChildCmp) children:QueryList<ChildCmp>;
@@ -816,8 +815,7 @@ export declare var ContentChild: ContentChildMetadataFactory;
  *     <child-cmp #child1></child-cmp>
  *     <child-cmp #child2></child-cmp>
  *     <child-cmp #child3></child-cmp>
- *   `,
- *   directives: [ChildCmp]
+ *   `
  * })
  * class SomeCmp {
  *   @ViewChildren('child1,child2,child3') children:QueryList<ChildCmp>;
@@ -864,8 +862,7 @@ export declare var ViewChildren: ViewChildrenMetadataFactory;
  *
  * @Component({
  *   selector: 'some-cmp',
- *   template: '<child-cmp></child-cmp>',
- *   directives: [ChildCmp]
+ *   template: '<child-cmp></child-cmp>'
  * })
  * class SomeCmp {
  *   @ViewChild(ChildCmp) child:ChildCmp;
@@ -890,8 +887,7 @@ export declare var ViewChildren: ViewChildrenMetadataFactory;
  *
  * @Component({
  *   selector: 'some-cmp',
- *   template: '<child-cmp #child></child-cmp>',
- *   directives: [ChildCmp]
+ *   template: '<child-cmp #child></child-cmp>'
  * })
  * class SomeCmp {
  *   @ViewChild('child') child:ChildCmp;

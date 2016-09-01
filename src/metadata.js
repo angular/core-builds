@@ -538,8 +538,7 @@ export var ContentChild = makePropDecorator(ContentChildMetadata);
  *     <child-cmp></child-cmp>
  *     <child-cmp></child-cmp>
  *     <child-cmp></child-cmp>
- *   `,
- *   directives: [ChildCmp]
+ *   `
  * })
  * class SomeCmp {
  *   @ViewChildren(ChildCmp) children:QueryList<ChildCmp>;
@@ -568,8 +567,7 @@ export var ContentChild = makePropDecorator(ContentChildMetadata);
  *     <child-cmp #child1></child-cmp>
  *     <child-cmp #child2></child-cmp>
  *     <child-cmp #child3></child-cmp>
- *   `,
- *   directives: [ChildCmp]
+ *   `
  * })
  * class SomeCmp {
  *   @ViewChildren('child1,child2,child3') children:QueryList<ChildCmp>;
@@ -617,8 +615,7 @@ export var ViewChildren = makePropDecorator(ViewChildrenMetadata);
  *
  * @Component({
  *   selector: 'some-cmp',
- *   template: '<child-cmp></child-cmp>',
- *   directives: [ChildCmp]
+ *   template: '<child-cmp></child-cmp>'
  * })
  * class SomeCmp {
  *   @ViewChild(ChildCmp) child:ChildCmp;
@@ -643,8 +640,7 @@ export var ViewChildren = makePropDecorator(ViewChildrenMetadata);
  *
  * @Component({
  *   selector: 'some-cmp',
- *   template: '<child-cmp #child></child-cmp>',
- *   directives: [ChildCmp]
+ *   template: '<child-cmp #child></child-cmp>'
  * })
  * class SomeCmp {
  *   @ViewChild('child') child:ChildCmp;
