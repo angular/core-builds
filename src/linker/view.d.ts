@@ -41,7 +41,6 @@ export declare abstract class AppView<T> {
     destroyed: boolean;
     cancelActiveAnimation(element: any, animationName: string, removeAllAnimations?: boolean): void;
     queueAnimation(element: any, animationName: string, player: AnimationPlayer, totalTime: number, fromState: string, toState: string): void;
-    triggerQueuedAnimations(): void;
     triggerAnimationOutput(element: any, animationName: string, phase: string, event: AnimationTransitionEvent): void;
     registerAnimationOutput(element: any, outputEvent: AnimationOutput, eventHandler: Function): void;
     create(context: T, givenProjectableNodes: Array<any | any[]>, rootSelectorOrNode: string | any): AppElement;

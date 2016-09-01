@@ -10034,6 +10034,27 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    var _queuedAnimations = [];
+    /** @internal */
+    function queueAnimation(player) {
+        _queuedAnimations.push(player);
+    }
+    /** @internal */
+    function triggerQueuedAnimations() {
+        for (var i = 0; i < _queuedAnimations.length; i++) {
+            var player = _queuedAnimations[i];
+            player.play();
+        }
+        _queuedAnimations = [];
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var __extends$14 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
@@ -10152,7 +10173,10 @@
         });
         ViewRef_.prototype.markForCheck = function () { this._view.markPathToRootAsCheckOnce(); };
         ViewRef_.prototype.detach = function () { this._view.cdMode = ChangeDetectorStatus.Detached; };
-        ViewRef_.prototype.detectChanges = function () { this._view.detectChanges(false); };
+        ViewRef_.prototype.detectChanges = function () {
+            this._view.detectChanges(false);
+            triggerQueuedAnimations();
+        };
         ViewRef_.prototype.checkNoChanges = function () { this._view.detectChanges(true); };
         ViewRef_.prototype.reattach = function () {
             this._view.cdMode = this._originalMode;
@@ -11851,6 +11875,7 @@
         };
         AppView.prototype.queueAnimation = function (element, animationName, player, totalTime, fromState, toState) {
             var _this = this;
+            queueAnimation(player);
             var event = new AnimationTransitionEvent({ 'fromState': fromState, 'toState': toState, 'totalTime': totalTime });
             this.animationPlayers.set(element, animationName, player);
             player.onDone(function () {
@@ -11859,13 +11884,6 @@
                 _this.animationPlayers.remove(element, animationName);
             });
             player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', event); });
-        };
-        AppView.prototype.triggerQueuedAnimations = function () {
-            this.animationPlayers.getAllPlayers().forEach(function (player) {
-                if (!player.hasStarted()) {
-                    player.play();
-                }
-            });
         };
         AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, event) {
             var listeners = this._animationListeners.get(element);
