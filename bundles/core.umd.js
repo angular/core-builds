@@ -9938,7 +9938,6 @@
     var SystemJsNgModuleLoader = (function () {
         function SystemJsNgModuleLoader(_compiler, config) {
             this._compiler = _compiler;
-            this._system = function () { return System; };
             this._config = config || DEFAULT_CONFIG;
         }
         SystemJsNgModuleLoader.prototype.load = function (path) {
@@ -9950,8 +9949,7 @@
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
             if (exportName === undefined)
                 exportName = 'default';
-            return this._system()
-                .import(module)
+            return System.import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
                 .then(function (type) { return _this._compiler.compileModuleAsync(type); });
@@ -9963,8 +9961,7 @@
                 exportName = 'default';
                 factoryClassSuffix = '';
             }
-            return this._system()
-                .import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
+            return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
