@@ -37,7 +37,7 @@ import { StringWrapper, isString, stringify } from '../facade/lang';
  * // user code
  * let routes = [
  *   {path: '/root', component: RootComp},
- *   {path: /teams', component: TeamsComp}
+ *   {path: '/teams', component: TeamsComp}
  * ];
  *
  * @NgModule({
