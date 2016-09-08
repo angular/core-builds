@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { NumberWrapper, isArray, isPresent, isString } from '../facade/lang';
+import { isArray, isPresent, isString } from '../facade/lang';
 /**
  * @experimental Animation support is experimental.
  */
@@ -387,7 +387,7 @@ export function style(tokens) {
         input.forEach(function (entry) {
             var entryOffset = entry['offset'];
             if (isPresent(entryOffset)) {
-                offset = offset == null ? NumberWrapper.parseFloat(entryOffset) : offset;
+                offset = offset == null ? parseFloat(entryOffset) : offset;
             }
         });
     }
