@@ -905,7 +905,7 @@
          * first use `resetTestEnvironment`.
          *
          * Test modules and platforms for individual platforms are available from
-         * 'angular2/platform/testing/<platform_name>'.
+         * '@angular/<platform_name>/testing'.
          *
          * @experimental
          */
@@ -978,7 +978,7 @@
          * first use `resetTestEnvironment`.
          *
          * Test modules and platforms for individual platforms are available from
-         * 'angular2/platform/testing/<platform_name>'.
+         * '@angular/<platform_name>/testing'.
          *
          * @experimental
          */
