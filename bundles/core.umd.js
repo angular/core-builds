@@ -1693,9 +1693,8 @@
             if (k1.length != k2.length) {
                 return false;
             }
-            var key;
             for (var i = 0; i < k1.length; i++) {
-                key = k1[i];
+                var key = k1[i];
                 if (m1[key] !== m2[key]) {
                     return false;
                 }
