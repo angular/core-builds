@@ -146,6 +146,12 @@ export interface TypeDecorator {
  * @stable
  */
 export declare function Class(clsDef: ClassDefinition): Type<any>;
-export declare function makeDecorator(annotationCls: any, chainFn?: (fn: Function) => void): (...args: any[]) => (cls: any) => any;
-export declare function makeParamDecorator(annotationCls: any): any;
-export declare function makePropDecorator(annotationCls: any): any;
+export declare function makeDecorator(name: string, props: {
+    [key: string]: any;
+}, parentClass?: any, chainFn?: (fn: Function) => void): (...args: any[]) => (cls: any) => any;
+export declare function makeParamDecorator(name: string, props: ([string, any] | {
+    [key: string]: any;
+})[], parentClass?: any): any;
+export declare function makePropDecorator(name: string, props: ([string, any] | {
+    [key: string]: any;
+})[], parentClass?: any): any;

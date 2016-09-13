@@ -233,7 +233,7 @@ export var DoCheck = (function () {
  *
  *
  * To create a stateful Pipe, you should implement this interface and set the `pure`
- * parameter to `false` in the {@link PipeMetadata}.
+ * parameter to `false` in the {@link Pipe}.
  *
  * A stateful pipe may produce different output, given the same input. It is
  * likely that a stateful pipe may contain state that should be cleaned up when
