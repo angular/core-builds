@@ -50,7 +50,10 @@ export var ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryCompon
  */
 export var Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
 /**
- * Base class for query metadata
+ * Base class for query metadata.
+ *
+ * See {@link ContentChildren}, {@link ContentChild}, {@link ViewChildren}, {@link ViewChild} for
+ * more information.
  *
  * @stable
  */
@@ -60,7 +63,45 @@ export var Query = (function () {
     return Query;
 }());
 /**
- * ContentChildren decorator and metadata.
+ * @whatItDoes Configures a content query.
+ *
+ * @howToUse
+ *
+ * ```
+ * import {Directive, QueryList, ContentChildren} from '@angular/core';
+ *
+ * @Directive({
+ *   selector: 'someDir'
+ * })
+ * class SomeDir {
+ *   @ContentChildren(ChildDirective) contentChildren: QueryList<ChildDirective>;
+ *
+ *   ngAfterContentInit() {
+ *     // contentChildren is set
+ *   }
+ * }
+ * ```
+ *
+ * @description
+ *
+ * You can use ContentChildren to get the {@link QueryList} of elements or directives from the
+ * content DOM. Any time a child element is added, removed, or moved, the query list will be
+ * updated,
+ * and the changes observable of the query list will emit a new value.
+ *
+ * Content queries are set before the `ngAfterContentInit` callback is called.
+ *
+ * **Metadata Properties**:
+ *
+ * * **selector** - the directive type or the name used for querying.
+ * * **descendants** - include only direct children or all descendants.
+ * * **read** - read a different token from the queried elements.
+ *
+ * Let's look at an example:
+ *
+ * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
+ *
+ * **npm package**: `@angular/core`
  *
  * @stable
  * @Annotation
@@ -70,7 +111,43 @@ export var ContentChildren = makePropDecorator('ContentChildren', [
     { first: false, isViewQuery: false, descendants: false, read: undefined }
 ], Query);
 /**
- * ContentChild decorator and metadata.
+ * @whatItDoes Configures a content query.
+ *
+ * @howToUse
+ *
+ * ```
+ * import {Directive, ContentChild} from '@angular/core';
+ *
+ * @Directive({
+ *   selector: 'someDir'
+ * })
+ * class SomeDir {
+ *   @ContentChild(ChildDirective) contentChild;
+ *
+ *   ngAfterContentInit() {
+ *     // contentChild is set
+ *   }
+ * }
+ * ```
+ *
+ * @description
+ *
+ * You can use ContentChild to get the first element or the directive matching the selector from the
+ * content DOM. If the content DOM changes, and a new child matches the selector,
+ * the property will be updated.
+ *
+ * Content queries are set before the `ngAfterContentInit` callback is called.
+ *
+ * **Metadata Properties**:
+ *
+ * * **selector** - the directive type or the name used for querying.
+ * * **read** - read a different token from the queried element.
+ *
+ * Let's look at an example:
+ *
+ * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
+ *
+ * **npm package**: `@angular/core`
  *
  * @stable
  * @Annotation
@@ -84,7 +161,44 @@ export var ContentChild = makePropDecorator('ContentChild', [
     }
 ], Query);
 /**
- * ViewChildren decorator and metadata.
+ * @whatItDoes Configures a view query.
+ *
+ * @howToUse
+ *
+ * ```
+ * import {Component, QueryList, ViewChildren} from '@angular/core';
+ *
+ * @Component({
+ *   selector: 'someCmp',
+ *   templateUrl: 'someCmp.html'
+ * })
+ * class SomeCmp {
+ *   @ViewChildren(ChildDirective) viewChildren: QueryList<ChildDirective>;
+ *
+ *   ngAfterViewInit() {
+ *     // viewChildren is set
+ *   }
+ * }
+ * ```
+ *
+ * @description
+ *
+ * You can use ViewChildren to get the {@link QueryList} of elements or directives from the
+ * view DOM. Any time a child element is added, removed, or moved, the query list will be updated,
+ * and the changes observable of the query list will emit a new value.
+ *
+ * View queries are set before the `ngAfterViewInit` callback is called.
+ *
+ * **Metadata Properties**:
+ *
+ * * **selector** - the directive type or the name used for querying.
+ * * **read** - read a different token from the queried elements.
+ *
+ * Let's look at an example:
+ *
+ * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
+ *
+ * **npm package**: `@angular/core`
  *
  * @stable
  * @Annotation
@@ -98,7 +212,44 @@ export var ViewChildren = makePropDecorator('ViewChildren', [
     }
 ], Query);
 /**
- * ViewChild decorator and metadata.
+ * @whatItDoes Configures a view query.
+ *
+ * @howToUse
+ *
+ * ```
+ * import {Component, QueryList, ViewChild} from '@angular/core';
+ *
+ * @Component({
+ *   selector: 'someCmp',
+ *   templateUrl: 'someCmp.html'
+ * })
+ * class SomeCmp {
+ *   @ViewChild(ChildDirective) child: ChildDirective;
+ *
+ *   ngAfterViewInit() {
+ *     // child is set
+ *   }
+ * }
+ * ```
+ *
+ * @description
+ *
+ * You can use ViewChild to get the first element or the directive matching the selector from the
+ * view DOM. If the view DOM changes, and a new child matches the selector,
+ * the property will be updated.
+ *
+ * View queries are set before the `ngAfterViewInit` callback is called.
+ *
+ * **Metadata Properties**:
+ *
+ * * **selector** - the directive type or the name used for querying.
+ * * **read** - read a different token from the queried elements.
+ *
+ * Let's look at an example:
+ *
+ * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
+ *
+ * **npm package**: `@angular/core`
  *
  * @stable
  * @Annotation
