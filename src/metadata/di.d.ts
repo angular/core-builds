@@ -137,7 +137,35 @@ export declare abstract class Query {
  */
 export interface ContentChildrenDecorator {
     /**
-     * @docsNotRequired
+     * @whatItDoes Configures a content query.
+     *
+     * @howToUse
+     *
+     * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
+     *
+     * @description
+     *
+     * You can use ContentChildren to get the {@link QueryList} of elements or directives from the
+     * content DOM. Any time a child element is added, removed, or moved, the query list will be
+     * updated,
+     * and the changes observable of the query list will emit a new value.
+     *
+     * Content queries are set before the `ngAfterContentInit` callback is called.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - the directive type or the name used for querying.
+     * * **descendants** - include only direct children or all descendants.
+     * * **read** - read a different token from the queried elements.
+     *
+     * Let's look at an example:
+     *
+     * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
+     *
+     * **npm package**: `@angular/core`
+     *
+     * @stable
+     * @Annotation
      */
     (selector: Type<any> | Function | string, {descendants, read}?: {
         descendants?: boolean;
@@ -152,51 +180,14 @@ export interface ContentChildrenDecorator {
  * Type of the ContentChildren metadata.
  *
  * @stable
+ * @Annotation
  */
 export declare type ContentChildren = Query;
 /**
- * @whatItDoes Configures a content query.
+ * ContentChildren decorator and metadata.
  *
- * @howToUse
- *
- * ```
- * import {Directive, QueryList, ContentChildren} from '@angular/core';
- *
- * @Directive({
- *   selector: 'someDir'
- * })
- * class SomeDir {
- *   @ContentChildren(ChildDirective) contentChildren: QueryList<ChildDirective>;
- *
- *   ngAfterContentInit() {
- *     // contentChildren is set
- *   }
- * }
- * ```
- *
- * @description
- *
- * You can use ContentChildren to get the {@link QueryList} of elements or directives from the
- * content DOM. Any time a child element is added, removed, or moved, the query list will be
- * updated,
- * and the changes observable of the query list will emit a new value.
- *
- * Content queries are set before the `ngAfterContentInit` callback is called.
- *
- * **Metadata Properties**:
- *
- * * **selector** - the directive type or the name used for querying.
- * * **descendants** - include only direct children or all descendants.
- * * **read** - read a different token from the queried elements.
- *
- * Let's look at an example:
- *
- * {@example core/di/ts/contentChildren/content_children_example.ts region='Component'}
- *
- * **npm package**: `@angular/core`
- *
- * @stable
- * @Annotation
+ *  @stable
+ *  @Annotation
  */
 export declare const ContentChildren: ContentChildrenDecorator;
 /**
@@ -229,20 +220,7 @@ export declare type ContentChild = Query;
  *
  * @howToUse
  *
- * ```
- * import {Directive, ContentChild} from '@angular/core';
- *
- * @Directive({
- *   selector: 'someDir'
- * })
- * class SomeDir {
- *   @ContentChild(ChildDirective) contentChild;
- *
- *   ngAfterContentInit() {
- *     // contentChild is set
- *   }
- * }
- * ```
+ * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
  *
  * @description
  *
@@ -295,21 +273,7 @@ export declare type ViewChildren = Query;
  *
  * @howToUse
  *
- * ```
- * import {Component, QueryList, ViewChildren} from '@angular/core';
- *
- * @Component({
- *   selector: 'someCmp',
- *   templateUrl: 'someCmp.html'
- * })
- * class SomeCmp {
- *   @ViewChildren(ChildDirective) viewChildren: QueryList<ChildDirective>;
- *
- *   ngAfterViewInit() {
- *     // viewChildren is set
- *   }
- * }
- * ```
+ * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
  *
  * @description
  *
@@ -343,8 +307,35 @@ export declare const ViewChildren: ViewChildrenDecorator;
  */
 export interface ViewChildDecorator {
     /**
-   * @docsNotRequired
-   */ (selector: Type<any> | Function | string, {read}?: {
+     * @whatItDoes Configures a view query.
+     *
+     * @howToUse
+     *
+     * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
+     *
+     * @description
+     *
+     * You can use ViewChild to get the first element or the directive matching the selector from the
+     * view DOM. If the view DOM changes, and a new child matches the selector,
+     * the property will be updated.
+     *
+     * View queries are set before the `ngAfterViewInit` callback is called.
+     *
+     * **Metadata Properties**:
+     *
+     * * **selector** - the directive type or the name used for querying.
+     * * **read** - read a different token from the queried elements.
+     *
+     * Let's look at an example!!!!:
+     *
+     * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
+     *
+     * **npm package**: `@angular/core`
+     *
+     * @stable
+     * @Annotation
+     */
+    (selector: Type<any> | Function | string, {read}?: {
         read?: any;
     }): any;
     new (selector: Type<any> | Function | string, {read}?: {
@@ -358,44 +349,7 @@ export interface ViewChildDecorator {
  */
 export declare type ViewChild = Query;
 /**
- * @whatItDoes Configures a view query.
- *
- * @howToUse
- *
- * ```
- * import {Component, QueryList, ViewChild} from '@angular/core';
- *
- * @Component({
- *   selector: 'someCmp',
- *   templateUrl: 'someCmp.html'
- * })
- * class SomeCmp {
- *   @ViewChild(ChildDirective) child: ChildDirective;
- *
- *   ngAfterViewInit() {
- *     // child is set
- *   }
- * }
- * ```
- *
- * @description
- *
- * You can use ViewChild to get the first element or the directive matching the selector from the
- * view DOM. If the view DOM changes, and a new child matches the selector,
- * the property will be updated.
- *
- * View queries are set before the `ngAfterViewInit` callback is called.
- *
- * **Metadata Properties**:
- *
- * * **selector** - the directive type or the name used for querying.
- * * **read** - read a different token from the queried elements.
- *
- * Let's look at an example:
- *
- * {@example core/di/ts/viewChild/view_child_example.ts region='Component'}
- *
- * **npm package**: `@angular/core`
+ * ViewChild decorator and metadata.
  *
  * @stable
  * @Annotation
