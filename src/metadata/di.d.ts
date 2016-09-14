@@ -95,8 +95,6 @@ export interface AttributeDecorator {
 }
 /**
  * Type of the Attribute metadata.
- *
- * @stable
  */
 export interface Attribute {
     attributeName?: string;
