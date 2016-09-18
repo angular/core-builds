@@ -1333,7 +1333,6 @@
          * - Throws {@link NoProviderError} if no `notFoundValue` that is not equal to
          * Injector.THROW_IF_NOT_FOUND is given
          * - Returns the `notFoundValue` otherwise
-         * ```
          */
         Injector.prototype.get = function (token, notFoundValue) { return unimplemented(); };
         Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
