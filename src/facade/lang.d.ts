@@ -42,7 +42,6 @@ export declare function isFunction(obj: any): boolean;
 export declare function isType(obj: any): boolean;
 export declare function isStringMap(obj: any): obj is Object;
 export declare function isStrictStringMap(obj: any): boolean;
-export declare function isPromise(obj: any): boolean;
 export declare function isArray(obj: any): boolean;
 export declare function isDate(obj: any): obj is Date;
 export declare function noop(): void;

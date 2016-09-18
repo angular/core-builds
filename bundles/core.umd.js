@@ -60,11 +60,6 @@
     function isFunction(obj) {
         return typeof obj === 'function';
     }
-    function isPromise(obj) {
-        // allow any Promise/A+ compliant thenable.
-        // It's up to the caller to ensure that obj.then conforms to the spec
-        return isPresent(obj) && isFunction(obj.then);
-    }
     function isArray(obj) {
         return Array.isArray(obj);
     }
@@ -3514,6 +3509,19 @@
         };
         return ErrorHandler;
     }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    function isPromise(obj) {
+        // allow any Promise/A+ compliant thenable.
+        // It's up to the caller to ensure that obj.then conforms to the spec
+        return !!obj && typeof obj.then === 'function';
+    }
 
     /**
      * A function that will be executed when an application is initialized.
@@ -9798,7 +9806,8 @@
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,
         FILL_STYLE_FLAG: FILL_STYLE_FLAG,
-        ComponentStillLoadingError: ComponentStillLoadingError
+        ComponentStillLoadingError: ComponentStillLoadingError,
+        isPromise: isPromise
     };
 
     exports.createPlatform = createPlatform;

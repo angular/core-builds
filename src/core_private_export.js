@@ -35,6 +35,7 @@ import * as reflection_capabilities from './reflection/reflection_capabilities';
 import * as reflector_reader from './reflection/reflector_reader';
 import * as api from './render/api';
 import * as decorators from './util/decorators';
+import { isPromise } from './util/lang';
 export var __core_private__ = {
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorStatus: constants.ChangeDetectorStatus,
@@ -100,6 +101,7 @@ export var __core_private__ = {
     DEFAULT_STATE: DEFAULT_STATE_,
     EMPTY_STATE: EMPTY_STATE_,
     FILL_STYLE_FLAG: FILL_STYLE_FLAG_,
-    ComponentStillLoadingError: ComponentStillLoadingError
+    ComponentStillLoadingError: ComponentStillLoadingError,
+    isPromise: isPromise
 };
 //# sourceMappingURL=core_private_export.js.map

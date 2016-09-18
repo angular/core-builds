@@ -36,6 +36,7 @@ import * as reflector_reader from './reflection/reflector_reader';
 import * as reflection_types from './reflection/types';
 import * as api from './render/api';
 import * as decorators from './util/decorators';
+import { isPromise } from './util/lang';
 export declare var __core_private__: {
     isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
     ChangeDetectorStatus: typeof constants.ChangeDetectorStatus;
@@ -133,4 +134,5 @@ export declare var __core_private__: {
     FILL_STYLE_FLAG: typeof FILL_STYLE_FLAG_;
     _ComponentStillLoadingError?: ComponentStillLoadingError;
     ComponentStillLoadingError: typeof ComponentStillLoadingError;
+    isPromise: typeof isPromise;
 };
