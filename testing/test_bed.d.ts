@@ -19,11 +19,11 @@ export declare class TestComponentRenderer {
 /**
  * @experimental
  */
-export declare var ComponentFixtureAutoDetect: OpaqueToken;
+export declare const ComponentFixtureAutoDetect: OpaqueToken;
 /**
  * @experimental
  */
-export declare var ComponentFixtureNoNgZone: OpaqueToken;
+export declare const ComponentFixtureNoNgZone: OpaqueToken;
 /**
  * @experimental
  */

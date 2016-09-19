@@ -658,8 +658,12 @@
      *  @Annotation
      */
     var ContentChildren = makePropDecorator('ContentChildren', [
-        ['selector', undefined],
-        { first: false, isViewQuery: false, descendants: false, read: undefined }
+        ['selector', undefined], {
+            first: false,
+            isViewQuery: false,
+            descendants: false,
+            read: undefined,
+        }
     ], Query);
     /**
      * @whatItDoes Configures a content query.
@@ -694,7 +698,7 @@
         ['selector', undefined], {
             first: true,
             isViewQuery: false,
-            descendants: false,
+            descendants: true,
             read: undefined,
         }
     ], Query);

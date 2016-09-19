@@ -8,8 +8,7 @@
 import { Injector, NgModule, NgZone, OpaqueToken } from '@angular/core';
 import { AsyncTestCompleter } from './async_test_completer';
 import { ComponentFixture } from './component_fixture';
-import { ListWrapper } from './facade/collection';
-import { FunctionWrapper, stringify } from './facade/lang';
+import { stringify } from './facade/lang';
 import { TestingCompilerFactory } from './test_compiler';
 var UNDEFINED = new Object();
 /**
@@ -69,7 +68,7 @@ export var TestBed = (function () {
      */
     TestBed.initTestEnvironment = function (ngModule, platform) {
         var testBed = getTestBed();
-        getTestBed().initTestEnvironment(ngModule, platform);
+        testBed.initTestEnvironment(ngModule, platform);
         return testBed;
     };
     /**
@@ -181,17 +180,18 @@ export var TestBed = (function () {
     TestBed.prototype.configureTestingModule = function (moduleDef) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
-            this._providers = ListWrapper.concat(this._providers, moduleDef.providers);
+            (_a = this._providers).push.apply(_a, moduleDef.providers);
         }
         if (moduleDef.declarations) {
-            this._declarations = ListWrapper.concat(this._declarations, moduleDef.declarations);
+            (_b = this._declarations).push.apply(_b, moduleDef.declarations);
         }
         if (moduleDef.imports) {
-            this._imports = ListWrapper.concat(this._imports, moduleDef.imports);
+            (_c = this._imports).push.apply(_c, moduleDef.imports);
         }
         if (moduleDef.schemas) {
-            this._schemas = ListWrapper.concat(this._schemas, moduleDef.schemas);
+            (_d = this._schemas).push.apply(_d, moduleDef.schemas);
         }
+        var _a, _b, _c, _d;
     };
     TestBed.prototype.compileComponents = function () {
         var _this = this;
@@ -274,7 +274,7 @@ export var TestBed = (function () {
         var _this = this;
         this._initIfNeeded();
         var params = tokens.map(function (t) { return _this.get(t); });
-        return FunctionWrapper.apply(fn, params);
+        return fn.apply(void 0, params);
     };
     TestBed.prototype.overrideModule = function (ngModule, override) {
         this._assertNotInstantiated('overrideModule', 'override module metadata');
@@ -309,7 +309,7 @@ export var TestBed = (function () {
             var componentRef = componentFactory.create(_this, [], "#" + rootElId);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
-        var fixture = ngZone == null ? initComponent() : ngZone.run(initComponent);
+        var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
         this._activeFixtures.push(fixture);
         return fixture;
     };
@@ -320,10 +320,7 @@ var _testBed = null;
  * @experimental
  */
 export function getTestBed() {
-    if (_testBed == null) {
-        _testBed = new TestBed();
-    }
-    return _testBed;
+    return _testBed = _testBed || new TestBed();
 }
 /**
  * Allows injecting dependencies in `beforeEach()` and `it()`.
