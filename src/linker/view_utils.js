@@ -9,7 +9,6 @@ import { APP_ID } from '../application_tokens';
 import { devModeEqual } from '../change_detection/change_detection';
 import { UNINITIALIZED } from '../change_detection/change_detection_util';
 import { Inject, Injectable } from '../di';
-import { ListWrapper } from '../facade/collection';
 import { isBlank, isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
@@ -73,7 +72,7 @@ export function ensureSlotCount(projectableNodes, expectedSlotCount) {
     }
     else if (projectableNodes.length < expectedSlotCount) {
         var givenSlotCount = projectableNodes.length;
-        res = ListWrapper.createFixedSize(expectedSlotCount);
+        res = new Array(expectedSlotCount);
         for (var i = 0; i < expectedSlotCount; i++) {
             res[i] = (i < givenSlotCount) ? projectableNodes[i] : EMPTY_ARR;
         }

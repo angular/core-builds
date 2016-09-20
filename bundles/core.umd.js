@@ -1344,20 +1344,18 @@
         return Injector;
     }());
 
-    var Map$1 = global$1.Map;
-    var Set = global$1.Set;
     // Safari and Internet Explorer do not support the iterable parameter to the
     // Map constructor.  We work around that by manually adding the items.
     var createMapFromPairs = (function () {
         try {
-            if (new Map$1([[1, 2]]).size === 1) {
-                return function createMapFromPairs(pairs) { return new Map$1(pairs); };
+            if (new Map([[1, 2]]).size === 1) {
+                return function createMapFromPairs(pairs) { return new Map(pairs); };
             }
         }
         catch (e) {
         }
         return function createMapAndPopulateFromPairs(pairs) {
-            var map = new Map$1();
+            var map = new Map();
             for (var i = 0; i < pairs.length; i++) {
                 var pair = pairs[i];
                 map.set(pair[0], pair[1]);
@@ -1365,22 +1363,8 @@
             return map;
         };
     })();
-    var createMapFromMap = (function () {
-        try {
-            if (new Map$1(new Map$1())) {
-                return function createMapFromMap(m) { return new Map$1(m); };
-            }
-        }
-        catch (e) {
-        }
-        return function createMapAndPopulateFromMap(m) {
-            var map = new Map$1();
-            m.forEach(function (v, k) { map.set(k, v); });
-            return map;
-        };
-    })();
     var _clearValues = (function () {
-        if ((new Map$1()).keys().next) {
+        if ((new Map()).keys().next) {
             return function _clearValues(m) {
                 var keyIterator = m.keys();
                 var k;
@@ -1399,7 +1383,7 @@
     // TODO(mlaval): remove the work around once we have a working polyfill of Array.from
     var _arrayFromMap = (function () {
         try {
-            if ((new Map$1()).values().next) {
+            if ((new Map()).values().next) {
                 return function createArrayFromMap(m, getValues) {
                     return getValues ? Array.from(m.values()) : Array.from(m.keys());
                 };
@@ -1408,7 +1392,7 @@
         catch (e) {
         }
         return function createArrayFromMapWithForeach(m, getValues) {
-            var res = ListWrapper.createFixedSize(m.size), i = 0;
+            var res = new Array(m.size), i = 0;
             m.forEach(function (v, k) {
                 res[i] = getValues ? v : k;
                 i++;
@@ -1419,9 +1403,8 @@
     var MapWrapper = (function () {
         function MapWrapper() {
         }
-        MapWrapper.clone = function (m) { return createMapFromMap(m); };
         MapWrapper.createFromStringMap = function (stringMap) {
-            var result = new Map$1();
+            var result = new Map();
             for (var prop in stringMap) {
                 result.set(prop, stringMap[prop]);
             }
@@ -1433,7 +1416,6 @@
             return r;
         };
         MapWrapper.createFromPairs = function (pairs) { return createMapFromPairs(pairs); };
-        MapWrapper.clearValues = function (m) { _clearValues(m); };
         MapWrapper.iterable = function (m) { return m; };
         MapWrapper.keys = function (m) { return _arrayFromMap(m, false); };
         MapWrapper.values = function (m) { return _arrayFromMap(m, true); };
@@ -1445,15 +1427,6 @@
     var StringMapWrapper = (function () {
         function StringMapWrapper() {
         }
-        StringMapWrapper.create = function () {
-            // Note: We are not using Object.create(null) here due to
-            // performance!
-            // http://jsperf.com/ng2-object-create-null
-            return {};
-        };
-        StringMapWrapper.contains = function (map, key) {
-            return map.hasOwnProperty(key);
-        };
         StringMapWrapper.get = function (map, key) {
             return map.hasOwnProperty(key) ? map[key] : undefined;
         };
@@ -1468,7 +1441,6 @@
             }
             return true;
         };
-        StringMapWrapper.delete = function (map, key) { delete map[key]; };
         StringMapWrapper.forEach = function (map, callback) {
             for (var _i = 0, _a = Object.keys(map); _i < _a.length; _i++) {
                 var k = _a[_i];
@@ -1637,7 +1609,7 @@
         if (!isJsObject(obj))
             return false;
         return isArray(obj) ||
-            (!(obj instanceof Map$1) &&
+            (!(obj instanceof Map) &&
                 getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
     }
     function areIterablesEqual(a, b, comparator) {
@@ -2259,16 +2231,17 @@
         __extends$2(Reflector, _super);
         function Reflector(reflectionCapabilities) {
             _super.call(this);
-            /** @internal */
-            this._injectableInfo = new Map$1();
-            /** @internal */
-            this._getters = new Map$1();
-            /** @internal */
-            this._setters = new Map$1();
-            /** @internal */
-            this._methods = new Map$1();
-            this._usedKeys = null;
             this.reflectionCapabilities = reflectionCapabilities;
+            /** @internal */
+            this._injectableInfo = new Map();
+            /** @internal */
+            this._getters = new Map();
+            /** @internal */
+            this._setters = new Map();
+            /** @internal */
+            this._methods = new Map();
+            /** @internal */
+            this._usedKeys = null;
         }
         Reflector.prototype.updateCapabilities = function (caps) { this.reflectionCapabilities = caps; };
         Reflector.prototype.isReflectionEnabled = function () { return this.reflectionCapabilities.isReflectionEnabled(); };
@@ -2715,7 +2688,7 @@
         function ReflectiveProtoInjectorDynamicStrategy(protoInj, providers) {
             this.providers = providers;
             var len = providers.length;
-            this.keyIds = ListWrapper.createFixedSize(len);
+            this.keyIds = new Array(len);
             for (var i = 0; i < len; i++) {
                 this.keyIds[i] = providers[i].key.id;
             }
@@ -2860,7 +2833,7 @@
         function ReflectiveInjectorDynamicStrategy(protoStrategy, injector) {
             this.protoStrategy = protoStrategy;
             this.injector = injector;
-            this.objs = ListWrapper.createFixedSize(protoStrategy.providers.length);
+            this.objs = new Array(protoStrategy.providers.length);
             ListWrapper.fill(this.objs, UNDEFINED);
         }
         ReflectiveInjectorDynamicStrategy.prototype.resetConstructionCounter = function () { this.injector._constructionCounter = 0; };
@@ -3204,7 +3177,7 @@
         };
         ReflectiveInjector_.prototype._instantiateProvider = function (provider) {
             if (provider.multiProvider) {
-                var res = ListWrapper.createFixedSize(provider.resolvedFactories.length);
+                var res = new Array(provider.resolvedFactories.length);
                 for (var i = 0; i < provider.resolvedFactories.length; ++i) {
                     res[i] = this._instantiate(provider, provider.resolvedFactories[i]);
                 }
@@ -5646,7 +5619,7 @@
         }
         else if (projectableNodes.length < expectedSlotCount) {
             var givenSlotCount = projectableNodes.length;
-            res = ListWrapper.createFixedSize(expectedSlotCount);
+            res = new Array(expectedSlotCount);
             for (var i = 0; i < expectedSlotCount; i++) {
                 res[i] = (i < givenSlotCount) ? projectableNodes[i] : EMPTY_ARR;
             }
@@ -6612,6 +6585,7 @@
             this._runCallbacksIfReady();
         };
         Testability.prototype.getPendingRequestCount = function () { return this._pendingCount; };
+        /** @deprecated use findProviders */
         Testability.prototype.findBindings = function (using, provider, exactMatch) {
             // TODO(juliemr): implement.
             return [];
@@ -6636,7 +6610,7 @@
     var TestabilityRegistry = (function () {
         function TestabilityRegistry() {
             /** @internal */
-            this._applications = new Map$1();
+            this._applications = new Map();
             _testabilityGetter.addToWindow(this);
         }
         TestabilityRegistry.prototype.registerApplication = function (token, testability) {
@@ -9237,7 +9211,7 @@
 
     var ViewAnimationMap = (function () {
         function ViewAnimationMap() {
-            this._map = new Map$1();
+            this._map = new Map();
             this._allPlayers = [];
         }
         Object.defineProperty(ViewAnimationMap.prototype, "length", {
@@ -9271,11 +9245,11 @@
         ViewAnimationMap.prototype.getAllPlayers = function () { return this._allPlayers; };
         ViewAnimationMap.prototype.remove = function (element, animationName) {
             var playersByAnimation = this._map.get(element);
-            if (isPresent(playersByAnimation)) {
+            if (playersByAnimation) {
                 var player = playersByAnimation[animationName];
                 delete playersByAnimation[animationName];
                 var index = this._allPlayers.indexOf(player);
-                ListWrapper.removeAt(this._allPlayers, index);
+                this._allPlayers.splice(index, 1);
                 if (StringMapWrapper.isEmpty(playersByAnimation)) {
                     this._map.delete(element);
                 }
