@@ -32,7 +32,13 @@ export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDet
  */
 export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
 /**
- * @experimental
+ * @whatItDoes Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
+ * @description
+ *
+ * TestBed is the primary api for writing unit tests for Angular applications and libraries.
+ *
+ * @stable
  */
 export var TestBed = (function () {
     function TestBed() {
