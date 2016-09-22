@@ -1147,13 +1147,6 @@
     /**
      * Metadata properties available for configuring Views.
      *
-     * Each Angular component requires a single `@Component` and at least one `@View` annotation. The
-     * `@View` annotation specifies the HTML template to use, and lists the directives that are active
-     * within the template.
-     *
-     * When a component is instantiated, the template is loaded into the component's shadow root, and
-     * the expressions and statements in the template are evaluated against the component.
-     *
      * For details on the `@Component` annotation, see {@link Component}.
      *
      * ### Example
@@ -1162,7 +1155,6 @@
      * @Component({
      *   selector: 'greet',
      *   template: 'Hello {{name}}!',
-     *   directives: [GreetUser, Bold]
      * })
      * class Greet {
      *   name: string;
@@ -1174,6 +1166,8 @@
      * ```
      *
      * @deprecated Use Component instead.
+     *
+     * {@link Component}
      */
     var ViewMetadata = (function () {
         function ViewMetadata(_a) {
@@ -3568,7 +3562,7 @@
     var APP_ID_RANDOM_PROVIDER = {
         provide: APP_ID,
         useFactory: _appIdRandomProviderFactory,
-        deps: []
+        deps: [],
     };
     function _randomChar() {
         return StringWrapper.fromCharCode(97 + Math.floor(Math.random() * 25));
@@ -6698,12 +6692,12 @@
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function createPlatform(injector) {
-        if (isPresent(_platform) && !_platform.destroyed) {
+        if (_platform && !_platform.destroyed) {
             throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
         }
         _platform = injector.get(PlatformRef);
         var inits = injector.get(PLATFORM_INITIALIZER, null);
-        if (isPresent(inits))
+        if (inits)
             inits.forEach(function (init) { return init(); });
         return _platform;
     }
@@ -6736,10 +6730,10 @@
      */
     function assertPlatform(requiredToken) {
         var platform = getPlatform();
-        if (isBlank(platform)) {
+        if (!platform) {
             throw new Error('No platform exists!');
         }
-        if (isPresent(platform) && isBlank(platform.injector.get(requiredToken, null))) {
+        if (!platform.injector.get(requiredToken, null)) {
             throw new Error('A platform with a different configuration has been created. Please destroy it first.');
         }
         return platform;
@@ -6750,7 +6744,7 @@
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function destroyPlatform() {
-        if (isPresent(_platform) && !_platform.destroyed) {
+        if (_platform && !_platform.destroyed) {
             _platform.destroy();
         }
     }
@@ -6760,7 +6754,7 @@
      * @experimental APIs related to application bootstrap are currently under review.
      */
     function getPlatform() {
-        return isPresent(_platform) && !_platform.destroyed ? _platform : null;
+        return _platform && !_platform.destroyed ? _platform : null;
     }
     /**
      * The Angular platform is the entry point for Angular on a web page. Each page
@@ -6847,9 +6841,7 @@
                     throw e;
                 });
             }
-            else {
-                return result;
-            }
+            return result;
         }
         catch (e) {
             errorHandler.handleError(e);
@@ -6881,8 +6873,8 @@
             if (this._destroyed) {
                 throw new Error('The platform has already been destroyed!');
             }
-            ListWrapper.clone(this._modules).forEach(function (app) { return app.destroy(); });
-            this._destroyListeners.forEach(function (dispose) { return dispose(); });
+            this._modules.slice().forEach(function (module) { return module.destroy(); });
+            this._destroyListeners.forEach(function (listener) { return listener(); });
             this._destroyed = true;
         };
         PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
@@ -6924,7 +6916,7 @@
             var _this = this;
             if (compilerOptions === void 0) { compilerOptions = []; }
             var compilerFactory = this.injector.get(CompilerFactory);
-            var compiler = compilerFactory.createCompiler(compilerOptions instanceof Array ? compilerOptions : [compilerOptions]);
+            var compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
             // ugly internal api hack: generate host component factories for all declared components and
             // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
             // factories.
@@ -7036,7 +7028,7 @@
             var compRef = componentFactory.create(this._injector, [], componentFactory.selector);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
             var testability = compRef.injector.get(Testability, null);
-            if (isPresent(testability)) {
+            if (testability) {
                 compRef.injector.get(TestabilityRegistry)
                     .registerApplication(compRef.location.nativeElement, testability);
             }
@@ -7058,7 +7050,7 @@
         };
         /** @internal */
         ApplicationRef_.prototype._unloadComponent = function (componentRef) {
-            if (!ListWrapper.contains(this._rootComponents, componentRef)) {
+            if (this._rootComponents.indexOf(componentRef) == -1) {
                 return;
             }
             this.unregisterChangeDetector(componentRef.changeDetectorRef);
@@ -7068,7 +7060,7 @@
             if (this._runningTick) {
                 throw new Error('ApplicationRef.tick is called recursively');
             }
-            var s = ApplicationRef_._tickScope();
+            var scope = ApplicationRef_._tickScope();
             try {
                 this._runningTick = true;
                 this._changeDetectorRefs.forEach(function (detector) { return detector.detectChanges(); });
@@ -7078,12 +7070,12 @@
             }
             finally {
                 this._runningTick = false;
-                wtfLeave(s);
+                wtfLeave(scope);
             }
         };
         ApplicationRef_.prototype.ngOnDestroy = function () {
             // TODO(alxhub): Dispose of the NgZone.
-            ListWrapper.clone(this._rootComponents).forEach(function (ref) { return ref.destroy(); });
+            this._rootComponents.slice().forEach(function (component) { return component.destroy(); });
         };
         Object.defineProperty(ApplicationRef_.prototype, "componentTypes", {
             get: function () { return this._rootComponentTypes; },
@@ -7862,9 +7854,12 @@
         return reflector;
     }
     var _CORE_PLATFORM_PROVIDERS = [
-        PlatformRef_, { provide: PlatformRef, useExisting: PlatformRef_ },
+        PlatformRef_,
+        { provide: PlatformRef, useExisting: PlatformRef_ },
         { provide: Reflector, useFactory: _reflector, deps: [] },
-        { provide: ReflectorReader, useExisting: Reflector }, TestabilityRegistry, Console
+        { provide: ReflectorReader, useExisting: Reflector },
+        TestabilityRegistry,
+        Console,
     ];
     /**
      * This platform has to be included in any other platform

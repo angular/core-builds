@@ -28,7 +28,7 @@ export function _appIdRandomProviderFactory() {
 export var APP_ID_RANDOM_PROVIDER = {
     provide: APP_ID,
     useFactory: _appIdRandomProviderFactory,
-    deps: []
+    deps: [],
 };
 function _randomChar() {
     return StringWrapper.fromCharCode(97 + Math.floor(Math.random() * 25));
