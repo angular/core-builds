@@ -8021,22 +8021,6 @@
     }());
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var AnimationOutput = (function () {
-        function AnimationOutput(name, phase, fullPropertyName) {
-            this.name = name;
-            this.phase = phase;
-            this.fullPropertyName = fullPropertyName;
-        }
-        return AnimationOutput;
-    }());
-
-    /**
      * @experimental Animation support is experimental.
      */
     var AnimationPlayer = (function () {
@@ -9363,20 +9347,19 @@
                     var listener = listeners[i];
                     // we check for both the name in addition to the phase in the event
                     // that there may be more than one @trigger on the same element
-                    if (listener.output.name == animationName && listener.output.phase == phase) {
+                    if (listener.eventName === animationName && listener.eventPhase === phase) {
                         listener.handler(event);
                         break;
                     }
                 }
             }
         };
-        AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
-            var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
+        AppView.prototype.registerAnimationOutput = function (element, eventName, eventPhase, eventHandler) {
             var animations = this._animationListeners.get(element);
             if (!isPresent(animations)) {
                 this._animationListeners.set(element, animations = []);
             }
-            animations.push(entry);
+            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
         };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
@@ -9705,12 +9688,13 @@
         }
         return lastNode;
     }
-    var _AnimationOutputWithHandler = (function () {
-        function _AnimationOutputWithHandler(output, handler) {
-            this.output = output;
+    var _AnimationOutputHandler = (function () {
+        function _AnimationOutputHandler(eventName, eventPhase, handler) {
+            this.eventName = eventName;
+            this.eventPhase = eventPhase;
             this.handler = handler;
         }
-        return _AnimationOutputWithHandler;
+        return _AnimationOutputHandler;
     }());
 
     var __core_private__ = {
@@ -9773,7 +9757,6 @@
         renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
-        AnimationOutput: AnimationOutput,
         ANY_STATE: ANY_STATE,
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,
