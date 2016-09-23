@@ -35,7 +35,6 @@ import { EventEmitter } from '../facade/async';
  *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
  *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
  *   `,
- *   directives: [NgIf]
  * })
  * export class NgZoneDemo {
  *   progress: number = 0;

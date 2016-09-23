@@ -3388,18 +3388,19 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * Provides a hook for centralized exception handling.
+     * @whatItDoes Provides a hook for centralized exception handling.
      *
-     * The default implementation of `ErrorHandler` prints error messages to the `Console`. To
-     * intercept error handling,
-     * write a custom exception handler that replaces this default as appropriate for your app.
+     * @description
+     *
+     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+     * intercept error handling, write a custom exception handler that replaces this default as
+     * appropriate for your app.
      *
      * ### Example
      *
-     * ```javascript
-     *
+     * ```
      * class MyErrorHandler implements ErrorHandler {
-     *   call(error, stackTrace = null, reason = null) {
+     *   handleError(error) {
      *     // do something with the exception
      *   }
      * }
@@ -3409,6 +3410,7 @@
      * })
      * class MyModule {}
      * ```
+     *
      * @stable
      */
     var ErrorHandler = (function () {
@@ -3451,9 +3453,7 @@
                 return error.context ? error.context :
                     this._findContext(error.originalError);
             }
-            else {
-                return null;
-            }
+            return null;
         };
         /** @internal */
         ErrorHandler.prototype._findOriginalError = function (error) {
@@ -5489,13 +5489,10 @@
      * ```typescript
      * @Component({
      *   selector: 'parent',
-     *   template: `
-     *     <child [prop]="parentProp"></child>
-     *   `,
-     *   directives: [forwardRef(() => Child)]
+     *   template: '<child [prop]="parentProp"></child>',
      * })
      * class Parent {
-     *   parentProp = "init";
+     *   parentProp = 'init';
      * }
      *
      * @Directive({selector: 'child', inputs: ['prop']})
@@ -5505,7 +5502,7 @@
      *   set prop(v) {
      *     // this updates the parent property, which is disallowed during change detection
      *     // this will result in ExpressionChangedAfterItHasBeenCheckedError
-     *     this.parent.parentProp = "updated";
+     *     this.parent.parentProp = 'updated';
      *   }
      * }
      * ```
@@ -6282,7 +6279,6 @@
      *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
      *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
      *   `,
-     *   directives: [NgIf]
      * })
      * export class NgZoneDemo {
      *   progress: number = 0;
@@ -8021,22 +8017,6 @@
     }());
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var AnimationOutput = (function () {
-        function AnimationOutput(name, phase, fullPropertyName) {
-            this.name = name;
-            this.phase = phase;
-            this.fullPropertyName = fullPropertyName;
-        }
-        return AnimationOutput;
-    }());
-
-    /**
      * @experimental Animation support is experimental.
      */
     var AnimationPlayer = (function () {
@@ -9363,20 +9343,19 @@
                     var listener = listeners[i];
                     // we check for both the name in addition to the phase in the event
                     // that there may be more than one @trigger on the same element
-                    if (listener.output.name == animationName && listener.output.phase == phase) {
+                    if (listener.eventName === animationName && listener.eventPhase === phase) {
                         listener.handler(event);
                         break;
                     }
                 }
             }
         };
-        AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
-            var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
+        AppView.prototype.registerAnimationOutput = function (element, eventName, eventPhase, eventHandler) {
             var animations = this._animationListeners.get(element);
             if (!isPresent(animations)) {
                 this._animationListeners.set(element, animations = []);
             }
-            animations.push(entry);
+            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
         };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
@@ -9705,12 +9684,13 @@
         }
         return lastNode;
     }
-    var _AnimationOutputWithHandler = (function () {
-        function _AnimationOutputWithHandler(output, handler) {
-            this.output = output;
+    var _AnimationOutputHandler = (function () {
+        function _AnimationOutputHandler(eventName, eventPhase, handler) {
+            this.eventName = eventName;
+            this.eventPhase = eventPhase;
             this.handler = handler;
         }
-        return _AnimationOutputWithHandler;
+        return _AnimationOutputHandler;
     }());
 
     var __core_private__ = {
@@ -9773,7 +9753,6 @@
         renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
-        AnimationOutput: AnimationOutput,
         ANY_STATE: ANY_STATE,
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,
