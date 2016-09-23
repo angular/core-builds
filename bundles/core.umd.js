@@ -3388,19 +3388,18 @@
      * found in the LICENSE file at https://angular.io/license
      */
     /**
-     * @whatItDoes Provides a hook for centralized exception handling.
+     * Provides a hook for centralized exception handling.
      *
-     * @description
-     *
-     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
-     * intercept error handling, write a custom exception handler that replaces this default as
-     * appropriate for your app.
+     * The default implementation of `ErrorHandler` prints error messages to the `Console`. To
+     * intercept error handling,
+     * write a custom exception handler that replaces this default as appropriate for your app.
      *
      * ### Example
      *
-     * ```
+     * ```javascript
+     *
      * class MyErrorHandler implements ErrorHandler {
-     *   handleError(error) {
+     *   call(error, stackTrace = null, reason = null) {
      *     // do something with the exception
      *   }
      * }
@@ -3410,7 +3409,6 @@
      * })
      * class MyModule {}
      * ```
-     *
      * @stable
      */
     var ErrorHandler = (function () {
@@ -3453,7 +3451,9 @@
                 return error.context ? error.context :
                     this._findContext(error.originalError);
             }
-            return null;
+            else {
+                return null;
+            }
         };
         /** @internal */
         ErrorHandler.prototype._findOriginalError = function (error) {
@@ -8021,6 +8021,22 @@
     }());
 
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var AnimationOutput = (function () {
+        function AnimationOutput(name, phase, fullPropertyName) {
+            this.name = name;
+            this.phase = phase;
+            this.fullPropertyName = fullPropertyName;
+        }
+        return AnimationOutput;
+    }());
+
+    /**
      * @experimental Animation support is experimental.
      */
     var AnimationPlayer = (function () {
@@ -9347,19 +9363,20 @@
                     var listener = listeners[i];
                     // we check for both the name in addition to the phase in the event
                     // that there may be more than one @trigger on the same element
-                    if (listener.eventName === animationName && listener.eventPhase === phase) {
+                    if (listener.output.name == animationName && listener.output.phase == phase) {
                         listener.handler(event);
                         break;
                     }
                 }
             }
         };
-        AppView.prototype.registerAnimationOutput = function (element, eventName, eventPhase, eventHandler) {
+        AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
+            var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
             var animations = this._animationListeners.get(element);
             if (!isPresent(animations)) {
                 this._animationListeners.set(element, animations = []);
             }
-            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
+            animations.push(entry);
         };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
@@ -9688,13 +9705,12 @@
         }
         return lastNode;
     }
-    var _AnimationOutputHandler = (function () {
-        function _AnimationOutputHandler(eventName, eventPhase, handler) {
-            this.eventName = eventName;
-            this.eventPhase = eventPhase;
+    var _AnimationOutputWithHandler = (function () {
+        function _AnimationOutputWithHandler(output, handler) {
+            this.output = output;
             this.handler = handler;
         }
-        return _AnimationOutputHandler;
+        return _AnimationOutputWithHandler;
     }());
 
     var __core_private__ = {
@@ -9757,6 +9773,7 @@
         renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
         AnimationStyles: AnimationStyles,
+        AnimationOutput: AnimationOutput,
         ANY_STATE: ANY_STATE,
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,

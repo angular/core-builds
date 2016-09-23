@@ -89,19 +89,20 @@ export var AppView = (function () {
                 var listener = listeners[i];
                 // we check for both the name in addition to the phase in the event
                 // that there may be more than one @trigger on the same element
-                if (listener.eventName === animationName && listener.eventPhase === phase) {
+                if (listener.output.name == animationName && listener.output.phase == phase) {
                     listener.handler(event);
                     break;
                 }
             }
         }
     };
-    AppView.prototype.registerAnimationOutput = function (element, eventName, eventPhase, eventHandler) {
+    AppView.prototype.registerAnimationOutput = function (element, outputEvent, eventHandler) {
+        var entry = new _AnimationOutputWithHandler(outputEvent, eventHandler);
         var animations = this._animationListeners.get(element);
         if (!isPresent(animations)) {
             this._animationListeners.set(element, animations = []);
         }
-        animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
+        animations.push(entry);
     };
     AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
         this.context = context;
@@ -430,12 +431,11 @@ function _findLastRenderNode(node) {
     }
     return lastNode;
 }
-var _AnimationOutputHandler = (function () {
-    function _AnimationOutputHandler(eventName, eventPhase, handler) {
-        this.eventName = eventName;
-        this.eventPhase = eventPhase;
+var _AnimationOutputWithHandler = (function () {
+    function _AnimationOutputWithHandler(output, handler) {
+        this.output = output;
         this.handler = handler;
     }
-    return _AnimationOutputHandler;
+    return _AnimationOutputWithHandler;
 }());
 //# sourceMappingURL=view.js.map
