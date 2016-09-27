@@ -36,12 +36,8 @@
     // exports the original value of the symbol.
     var global$1 = globalScope;
     function getTypeNameForDebugging(type) {
-        if (type['name']) {
-            return type['name'];
-        }
-        return typeof type;
+        return type['name'] || typeof type;
     }
-    var Math = global$1.Math;
     // TODO: remove calls to assert in production environment
     // Note: Can't just export this and import in in other files
     // as `assert` is a reserved keyword in Dart
@@ -78,7 +74,7 @@
         }
         var res = token.toString();
         var newLineIndex = res.indexOf('\n');
-        return (newLineIndex === -1) ? res : res.substring(0, newLineIndex);
+        return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
     }
     var StringWrapper = (function () {
         function StringWrapper() {
@@ -806,13 +802,6 @@
          */
         ChangeDetectorStatus[ChangeDetectorStatus["Destroyed"] = 5] = "Destroyed";
     })(ChangeDetectorStatus || (ChangeDetectorStatus = {}));
-    /**
-     * List of possible {@link ChangeDetectionStrategy} values.
-     */
-    var CHANGE_DETECTION_STRATEGY_VALUES = [
-        exports.ChangeDetectionStrategy.OnPush,
-        exports.ChangeDetectionStrategy.Default,
-    ];
     function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
         return isBlank(changeDetectionStrategy) ||
             changeDetectionStrategy === exports.ChangeDetectionStrategy.Default;
@@ -1143,7 +1132,6 @@
          */
         ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
     })(exports.ViewEncapsulation || (exports.ViewEncapsulation = {}));
-    var VIEW_ENCAPSULATION_VALUES = [exports.ViewEncapsulation.Emulated, exports.ViewEncapsulation.Native, exports.ViewEncapsulation.None];
     /**
      * Metadata properties available for configuring Views.
      *
@@ -1421,10 +1409,15 @@
     var StringMapWrapper = (function () {
         function StringMapWrapper() {
         }
-        StringMapWrapper.get = function (map, key) {
-            return map.hasOwnProperty(key) ? map[key] : undefined;
+        StringMapWrapper.create = function () {
+            // Note: We are not using Object.create(null) here due to
+            // performance!
+            // http://jsperf.com/ng2-object-create-null
+            return {};
         };
-        StringMapWrapper.set = function (map, key, value) { map[key] = value; };
+        StringMapWrapper.contains = function (map, key) {
+            return map.hasOwnProperty(key);
+        };
         StringMapWrapper.keys = function (map) { return Object.keys(map); };
         StringMapWrapper.values = function (map) {
             return Object.keys(map).map(function (k) { return map[k]; });
@@ -1634,33 +1627,6 @@
             }
         }
     }
-    // Safari and Internet Explorer do not support the iterable parameter to the
-    // Set constructor.  We work around that by manually adding the items.
-    var createSetFromList = (function () {
-        var test = new Set([1, 2, 3]);
-        if (test.size === 3) {
-            return function createSetFromList(lst) { return new Set(lst); };
-        }
-        else {
-            return function createSetAndPopulateFromList(lst) {
-                var res = new Set(lst);
-                if (res.size !== lst.length) {
-                    for (var i = 0; i < lst.length; i++) {
-                        res.add(lst[i]);
-                    }
-                }
-                return res;
-            };
-        }
-    })();
-    var SetWrapper = (function () {
-        function SetWrapper() {
-        }
-        SetWrapper.createFromList = function (lst) { return createSetFromList(lst); };
-        SetWrapper.has = function (s, key) { return s.has(key); };
-        SetWrapper.delete = function (m, k) { m.delete(k); };
-        return SetWrapper;
-    }());
 
     /**
      * @license
@@ -2255,7 +2221,7 @@
                 throw new Error('Usage tracking is disabled');
             }
             var allTypes = MapWrapper.keys(this._injectableInfo);
-            return allTypes.filter(function (key) { return !SetWrapper.has(_this._usedKeys, key); });
+            return allTypes.filter(function (key) { return !_this._usedKeys.has(key); });
         };
         Reflector.prototype.registerFunction = function (func, funcInfo) {
             this._injectableInfo.set(func, funcInfo);
@@ -9696,7 +9662,6 @@
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorStatus: ChangeDetectorStatus,
-        CHANGE_DETECTION_STRATEGY_VALUES: CHANGE_DETECTION_STRATEGY_VALUES,
         constructDependencies: constructDependencies,
         LifecycleHooks: LifecycleHooks,
         LIFECYCLE_HOOKS_VALUES: LIFECYCLE_HOOKS_VALUES,
@@ -9713,7 +9678,6 @@
         flattenNestedViewRenderNodes: flattenNestedViewRenderNodes,
         interpolate: interpolate,
         ViewUtils: ViewUtils,
-        VIEW_ENCAPSULATION_VALUES: VIEW_ENCAPSULATION_VALUES,
         ViewMetadata: ViewMetadata,
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,

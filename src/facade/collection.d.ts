@@ -14,12 +14,12 @@ export declare class MapWrapper {
  * Wraps Javascript Objects
  */
 export declare class StringMapWrapper {
-    static get<V>(map: {
-        [key: string]: V;
-    }, key: string): V;
-    static set<V>(map: {
-        [key: string]: V;
-    }, key: string, value: V): void;
+    static create(): {
+        [k: string]: any;
+    };
+    static contains(map: {
+        [key: string]: any;
+    }, key: string): boolean;
     static keys(map: {
         [key: string]: any;
     }): string[];
@@ -83,8 +83,3 @@ export declare class ListWrapper {
 export declare function isListLikeIterable(obj: any): boolean;
 export declare function areIterablesEqual(a: any, b: any, comparator: Function): boolean;
 export declare function iterateListLike(obj: any, fn: Function): void;
-export declare class SetWrapper {
-    static createFromList<T>(lst: T[]): Set<T>;
-    static has<T>(s: Set<T>, key: T): boolean;
-    static delete<K>(m: Set<K>, k: K): void;
-}

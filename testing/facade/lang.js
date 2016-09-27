@@ -26,13 +26,8 @@ export function scheduleMicroTask(fn) {
 var _global = globalScope;
 export { _global as global };
 export function getTypeNameForDebugging(type) {
-    if (type['name']) {
-        return type['name'];
-    }
-    return typeof type;
+    return type['name'] || typeof type;
 }
-export var Math = _global.Math;
-export var Date = _global.Date;
 // TODO: remove calls to assert in production environment
 // Note: Can't just export this and import in in other files
 // as `assert` is a reserved keyword in Dart
@@ -89,18 +84,7 @@ export function stringify(token) {
     }
     var res = token.toString();
     var newLineIndex = res.indexOf('\n');
-    return (newLineIndex === -1) ? res : res.substring(0, newLineIndex);
-}
-// serialize / deserialize enum exist only for consistency with dart API
-// enums in typescript don't need to be serialized
-export function serializeEnum(val) {
-    return val;
-}
-export function deserializeEnum(val, values) {
-    return val;
-}
-export function resolveEnumToken(enumValue, val) {
-    return enumValue[val];
+    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
 export var StringWrapper = (function () {
     function StringWrapper() {

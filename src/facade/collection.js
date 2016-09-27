@@ -103,10 +103,15 @@ export var MapWrapper = (function () {
 export var StringMapWrapper = (function () {
     function StringMapWrapper() {
     }
-    StringMapWrapper.get = function (map, key) {
-        return map.hasOwnProperty(key) ? map[key] : undefined;
+    StringMapWrapper.create = function () {
+        // Note: We are not using Object.create(null) here due to
+        // performance!
+        // http://jsperf.com/ng2-object-create-null
+        return {};
     };
-    StringMapWrapper.set = function (map, key, value) { map[key] = value; };
+    StringMapWrapper.contains = function (map, key) {
+        return map.hasOwnProperty(key);
+    };
     StringMapWrapper.keys = function (map) { return Object.keys(map); };
     StringMapWrapper.values = function (map) {
         return Object.keys(map).map(function (k) { return map[k]; });
@@ -316,31 +321,4 @@ export function iterateListLike(obj, fn) {
         }
     }
 }
-// Safari and Internet Explorer do not support the iterable parameter to the
-// Set constructor.  We work around that by manually adding the items.
-var createSetFromList = (function () {
-    var test = new Set([1, 2, 3]);
-    if (test.size === 3) {
-        return function createSetFromList(lst) { return new Set(lst); };
-    }
-    else {
-        return function createSetAndPopulateFromList(lst) {
-            var res = new Set(lst);
-            if (res.size !== lst.length) {
-                for (var i = 0; i < lst.length; i++) {
-                    res.add(lst[i]);
-                }
-            }
-            return res;
-        };
-    }
-})();
-export var SetWrapper = (function () {
-    function SetWrapper() {
-    }
-    SetWrapper.createFromList = function (lst) { return createSetFromList(lst); };
-    SetWrapper.has = function (s, key) { return s.has(key); };
-    SetWrapper.delete = function (m, k) { m.delete(k); };
-    return SetWrapper;
-}());
 //# sourceMappingURL=collection.js.map

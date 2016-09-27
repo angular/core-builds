@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { MapWrapper, SetWrapper, StringMapWrapper } from '../facade/collection';
+import { MapWrapper, StringMapWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
 import { ReflectorReader } from './reflector_reader';
 /**
@@ -64,7 +64,7 @@ export var Reflector = (function (_super) {
             throw new Error('Usage tracking is disabled');
         }
         var allTypes = MapWrapper.keys(this._injectableInfo);
-        return allTypes.filter(function (key) { return !SetWrapper.has(_this._usedKeys, key); });
+        return allTypes.filter(function (key) { return !_this._usedKeys.has(key); });
     };
     Reflector.prototype.registerFunction = function (func, funcInfo) {
         this._injectableInfo.set(func, funcInfo);

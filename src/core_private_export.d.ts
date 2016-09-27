@@ -40,7 +40,6 @@ export declare var __core_private__: {
     isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
     ChangeDetectorStatus: typeof constants.ChangeDetectorStatus;
     _ChangeDetectorStatus?: constants.ChangeDetectorStatus;
-    CHANGE_DETECTION_STRATEGY_VALUES: typeof constants.CHANGE_DETECTION_STRATEGY_VALUES;
     constructDependencies: typeof reflective_provider.constructDependencies;
     LifecycleHooks: typeof lifecycle_hooks.LifecycleHooks;
     _LifecycleHooks?: lifecycle_hooks.LifecycleHooks;
@@ -69,7 +68,6 @@ export declare var __core_private__: {
     interpolate: typeof view_utils.interpolate;
     ViewUtils: typeof view_utils.ViewUtils;
     _ViewUtils?: view_utils.ViewUtils;
-    VIEW_ENCAPSULATION_VALUES: typeof metadata_view.VIEW_ENCAPSULATION_VALUES;
     ViewMetadata: typeof metadata_view.ViewMetadata;
     _ViewMetadata?: metadata_view.ViewMetadata;
     DebugContext: typeof debug_context.DebugContext;

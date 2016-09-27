@@ -34,7 +34,6 @@ export declare enum ViewEncapsulation {
      */
     None = 2,
 }
-export declare var VIEW_ENCAPSULATION_VALUES: ViewEncapsulation[];
 /**
  * Metadata properties available for configuring Views.
  *

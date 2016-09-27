@@ -31,8 +31,6 @@ export declare function scheduleMicroTask(fn: Function): void;
 declare var _global: BrowserNodeGlobal;
 export { _global as global };
 export declare function getTypeNameForDebugging(type: any): string;
-export declare var Math: any;
-export declare var Date: DateConstructor;
 export declare function isPresent(obj: any): boolean;
 export declare function isBlank(obj: any): boolean;
 export declare function isBoolean(obj: any): boolean;
@@ -46,9 +44,6 @@ export declare function isArray(obj: any): boolean;
 export declare function isDate(obj: any): obj is Date;
 export declare function noop(): void;
 export declare function stringify(token: any): string;
-export declare function serializeEnum(val: any): number;
-export declare function deserializeEnum(val: any, values: Map<number, any>): any;
-export declare function resolveEnumToken(enumValue: any, val: any): string;
 export declare class StringWrapper {
     static fromCharCode(code: number): string;
     static charCodeAt(s: string, index: number): number;
