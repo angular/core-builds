@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { MapWrapper, StringMapWrapper } from '../facade/collection';
+import { MapWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
 import { ReflectorReader } from './reflector_reader';
 /**
@@ -172,6 +172,6 @@ export var Reflector = (function (_super) {
     return Reflector;
 }(ReflectorReader));
 function _mergeMaps(target, config) {
-    StringMapWrapper.forEach(config, function (v, k) { return target.set(k, v); });
+    Object.keys(config).forEach(function (k) { target.set(k, config[k]); });
 }
 //# sourceMappingURL=reflector.js.map

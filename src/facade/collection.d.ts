@@ -14,24 +14,6 @@ export declare class MapWrapper {
  * Wraps Javascript Objects
  */
 export declare class StringMapWrapper {
-    static create(): {
-        [k: string]: any;
-    };
-    static contains(map: {
-        [key: string]: any;
-    }, key: string): boolean;
-    static keys(map: {
-        [key: string]: any;
-    }): string[];
-    static values<T>(map: {
-        [key: string]: T;
-    }): T[];
-    static isEmpty(map: {
-        [key: string]: any;
-    }): boolean;
-    static forEach<K, V>(map: {
-        [key: string]: V;
-    }, callback: (v: V, K: string) => void): void;
     static merge<V>(m1: {
         [key: string]: V;
     }, m2: {

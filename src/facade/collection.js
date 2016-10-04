@@ -103,31 +103,6 @@ export var MapWrapper = (function () {
 export var StringMapWrapper = (function () {
     function StringMapWrapper() {
     }
-    StringMapWrapper.create = function () {
-        // Note: We are not using Object.create(null) here due to
-        // performance!
-        // http://jsperf.com/ng2-object-create-null
-        return {};
-    };
-    StringMapWrapper.contains = function (map, key) {
-        return map.hasOwnProperty(key);
-    };
-    StringMapWrapper.keys = function (map) { return Object.keys(map); };
-    StringMapWrapper.values = function (map) {
-        return Object.keys(map).map(function (k) { return map[k]; });
-    };
-    StringMapWrapper.isEmpty = function (map) {
-        for (var prop in map) {
-            return false;
-        }
-        return true;
-    };
-    StringMapWrapper.forEach = function (map, callback) {
-        for (var _i = 0, _a = Object.keys(map); _i < _a.length; _i++) {
-            var k = _a[_i];
-            callback(map[k], k);
-        }
-    };
     StringMapWrapper.merge = function (m1, m2) {
         var m = {};
         for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {

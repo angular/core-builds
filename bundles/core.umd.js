@@ -1409,31 +1409,6 @@
     var StringMapWrapper = (function () {
         function StringMapWrapper() {
         }
-        StringMapWrapper.create = function () {
-            // Note: We are not using Object.create(null) here due to
-            // performance!
-            // http://jsperf.com/ng2-object-create-null
-            return {};
-        };
-        StringMapWrapper.contains = function (map, key) {
-            return map.hasOwnProperty(key);
-        };
-        StringMapWrapper.keys = function (map) { return Object.keys(map); };
-        StringMapWrapper.values = function (map) {
-            return Object.keys(map).map(function (k) { return map[k]; });
-        };
-        StringMapWrapper.isEmpty = function (map) {
-            for (var prop in map) {
-                return false;
-            }
-            return true;
-        };
-        StringMapWrapper.forEach = function (map, callback) {
-            for (var _i = 0, _a = Object.keys(map); _i < _a.length; _i++) {
-                var k = _a[_i];
-                callback(map[k], k);
-            }
-        };
         StringMapWrapper.merge = function (m1, m2) {
             var m = {};
             for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {
@@ -2329,7 +2304,7 @@
         return Reflector;
     }(ReflectorReader));
     function _mergeMaps(target, config) {
-        StringMapWrapper.forEach(config, function (v, k) { return target.set(k, v); });
+        Object.keys(config).forEach(function (k) { target.set(k, config[k]); });
     }
 
     /**
@@ -4641,7 +4616,7 @@
                 obj.forEach(fn);
             }
             else {
-                StringMapWrapper.forEach(obj, fn);
+                Object.keys(obj).forEach(function (k) { return fn(obj[k], k); });
             }
         };
         return DefaultKeyValueDiffer;
@@ -8770,10 +8745,11 @@
     function prepareFinalAnimationStyles(previousStyles, newStyles, nullValue) {
         if (nullValue === void 0) { nullValue = null; }
         var finalStyles = {};
-        StringMapWrapper.forEach(newStyles, function (value, prop) {
+        Object.keys(newStyles).forEach(function (prop) {
+            var value = newStyles[prop];
             finalStyles[prop] = value == AUTO_STYLE ? nullValue : value.toString();
         });
-        StringMapWrapper.forEach(previousStyles, function (value, prop) {
+        Object.keys(previousStyles).forEach(function (prop) {
             if (!isPresent(finalStyles[prop])) {
                 finalStyles[prop] = nullValue;
             }
@@ -8787,7 +8763,8 @@
         var flatenedFirstKeyframeStyles = flattenStyles(firstKeyframe.styles.styles);
         var extraFirstKeyframeStyles = {};
         var hasExtraFirstStyles = false;
-        StringMapWrapper.forEach(collectedStyles, function (value, prop) {
+        Object.keys(collectedStyles).forEach(function (prop) {
+            var value = collectedStyles[prop];
             // if the style is already defined in the first keyframe then
             // we do not replace it.
             if (!flatenedFirstKeyframeStyles[prop]) {
@@ -8803,7 +8780,7 @@
         var flatenedFinalKeyframeStyles = flattenStyles(finalKeyframe.styles.styles);
         var extraFinalKeyframeStyles = {};
         var hasExtraFinalStyles = false;
-        StringMapWrapper.forEach(keyframeCollectedStyles, function (value, prop) {
+        Object.keys(keyframeCollectedStyles).forEach(function (prop) {
             if (!isPresent(flatenedFinalKeyframeStyles[prop])) {
                 extraFinalKeyframeStyles[prop] = AUTO_STYLE;
                 hasExtraFinalStyles = true;
@@ -8812,7 +8789,7 @@
         if (hasExtraFinalStyles) {
             finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
         }
-        StringMapWrapper.forEach(flatenedFinalKeyframeStyles, function (value, prop) {
+        Object.keys(flatenedFinalKeyframeStyles).forEach(function (prop) {
             if (!isPresent(flatenedFirstKeyframeStyles[prop])) {
                 extraFirstKeyframeStyles[prop] = AUTO_STYLE;
                 hasExtraFirstStyles = true;
@@ -8825,13 +8802,14 @@
     }
     function clearStyles(styles) {
         var finalStyles = {};
-        StringMapWrapper.keys(styles).forEach(function (key) { finalStyles[key] = null; });
+        Object.keys(styles).forEach(function (key) { finalStyles[key] = null; });
         return finalStyles;
     }
     function collectAndResolveStyles(collection, styles) {
         return styles.map(function (entry) {
             var stylesObj = {};
-            StringMapWrapper.forEach(entry, function (value, prop) {
+            Object.keys(entry).forEach(function (prop) {
+                var value = entry[prop];
                 if (value == FILL_STYLE_FLAG) {
                     value = collection[prop];
                     if (!isPresent(value)) {
@@ -8845,12 +8823,12 @@
         });
     }
     function renderStyles(element, renderer, styles) {
-        StringMapWrapper.forEach(styles, function (value, prop) { renderer.setElementStyle(element, prop, value); });
+        Object.keys(styles).forEach(function (prop) { renderer.setElementStyle(element, prop, styles[prop]); });
     }
     function flattenStyles(styles) {
         var finalStyles = {};
         styles.forEach(function (entry) {
-            StringMapWrapper.forEach(entry, function (value, prop) { finalStyles[prop] = value; });
+            Object.keys(entry).forEach(function (prop) { finalStyles[prop] = entry[prop]; });
         });
         return finalStyles;
     }
@@ -9083,7 +9061,8 @@
                 var staticNodeInfo = this._staticNodeInfo;
                 if (isPresent(staticNodeInfo)) {
                     var refs = staticNodeInfo.refTokens;
-                    StringMapWrapper.forEach(refs, function (refToken, refName) {
+                    Object.keys(refs).forEach(function (refName) {
+                        var refToken = refs[refName];
                         var varValue;
                         if (isBlank(refToken)) {
                             varValue = _this._view.allNodes ? _this._view.allNodes[_this._nodeIndex] : null;
@@ -9168,7 +9147,7 @@
         };
         ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
             var el = this._map.get(element);
-            return el ? StringMapWrapper.values(el) : [];
+            return el ? Object.keys(el).map(function (k) { return el[k]; }) : [];
         };
         ViewAnimationMap.prototype.set = function (element, animationName, player) {
             var playersByAnimation = this._map.get(element);
@@ -9191,7 +9170,7 @@
                 delete playersByAnimation[animationName];
                 var index = this._allPlayers.indexOf(player);
                 this._allPlayers.splice(index, 1);
-                if (StringMapWrapper.isEmpty(playersByAnimation)) {
+                if (Object.keys(playersByAnimation).length === 0) {
                     this._map.delete(element);
                 }
             }
