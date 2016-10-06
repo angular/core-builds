@@ -76,74 +76,6 @@
         var newLineIndex = res.indexOf('\n');
         return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
     }
-    var StringWrapper = (function () {
-        function StringWrapper() {
-        }
-        StringWrapper.fromCharCode = function (code) { return String.fromCharCode(code); };
-        StringWrapper.charCodeAt = function (s, index) { return s.charCodeAt(index); };
-        StringWrapper.split = function (s, regExp) { return s.split(regExp); };
-        StringWrapper.equals = function (s, s2) { return s === s2; };
-        StringWrapper.stripLeft = function (s, charVal) {
-            if (s && s.length) {
-                var pos = 0;
-                for (var i = 0; i < s.length; i++) {
-                    if (s[i] != charVal)
-                        break;
-                    pos++;
-                }
-                s = s.substring(pos);
-            }
-            return s;
-        };
-        StringWrapper.stripRight = function (s, charVal) {
-            if (s && s.length) {
-                var pos = s.length;
-                for (var i = s.length - 1; i >= 0; i--) {
-                    if (s[i] != charVal)
-                        break;
-                    pos--;
-                }
-                s = s.substring(0, pos);
-            }
-            return s;
-        };
-        StringWrapper.replace = function (s, from, replace) {
-            return s.replace(from, replace);
-        };
-        StringWrapper.replaceAll = function (s, from, replace) {
-            return s.replace(from, replace);
-        };
-        StringWrapper.slice = function (s, from, to) {
-            if (from === void 0) { from = 0; }
-            if (to === void 0) { to = null; }
-            return s.slice(from, to === null ? undefined : to);
-        };
-        StringWrapper.replaceAllMapped = function (s, from, cb) {
-            return s.replace(from, function () {
-                var matches = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    matches[_i - 0] = arguments[_i];
-                }
-                // Remove offset & string from the result array
-                matches.splice(-2, 2);
-                // The callback receives match, p1, ..., pn
-                return cb(matches);
-            });
-        };
-        StringWrapper.contains = function (s, substr) { return s.indexOf(substr) != -1; };
-        StringWrapper.compare = function (a, b) {
-            if (a < b) {
-                return -1;
-            }
-            else if (a > b) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        };
-        return StringWrapper;
-    }());
     var NumberWrapper = (function () {
         function NumberWrapper() {
         }
@@ -1972,20 +1904,15 @@
             this._reflect = reflect || global$1.Reflect;
         }
         ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
-        ReflectionCapabilities.prototype.factory = function (t) {
-            var prototype = t.prototype;
-            return function () {
-                var args = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    args[_i - 0] = arguments[_i];
-                }
-                var instance = Object.create(prototype);
-                t.apply(instance, args);
-                return instance;
-            };
-        };
+        ReflectionCapabilities.prototype.factory = function (t) { return function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            return new (t.bind.apply(t, [void 0].concat(args)))();
+        }; };
         /** @internal */
-        ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes /** TODO #9100 */, paramAnnotations /** TODO #9100 */) {
+        ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes, paramAnnotations) {
             var result;
             if (typeof paramTypes === 'undefined') {
                 result = new Array(paramAnnotations.length);
@@ -2006,42 +1933,40 @@
                 else {
                     result[i] = [];
                 }
-                if (isPresent(paramAnnotations) && isPresent(paramAnnotations[i])) {
+                if (paramAnnotations && isPresent(paramAnnotations[i])) {
                     result[i] = result[i].concat(paramAnnotations[i]);
                 }
             }
             return result;
         };
-        ReflectionCapabilities.prototype.parameters = function (typeOrFunc) {
+        ReflectionCapabilities.prototype.parameters = function (type) {
             // Prefer the direct API.
-            if (isPresent(typeOrFunc.parameters)) {
-                return typeOrFunc.parameters;
+            if (type.parameters) {
+                return type.parameters;
             }
             // API of tsickle for lowering decorators to properties on the class.
-            if (isPresent(typeOrFunc.ctorParameters)) {
-                var ctorParameters = typeOrFunc.ctorParameters;
-                var paramTypes_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) { return ctorParam && ctorParam.type; });
-                var paramAnnotations_1 = ctorParameters.map(function (ctorParam /** TODO #9100 */) {
+            if (type.ctorParameters) {
+                var ctorParameters = type.ctorParameters;
+                var paramTypes = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
+                var paramAnnotations = ctorParameters.map(function (ctorParam) {
                     return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
                 });
-                return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
+                return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
             }
             // API for metadata created by invoking the decorators.
             if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
-                var paramAnnotations = this._reflect.getMetadata('parameters', typeOrFunc);
-                var paramTypes = this._reflect.getMetadata('design:paramtypes', typeOrFunc);
-                if (isPresent(paramTypes) || isPresent(paramAnnotations)) {
+                var paramAnnotations = this._reflect.getMetadata('parameters', type);
+                var paramTypes = this._reflect.getMetadata('design:paramtypes', type);
+                if (paramTypes || paramAnnotations) {
                     return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
                 }
             }
             // The array has to be filled with `undefined` because holes would be skipped by `some`
-            var parameters = new Array(typeOrFunc.length);
-            parameters.fill(undefined);
-            return parameters;
+            return new Array(type.length).fill(undefined);
         };
         ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
             // Prefer the direct API.
-            if (isPresent(typeOrFunc.annotations)) {
+            if (typeOrFunc.annotations) {
                 var annotations = typeOrFunc.annotations;
                 if (isFunction(annotations) && annotations.annotations) {
                     annotations = annotations.annotations;
@@ -2049,20 +1974,20 @@
                 return annotations;
             }
             // API of tsickle for lowering decorators to properties on the class.
-            if (isPresent(typeOrFunc.decorators)) {
+            if (typeOrFunc.decorators) {
                 return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);
             }
             // API for metadata created by invoking the decorators.
-            if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
+            if (this._reflect && this._reflect.getMetadata) {
                 var annotations = this._reflect.getMetadata('annotations', typeOrFunc);
-                if (isPresent(annotations))
+                if (annotations)
                     return annotations;
             }
             return [];
         };
         ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
             // Prefer the direct API.
-            if (isPresent(typeOrFunc.propMetadata)) {
+            if (typeOrFunc.propMetadata) {
                 var propMetadata = typeOrFunc.propMetadata;
                 if (isFunction(propMetadata) && propMetadata.propMetadata) {
                     propMetadata = propMetadata.propMetadata;
@@ -2070,7 +1995,7 @@
                 return propMetadata;
             }
             // API of tsickle for lowering decorators to properties on the class.
-            if (isPresent(typeOrFunc.propDecorators)) {
+            if (typeOrFunc.propDecorators) {
                 var propDecorators_1 = typeOrFunc.propDecorators;
                 var propMetadata_1 = {};
                 Object.keys(propDecorators_1).forEach(function (prop) {
@@ -2079,9 +2004,9 @@
                 return propMetadata_1;
             }
             // API for metadata created by invoking the decorators.
-            if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
+            if (this._reflect && this._reflect.getMetadata) {
                 var propMetadata = this._reflect.getMetadata('propMetadata', typeOrFunc);
-                if (isPresent(propMetadata))
+                if (propMetadata)
                     return propMetadata;
             }
             return {};
@@ -2192,7 +2117,7 @@
          */
         Reflector.prototype.listUnusedKeys = function () {
             var _this = this;
-            if (this._usedKeys == null) {
+            if (!this._usedKeys) {
                 throw new Error('Usage tracking is disabled');
             }
             var allTypes = MapWrapper.keys(this._injectableInfo);
@@ -2209,85 +2134,55 @@
         Reflector.prototype.registerMethods = function (methods) { _mergeMaps(this._methods, methods); };
         Reflector.prototype.factory = function (type) {
             if (this._containsReflectionInfo(type)) {
-                var res = this._getReflectionInfo(type).factory;
-                return isPresent(res) ? res : null;
+                return this._getReflectionInfo(type).factory || null;
             }
-            else {
-                return this.reflectionCapabilities.factory(type);
-            }
+            return this.reflectionCapabilities.factory(type);
         };
         Reflector.prototype.parameters = function (typeOrFunc) {
             if (this._injectableInfo.has(typeOrFunc)) {
-                var res = this._getReflectionInfo(typeOrFunc).parameters;
-                return isPresent(res) ? res : [];
+                return this._getReflectionInfo(typeOrFunc).parameters || [];
             }
-            else {
-                return this.reflectionCapabilities.parameters(typeOrFunc);
-            }
+            return this.reflectionCapabilities.parameters(typeOrFunc);
         };
         Reflector.prototype.annotations = function (typeOrFunc) {
             if (this._injectableInfo.has(typeOrFunc)) {
-                var res = this._getReflectionInfo(typeOrFunc).annotations;
-                return isPresent(res) ? res : [];
+                return this._getReflectionInfo(typeOrFunc).annotations || [];
             }
-            else {
-                return this.reflectionCapabilities.annotations(typeOrFunc);
-            }
+            return this.reflectionCapabilities.annotations(typeOrFunc);
         };
         Reflector.prototype.propMetadata = function (typeOrFunc) {
             if (this._injectableInfo.has(typeOrFunc)) {
-                var res = this._getReflectionInfo(typeOrFunc).propMetadata;
-                return isPresent(res) ? res : {};
+                return this._getReflectionInfo(typeOrFunc).propMetadata || {};
             }
-            else {
-                return this.reflectionCapabilities.propMetadata(typeOrFunc);
-            }
+            return this.reflectionCapabilities.propMetadata(typeOrFunc);
         };
         Reflector.prototype.interfaces = function (type) {
             if (this._injectableInfo.has(type)) {
-                var res = this._getReflectionInfo(type).interfaces;
-                return isPresent(res) ? res : [];
+                return this._getReflectionInfo(type).interfaces || [];
             }
-            else {
-                return this.reflectionCapabilities.interfaces(type);
-            }
+            return this.reflectionCapabilities.interfaces(type);
         };
         Reflector.prototype.hasLifecycleHook = function (type, lcInterface, lcProperty) {
-            var interfaces = this.interfaces(type);
-            if (interfaces.indexOf(lcInterface) !== -1) {
+            if (this.interfaces(type).indexOf(lcInterface) !== -1) {
                 return true;
             }
-            else {
-                return this.reflectionCapabilities.hasLifecycleHook(type, lcInterface, lcProperty);
-            }
+            return this.reflectionCapabilities.hasLifecycleHook(type, lcInterface, lcProperty);
         };
         Reflector.prototype.getter = function (name) {
-            if (this._getters.has(name)) {
-                return this._getters.get(name);
-            }
-            else {
-                return this.reflectionCapabilities.getter(name);
-            }
+            return this._getters.has(name) ? this._getters.get(name) :
+                this.reflectionCapabilities.getter(name);
         };
         Reflector.prototype.setter = function (name) {
-            if (this._setters.has(name)) {
-                return this._setters.get(name);
-            }
-            else {
-                return this.reflectionCapabilities.setter(name);
-            }
+            return this._setters.has(name) ? this._setters.get(name) :
+                this.reflectionCapabilities.setter(name);
         };
         Reflector.prototype.method = function (name) {
-            if (this._methods.has(name)) {
-                return this._methods.get(name);
-            }
-            else {
-                return this.reflectionCapabilities.method(name);
-            }
+            return this._methods.has(name) ? this._methods.get(name) :
+                this.reflectionCapabilities.method(name);
         };
         /** @internal */
         Reflector.prototype._getReflectionInfo = function (typeOrFunc) {
-            if (isPresent(this._usedKeys)) {
+            if (this._usedKeys) {
                 this._usedKeys.add(typeOrFunc);
             }
             return this._injectableInfo.get(typeOrFunc);
@@ -3506,7 +3401,7 @@
         deps: [],
     };
     function _randomChar() {
-        return StringWrapper.fromCharCode(97 + Math.floor(Math.random() * 25));
+        return String.fromCharCode(97 + Math.floor(Math.random() * 25));
     }
     /**
      * A function that will be executed when a platform is initialized.
