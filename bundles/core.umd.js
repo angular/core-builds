@@ -7280,7 +7280,7 @@
      */
     var _queuedAnimations = [];
     /** @internal */
-    function queueAnimation(player) {
+    function queueAnimationGlobally(player) {
         _queuedAnimations.push(player);
     }
     /** @internal */
@@ -8936,64 +8936,11 @@
         return DebugContext;
     }());
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * An instance of this class is returned as an event parameter when an animation
-     * callback is captured for an animation either during the start or done phase.
-     *
-     * ```typescript
-     * @Component({
-     *   host: {
-     *     '[@myAnimationTrigger]': 'someExpression',
-     *     '(@myAnimationTrigger.start)': 'captureStartEvent($event)',
-     *     '(@myAnimationTrigger.done)': 'captureDoneEvent($event)',
-     *   },
-     *   animations: [
-     *     trigger("myAnimationTrigger", [
-     *        // ...
-     *     ])
-     *   ]
-     * })
-     * class MyComponent {
-     *   someExpression: any = false;
-     *   captureStartEvent(event: AnimationTransitionEvent) {
-     *     // the toState, fromState and totalTime data is accessible from the event variable
-     *   }
-     *
-     *   captureDoneEvent(event: AnimationTransitionEvent) {
-     *     // the toState, fromState and totalTime data is accessible from the event variable
-     *   }
-     * }
-     * ```
-     *
-     * @experimental Animation support is experimental.
-     */
-    var AnimationTransitionEvent = (function () {
-        function AnimationTransitionEvent(_a) {
-            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime;
-            this.fromState = fromState;
-            this.toState = toState;
-            this.totalTime = totalTime;
-        }
-        return AnimationTransitionEvent;
-    }());
-
     var ViewAnimationMap = (function () {
         function ViewAnimationMap() {
             this._map = new Map();
             this._allPlayers = [];
         }
-        Object.defineProperty(ViewAnimationMap.prototype, "length", {
-            get: function () { return this.getAllPlayers().length; },
-            enumerable: true,
-            configurable: true
-        });
         ViewAnimationMap.prototype.find = function (element, animationName) {
             var playersByAnimation = this._map.get(element);
             if (isPresent(playersByAnimation)) {
@@ -9031,6 +8978,77 @@
             }
         };
         return ViewAnimationMap;
+    }());
+
+    var AnimationViewContext = (function () {
+        function AnimationViewContext() {
+            this._players = new ViewAnimationMap();
+            this._listeners = new Map();
+        }
+        AnimationViewContext.prototype.onAllActiveAnimationsDone = function (callback) {
+            var activeAnimationPlayers = this._players.getAllPlayers();
+            // we check for the length to avoid having GroupAnimationPlayer
+            // issue an unnecessary microtask when zero players are passed in
+            if (activeAnimationPlayers.length) {
+                new AnimationGroupPlayer(activeAnimationPlayers).onDone(function () { return callback(); });
+            }
+            else {
+                callback();
+            }
+        };
+        AnimationViewContext.prototype.queueAnimation = function (element, animationName, player, event) {
+            var _this = this;
+            queueAnimationGlobally(player);
+            this._players.set(element, animationName, player);
+            player.onDone(function () {
+                // TODO: add codegen to remove the need to store these values
+                _this._triggerOutputHandler(element, animationName, 'done', event);
+                _this._players.remove(element, animationName);
+            });
+            player.onStart(function () { return _this._triggerOutputHandler(element, animationName, 'start', event); });
+        };
+        AnimationViewContext.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
+            if (removeAllAnimations === void 0) { removeAllAnimations = false; }
+            if (removeAllAnimations) {
+                this._players.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
+            }
+            else {
+                var player = this._players.find(element, animationName);
+                if (player) {
+                    player.destroy();
+                }
+            }
+        };
+        AnimationViewContext.prototype.registerOutputHandler = function (element, eventName, eventPhase, eventHandler) {
+            var animations = this._listeners.get(element);
+            if (!animations) {
+                this._listeners.set(element, animations = []);
+            }
+            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
+        };
+        AnimationViewContext.prototype._triggerOutputHandler = function (element, animationName, phase, event) {
+            var listeners = this._listeners.get(element);
+            if (listeners && listeners.length) {
+                for (var i = 0; i < listeners.length; i++) {
+                    var listener = listeners[i];
+                    // we check for both the name in addition to the phase in the event
+                    // that there may be more than one @trigger on the same element
+                    if (listener.eventName === animationName && listener.eventPhase === phase) {
+                        listener.handler(event);
+                        break;
+                    }
+                }
+            }
+        };
+        return AnimationViewContext;
+    }());
+    var _AnimationOutputHandler = (function () {
+        function _AnimationOutputHandler(eventName, eventPhase, handler) {
+            this.eventName = eventName;
+            this.eventPhase = eventPhase;
+            this.handler = handler;
+        }
+        return _AnimationOutputHandler;
     }());
 
     /**
@@ -9097,8 +9115,6 @@
             this.viewChildren = [];
             this.viewContainerElement = null;
             this.numberOfChecks = 0;
-            this.animationPlayers = new ViewAnimationMap();
-            this._animationListeners = new Map();
             this.ref = new ViewRef_(this);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
                 this.renderer = viewUtils.renderComponent(componentType);
@@ -9107,56 +9123,21 @@
                 this.renderer = declarationAppElement.parentView.renderer;
             }
         }
+        Object.defineProperty(AppView.prototype, "animationContext", {
+            get: function () {
+                if (!this._animationContext) {
+                    this._animationContext = new AnimationViewContext();
+                }
+                return this._animationContext;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(AppView.prototype, "destroyed", {
             get: function () { return this.cdMode === ChangeDetectorStatus.Destroyed; },
             enumerable: true,
             configurable: true
         });
-        AppView.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
-            if (removeAllAnimations === void 0) { removeAllAnimations = false; }
-            if (removeAllAnimations) {
-                this.animationPlayers.findAllPlayersByElement(element).forEach(function (player) { return player.destroy(); });
-            }
-            else {
-                var player = this.animationPlayers.find(element, animationName);
-                if (isPresent(player)) {
-                    player.destroy();
-                }
-            }
-        };
-        AppView.prototype.queueAnimation = function (element, animationName, player, totalTime, fromState, toState) {
-            var _this = this;
-            queueAnimation(player);
-            var event = new AnimationTransitionEvent({ 'fromState': fromState, 'toState': toState, 'totalTime': totalTime });
-            this.animationPlayers.set(element, animationName, player);
-            player.onDone(function () {
-                // TODO: make this into a datastructure for done|start
-                _this.triggerAnimationOutput(element, animationName, 'done', event);
-                _this.animationPlayers.remove(element, animationName);
-            });
-            player.onStart(function () { _this.triggerAnimationOutput(element, animationName, 'start', event); });
-        };
-        AppView.prototype.triggerAnimationOutput = function (element, animationName, phase, event) {
-            var listeners = this._animationListeners.get(element);
-            if (isPresent(listeners) && listeners.length) {
-                for (var i = 0; i < listeners.length; i++) {
-                    var listener = listeners[i];
-                    // we check for both the name in addition to the phase in the event
-                    // that there may be more than one @trigger on the same element
-                    if (listener.eventName === animationName && listener.eventPhase === phase) {
-                        listener.handler(event);
-                        break;
-                    }
-                }
-            }
-        };
-        AppView.prototype.registerAnimationOutput = function (element, eventName, eventPhase, eventHandler) {
-            var animations = this._animationListeners.get(element);
-            if (!isPresent(animations)) {
-                this._animationListeners.set(element, animations = []);
-            }
-            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
-        };
         AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
             this.context = context;
             var projectableNodes;
@@ -9256,12 +9237,11 @@
             }
             this.destroyInternal();
             this.dirtyParentQueriesInternal();
-            if (this.animationPlayers.length == 0) {
-                this.renderer.destroyView(hostElement, this.allNodes);
+            if (this._animationContext) {
+                this._animationContext.onAllActiveAnimationsDone(function () { return _this.renderer.destroyView(hostElement, _this.allNodes); });
             }
             else {
-                var player = new AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
-                player.onDone(function () { _this.renderer.destroyView(hostElement, _this.allNodes); });
+                this.renderer.destroyView(hostElement, this.allNodes);
             }
         };
         /**
@@ -9275,12 +9255,11 @@
         AppView.prototype.detach = function () {
             var _this = this;
             this.detachInternal();
-            if (this.animationPlayers.length == 0) {
-                this.renderer.detachView(this.flatRootNodes);
+            if (this._animationContext) {
+                this._animationContext.onAllActiveAnimationsDone(function () { return _this.renderer.detachView(_this.flatRootNodes); });
             }
             else {
-                var player = new AnimationGroupPlayer(this.animationPlayers.getAllPlayers());
-                player.onDone(function () { _this.renderer.detachView(_this.flatRootNodes); });
+                this.renderer.detachView(this.flatRootNodes);
             }
         };
         Object.defineProperty(AppView.prototype, "changeDetectorRef", {
@@ -9484,14 +9463,6 @@
         }
         return lastNode;
     }
-    var _AnimationOutputHandler = (function () {
-        function _AnimationOutputHandler(eventName, eventPhase, handler) {
-            this.eventName = eventName;
-            this.eventPhase = eventPhase;
-            this.handler = handler;
-        }
-        return _AnimationOutputHandler;
-    }());
 
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
@@ -9558,6 +9529,54 @@
         ComponentStillLoadingError: ComponentStillLoadingError,
         isPromise: isPromise
     };
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * An instance of this class is returned as an event parameter when an animation
+     * callback is captured for an animation either during the start or done phase.
+     *
+     * ```typescript
+     * @Component({
+     *   host: {
+     *     '[@myAnimationTrigger]': 'someExpression',
+     *     '(@myAnimationTrigger.start)': 'captureStartEvent($event)',
+     *     '(@myAnimationTrigger.done)': 'captureDoneEvent($event)',
+     *   },
+     *   animations: [
+     *     trigger("myAnimationTrigger", [
+     *        // ...
+     *     ])
+     *   ]
+     * })
+     * class MyComponent {
+     *   someExpression: any = false;
+     *   captureStartEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     *
+     *   captureDoneEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     * }
+     * ```
+     *
+     * @experimental Animation support is experimental.
+     */
+    var AnimationTransitionEvent = (function () {
+        function AnimationTransitionEvent(_a) {
+            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime;
+            this.fromState = fromState;
+            this.toState = toState;
+            this.totalTime = totalTime;
+        }
+        return AnimationTransitionEvent;
+    }());
 
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
