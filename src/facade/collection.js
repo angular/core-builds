@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { getSymbolIterator, isArray, isBlank, isJsObject, isPresent } from './lang';
+import { getSymbolIterator, isBlank, isJsObject, isPresent } from './lang';
 // Safari doesn't implement MapIterator.next(), which is used is Traceur's polyfill of Array.from
 // TODO(mlaval): remove the work around once we have a working polyfill of Array.from
 var _arrayFromMap = (function () {
@@ -195,7 +195,7 @@ function _flattenArray(source, target) {
     if (isPresent(source)) {
         for (var i = 0; i < source.length; i++) {
             var item = source[i];
-            if (isArray(item)) {
+            if (Array.isArray(item)) {
                 _flattenArray(item, target);
             }
             else {
@@ -208,7 +208,7 @@ function _flattenArray(source, target) {
 export function isListLikeIterable(obj) {
     if (!isJsObject(obj))
         return false;
-    return isArray(obj) ||
+    return Array.isArray(obj) ||
         (!(obj instanceof Map) &&
             getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
 }
@@ -227,14 +227,14 @@ export function areIterablesEqual(a, b, comparator) {
     }
 }
 export function iterateListLike(obj, fn) {
-    if (isArray(obj)) {
+    if (Array.isArray(obj)) {
         for (var i = 0; i < obj.length; i++) {
             fn(obj[i]);
         }
     }
     else {
         var iterator = obj[getSymbolIterator()]();
-        var item;
+        var item = void 0;
         while (!((item = iterator.next()).done)) {
             fn(item.value);
         }

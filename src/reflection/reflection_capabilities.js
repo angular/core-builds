@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { global, isFunction, isPresent, stringify } from '../facade/lang';
+import { global, isPresent, stringify } from '../facade/lang';
 import { Type } from '../type';
 export var ReflectionCapabilities = (function () {
     function ReflectionCapabilities(reflect) {
@@ -76,7 +76,7 @@ export var ReflectionCapabilities = (function () {
         // Prefer the direct API.
         if (typeOrFunc.annotations) {
             var annotations = typeOrFunc.annotations;
-            if (isFunction(annotations) && annotations.annotations) {
+            if (typeof annotations === 'function' && annotations.annotations) {
                 annotations = annotations.annotations;
             }
             return annotations;
@@ -97,7 +97,7 @@ export var ReflectionCapabilities = (function () {
         // Prefer the direct API.
         if (typeOrFunc.propMetadata) {
             var propMetadata = typeOrFunc.propMetadata;
-            if (isFunction(propMetadata) && propMetadata.propMetadata) {
+            if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
                 propMetadata = propMetadata.propMetadata;
             }
             return propMetadata;
