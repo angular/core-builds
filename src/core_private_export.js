@@ -12,6 +12,7 @@ import { AnimationPlayer as AnimationPlayer_, NoOpAnimationPlayer as NoOpAnimati
 import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './animation/animation_sequence_player';
 import * as animationUtils from './animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './animation/animation_styles';
+import { AnimationTransition } from './animation/animation_transition';
 import * as change_detection_util from './change_detection/change_detection_util';
 import * as constants from './change_detection/constants';
 import * as console from './console';
@@ -98,6 +99,7 @@ export var __core_private__ = {
     EMPTY_STATE: EMPTY_STATE_,
     FILL_STYLE_FLAG: FILL_STYLE_FLAG_,
     ComponentStillLoadingError: ComponentStillLoadingError,
-    isPromise: isPromise
+    isPromise: isPromise,
+    AnimationTransition: AnimationTransition
 };
 //# sourceMappingURL=core_private_export.js.map

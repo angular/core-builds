@@ -8570,6 +8570,81 @@
         return AnimationStyles;
     }());
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * An instance of this class is returned as an event parameter when an animation
+     * callback is captured for an animation either during the start or done phase.
+     *
+     * ```typescript
+     * @Component({
+     *   host: {
+     *     '[@myAnimationTrigger]': 'someExpression',
+     *     '(@myAnimationTrigger.start)': 'captureStartEvent($event)',
+     *     '(@myAnimationTrigger.done)': 'captureDoneEvent($event)',
+     *   },
+     *   animations: [
+     *     trigger("myAnimationTrigger", [
+     *        // ...
+     *     ])
+     *   ]
+     * })
+     * class MyComponent {
+     *   someExpression: any = false;
+     *   captureStartEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     *
+     *   captureDoneEvent(event: AnimationTransitionEvent) {
+     *     // the toState, fromState and totalTime data is accessible from the event variable
+     *   }
+     * }
+     * ```
+     *
+     * @experimental Animation support is experimental.
+     */
+    var AnimationTransitionEvent = (function () {
+        function AnimationTransitionEvent(_a) {
+            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName;
+            this.fromState = fromState;
+            this.toState = toState;
+            this.totalTime = totalTime;
+            this.phaseName = phaseName;
+        }
+        return AnimationTransitionEvent;
+    }());
+
+    var AnimationTransition = (function () {
+        function AnimationTransition(_player, _fromState, _toState, _totalTime) {
+            this._player = _player;
+            this._fromState = _fromState;
+            this._toState = _toState;
+            this._totalTime = _totalTime;
+        }
+        AnimationTransition.prototype._createEvent = function (phaseName) {
+            return new AnimationTransitionEvent({
+                fromState: this._fromState,
+                toState: this._toState,
+                totalTime: this._totalTime,
+                phaseName: phaseName
+            });
+        };
+        AnimationTransition.prototype.onStart = function (callback) {
+            var event = this._createEvent('start');
+            this._player.onStart(function () { return callback(event); });
+        };
+        AnimationTransition.prototype.onDone = function (callback) {
+            var event = this._createEvent('done');
+            this._player.onDone(function () { return callback(event); });
+        };
+        return AnimationTransition;
+    }());
+
     var DebugDomRootRenderer = (function () {
         function DebugDomRootRenderer(_delegate) {
             this._delegate = _delegate;
@@ -8851,7 +8926,6 @@
     var AnimationViewContext = (function () {
         function AnimationViewContext() {
             this._players = new ViewAnimationMap();
-            this._listeners = new Map();
         }
         AnimationViewContext.prototype.onAllActiveAnimationsDone = function (callback) {
             var activeAnimationPlayers = this._players.getAllPlayers();
@@ -8864,16 +8938,9 @@
                 callback();
             }
         };
-        AnimationViewContext.prototype.queueAnimation = function (element, animationName, player, event) {
-            var _this = this;
+        AnimationViewContext.prototype.queueAnimation = function (element, animationName, player) {
             queueAnimationGlobally(player);
             this._players.set(element, animationName, player);
-            player.onDone(function () {
-                // TODO: add codegen to remove the need to store these values
-                _this._triggerOutputHandler(element, animationName, 'done', event);
-                _this._players.remove(element, animationName);
-            });
-            player.onStart(function () { return _this._triggerOutputHandler(element, animationName, 'start', event); });
         };
         AnimationViewContext.prototype.cancelActiveAnimation = function (element, animationName, removeAllAnimations) {
             if (removeAllAnimations === void 0) { removeAllAnimations = false; }
@@ -8887,36 +8954,7 @@
                 }
             }
         };
-        AnimationViewContext.prototype.registerOutputHandler = function (element, eventName, eventPhase, eventHandler) {
-            var animations = this._listeners.get(element);
-            if (!animations) {
-                this._listeners.set(element, animations = []);
-            }
-            animations.push(new _AnimationOutputHandler(eventName, eventPhase, eventHandler));
-        };
-        AnimationViewContext.prototype._triggerOutputHandler = function (element, animationName, phase, event) {
-            var listeners = this._listeners.get(element);
-            if (listeners && listeners.length) {
-                for (var i = 0; i < listeners.length; i++) {
-                    var listener = listeners[i];
-                    // we check for both the name in addition to the phase in the event
-                    // that there may be more than one @trigger on the same element
-                    if (listener.eventName === animationName && listener.eventPhase === phase) {
-                        listener.handler(event);
-                        break;
-                    }
-                }
-            }
-        };
         return AnimationViewContext;
-    }());
-    var _AnimationOutputHandler = (function () {
-        function _AnimationOutputHandler(eventName, eventPhase, handler) {
-            this.eventName = eventName;
-            this.eventPhase = eventPhase;
-            this.handler = handler;
-        }
-        return _AnimationOutputHandler;
     }());
 
     /**
@@ -9395,56 +9433,9 @@
         EMPTY_STATE: EMPTY_STATE,
         FILL_STYLE_FLAG: FILL_STYLE_FLAG,
         ComponentStillLoadingError: ComponentStillLoadingError,
-        isPromise: isPromise
+        isPromise: isPromise,
+        AnimationTransition: AnimationTransition
     };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * An instance of this class is returned as an event parameter when an animation
-     * callback is captured for an animation either during the start or done phase.
-     *
-     * ```typescript
-     * @Component({
-     *   host: {
-     *     '[@myAnimationTrigger]': 'someExpression',
-     *     '(@myAnimationTrigger.start)': 'captureStartEvent($event)',
-     *     '(@myAnimationTrigger.done)': 'captureDoneEvent($event)',
-     *   },
-     *   animations: [
-     *     trigger("myAnimationTrigger", [
-     *        // ...
-     *     ])
-     *   ]
-     * })
-     * class MyComponent {
-     *   someExpression: any = false;
-     *   captureStartEvent(event: AnimationTransitionEvent) {
-     *     // the toState, fromState and totalTime data is accessible from the event variable
-     *   }
-     *
-     *   captureDoneEvent(event: AnimationTransitionEvent) {
-     *     // the toState, fromState and totalTime data is accessible from the event variable
-     *   }
-     * }
-     * ```
-     *
-     * @experimental Animation support is experimental.
-     */
-    var AnimationTransitionEvent = (function () {
-        function AnimationTransitionEvent(_a) {
-            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime;
-            this.fromState = fromState;
-            this.toState = toState;
-            this.totalTime = totalTime;
-        }
-        return AnimationTransitionEvent;
-    }());
 
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
