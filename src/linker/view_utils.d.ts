@@ -1,6 +1,5 @@
-import { SimpleChange } from '../change_detection/change_detection';
 import { ViewEncapsulation } from '../metadata/view';
-import { RenderComponentType, Renderer, RootRenderer } from '../render/api';
+import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
 export declare class ViewUtils {
     private _renderer;
@@ -33,7 +32,3 @@ export declare function pureProxy7<P0, P1, P2, P3, P4, P5, P6, R>(fn: (p0: P0, p
 export declare function pureProxy8<P0, P1, P2, P3, P4, P5, P6, P7, R>(fn: (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7) => R): (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7) => R;
 export declare function pureProxy9<P0, P1, P2, P3, P4, P5, P6, P7, P8, R>(fn: (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8) => R): (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8) => R;
 export declare function pureProxy10<P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, R>(fn: (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9) => R): (p0: P0, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9) => R;
-export declare function setBindingDebugInfoForChanges(renderer: Renderer, el: any, changes: {
-    [key: string]: SimpleChange;
-}): void;
-export declare function setBindingDebugInfo(renderer: Renderer, el: any, propName: string, value: any): void;

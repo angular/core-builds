@@ -10,7 +10,8 @@ import { GetterFn, MethodFn, SetterFn } from './types';
 export interface PlatformReflectionCapabilities {
     isReflectionEnabled(): boolean;
     factory(type: Type<any>): Function;
-    hasLifecycleHook(type: any, lcProperty: string): boolean;
+    interfaces(type: Type<any>): any[];
+    hasLifecycleHook(type: any, lcInterface: Type<any>, lcProperty: string): boolean;
     parameters(type: Type<any>): any[][];
     annotations(type: Type<any>): any[];
     propMetadata(typeOrFunc: Type<any>): {
