@@ -5489,6 +5489,54 @@
             return result;
         };
     }
+    function setBindingDebugInfoForChanges(renderer, el, changes) {
+        Object.keys(changes).forEach(function (propName) {
+            setBindingDebugInfo(renderer, el, propName, changes[propName].currentValue);
+        });
+    }
+    function setBindingDebugInfo(renderer, el, propName, value) {
+        try {
+            renderer.setBindingDebugInfo(el, "ng-reflect-" + camelCaseToDashCase(propName), value ? value.toString() : null);
+        }
+        catch (e) {
+            renderer.setBindingDebugInfo(el, "ng-reflect-" + camelCaseToDashCase(propName), '[ERROR] Exception while trying to serialize the value');
+        }
+    }
+    var CAMEL_CASE_REGEXP = /([A-Z])/g;
+    function camelCaseToDashCase(input) {
+        return input.replace(CAMEL_CASE_REGEXP, function () {
+            var m = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                m[_i - 0] = arguments[_i];
+            }
+            return '-' + m[1].toLowerCase();
+        });
+    }
+
+
+    var view_utils = Object.freeze({
+        ViewUtils: ViewUtils,
+        flattenNestedViewRenderNodes: flattenNestedViewRenderNodes,
+        ensureSlotCount: ensureSlotCount,
+        MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
+        interpolate: interpolate,
+        checkBinding: checkBinding,
+        castByValue: castByValue,
+        EMPTY_ARRAY: EMPTY_ARRAY,
+        EMPTY_MAP: EMPTY_MAP,
+        pureProxy1: pureProxy1,
+        pureProxy2: pureProxy2,
+        pureProxy3: pureProxy3,
+        pureProxy4: pureProxy4,
+        pureProxy5: pureProxy5,
+        pureProxy6: pureProxy6,
+        pureProxy7: pureProxy7,
+        pureProxy8: pureProxy8,
+        pureProxy9: pureProxy9,
+        pureProxy10: pureProxy10,
+        setBindingDebugInfoForChanges: setBindingDebugInfoForChanges,
+        setBindingDebugInfo: setBindingDebugInfo
+    });
 
     /**
      * @license
@@ -9323,11 +9371,7 @@
         NgModuleInjector: NgModuleInjector,
         registerModuleFactory: registerModuleFactory,
         ViewType: ViewType,
-        MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
-        checkBinding: checkBinding,
-        flattenNestedViewRenderNodes: flattenNestedViewRenderNodes,
-        interpolate: interpolate,
-        ViewUtils: ViewUtils,
+        view_utils: view_utils,
         ViewMetadata: ViewMetadata,
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
@@ -9339,19 +9383,6 @@
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
-        EMPTY_ARRAY: EMPTY_ARRAY,
-        EMPTY_MAP: EMPTY_MAP,
-        pureProxy1: pureProxy1,
-        pureProxy2: pureProxy2,
-        pureProxy3: pureProxy3,
-        pureProxy4: pureProxy4,
-        pureProxy5: pureProxy5,
-        pureProxy6: pureProxy6,
-        pureProxy7: pureProxy7,
-        pureProxy8: pureProxy8,
-        pureProxy9: pureProxy9,
-        pureProxy10: pureProxy10,
-        castByValue: castByValue,
         Console: Console,
         reflector: reflector,
         Reflector: Reflector,
