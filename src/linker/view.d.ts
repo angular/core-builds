@@ -88,7 +88,7 @@ export declare abstract class AppView<T> {
     removeFromContentChildren(renderAppElement: AppElement): void;
     markAsCheckOnce(): void;
     markPathToRootAsCheckOnce(): void;
-    eventHandler<E, R>(cb: (event?: E) => R): (event?: E) => R;
+    eventHandler<E, R>(cb: (eventName: string, event?: E) => R): (eventName: string, event?: E) => R;
     throwDestroyedError(details: string): void;
 }
 export declare class DebugAppView<T> extends AppView<T> {
@@ -103,5 +103,5 @@ export declare class DebugAppView<T> extends AppView<T> {
     private _resetDebug();
     debug(nodeIndex: number, rowNum: number, colNum: number): DebugContext;
     private _rethrowWithContext(e);
-    eventHandler<E, R>(cb: (event?: E) => R): (event?: E) => R;
+    eventHandler<E, R>(cb: (eventName: string, event?: E) => R): (eventName: string, event?: E) => R;
 }

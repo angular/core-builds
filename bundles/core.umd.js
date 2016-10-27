@@ -5463,11 +5463,53 @@
         }
         return hostElement;
     }
+    function subscribeToRenderElement(renderer, element, eventNamesAndTargets, listener) {
+        var disposables = createEmptyInlineArray(eventNamesAndTargets.length / 2);
+        for (var i = 0; i < eventNamesAndTargets.length; i += 2) {
+            var eventName = eventNamesAndTargets.get(i);
+            var eventTarget = eventNamesAndTargets.get(i + 1);
+            var disposable = void 0;
+            if (eventTarget) {
+                disposable = renderer.listenGlobal(eventTarget, eventName, listener.bind(null, eventTarget + ":" + eventName));
+            }
+            else {
+                disposable = renderer.listen(element, eventName, listener.bind(null, eventName));
+            }
+            disposables.set(i / 2, disposable);
+        }
+        return disposeInlineArray.bind(null, disposables);
+    }
+    function disposeInlineArray(disposables) {
+        for (var i = 0; i < disposables.length; i++) {
+            disposables.get(i)();
+        }
+    }
+    function noop() { }
+    function createEmptyInlineArray(length) {
+        var ctor;
+        if (length <= 2) {
+            ctor = InlineArray2;
+        }
+        else if (length <= 4) {
+            ctor = InlineArray4;
+        }
+        else if (length <= 8) {
+            ctor = InlineArray8;
+        }
+        else if (length <= 16) {
+            ctor = InlineArray16;
+        }
+        else {
+            ctor = InlineArrayDynamic;
+        }
+        return new ctor(length);
+    }
     var InlineArray0 = (function () {
         function InlineArray0() {
             this.length = 0;
         }
         InlineArray0.prototype.get = function (index) { return undefined; };
+        InlineArray0.prototype.set = function (index, value) { };
         return InlineArray0;
     }());
     var InlineArray2 = (function () {
@@ -5484,6 +5526,16 @@
                     return this._v1;
                 default:
                     return undefined;
+            }
+        };
+        InlineArray2.prototype.set = function (index, value) {
+            switch (index) {
+                case 0:
+                    this._v0 = value;
+                    break;
+                case 1:
+                    this._v1 = value;
+                    break;
             }
         };
         return InlineArray2;
@@ -5508,6 +5560,22 @@
                     return this._v3;
                 default:
                     return undefined;
+            }
+        };
+        InlineArray4.prototype.set = function (index, value) {
+            switch (index) {
+                case 0:
+                    this._v0 = value;
+                    break;
+                case 1:
+                    this._v1 = value;
+                    break;
+                case 2:
+                    this._v2 = value;
+                    break;
+                case 3:
+                    this._v3 = value;
+                    break;
             }
         };
         return InlineArray4;
@@ -5544,6 +5612,34 @@
                     return this._v7;
                 default:
                     return undefined;
+            }
+        };
+        InlineArray8.prototype.set = function (index, value) {
+            switch (index) {
+                case 0:
+                    this._v0 = value;
+                    break;
+                case 1:
+                    this._v1 = value;
+                    break;
+                case 2:
+                    this._v2 = value;
+                    break;
+                case 3:
+                    this._v3 = value;
+                    break;
+                case 4:
+                    this._v4 = value;
+                    break;
+                case 5:
+                    this._v5 = value;
+                    break;
+                case 6:
+                    this._v6 = value;
+                    break;
+                case 7:
+                    this._v7 = value;
+                    break;
             }
         };
         return InlineArray8;
@@ -5606,6 +5702,58 @@
                     return undefined;
             }
         };
+        InlineArray16.prototype.set = function (index, value) {
+            switch (index) {
+                case 0:
+                    this._v0 = value;
+                    break;
+                case 1:
+                    this._v1 = value;
+                    break;
+                case 2:
+                    this._v2 = value;
+                    break;
+                case 3:
+                    this._v3 = value;
+                    break;
+                case 4:
+                    this._v4 = value;
+                    break;
+                case 5:
+                    this._v5 = value;
+                    break;
+                case 6:
+                    this._v6 = value;
+                    break;
+                case 7:
+                    this._v7 = value;
+                    break;
+                case 8:
+                    this._v8 = value;
+                    break;
+                case 9:
+                    this._v9 = value;
+                    break;
+                case 10:
+                    this._v10 = value;
+                    break;
+                case 11:
+                    this._v11 = value;
+                    break;
+                case 12:
+                    this._v12 = value;
+                    break;
+                case 13:
+                    this._v13 = value;
+                    break;
+                case 14:
+                    this._v14 = value;
+                    break;
+                case 15:
+                    this._v15 = value;
+                    break;
+            }
+        };
         return InlineArray16;
     }());
     var InlineArrayDynamic = (function () {
@@ -5620,6 +5768,7 @@
             this._values = values;
         }
         InlineArrayDynamic.prototype.get = function (index) { return this._values[index]; };
+        InlineArrayDynamic.prototype.set = function (index, value) { this._values[index] = value; };
         return InlineArrayDynamic;
     }());
     var EMPTY_INLINE_ARRAY = new InlineArray0();
@@ -5649,6 +5798,8 @@
         setBindingDebugInfo: setBindingDebugInfo,
         createRenderElement: createRenderElement,
         selectOrCreateRenderHostElement: selectOrCreateRenderHostElement,
+        subscribeToRenderElement: subscribeToRenderElement,
+        noop: noop,
         InlineArray2: InlineArray2,
         InlineArray4: InlineArray4,
         InlineArray8: InlineArray8,
@@ -9353,7 +9504,9 @@
                 c = isPresent(parentEl) ? parentEl.parentView : null;
             }
         };
-        AppView.prototype.eventHandler = function (cb) { return cb; };
+        AppView.prototype.eventHandler = function (cb) {
+            return cb;
+        };
         AppView.prototype.throwDestroyedError = function (details) { throw new ViewDestroyedError(details); };
         return AppView;
     }());
@@ -9431,10 +9584,10 @@
         DebugAppView.prototype.eventHandler = function (cb) {
             var _this = this;
             var superHandler = _super.prototype.eventHandler.call(this, cb);
-            return function (event) {
+            return function (eventName, event) {
                 _this._resetDebug();
                 try {
-                    return superHandler(event);
+                    return superHandler(eventName, event);
                 }
                 catch (e) {
                     _this._rethrowWithContext(e);

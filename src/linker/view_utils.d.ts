@@ -39,9 +39,12 @@ export declare function setBindingDebugInfoForChanges(renderer: Renderer, el: an
 export declare function setBindingDebugInfo(renderer: Renderer, el: any, propName: string, value: any): void;
 export declare function createRenderElement(renderer: Renderer, parentElement: any, name: string, attrs: InlineArray<string>, debugInfo?: RenderDebugInfo): any;
 export declare function selectOrCreateRenderHostElement(renderer: Renderer, elementName: string, attrs: InlineArray<string>, rootSelectorOrNode: string | any, debugInfo?: RenderDebugInfo): any;
+export declare function subscribeToRenderElement(renderer: Renderer, element: any, eventNamesAndTargets: InlineArray<string>, listener: (eventName: string, event: any) => any): any;
+export declare function noop(): void;
 export interface InlineArray<T> {
     length: number;
     get(index: number): T;
+    set(index: number, value: T): void;
 }
 export declare class InlineArray2<T> implements InlineArray<T> {
     length: number;
@@ -49,6 +52,7 @@ export declare class InlineArray2<T> implements InlineArray<T> {
     private _v1;
     constructor(length: number, _v0?: T, _v1?: T);
     get(index: number): T;
+    set(index: number, value: T): void;
 }
 export declare class InlineArray4<T> implements InlineArray<T> {
     length: number;
@@ -58,6 +62,7 @@ export declare class InlineArray4<T> implements InlineArray<T> {
     private _v3;
     constructor(length: number, _v0?: T, _v1?: T, _v2?: T, _v3?: T);
     get(index: number): T;
+    set(index: number, value: T): void;
 }
 export declare class InlineArray8<T> implements InlineArray<T> {
     length: number;
@@ -71,6 +76,7 @@ export declare class InlineArray8<T> implements InlineArray<T> {
     private _v7;
     constructor(length: number, _v0?: T, _v1?: T, _v2?: T, _v3?: T, _v4?: T, _v5?: T, _v6?: T, _v7?: T);
     get(index: number): T;
+    set(index: number, value: T): void;
 }
 export declare class InlineArray16<T> implements InlineArray<T> {
     length: number;
@@ -92,11 +98,13 @@ export declare class InlineArray16<T> implements InlineArray<T> {
     private _v15;
     constructor(length: number, _v0?: T, _v1?: T, _v2?: T, _v3?: T, _v4?: T, _v5?: T, _v6?: T, _v7?: T, _v8?: T, _v9?: T, _v10?: T, _v11?: T, _v12?: T, _v13?: T, _v14?: T, _v15?: T);
     get(index: number): T;
+    set(index: number, value: T): void;
 }
 export declare class InlineArrayDynamic<T> implements InlineArray<T> {
     length: number;
     private _values;
     constructor(length: number, ...values: any[]);
     get(index: number): any;
+    set(index: number, value: T): void;
 }
 export declare const EMPTY_INLINE_ARRAY: InlineArray<any>;

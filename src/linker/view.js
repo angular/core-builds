@@ -267,7 +267,9 @@ export var AppView = (function () {
             c = isPresent(parentEl) ? parentEl.parentView : null;
         }
     };
-    AppView.prototype.eventHandler = function (cb) { return cb; };
+    AppView.prototype.eventHandler = function (cb) {
+        return cb;
+    };
     AppView.prototype.throwDestroyedError = function (details) { throw new ViewDestroyedError(details); };
     return AppView;
 }());
@@ -345,10 +347,10 @@ export var DebugAppView = (function (_super) {
     DebugAppView.prototype.eventHandler = function (cb) {
         var _this = this;
         var superHandler = _super.prototype.eventHandler.call(this, cb);
-        return function (event) {
+        return function (eventName, event) {
             _this._resetDebug();
             try {
-                return superHandler(event);
+                return superHandler(eventName, event);
             }
             catch (e) {
                 _this._rethrowWithContext(e);
