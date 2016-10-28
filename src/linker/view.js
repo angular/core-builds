@@ -350,7 +350,7 @@ export var DebugAppView = (function (_super) {
         return function (eventName, event) {
             _this._resetDebug();
             try {
-                return superHandler(eventName, event);
+                return superHandler.call(_this, eventName, event);
             }
             catch (e) {
                 _this._rethrowWithContext(e);

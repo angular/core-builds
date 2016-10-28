@@ -5463,17 +5463,17 @@
         }
         return hostElement;
     }
-    function subscribeToRenderElement(renderer, element, eventNamesAndTargets, listener) {
+    function subscribeToRenderElement(view, element, eventNamesAndTargets, listener) {
         var disposables = createEmptyInlineArray(eventNamesAndTargets.length / 2);
         for (var i = 0; i < eventNamesAndTargets.length; i += 2) {
             var eventName = eventNamesAndTargets.get(i);
             var eventTarget = eventNamesAndTargets.get(i + 1);
             var disposable = void 0;
             if (eventTarget) {
-                disposable = renderer.listenGlobal(eventTarget, eventName, listener.bind(null, eventTarget + ":" + eventName));
+                disposable = view.renderer.listenGlobal(eventTarget, eventName, listener.bind(view, eventTarget + ":" + eventName));
             }
             else {
-                disposable = renderer.listen(element, eventName, listener.bind(null, eventName));
+                disposable = view.renderer.listen(element, eventName, listener.bind(view, eventName));
             }
             disposables.set(i / 2, disposable);
         }
@@ -9587,7 +9587,7 @@
             return function (eventName, event) {
                 _this._resetDebug();
                 try {
-                    return superHandler(eventName, event);
+                    return superHandler.call(_this, eventName, event);
                 }
                 catch (e) {
                     _this._rethrowWithContext(e);

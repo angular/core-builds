@@ -2,6 +2,7 @@ import { SimpleChange } from '../change_detection/change_detection';
 import { ViewEncapsulation } from '../metadata/view';
 import { RenderComponentType, RenderDebugInfo, Renderer, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
+import { AppView } from './view';
 export declare class ViewUtils {
     private _renderer;
     private _appId;
@@ -39,7 +40,7 @@ export declare function setBindingDebugInfoForChanges(renderer: Renderer, el: an
 export declare function setBindingDebugInfo(renderer: Renderer, el: any, propName: string, value: any): void;
 export declare function createRenderElement(renderer: Renderer, parentElement: any, name: string, attrs: InlineArray<string>, debugInfo?: RenderDebugInfo): any;
 export declare function selectOrCreateRenderHostElement(renderer: Renderer, elementName: string, attrs: InlineArray<string>, rootSelectorOrNode: string | any, debugInfo?: RenderDebugInfo): any;
-export declare function subscribeToRenderElement(renderer: Renderer, element: any, eventNamesAndTargets: InlineArray<string>, listener: (eventName: string, event: any) => any): any;
+export declare function subscribeToRenderElement(view: AppView<any>, element: any, eventNamesAndTargets: InlineArray<string>, listener: (eventName: string, event: any) => any): any;
 export declare function noop(): void;
 export interface InlineArray<T> {
     length: number;
