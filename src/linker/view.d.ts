@@ -27,15 +27,11 @@ export declare abstract class AppView<T> {
     declarationAppElement: AppElement;
     cdMode: ChangeDetectorStatus;
     ref: ViewRef_<T>;
-    rootNodesOrAppElements: any[];
+    lastRootNode: any;
     allNodes: any[];
     disposables: Function[];
-    subscriptions: any[];
-    contentChildren: AppView<any>[];
-    viewChildren: AppView<any>[];
     viewContainerElement: AppElement;
     numberOfChecks: number;
-    projectableNodes: Array<any | any[]>;
     renderer: Renderer;
     private _hasExternalHostElement;
     private _animationContext;
@@ -43,22 +39,21 @@ export declare abstract class AppView<T> {
     constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentInjector: Injector, declarationAppElement: AppElement, cdMode: ChangeDetectorStatus);
     animationContext: AnimationViewContext;
     destroyed: boolean;
-    create(context: T, givenProjectableNodes: Array<any | any[]>, rootSelectorOrNode: string | any): AppElement;
+    create(context: T, rootSelectorOrNode: string | any): AppElement;
     /**
      * Overwritten by implementations.
      * Returns the AppElement for the host element for ViewType.HOST.
      */
     createInternal(rootSelectorOrNode: string | any): AppElement;
-    init(rootNodesOrAppElements: any[], allNodes: any[], disposables: Function[], subscriptions: any[]): void;
+    init(lastRootNode: any, allNodes: any[], disposables: Function[]): void;
     injectorGet(token: any, nodeIndex: number, notFoundResult: any): any;
     /**
      * Overwritten by implementations
      */
     injectorGetInternal(token: any, nodeIndex: number, notFoundResult: any): any;
     injector(nodeIndex: number): Injector;
+    detachAndDestroy(): void;
     destroy(): void;
-    private _destroyRecurse();
-    destroyLocal(): void;
     /**
      * Overwritten by implementations
      */
@@ -71,7 +66,16 @@ export declare abstract class AppView<T> {
     changeDetectorRef: ChangeDetectorRef;
     parent: AppView<any>;
     flatRootNodes: any[];
-    lastRootNode: any;
+    projectedNodes(ngContentIndex: number): any[];
+    visitProjectedNodes<C>(ngContentIndex: number, cb: (node: any, ctx: C) => void, c: C): void;
+    /**
+     * Overwritten by implementations
+     */
+    visitRootNodesInternal<C>(cb: (node: any, ctx: C) => void, c: C): void;
+    /**
+     * Overwritten by implementations
+     */
+    visitProjectableNodesInternal<C>(nodeIndex: number, ngContentIndex: number, cb: (node: any, ctx: C) => void, c: C): void;
     /**
      * Overwritten by implementations
      */
@@ -81,8 +85,6 @@ export declare abstract class AppView<T> {
      * Overwritten by implementations
      */
     detectChangesInternal(throwOnChange: boolean): void;
-    detectContentChildrenChanges(throwOnChange: boolean): void;
-    detectViewChildrenChanges(throwOnChange: boolean): void;
     markContentChildAsMoved(renderAppElement: AppElement): void;
     addToContentChildren(renderAppElement: AppElement): void;
     removeFromContentChildren(renderAppElement: AppElement): void;
@@ -95,10 +97,10 @@ export declare class DebugAppView<T> extends AppView<T> {
     staticNodeDebugInfos: StaticNodeDebugInfo[];
     private _currentDebugContext;
     constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentInjector: Injector, declarationAppElement: AppElement, cdMode: ChangeDetectorStatus, staticNodeDebugInfos: StaticNodeDebugInfo[]);
-    create(context: T, givenProjectableNodes: Array<any | any[]>, rootSelectorOrNode: string | any): AppElement;
+    create(context: T, rootSelectorOrNode: string | any): AppElement;
     injectorGet(token: any, nodeIndex: number, notFoundResult: any): any;
     detach(): void;
-    destroyLocal(): void;
+    destroy(): void;
     detectChanges(throwOnChange: boolean): void;
     private _resetDebug();
     debug(nodeIndex: number, rowNum: number, colNum: number): DebugContext;

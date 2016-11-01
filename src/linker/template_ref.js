@@ -54,7 +54,7 @@ export var TemplateRef_ = (function (_super) {
     }
     TemplateRef_.prototype.createEmbeddedView = function (context) {
         var view = this._viewFactory(this._appElement.parentView.viewUtils, this._appElement.parentInjector, this._appElement);
-        view.create(context || {}, null, null);
+        view.create(context || {}, null);
         return view.ref;
     };
     Object.defineProperty(TemplateRef_.prototype, "elementRef", {

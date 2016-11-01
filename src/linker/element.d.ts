@@ -7,7 +7,6 @@
  */
 import { Injector } from '../di/injector';
 import { ElementRef } from './element_ref';
-import { QueryList } from './query_list';
 import { AppView } from './view';
 import { ViewContainerRef_ } from './view_container_ref';
 /**
@@ -23,13 +22,15 @@ export declare class AppElement {
     nestedViews: AppView<any>[];
     componentView: AppView<any>;
     component: any;
-    componentConstructorViewQueries: QueryList<any>[];
     constructor(index: number, parentIndex: number, parentView: AppView<any>, nativeElement: any);
     elementRef: ElementRef;
     vcRef: ViewContainerRef_;
-    initComponent(component: any, componentConstructorViewQueries: QueryList<any>[], view: AppView<any>): void;
+    initComponent(component: any, view: AppView<any>): void;
     parentInjector: Injector;
     injector: Injector;
+    detectChangesInNestedViews(throwOnChange: boolean): void;
+    destroyNestedViews(): void;
+    visitNestedViewRootNodes<C>(cb: (node: any, ctx: C) => void, c: C): void;
     mapNestedViews(nestedViewClass: any, callback: Function): any[];
     moveView(view: AppView<any>, currentIndex: number): void;
     attachView(view: AppView<any>, viewIndex: number): void;

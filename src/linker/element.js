@@ -20,8 +20,6 @@ export var AppElement = (function () {
         this.parentIndex = parentIndex;
         this.parentView = parentView;
         this.nativeElement = nativeElement;
-        this.nestedViews = null;
-        this.componentView = null;
     }
     Object.defineProperty(AppElement.prototype, "elementRef", {
         get: function () { return new ElementRef(this.nativeElement); },
@@ -33,9 +31,8 @@ export var AppElement = (function () {
         enumerable: true,
         configurable: true
     });
-    AppElement.prototype.initComponent = function (component, componentConstructorViewQueries, view) {
+    AppElement.prototype.initComponent = function (component, view) {
         this.component = component;
-        this.componentConstructorViewQueries = componentConstructorViewQueries;
         this.componentView = view;
     };
     Object.defineProperty(AppElement.prototype, "parentInjector", {
@@ -48,6 +45,27 @@ export var AppElement = (function () {
         enumerable: true,
         configurable: true
     });
+    AppElement.prototype.detectChangesInNestedViews = function (throwOnChange) {
+        if (this.nestedViews) {
+            for (var i = 0; i < this.nestedViews.length; i++) {
+                this.nestedViews[i].detectChanges(throwOnChange);
+            }
+        }
+    };
+    AppElement.prototype.destroyNestedViews = function () {
+        if (this.nestedViews) {
+            for (var i = 0; i < this.nestedViews.length; i++) {
+                this.nestedViews[i].destroy();
+            }
+        }
+    };
+    AppElement.prototype.visitNestedViewRootNodes = function (cb, c) {
+        if (this.nestedViews) {
+            for (var i = 0; i < this.nestedViews.length; i++) {
+                this.nestedViews[i].visitRootNodesInternal(cb, c);
+            }
+        }
+    };
     AppElement.prototype.mapNestedViews = function (nestedViewClass, callback) {
         var result = [];
         if (isPresent(this.nestedViews)) {

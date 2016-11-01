@@ -115,7 +115,7 @@ export var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.destroy(); };
+    ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.detachAndDestroy(); };
     ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
     return ComponentRef_;
 }(ComponentRef));
@@ -149,7 +149,14 @@ export var ComponentFactory = (function () {
         }
         // Note: Host views don't need a declarationAppElement!
         var hostView = this._viewFactory(vu, injector, null);
-        var hostElement = hostView.create(EMPTY_CONTEXT, projectableNodes, rootSelectorOrNode);
+        hostView.visitProjectableNodesInternal =
+            function (nodeIndex, ngContentIndex, cb, ctx) {
+                var nodes = projectableNodes[ngContentIndex] || [];
+                for (var i = 0; i < nodes.length; i++) {
+                    cb(nodes[i], ctx);
+                }
+            };
+        var hostElement = hostView.create(EMPTY_CONTEXT, rootSelectorOrNode);
         return new ComponentRef_(hostElement, this._componentType);
     };
     return ComponentFactory;

@@ -12,7 +12,6 @@ import { Inject, Injectable } from '../di';
 import { isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
-import { AppElement } from './element';
 import { ExpressionChangedAfterItHasBeenCheckedError } from './errors';
 export var ViewUtils = (function () {
     function ViewUtils(_renderer, _appId, sanitizer) {
@@ -43,44 +42,8 @@ export var ViewUtils = (function () {
     ];
     return ViewUtils;
 }());
-export function flattenNestedViewRenderNodes(nodes) {
-    return _flattenNestedViewRenderNodes(nodes, []);
-}
-function _flattenNestedViewRenderNodes(nodes, renderNodes) {
-    for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        if (node instanceof AppElement) {
-            var appEl = node;
-            renderNodes.push(appEl.nativeElement);
-            if (isPresent(appEl.nestedViews)) {
-                for (var k = 0; k < appEl.nestedViews.length; k++) {
-                    _flattenNestedViewRenderNodes(appEl.nestedViews[k].rootNodesOrAppElements, renderNodes);
-                }
-            }
-        }
-        else {
-            renderNodes.push(node);
-        }
-    }
-    return renderNodes;
-}
-var EMPTY_ARR = [];
-export function ensureSlotCount(projectableNodes, expectedSlotCount) {
-    var res;
-    if (!projectableNodes) {
-        res = EMPTY_ARR;
-    }
-    else if (projectableNodes.length < expectedSlotCount) {
-        var givenSlotCount = projectableNodes.length;
-        res = new Array(expectedSlotCount);
-        for (var i = 0; i < expectedSlotCount; i++) {
-            res[i] = (i < givenSlotCount) ? projectableNodes[i] : EMPTY_ARR;
-        }
-    }
-    else {
-        res = projectableNodes;
-    }
-    return res;
+export function addToArray(e, array) {
+    array.push(e);
 }
 export var MAX_INTERPOLATION_VALUES = 9;
 export function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {

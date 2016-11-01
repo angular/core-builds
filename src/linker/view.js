@@ -11,17 +11,15 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { ChangeDetectorStatus } from '../change_detection/change_detection';
-import { ListWrapper } from '../facade/collection';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { AnimationViewContext } from './animation_view_context';
 import { DebugContext } from './debug_context';
-import { AppElement } from './element';
 import { ElementInjector } from './element_injector';
 import { ExpressionChangedAfterItHasBeenCheckedError, ViewDestroyedError, ViewWrappedError } from './errors';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
-import { ensureSlotCount, flattenNestedViewRenderNodes } from './view_utils';
+import { addToArray } from './view_utils';
 var _scope_check = wtfCreateScope("AppView#check(ascii id)");
 /**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -36,8 +34,6 @@ export var AppView = (function () {
         this.parentInjector = parentInjector;
         this.declarationAppElement = declarationAppElement;
         this.cdMode = cdMode;
-        this.contentChildren = [];
-        this.viewChildren = [];
         this.viewContainerElement = null;
         this.numberOfChecks = 0;
         this.ref = new ViewRef_(this);
@@ -63,24 +59,9 @@ export var AppView = (function () {
         enumerable: true,
         configurable: true
     });
-    AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
+    AppView.prototype.create = function (context, rootSelectorOrNode) {
         this.context = context;
-        var projectableNodes;
-        switch (this.type) {
-            case ViewType.COMPONENT:
-                projectableNodes = ensureSlotCount(givenProjectableNodes, this.componentType.slotCount);
-                break;
-            case ViewType.EMBEDDED:
-                projectableNodes = this.declarationAppElement.parentView.projectableNodes;
-                break;
-            case ViewType.HOST:
-                // Note: Don't ensure the slot count for the projectableNodes as we store
-                // them only for the contained component view (which will later check the slot count...)
-                projectableNodes = givenProjectableNodes;
-                break;
-        }
         this._hasExternalHostElement = isPresent(rootSelectorOrNode);
-        this.projectableNodes = projectableNodes;
         return this.createInternal(rootSelectorOrNode);
     };
     /**
@@ -88,15 +69,11 @@ export var AppView = (function () {
      * Returns the AppElement for the host element for ViewType.HOST.
      */
     AppView.prototype.createInternal = function (rootSelectorOrNode) { return null; };
-    AppView.prototype.init = function (rootNodesOrAppElements, allNodes, disposables, subscriptions) {
-        this.rootNodesOrAppElements = rootNodesOrAppElements;
+    AppView.prototype.init = function (lastRootNode, allNodes, disposables) {
+        this.lastRootNode = lastRootNode;
         this.allNodes = allNodes;
         this.disposables = disposables;
-        this.subscriptions = subscriptions;
         if (this.type === ViewType.COMPONENT) {
-            // Note: the render nodes have been attached to their host element
-            // in the ViewFactory already.
-            this.declarationAppElement.parentView.viewChildren.push(this);
             this.dirtyParentQueriesInternal();
         }
     };
@@ -117,38 +94,25 @@ export var AppView = (function () {
             return this.parentInjector;
         }
     };
-    AppView.prototype.destroy = function () {
+    AppView.prototype.detachAndDestroy = function () {
         if (this._hasExternalHostElement) {
             this.renderer.detachView(this.flatRootNodes);
         }
         else if (isPresent(this.viewContainerElement)) {
             this.viewContainerElement.detachView(this.viewContainerElement.nestedViews.indexOf(this));
         }
-        this._destroyRecurse();
+        this.destroy();
     };
-    AppView.prototype._destroyRecurse = function () {
+    AppView.prototype.destroy = function () {
+        var _this = this;
         if (this.cdMode === ChangeDetectorStatus.Destroyed) {
             return;
         }
-        var children = this.contentChildren;
-        for (var i = 0; i < children.length; i++) {
-            children[i]._destroyRecurse();
-        }
-        children = this.viewChildren;
-        for (var i = 0; i < children.length; i++) {
-            children[i]._destroyRecurse();
-        }
-        this.destroyLocal();
-        this.cdMode = ChangeDetectorStatus.Destroyed;
-    };
-    AppView.prototype.destroyLocal = function () {
-        var _this = this;
         var hostElement = this.type === ViewType.COMPONENT ? this.declarationAppElement.nativeElement : null;
-        for (var i = 0; i < this.disposables.length; i++) {
-            this.disposables[i]();
-        }
-        for (var i = 0; i < this.subscriptions.length; i++) {
-            this.subscriptions[i].unsubscribe();
+        if (this.disposables) {
+            for (var i = 0; i < this.disposables.length; i++) {
+                this.disposables[i]();
+            }
         }
         this.destroyInternal();
         this.dirtyParentQueriesInternal();
@@ -158,6 +122,7 @@ export var AppView = (function () {
         else {
             this.renderer.destroyView(hostElement, this.allNodes);
         }
+        this.cdMode = ChangeDetectorStatus.Destroyed;
     };
     /**
      * Overwritten by implementations
@@ -190,20 +155,38 @@ export var AppView = (function () {
         configurable: true
     });
     Object.defineProperty(AppView.prototype, "flatRootNodes", {
-        get: function () { return flattenNestedViewRenderNodes(this.rootNodesOrAppElements); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(AppView.prototype, "lastRootNode", {
         get: function () {
-            var lastNode = this.rootNodesOrAppElements.length > 0 ?
-                this.rootNodesOrAppElements[this.rootNodesOrAppElements.length - 1] :
-                null;
-            return _findLastRenderNode(lastNode);
+            var nodes = [];
+            this.visitRootNodesInternal(addToArray, nodes);
+            return nodes;
         },
         enumerable: true,
         configurable: true
     });
+    AppView.prototype.projectedNodes = function (ngContentIndex) {
+        var nodes = [];
+        this.visitProjectedNodes(ngContentIndex, addToArray, nodes);
+        return nodes;
+    };
+    AppView.prototype.visitProjectedNodes = function (ngContentIndex, cb, c) {
+        var appEl = this.declarationAppElement;
+        switch (this.type) {
+            case ViewType.EMBEDDED:
+                appEl.parentView.visitProjectedNodes(ngContentIndex, cb, c);
+                break;
+            case ViewType.COMPONENT:
+                appEl.parentView.visitProjectableNodesInternal(appEl.index, ngContentIndex, cb, c);
+                break;
+        }
+    };
+    /**
+     * Overwritten by implementations
+     */
+    AppView.prototype.visitRootNodesInternal = function (cb, c) { };
+    /**
+     * Overwritten by implementations
+     */
+    AppView.prototype.visitProjectableNodesInternal = function (nodeIndex, ngContentIndex, cb, c) { };
     /**
      * Overwritten by implementations
      */
@@ -211,7 +194,8 @@ export var AppView = (function () {
     AppView.prototype.detectChanges = function (throwOnChange) {
         var s = _scope_check(this.clazz);
         if (this.cdMode === ChangeDetectorStatus.Checked ||
-            this.cdMode === ChangeDetectorStatus.Errored)
+            this.cdMode === ChangeDetectorStatus.Errored ||
+            this.cdMode === ChangeDetectorStatus.Detached)
             return;
         if (this.cdMode === ChangeDetectorStatus.Destroyed) {
             this.throwDestroyedError('detectChanges');
@@ -225,34 +209,13 @@ export var AppView = (function () {
     /**
      * Overwritten by implementations
      */
-    AppView.prototype.detectChangesInternal = function (throwOnChange) {
-        this.detectContentChildrenChanges(throwOnChange);
-        this.detectViewChildrenChanges(throwOnChange);
-    };
-    AppView.prototype.detectContentChildrenChanges = function (throwOnChange) {
-        for (var i = 0; i < this.contentChildren.length; ++i) {
-            var child = this.contentChildren[i];
-            if (child.cdMode === ChangeDetectorStatus.Detached)
-                continue;
-            child.detectChanges(throwOnChange);
-        }
-    };
-    AppView.prototype.detectViewChildrenChanges = function (throwOnChange) {
-        for (var i = 0; i < this.viewChildren.length; ++i) {
-            var child = this.viewChildren[i];
-            if (child.cdMode === ChangeDetectorStatus.Detached)
-                continue;
-            child.detectChanges(throwOnChange);
-        }
-    };
+    AppView.prototype.detectChangesInternal = function (throwOnChange) { };
     AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
     AppView.prototype.addToContentChildren = function (renderAppElement) {
-        renderAppElement.parentView.contentChildren.push(this);
         this.viewContainerElement = renderAppElement;
         this.dirtyParentQueriesInternal();
     };
     AppView.prototype.removeFromContentChildren = function (renderAppElement) {
-        ListWrapper.remove(renderAppElement.parentView.contentChildren, this);
         this.dirtyParentQueriesInternal();
         this.viewContainerElement = null;
     };
@@ -280,10 +243,10 @@ export var DebugAppView = (function (_super) {
         this.staticNodeDebugInfos = staticNodeDebugInfos;
         this._currentDebugContext = null;
     }
-    DebugAppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
+    DebugAppView.prototype.create = function (context, rootSelectorOrNode) {
         this._resetDebug();
         try {
-            return _super.prototype.create.call(this, context, givenProjectableNodes, rootSelectorOrNode);
+            return _super.prototype.create.call(this, context, rootSelectorOrNode);
         }
         catch (e) {
             this._rethrowWithContext(e);
@@ -310,10 +273,10 @@ export var DebugAppView = (function (_super) {
             throw e;
         }
     };
-    DebugAppView.prototype.destroyLocal = function () {
+    DebugAppView.prototype.destroy = function () {
         this._resetDebug();
         try {
-            _super.prototype.destroyLocal.call(this);
+            _super.prototype.destroy.call(this);
         }
         catch (e) {
             this._rethrowWithContext(e);
@@ -360,24 +323,4 @@ export var DebugAppView = (function (_super) {
     };
     return DebugAppView;
 }(AppView));
-function _findLastRenderNode(node) {
-    var lastNode;
-    if (node instanceof AppElement) {
-        var appEl = node;
-        lastNode = appEl.nativeElement;
-        if (isPresent(appEl.nestedViews)) {
-            // Note: Views might have no root nodes at all!
-            for (var i = appEl.nestedViews.length - 1; i >= 0; i--) {
-                var nestedView = appEl.nestedViews[i];
-                if (nestedView.rootNodesOrAppElements.length > 0) {
-                    lastNode = _findLastRenderNode(nestedView.rootNodesOrAppElements[nestedView.rootNodesOrAppElements.length - 1]);
-                }
-            }
-        }
-    }
-    else {
-        lastNode = node;
-    }
-    return lastNode;
-}
 //# sourceMappingURL=view.js.map

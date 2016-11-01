@@ -4632,418 +4632,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * A wrapper around a native element inside of a View.
-     *
-     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
-     * element.
-     *
-     * @security Permitting direct access to the DOM can make your application more vulnerable to
-     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
-     * [Security Guide](http://g.co/ng/security).
-     *
-     * @stable
-     */
-    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
-    // i.e. users have to ask for what they need. With that, we can build better analysis tools
-    // and could do better codegen in the future.
-    var ElementRef = (function () {
-        function ElementRef(nativeElement) {
-            this.nativeElement = nativeElement;
-        }
-        return ElementRef;
-    }());
-
-    var trace;
-    var events;
-    function detectWTF() {
-        var wtf = global$1['wtf'];
-        if (wtf) {
-            trace = wtf['trace'];
-            if (trace) {
-                events = trace['events'];
-                return true;
-            }
-        }
-        return false;
-    }
-    function createScope(signature, flags) {
-        if (flags === void 0) { flags = null; }
-        return events.createScope(signature, flags);
-    }
-    function leave(scope, returnValue) {
-        trace.leaveScope(scope, returnValue);
-        return returnValue;
-    }
-    function startTimeRange(rangeType, action) {
-        return trace.beginTimeRange(rangeType, action);
-    }
-    function endTimeRange(range) {
-        trace.endTimeRange(range);
-    }
-
-    /**
-     * True if WTF is enabled.
-     */
-    var wtfEnabled = detectWTF();
-    function noopScope(arg0, arg1) {
-        return null;
-    }
-    /**
-     * Create trace scope.
-     *
-     * Scopes must be strictly nested and are analogous to stack frames, but
-     * do not have to follow the stack frames. Instead it is recommended that they follow logical
-     * nesting. You may want to use
-     * [Event
-     * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
-     * as they are defined in WTF.
-     *
-     * Used to mark scope entry. The return value is used to leave the scope.
-     *
-     *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
-     *
-     *     someMethod() {
-     *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
-     *        // DO SOME WORK HERE
-     *        return wtfLeave(s, 123); // Return value 123
-     *     }
-     *
-     * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
-     * negatively impact the performance of your application. For this reason we recommend that
-     * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
-     * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
-     * exception, will produce incorrect trace, but presence of exception signifies logic error which
-     * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
-     * an exception is expected during normal execution while profiling.
-     *
-     * @experimental
-     */
-    var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
-    /**
-     * Used to mark end of Scope.
-     *
-     * - `scope` to end.
-     * - `returnValue` (optional) to be passed to the WTF.
-     *
-     * Returns the `returnValue for easy chaining.
-     * @experimental
-     */
-    var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
-    /**
-     * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
-     * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
-     * enabled.
-     *
-     *     someMethod() {
-     *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
-     *        var future = new Future.delay(5).then((_) {
-     *          wtfEndTimeRange(s);
-     *        });
-     *     }
-     * @experimental
-     */
-    var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
-    /**
-     * Ends a async time range operation.
-     * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
-     * enabled.
-     * @experimental
-     */
-    var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
-
-    /**
-     * Represents a container where one or more Views can be attached.
-     *
-     * The container can contain two kinds of Views. Host Views, created by instantiating a
-     * {@link Component} via {@link #createComponent}, and Embedded Views, created by instantiating an
-     * {@link TemplateRef Embedded Template} via {@link #createEmbeddedView}.
-     *
-     * The location of the View Container within the containing View is specified by the Anchor
-     * `element`. Each View Container can have only one Anchor Element and each Anchor Element can only
-     * have a single View Container.
-     *
-     * Root elements of Views attached to this container become siblings of the Anchor Element in
-     * the Rendered View.
-     *
-     * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
-     * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
-     * @stable
-     */
-    var ViewContainerRef = (function () {
-        function ViewContainerRef() {
-        }
-        Object.defineProperty(ViewContainerRef.prototype, "element", {
-            /**
-             * Anchor element that specifies the location of this container in the containing View.
-             * <!-- TODO: rename to anchorElement -->
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef.prototype, "injector", {
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef.prototype, "length", {
-            /**
-             * Returns the number of Views currently attached to this container.
-             */
-            get: function () { return unimplemented(); },
-            enumerable: true,
-            configurable: true
-        });
-        ;
-        return ViewContainerRef;
-    }());
-    var ViewContainerRef_ = (function () {
-        function ViewContainerRef_(_element) {
-            this._element = _element;
-            /** @internal */
-            this._createComponentInContainerScope = wtfCreateScope('ViewContainerRef#createComponent()');
-            /** @internal */
-            this._insertScope = wtfCreateScope('ViewContainerRef#insert()');
-            /** @internal */
-            this._removeScope = wtfCreateScope('ViewContainerRef#remove()');
-            /** @internal */
-            this._detachScope = wtfCreateScope('ViewContainerRef#detach()');
-        }
-        ViewContainerRef_.prototype.get = function (index) { return this._element.nestedViews[index].ref; };
-        Object.defineProperty(ViewContainerRef_.prototype, "length", {
-            get: function () {
-                var views = this._element.nestedViews;
-                return isPresent(views) ? views.length : 0;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef_.prototype, "element", {
-            get: function () { return this._element.elementRef; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef_.prototype, "injector", {
-            get: function () { return this._element.injector; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
-            get: function () { return this._element.parentInjector; },
-            enumerable: true,
-            configurable: true
-        });
-        // TODO(rado): profile and decide whether bounds checks should be added
-        // to the methods below.
-        ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
-            if (context === void 0) { context = null; }
-            if (index === void 0) { index = -1; }
-            var viewRef = templateRef.createEmbeddedView(context);
-            this.insert(viewRef, index);
-            return viewRef;
-        };
-        ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) {
-            if (index === void 0) { index = -1; }
-            if (injector === void 0) { injector = null; }
-            if (projectableNodes === void 0) { projectableNodes = null; }
-            var s = this._createComponentInContainerScope();
-            var contextInjector = injector || this._element.parentInjector;
-            var componentRef = componentFactory.create(contextInjector, projectableNodes);
-            this.insert(componentRef.hostView, index);
-            return wtfLeave(s, componentRef);
-        };
-        // TODO(i): refactor insert+remove into move
-        ViewContainerRef_.prototype.insert = function (viewRef, index) {
-            if (index === void 0) { index = -1; }
-            var s = this._insertScope();
-            if (index == -1)
-                index = this.length;
-            var viewRef_ = viewRef;
-            this._element.attachView(viewRef_.internalView, index);
-            return wtfLeave(s, viewRef_);
-        };
-        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
-            var s = this._insertScope();
-            if (currentIndex == -1)
-                return;
-            var viewRef_ = viewRef;
-            this._element.moveView(viewRef_.internalView, currentIndex);
-            return wtfLeave(s, viewRef_);
-        };
-        ViewContainerRef_.prototype.indexOf = function (viewRef) {
-            return this._element.nestedViews.indexOf(viewRef.internalView);
-        };
-        // TODO(i): rename to destroy
-        ViewContainerRef_.prototype.remove = function (index) {
-            if (index === void 0) { index = -1; }
-            var s = this._removeScope();
-            if (index == -1)
-                index = this.length - 1;
-            var view = this._element.detachView(index);
-            view.destroy();
-            // view is intentionally not returned to the client.
-            wtfLeave(s);
-        };
-        // TODO(i): refactor insert+remove into move
-        ViewContainerRef_.prototype.detach = function (index) {
-            if (index === void 0) { index = -1; }
-            var s = this._detachScope();
-            if (index == -1)
-                index = this.length - 1;
-            var view = this._element.detachView(index);
-            return wtfLeave(s, view.ref);
-        };
-        ViewContainerRef_.prototype.clear = function () {
-            for (var i = this.length - 1; i >= 0; i--) {
-                this.remove(i);
-            }
-        };
-        return ViewContainerRef_;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var ViewType;
-    (function (ViewType) {
-        // A view that contains the host element with bound component directive.
-        // Contains a COMPONENT view
-        ViewType[ViewType["HOST"] = 0] = "HOST";
-        // The view of the component
-        // Can contain 0 to n EMBEDDED views
-        ViewType[ViewType["COMPONENT"] = 1] = "COMPONENT";
-        // A view that is embedded into another View via a <template> element
-        // inside of a COMPONENT view
-        ViewType[ViewType["EMBEDDED"] = 2] = "EMBEDDED";
-    })(ViewType || (ViewType = {}));
-
-    /**
-     * An AppElement is created for elements that have a ViewContainerRef,
-     * a nested component or a <template> element to keep data around
-     * that is needed for later instantiations.
-     */
-    var AppElement = (function () {
-        function AppElement(index, parentIndex, parentView, nativeElement) {
-            this.index = index;
-            this.parentIndex = parentIndex;
-            this.parentView = parentView;
-            this.nativeElement = nativeElement;
-            this.nestedViews = null;
-            this.componentView = null;
-        }
-        Object.defineProperty(AppElement.prototype, "elementRef", {
-            get: function () { return new ElementRef(this.nativeElement); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppElement.prototype, "vcRef", {
-            get: function () { return new ViewContainerRef_(this); },
-            enumerable: true,
-            configurable: true
-        });
-        AppElement.prototype.initComponent = function (component, componentConstructorViewQueries, view) {
-            this.component = component;
-            this.componentConstructorViewQueries = componentConstructorViewQueries;
-            this.componentView = view;
-        };
-        Object.defineProperty(AppElement.prototype, "parentInjector", {
-            get: function () { return this.parentView.injector(this.parentIndex); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppElement.prototype, "injector", {
-            get: function () { return this.parentView.injector(this.index); },
-            enumerable: true,
-            configurable: true
-        });
-        AppElement.prototype.mapNestedViews = function (nestedViewClass, callback) {
-            var result = [];
-            if (isPresent(this.nestedViews)) {
-                this.nestedViews.forEach(function (nestedView) {
-                    if (nestedView.clazz === nestedViewClass) {
-                        result.push(callback(nestedView));
-                    }
-                });
-            }
-            return result;
-        };
-        AppElement.prototype.moveView = function (view, currentIndex) {
-            var previousIndex = this.nestedViews.indexOf(view);
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            var nestedViews = this.nestedViews;
-            if (nestedViews == null) {
-                nestedViews = [];
-                this.nestedViews = nestedViews;
-            }
-            nestedViews.splice(previousIndex, 1);
-            nestedViews.splice(currentIndex, 0, view);
-            var refRenderNode;
-            if (currentIndex > 0) {
-                var prevView = nestedViews[currentIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
-            }
-            view.markContentChildAsMoved(this);
-        };
-        AppElement.prototype.attachView = function (view, viewIndex) {
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            var nestedViews = this.nestedViews;
-            if (nestedViews == null) {
-                nestedViews = [];
-                this.nestedViews = nestedViews;
-            }
-            nestedViews.splice(viewIndex, 0, view);
-            var refRenderNode;
-            if (viewIndex > 0) {
-                var prevView = nestedViews[viewIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
-            }
-            view.addToContentChildren(this);
-        };
-        AppElement.prototype.detachView = function (viewIndex) {
-            var view = this.nestedViews.splice(viewIndex, 1)[0];
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            view.detach();
-            view.removeFromContentChildren(this);
-            return view;
-        };
-        return AppElement;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var __extends$6 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
@@ -5153,44 +4741,8 @@
         ];
         return ViewUtils;
     }());
-    function flattenNestedViewRenderNodes(nodes) {
-        return _flattenNestedViewRenderNodes(nodes, []);
-    }
-    function _flattenNestedViewRenderNodes(nodes, renderNodes) {
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            if (node instanceof AppElement) {
-                var appEl = node;
-                renderNodes.push(appEl.nativeElement);
-                if (isPresent(appEl.nestedViews)) {
-                    for (var k = 0; k < appEl.nestedViews.length; k++) {
-                        _flattenNestedViewRenderNodes(appEl.nestedViews[k].rootNodesOrAppElements, renderNodes);
-                    }
-                }
-            }
-            else {
-                renderNodes.push(node);
-            }
-        }
-        return renderNodes;
-    }
-    var EMPTY_ARR = [];
-    function ensureSlotCount(projectableNodes, expectedSlotCount) {
-        var res;
-        if (!projectableNodes) {
-            res = EMPTY_ARR;
-        }
-        else if (projectableNodes.length < expectedSlotCount) {
-            var givenSlotCount = projectableNodes.length;
-            res = new Array(expectedSlotCount);
-            for (var i = 0; i < expectedSlotCount; i++) {
-                res[i] = (i < givenSlotCount) ? projectableNodes[i] : EMPTY_ARR;
-            }
-        }
-        else {
-            res = projectableNodes;
-        }
-        return res;
+    function addToArray(e, array) {
+        array.push(e);
     }
     var MAX_INTERPOLATION_VALUES = 9;
     function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
@@ -5776,8 +5328,7 @@
 
     var view_utils = Object.freeze({
         ViewUtils: ViewUtils,
-        flattenNestedViewRenderNodes: flattenNestedViewRenderNodes,
-        ensureSlotCount: ensureSlotCount,
+        addToArray: addToArray,
         MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         interpolate: interpolate,
         checkBinding: checkBinding,
@@ -5923,7 +5474,7 @@
             enumerable: true,
             configurable: true
         });
-        ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.destroy(); };
+        ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.detachAndDestroy(); };
         ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
         return ComponentRef_;
     }(ComponentRef));
@@ -5957,7 +5508,14 @@
             }
             // Note: Host views don't need a declarationAppElement!
             var hostView = this._viewFactory(vu, injector, null);
-            var hostElement = hostView.create(EMPTY_CONTEXT, projectableNodes, rootSelectorOrNode);
+            hostView.visitProjectableNodesInternal =
+                function (nodeIndex, ngContentIndex, cb, ctx) {
+                    var nodes = projectableNodes[ngContentIndex] || [];
+                    for (var i = 0; i < nodes.length; i++) {
+                        cb(nodes[i], ctx);
+                    }
+                };
+            var hostElement = hostView.create(EMPTY_CONTEXT, rootSelectorOrNode);
             return new ComponentRef_(hostElement, this._componentType);
         };
         return ComponentFactory;
@@ -6021,6 +5579,104 @@
         };
         return CodegenComponentFactoryResolver;
     }());
+
+    var trace;
+    var events;
+    function detectWTF() {
+        var wtf = global$1['wtf'];
+        if (wtf) {
+            trace = wtf['trace'];
+            if (trace) {
+                events = trace['events'];
+                return true;
+            }
+        }
+        return false;
+    }
+    function createScope(signature, flags) {
+        if (flags === void 0) { flags = null; }
+        return events.createScope(signature, flags);
+    }
+    function leave(scope, returnValue) {
+        trace.leaveScope(scope, returnValue);
+        return returnValue;
+    }
+    function startTimeRange(rangeType, action) {
+        return trace.beginTimeRange(rangeType, action);
+    }
+    function endTimeRange(range) {
+        trace.endTimeRange(range);
+    }
+
+    /**
+     * True if WTF is enabled.
+     */
+    var wtfEnabled = detectWTF();
+    function noopScope(arg0, arg1) {
+        return null;
+    }
+    /**
+     * Create trace scope.
+     *
+     * Scopes must be strictly nested and are analogous to stack frames, but
+     * do not have to follow the stack frames. Instead it is recommended that they follow logical
+     * nesting. You may want to use
+     * [Event
+     * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
+     * as they are defined in WTF.
+     *
+     * Used to mark scope entry. The return value is used to leave the scope.
+     *
+     *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
+     *
+     *     someMethod() {
+     *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
+     *        // DO SOME WORK HERE
+     *        return wtfLeave(s, 123); // Return value 123
+     *     }
+     *
+     * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
+     * negatively impact the performance of your application. For this reason we recommend that
+     * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
+     * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
+     * exception, will produce incorrect trace, but presence of exception signifies logic error which
+     * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
+     * an exception is expected during normal execution while profiling.
+     *
+     * @experimental
+     */
+    var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
+    /**
+     * Used to mark end of Scope.
+     *
+     * - `scope` to end.
+     * - `returnValue` (optional) to be passed to the WTF.
+     *
+     * Returns the `returnValue for easy chaining.
+     * @experimental
+     */
+    var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
+    /**
+     * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
+     * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
+     * enabled.
+     *
+     *     someMethod() {
+     *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
+     *        var future = new Future.delay(5).then((_) {
+     *          wtfEndTimeRange(s);
+     *        });
+     *     }
+     * @experimental
+     */
+    var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
+    /**
+     * Ends a async time range operation.
+     * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
+     * enabled.
+     * @experimental
+     */
+    var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 
     /**
      * @license
@@ -7017,6 +6673,35 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * A wrapper around a native element inside of a View.
+     *
+     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+     * element.
+     *
+     * @security Permitting direct access to the DOM can make your application more vulnerable to
+     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+     * [Security Guide](http://g.co/ng/security).
+     *
+     * @stable
+     */
+    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
+    // i.e. users have to ask for what they need. With that, we can build better analysis tools
+    // and could do better codegen in the future.
+    var ElementRef = (function () {
+        function ElementRef(nativeElement) {
+            this.nativeElement = nativeElement;
+        }
+        return ElementRef;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var __extends$9 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
@@ -7393,7 +7078,7 @@
         }
         TemplateRef_.prototype.createEmbeddedView = function (context) {
             var view = this._viewFactory(this._appElement.parentView.viewUtils, this._appElement.parentInjector, this._appElement);
-            view.create(context || {}, null, null);
+            view.create(context || {}, null);
             return view.ref;
         };
         Object.defineProperty(TemplateRef_.prototype, "elementRef", {
@@ -7403,6 +7088,161 @@
         });
         return TemplateRef_;
     }(TemplateRef));
+
+    /**
+     * Represents a container where one or more Views can be attached.
+     *
+     * The container can contain two kinds of Views. Host Views, created by instantiating a
+     * {@link Component} via {@link #createComponent}, and Embedded Views, created by instantiating an
+     * {@link TemplateRef Embedded Template} via {@link #createEmbeddedView}.
+     *
+     * The location of the View Container within the containing View is specified by the Anchor
+     * `element`. Each View Container can have only one Anchor Element and each Anchor Element can only
+     * have a single View Container.
+     *
+     * Root elements of Views attached to this container become siblings of the Anchor Element in
+     * the Rendered View.
+     *
+     * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
+     * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
+     * @stable
+     */
+    var ViewContainerRef = (function () {
+        function ViewContainerRef() {
+        }
+        Object.defineProperty(ViewContainerRef.prototype, "element", {
+            /**
+             * Anchor element that specifies the location of this container in the containing View.
+             * <!-- TODO: rename to anchorElement -->
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef.prototype, "injector", {
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef.prototype, "length", {
+            /**
+             * Returns the number of Views currently attached to this container.
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        return ViewContainerRef;
+    }());
+    var ViewContainerRef_ = (function () {
+        function ViewContainerRef_(_element) {
+            this._element = _element;
+            /** @internal */
+            this._createComponentInContainerScope = wtfCreateScope('ViewContainerRef#createComponent()');
+            /** @internal */
+            this._insertScope = wtfCreateScope('ViewContainerRef#insert()');
+            /** @internal */
+            this._removeScope = wtfCreateScope('ViewContainerRef#remove()');
+            /** @internal */
+            this._detachScope = wtfCreateScope('ViewContainerRef#detach()');
+        }
+        ViewContainerRef_.prototype.get = function (index) { return this._element.nestedViews[index].ref; };
+        Object.defineProperty(ViewContainerRef_.prototype, "length", {
+            get: function () {
+                var views = this._element.nestedViews;
+                return isPresent(views) ? views.length : 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "element", {
+            get: function () { return this._element.elementRef; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "injector", {
+            get: function () { return this._element.injector; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+            get: function () { return this._element.parentInjector; },
+            enumerable: true,
+            configurable: true
+        });
+        // TODO(rado): profile and decide whether bounds checks should be added
+        // to the methods below.
+        ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+            if (context === void 0) { context = null; }
+            if (index === void 0) { index = -1; }
+            var viewRef = templateRef.createEmbeddedView(context);
+            this.insert(viewRef, index);
+            return viewRef;
+        };
+        ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) {
+            if (index === void 0) { index = -1; }
+            if (injector === void 0) { injector = null; }
+            if (projectableNodes === void 0) { projectableNodes = null; }
+            var s = this._createComponentInContainerScope();
+            var contextInjector = injector || this._element.parentInjector;
+            var componentRef = componentFactory.create(contextInjector, projectableNodes);
+            this.insert(componentRef.hostView, index);
+            return wtfLeave(s, componentRef);
+        };
+        // TODO(i): refactor insert+remove into move
+        ViewContainerRef_.prototype.insert = function (viewRef, index) {
+            if (index === void 0) { index = -1; }
+            var s = this._insertScope();
+            if (index == -1)
+                index = this.length;
+            var viewRef_ = viewRef;
+            this._element.attachView(viewRef_.internalView, index);
+            return wtfLeave(s, viewRef_);
+        };
+        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+            var s = this._insertScope();
+            if (currentIndex == -1)
+                return;
+            var viewRef_ = viewRef;
+            this._element.moveView(viewRef_.internalView, currentIndex);
+            return wtfLeave(s, viewRef_);
+        };
+        ViewContainerRef_.prototype.indexOf = function (viewRef) {
+            return this._element.nestedViews.indexOf(viewRef.internalView);
+        };
+        // TODO(i): rename to destroy
+        ViewContainerRef_.prototype.remove = function (index) {
+            if (index === void 0) { index = -1; }
+            var s = this._removeScope();
+            if (index == -1)
+                index = this.length - 1;
+            var view = this._element.detachView(index);
+            view.destroy();
+            // view is intentionally not returned to the client.
+            wtfLeave(s);
+        };
+        // TODO(i): refactor insert+remove into move
+        ViewContainerRef_.prototype.detach = function (index) {
+            if (index === void 0) { index = -1; }
+            var s = this._detachScope();
+            if (index == -1)
+                index = this.length - 1;
+            var view = this._element.detachView(index);
+            return wtfLeave(s, view.ref);
+        };
+        ViewContainerRef_.prototype.clear = function () {
+            for (var i = this.length - 1; i >= 0; i--) {
+                this.remove(i);
+            }
+        };
+        return ViewContainerRef_;
+    }());
 
     /**
      * @license
@@ -7559,8 +7399,13 @@
             this._view.cdMode = this._originalMode;
             this.markForCheck();
         };
-        ViewRef_.prototype.onDestroy = function (callback) { this._view.disposables.push(callback); };
-        ViewRef_.prototype.destroy = function () { this._view.destroy(); };
+        ViewRef_.prototype.onDestroy = function (callback) {
+            if (!this._view.disposables) {
+                this._view.disposables = [];
+            }
+            this._view.disposables.push(callback);
+        };
+        ViewRef_.prototype.destroy = function () { this._view.detachAndDestroy(); };
         return ViewRef_;
     }());
 
@@ -9029,6 +8874,26 @@
         return DebugDomRenderer;
     }());
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var ViewType;
+    (function (ViewType) {
+        // A view that contains the host element with bound component directive.
+        // Contains a COMPONENT view
+        ViewType[ViewType["HOST"] = 0] = "HOST";
+        // The view of the component
+        // Can contain 0 to n EMBEDDED views
+        ViewType[ViewType["COMPONENT"] = 1] = "COMPONENT";
+        // A view that is embedded into another View via a <template> element
+        // inside of a COMPONENT view
+        ViewType[ViewType["EMBEDDED"] = 2] = "EMBEDDED";
+    })(ViewType || (ViewType = {}));
+
     var StaticNodeDebugInfo = (function () {
         function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
             this.providerTokens = providerTokens;
@@ -9138,6 +9003,134 @@
             configurable: true
         });
         return DebugContext;
+    }());
+
+    /**
+     * An AppElement is created for elements that have a ViewContainerRef,
+     * a nested component or a <template> element to keep data around
+     * that is needed for later instantiations.
+     */
+    var AppElement = (function () {
+        function AppElement(index, parentIndex, parentView, nativeElement) {
+            this.index = index;
+            this.parentIndex = parentIndex;
+            this.parentView = parentView;
+            this.nativeElement = nativeElement;
+        }
+        Object.defineProperty(AppElement.prototype, "elementRef", {
+            get: function () { return new ElementRef(this.nativeElement); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AppElement.prototype, "vcRef", {
+            get: function () { return new ViewContainerRef_(this); },
+            enumerable: true,
+            configurable: true
+        });
+        AppElement.prototype.initComponent = function (component, view) {
+            this.component = component;
+            this.componentView = view;
+        };
+        Object.defineProperty(AppElement.prototype, "parentInjector", {
+            get: function () { return this.parentView.injector(this.parentIndex); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AppElement.prototype, "injector", {
+            get: function () { return this.parentView.injector(this.index); },
+            enumerable: true,
+            configurable: true
+        });
+        AppElement.prototype.detectChangesInNestedViews = function (throwOnChange) {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].detectChanges(throwOnChange);
+                }
+            }
+        };
+        AppElement.prototype.destroyNestedViews = function () {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].destroy();
+                }
+            }
+        };
+        AppElement.prototype.visitNestedViewRootNodes = function (cb, c) {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].visitRootNodesInternal(cb, c);
+                }
+            }
+        };
+        AppElement.prototype.mapNestedViews = function (nestedViewClass, callback) {
+            var result = [];
+            if (isPresent(this.nestedViews)) {
+                this.nestedViews.forEach(function (nestedView) {
+                    if (nestedView.clazz === nestedViewClass) {
+                        result.push(callback(nestedView));
+                    }
+                });
+            }
+            return result;
+        };
+        AppElement.prototype.moveView = function (view, currentIndex) {
+            var previousIndex = this.nestedViews.indexOf(view);
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            nestedViews.splice(previousIndex, 1);
+            nestedViews.splice(currentIndex, 0, view);
+            var refRenderNode;
+            if (currentIndex > 0) {
+                var prevView = nestedViews[currentIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.markContentChildAsMoved(this);
+        };
+        AppElement.prototype.attachView = function (view, viewIndex) {
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            nestedViews.splice(viewIndex, 0, view);
+            var refRenderNode;
+            if (viewIndex > 0) {
+                var prevView = nestedViews[viewIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.addToContentChildren(this);
+        };
+        AppElement.prototype.detachView = function (viewIndex) {
+            var view = this.nestedViews.splice(viewIndex, 1)[0];
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            view.detach();
+            view.removeFromContentChildren(this);
+            return view;
+        };
+        return AppElement;
     }());
 
     var ViewAnimationMap = (function () {
@@ -9278,8 +9271,6 @@
             this.parentInjector = parentInjector;
             this.declarationAppElement = declarationAppElement;
             this.cdMode = cdMode;
-            this.contentChildren = [];
-            this.viewChildren = [];
             this.viewContainerElement = null;
             this.numberOfChecks = 0;
             this.ref = new ViewRef_(this);
@@ -9305,24 +9296,9 @@
             enumerable: true,
             configurable: true
         });
-        AppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
+        AppView.prototype.create = function (context, rootSelectorOrNode) {
             this.context = context;
-            var projectableNodes;
-            switch (this.type) {
-                case ViewType.COMPONENT:
-                    projectableNodes = ensureSlotCount(givenProjectableNodes, this.componentType.slotCount);
-                    break;
-                case ViewType.EMBEDDED:
-                    projectableNodes = this.declarationAppElement.parentView.projectableNodes;
-                    break;
-                case ViewType.HOST:
-                    // Note: Don't ensure the slot count for the projectableNodes as we store
-                    // them only for the contained component view (which will later check the slot count...)
-                    projectableNodes = givenProjectableNodes;
-                    break;
-            }
             this._hasExternalHostElement = isPresent(rootSelectorOrNode);
-            this.projectableNodes = projectableNodes;
             return this.createInternal(rootSelectorOrNode);
         };
         /**
@@ -9330,15 +9306,11 @@
          * Returns the AppElement for the host element for ViewType.HOST.
          */
         AppView.prototype.createInternal = function (rootSelectorOrNode) { return null; };
-        AppView.prototype.init = function (rootNodesOrAppElements, allNodes, disposables, subscriptions) {
-            this.rootNodesOrAppElements = rootNodesOrAppElements;
+        AppView.prototype.init = function (lastRootNode, allNodes, disposables) {
+            this.lastRootNode = lastRootNode;
             this.allNodes = allNodes;
             this.disposables = disposables;
-            this.subscriptions = subscriptions;
             if (this.type === ViewType.COMPONENT) {
-                // Note: the render nodes have been attached to their host element
-                // in the ViewFactory already.
-                this.declarationAppElement.parentView.viewChildren.push(this);
                 this.dirtyParentQueriesInternal();
             }
         };
@@ -9359,38 +9331,25 @@
                 return this.parentInjector;
             }
         };
-        AppView.prototype.destroy = function () {
+        AppView.prototype.detachAndDestroy = function () {
             if (this._hasExternalHostElement) {
                 this.renderer.detachView(this.flatRootNodes);
             }
             else if (isPresent(this.viewContainerElement)) {
                 this.viewContainerElement.detachView(this.viewContainerElement.nestedViews.indexOf(this));
             }
-            this._destroyRecurse();
+            this.destroy();
         };
-        AppView.prototype._destroyRecurse = function () {
+        AppView.prototype.destroy = function () {
+            var _this = this;
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 return;
             }
-            var children = this.contentChildren;
-            for (var i = 0; i < children.length; i++) {
-                children[i]._destroyRecurse();
-            }
-            children = this.viewChildren;
-            for (var i = 0; i < children.length; i++) {
-                children[i]._destroyRecurse();
-            }
-            this.destroyLocal();
-            this.cdMode = ChangeDetectorStatus.Destroyed;
-        };
-        AppView.prototype.destroyLocal = function () {
-            var _this = this;
             var hostElement = this.type === ViewType.COMPONENT ? this.declarationAppElement.nativeElement : null;
-            for (var i = 0; i < this.disposables.length; i++) {
-                this.disposables[i]();
-            }
-            for (var i = 0; i < this.subscriptions.length; i++) {
-                this.subscriptions[i].unsubscribe();
+            if (this.disposables) {
+                for (var i = 0; i < this.disposables.length; i++) {
+                    this.disposables[i]();
+                }
             }
             this.destroyInternal();
             this.dirtyParentQueriesInternal();
@@ -9400,6 +9359,7 @@
             else {
                 this.renderer.destroyView(hostElement, this.allNodes);
             }
+            this.cdMode = ChangeDetectorStatus.Destroyed;
         };
         /**
          * Overwritten by implementations
@@ -9432,20 +9392,38 @@
             configurable: true
         });
         Object.defineProperty(AppView.prototype, "flatRootNodes", {
-            get: function () { return flattenNestedViewRenderNodes(this.rootNodesOrAppElements); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppView.prototype, "lastRootNode", {
             get: function () {
-                var lastNode = this.rootNodesOrAppElements.length > 0 ?
-                    this.rootNodesOrAppElements[this.rootNodesOrAppElements.length - 1] :
-                    null;
-                return _findLastRenderNode(lastNode);
+                var nodes = [];
+                this.visitRootNodesInternal(addToArray, nodes);
+                return nodes;
             },
             enumerable: true,
             configurable: true
         });
+        AppView.prototype.projectedNodes = function (ngContentIndex) {
+            var nodes = [];
+            this.visitProjectedNodes(ngContentIndex, addToArray, nodes);
+            return nodes;
+        };
+        AppView.prototype.visitProjectedNodes = function (ngContentIndex, cb, c) {
+            var appEl = this.declarationAppElement;
+            switch (this.type) {
+                case ViewType.EMBEDDED:
+                    appEl.parentView.visitProjectedNodes(ngContentIndex, cb, c);
+                    break;
+                case ViewType.COMPONENT:
+                    appEl.parentView.visitProjectableNodesInternal(appEl.index, ngContentIndex, cb, c);
+                    break;
+            }
+        };
+        /**
+         * Overwritten by implementations
+         */
+        AppView.prototype.visitRootNodesInternal = function (cb, c) { };
+        /**
+         * Overwritten by implementations
+         */
+        AppView.prototype.visitProjectableNodesInternal = function (nodeIndex, ngContentIndex, cb, c) { };
         /**
          * Overwritten by implementations
          */
@@ -9453,7 +9431,8 @@
         AppView.prototype.detectChanges = function (throwOnChange) {
             var s = _scope_check(this.clazz);
             if (this.cdMode === ChangeDetectorStatus.Checked ||
-                this.cdMode === ChangeDetectorStatus.Errored)
+                this.cdMode === ChangeDetectorStatus.Errored ||
+                this.cdMode === ChangeDetectorStatus.Detached)
                 return;
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 this.throwDestroyedError('detectChanges');
@@ -9467,34 +9446,13 @@
         /**
          * Overwritten by implementations
          */
-        AppView.prototype.detectChangesInternal = function (throwOnChange) {
-            this.detectContentChildrenChanges(throwOnChange);
-            this.detectViewChildrenChanges(throwOnChange);
-        };
-        AppView.prototype.detectContentChildrenChanges = function (throwOnChange) {
-            for (var i = 0; i < this.contentChildren.length; ++i) {
-                var child = this.contentChildren[i];
-                if (child.cdMode === ChangeDetectorStatus.Detached)
-                    continue;
-                child.detectChanges(throwOnChange);
-            }
-        };
-        AppView.prototype.detectViewChildrenChanges = function (throwOnChange) {
-            for (var i = 0; i < this.viewChildren.length; ++i) {
-                var child = this.viewChildren[i];
-                if (child.cdMode === ChangeDetectorStatus.Detached)
-                    continue;
-                child.detectChanges(throwOnChange);
-            }
-        };
+        AppView.prototype.detectChangesInternal = function (throwOnChange) { };
         AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
         AppView.prototype.addToContentChildren = function (renderAppElement) {
-            renderAppElement.parentView.contentChildren.push(this);
             this.viewContainerElement = renderAppElement;
             this.dirtyParentQueriesInternal();
         };
         AppView.prototype.removeFromContentChildren = function (renderAppElement) {
-            ListWrapper.remove(renderAppElement.parentView.contentChildren, this);
             this.dirtyParentQueriesInternal();
             this.viewContainerElement = null;
         };
@@ -9522,10 +9480,10 @@
             this.staticNodeDebugInfos = staticNodeDebugInfos;
             this._currentDebugContext = null;
         }
-        DebugAppView.prototype.create = function (context, givenProjectableNodes, rootSelectorOrNode) {
+        DebugAppView.prototype.create = function (context, rootSelectorOrNode) {
             this._resetDebug();
             try {
-                return _super.prototype.create.call(this, context, givenProjectableNodes, rootSelectorOrNode);
+                return _super.prototype.create.call(this, context, rootSelectorOrNode);
             }
             catch (e) {
                 this._rethrowWithContext(e);
@@ -9552,10 +9510,10 @@
                 throw e;
             }
         };
-        DebugAppView.prototype.destroyLocal = function () {
+        DebugAppView.prototype.destroy = function () {
             this._resetDebug();
             try {
-                _super.prototype.destroyLocal.call(this);
+                _super.prototype.destroy.call(this);
             }
             catch (e) {
                 this._rethrowWithContext(e);
@@ -9602,26 +9560,6 @@
         };
         return DebugAppView;
     }(AppView));
-    function _findLastRenderNode(node) {
-        var lastNode;
-        if (node instanceof AppElement) {
-            var appEl = node;
-            lastNode = appEl.nativeElement;
-            if (isPresent(appEl.nestedViews)) {
-                // Note: Views might have no root nodes at all!
-                for (var i = appEl.nestedViews.length - 1; i >= 0; i--) {
-                    var nestedView = appEl.nestedViews[i];
-                    if (nestedView.rootNodesOrAppElements.length > 0) {
-                        lastNode = _findLastRenderNode(nestedView.rootNodesOrAppElements[nestedView.rootNodesOrAppElements.length - 1]);
-                    }
-                }
-            }
-        }
-        else {
-            lastNode = node;
-        }
-        return lastNode;
-    }
 
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
