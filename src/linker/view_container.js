@@ -93,7 +93,7 @@ export var ViewContainer = (function () {
             refRenderNode = this.nativeElement;
         }
         if (isPresent(refRenderNode)) {
-            view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            view.attachAfter(refRenderNode);
         }
         view.markContentChildAsMoved(this);
     };
@@ -122,7 +122,7 @@ export var ViewContainer = (function () {
             refRenderNode = this.nativeElement;
         }
         if (isPresent(refRenderNode)) {
-            view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            view.attachAfter(refRenderNode);
         }
         view.addToContentChildren(this);
     };

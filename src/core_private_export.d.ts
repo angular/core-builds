@@ -78,6 +78,7 @@ export declare var __core_private__: {
     _ValueUnwrapper?: change_detection_util.ValueUnwrapper;
     RenderDebugInfo: typeof api.RenderDebugInfo;
     _RenderDebugInfo?: api.RenderDebugInfo;
+    _DirectRenderer?: api.DirectRenderer;
     TemplateRef_: typeof template_ref.TemplateRef_;
     _TemplateRef_?: template_ref.TemplateRef_<any>;
     ReflectionCapabilities: typeof reflection_capabilities.ReflectionCapabilities;

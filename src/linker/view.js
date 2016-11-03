@@ -50,6 +50,7 @@ export var AppView = (function () {
         else {
             this.renderer = parentView.renderer;
         }
+        this._directRenderer = this.renderer.directRenderer;
     }
     Object.defineProperty(AppView.prototype, "animationContext", {
         get: function () {
@@ -119,7 +120,7 @@ export var AppView = (function () {
     AppView.prototype.injector = function (nodeIndex) { return new ElementInjector(this, nodeIndex); };
     AppView.prototype.detachAndDestroy = function () {
         if (this._hasExternalHostElement) {
-            this.renderer.detachView(this.flatRootNodes);
+            this.detach();
         }
         else if (isPresent(this.viewContainerElement)) {
             this.viewContainerElement.detachView(this.viewContainerElement.nestedViews.indexOf(this));
@@ -159,10 +160,32 @@ export var AppView = (function () {
         var _this = this;
         this.detachInternal();
         if (this._animationContext) {
-            this._animationContext.onAllActiveAnimationsDone(function () { return _this.renderer.detachView(_this.flatRootNodes); });
+            this._animationContext.onAllActiveAnimationsDone(function () { return _this._renderDetach(); });
+        }
+        else {
+            this._renderDetach();
+        }
+    };
+    AppView.prototype._renderDetach = function () {
+        if (this._directRenderer) {
+            this.visitRootNodesInternal(this._directRenderer.remove, null);
         }
         else {
             this.renderer.detachView(this.flatRootNodes);
+        }
+    };
+    AppView.prototype.attachAfter = function (prevNode) {
+        if (this._directRenderer) {
+            var nextSibling = this._directRenderer.nextSibling(prevNode);
+            if (nextSibling) {
+                this.visitRootNodesInternal(this._directRenderer.insertBefore, nextSibling);
+            }
+            else {
+                this.visitRootNodesInternal(this._directRenderer.appendChild, this._directRenderer.parentElement(prevNode));
+            }
+        }
+        else {
+            this.renderer.attachViewAfter(prevNode, this.flatRootNodes);
         }
     };
     Object.defineProperty(AppView.prototype, "changeDetectorRef", {
@@ -179,10 +202,15 @@ export var AppView = (function () {
         enumerable: true,
         configurable: true
     });
-    AppView.prototype.projectedNodes = function (ngContentIndex) {
-        var nodes = [];
-        this.visitProjectedNodes(ngContentIndex, addToArray, nodes);
-        return nodes;
+    AppView.prototype.projectNodes = function (parentElement, ngContentIndex) {
+        if (this._directRenderer) {
+            this.visitProjectedNodes(ngContentIndex, this._directRenderer.appendChild, parentElement);
+        }
+        else {
+            var nodes = [];
+            this.visitProjectedNodes(ngContentIndex, addToArray, nodes);
+            this.renderer.projectNodes(parentElement, nodes);
+        }
     };
     AppView.prototype.visitProjectedNodes = function (ngContentIndex, cb, c) {
         switch (this.type) {
