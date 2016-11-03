@@ -4742,19 +4742,11 @@
     }(BaseError));
 
     var ViewUtils = (function () {
-        function ViewUtils(_renderer, _appId, sanitizer) {
+        function ViewUtils(_renderer, sanitizer) {
             this._renderer = _renderer;
-            this._appId = _appId;
             this._nextCompTypeId = 0;
             this.sanitizer = sanitizer;
         }
-        /**
-         * Used by the generated code
-         */
-        // TODO (matsko): add typing for the animation function
-        ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles, animations) {
-            return new RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
-        };
         /** @internal */
         ViewUtils.prototype.renderComponent = function (renderComponentType) {
             return this._renderer.renderComponent(renderComponentType);
@@ -4765,11 +4757,14 @@
         /** @nocollapse */
         ViewUtils.ctorParameters = [
             { type: RootRenderer, },
-            { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
             { type: Sanitizer, },
         ];
         return ViewUtils;
     }());
+    var nextRenderComponentTypeId = 0;
+    function createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
+        return new RenderComponentType("" + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
+    }
     function addToArray(e, array) {
         array.push(e);
     }
@@ -5357,6 +5352,7 @@
 
     var view_utils = Object.freeze({
         ViewUtils: ViewUtils,
+        createRenderComponentType: createRenderComponentType,
         addToArray: addToArray,
         MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         interpolate: interpolate,
@@ -5513,9 +5509,9 @@
      * @stable
      */
     var ComponentFactory = (function () {
-        function ComponentFactory(selector, _viewFactory, _componentType) {
+        function ComponentFactory(selector, _viewClass, _componentType) {
             this.selector = selector;
-            this._viewFactory = _viewFactory;
+            this._viewClass = _viewClass;
             this._componentType = _componentType;
         }
         Object.defineProperty(ComponentFactory.prototype, "componentType", {
@@ -5533,7 +5529,7 @@
             if (!projectableNodes) {
                 projectableNodes = [];
             }
-            var hostView = this._viewFactory(vu, null, null, null);
+            var hostView = new this._viewClass(vu, null, null, null);
             return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
         };
         return ComponentFactory;
@@ -9546,7 +9542,13 @@
                 nestedViews = [];
                 this.nestedViews = nestedViews;
             }
-            nestedViews.splice(viewIndex, 0, view);
+            // perf: array.push is faster than array.splice!
+            if (viewIndex >= nestedViews.length) {
+                nestedViews.push(view);
+            }
+            else {
+                nestedViews.splice(viewIndex, 0, view);
+            }
             var refRenderNode;
             if (viewIndex > 0) {
                 var prevView = nestedViews[viewIndex - 1];
@@ -9561,7 +9563,14 @@
             view.addToContentChildren(this);
         };
         ViewContainer.prototype.detachView = function (viewIndex) {
-            var view = this.nestedViews.splice(viewIndex, 1)[0];
+            var view = this.nestedViews[viewIndex];
+            // perf: array.pop is faster than array.splice!
+            if (viewIndex >= this.nestedViews.length - 1) {
+                this.nestedViews.pop();
+            }
+            else {
+                this.nestedViews.splice(viewIndex, 1);
+            }
             if (view.type === ViewType.COMPONENT) {
                 throw new Error("Component views can't be moved!");
             }
@@ -9613,6 +9622,7 @@
         clearStyles: clearStyles,
         renderStyles: renderStyles,
         collectAndResolveStyles: collectAndResolveStyles,
+        APP_ID_RANDOM_PROVIDER: APP_ID_RANDOM_PROVIDER,
         AnimationStyles: AnimationStyles,
         ANY_STATE: ANY_STATE,
         DEFAULT_STATE: DEFAULT_STATE,

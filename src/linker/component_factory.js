@@ -130,9 +130,9 @@ var EMPTY_CONTEXT = new Object();
  * @stable
  */
 export var ComponentFactory = (function () {
-    function ComponentFactory(selector, _viewFactory, _componentType) {
+    function ComponentFactory(selector, _viewClass, _componentType) {
         this.selector = selector;
-        this._viewFactory = _viewFactory;
+        this._viewClass = _viewClass;
         this._componentType = _componentType;
     }
     Object.defineProperty(ComponentFactory.prototype, "componentType", {
@@ -150,7 +150,7 @@ export var ComponentFactory = (function () {
         if (!projectableNodes) {
             projectableNodes = [];
         }
-        var hostView = this._viewFactory(vu, null, null, null);
+        var hostView = new this._viewClass(vu, null, null, null);
         return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
     };
     return ComponentFactory;

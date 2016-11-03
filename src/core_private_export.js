@@ -13,6 +13,7 @@ import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './animation
 import * as animationUtils from './animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './animation/animation_styles';
 import { AnimationTransition } from './animation/animation_transition';
+import * as application_tokens from './application_tokens';
 import * as change_detection_util from './change_detection/change_detection_util';
 import * as constants from './change_detection/constants';
 import * as console from './console';
@@ -78,6 +79,7 @@ export var __core_private__ = {
     clearStyles: animationUtils.clearStyles,
     renderStyles: animationUtils.renderStyles,
     collectAndResolveStyles: animationUtils.collectAndResolveStyles,
+    APP_ID_RANDOM_PROVIDER: application_tokens.APP_ID_RANDOM_PROVIDER,
     AnimationStyles: AnimationStyles_,
     ANY_STATE: ANY_STATE_,
     DEFAULT_STATE: DEFAULT_STATE_,

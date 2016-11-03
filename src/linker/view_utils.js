@@ -5,28 +5,19 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { APP_ID } from '../application_tokens';
 import { devModeEqual } from '../change_detection/change_detection';
 import { UNINITIALIZED } from '../change_detection/change_detection_util';
-import { Inject, Injectable } from '../di';
+import { Injectable } from '../di';
 import { isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
 import { ExpressionChangedAfterItHasBeenCheckedError } from './errors';
 export var ViewUtils = (function () {
-    function ViewUtils(_renderer, _appId, sanitizer) {
+    function ViewUtils(_renderer, sanitizer) {
         this._renderer = _renderer;
-        this._appId = _appId;
         this._nextCompTypeId = 0;
         this.sanitizer = sanitizer;
     }
-    /**
-     * Used by the generated code
-     */
-    // TODO (matsko): add typing for the animation function
-    ViewUtils.prototype.createRenderComponentType = function (templateUrl, slotCount, encapsulation, styles, animations) {
-        return new RenderComponentType(this._appId + "-" + this._nextCompTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
-    };
     /** @internal */
     ViewUtils.prototype.renderComponent = function (renderComponentType) {
         return this._renderer.renderComponent(renderComponentType);
@@ -37,11 +28,14 @@ export var ViewUtils = (function () {
     /** @nocollapse */
     ViewUtils.ctorParameters = [
         { type: RootRenderer, },
-        { type: undefined, decorators: [{ type: Inject, args: [APP_ID,] },] },
         { type: Sanitizer, },
     ];
     return ViewUtils;
 }());
+var nextRenderComponentTypeId = 0;
+export function createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
+    return new RenderComponentType("" + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
+}
 export function addToArray(e, array) {
     array.push(e);
 }

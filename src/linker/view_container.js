@@ -106,7 +106,13 @@ export var ViewContainer = (function () {
             nestedViews = [];
             this.nestedViews = nestedViews;
         }
-        nestedViews.splice(viewIndex, 0, view);
+        // perf: array.push is faster than array.splice!
+        if (viewIndex >= nestedViews.length) {
+            nestedViews.push(view);
+        }
+        else {
+            nestedViews.splice(viewIndex, 0, view);
+        }
         var refRenderNode;
         if (viewIndex > 0) {
             var prevView = nestedViews[viewIndex - 1];
@@ -121,7 +127,14 @@ export var ViewContainer = (function () {
         view.addToContentChildren(this);
     };
     ViewContainer.prototype.detachView = function (viewIndex) {
-        var view = this.nestedViews.splice(viewIndex, 1)[0];
+        var view = this.nestedViews[viewIndex];
+        // perf: array.pop is faster than array.splice!
+        if (viewIndex >= this.nestedViews.length - 1) {
+            this.nestedViews.pop();
+        }
+        else {
+            this.nestedViews.splice(viewIndex, 1);
+        }
         if (view.type === ViewType.COMPONENT) {
             throw new Error("Component views can't be moved!");
         }
