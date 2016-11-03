@@ -3278,6 +3278,35 @@
         return CompilerFactory;
     }());
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * A wrapper around a native element inside of a View.
+     *
+     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+     * element.
+     *
+     * @security Permitting direct access to the DOM can make your application more vulnerable to
+     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+     * [Security Guide](http://g.co/ng/security).
+     *
+     * @stable
+     */
+    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
+    // i.e. users have to ask for what they need. With that, we can build better analysis tools
+    // and could do better codegen in the future.
+    var ElementRef = (function () {
+        function ElementRef(nativeElement) {
+            this.nativeElement = nativeElement;
+        }
+        return ElementRef;
+    }());
+
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
         }
@@ -5436,52 +5465,50 @@
     }());
     var ComponentRef_ = (function (_super) {
         __extends$5(ComponentRef_, _super);
-        function ComponentRef_(_hostElement, _componentType) {
+        function ComponentRef_(_index, _parentView, _nativeElement, _component) {
             _super.call(this);
-            this._hostElement = _hostElement;
-            this._componentType = _componentType;
+            this._index = _index;
+            this._parentView = _parentView;
+            this._nativeElement = _nativeElement;
+            this._component = _component;
         }
         Object.defineProperty(ComponentRef_.prototype, "location", {
-            get: function () { return this._hostElement.elementRef; },
+            get: function () { return new ElementRef(this._nativeElement); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(ComponentRef_.prototype, "injector", {
-            get: function () { return this._hostElement.injector; },
+            get: function () { return this._parentView.injector(this._index); },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(ComponentRef_.prototype, "instance", {
-            get: function () { return this._hostElement.component; },
+            get: function () { return this._component; },
             enumerable: true,
             configurable: true
         });
         ;
         Object.defineProperty(ComponentRef_.prototype, "hostView", {
-            get: function () { return this._hostElement.parentView.ref; },
+            get: function () { return this._parentView.ref; },
             enumerable: true,
             configurable: true
         });
         ;
         Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
-            get: function () { return this._hostElement.parentView.ref; },
+            get: function () { return this._parentView.ref; },
             enumerable: true,
             configurable: true
         });
         ;
         Object.defineProperty(ComponentRef_.prototype, "componentType", {
-            get: function () { return this._componentType; },
+            get: function () { return this._component.constructor; },
             enumerable: true,
             configurable: true
         });
-        ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.detachAndDestroy(); };
+        ComponentRef_.prototype.destroy = function () { this._parentView.detachAndDestroy(); };
         ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
         return ComponentRef_;
     }(ComponentRef));
-    /**
-     * @experimental
-     */
-    var EMPTY_CONTEXT = new Object();
     /**
      * @stable
      */
@@ -5506,17 +5533,8 @@
             if (!projectableNodes) {
                 projectableNodes = [];
             }
-            // Note: Host views don't need a declarationAppElement!
-            var hostView = this._viewFactory(vu, injector, null);
-            hostView.visitProjectableNodesInternal =
-                function (nodeIndex, ngContentIndex, cb, ctx) {
-                    var nodes = projectableNodes[ngContentIndex] || [];
-                    for (var i = 0; i < nodes.length; i++) {
-                        cb(nodes[i], ctx);
-                    }
-                };
-            var hostElement = hostView.create(EMPTY_CONTEXT, rootSelectorOrNode);
-            return new ComponentRef_(hostElement, this._componentType);
+            var hostView = this._viewFactory(vu, null, null, null);
+            return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
         };
         return ComponentFactory;
     }());
@@ -6673,35 +6691,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    /**
-     * A wrapper around a native element inside of a View.
-     *
-     * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
-     * element.
-     *
-     * @security Permitting direct access to the DOM can make your application more vulnerable to
-     * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
-     * [Security Guide](http://g.co/ng/security).
-     *
-     * @stable
-     */
-    // Note: We don't expose things like `Injector`, `ViewContainer`, ... here,
-    // i.e. users have to ask for what they need. With that, we can build better analysis tools
-    // and could do better codegen in the future.
-    var ElementRef = (function () {
-        function ElementRef(nativeElement) {
-            this.nativeElement = nativeElement;
-        }
-        return ElementRef;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var __extends$9 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
@@ -7071,18 +7060,19 @@
     }());
     var TemplateRef_ = (function (_super) {
         __extends$10(TemplateRef_, _super);
-        function TemplateRef_(_appElement, _viewFactory) {
+        function TemplateRef_(_parentView, _nodeIndex, _nativeElement) {
             _super.call(this);
-            this._appElement = _appElement;
-            this._viewFactory = _viewFactory;
+            this._parentView = _parentView;
+            this._nodeIndex = _nodeIndex;
+            this._nativeElement = _nativeElement;
         }
         TemplateRef_.prototype.createEmbeddedView = function (context) {
-            var view = this._viewFactory(this._appElement.parentView.viewUtils, this._appElement.parentInjector, this._appElement);
-            view.create(context || {}, null);
+            var view = this._parentView.createEmbeddedViewInternal(this._nodeIndex);
+            view.create(context || {});
             return view.ref;
         };
         Object.defineProperty(TemplateRef_.prototype, "elementRef", {
-            get: function () { return this._appElement.elementRef; },
+            get: function () { return new ElementRef(this._nativeElement); },
             enumerable: true,
             configurable: true
         });
@@ -8935,13 +8925,10 @@
         Object.defineProperty(DebugContext.prototype, "componentRenderElement", {
             get: function () {
                 var componentView = this._view;
-                while (isPresent(componentView.declarationAppElement) &&
-                    componentView.type !== ViewType.COMPONENT) {
-                    componentView = componentView.declarationAppElement.parentView;
+                while (isPresent(componentView.parentView) && componentView.type !== ViewType.COMPONENT) {
+                    componentView = componentView.parentView;
                 }
-                return isPresent(componentView.declarationAppElement) ?
-                    componentView.declarationAppElement.nativeElement :
-                    null;
+                return componentView.parentElement;
             },
             enumerable: true,
             configurable: true
@@ -9003,134 +8990,6 @@
             configurable: true
         });
         return DebugContext;
-    }());
-
-    /**
-     * An AppElement is created for elements that have a ViewContainerRef,
-     * a nested component or a <template> element to keep data around
-     * that is needed for later instantiations.
-     */
-    var AppElement = (function () {
-        function AppElement(index, parentIndex, parentView, nativeElement) {
-            this.index = index;
-            this.parentIndex = parentIndex;
-            this.parentView = parentView;
-            this.nativeElement = nativeElement;
-        }
-        Object.defineProperty(AppElement.prototype, "elementRef", {
-            get: function () { return new ElementRef(this.nativeElement); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppElement.prototype, "vcRef", {
-            get: function () { return new ViewContainerRef_(this); },
-            enumerable: true,
-            configurable: true
-        });
-        AppElement.prototype.initComponent = function (component, view) {
-            this.component = component;
-            this.componentView = view;
-        };
-        Object.defineProperty(AppElement.prototype, "parentInjector", {
-            get: function () { return this.parentView.injector(this.parentIndex); },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(AppElement.prototype, "injector", {
-            get: function () { return this.parentView.injector(this.index); },
-            enumerable: true,
-            configurable: true
-        });
-        AppElement.prototype.detectChangesInNestedViews = function (throwOnChange) {
-            if (this.nestedViews) {
-                for (var i = 0; i < this.nestedViews.length; i++) {
-                    this.nestedViews[i].detectChanges(throwOnChange);
-                }
-            }
-        };
-        AppElement.prototype.destroyNestedViews = function () {
-            if (this.nestedViews) {
-                for (var i = 0; i < this.nestedViews.length; i++) {
-                    this.nestedViews[i].destroy();
-                }
-            }
-        };
-        AppElement.prototype.visitNestedViewRootNodes = function (cb, c) {
-            if (this.nestedViews) {
-                for (var i = 0; i < this.nestedViews.length; i++) {
-                    this.nestedViews[i].visitRootNodesInternal(cb, c);
-                }
-            }
-        };
-        AppElement.prototype.mapNestedViews = function (nestedViewClass, callback) {
-            var result = [];
-            if (isPresent(this.nestedViews)) {
-                this.nestedViews.forEach(function (nestedView) {
-                    if (nestedView.clazz === nestedViewClass) {
-                        result.push(callback(nestedView));
-                    }
-                });
-            }
-            return result;
-        };
-        AppElement.prototype.moveView = function (view, currentIndex) {
-            var previousIndex = this.nestedViews.indexOf(view);
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            var nestedViews = this.nestedViews;
-            if (nestedViews == null) {
-                nestedViews = [];
-                this.nestedViews = nestedViews;
-            }
-            nestedViews.splice(previousIndex, 1);
-            nestedViews.splice(currentIndex, 0, view);
-            var refRenderNode;
-            if (currentIndex > 0) {
-                var prevView = nestedViews[currentIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
-            }
-            view.markContentChildAsMoved(this);
-        };
-        AppElement.prototype.attachView = function (view, viewIndex) {
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            var nestedViews = this.nestedViews;
-            if (nestedViews == null) {
-                nestedViews = [];
-                this.nestedViews = nestedViews;
-            }
-            nestedViews.splice(viewIndex, 0, view);
-            var refRenderNode;
-            if (viewIndex > 0) {
-                var prevView = nestedViews[viewIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
-            }
-            view.addToContentChildren(this);
-        };
-        AppElement.prototype.detachView = function (viewIndex) {
-            var view = this.nestedViews.splice(viewIndex, 1)[0];
-            if (view.type === ViewType.COMPONENT) {
-                throw new Error("Component views can't be moved!");
-            }
-            view.detach();
-            view.removeFromContentChildren(this);
-            return view;
-        };
-        return AppElement;
     }());
 
     var ViewAnimationMap = (function () {
@@ -9223,7 +9082,6 @@
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var _UNDEFINED$1 = new Object();
     var ElementInjector = (function (_super) {
         __extends$15(ElementInjector, _super);
         function ElementInjector(_view, _nodeIndex) {
@@ -9233,14 +9091,7 @@
         }
         ElementInjector.prototype.get = function (token, notFoundValue) {
             if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
-            var result = _UNDEFINED$1;
-            if (result === _UNDEFINED$1) {
-                result = this._view.injectorGet(token, this._nodeIndex, _UNDEFINED$1);
-            }
-            if (result === _UNDEFINED$1) {
-                result = this._view.parentInjector.get(token, notFoundValue);
-            }
-            return result;
+            return this._view.injectorGet(token, this._nodeIndex, notFoundValue);
         };
         return ElementInjector;
     }(Injector));
@@ -9259,17 +9110,23 @@
     };
     var _scope_check = wtfCreateScope("AppView#check(ascii id)");
     /**
+     * @experimental
+     */
+    var EMPTY_CONTEXT$1 = new Object();
+    var UNDEFINED$1 = new Object();
+    /**
      * Cost of making objects: http://jsperf.com/instantiate-size-of-object
      *
      */
     var AppView = (function () {
-        function AppView(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode) {
+        function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode) {
             this.clazz = clazz;
             this.componentType = componentType;
             this.type = type;
             this.viewUtils = viewUtils;
-            this.parentInjector = parentInjector;
-            this.declarationAppElement = declarationAppElement;
+            this.parentView = parentView;
+            this.parentIndex = parentIndex;
+            this.parentElement = parentElement;
             this.cdMode = cdMode;
             this.viewContainerElement = null;
             this.numberOfChecks = 0;
@@ -9278,7 +9135,7 @@
                 this.renderer = viewUtils.renderComponent(componentType);
             }
             else {
-                this.renderer = declarationAppElement.parentView.renderer;
+                this.renderer = parentView.renderer;
             }
         }
         Object.defineProperty(AppView.prototype, "animationContext", {
@@ -9296,16 +9153,26 @@
             enumerable: true,
             configurable: true
         });
-        AppView.prototype.create = function (context, rootSelectorOrNode) {
+        AppView.prototype.create = function (context) {
             this.context = context;
+            return this.createInternal(null);
+        };
+        AppView.prototype.createHostView = function (rootSelectorOrNode, hostInjector, projectableNodes) {
+            this.context = EMPTY_CONTEXT$1;
             this._hasExternalHostElement = isPresent(rootSelectorOrNode);
+            this._hostInjector = hostInjector;
+            this._hostProjectableNodes = projectableNodes;
             return this.createInternal(rootSelectorOrNode);
         };
         /**
          * Overwritten by implementations.
-         * Returns the AppElement for the host element for ViewType.HOST.
+         * Returns the ComponentRef for the host element for ViewType.HOST.
          */
         AppView.prototype.createInternal = function (rootSelectorOrNode) { return null; };
+        /**
+         * Overwritten by implementations.
+         */
+        AppView.prototype.createEmbeddedViewInternal = function (templateNodeIndex) { return null; };
         AppView.prototype.init = function (lastRootNode, allNodes, disposables) {
             this.lastRootNode = lastRootNode;
             this.allNodes = allNodes;
@@ -9314,8 +9181,21 @@
                 this.dirtyParentQueriesInternal();
             }
         };
-        AppView.prototype.injectorGet = function (token, nodeIndex, notFoundResult) {
-            return this.injectorGetInternal(token, nodeIndex, notFoundResult);
+        AppView.prototype.injectorGet = function (token, nodeIndex, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+            var result = UNDEFINED$1;
+            var view = this;
+            while (result === UNDEFINED$1) {
+                if (isPresent(nodeIndex)) {
+                    result = view.injectorGetInternal(token, nodeIndex, UNDEFINED$1);
+                }
+                if (result === UNDEFINED$1 && view.type === ViewType.HOST) {
+                    result = view._hostInjector.get(token, notFoundValue);
+                }
+                nodeIndex = view.parentIndex;
+                view = view.parentView;
+            }
+            return result;
         };
         /**
          * Overwritten by implementations
@@ -9323,14 +9203,7 @@
         AppView.prototype.injectorGetInternal = function (token, nodeIndex, notFoundResult) {
             return notFoundResult;
         };
-        AppView.prototype.injector = function (nodeIndex) {
-            if (isPresent(nodeIndex)) {
-                return new ElementInjector(this, nodeIndex);
-            }
-            else {
-                return this.parentInjector;
-            }
-        };
+        AppView.prototype.injector = function (nodeIndex) { return new ElementInjector(this, nodeIndex); };
         AppView.prototype.detachAndDestroy = function () {
             if (this._hasExternalHostElement) {
                 this.renderer.detachView(this.flatRootNodes);
@@ -9345,7 +9218,7 @@
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 return;
             }
-            var hostElement = this.type === ViewType.COMPONENT ? this.declarationAppElement.nativeElement : null;
+            var hostElement = this.type === ViewType.COMPONENT ? this.parentElement : null;
             if (this.disposables) {
                 for (var i = 0; i < this.disposables.length; i++) {
                     this.disposables[i]();
@@ -9384,13 +9257,6 @@
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(AppView.prototype, "parent", {
-            get: function () {
-                return isPresent(this.declarationAppElement) ? this.declarationAppElement.parentView : null;
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(AppView.prototype, "flatRootNodes", {
             get: function () {
                 var nodes = [];
@@ -9406,13 +9272,20 @@
             return nodes;
         };
         AppView.prototype.visitProjectedNodes = function (ngContentIndex, cb, c) {
-            var appEl = this.declarationAppElement;
             switch (this.type) {
                 case ViewType.EMBEDDED:
-                    appEl.parentView.visitProjectedNodes(ngContentIndex, cb, c);
+                    this.parentView.visitProjectedNodes(ngContentIndex, cb, c);
                     break;
                 case ViewType.COMPONENT:
-                    appEl.parentView.visitProjectableNodesInternal(appEl.index, ngContentIndex, cb, c);
+                    if (this.parentView.type === ViewType.HOST) {
+                        var nodes = this.parentView._hostProjectableNodes[ngContentIndex] || [];
+                        for (var i = 0; i < nodes.length; i++) {
+                            cb(nodes[i], c);
+                        }
+                    }
+                    else {
+                        this.parentView.visitProjectableNodesInternal(this.parentIndex, ngContentIndex, cb, c);
+                    }
                     break;
             }
         };
@@ -9447,12 +9320,12 @@
          * Overwritten by implementations
          */
         AppView.prototype.detectChangesInternal = function (throwOnChange) { };
-        AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
-        AppView.prototype.addToContentChildren = function (renderAppElement) {
-            this.viewContainerElement = renderAppElement;
+        AppView.prototype.markContentChildAsMoved = function (viewContainer) { this.dirtyParentQueriesInternal(); };
+        AppView.prototype.addToContentChildren = function (viewContainer) {
+            this.viewContainerElement = viewContainer;
             this.dirtyParentQueriesInternal();
         };
-        AppView.prototype.removeFromContentChildren = function (renderAppElement) {
+        AppView.prototype.removeFromContentChildren = function (viewContainer) {
             this.dirtyParentQueriesInternal();
             this.viewContainerElement = null;
         };
@@ -9463,8 +9336,12 @@
                 if (c.cdMode === ChangeDetectorStatus.Checked) {
                     c.cdMode = ChangeDetectorStatus.CheckOnce;
                 }
-                var parentEl = c.type === ViewType.COMPONENT ? c.declarationAppElement : c.viewContainerElement;
-                c = isPresent(parentEl) ? parentEl.parentView : null;
+                if (c.type === ViewType.COMPONENT) {
+                    c = c.parentView;
+                }
+                else {
+                    c = c.viewContainerElement ? c.viewContainerElement.parentView : null;
+                }
             }
         };
         AppView.prototype.eventHandler = function (cb) {
@@ -9475,15 +9352,26 @@
     }());
     var DebugAppView = (function (_super) {
         __extends$14(DebugAppView, _super);
-        function DebugAppView(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode, staticNodeDebugInfos) {
-            _super.call(this, clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode);
+        function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos) {
+            _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode);
             this.staticNodeDebugInfos = staticNodeDebugInfos;
             this._currentDebugContext = null;
         }
-        DebugAppView.prototype.create = function (context, rootSelectorOrNode) {
+        DebugAppView.prototype.create = function (context) {
             this._resetDebug();
             try {
-                return _super.prototype.create.call(this, context, rootSelectorOrNode);
+                return _super.prototype.create.call(this, context);
+            }
+            catch (e) {
+                this._rethrowWithContext(e);
+                throw e;
+            }
+        };
+        DebugAppView.prototype.createHostView = function (rootSelectorOrNode, injector, projectableNodes) {
+            if (projectableNodes === void 0) { projectableNodes = null; }
+            this._resetDebug();
+            try {
+                return _super.prototype.createHostView.call(this, rootSelectorOrNode, injector, projectableNodes);
             }
             catch (e) {
                 this._rethrowWithContext(e);
@@ -9561,6 +9449,129 @@
         return DebugAppView;
     }(AppView));
 
+    /**
+     * A ViewContainer is created for elements that have a ViewContainerRef
+     * to keep track of the nested views.
+     */
+    var ViewContainer = (function () {
+        function ViewContainer(index, parentIndex, parentView, nativeElement) {
+            this.index = index;
+            this.parentIndex = parentIndex;
+            this.parentView = parentView;
+            this.nativeElement = nativeElement;
+        }
+        Object.defineProperty(ViewContainer.prototype, "elementRef", {
+            get: function () { return new ElementRef(this.nativeElement); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainer.prototype, "vcRef", {
+            get: function () { return new ViewContainerRef_(this); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainer.prototype, "parentInjector", {
+            get: function () { return this.parentView.injector(this.parentIndex); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainer.prototype, "injector", {
+            get: function () { return this.parentView.injector(this.index); },
+            enumerable: true,
+            configurable: true
+        });
+        ViewContainer.prototype.detectChangesInNestedViews = function (throwOnChange) {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].detectChanges(throwOnChange);
+                }
+            }
+        };
+        ViewContainer.prototype.destroyNestedViews = function () {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].destroy();
+                }
+            }
+        };
+        ViewContainer.prototype.visitNestedViewRootNodes = function (cb, c) {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    this.nestedViews[i].visitRootNodesInternal(cb, c);
+                }
+            }
+        };
+        ViewContainer.prototype.mapNestedViews = function (nestedViewClass, callback) {
+            var result = [];
+            if (isPresent(this.nestedViews)) {
+                this.nestedViews.forEach(function (nestedView) {
+                    if (nestedView.clazz === nestedViewClass) {
+                        result.push(callback(nestedView));
+                    }
+                });
+            }
+            return result;
+        };
+        ViewContainer.prototype.moveView = function (view, currentIndex) {
+            var previousIndex = this.nestedViews.indexOf(view);
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            nestedViews.splice(previousIndex, 1);
+            nestedViews.splice(currentIndex, 0, view);
+            var refRenderNode;
+            if (currentIndex > 0) {
+                var prevView = nestedViews[currentIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.markContentChildAsMoved(this);
+        };
+        ViewContainer.prototype.attachView = function (view, viewIndex) {
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            var nestedViews = this.nestedViews;
+            if (nestedViews == null) {
+                nestedViews = [];
+                this.nestedViews = nestedViews;
+            }
+            nestedViews.splice(viewIndex, 0, view);
+            var refRenderNode;
+            if (viewIndex > 0) {
+                var prevView = nestedViews[viewIndex - 1];
+                refRenderNode = prevView.lastRootNode;
+            }
+            else {
+                refRenderNode = this.nativeElement;
+            }
+            if (isPresent(refRenderNode)) {
+                view.renderer.attachViewAfter(refRenderNode, view.flatRootNodes);
+            }
+            view.addToContentChildren(this);
+        };
+        ViewContainer.prototype.detachView = function (viewIndex) {
+            var view = this.nestedViews.splice(viewIndex, 1)[0];
+            if (view.type === ViewType.COMPONENT) {
+                throw new Error("Component views can't be moved!");
+            }
+            view.detach();
+            view.removeFromContentChildren(this);
+            return view;
+        };
+        return ViewContainer;
+    }());
+
     var __core_private__ = {
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorStatus: ChangeDetectorStatus,
@@ -9569,7 +9580,8 @@
         LIFECYCLE_HOOKS_VALUES: LIFECYCLE_HOOKS_VALUES,
         ReflectorReader: ReflectorReader,
         CodegenComponentFactoryResolver: CodegenComponentFactoryResolver,
-        AppElement: AppElement,
+        ComponentRef_: ComponentRef_,
+        ViewContainer: ViewContainer,
         AppView: AppView,
         DebugAppView: DebugAppView,
         NgModuleInjector: NgModuleInjector,

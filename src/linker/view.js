@@ -11,6 +11,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { ChangeDetectorStatus } from '../change_detection/change_detection';
+import { THROW_IF_NOT_FOUND } from '../di/injector';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { AnimationViewContext } from './animation_view_context';
@@ -22,17 +23,23 @@ import { ViewType } from './view_type';
 import { addToArray } from './view_utils';
 var _scope_check = wtfCreateScope("AppView#check(ascii id)");
 /**
+ * @experimental
+ */
+var EMPTY_CONTEXT = new Object();
+var UNDEFINED = new Object();
+/**
  * Cost of making objects: http://jsperf.com/instantiate-size-of-object
  *
  */
 export var AppView = (function () {
-    function AppView(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode) {
+    function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode) {
         this.clazz = clazz;
         this.componentType = componentType;
         this.type = type;
         this.viewUtils = viewUtils;
-        this.parentInjector = parentInjector;
-        this.declarationAppElement = declarationAppElement;
+        this.parentView = parentView;
+        this.parentIndex = parentIndex;
+        this.parentElement = parentElement;
         this.cdMode = cdMode;
         this.viewContainerElement = null;
         this.numberOfChecks = 0;
@@ -41,7 +48,7 @@ export var AppView = (function () {
             this.renderer = viewUtils.renderComponent(componentType);
         }
         else {
-            this.renderer = declarationAppElement.parentView.renderer;
+            this.renderer = parentView.renderer;
         }
     }
     Object.defineProperty(AppView.prototype, "animationContext", {
@@ -59,16 +66,26 @@ export var AppView = (function () {
         enumerable: true,
         configurable: true
     });
-    AppView.prototype.create = function (context, rootSelectorOrNode) {
+    AppView.prototype.create = function (context) {
         this.context = context;
+        return this.createInternal(null);
+    };
+    AppView.prototype.createHostView = function (rootSelectorOrNode, hostInjector, projectableNodes) {
+        this.context = EMPTY_CONTEXT;
         this._hasExternalHostElement = isPresent(rootSelectorOrNode);
+        this._hostInjector = hostInjector;
+        this._hostProjectableNodes = projectableNodes;
         return this.createInternal(rootSelectorOrNode);
     };
     /**
      * Overwritten by implementations.
-     * Returns the AppElement for the host element for ViewType.HOST.
+     * Returns the ComponentRef for the host element for ViewType.HOST.
      */
     AppView.prototype.createInternal = function (rootSelectorOrNode) { return null; };
+    /**
+     * Overwritten by implementations.
+     */
+    AppView.prototype.createEmbeddedViewInternal = function (templateNodeIndex) { return null; };
     AppView.prototype.init = function (lastRootNode, allNodes, disposables) {
         this.lastRootNode = lastRootNode;
         this.allNodes = allNodes;
@@ -77,8 +94,21 @@ export var AppView = (function () {
             this.dirtyParentQueriesInternal();
         }
     };
-    AppView.prototype.injectorGet = function (token, nodeIndex, notFoundResult) {
-        return this.injectorGetInternal(token, nodeIndex, notFoundResult);
+    AppView.prototype.injectorGet = function (token, nodeIndex, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+        var result = UNDEFINED;
+        var view = this;
+        while (result === UNDEFINED) {
+            if (isPresent(nodeIndex)) {
+                result = view.injectorGetInternal(token, nodeIndex, UNDEFINED);
+            }
+            if (result === UNDEFINED && view.type === ViewType.HOST) {
+                result = view._hostInjector.get(token, notFoundValue);
+            }
+            nodeIndex = view.parentIndex;
+            view = view.parentView;
+        }
+        return result;
     };
     /**
      * Overwritten by implementations
@@ -86,14 +116,7 @@ export var AppView = (function () {
     AppView.prototype.injectorGetInternal = function (token, nodeIndex, notFoundResult) {
         return notFoundResult;
     };
-    AppView.prototype.injector = function (nodeIndex) {
-        if (isPresent(nodeIndex)) {
-            return new ElementInjector(this, nodeIndex);
-        }
-        else {
-            return this.parentInjector;
-        }
-    };
+    AppView.prototype.injector = function (nodeIndex) { return new ElementInjector(this, nodeIndex); };
     AppView.prototype.detachAndDestroy = function () {
         if (this._hasExternalHostElement) {
             this.renderer.detachView(this.flatRootNodes);
@@ -108,7 +131,7 @@ export var AppView = (function () {
         if (this.cdMode === ChangeDetectorStatus.Destroyed) {
             return;
         }
-        var hostElement = this.type === ViewType.COMPONENT ? this.declarationAppElement.nativeElement : null;
+        var hostElement = this.type === ViewType.COMPONENT ? this.parentElement : null;
         if (this.disposables) {
             for (var i = 0; i < this.disposables.length; i++) {
                 this.disposables[i]();
@@ -147,13 +170,6 @@ export var AppView = (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(AppView.prototype, "parent", {
-        get: function () {
-            return isPresent(this.declarationAppElement) ? this.declarationAppElement.parentView : null;
-        },
-        enumerable: true,
-        configurable: true
-    });
     Object.defineProperty(AppView.prototype, "flatRootNodes", {
         get: function () {
             var nodes = [];
@@ -169,13 +185,20 @@ export var AppView = (function () {
         return nodes;
     };
     AppView.prototype.visitProjectedNodes = function (ngContentIndex, cb, c) {
-        var appEl = this.declarationAppElement;
         switch (this.type) {
             case ViewType.EMBEDDED:
-                appEl.parentView.visitProjectedNodes(ngContentIndex, cb, c);
+                this.parentView.visitProjectedNodes(ngContentIndex, cb, c);
                 break;
             case ViewType.COMPONENT:
-                appEl.parentView.visitProjectableNodesInternal(appEl.index, ngContentIndex, cb, c);
+                if (this.parentView.type === ViewType.HOST) {
+                    var nodes = this.parentView._hostProjectableNodes[ngContentIndex] || [];
+                    for (var i = 0; i < nodes.length; i++) {
+                        cb(nodes[i], c);
+                    }
+                }
+                else {
+                    this.parentView.visitProjectableNodesInternal(this.parentIndex, ngContentIndex, cb, c);
+                }
                 break;
         }
     };
@@ -210,12 +233,12 @@ export var AppView = (function () {
      * Overwritten by implementations
      */
     AppView.prototype.detectChangesInternal = function (throwOnChange) { };
-    AppView.prototype.markContentChildAsMoved = function (renderAppElement) { this.dirtyParentQueriesInternal(); };
-    AppView.prototype.addToContentChildren = function (renderAppElement) {
-        this.viewContainerElement = renderAppElement;
+    AppView.prototype.markContentChildAsMoved = function (viewContainer) { this.dirtyParentQueriesInternal(); };
+    AppView.prototype.addToContentChildren = function (viewContainer) {
+        this.viewContainerElement = viewContainer;
         this.dirtyParentQueriesInternal();
     };
-    AppView.prototype.removeFromContentChildren = function (renderAppElement) {
+    AppView.prototype.removeFromContentChildren = function (viewContainer) {
         this.dirtyParentQueriesInternal();
         this.viewContainerElement = null;
     };
@@ -226,8 +249,12 @@ export var AppView = (function () {
             if (c.cdMode === ChangeDetectorStatus.Checked) {
                 c.cdMode = ChangeDetectorStatus.CheckOnce;
             }
-            var parentEl = c.type === ViewType.COMPONENT ? c.declarationAppElement : c.viewContainerElement;
-            c = isPresent(parentEl) ? parentEl.parentView : null;
+            if (c.type === ViewType.COMPONENT) {
+                c = c.parentView;
+            }
+            else {
+                c = c.viewContainerElement ? c.viewContainerElement.parentView : null;
+            }
         }
     };
     AppView.prototype.eventHandler = function (cb) {
@@ -238,15 +265,26 @@ export var AppView = (function () {
 }());
 export var DebugAppView = (function (_super) {
     __extends(DebugAppView, _super);
-    function DebugAppView(clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode, staticNodeDebugInfos) {
-        _super.call(this, clazz, componentType, type, viewUtils, parentInjector, declarationAppElement, cdMode);
+    function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos) {
+        _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode);
         this.staticNodeDebugInfos = staticNodeDebugInfos;
         this._currentDebugContext = null;
     }
-    DebugAppView.prototype.create = function (context, rootSelectorOrNode) {
+    DebugAppView.prototype.create = function (context) {
         this._resetDebug();
         try {
-            return _super.prototype.create.call(this, context, rootSelectorOrNode);
+            return _super.prototype.create.call(this, context);
+        }
+        catch (e) {
+            this._rethrowWithContext(e);
+            throw e;
+        }
+    };
+    DebugAppView.prototype.createHostView = function (rootSelectorOrNode, injector, projectableNodes) {
+        if (projectableNodes === void 0) { projectableNodes = null; }
+        this._resetDebug();
+        try {
+            return _super.prototype.createHostView.call(this, rootSelectorOrNode, injector, projectableNodes);
         }
         catch (e) {
             this._rethrowWithContext(e);

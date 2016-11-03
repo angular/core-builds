@@ -10,63 +10,58 @@ import { ElementRef } from './element_ref';
 import { ViewContainerRef_ } from './view_container_ref';
 import { ViewType } from './view_type';
 /**
- * An AppElement is created for elements that have a ViewContainerRef,
- * a nested component or a <template> element to keep data around
- * that is needed for later instantiations.
+ * A ViewContainer is created for elements that have a ViewContainerRef
+ * to keep track of the nested views.
  */
-export var AppElement = (function () {
-    function AppElement(index, parentIndex, parentView, nativeElement) {
+export var ViewContainer = (function () {
+    function ViewContainer(index, parentIndex, parentView, nativeElement) {
         this.index = index;
         this.parentIndex = parentIndex;
         this.parentView = parentView;
         this.nativeElement = nativeElement;
     }
-    Object.defineProperty(AppElement.prototype, "elementRef", {
+    Object.defineProperty(ViewContainer.prototype, "elementRef", {
         get: function () { return new ElementRef(this.nativeElement); },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(AppElement.prototype, "vcRef", {
+    Object.defineProperty(ViewContainer.prototype, "vcRef", {
         get: function () { return new ViewContainerRef_(this); },
         enumerable: true,
         configurable: true
     });
-    AppElement.prototype.initComponent = function (component, view) {
-        this.component = component;
-        this.componentView = view;
-    };
-    Object.defineProperty(AppElement.prototype, "parentInjector", {
+    Object.defineProperty(ViewContainer.prototype, "parentInjector", {
         get: function () { return this.parentView.injector(this.parentIndex); },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(AppElement.prototype, "injector", {
+    Object.defineProperty(ViewContainer.prototype, "injector", {
         get: function () { return this.parentView.injector(this.index); },
         enumerable: true,
         configurable: true
     });
-    AppElement.prototype.detectChangesInNestedViews = function (throwOnChange) {
+    ViewContainer.prototype.detectChangesInNestedViews = function (throwOnChange) {
         if (this.nestedViews) {
             for (var i = 0; i < this.nestedViews.length; i++) {
                 this.nestedViews[i].detectChanges(throwOnChange);
             }
         }
     };
-    AppElement.prototype.destroyNestedViews = function () {
+    ViewContainer.prototype.destroyNestedViews = function () {
         if (this.nestedViews) {
             for (var i = 0; i < this.nestedViews.length; i++) {
                 this.nestedViews[i].destroy();
             }
         }
     };
-    AppElement.prototype.visitNestedViewRootNodes = function (cb, c) {
+    ViewContainer.prototype.visitNestedViewRootNodes = function (cb, c) {
         if (this.nestedViews) {
             for (var i = 0; i < this.nestedViews.length; i++) {
                 this.nestedViews[i].visitRootNodesInternal(cb, c);
             }
         }
     };
-    AppElement.prototype.mapNestedViews = function (nestedViewClass, callback) {
+    ViewContainer.prototype.mapNestedViews = function (nestedViewClass, callback) {
         var result = [];
         if (isPresent(this.nestedViews)) {
             this.nestedViews.forEach(function (nestedView) {
@@ -77,7 +72,7 @@ export var AppElement = (function () {
         }
         return result;
     };
-    AppElement.prototype.moveView = function (view, currentIndex) {
+    ViewContainer.prototype.moveView = function (view, currentIndex) {
         var previousIndex = this.nestedViews.indexOf(view);
         if (view.type === ViewType.COMPONENT) {
             throw new Error("Component views can't be moved!");
@@ -102,7 +97,7 @@ export var AppElement = (function () {
         }
         view.markContentChildAsMoved(this);
     };
-    AppElement.prototype.attachView = function (view, viewIndex) {
+    ViewContainer.prototype.attachView = function (view, viewIndex) {
         if (view.type === ViewType.COMPONENT) {
             throw new Error("Component views can't be moved!");
         }
@@ -125,7 +120,7 @@ export var AppElement = (function () {
         }
         view.addToContentChildren(this);
     };
-    AppElement.prototype.detachView = function (viewIndex) {
+    ViewContainer.prototype.detachView = function (viewIndex) {
         var view = this.nestedViews.splice(viewIndex, 1)[0];
         if (view.type === ViewType.COMPONENT) {
             throw new Error("Component views can't be moved!");
@@ -134,6 +129,6 @@ export var AppElement = (function () {
         view.removeFromContentChildren(this);
         return view;
     };
-    return AppElement;
+    return ViewContainer;
 }());
-//# sourceMappingURL=element.js.map
+//# sourceMappingURL=view_container.js.map
