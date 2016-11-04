@@ -1539,177 +1539,6 @@
     }());
     var _globalKeyRegistry = new KeyRegistry();
 
-    // Safari doesn't implement MapIterator.next(), which is used is Traceur's polyfill of Array.from
-    // TODO(mlaval): remove the work around once we have a working polyfill of Array.from
-    var _arrayFromMap = (function () {
-        try {
-            if ((new Map()).values().next) {
-                return function createArrayFromMap(m, getValues) {
-                    return getValues ? Array.from(m.values()) : Array.from(m.keys());
-                };
-            }
-        }
-        catch (e) {
-        }
-        return function createArrayFromMapWithForeach(m, getValues) {
-            var res = new Array(m.size), i = 0;
-            m.forEach(function (v, k) {
-                res[i] = getValues ? v : k;
-                i++;
-            });
-            return res;
-        };
-    })();
-    var MapWrapper = (function () {
-        function MapWrapper() {
-        }
-        MapWrapper.createFromStringMap = function (stringMap) {
-            var result = new Map();
-            for (var prop in stringMap) {
-                result.set(prop, stringMap[prop]);
-            }
-            return result;
-        };
-        MapWrapper.keys = function (m) { return _arrayFromMap(m, false); };
-        MapWrapper.values = function (m) { return _arrayFromMap(m, true); };
-        return MapWrapper;
-    }());
-    /**
-     * Wraps Javascript Objects
-     */
-    var StringMapWrapper = (function () {
-        function StringMapWrapper() {
-        }
-        StringMapWrapper.merge = function (m1, m2) {
-            var m = {};
-            for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {
-                var k = _a[_i];
-                m[k] = m1[k];
-            }
-            for (var _b = 0, _c = Object.keys(m2); _b < _c.length; _b++) {
-                var k = _c[_b];
-                m[k] = m2[k];
-            }
-            return m;
-        };
-        StringMapWrapper.equals = function (m1, m2) {
-            var k1 = Object.keys(m1);
-            var k2 = Object.keys(m2);
-            if (k1.length != k2.length) {
-                return false;
-            }
-            for (var i = 0; i < k1.length; i++) {
-                var key = k1[i];
-                if (m1[key] !== m2[key]) {
-                    return false;
-                }
-            }
-            return true;
-        };
-        return StringMapWrapper;
-    }());
-    var ListWrapper = (function () {
-        function ListWrapper() {
-        }
-        ListWrapper.removeAll = function (list, items) {
-            for (var i = 0; i < items.length; ++i) {
-                var index = list.indexOf(items[i]);
-                list.splice(index, 1);
-            }
-        };
-        ListWrapper.remove = function (list, el) {
-            var index = list.indexOf(el);
-            if (index > -1) {
-                list.splice(index, 1);
-                return true;
-            }
-            return false;
-        };
-        ListWrapper.equals = function (a, b) {
-            if (a.length != b.length)
-                return false;
-            for (var i = 0; i < a.length; ++i) {
-                if (a[i] !== b[i])
-                    return false;
-            }
-            return true;
-        };
-        ListWrapper.maximum = function (list, predicate) {
-            if (list.length == 0) {
-                return null;
-            }
-            var solution = null;
-            var maxValue = -Infinity;
-            for (var index = 0; index < list.length; index++) {
-                var candidate = list[index];
-                if (candidate == null) {
-                    continue;
-                }
-                var candidateValue = predicate(candidate);
-                if (candidateValue > maxValue) {
-                    solution = candidate;
-                    maxValue = candidateValue;
-                }
-            }
-            return solution;
-        };
-        ListWrapper.flatten = function (list) {
-            var target = [];
-            _flattenArray(list, target);
-            return target;
-        };
-        return ListWrapper;
-    }());
-    function _flattenArray(source, target) {
-        if (isPresent(source)) {
-            for (var i = 0; i < source.length; i++) {
-                var item = source[i];
-                if (Array.isArray(item)) {
-                    _flattenArray(item, target);
-                }
-                else {
-                    target.push(item);
-                }
-            }
-        }
-        return target;
-    }
-    function isListLikeIterable(obj) {
-        if (!isJsObject(obj))
-            return false;
-        return Array.isArray(obj) ||
-            (!(obj instanceof Map) &&
-                getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-    }
-    function areIterablesEqual(a, b, comparator) {
-        var iterator1 = a[getSymbolIterator()]();
-        var iterator2 = b[getSymbolIterator()]();
-        while (true) {
-            var item1 = iterator1.next();
-            var item2 = iterator2.next();
-            if (item1.done && item2.done)
-                return true;
-            if (item1.done || item2.done)
-                return false;
-            if (!comparator(item1.value, item2.value))
-                return false;
-        }
-    }
-    function iterateListLike(obj, fn) {
-        if (Array.isArray(obj)) {
-            for (var i = 0; i < obj.length; i++) {
-                fn(obj[i]);
-            }
-        }
-        else {
-            var iterator = obj[getSymbolIterator()]();
-            var item = void 0;
-            while (!((item = iterator.next()).done)) {
-                fn(item.value);
-            }
-        }
-    }
-
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -2006,16 +1835,16 @@
     function resolveReflectiveFactory(provider) {
         var factoryFn;
         var resolvedDeps;
-        if (isPresent(provider.useClass)) {
+        if (provider.useClass) {
             var useClass = resolveForwardRef(provider.useClass);
             factoryFn = reflector.factory(useClass);
             resolvedDeps = _dependenciesFor(useClass);
         }
-        else if (isPresent(provider.useExisting)) {
+        else if (provider.useExisting) {
             factoryFn = function (aliasInstance) { return aliasInstance; };
             resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
         }
-        else if (isPresent(provider.useFactory)) {
+        else if (provider.useFactory) {
             factoryFn = provider.useFactory;
             resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
         }
@@ -2040,7 +1869,8 @@
     function resolveReflectiveProviders(providers) {
         var normalized = _normalizeProviders(providers, []);
         var resolved = normalized.map(resolveReflectiveProvider);
-        return MapWrapper.values(mergeResolvedReflectiveProviders(resolved, new Map()));
+        var resolvedProviderMap = mergeResolvedReflectiveProviders(resolved, new Map());
+        return Array.from(resolvedProviderMap.values());
     }
     /**
      * Merges a list of ResolvedProviders into a list where
@@ -2051,7 +1881,7 @@
         for (var i = 0; i < providers.length; i++) {
             var provider = providers[i];
             var existing = normalizedProvidersMap.get(provider.key.id);
-            if (isPresent(existing)) {
+            if (existing) {
                 if (provider.multiProvider !== existing.multiProvider) {
                     throw new MixingMultiProvidersWithRegularProvidersError(existing, provider);
                 }
@@ -2065,7 +1895,7 @@
                 }
             }
             else {
-                var resolvedProvider;
+                var resolvedProvider = void 0;
                 if (provider.multiProvider) {
                     resolvedProvider = new ResolvedReflectiveProvider_(provider.key, provider.resolvedFactories.slice(), provider.multiProvider);
                 }
@@ -2099,20 +1929,20 @@
             return _dependenciesFor(typeOrFunc);
         }
         else {
-            var params = dependencies.map(function (t) { return [t]; });
-            return dependencies.map(function (t) { return _extractToken(typeOrFunc, t, params); });
+            var params_1 = dependencies.map(function (t) { return [t]; });
+            return dependencies.map(function (t) { return _extractToken(typeOrFunc, t, params_1); });
         }
     }
     function _dependenciesFor(typeOrFunc) {
         var params = reflector.parameters(typeOrFunc);
         if (!params)
             return [];
-        if (params.some(isBlank)) {
+        if (params.some(function (p) { return p == null; })) {
             throw new NoAnnotationError(typeOrFunc, params);
         }
         return params.map(function (p) { return _extractToken(typeOrFunc, p, params); });
     }
-    function _extractToken(typeOrFunc /** TODO #9100 */, metadata /** TODO #9100 */ /*any[] | any*/, params) {
+    function _extractToken(typeOrFunc, metadata, params) {
         var depProps = [];
         var token = null;
         var optional = false;
@@ -2148,14 +1978,14 @@
             }
         }
         token = resolveForwardRef(token);
-        if (isPresent(token)) {
+        if (token != null) {
             return _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps);
         }
         else {
             throw new NoAnnotationError(typeOrFunc, params);
         }
     }
-    function _createDependency(token /** TODO #9100 */, optional /** TODO #9100 */, lowerBoundVisibility /** TODO #9100 */, upperBoundVisibility /** TODO #9100 */, depProps /** TODO #9100 */) {
+    function _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps) {
         return new ReflectiveDependency(ReflectiveKey.get(token), optional, lowerBoundVisibility, upperBoundVisibility, depProps);
     }
 
@@ -3054,6 +2884,142 @@
         };
         return ErrorHandler;
     }());
+
+    /**
+     * Wraps Javascript Objects
+     */
+    var StringMapWrapper = (function () {
+        function StringMapWrapper() {
+        }
+        StringMapWrapper.merge = function (m1, m2) {
+            var m = {};
+            for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {
+                var k = _a[_i];
+                m[k] = m1[k];
+            }
+            for (var _b = 0, _c = Object.keys(m2); _b < _c.length; _b++) {
+                var k = _c[_b];
+                m[k] = m2[k];
+            }
+            return m;
+        };
+        StringMapWrapper.equals = function (m1, m2) {
+            var k1 = Object.keys(m1);
+            var k2 = Object.keys(m2);
+            if (k1.length != k2.length) {
+                return false;
+            }
+            for (var i = 0; i < k1.length; i++) {
+                var key = k1[i];
+                if (m1[key] !== m2[key]) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        return StringMapWrapper;
+    }());
+    var ListWrapper = (function () {
+        function ListWrapper() {
+        }
+        ListWrapper.removeAll = function (list, items) {
+            for (var i = 0; i < items.length; ++i) {
+                var index = list.indexOf(items[i]);
+                list.splice(index, 1);
+            }
+        };
+        ListWrapper.remove = function (list, el) {
+            var index = list.indexOf(el);
+            if (index > -1) {
+                list.splice(index, 1);
+                return true;
+            }
+            return false;
+        };
+        ListWrapper.equals = function (a, b) {
+            if (a.length != b.length)
+                return false;
+            for (var i = 0; i < a.length; ++i) {
+                if (a[i] !== b[i])
+                    return false;
+            }
+            return true;
+        };
+        ListWrapper.maximum = function (list, predicate) {
+            if (list.length == 0) {
+                return null;
+            }
+            var solution = null;
+            var maxValue = -Infinity;
+            for (var index = 0; index < list.length; index++) {
+                var candidate = list[index];
+                if (candidate == null) {
+                    continue;
+                }
+                var candidateValue = predicate(candidate);
+                if (candidateValue > maxValue) {
+                    solution = candidate;
+                    maxValue = candidateValue;
+                }
+            }
+            return solution;
+        };
+        ListWrapper.flatten = function (list) {
+            var target = [];
+            _flattenArray(list, target);
+            return target;
+        };
+        return ListWrapper;
+    }());
+    function _flattenArray(source, target) {
+        if (isPresent(source)) {
+            for (var i = 0; i < source.length; i++) {
+                var item = source[i];
+                if (Array.isArray(item)) {
+                    _flattenArray(item, target);
+                }
+                else {
+                    target.push(item);
+                }
+            }
+        }
+        return target;
+    }
+    function isListLikeIterable(obj) {
+        if (!isJsObject(obj))
+            return false;
+        return Array.isArray(obj) ||
+            (!(obj instanceof Map) &&
+                getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+    }
+    function areIterablesEqual(a, b, comparator) {
+        var iterator1 = a[getSymbolIterator()]();
+        var iterator2 = b[getSymbolIterator()]();
+        while (true) {
+            var item1 = iterator1.next();
+            var item2 = iterator2.next();
+            if (item1.done && item2.done)
+                return true;
+            if (item1.done || item2.done)
+                return false;
+            if (!comparator(item1.value, item2.value))
+                return false;
+        }
+    }
+    function iterateListLike(obj, fn) {
+        if (Array.isArray(obj)) {
+            for (var i = 0; i < obj.length; i++) {
+                fn(obj[i]);
+            }
+        }
+        else {
+            var iterator = obj[getSymbolIterator()]();
+            var item = void 0;
+            while (!((item = iterator.next()).done)) {
+                fn(item.value);
+            }
+        }
+    }
 
     /**
      * @license
@@ -6185,8 +6151,8 @@
             this._applications.set(token, testability);
         };
         TestabilityRegistry.prototype.getTestability = function (elem) { return this._applications.get(elem); };
-        TestabilityRegistry.prototype.getAllTestabilities = function () { return MapWrapper.values(this._applications); };
-        TestabilityRegistry.prototype.getAllRootElements = function () { return MapWrapper.keys(this._applications); };
+        TestabilityRegistry.prototype.getAllTestabilities = function () { return Array.from(this._applications.values()); };
+        TestabilityRegistry.prototype.getAllRootElements = function () { return Array.from(this._applications.keys()); };
         TestabilityRegistry.prototype.findTestabilityInTree = function (elem, findInAncestors) {
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
@@ -7422,7 +7388,7 @@
         function DebugNode(nativeNode, parent, _debugInfo) {
             this._debugInfo = _debugInfo;
             this.nativeNode = nativeNode;
-            if (isPresent(parent) && parent instanceof DebugElement) {
+            if (parent && parent instanceof DebugElement) {
                 parent.addChild(this);
             }
             else {
@@ -7431,38 +7397,34 @@
             this.listeners = [];
         }
         Object.defineProperty(DebugNode.prototype, "injector", {
-            get: function () { return isPresent(this._debugInfo) ? this._debugInfo.injector : null; },
+            get: function () { return this._debugInfo ? this._debugInfo.injector : null; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "componentInstance", {
-            get: function () {
-                return isPresent(this._debugInfo) ? this._debugInfo.component : null;
-            },
+            get: function () { return this._debugInfo ? this._debugInfo.component : null; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "context", {
-            get: function () { return isPresent(this._debugInfo) ? this._debugInfo.context : null; },
+            get: function () { return this._debugInfo ? this._debugInfo.context : null; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "references", {
             get: function () {
-                return isPresent(this._debugInfo) ? this._debugInfo.references : null;
+                return this._debugInfo ? this._debugInfo.references : null;
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "providerTokens", {
-            get: function () {
-                return isPresent(this._debugInfo) ? this._debugInfo.providerTokens : null;
-            },
+            get: function () { return this._debugInfo ? this._debugInfo.providerTokens : null; },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "source", {
-            get: function () { return isPresent(this._debugInfo) ? this._debugInfo.source : null; },
+            get: function () { return this._debugInfo ? this._debugInfo.source : null; },
             enumerable: true,
             configurable: true
         });
@@ -7483,7 +7445,7 @@
             this.nativeElement = nativeNode;
         }
         DebugElement.prototype.addChild = function (child) {
-            if (isPresent(child)) {
+            if (child) {
                 this.childNodes.push(child);
                 child.parent = this;
             }
@@ -7503,7 +7465,7 @@
                 this.childNodes = previousChildren.concat(newChildren, nextChildren);
                 for (var i = 0; i < newChildren.length; ++i) {
                     var newChild = newChildren[i];
-                    if (isPresent(newChild.parent)) {
+                    if (newChild.parent) {
                         newChild.parent.removeChild(newChild);
                     }
                     newChild.parent = this;
@@ -7512,7 +7474,7 @@
         };
         DebugElement.prototype.query = function (predicate) {
             var results = this.queryAll(predicate);
-            return results.length > 0 ? results[0] : null;
+            return results[0] || null;
         };
         DebugElement.prototype.queryAll = function (predicate) {
             var matches = [];
@@ -7526,13 +7488,7 @@
         };
         Object.defineProperty(DebugElement.prototype, "children", {
             get: function () {
-                var children = [];
-                this.childNodes.forEach(function (node) {
-                    if (node instanceof DebugElement) {
-                        children.push(node);
-                    }
-                });
-                return children;
+                return this.childNodes.filter(function (node) { return node instanceof DebugElement; });
             },
             enumerable: true,
             configurable: true

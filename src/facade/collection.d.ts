@@ -1,10 +1,3 @@
-export declare class MapWrapper {
-    static createFromStringMap<T>(stringMap: {
-        [key: string]: T;
-    }): Map<string, T>;
-    static keys<K>(m: Map<K, any>): K[];
-    static values<V>(m: Map<any, V>): V[];
-}
 /**
  * Wraps Javascript Objects
  */
