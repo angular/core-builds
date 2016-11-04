@@ -32,7 +32,8 @@ var UNDEFINED = new Object();
  *
  */
 export var AppView = (function () {
-    function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode) {
+    function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode, declaredViewContainer) {
+        if (declaredViewContainer === void 0) { declaredViewContainer = null; }
         this.clazz = clazz;
         this.componentType = componentType;
         this.type = type;
@@ -41,7 +42,8 @@ export var AppView = (function () {
         this.parentIndex = parentIndex;
         this.parentElement = parentElement;
         this.cdMode = cdMode;
-        this.viewContainerElement = null;
+        this.declaredViewContainer = declaredViewContainer;
+        this.viewContainer = null;
         this.numberOfChecks = 0;
         this.ref = new ViewRef_(this);
         if (type === ViewType.COMPONENT || type === ViewType.HOST) {
@@ -122,8 +124,8 @@ export var AppView = (function () {
         if (this._hasExternalHostElement) {
             this.detach();
         }
-        else if (isPresent(this.viewContainerElement)) {
-            this.viewContainerElement.detachView(this.viewContainerElement.nestedViews.indexOf(this));
+        else if (isPresent(this.viewContainer)) {
+            this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));
         }
         this.destroy();
     };
@@ -165,6 +167,19 @@ export var AppView = (function () {
         else {
             this._renderDetach();
         }
+        if (this.declaredViewContainer && this.declaredViewContainer !== this.viewContainer) {
+            var projectedViews = this.declaredViewContainer.projectedViews;
+            var index = projectedViews.indexOf(this);
+            // perf: pop is faster than splice!
+            if (index >= projectedViews.length - 1) {
+                projectedViews.pop();
+            }
+            else {
+                projectedViews.splice(index, 1);
+            }
+        }
+        this.viewContainer = null;
+        this.dirtyParentQueriesInternal();
     };
     AppView.prototype._renderDetach = function () {
         if (this._directRenderer) {
@@ -174,7 +189,23 @@ export var AppView = (function () {
             this.renderer.detachView(this.flatRootNodes);
         }
     };
-    AppView.prototype.attachAfter = function (prevNode) {
+    AppView.prototype.attachAfter = function (viewContainer, prevView) {
+        this._renderAttach(viewContainer, prevView);
+        this.viewContainer = viewContainer;
+        if (this.declaredViewContainer && this.declaredViewContainer !== viewContainer) {
+            if (!this.declaredViewContainer.projectedViews) {
+                this.declaredViewContainer.projectedViews = [];
+            }
+            this.declaredViewContainer.projectedViews.push(this);
+        }
+        this.dirtyParentQueriesInternal();
+    };
+    AppView.prototype.moveAfter = function (viewContainer, prevView) {
+        this._renderAttach(viewContainer, prevView);
+        this.dirtyParentQueriesInternal();
+    };
+    AppView.prototype._renderAttach = function (viewContainer, prevView) {
+        var prevNode = prevView ? prevView.lastRootNode : viewContainer.nativeElement;
         if (this._directRenderer) {
             var nextSibling = this._directRenderer.nextSibling(prevNode);
             if (nextSibling) {
@@ -261,15 +292,6 @@ export var AppView = (function () {
      * Overwritten by implementations
      */
     AppView.prototype.detectChangesInternal = function (throwOnChange) { };
-    AppView.prototype.markContentChildAsMoved = function (viewContainer) { this.dirtyParentQueriesInternal(); };
-    AppView.prototype.addToContentChildren = function (viewContainer) {
-        this.viewContainerElement = viewContainer;
-        this.dirtyParentQueriesInternal();
-    };
-    AppView.prototype.removeFromContentChildren = function (viewContainer) {
-        this.dirtyParentQueriesInternal();
-        this.viewContainerElement = null;
-    };
     AppView.prototype.markAsCheckOnce = function () { this.cdMode = ChangeDetectorStatus.CheckOnce; };
     AppView.prototype.markPathToRootAsCheckOnce = function () {
         var c = this;
@@ -281,7 +303,7 @@ export var AppView = (function () {
                 c = c.parentView;
             }
             else {
-                c = c.viewContainerElement ? c.viewContainerElement.parentView : null;
+                c = c.viewContainer ? c.viewContainer.parentView : null;
             }
         }
     };
@@ -293,8 +315,9 @@ export var AppView = (function () {
 }());
 export var DebugAppView = (function (_super) {
     __extends(DebugAppView, _super);
-    function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos) {
-        _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode);
+    function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos, declaredViewContainer) {
+        if (declaredViewContainer === void 0) { declaredViewContainer = null; }
+        _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer);
         this.staticNodeDebugInfos = staticNodeDebugInfos;
         this._currentDebugContext = null;
     }

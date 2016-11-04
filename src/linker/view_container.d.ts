@@ -19,6 +19,7 @@ export declare class ViewContainer {
     parentView: AppView<any>;
     nativeElement: any;
     nestedViews: AppView<any>[];
+    projectedViews: AppView<any>[];
     constructor(index: number, parentIndex: number, parentView: AppView<any>, nativeElement: any);
     elementRef: ElementRef;
     vcRef: ViewContainerRef_;

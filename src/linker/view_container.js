@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { isPresent } from '../facade/lang';
 import { ElementRef } from './element_ref';
 import { ViewContainerRef_ } from './view_container_ref';
 import { ViewType } from './view_type';
@@ -63,12 +62,21 @@ export var ViewContainer = (function () {
     };
     ViewContainer.prototype.mapNestedViews = function (nestedViewClass, callback) {
         var result = [];
-        if (isPresent(this.nestedViews)) {
-            this.nestedViews.forEach(function (nestedView) {
+        if (this.nestedViews) {
+            for (var i = 0; i < this.nestedViews.length; i++) {
+                var nestedView = this.nestedViews[i];
                 if (nestedView.clazz === nestedViewClass) {
                     result.push(callback(nestedView));
                 }
-            });
+            }
+        }
+        if (this.projectedViews) {
+            for (var i = 0; i < this.projectedViews.length; i++) {
+                var projectedView = this.projectedViews[i];
+                if (projectedView.clazz === nestedViewClass) {
+                    result.push(callback(projectedView));
+                }
+            }
         }
         return result;
     };
@@ -84,18 +92,8 @@ export var ViewContainer = (function () {
         }
         nestedViews.splice(previousIndex, 1);
         nestedViews.splice(currentIndex, 0, view);
-        var refRenderNode;
-        if (currentIndex > 0) {
-            var prevView = nestedViews[currentIndex - 1];
-            refRenderNode = prevView.lastRootNode;
-        }
-        else {
-            refRenderNode = this.nativeElement;
-        }
-        if (isPresent(refRenderNode)) {
-            view.attachAfter(refRenderNode);
-        }
-        view.markContentChildAsMoved(this);
+        var prevView = currentIndex > 0 ? nestedViews[currentIndex - 1] : null;
+        view.moveAfter(this, prevView);
     };
     ViewContainer.prototype.attachView = function (view, viewIndex) {
         if (view.type === ViewType.COMPONENT) {
@@ -113,18 +111,8 @@ export var ViewContainer = (function () {
         else {
             nestedViews.splice(viewIndex, 0, view);
         }
-        var refRenderNode;
-        if (viewIndex > 0) {
-            var prevView = nestedViews[viewIndex - 1];
-            refRenderNode = prevView.lastRootNode;
-        }
-        else {
-            refRenderNode = this.nativeElement;
-        }
-        if (isPresent(refRenderNode)) {
-            view.attachAfter(refRenderNode);
-        }
-        view.addToContentChildren(this);
+        var prevView = viewIndex > 0 ? nestedViews[viewIndex - 1] : null;
+        view.attachAfter(this, prevView);
     };
     ViewContainer.prototype.detachView = function (viewIndex) {
         var view = this.nestedViews[viewIndex];
@@ -139,7 +127,6 @@ export var ViewContainer = (function () {
             throw new Error("Component views can't be moved!");
         }
         view.detach();
-        view.removeFromContentChildren(this);
         return view;
     };
     return ViewContainer;

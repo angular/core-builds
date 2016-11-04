@@ -9116,7 +9116,8 @@
      *
      */
     var AppView = (function () {
-        function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode) {
+        function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode, declaredViewContainer) {
+            if (declaredViewContainer === void 0) { declaredViewContainer = null; }
             this.clazz = clazz;
             this.componentType = componentType;
             this.type = type;
@@ -9125,7 +9126,8 @@
             this.parentIndex = parentIndex;
             this.parentElement = parentElement;
             this.cdMode = cdMode;
-            this.viewContainerElement = null;
+            this.declaredViewContainer = declaredViewContainer;
+            this.viewContainer = null;
             this.numberOfChecks = 0;
             this.ref = new ViewRef_(this);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
@@ -9206,8 +9208,8 @@
             if (this._hasExternalHostElement) {
                 this.detach();
             }
-            else if (isPresent(this.viewContainerElement)) {
-                this.viewContainerElement.detachView(this.viewContainerElement.nestedViews.indexOf(this));
+            else if (isPresent(this.viewContainer)) {
+                this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));
             }
             this.destroy();
         };
@@ -9249,6 +9251,19 @@
             else {
                 this._renderDetach();
             }
+            if (this.declaredViewContainer && this.declaredViewContainer !== this.viewContainer) {
+                var projectedViews = this.declaredViewContainer.projectedViews;
+                var index = projectedViews.indexOf(this);
+                // perf: pop is faster than splice!
+                if (index >= projectedViews.length - 1) {
+                    projectedViews.pop();
+                }
+                else {
+                    projectedViews.splice(index, 1);
+                }
+            }
+            this.viewContainer = null;
+            this.dirtyParentQueriesInternal();
         };
         AppView.prototype._renderDetach = function () {
             if (this._directRenderer) {
@@ -9258,7 +9273,23 @@
                 this.renderer.detachView(this.flatRootNodes);
             }
         };
-        AppView.prototype.attachAfter = function (prevNode) {
+        AppView.prototype.attachAfter = function (viewContainer, prevView) {
+            this._renderAttach(viewContainer, prevView);
+            this.viewContainer = viewContainer;
+            if (this.declaredViewContainer && this.declaredViewContainer !== viewContainer) {
+                if (!this.declaredViewContainer.projectedViews) {
+                    this.declaredViewContainer.projectedViews = [];
+                }
+                this.declaredViewContainer.projectedViews.push(this);
+            }
+            this.dirtyParentQueriesInternal();
+        };
+        AppView.prototype.moveAfter = function (viewContainer, prevView) {
+            this._renderAttach(viewContainer, prevView);
+            this.dirtyParentQueriesInternal();
+        };
+        AppView.prototype._renderAttach = function (viewContainer, prevView) {
+            var prevNode = prevView ? prevView.lastRootNode : viewContainer.nativeElement;
             if (this._directRenderer) {
                 var nextSibling = this._directRenderer.nextSibling(prevNode);
                 if (nextSibling) {
@@ -9345,15 +9376,6 @@
          * Overwritten by implementations
          */
         AppView.prototype.detectChangesInternal = function (throwOnChange) { };
-        AppView.prototype.markContentChildAsMoved = function (viewContainer) { this.dirtyParentQueriesInternal(); };
-        AppView.prototype.addToContentChildren = function (viewContainer) {
-            this.viewContainerElement = viewContainer;
-            this.dirtyParentQueriesInternal();
-        };
-        AppView.prototype.removeFromContentChildren = function (viewContainer) {
-            this.dirtyParentQueriesInternal();
-            this.viewContainerElement = null;
-        };
         AppView.prototype.markAsCheckOnce = function () { this.cdMode = ChangeDetectorStatus.CheckOnce; };
         AppView.prototype.markPathToRootAsCheckOnce = function () {
             var c = this;
@@ -9365,7 +9387,7 @@
                     c = c.parentView;
                 }
                 else {
-                    c = c.viewContainerElement ? c.viewContainerElement.parentView : null;
+                    c = c.viewContainer ? c.viewContainer.parentView : null;
                 }
             }
         };
@@ -9377,8 +9399,9 @@
     }());
     var DebugAppView = (function (_super) {
         __extends$14(DebugAppView, _super);
-        function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos) {
-            _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode);
+        function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos, declaredViewContainer) {
+            if (declaredViewContainer === void 0) { declaredViewContainer = null; }
+            _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer);
             this.staticNodeDebugInfos = staticNodeDebugInfos;
             this._currentDebugContext = null;
         }
@@ -9528,12 +9551,21 @@
         };
         ViewContainer.prototype.mapNestedViews = function (nestedViewClass, callback) {
             var result = [];
-            if (isPresent(this.nestedViews)) {
-                this.nestedViews.forEach(function (nestedView) {
+            if (this.nestedViews) {
+                for (var i = 0; i < this.nestedViews.length; i++) {
+                    var nestedView = this.nestedViews[i];
                     if (nestedView.clazz === nestedViewClass) {
                         result.push(callback(nestedView));
                     }
-                });
+                }
+            }
+            if (this.projectedViews) {
+                for (var i = 0; i < this.projectedViews.length; i++) {
+                    var projectedView = this.projectedViews[i];
+                    if (projectedView.clazz === nestedViewClass) {
+                        result.push(callback(projectedView));
+                    }
+                }
             }
             return result;
         };
@@ -9549,18 +9581,8 @@
             }
             nestedViews.splice(previousIndex, 1);
             nestedViews.splice(currentIndex, 0, view);
-            var refRenderNode;
-            if (currentIndex > 0) {
-                var prevView = nestedViews[currentIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.attachAfter(refRenderNode);
-            }
-            view.markContentChildAsMoved(this);
+            var prevView = currentIndex > 0 ? nestedViews[currentIndex - 1] : null;
+            view.moveAfter(this, prevView);
         };
         ViewContainer.prototype.attachView = function (view, viewIndex) {
             if (view.type === ViewType.COMPONENT) {
@@ -9578,18 +9600,8 @@
             else {
                 nestedViews.splice(viewIndex, 0, view);
             }
-            var refRenderNode;
-            if (viewIndex > 0) {
-                var prevView = nestedViews[viewIndex - 1];
-                refRenderNode = prevView.lastRootNode;
-            }
-            else {
-                refRenderNode = this.nativeElement;
-            }
-            if (isPresent(refRenderNode)) {
-                view.attachAfter(refRenderNode);
-            }
-            view.addToContentChildren(this);
+            var prevView = viewIndex > 0 ? nestedViews[viewIndex - 1] : null;
+            view.attachAfter(this, prevView);
         };
         ViewContainer.prototype.detachView = function (viewIndex) {
             var view = this.nestedViews[viewIndex];
@@ -9604,7 +9616,6 @@
                 throw new Error("Component views can't be moved!");
             }
             view.detach();
-            view.removeFromContentChildren(this);
             return view;
         };
         return ViewContainer;

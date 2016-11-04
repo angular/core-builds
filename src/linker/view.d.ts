@@ -28,11 +28,12 @@ export declare abstract class AppView<T> {
     parentIndex: number;
     parentElement: any;
     cdMode: ChangeDetectorStatus;
+    declaredViewContainer: ViewContainer;
     ref: ViewRef_<T>;
     lastRootNode: any;
     allNodes: any[];
     disposables: Function[];
-    viewContainerElement: ViewContainer;
+    viewContainer: ViewContainer;
     numberOfChecks: number;
     renderer: Renderer;
     private _hasExternalHostElement;
@@ -41,7 +42,7 @@ export declare abstract class AppView<T> {
     private _animationContext;
     private _directRenderer;
     context: T;
-    constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentView: AppView<any>, parentIndex: number, parentElement: any, cdMode: ChangeDetectorStatus);
+    constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentView: AppView<any>, parentIndex: number, parentElement: any, cdMode: ChangeDetectorStatus, declaredViewContainer?: ViewContainer);
     animationContext: AnimationViewContext;
     destroyed: boolean;
     create(context: T): ComponentRef<any>;
@@ -74,7 +75,9 @@ export declare abstract class AppView<T> {
     detachInternal(): void;
     detach(): void;
     private _renderDetach();
-    attachAfter(prevNode: any): void;
+    attachAfter(viewContainer: ViewContainer, prevView: AppView<any>): void;
+    moveAfter(viewContainer: ViewContainer, prevView: AppView<any>): void;
+    private _renderAttach(viewContainer, prevView);
     changeDetectorRef: ChangeDetectorRef;
     flatRootNodes: any[];
     projectNodes(parentElement: any, ngContentIndex: number): void;
@@ -96,9 +99,6 @@ export declare abstract class AppView<T> {
      * Overwritten by implementations
      */
     detectChangesInternal(throwOnChange: boolean): void;
-    markContentChildAsMoved(viewContainer: ViewContainer): void;
-    addToContentChildren(viewContainer: ViewContainer): void;
-    removeFromContentChildren(viewContainer: ViewContainer): void;
     markAsCheckOnce(): void;
     markPathToRootAsCheckOnce(): void;
     eventHandler<E, R>(cb: (eventName: string, event?: E) => R): (eventName: string, event?: E) => R;
@@ -107,7 +107,7 @@ export declare abstract class AppView<T> {
 export declare class DebugAppView<T> extends AppView<T> {
     staticNodeDebugInfos: StaticNodeDebugInfo[];
     private _currentDebugContext;
-    constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentView: AppView<any>, parentIndex: number, parentNode: any, cdMode: ChangeDetectorStatus, staticNodeDebugInfos: StaticNodeDebugInfo[]);
+    constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentView: AppView<any>, parentIndex: number, parentNode: any, cdMode: ChangeDetectorStatus, staticNodeDebugInfos: StaticNodeDebugInfo[], declaredViewContainer?: ViewContainer);
     create(context: T): ComponentRef<any>;
     createHostView(rootSelectorOrNode: string | any, injector: Injector, projectableNodes?: any[][]): ComponentRef<any>;
     injectorGet(token: any, nodeIndex: number, notFoundResult?: any): any;
