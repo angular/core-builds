@@ -10,19 +10,22 @@ import { ElementRef } from './element_ref';
 import { AppView } from './view';
 import { ViewContainerRef_ } from './view_container_ref';
 /**
- * A ViewContainer is created for elements that have a ViewContainerRef
- * to keep track of the nested views.
+ * An AppElement is created for elements that have a ViewContainerRef,
+ * a nested component or a <template> element to keep data around
+ * that is needed for later instantiations.
  */
-export declare class ViewContainer {
+export declare class AppElement {
     index: number;
     parentIndex: number;
     parentView: AppView<any>;
     nativeElement: any;
     nestedViews: AppView<any>[];
-    projectedViews: AppView<any>[];
+    componentView: AppView<any>;
+    component: any;
     constructor(index: number, parentIndex: number, parentView: AppView<any>, nativeElement: any);
     elementRef: ElementRef;
     vcRef: ViewContainerRef_;
+    initComponent(component: any, view: AppView<any>): void;
     parentInjector: Injector;
     injector: Injector;
     detectChangesInNestedViews(throwOnChange: boolean): void;

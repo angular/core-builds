@@ -76,7 +76,6 @@ export var DebugDomRenderer = (function () {
         this._delegate.detachView(viewRootNodes);
     };
     DebugDomRenderer.prototype.destroyView = function (hostElement, viewAllNodes) {
-        viewAllNodes = viewAllNodes || [];
         viewAllNodes.forEach(function (node) { removeDebugNodeFromIndex(getDebugNode(node)); });
         this._delegate.destroyView(hostElement, viewAllNodes);
     };

@@ -48,10 +48,13 @@ export var DebugContext = (function () {
     Object.defineProperty(DebugContext.prototype, "componentRenderElement", {
         get: function () {
             var componentView = this._view;
-            while (isPresent(componentView.parentView) && componentView.type !== ViewType.COMPONENT) {
-                componentView = componentView.parentView;
+            while (isPresent(componentView.declarationAppElement) &&
+                componentView.type !== ViewType.COMPONENT) {
+                componentView = componentView.declarationAppElement.parentView;
             }
-            return componentView.parentElement;
+            return isPresent(componentView.declarationAppElement) ?
+                componentView.declarationAppElement.nativeElement :
+                null;
         },
         enumerable: true,
         configurable: true

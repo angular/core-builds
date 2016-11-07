@@ -28,7 +28,7 @@ export var ChangeDetectionStrategy;
 export var ChangeDetectorStatus;
 (function (ChangeDetectorStatus) {
     /**
-     * `CheckOnce` means that after calling detectChanges the mode of the change detector
+     * `CheckedOnce` means that after calling detectChanges the mode of the change detector
      * will become `Checked`.
      */
     ChangeDetectorStatus[ChangeDetectorStatus["CheckOnce"] = 0] = "CheckOnce";

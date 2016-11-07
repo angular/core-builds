@@ -11,7 +11,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { unimplemented } from '../facade/errors';
-import { ElementRef } from './element_ref';
 import { ViewUtils } from './view_utils';
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
@@ -78,47 +77,45 @@ export var ComponentRef = (function () {
 }());
 export var ComponentRef_ = (function (_super) {
     __extends(ComponentRef_, _super);
-    function ComponentRef_(_index, _parentView, _nativeElement, _component) {
+    function ComponentRef_(_hostElement, _componentType) {
         _super.call(this);
-        this._index = _index;
-        this._parentView = _parentView;
-        this._nativeElement = _nativeElement;
-        this._component = _component;
+        this._hostElement = _hostElement;
+        this._componentType = _componentType;
     }
     Object.defineProperty(ComponentRef_.prototype, "location", {
-        get: function () { return new ElementRef(this._nativeElement); },
+        get: function () { return this._hostElement.elementRef; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentRef_.prototype, "injector", {
-        get: function () { return this._parentView.injector(this._index); },
+        get: function () { return this._hostElement.injector; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentRef_.prototype, "instance", {
-        get: function () { return this._component; },
+        get: function () { return this._hostElement.component; },
         enumerable: true,
         configurable: true
     });
     ;
     Object.defineProperty(ComponentRef_.prototype, "hostView", {
-        get: function () { return this._parentView.ref; },
+        get: function () { return this._hostElement.parentView.ref; },
         enumerable: true,
         configurable: true
     });
     ;
     Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
-        get: function () { return this._parentView.ref; },
+        get: function () { return this._hostElement.parentView.ref; },
         enumerable: true,
         configurable: true
     });
     ;
     Object.defineProperty(ComponentRef_.prototype, "componentType", {
-        get: function () { return this._component.constructor; },
+        get: function () { return this._componentType; },
         enumerable: true,
         configurable: true
     });
-    ComponentRef_.prototype.destroy = function () { this._parentView.detachAndDestroy(); };
+    ComponentRef_.prototype.destroy = function () { this._hostElement.parentView.detachAndDestroy(); };
     ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
     return ComponentRef_;
 }(ComponentRef));
@@ -130,9 +127,9 @@ var EMPTY_CONTEXT = new Object();
  * @stable
  */
 export var ComponentFactory = (function () {
-    function ComponentFactory(selector, _viewClass, _componentType) {
+    function ComponentFactory(selector, _viewFactory, _componentType) {
         this.selector = selector;
-        this._viewClass = _viewClass;
+        this._viewFactory = _viewFactory;
         this._componentType = _componentType;
     }
     Object.defineProperty(ComponentFactory.prototype, "componentType", {
@@ -150,8 +147,17 @@ export var ComponentFactory = (function () {
         if (!projectableNodes) {
             projectableNodes = [];
         }
-        var hostView = new this._viewClass(vu, null, null, null);
-        return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
+        // Note: Host views don't need a declarationAppElement!
+        var hostView = this._viewFactory(vu, injector, null);
+        hostView.visitProjectableNodesInternal =
+            function (nodeIndex, ngContentIndex, cb, ctx) {
+                var nodes = projectableNodes[ngContentIndex] || [];
+                for (var i = 0; i < nodes.length; i++) {
+                    cb(nodes[i], ctx);
+                }
+            };
+        var hostElement = hostView.create(EMPTY_CONTEXT, rootSelectorOrNode);
+        return new ComponentRef_(hostElement, this._componentType);
     };
     return ComponentFactory;
 }());
