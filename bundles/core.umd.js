@@ -4734,8 +4734,14 @@
     function addToArray(e, array) {
         array.push(e);
     }
-    var MAX_INTERPOLATION_VALUES = 9;
-    function interpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
+    function interpolate(valueCount, constAndInterp) {
+        var result = '';
+        for (var i = 0; i < valueCount * 2; i = i + 2) {
+            result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
+        }
+        return result + constAndInterp[valueCount * 2];
+    }
+    function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
         switch (valueCount) {
             case 1:
                 return c0 + _toStringWithNull(a1) + c1;
@@ -5320,8 +5326,8 @@
         ViewUtils: ViewUtils,
         createRenderComponentType: createRenderComponentType,
         addToArray: addToArray,
-        MAX_INTERPOLATION_VALUES: MAX_INTERPOLATION_VALUES,
         interpolate: interpolate,
+        inlineInterpolate: inlineInterpolate,
         checkBinding: checkBinding,
         castByValue: castByValue,
         EMPTY_ARRAY: EMPTY_ARRAY,
