@@ -26,9 +26,8 @@ export declare class ListWrapper {
     static removeAll<T>(list: T[], items: T[]): void;
     static remove<T>(list: T[], el: T): boolean;
     static equals(a: any[], b: any[]): boolean;
-    static maximum<T>(list: T[], predicate: (t: T) => number): T;
     static flatten<T>(list: Array<T | T[]>): T[];
 }
 export declare function isListLikeIterable(obj: any): boolean;
-export declare function areIterablesEqual(a: any, b: any, comparator: Function): boolean;
-export declare function iterateListLike(obj: any, fn: Function): void;
+export declare function areIterablesEqual(a: any, b: any, comparator: (a: any, b: any) => boolean): boolean;
+export declare function iterateListLike(obj: any, fn: (p: any) => any): void;
