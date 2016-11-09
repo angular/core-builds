@@ -7618,6 +7618,7 @@
             this._onStartFns = [];
             this._finished = false;
             this._started = false;
+            this._destroyed = false;
             this.parentPlayer = null;
             var count = 0;
             var total = this._players.length;
@@ -7638,9 +7639,6 @@
         AnimationGroupPlayer.prototype._onFinish = function () {
             if (!this._finished) {
                 this._finished = true;
-                if (!isPresent(this.parentPlayer)) {
-                    this.destroy();
-                }
                 this._onDoneFns.forEach(function (fn) { return fn(); });
                 this._onDoneFns = [];
             }
@@ -7667,10 +7665,18 @@
             this._players.forEach(function (player) { return player.finish(); });
         };
         AnimationGroupPlayer.prototype.destroy = function () {
-            this._onFinish();
-            this._players.forEach(function (player) { return player.destroy(); });
+            if (!this._destroyed) {
+                this._onFinish();
+                this._players.forEach(function (player) { return player.destroy(); });
+                this._destroyed = true;
+            }
         };
-        AnimationGroupPlayer.prototype.reset = function () { this._players.forEach(function (player) { return player.reset(); }); };
+        AnimationGroupPlayer.prototype.reset = function () {
+            this._players.forEach(function (player) { return player.reset(); });
+            this._destroyed = false;
+            this._finished = false;
+            this._started = false;
+        };
         AnimationGroupPlayer.prototype.setPosition = function (p /** TODO #9100 */) {
             this._players.forEach(function (player) { player.setPosition(p); });
         };
@@ -7758,6 +7764,7 @@
             this._onStartFns = [];
             this._finished = false;
             this._started = false;
+            this._destroyed = false;
             this.parentPlayer = null;
             this._players.forEach(function (player) { player.parentPlayer = _this; });
             this._onNext(false);
@@ -7786,9 +7793,6 @@
         AnimationSequencePlayer.prototype._onFinish = function () {
             if (!this._finished) {
                 this._finished = true;
-                if (!isPresent(this.parentPlayer)) {
-                    this.destroy();
-                }
                 this._onDoneFns.forEach(function (fn) { return fn(); });
                 this._onDoneFns = [];
             }
@@ -7810,19 +7814,27 @@
         };
         AnimationSequencePlayer.prototype.pause = function () { this._activePlayer.pause(); };
         AnimationSequencePlayer.prototype.restart = function () {
+            this.reset();
             if (this._players.length > 0) {
-                this.reset();
                 this._players[0].restart();
             }
         };
-        AnimationSequencePlayer.prototype.reset = function () { this._players.forEach(function (player) { return player.reset(); }); };
+        AnimationSequencePlayer.prototype.reset = function () {
+            this._players.forEach(function (player) { return player.reset(); });
+            this._destroyed = false;
+            this._finished = false;
+            this._started = false;
+        };
         AnimationSequencePlayer.prototype.finish = function () {
             this._onFinish();
             this._players.forEach(function (player) { return player.finish(); });
         };
         AnimationSequencePlayer.prototype.destroy = function () {
-            this._onFinish();
-            this._players.forEach(function (player) { return player.destroy(); });
+            if (!this._destroyed) {
+                this._onFinish();
+                this._players.forEach(function (player) { return player.destroy(); });
+                this._destroyed = true;
+            }
         };
         AnimationSequencePlayer.prototype.setPosition = function (p /** TODO #9100 */) { this._players[0].setPosition(p); };
         AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };

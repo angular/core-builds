@@ -7,6 +7,7 @@ export declare class AnimationSequencePlayer implements AnimationPlayer {
     private _onStartFns;
     private _finished;
     private _started;
+    private _destroyed;
     parentPlayer: AnimationPlayer;
     constructor(_players: AnimationPlayer[]);
     private _onNext(start);

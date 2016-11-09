@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { isPresent } from './facade/lang';
 export var MockAnimationPlayer = (function () {
     function MockAnimationPlayer() {
         this._onDoneFns = [];
@@ -22,9 +21,6 @@ export var MockAnimationPlayer = (function () {
             this.log.push('finish');
             this._onDoneFns.forEach(function (fn) { return fn(); });
             this._onDoneFns = [];
-            if (!isPresent(this.parentPlayer)) {
-                this.destroy();
-            }
         }
     };
     MockAnimationPlayer.prototype.init = function () { this.log.push('init'); };
@@ -42,7 +38,12 @@ export var MockAnimationPlayer = (function () {
     MockAnimationPlayer.prototype.pause = function () { this.log.push('pause'); };
     MockAnimationPlayer.prototype.restart = function () { this.log.push('restart'); };
     MockAnimationPlayer.prototype.finish = function () { this._onFinish(); };
-    MockAnimationPlayer.prototype.reset = function () { this.log.push('reset'); };
+    MockAnimationPlayer.prototype.reset = function () {
+        this.log.push('reset');
+        this._destroyed = false;
+        this._finished = false;
+        this._started = false;
+    };
     MockAnimationPlayer.prototype.destroy = function () {
         if (!this._destroyed) {
             this._destroyed = true;

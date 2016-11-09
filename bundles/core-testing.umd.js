@@ -108,9 +108,6 @@
     function scheduleMicroTask(fn) {
         Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
     }
-    function isPresent(obj) {
-        return obj != null;
-    }
     function stringify(token) {
         if (typeof token === 'string') {
             return token;
@@ -966,6 +963,13 @@
      * found in the LICENSE file at https://angular.io/license
      */
 
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
     var MockAnimationPlayer = (function () {
         function MockAnimationPlayer() {
             this._onDoneFns = [];
@@ -982,9 +986,6 @@
                 this.log.push('finish');
                 this._onDoneFns.forEach(function (fn) { return fn(); });
                 this._onDoneFns = [];
-                if (!isPresent(this.parentPlayer)) {
-                    this.destroy();
-                }
             }
         };
         MockAnimationPlayer.prototype.init = function () { this.log.push('init'); };
@@ -1002,7 +1003,12 @@
         MockAnimationPlayer.prototype.pause = function () { this.log.push('pause'); };
         MockAnimationPlayer.prototype.restart = function () { this.log.push('restart'); };
         MockAnimationPlayer.prototype.finish = function () { this._onFinish(); };
-        MockAnimationPlayer.prototype.reset = function () { this.log.push('reset'); };
+        MockAnimationPlayer.prototype.reset = function () {
+            this.log.push('reset');
+            this._destroyed = false;
+            this._finished = false;
+            this._started = false;
+        };
         MockAnimationPlayer.prototype.destroy = function () {
             if (!this._destroyed) {
                 this._destroyed = true;
