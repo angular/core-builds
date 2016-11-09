@@ -310,6 +310,9 @@ export function selectOrCreateRenderHostElement(renderer, elementName, attrs, ro
     var hostElement;
     if (isPresent(rootSelectorOrNode)) {
         hostElement = renderer.selectRootElement(rootSelectorOrNode, debugInfo);
+        for (var i = 0; i < attrs.length; i += 2) {
+            renderer.setElementAttribute(hostElement, attrs.get(i), attrs.get(i + 1));
+        }
     }
     else {
         hostElement = createRenderElement(renderer, null, elementName, attrs, debugInfo);
