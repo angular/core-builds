@@ -3464,8 +3464,8 @@
          */
         DefaultIterableDiffer.prototype._reset = function () {
             if (this.isDirty) {
-                var record;
-                var nextRecord;
+                var record = void 0;
+                var nextRecord = void 0;
                 for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
                     record._nextPrevious = record._next;
                 }
@@ -6917,8 +6917,9 @@
         SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
             var _this = this;
             var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
-            if (exportName === undefined)
+            if (exportName === undefined) {
                 exportName = 'default';
+            }
             return System.import(module)
                 .then(function (module) { return module[exportName]; })
                 .then(function (type) { return checkNotEmpty(type, module, exportName); })
@@ -8745,9 +8746,9 @@
             if (isPresent(debugNode)) {
                 var debugParent = debugNode.parent;
                 if (viewRootNodes.length > 0 && isPresent(debugParent)) {
-                    var debugViewRootNodes = [];
-                    viewRootNodes.forEach(function (rootNode) { return debugViewRootNodes.push(getDebugNode(rootNode)); });
-                    debugParent.insertChildrenAfter(debugNode, debugViewRootNodes);
+                    var debugViewRootNodes_1 = [];
+                    viewRootNodes.forEach(function (rootNode) { return debugViewRootNodes_1.push(getDebugNode(rootNode)); });
+                    debugParent.insertChildrenAfter(debugNode, debugViewRootNodes_1);
                 }
             }
             this._delegate.attachViewAfter(node, viewRootNodes);
@@ -8924,9 +8925,9 @@
                 var varValues = {};
                 var staticNodeInfo = this._staticNodeInfo;
                 if (isPresent(staticNodeInfo)) {
-                    var refs = staticNodeInfo.refTokens;
-                    Object.keys(refs).forEach(function (refName) {
-                        var refToken = refs[refName];
+                    var refs_1 = staticNodeInfo.refTokens;
+                    Object.keys(refs_1).forEach(function (refName) {
+                        var refToken = refs_1[refName];
                         var varValue;
                         if (isBlank(refToken)) {
                             varValue = _this._view.allNodes ? _this._view.allNodes[_this._nodeIndex] : null;

@@ -59,9 +59,9 @@ export var DebugDomRenderer = (function () {
         if (isPresent(debugNode)) {
             var debugParent = debugNode.parent;
             if (viewRootNodes.length > 0 && isPresent(debugParent)) {
-                var debugViewRootNodes = [];
-                viewRootNodes.forEach(function (rootNode) { return debugViewRootNodes.push(getDebugNode(rootNode)); });
-                debugParent.insertChildrenAfter(debugNode, debugViewRootNodes);
+                var debugViewRootNodes_1 = [];
+                viewRootNodes.forEach(function (rootNode) { return debugViewRootNodes_1.push(getDebugNode(rootNode)); });
+                debugParent.insertChildrenAfter(debugNode, debugViewRootNodes_1);
             }
         }
         this._delegate.attachViewAfter(node, viewRootNodes);

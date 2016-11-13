@@ -94,9 +94,9 @@ export var DebugContext = (function () {
             var varValues = {};
             var staticNodeInfo = this._staticNodeInfo;
             if (isPresent(staticNodeInfo)) {
-                var refs = staticNodeInfo.refTokens;
-                Object.keys(refs).forEach(function (refName) {
-                    var refToken = refs[refName];
+                var refs_1 = staticNodeInfo.refTokens;
+                Object.keys(refs_1).forEach(function (refName) {
+                    var refToken = refs_1[refName];
                     var varValue;
                     if (isBlank(refToken)) {
                         varValue = _this._view.allNodes ? _this._view.allNodes[_this._nodeIndex] : null;
