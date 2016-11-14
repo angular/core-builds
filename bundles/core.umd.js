@@ -6205,6 +6205,18 @@
         return _devMode;
     }
     /**
+     * A token for third-party components that can register themselves with NgProbe.
+     *
+     * @experimental
+     */
+    var NgProbeToken = (function () {
+        function NgProbeToken(name, token) {
+            this.name = name;
+            this.token = token;
+        }
+        return NgProbeToken;
+    }());
+    /**
      * Creates a platform.
      * Platforms have to be eagerly created via this function.
      *
@@ -9639,6 +9651,7 @@
     exports.enableProdMode = enableProdMode;
     exports.isDevMode = isDevMode;
     exports.createPlatformFactory = createPlatformFactory;
+    exports.NgProbeToken = NgProbeToken;
     exports.APP_ID = APP_ID;
     exports.PACKAGE_ROOT_URL = PACKAGE_ROOT_URL;
     exports.PLATFORM_INITIALIZER = PLATFORM_INITIALIZER;

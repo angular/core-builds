@@ -57,6 +57,18 @@ export function isDevMode() {
     return _devMode;
 }
 /**
+ * A token for third-party components that can register themselves with NgProbe.
+ *
+ * @experimental
+ */
+export var NgProbeToken = (function () {
+    function NgProbeToken(name, token) {
+        this.name = name;
+        this.token = token;
+    }
+    return NgProbeToken;
+}());
+/**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
  *

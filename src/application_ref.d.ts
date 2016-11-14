@@ -38,6 +38,16 @@ export declare function enableProdMode(): void;
  */
 export declare function isDevMode(): boolean;
 /**
+ * A token for third-party components that can register themselves with NgProbe.
+ *
+ * @experimental
+ */
+export declare class NgProbeToken {
+    name: string;
+    token: any;
+    constructor(name: string, token: any);
+}
+/**
  * Creates a platform.
  * Platforms have to be eagerly created via this function.
  *
