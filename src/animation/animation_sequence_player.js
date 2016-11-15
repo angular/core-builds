@@ -89,8 +89,13 @@ export var AnimationSequencePlayer = (function () {
             this._activePlayer = new NoOpAnimationPlayer();
         }
     };
-    AnimationSequencePlayer.prototype.setPosition = function (p /** TODO #9100 */) { this._players[0].setPosition(p); };
+    AnimationSequencePlayer.prototype.setPosition = function (p) { this._players[0].setPosition(p); };
     AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
+    Object.defineProperty(AnimationSequencePlayer.prototype, "players", {
+        get: function () { return this._players; },
+        enumerable: true,
+        configurable: true
+    });
     return AnimationSequencePlayer;
 }());
 //# sourceMappingURL=animation_sequence_player.js.map

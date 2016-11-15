@@ -73,7 +73,7 @@ export var AnimationGroupPlayer = (function () {
         this._finished = false;
         this._started = false;
     };
-    AnimationGroupPlayer.prototype.setPosition = function (p /** TODO #9100 */) {
+    AnimationGroupPlayer.prototype.setPosition = function (p) {
         this._players.forEach(function (player) { player.setPosition(p); });
     };
     AnimationGroupPlayer.prototype.getPosition = function () {
@@ -84,6 +84,11 @@ export var AnimationGroupPlayer = (function () {
         });
         return min;
     };
+    Object.defineProperty(AnimationGroupPlayer.prototype, "players", {
+        get: function () { return this._players; },
+        enumerable: true,
+        configurable: true
+    });
     return AnimationGroupPlayer;
 }());
 //# sourceMappingURL=animation_group_player.js.map
