@@ -365,6 +365,24 @@ export var ApplicationRef = (function () {
         configurable: true
     });
     ;
+    /**
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
+     */
+    ApplicationRef.prototype.attachView = function (view) { unimplemented(); };
+    /**
+     * Detaches a view from dirty checking again.
+     */
+    ApplicationRef.prototype.detachView = function (view) { unimplemented(); };
+    Object.defineProperty(ApplicationRef.prototype, "viewCount", {
+        /**
+         * Returns the number of attached views.
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
     return ApplicationRef;
 }());
 export var ApplicationRef_ = (function (_super) {
@@ -383,17 +401,21 @@ export var ApplicationRef_ = (function (_super) {
         this._bootstrapListeners = [];
         this._rootComponents = [];
         this._rootComponentTypes = [];
-        this._changeDetectorRefs = [];
+        this._views = [];
         this._runningTick = false;
         this._enforceNoNewChanges = false;
         this._enforceNoNewChanges = isDevMode();
         this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
     }
-    ApplicationRef_.prototype.registerChangeDetector = function (changeDetector) {
-        this._changeDetectorRefs.push(changeDetector);
+    ApplicationRef_.prototype.attachView = function (viewRef) {
+        var view = viewRef.internalView;
+        this._views.push(view);
+        view.attachToAppRef(this);
     };
-    ApplicationRef_.prototype.unregisterChangeDetector = function (changeDetector) {
-        ListWrapper.remove(this._changeDetectorRefs, changeDetector);
+    ApplicationRef_.prototype.detachView = function (viewRef) {
+        var view = viewRef.internalView;
+        ListWrapper.remove(this._views, view);
+        view.detach();
     };
     ApplicationRef_.prototype.bootstrap = function (componentOrFactory) {
         var _this = this;
@@ -421,9 +443,8 @@ export var ApplicationRef_ = (function (_super) {
         }
         return compRef;
     };
-    /** @internal */
     ApplicationRef_.prototype._loadComponent = function (componentRef) {
-        this._changeDetectorRefs.push(componentRef.changeDetectorRef);
+        this.attachView(componentRef.hostView);
         this.tick();
         this._rootComponents.push(componentRef);
         // Get the listeners lazily to prevent DI cycles.
@@ -431,12 +452,8 @@ export var ApplicationRef_ = (function (_super) {
             .concat(this._bootstrapListeners);
         listeners.forEach(function (listener) { return listener(componentRef); });
     };
-    /** @internal */
     ApplicationRef_.prototype._unloadComponent = function (componentRef) {
-        if (this._rootComponents.indexOf(componentRef) == -1) {
-            return;
-        }
-        this.unregisterChangeDetector(componentRef.changeDetectorRef);
+        this.detachView(componentRef.hostView);
         ListWrapper.remove(this._rootComponents, componentRef);
     };
     ApplicationRef_.prototype.tick = function () {
@@ -446,9 +463,9 @@ export var ApplicationRef_ = (function (_super) {
         var scope = ApplicationRef_._tickScope();
         try {
             this._runningTick = true;
-            this._changeDetectorRefs.forEach(function (detector) { return detector.detectChanges(); });
+            this._views.forEach(function (view) { return view.ref.detectChanges(); });
             if (this._enforceNoNewChanges) {
-                this._changeDetectorRefs.forEach(function (detector) { return detector.checkNoChanges(); });
+                this._views.forEach(function (view) { return view.ref.checkNoChanges(); });
             }
         }
         finally {
@@ -458,8 +475,13 @@ export var ApplicationRef_ = (function (_super) {
     };
     ApplicationRef_.prototype.ngOnDestroy = function () {
         // TODO(alxhub): Dispose of the NgZone.
-        this._rootComponents.slice().forEach(function (component) { return component.destroy(); });
+        this._views.slice().forEach(function (view) { return view.destroy(); });
     };
+    Object.defineProperty(ApplicationRef_.prototype, "viewCount", {
+        get: function () { return this._views.length; },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(ApplicationRef_.prototype, "componentTypes", {
         get: function () { return this._rootComponentTypes; },
         enumerable: true,
