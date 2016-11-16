@@ -9327,7 +9327,10 @@
                     this.visitRootNodesInternal(this._directRenderer.insertBefore, nextSibling);
                 }
                 else {
-                    this.visitRootNodesInternal(this._directRenderer.appendChild, this._directRenderer.parentElement(prevNode));
+                    var parentElement = this._directRenderer.parentElement(prevNode);
+                    if (parentElement) {
+                        this.visitRootNodesInternal(this._directRenderer.appendChild, parentElement);
+                    }
                 }
             }
             else {
