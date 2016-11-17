@@ -43,7 +43,6 @@ export var AppView = (function () {
         this.parentElement = parentElement;
         this.cdMode = cdMode;
         this.declaredViewContainer = declaredViewContainer;
-        this.viewContainer = null;
         this.numberOfChecks = 0;
         this.ref = new ViewRef_(this);
         if (type === ViewType.COMPONENT || type === ViewType.HOST) {
@@ -121,11 +120,14 @@ export var AppView = (function () {
     };
     AppView.prototype.injector = function (nodeIndex) { return new ElementInjector(this, nodeIndex); };
     AppView.prototype.detachAndDestroy = function () {
-        if (this._hasExternalHostElement) {
-            this.detach();
-        }
-        else if (isPresent(this.viewContainer)) {
+        if (this.viewContainer) {
             this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));
+        }
+        else if (this.appRef) {
+            this.appRef.detachView(this.ref);
+        }
+        else if (this._hasExternalHostElement) {
+            this.detach();
         }
         this.destroy();
     };
@@ -178,6 +180,7 @@ export var AppView = (function () {
                 projectedViews.splice(index, 1);
             }
         }
+        this.appRef = null;
         this.viewContainer = null;
         this.dirtyParentQueriesInternal();
     };
@@ -189,7 +192,17 @@ export var AppView = (function () {
             this.renderer.detachView(this.flatRootNodes);
         }
     };
+    AppView.prototype.attachToAppRef = function (appRef) {
+        if (this.viewContainer) {
+            throw new Error('This view is already attached to a ViewContainer!');
+        }
+        this.appRef = appRef;
+        this.dirtyParentQueriesInternal();
+    };
     AppView.prototype.attachAfter = function (viewContainer, prevView) {
+        if (this.appRef) {
+            throw new Error('This view is already attached directly to the ApplicationRef!');
+        }
         this._renderAttach(viewContainer, prevView);
         this.viewContainer = viewContainer;
         if (this.declaredViewContainer && this.declaredViewContainer !== viewContainer) {
