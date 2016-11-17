@@ -11,16 +11,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { triggerQueuedAnimations } from '../animation/animation_queue';
-import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ChangeDetectorStatus } from '../change_detection/constants';
 import { unimplemented } from '../facade/errors';
 /**
  * @stable
  */
-export var ViewRef = (function (_super) {
-    __extends(ViewRef, _super);
+export var ViewRef = (function () {
     function ViewRef() {
-        _super.apply(this, arguments);
     }
     Object.defineProperty(ViewRef.prototype, "destroyed", {
         get: function () { return unimplemented(); },
@@ -28,7 +25,7 @@ export var ViewRef = (function (_super) {
         configurable: true
     });
     return ViewRef;
-}(ChangeDetectorRef));
+}());
 /**
  * Represents an Angular View.
  *
