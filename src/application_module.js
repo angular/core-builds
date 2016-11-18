@@ -13,17 +13,22 @@ import { LOCALE_ID } from './i18n/tokens';
 import { Compiler } from './linker/compiler';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
+/**
+ * @return {?}
+ */
 export function _iterableDiffersFactory() {
     return defaultIterableDiffers;
 }
+/**
+ * @return {?}
+ */
 export function _keyValueDiffersFactory() {
     return defaultKeyValueDiffers;
 }
 /**
- * This module includes the providers of @angular/core that are needed
- * to bootstrap components via `ApplicationRef`.
- *
- * @experimental
+ *  This module includes the providers of @angular/core that are needed
+  * to bootstrap components via `ApplicationRef`.
+  * *
  */
 export var ApplicationModule = (function () {
     function ApplicationModule() {
@@ -44,7 +49,16 @@ export var ApplicationModule = (function () {
                 },] },
     ];
     /** @nocollapse */
-    ApplicationModule.ctorParameters = [];
+    ApplicationModule.ctorParameters = function () { return []; };
     return ApplicationModule;
 }());
+function ApplicationModule_tsickle_Closure_declarations() {
+    /** @type {?} */
+    ApplicationModule.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    ApplicationModule.ctorParameters;
+}
 //# sourceMappingURL=application_module.js.map

@@ -784,7 +784,7 @@
                     { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
                 ];
                 /** @nocollapse */
-                DynamicTestModule.ctorParameters = [];
+                DynamicTestModule.ctorParameters = function () { return []; };
                 return DynamicTestModule;
             }());
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
