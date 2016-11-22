@@ -41,21 +41,21 @@ import { makeParamDecorator, makePropDecorator } from '../util/decorators';
  *
  * @experimental
  */
-export var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
+export var ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
 /**
  * Attribute decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
+export var Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
 /**
- *  Base class for query metadata.
-  * *
-  * See {@link ContentChildren}, {@link ContentChild}, {@link ViewChildren}, {@link ViewChild} for
-  * more information.
-  * *
- * @abstract
+ * Base class for query metadata.
+ *
+ * See {@link ContentChildren}, {@link ContentChild}, {@link ViewChildren}, {@link ViewChild} for
+ * more information.
+ *
+ * @stable
  */
 export var Query = (function () {
     function Query() {
@@ -68,14 +68,14 @@ export var Query = (function () {
  *  @stable
  *  @Annotation
  */
-export var /** @type {?} */ ContentChildren = (makePropDecorator('ContentChildren', [
+export var ContentChildren = makePropDecorator('ContentChildren', [
     ['selector', undefined], {
         first: false,
         isViewQuery: false,
         descendants: false,
         read: undefined,
     }
-], Query));
+], Query);
 /**
  * @whatItDoes Configures a content query.
  *
@@ -105,7 +105,7 @@ export var /** @type {?} */ ContentChildren = (makePropDecorator('ContentChildre
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', [
+export var ContentChild = makePropDecorator('ContentChild', [
     ['selector', undefined], {
         first: true,
         isViewQuery: false,
@@ -142,7 +142,7 @@ export var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', [
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', [
+export var ViewChildren = makePropDecorator('ViewChildren', [
     ['selector', undefined], {
         first: false,
         isViewQuery: true,
@@ -156,7 +156,7 @@ export var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', [
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ ViewChild = makePropDecorator('ViewChild', [
+export var ViewChild = makePropDecorator('ViewChild', [
     ['selector', undefined], {
         first: true,
         isViewQuery: true,
