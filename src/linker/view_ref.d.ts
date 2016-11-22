@@ -3,7 +3,7 @@ import { AppView } from './view';
 /**
  * @stable
  */
-export declare abstract class ViewRef {
+export declare abstract class ViewRef extends ChangeDetectorRef {
     destroyed: boolean;
     abstract onDestroy(callback: Function): any;
 }
