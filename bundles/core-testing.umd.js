@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-beta.1-4553948
+ * @license Angular v2.2.2-69572ac
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -784,7 +784,7 @@
                     { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
                 ];
                 /** @nocollapse */
-                DynamicTestModule.ctorParameters = function () { return []; };
+                DynamicTestModule.ctorParameters = [];
                 return DynamicTestModule;
             }());
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);

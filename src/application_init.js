@@ -11,15 +11,13 @@ import { Inject, Injectable, OpaqueToken, Optional } from './di';
  * A function that will be executed when an application is initialized.
  * @experimental
  */
-export var /** @type {?} */ APP_INITIALIZER = new OpaqueToken('Application Initializer');
+export var APP_INITIALIZER = new OpaqueToken('Application Initializer');
 /**
- *  A class that reflects the state of running {@link APP_INITIALIZER}s.
-  * *
+ * A class that reflects the state of running {@link APP_INITIALIZER}s.
+ *
+ * @experimental
  */
 export var ApplicationInitStatus = (function () {
-    /**
-     * @param {?} appInits
-     */
     function ApplicationInitStatus(appInits) {
         var _this = this;
         this._done = false;
@@ -38,17 +36,11 @@ export var ApplicationInitStatus = (function () {
         }
     }
     Object.defineProperty(ApplicationInitStatus.prototype, "done", {
-        /**
-         * @return {?}
-         */
         get: function () { return this._done; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ApplicationInitStatus.prototype, "donePromise", {
-        /**
-         * @return {?}
-         */
         get: function () { return this._donePromise; },
         enumerable: true,
         configurable: true
@@ -57,22 +49,9 @@ export var ApplicationInitStatus = (function () {
         { type: Injectable },
     ];
     /** @nocollapse */
-    ApplicationInitStatus.ctorParameters = function () { return [
+    ApplicationInitStatus.ctorParameters = [
         { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
-    ]; };
+    ];
     return ApplicationInitStatus;
 }());
-function ApplicationInitStatus_tsickle_Closure_declarations() {
-    /** @type {?} */
-    ApplicationInitStatus.decorators;
-    /**
-     * @nocollapse
-     * @type {?}
-     */
-    ApplicationInitStatus.ctorParameters;
-    /** @type {?} */
-    ApplicationInitStatus.prototype._donePromise;
-    /** @type {?} */
-    ApplicationInitStatus.prototype._done;
-}
 //# sourceMappingURL=application_init.js.map

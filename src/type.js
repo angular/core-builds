@@ -15,5 +15,5 @@
  *
  * @stable
  */
-export var /** @type {?} */ Type = Function;
+export var Type = Function;
 //# sourceMappingURL=type.js.map

@@ -14,102 +14,74 @@ import { OpaqueToken } from '../di';
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
- *  Indicates that a component is still being loaded in a synchronous compile.
-  * *
+ * Indicates that a component is still being loaded in a synchronous compile.
+ *
+ * @stable
  */
 export var ComponentStillLoadingError = (function (_super) {
     __extends(ComponentStillLoadingError, _super);
-    /**
-     * @param {?} compType
-     */
     function ComponentStillLoadingError(compType) {
         _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
         this.compType = compType;
     }
     return ComponentStillLoadingError;
 }(BaseError));
-function ComponentStillLoadingError_tsickle_Closure_declarations() {
-    /** @type {?} */
-    ComponentStillLoadingError.prototype.compType;
-}
 /**
- *  Combination of NgModuleFactory and ComponentFactorys.
-  * *
+ * Combination of NgModuleFactory and ComponentFactorys.
+ *
+ * @experimental
  */
 export var ModuleWithComponentFactories = (function () {
-    /**
-     * @param {?} ngModuleFactory
-     * @param {?} componentFactories
-     */
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
     }
     return ModuleWithComponentFactories;
 }());
-function ModuleWithComponentFactories_tsickle_Closure_declarations() {
-    /** @type {?} */
-    ModuleWithComponentFactories.prototype.ngModuleFactory;
-    /** @type {?} */
-    ModuleWithComponentFactories.prototype.componentFactories;
-}
-/**
- * @return {?}
- */
 function _throwError() {
     throw new Error("Runtime compiler is not loaded");
 }
 /**
- *  Low-level service for running the angular compiler during runtime
-  * to create {@link ComponentFactory}s, which
-  * can later be used to create and render a Component instance.
-  * *
-  * Each `@NgModule` provides an own `Compiler` to its injector,
-  * that will use the directives/pipes of the ng module for compilation
-  * of components.
+ * Low-level service for running the angular compiler during runtime
+ * to create {@link ComponentFactory}s, which
+ * can later be used to create and render a Component instance.
+ *
+ * Each `@NgModule` provides an own `Compiler` to its injector,
+ * that will use the directives/pipes of the ng module for compilation
+ * of components.
+ * @stable
  */
 export var Compiler = (function () {
     function Compiler() {
     }
     /**
-     *  Compiles the given NgModule and all of its components. All templates of the components listed
-      * in `entryComponents`
-      * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
-     * @param {?} moduleType
-     * @return {?}
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents`
+     * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
      */
     Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
     /**
-     *  Compiles the given NgModule and all of its components
-     * @param {?} moduleType
-     * @return {?}
+     * Compiles the given NgModule and all of its components
      */
     Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
     /**
-     *  Same as {@link compileModuleSync} but also creates ComponentFactories for all components.
-     * @param {?} moduleType
-     * @return {?}
+     * Same as {@link compileModuleSync} but also creates ComponentFactories for all components.
      */
     Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
         throw _throwError();
     };
     /**
-     *  Same as {@link compileModuleAsync} but also creates ComponentFactories for all components.
-     * @param {?} moduleType
-     * @return {?}
+     * Same as {@link compileModuleAsync} but also creates ComponentFactories for all components.
      */
     Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
         throw _throwError();
     };
     /**
-     *  Clears all caches.
-     * @return {?}
+     * Clears all caches.
      */
     Compiler.prototype.clearCache = function () { };
     /**
-     *  Clears the cache for the given component/ngModule.
-     * @param {?} type
-     * @return {?}
+     * Clears the cache for the given component/ngModule.
      */
     Compiler.prototype.clearCacheFor = function (type) { };
     return Compiler;
@@ -119,21 +91,15 @@ export var Compiler = (function () {
  *
  * @experimental
  */
-export var /** @type {?} */ COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
+export var COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
 /**
- *  A factory for creating a Compiler
-  * *
- * @abstract
+ * A factory for creating a Compiler
+ *
+ * @experimental
  */
 export var CompilerFactory = (function () {
     function CompilerFactory() {
     }
-    /**
-     * @abstract
-     * @param {?=} options
-     * @return {?}
-     */
-    CompilerFactory.prototype.createCompiler = function (options) { };
     return CompilerFactory;
 }());
 //# sourceMappingURL=compiler.js.map
