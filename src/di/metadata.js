@@ -12,40 +12,40 @@ import { makeParamDecorator } from '../util/decorators';
  * @stable
  * @Annotation
  */
-export var Inject = makeParamDecorator('Inject', [['token', undefined]]);
+export var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
 /**
  * Optional decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var Optional = makeParamDecorator('Optional', []);
+export var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
 /**
  * Injectable decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var Injectable = makeParamDecorator('Injectable', []);
+export var /** @type {?} */ Injectable = makeParamDecorator('Injectable', []);
 /**
  * Self decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var Self = makeParamDecorator('Self', []);
+export var /** @type {?} */ Self = makeParamDecorator('Self', []);
 /**
  * SkipSelf decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var SkipSelf = makeParamDecorator('SkipSelf', []);
+export var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
 /**
  * Host decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var Host = makeParamDecorator('Host', []);
+export var /** @type {?} */ Host = makeParamDecorator('Host', []);
 //# sourceMappingURL=metadata.js.map

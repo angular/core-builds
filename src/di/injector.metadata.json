@@ -1,1 +1,1 @@
-{"__symbolic":"module","version":1,"metadata":{"THROW_IF_NOT_FOUND":{"__symbolic":"new","expression":{"__symbolic":"reference","name":"Object"}}}}
+{"__symbolic":"module","version":2,"metadata":{"THROW_IF_NOT_FOUND":{"__symbolic":"new","expression":{"__symbolic":"reference","name":"Object"}},"Injector":{"__symbolic":"class"}}}
