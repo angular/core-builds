@@ -7,6 +7,10 @@
  */
 import { global, isPresent, stringify } from '../facade/lang';
 import { Type } from '../type';
+/**
+ * Attention: This regex has to hold even if the code is minified!
+ */
+export var /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?\S+\.apply\(this,\s*arguments\)/;
 export var ReflectionCapabilities = (function () {
     /**
      * @param {?=} reflect
@@ -63,16 +67,27 @@ export var ReflectionCapabilities = (function () {
     };
     /**
      * @param {?} type
+     * @param {?} parentCtor
      * @return {?}
      */
-    ReflectionCapabilities.prototype.parameters = function (type) {
+    ReflectionCapabilities.prototype._ownParameters = function (type, parentCtor) {
+        // If we have no decorators, we only have function.length as metadata.
+        // In that case, to detect whether a child class declared an own constructor or not,
+        // we need to look inside of that constructor to check whether it is
+        // just calling the parent.
+        // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
+        // that sets 'design:paramtypes' to []
+        // if a class inherits from another class but has no ctor declared itself.
+        if (DELEGATE_CTOR.exec(type.toString())) {
+            return null;
+        }
         // Prefer the direct API.
-        if (((type)).parameters) {
+        if (((type)).parameters && ((type)).parameters !== parentCtor.parameters) {
             return ((type)).parameters;
         }
         // API of tsickle for lowering decorators to properties on the class.
         var /** @type {?} */ tsickleCtorParams = ((type)).ctorParameters;
-        if (tsickleCtorParams) {
+        if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
             // Newer tsickle uses a function closure
             // Retain the non-function case for compatibility with older tsickle
             var /** @type {?} */ ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
@@ -83,23 +98,41 @@ export var ReflectionCapabilities = (function () {
             return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
         }
         // API for metadata created by invoking the decorators.
-        if (isPresent(this._reflect) && isPresent(this._reflect.getMetadata)) {
-            var /** @type {?} */ paramAnnotations = this._reflect.getMetadata('parameters', type);
-            var /** @type {?} */ paramTypes = this._reflect.getMetadata('design:paramtypes', type);
+        if (isPresent(this._reflect) && isPresent(this._reflect.getOwnMetadata)) {
+            var /** @type {?} */ paramAnnotations = this._reflect.getOwnMetadata('parameters', type);
+            var /** @type {?} */ paramTypes = this._reflect.getOwnMetadata('design:paramtypes', type);
             if (paramTypes || paramAnnotations) {
                 return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
             }
         }
-        // The array has to be filled with `undefined` because holes would be skipped by `some`
+        // If a class has no decorators, at least create metadata
+        // based on function.length.
+        // Note: We know that this is a real constructor as we checked
+        // the content of the constructor above.
         return new Array(((type.length))).fill(undefined);
     };
     /**
-     * @param {?} typeOrFunc
+     * @param {?} type
      * @return {?}
      */
-    ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
+    ReflectionCapabilities.prototype.parameters = function (type) {
+        // Note: only report metadata if we have at least one class decorator
+        // to stay in sync with the static reflector.
+        var /** @type {?} */ parentCtor = Object.getPrototypeOf(type.prototype).constructor;
+        var /** @type {?} */ parameters = this._ownParameters(type, parentCtor);
+        if (!parameters && parentCtor !== Object) {
+            parameters = this.parameters(parentCtor);
+        }
+        return parameters || [];
+    };
+    /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    ReflectionCapabilities.prototype._ownAnnotations = function (typeOrFunc, parentCtor) {
         // Prefer the direct API.
-        if (((typeOrFunc)).annotations) {
+        if (((typeOrFunc)).annotations && ((typeOrFunc)).annotations !== parentCtor.annotations) {
             var /** @type {?} */ annotations = ((typeOrFunc)).annotations;
             if (typeof annotations === 'function' && annotations.annotations) {
                 annotations = annotations.annotations;
@@ -107,24 +140,33 @@ export var ReflectionCapabilities = (function () {
             return annotations;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (((typeOrFunc)).decorators) {
+        if (((typeOrFunc)).decorators && ((typeOrFunc)).decorators !== parentCtor.decorators) {
             return convertTsickleDecoratorIntoMetadata(((typeOrFunc)).decorators);
         }
         // API for metadata created by invoking the decorators.
-        if (this._reflect && this._reflect.getMetadata) {
-            var /** @type {?} */ annotations = this._reflect.getMetadata('annotations', typeOrFunc);
-            if (annotations)
-                return annotations;
+        if (this._reflect && this._reflect.getOwnMetadata) {
+            return this._reflect.getOwnMetadata('annotations', typeOrFunc);
         }
-        return [];
     };
     /**
      * @param {?} typeOrFunc
      * @return {?}
      */
-    ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
+    ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
+        var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
+        var /** @type {?} */ ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
+        var /** @type {?} */ parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
+        return parentAnnotations.concat(ownAnnotations);
+    };
+    /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    ReflectionCapabilities.prototype._ownPropMetadata = function (typeOrFunc, parentCtor) {
         // Prefer the direct API.
-        if (((typeOrFunc)).propMetadata) {
+        if (((typeOrFunc)).propMetadata &&
+            ((typeOrFunc)).propMetadata !== parentCtor.propMetadata) {
             var /** @type {?} */ propMetadata = ((typeOrFunc)).propMetadata;
             if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
                 propMetadata = propMetadata.propMetadata;
@@ -132,7 +174,8 @@ export var ReflectionCapabilities = (function () {
             return propMetadata;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (((typeOrFunc)).propDecorators) {
+        if (((typeOrFunc)).propDecorators &&
+            ((typeOrFunc)).propDecorators !== parentCtor.propDecorators) {
             var /** @type {?} */ propDecorators_1 = ((typeOrFunc)).propDecorators;
             var /** @type {?} */ propMetadata_1 = ({});
             Object.keys(propDecorators_1).forEach(function (prop) {
@@ -141,12 +184,35 @@ export var ReflectionCapabilities = (function () {
             return propMetadata_1;
         }
         // API for metadata created by invoking the decorators.
-        if (this._reflect && this._reflect.getMetadata) {
-            var /** @type {?} */ propMetadata = this._reflect.getMetadata('propMetadata', typeOrFunc);
-            if (propMetadata)
-                return propMetadata;
+        if (this._reflect && this._reflect.getOwnMetadata) {
+            return this._reflect.getOwnMetadata('propMetadata', typeOrFunc);
         }
-        return {};
+    };
+    /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
+        var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
+        var /** @type {?} */ propMetadata = {};
+        if (parentCtor !== Object) {
+            var /** @type {?} */ parentPropMetadata_1 = this.propMetadata(parentCtor);
+            Object.keys(parentPropMetadata_1).forEach(function (propName) {
+                propMetadata[propName] = parentPropMetadata_1[propName];
+            });
+        }
+        var /** @type {?} */ ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
+        if (ownPropMetadata) {
+            Object.keys(ownPropMetadata).forEach(function (propName) {
+                var /** @type {?} */ decorators = [];
+                if (propMetadata.hasOwnProperty(propName)) {
+                    decorators.push.apply(decorators, propMetadata[propName]);
+                }
+                decorators.push.apply(decorators, ownPropMetadata[propName]);
+                propMetadata[propName] = decorators;
+            });
+        }
+        return propMetadata;
     };
     /**
      * @param {?} type

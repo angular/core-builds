@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { makeParamDecorator } from '../util/decorators';
+import { makeDecorator, makeParamDecorator } from '../util/decorators';
 /**
  * Inject decorator and metadata.
  *
@@ -26,7 +26,7 @@ export var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Injectable = makeParamDecorator('Injectable', []);
+export var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
 /**
  * Self decorator and metadata.
  *

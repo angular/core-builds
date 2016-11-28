@@ -1,1 +1,1 @@
-{"__symbolic":"module","version":2,"metadata":{"AnimationViewContext":{"__symbolic":"class"}}}
+{"__symbolic":"module","version":2,"metadata":{"AnimationViewContext":{"__symbolic":"class","members":{"onAllActiveAnimationsDone":[{"__symbolic":"method"}],"queueAnimation":[{"__symbolic":"method"}],"getAnimationPlayers":[{"__symbolic":"method"}]}}}}

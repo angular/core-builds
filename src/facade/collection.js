@@ -54,6 +54,19 @@ export var ListWrapper = (function () {
     function ListWrapper() {
     }
     /**
+     * @param {?} arr
+     * @param {?} condition
+     * @return {?}
+     */
+    ListWrapper.findLast = function (arr, condition) {
+        for (var /** @type {?} */ i = arr.length - 1; i >= 0; i--) {
+            if (condition(arr[i])) {
+                return arr[i];
+            }
+        }
+        return null;
+    };
+    /**
      * @param {?} list
      * @param {?} items
      * @return {?}

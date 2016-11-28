@@ -22,6 +22,12 @@ export var ViewRef = (function (_super) {
     function ViewRef() {
         _super.apply(this, arguments);
     }
+    /**
+     *  Destroys the view and all of the data structures associated with it.
+     * @abstract
+     * @return {?}
+     */
+    ViewRef.prototype.destroy = function () { };
     Object.defineProperty(ViewRef.prototype, "destroyed", {
         /**
          * @return {?}
@@ -114,12 +120,6 @@ export var EmbeddedViewRef = (function (_super) {
         configurable: true
     });
     ;
-    /**
-     *  Destroys the view and all of the data structures associated with it.
-     * @abstract
-     * @return {?}
-     */
-    EmbeddedViewRef.prototype.destroy = function () { };
     return EmbeddedViewRef;
 }(ViewRef));
 export var ViewRef_ = (function () {

@@ -188,7 +188,7 @@ export function makeDecorator(name, props, parentClass, chainFn) {
      * @return {?}
      */
     function DecoratorFactory(objOrType) {
-        if (!(Reflect && Reflect.getMetadata)) {
+        if (!(Reflect && Reflect.getOwnMetadata)) {
             throw 'reflect-metadata shim is required when using class decorators';
         }
         if (this instanceof DecoratorFactory) {
@@ -274,7 +274,7 @@ export function makeParamDecorator(name, props, parentClass) {
          * @return {?}
          */
         function ParamDecorator(cls, unusedKey, index) {
-            var /** @type {?} */ parameters = Reflect.getMetadata('parameters', cls) || [];
+            var /** @type {?} */ parameters = Reflect.getOwnMetadata('parameters', cls) || [];
             // there might be gaps if some in between parameters do not have annotations.
             // we pad with nulls.
             while (parameters.length <= index) {

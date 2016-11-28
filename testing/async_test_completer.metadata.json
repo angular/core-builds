@@ -1,1 +1,1 @@
-{"__symbolic":"module","version":2,"metadata":{"AsyncTestCompleter":{"__symbolic":"class"}}}
+{"__symbolic":"module","version":2,"metadata":{"AsyncTestCompleter":{"__symbolic":"class","members":{"done":[{"__symbolic":"method"}],"fail":[{"__symbolic":"method"}]}}}}
