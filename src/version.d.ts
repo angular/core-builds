@@ -6,13 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @module
- * @description
- * Entry point for all public APIs of the core package.
- */
-export * from './src/core';
-import { Version } from './src/core';
-/**
+ * @whatItDoes Represents the version of Angular
+ *
  * @stable
  */
-export declare const VERSION: Version;
+export declare class Version {
+    full: string;
+    constructor(full: string);
+    major: string;
+    minor: string;
+    patch: string;
+}

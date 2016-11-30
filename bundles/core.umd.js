@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-beta.0-3e73bea
+ * @license Angular v2.3.0-beta.0-e628b66
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1108,6 +1108,43 @@
             this.interpolation = interpolation;
         }
         return ViewMetadata;
+    }());
+
+    /**
+     *  *
+     */
+    var Version = (function () {
+        /**
+         * @param {?} full
+         */
+        function Version(full) {
+            this.full = full;
+        }
+        Object.defineProperty(Version.prototype, "major", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.full.split('.')[0]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Version.prototype, "minor", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.full.split('.')[1]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Version.prototype, "patch", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.full.split('.')[2]; },
+            enumerable: true,
+            configurable: true
+        });
+        return Version;
     }());
 
     /**
@@ -12909,6 +12946,12 @@
         AnimationTransition: AnimationTransition
     };
 
+    /**
+     * @stable
+     */
+    var /** @type {?} */ VERSION = new Version('2.3.0-beta.0-e628b66');
+
+    exports.VERSION = VERSION;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -12973,6 +13016,7 @@
     exports.NO_ERRORS_SCHEMA = NO_ERRORS_SCHEMA;
     exports.NgModule = NgModule;
     exports.ViewEncapsulation = ViewEncapsulation;
+    exports.Version = Version;
     exports.Class = Class;
     exports.forwardRef = forwardRef;
     exports.resolveForwardRef = resolveForwardRef;
