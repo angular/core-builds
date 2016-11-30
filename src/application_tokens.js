@@ -16,10 +16,7 @@ import { OpaqueToken } from './di';
  * using this token.
  * @experimental
  */
-export var /** @type {?} */ APP_ID = new OpaqueToken('AppId');
-/**
- * @return {?}
- */
+export var APP_ID = new OpaqueToken('AppId');
 export function _appIdRandomProviderFactory() {
     return "" + _randomChar() + _randomChar() + _randomChar();
 }
@@ -27,14 +24,11 @@ export function _appIdRandomProviderFactory() {
  * Providers that will generate a random APP_ID_TOKEN.
  * @experimental
  */
-export var /** @type {?} */ APP_ID_RANDOM_PROVIDER = {
+export var APP_ID_RANDOM_PROVIDER = {
     provide: APP_ID,
     useFactory: _appIdRandomProviderFactory,
-    deps: /** @type {?} */ ([]),
+    deps: [],
 };
-/**
- * @return {?}
- */
 function _randomChar() {
     return String.fromCharCode(97 + Math.floor(Math.random() * 25));
 }
@@ -42,7 +36,7 @@ function _randomChar() {
  * A function that will be executed when a platform is initialized.
  * @experimental
  */
-export var /** @type {?} */ PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
+export var PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
 /**
  * All callbacks provided via this token will be called for every component that is bootstrapped.
  * Signature of the callback:
@@ -51,10 +45,10 @@ export var /** @type {?} */ PLATFORM_INITIALIZER = new OpaqueToken('Platform Ini
  *
  * @experimental
  */
-export var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
+export var APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
 /**
  * A token which indicates the root directory of the application
  * @experimental
  */
-export var /** @type {?} */ PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
+export var PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
 //# sourceMappingURL=application_tokens.js.map

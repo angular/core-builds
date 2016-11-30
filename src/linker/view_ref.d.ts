@@ -3,11 +3,7 @@ import { AppView } from './view';
 /**
  * @stable
  */
-export declare abstract class ViewRef extends ChangeDetectorRef {
-    /**
-     * Destroys the view and all of the data structures associated with it.
-     */
-    abstract destroy(): void;
+export declare abstract class ViewRef {
     destroyed: boolean;
     abstract onDestroy(callback: Function): any;
 }
@@ -68,6 +64,10 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
 export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     context: C;
     rootNodes: any[];
+    /**
+     * Destroys the view and all of the data structures associated with it.
+     */
+    abstract destroy(): void;
 }
 export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRef {
     private _view;
