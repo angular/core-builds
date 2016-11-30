@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-beta.0-e628b66
+ * @license Angular v2.3.0-beta.0-f275f36
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1140,7 +1140,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this.full.split('.')[2]; },
+            get: function () { return this.full.split('.').slice(2).join('.'); },
             enumerable: true,
             configurable: true
         });
@@ -12949,7 +12949,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.3.0-beta.0-e628b66');
+    var /** @type {?} */ VERSION = new Version('2.3.0-beta.0-f275f36');
 
     exports.VERSION = VERSION;
     exports.createPlatform = createPlatform;

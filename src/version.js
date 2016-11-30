@@ -28,7 +28,7 @@ export var Version = (function () {
         /**
          * @return {?}
          */
-        get: function () { return this.full.split('.')[2]; },
+        get: function () { return this.full.split('.').slice(2).join('.'); },
         enumerable: true,
         configurable: true
     });
