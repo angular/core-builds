@@ -15,5 +15,5 @@ import { Version } from './src/core';
 /**
  * @stable
  */
-export var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-12959f4');
+export var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-82c81cd');
 //# sourceMappingURL=index.js.map
