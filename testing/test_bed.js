@@ -247,7 +247,7 @@ export var TestBed = (function () {
                 { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
             ];
             /** @nocollapse */
-            DynamicTestModule.ctorParameters = [];
+            DynamicTestModule.ctorParameters = function () { return []; };
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);

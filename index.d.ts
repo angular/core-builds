@@ -11,3 +11,8 @@
  * Entry point for all public APIs of the core package.
  */
 export * from './src/core';
+import { Version } from './src/core';
+/**
+ * @stable
+ */
+export declare const VERSION: Version;
