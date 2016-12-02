@@ -80,7 +80,7 @@ export var /** @type {?} */ Output = makePropDecorator('Output', [['bindingPrope
  */
 export var /** @type {?} */ HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
 /**
- * HostBinding decorator and metadata.
+ * HostListener decorator and metadata.
  *
  * @stable
  * @Annotation
