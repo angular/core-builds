@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-rc.0-c767df0
+ * @license Angular v2.3.0-rc.0-5614c4f
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12949,7 +12949,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-c767df0');
+    var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-5614c4f');
 
     exports.VERSION = VERSION;
     exports.createPlatform = createPlatform;
