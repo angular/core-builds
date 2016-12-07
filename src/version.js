@@ -38,4 +38,8 @@ function Version_tsickle_Closure_declarations() {
     /** @type {?} */
     Version.prototype.full;
 }
+/**
+ * @stable
+ */
+export var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-16efb13');
 //# sourceMappingURL=version.js.map

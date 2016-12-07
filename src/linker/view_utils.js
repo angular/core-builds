@@ -11,6 +11,7 @@ import { Injectable } from '../di';
 import { isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
+import { VERSION } from '../version';
 import { ExpressionChangedAfterItHasBeenCheckedError } from './errors';
 export var ViewUtils = (function () {
     /**
@@ -464,6 +465,7 @@ export function selectOrCreateRenderHostElement(renderer, elementName, attrs, ro
         for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
             renderer.setElementAttribute(hostElement, attrs.get(i), attrs.get(i + 1));
         }
+        renderer.setElementAttribute(hostElement, 'ng-version', VERSION.full);
     }
     else {
         hostElement = createRenderElement(renderer, null, elementName, attrs, debugInfo);

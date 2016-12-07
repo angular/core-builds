@@ -17,3 +17,7 @@ export declare class Version {
     minor: string;
     patch: string;
 }
+/**
+ * @stable
+ */
+export declare const VERSION: Version;

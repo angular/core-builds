@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-rc.0-986abbe
+ * @license Angular v2.3.0-rc.0-16efb13
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1146,6 +1146,10 @@
         });
         return Version;
     }());
+    /**
+     * @stable
+     */
+    var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-16efb13');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -6510,6 +6514,7 @@
             for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
                 renderer.setElementAttribute(hostElement, attrs.get(i), attrs.get(i + 1));
             }
+            renderer.setElementAttribute(hostElement, 'ng-version', VERSION.full);
         }
         else {
             hostElement = createRenderElement(renderer, null, elementName, attrs, debugInfo);
@@ -12946,12 +12951,6 @@
         AnimationTransition: AnimationTransition
     };
 
-    /**
-     * @stable
-     */
-    var /** @type {?} */ VERSION = new Version('2.3.0-rc.0-986abbe');
-
-    exports.VERSION = VERSION;
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
     exports.destroyPlatform = destroyPlatform;
@@ -13017,6 +13016,7 @@
     exports.NgModule = NgModule;
     exports.ViewEncapsulation = ViewEncapsulation;
     exports.Version = Version;
+    exports.VERSION = VERSION;
     exports.Class = Class;
     exports.forwardRef = forwardRef;
     exports.resolveForwardRef = resolveForwardRef;
