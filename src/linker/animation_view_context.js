@@ -28,26 +28,27 @@ export var AnimationViewContext = (function () {
      * @return {?}
      */
     AnimationViewContext.prototype.queueAnimation = function (element, animationName, player) {
+        var _this = this;
         queueAnimationGlobally(player);
         this._players.set(element, animationName, player);
+        player.onDone(function () { return _this._players.remove(element, animationName, player); });
     };
     /**
      * @param {?} element
-     * @param {?} animationName
-     * @param {?=} removeAllAnimations
+     * @param {?=} animationName
      * @return {?}
      */
-    AnimationViewContext.prototype.getAnimationPlayers = function (element, animationName, removeAllAnimations) {
-        if (removeAllAnimations === void 0) { removeAllAnimations = false; }
+    AnimationViewContext.prototype.getAnimationPlayers = function (element, animationName) {
+        if (animationName === void 0) { animationName = null; }
         var /** @type {?} */ players = [];
-        if (removeAllAnimations) {
-            this._players.findAllPlayersByElement(element).forEach(function (player) { _recursePlayers(player, players); });
-        }
-        else {
+        if (animationName) {
             var /** @type {?} */ currentPlayer = this._players.find(element, animationName);
             if (currentPlayer) {
                 _recursePlayers(currentPlayer, players);
             }
+        }
+        else {
+            this._players.findAllPlayersByElement(element).forEach(function (player) { return _recursePlayers(player, players); });
         }
         return players;
     };

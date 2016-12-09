@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-b5c4bf1
+ * @license Angular v2.3.0-f0b0762
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.3.0-b5c4bf1');
+    var /** @type {?} */ VERSION = new Version('2.3.0-f0b0762');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -12003,17 +12003,21 @@
         /**
          * @param {?} element
          * @param {?} animationName
+         * @param {?=} targetPlayer
          * @return {?}
          */
-        ViewAnimationMap.prototype.remove = function (element, animationName) {
+        ViewAnimationMap.prototype.remove = function (element, animationName, targetPlayer) {
+            if (targetPlayer === void 0) { targetPlayer = null; }
             var /** @type {?} */ playersByAnimation = this._map.get(element);
             if (playersByAnimation) {
                 var /** @type {?} */ player = playersByAnimation[animationName];
-                delete playersByAnimation[animationName];
-                var /** @type {?} */ index = this._allPlayers.indexOf(player);
-                this._allPlayers.splice(index, 1);
-                if (Object.keys(playersByAnimation).length === 0) {
-                    this._map.delete(element);
+                if (!targetPlayer || player === targetPlayer) {
+                    delete playersByAnimation[animationName];
+                    var /** @type {?} */ index = this._allPlayers.indexOf(player);
+                    this._allPlayers.splice(index, 1);
+                    if (Object.keys(playersByAnimation).length === 0) {
+                        this._map.delete(element);
+                    }
                 }
             }
         };
@@ -12046,26 +12050,27 @@
          * @return {?}
          */
         AnimationViewContext.prototype.queueAnimation = function (element, animationName, player) {
+            var _this = this;
             queueAnimationGlobally(player);
             this._players.set(element, animationName, player);
+            player.onDone(function () { return _this._players.remove(element, animationName, player); });
         };
         /**
          * @param {?} element
-         * @param {?} animationName
-         * @param {?=} removeAllAnimations
+         * @param {?=} animationName
          * @return {?}
          */
-        AnimationViewContext.prototype.getAnimationPlayers = function (element, animationName, removeAllAnimations) {
-            if (removeAllAnimations === void 0) { removeAllAnimations = false; }
+        AnimationViewContext.prototype.getAnimationPlayers = function (element, animationName) {
+            if (animationName === void 0) { animationName = null; }
             var /** @type {?} */ players = [];
-            if (removeAllAnimations) {
-                this._players.findAllPlayersByElement(element).forEach(function (player) { _recursePlayers(player, players); });
-            }
-            else {
+            if (animationName) {
                 var /** @type {?} */ currentPlayer = this._players.find(element, animationName);
                 if (currentPlayer) {
                     _recursePlayers(currentPlayer, players);
                 }
+            }
+            else {
+                this._players.findAllPlayersByElement(element).forEach(function (player) { return _recursePlayers(player, players); });
             }
             return players;
         };

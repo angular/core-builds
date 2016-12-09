@@ -3,5 +3,5 @@ export declare class AnimationViewContext {
     private _players;
     onAllActiveAnimationsDone(callback: () => any): void;
     queueAnimation(element: any, animationName: string, player: AnimationPlayer): void;
-    getAnimationPlayers(element: any, animationName: string, removeAllAnimations?: boolean): AnimationPlayer[];
+    getAnimationPlayers(element: any, animationName?: string): AnimationPlayer[];
 }
