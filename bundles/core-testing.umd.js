@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-821b8f0
+ * @license Angular v2.3.0-5031adc
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -450,9 +450,12 @@
     var BaseError = (function (_super) {
         __extends$1(BaseError, _super);
         function BaseError(message) {
+            _super.call(this, message);
             // Errors don't use current this, instead they create a new instance.
             // We have to do forward all of our api to the nativeInstance.
-            var nativeError = _super.call(this, message);
+            // TODO(bradfordcsmith): Remove this hack when
+            //     google/closure-compiler/issues/2102 is fixed.
+            var nativeError = new Error(message);
             this._nativeError = nativeError;
         }
         Object.defineProperty(BaseError.prototype, "message", {
