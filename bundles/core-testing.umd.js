@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-42203ea
+ * @license Angular v2.3.0-f5f1d5f
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -116,10 +116,10 @@
             return '' + token;
         }
         if (token.overriddenName) {
-            return token.overriddenName;
+            return "" + token.overriddenName;
         }
         if (token.name) {
-            return token.name;
+            return "" + token.name;
         }
         var res = token.toString();
         var newLineIndex = res.indexOf('\n');

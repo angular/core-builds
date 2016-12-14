@@ -407,7 +407,8 @@ export var AppView = (function () {
     AppView.prototype.detectChanges = function (throwOnChange) {
         var /** @type {?} */ s = _scope_check(this.clazz);
         if (this.cdMode === ChangeDetectorStatus.Checked ||
-            this.cdMode === ChangeDetectorStatus.Errored)
+            this.cdMode === ChangeDetectorStatus.Errored ||
+            this.cdMode === ChangeDetectorStatus.Detached)
             return;
         if (this.cdMode === ChangeDetectorStatus.Destroyed) {
             this.throwDestroyedError('detectChanges');
