@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-a8d2375
+ * @license Angular v2.3.0-42203ea
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.3.0-a8d2375');
+    var /** @type {?} */ VERSION = new Version('2.3.0-42203ea');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -12523,8 +12523,7 @@
         AppView.prototype.detectChanges = function (throwOnChange) {
             var /** @type {?} */ s = _scope_check(this.clazz);
             if (this.cdMode === ChangeDetectorStatus.Checked ||
-                this.cdMode === ChangeDetectorStatus.Errored ||
-                this.cdMode === ChangeDetectorStatus.Detached)
+                this.cdMode === ChangeDetectorStatus.Errored)
                 return;
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 this.throwDestroyedError('detectChanges');
