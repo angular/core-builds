@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-5031adc
+ * @license Angular v2.3.0-d4ddb60
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -770,8 +770,9 @@
                     }
                 }
             }
-            this._moduleRef =
-                this._moduleWithComponentFactories.ngModuleFactory.create(this.platform.injector);
+            var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
+            var ngZoneInjector = _angular_core.ReflectiveInjector.resolveAndCreate([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
+            this._moduleRef = this._moduleWithComponentFactories.ngModuleFactory.create(ngZoneInjector);
             this._instantiated = true;
         };
         TestBed.prototype._createCompilerAndModule = function () {

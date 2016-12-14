@@ -97,6 +97,7 @@ export declare abstract class AppView<T> {
      * Overwritten by implementations
      */
     dirtyParentQueriesInternal(): void;
+    internalDetectChanges(throwOnChange: boolean): void;
     detectChanges(throwOnChange: boolean): void;
     /**
      * Overwritten by implementations
