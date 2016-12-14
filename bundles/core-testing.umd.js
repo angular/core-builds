@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-fd8e15b
+ * @license Angular v2.3.0-169ed82
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -663,6 +663,10 @@
         };
         TestBed.overridePipe = function (pipe, override) {
             getTestBed().overridePipe(pipe, override);
+            return TestBed;
+        };
+        TestBed.overrideTemplate = function (component, template) {
+            getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
             return TestBed;
         };
         TestBed.get = function (token, notFoundValue) {
