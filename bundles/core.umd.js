@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.3.0-a0a0504
+ * @license Angular v2.3.0-3edca4d
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.3.0-a0a0504');
+    var /** @type {?} */ VERSION = new Version('2.3.0-3edca4d');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -12348,7 +12348,8 @@
             else {
                 this._renderDetach();
             }
-            if (this.declaredViewContainer && this.declaredViewContainer !== this.viewContainer) {
+            if (this.declaredViewContainer && this.declaredViewContainer !== this.viewContainer &&
+                this.declaredViewContainer.projectedViews) {
                 var /** @type {?} */ projectedViews = this.declaredViewContainer.projectedViews;
                 var /** @type {?} */ index = projectedViews.indexOf(this);
                 // perf: pop is faster than splice!
