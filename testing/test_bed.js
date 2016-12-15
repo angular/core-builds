@@ -125,6 +125,10 @@ export var TestBed = (function () {
         getTestBed().overridePipe(pipe, override);
         return TestBed;
     };
+    TestBed.overrideTemplate = function (component, template) {
+        getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
+        return TestBed;
+    };
     TestBed.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
