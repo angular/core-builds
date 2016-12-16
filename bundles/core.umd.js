@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.0-4568d5d
+ * @license Angular v4.0.0-beta.0-a23fa94
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.0-4568d5d');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.0-a23fa94');
 
     /**
      *  Allows to refer to references which are not yet defined.
