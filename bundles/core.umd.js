@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.0-0e3981a
+ * @license Angular v2.3.1-dbb364e
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.0-0e3981a');
+    var /** @type {?} */ VERSION = new Version('2.3.1-dbb364e');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -3971,11 +3971,6 @@
          * @return {?}
          */
         Compiler.prototype.clearCacheFor = function (type) { };
-        Compiler.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        Compiler.ctorParameters = function () { return []; };
         return Compiler;
     }());
     /**
@@ -8205,19 +8200,19 @@
     /**
      *  Creates a factory for a platform
       * *
-     * @param {?} parentPlatformFactory
+     * @param {?} parentPlaformFactory
      * @param {?} name
      * @param {?=} providers
      * @return {?}
      */
-    function createPlatformFactory(parentPlatformFactory, name, providers) {
+    function createPlatformFactory(parentPlaformFactory, name, providers) {
         if (providers === void 0) { providers = []; }
         var /** @type {?} */ marker = new OpaqueToken("Platform: " + name);
         return function (extraProviders) {
             if (extraProviders === void 0) { extraProviders = []; }
             if (!getPlatform()) {
-                if (parentPlatformFactory) {
-                    parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+                if (parentPlaformFactory) {
+                    parentPlaformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
                 }
                 else {
                     createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
