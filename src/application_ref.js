@@ -97,19 +97,19 @@ export function createPlatform(injector) {
 /**
  *  Creates a factory for a platform
   * *
- * @param {?} parentPlaformFactory
+ * @param {?} parentPlatformFactory
  * @param {?} name
  * @param {?=} providers
  * @return {?}
  */
-export function createPlatformFactory(parentPlaformFactory, name, providers) {
+export function createPlatformFactory(parentPlatformFactory, name, providers) {
     if (providers === void 0) { providers = []; }
     var /** @type {?} */ marker = new OpaqueToken("Platform: " + name);
     return function (extraProviders) {
         if (extraProviders === void 0) { extraProviders = []; }
         if (!getPlatform()) {
-            if (parentPlaformFactory) {
-                parentPlaformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+            if (parentPlatformFactory) {
+                parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
             else {
                 createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));

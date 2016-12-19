@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { OpaqueToken } from '../di';
+import { Injectable, OpaqueToken } from '../di';
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
@@ -121,8 +121,22 @@ export var Compiler = (function () {
      * @return {?}
      */
     Compiler.prototype.clearCacheFor = function (type) { };
+    Compiler.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Compiler.ctorParameters = function () { return []; };
     return Compiler;
 }());
+function Compiler_tsickle_Closure_declarations() {
+    /** @type {?} */
+    Compiler.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    Compiler.ctorParameters;
+}
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
