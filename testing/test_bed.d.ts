@@ -87,6 +87,7 @@ export declare class TestBed implements Injector {
     static overrideComponent(component: Type<any>, override: MetadataOverride<Component>): typeof TestBed;
     static overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): typeof TestBed;
     static overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): typeof TestBed;
+    static overrideTemplate(component: Type<any>, template: string): typeof TestBed;
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     private _instantiated;
