@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.0-9b8488f
+ * @license Angular v4.0.0-beta.0-383adc9
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1149,7 +1149,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.0-9b8488f');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.0-383adc9');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -7733,7 +7733,7 @@
          * @param {?} component
          */
         function NoComponentFactoryError(component) {
-            _super.call(this, "No component factory found for " + stringify(component));
+            _super.call(this, "No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
             this.component = component;
         }
         return NoComponentFactoryError;

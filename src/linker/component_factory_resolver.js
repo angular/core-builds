@@ -21,7 +21,7 @@ export var NoComponentFactoryError = (function (_super) {
      * @param {?} component
      */
     function NoComponentFactoryError(component) {
-        _super.call(this, "No component factory found for " + stringify(component));
+        _super.call(this, "No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
         this.component = component;
     }
     return NoComponentFactoryError;
