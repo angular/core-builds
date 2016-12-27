@@ -39,7 +39,7 @@ import * as reflection_types from './reflection/types';
 import * as api from './render/api';
 import * as decorators from './util/decorators';
 import { isPromise } from './util/lang';
-export declare var __core_private__: {
+export declare const __core_private__: {
     isDefaultChangeDetectionStrategy: typeof constants.isDefaultChangeDetectionStrategy;
     ChangeDetectorStatus: typeof constants.ChangeDetectorStatus;
     _ChangeDetectorStatus?: constants.ChangeDetectorStatus;
