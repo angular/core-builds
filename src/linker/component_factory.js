@@ -197,8 +197,8 @@ export var ComponentFactory = (function () {
      */
     function ComponentFactory(selector, _viewClass, _componentType) {
         this.selector = selector;
-        this._viewClass = _viewClass;
         this._componentType = _componentType;
+        this._viewClass = _viewClass;
     }
     Object.defineProperty(ComponentFactory.prototype, "componentType", {
         /**
@@ -229,9 +229,9 @@ export var ComponentFactory = (function () {
 }());
 function ComponentFactory_tsickle_Closure_declarations() {
     /** @type {?} */
-    ComponentFactory.prototype.selector;
-    /** @type {?} */
     ComponentFactory.prototype._viewClass;
+    /** @type {?} */
+    ComponentFactory.prototype.selector;
     /** @type {?} */
     ComponentFactory.prototype._componentType;
 }

@@ -10,6 +10,8 @@ import { SimpleChange } from '../change_detection/change_detection';
 import { ViewEncapsulation } from '../metadata/view';
 import { RenderComponentType, RenderDebugInfo, Renderer, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
+import { Type } from '../type';
+import { ComponentFactory } from './component_factory';
 import { AppView } from './view';
 export declare class ViewUtils {
     private _renderer;
@@ -113,3 +115,7 @@ export declare class InlineArrayDynamic<T> implements InlineArray<T> {
     set(index: number, value: T): void;
 }
 export declare const EMPTY_INLINE_ARRAY: InlineArray<any>;
+/**
+ * This is a private API only used by the compiler to read the view class.
+ */
+export declare function getComponentFactoryViewClass(componentFactory: ComponentFactory<any>): Type<any>;

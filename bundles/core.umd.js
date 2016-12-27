@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.1-6976903
+ * @license Angular v4.0.0-beta.1-9c69703
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,6 +8,41 @@
     typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
     (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx));
 }(this, function (exports,rxjs_Subject,rxjs_Observable) { 'use strict';
+
+    /**
+     *  Creates a token that can be used in a DI Provider.
+      * *
+      * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+      * *
+      * ```typescript
+      * var t = new OpaqueToken("value");
+      * *
+      * var injector = Injector.resolveAndCreate([
+      * {provide: t, useValue: "bindingValue"}
+      * ]);
+      * *
+      * expect(injector.get(t)).toEqual("bindingValue");
+      * ```
+      * *
+      * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
+      * caused by multiple providers using the same string as two different tokens.
+      * *
+      * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
+      * error messages.
+     */
+    var OpaqueToken = (function () {
+        /**
+         * @param {?} _desc
+         */
+        function OpaqueToken(_desc) {
+            this._desc = _desc;
+        }
+        /**
+         * @return {?}
+         */
+        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
+        return OpaqueToken;
+    }());
 
     /**
      * @license
@@ -473,93 +508,6 @@
         ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
         return PropDecoratorFactory;
     }
-
-    /**
-     * Inject decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
-    /**
-     * Optional decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
-    /**
-     * Injectable decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
-    /**
-     * Self decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Self = makeParamDecorator('Self', []);
-    /**
-     * SkipSelf decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
-    /**
-     * Host decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Host = makeParamDecorator('Host', []);
-
-    /**
-     * Creates a token that can be used in a DI Provider.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
-     *
-     * ```typescript
-     * var t = new OpaqueToken("value");
-     *
-     * var injector = Injector.resolveAndCreate([
-     *   {provide: t, useValue: "bindingValue"}
-     * ]);
-     *
-     * expect(injector.get(t)).toEqual("bindingValue");
-     * ```
-     *
-     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
-     * caused by multiple providers using the same string as two different tokens.
-     *
-     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
-     * error messages.
-     * @stable
-     */
-    // so that metadata is gathered for this class
-    var OpaqueToken = (function () {
-        /**
-         * @param {?} _desc
-         */
-        function OpaqueToken(_desc) {
-            this._desc = _desc;
-        }
-        /**
-         * @return {?}
-         */
-        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
-        OpaqueToken.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        OpaqueToken.ctorParameters = function () { return [
-            null,
-        ]; };
-        return OpaqueToken;
-    }());
 
     /**
      * This token can be used to create a virtual provider that will populate the
@@ -1149,7 +1097,50 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-6976903');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-9c69703');
+
+    /**
+     * Inject decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
+    /**
+     * Optional decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
+    /**
+     * Injectable decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
+    /**
+     * Self decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Self = makeParamDecorator('Self', []);
+    /**
+     * SkipSelf decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
+    /**
+     * Host decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Host = makeParamDecorator('Host', []);
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -7463,6 +7454,14 @@
         return InlineArrayDynamic;
     }());
     var /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
+    /**
+     *  This is a private API only used by the compiler to read the view class.
+     * @param {?} componentFactory
+     * @return {?}
+     */
+    function getComponentFactoryViewClass(componentFactory) {
+        return componentFactory._viewClass;
+    }
 
 
     var view_utils = Object.freeze({
@@ -7496,7 +7495,8 @@
         InlineArray8: InlineArray8,
         InlineArray16: InlineArray16,
         InlineArrayDynamic: InlineArrayDynamic,
-        EMPTY_INLINE_ARRAY: EMPTY_INLINE_ARRAY
+        EMPTY_INLINE_ARRAY: EMPTY_INLINE_ARRAY,
+        getComponentFactoryViewClass: getComponentFactoryViewClass
     });
 
     /**
@@ -7681,8 +7681,8 @@
          */
         function ComponentFactory(selector, _viewClass, _componentType) {
             this.selector = selector;
-            this._viewClass = _viewClass;
             this._componentType = _componentType;
+            this._viewClass = _viewClass;
         }
         Object.defineProperty(ComponentFactory.prototype, "componentType", {
             /**

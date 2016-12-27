@@ -989,4 +989,12 @@ function InlineArrayDynamic_tsickle_Closure_declarations() {
     InlineArrayDynamic.prototype.length;
 }
 export var /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
+/**
+ *  This is a private API only used by the compiler to read the view class.
+ * @param {?} componentFactory
+ * @return {?}
+ */
+export function getComponentFactoryViewClass(componentFactory) {
+    return componentFactory._viewClass;
+}
 //# sourceMappingURL=view_utils.js.map
