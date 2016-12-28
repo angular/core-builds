@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.1-7690d02
+ * @license Angular v4.0.0-beta.1-b2ae7b6
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-7690d02');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-b2ae7b6');
 
     /**
      * Inject decorator and metadata.
@@ -1719,13 +1719,6 @@
      * @stable
      */
     var /** @type {?} */ Type = Function;
-    /**
-     * @param {?} v
-     * @return {?}
-     */
-    function isType(v) {
-        return typeof v === 'function';
-    }
 
     /**
      * Attention: This regex has to hold even if the code is minified!
@@ -1838,10 +1831,7 @@
         ReflectionCapabilities.prototype.parameters = function (type) {
             // Note: only report metadata if we have at least one class decorator
             // to stay in sync with the static reflector.
-            if (!isType(type)) {
-                return [];
-            }
-            var /** @type {?} */ parentCtor = getParentCtor(type);
+            var /** @type {?} */ parentCtor = Object.getPrototypeOf(type.prototype).constructor;
             var /** @type {?} */ parameters = this._ownParameters(type, parentCtor);
             if (!parameters && parentCtor !== Object) {
                 parameters = this.parameters(parentCtor);
@@ -1876,10 +1866,7 @@
          * @return {?}
          */
         ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
-            if (!isType(typeOrFunc)) {
-                return [];
-            }
-            var /** @type {?} */ parentCtor = getParentCtor(typeOrFunc);
+            var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
             var /** @type {?} */ ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
             var /** @type {?} */ parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
             return parentAnnotations.concat(ownAnnotations);
@@ -1919,10 +1906,7 @@
          * @return {?}
          */
         ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
-            if (!isType(typeOrFunc)) {
-                return {};
-            }
-            var /** @type {?} */ parentCtor = getParentCtor(typeOrFunc);
+            var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
             var /** @type {?} */ propMetadata = {};
             if (parentCtor !== Object) {
                 var /** @type {?} */ parentPropMetadata_1 = this.propMetadata(parentCtor);
@@ -2012,17 +1996,6 @@
             var /** @type {?} */ annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
             return new (annotationCls.bind.apply(annotationCls, [void 0].concat(annotationArgs)))();
         });
-    }
-    /**
-     * @param {?} ctor
-     * @return {?}
-     */
-    function getParentCtor(ctor) {
-        var /** @type {?} */ parentProto = Object.getPrototypeOf(ctor.prototype);
-        var /** @type {?} */ parentCtor = parentProto ? parentProto.constructor : null;
-        // Note: We always use `Object` as the null value
-        // to simplify checking later on.
-        return parentCtor || Object;
     }
 
     /**
