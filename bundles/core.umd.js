@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.1-bb0d23f
+ * @license Angular v4.0.0-beta.1-c5c53f3
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-bb0d23f');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-c5c53f3');
 
     /**
      * Inject decorator and metadata.
@@ -8664,7 +8664,7 @@
             }
             this._loadComponent(compRef);
             if (isDevMode()) {
-                this._console.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
+                this._console.log("Angular is running in the development mode. Call enableProdMode() to enable the production mode.");
             }
             return compRef;
         };
