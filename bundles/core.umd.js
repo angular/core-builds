@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.1-c5c53f3
+ * @license Angular v4.0.0-beta.1-465516b
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-c5c53f3');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-465516b');
 
     /**
      * Inject decorator and metadata.
@@ -5885,9 +5885,6 @@
         return KeyValueDiffers;
     }());
 
-    var /** @type {?} */ UNINITIALIZED = {
-        toString: function () { return 'CD_INIT_VALUE'; }
-    };
     /**
      * @param {?} a
      * @param {?} b
@@ -5967,16 +5964,18 @@
         /**
          * @param {?} previousValue
          * @param {?} currentValue
+         * @param {?} firstChange
          */
-        function SimpleChange(previousValue, currentValue) {
+        function SimpleChange(previousValue, currentValue, firstChange) {
             this.previousValue = previousValue;
             this.currentValue = currentValue;
+            this.firstChange = firstChange;
         }
         /**
          *  Check whether the new value is the first value assigned.
          * @return {?}
          */
-        SimpleChange.prototype.isFirstChange = function () { return this.previousValue === UNINITIALIZED; };
+        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
         return SimpleChange;
     }());
 
@@ -6515,10 +6514,11 @@
         /**
          * @param {?} oldValue
          * @param {?} currValue
+         * @param {?} isFirstCheck
          */
-        function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
+        function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
             var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-            if (oldValue === UNINITIALIZED) {
+            if (isFirstCheck) {
                 msg +=
                     " It seems like the view has been created after its parent and its children have been dirty checked." +
                         " Has it been created in a change detection hook ?";
@@ -6690,20 +6690,120 @@
         return v != null ? v.toString() : '';
     }
     /**
-     * @param {?} throwOnChange
+     * @param {?} view
      * @param {?} oldValue
      * @param {?} newValue
+     * @param {?} forceUpdate
      * @return {?}
      */
-    function checkBinding(throwOnChange, oldValue, newValue) {
-        if (throwOnChange) {
-            if (!devModeEqual(oldValue, newValue)) {
-                throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue);
+    function checkBinding(view, oldValue, newValue, forceUpdate) {
+        var /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
+        if (view.throwOnChange) {
+            if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
+                throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
             }
             return false;
         }
         else {
-            return !looseIdentical(oldValue, newValue);
+            return isFirstCheck || forceUpdate || !looseIdentical(oldValue, newValue);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @return {?}
+     */
+    function checkBindingChange(view, oldValue, newValue, forceUpdate) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            return new SimpleChange(oldValue, newValue, view.numberOfChecks === 0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderElement
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @return {?}
+     */
+    function checkRenderText(view, renderElement, oldValue, newValue, forceUpdate) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            view.renderer.setText(renderElement, newValue);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderElement
+     * @param {?} propName
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @param {?} securityContext
+     * @return {?}
+     */
+    function checkRenderProperty(view, renderElement, propName, oldValue, newValue, forceUpdate, securityContext) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+            view.renderer.setElementProperty(renderElement, propName, renderValue);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderElement
+     * @param {?} attrName
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @param {?} securityContext
+     * @return {?}
+     */
+    function checkRenderAttribute(view, renderElement, attrName, oldValue, newValue, forceUpdate, securityContext) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+            renderValue = renderValue != null ? renderValue.toString() : null;
+            view.renderer.setElementAttribute(renderElement, attrName, renderValue);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @return {?}
+     */
+    function checkRenderClass(view, renderElement, className, oldValue, newValue, forceUpdate) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            view.renderer.setElementClass(renderElement, className, newValue);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} unit
+     * @param {?} oldValue
+     * @param {?} newValue
+     * @param {?} forceUpdate
+     * @param {?} securityContext
+     * @return {?}
+     */
+    function checkRenderStyle(view, renderElement, styleName, unit, oldValue, newValue, forceUpdate, securityContext) {
+        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
+            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+            if (renderValue != null) {
+                renderValue = renderValue.toString();
+                if (unit != null) {
+                    renderValue = renderValue + unit;
+                }
+            }
+            else {
+                renderValue = null;
+            }
+            view.renderer.setElementStyle(renderElement, styleName, renderValue);
         }
     }
     /**
@@ -6721,10 +6821,11 @@
      * @return {?}
      */
     function pureProxy1(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0 = UNINITIALIZED;
+        var /** @type {?} */ v0;
         return function (p0) {
-            if (!looseIdentical(v0, p0)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0)) {
                 v0 = p0;
                 result = fn(p0);
             }
@@ -6736,11 +6837,12 @@
      * @return {?}
      */
     function pureProxy2(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0 = UNINITIALIZED;
-        var /** @type {?} */ v1 = UNINITIALIZED;
+        var /** @type {?} */ v0;
+        var /** @type {?} */ v1;
         return function (p0, p1) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
                 v0 = p0;
                 v1 = p1;
                 result = fn(p0, p1);
@@ -6753,12 +6855,14 @@
      * @return {?}
      */
     function pureProxy3(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0 = UNINITIALIZED;
-        var /** @type {?} */ v1 = UNINITIALIZED;
-        var /** @type {?} */ v2 = UNINITIALIZED;
+        var /** @type {?} */ v0;
+        var /** @type {?} */ v1;
+        var /** @type {?} */ v2;
         return function (p0, p1, p2) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6772,12 +6876,13 @@
      * @return {?}
      */
     function pureProxy4(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3;
-        v0 = v1 = v2 = v3 = UNINITIALIZED;
+        v0 = v1 = v2 = v3;
         return function (p0, p1, p2, p3) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6792,12 +6897,13 @@
      * @return {?}
      */
     function pureProxy5(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4;
-        v0 = v1 = v2 = v3 = v4 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4;
         return function (p0, p1, p2, p3, p4) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6813,12 +6919,14 @@
      * @return {?}
      */
     function pureProxy6(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5;
-        v0 = v1 = v2 = v3 = v4 = v5 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4 = v5;
         return function (p0, p1, p2, p3, p4, p5) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
+                !looseIdentical(v5, p5)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6835,13 +6943,14 @@
      * @return {?}
      */
     function pureProxy7(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6;
         return function (p0, p1, p2, p3, p4, p5, p6) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
-                !looseIdentical(v6, p6)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
+                !looseIdentical(v5, p5) || !looseIdentical(v6, p6)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6859,13 +6968,14 @@
      * @return {?}
      */
     function pureProxy8(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7;
         return function (p0, p1, p2, p3, p4, p5, p6, p7) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
-                !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
+                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6884,13 +6994,15 @@
      * @return {?}
      */
     function pureProxy9(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
-                !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
+                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
+                !looseIdentical(v8, p8)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6910,14 +7022,15 @@
      * @return {?}
      */
     function pureProxy10(fn) {
+        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8, /** @type {?} */ v9;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9 = UNINITIALIZED;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) {
-            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
-                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
-                !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8) ||
-                !looseIdentical(v9, p9)) {
+            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
+                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
+                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
+                !looseIdentical(v8, p8) || !looseIdentical(v9, p9)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -7452,6 +7565,12 @@
         interpolate: interpolate,
         inlineInterpolate: inlineInterpolate,
         checkBinding: checkBinding,
+        checkBindingChange: checkBindingChange,
+        checkRenderText: checkRenderText,
+        checkRenderProperty: checkRenderProperty,
+        checkRenderAttribute: checkRenderAttribute,
+        checkRenderClass: checkRenderClass,
+        checkRenderStyle: checkRenderStyle,
         castByValue: castByValue,
         EMPTY_ARRAY: EMPTY_ARRAY,
         EMPTY_MAP: EMPTY_MAP,
@@ -12204,6 +12323,7 @@
             this.cdMode = cdMode;
             this.declaredViewContainer = declaredViewContainer;
             this.numberOfChecks = 0;
+            this.throwOnChange = false;
             this.ref = new ViewRef_(this, viewUtils.animationQueue);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
                 this.renderer = viewUtils.renderComponent(componentType);
@@ -12570,7 +12690,8 @@
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 this.throwDestroyedError('detectChanges');
             }
-            this.detectChangesInternal(throwOnChange);
+            this.throwOnChange = throwOnChange;
+            this.detectChangesInternal();
             if (this.cdMode === ChangeDetectorStatus.CheckOnce)
                 this.cdMode = ChangeDetectorStatus.Checked;
             this.numberOfChecks++;
@@ -12578,10 +12699,9 @@
         };
         /**
          *  Overwritten by implementations
-         * @param {?} throwOnChange
          * @return {?}
          */
-        AppView.prototype.detectChangesInternal = function (throwOnChange) { };
+        AppView.prototype.detectChangesInternal = function () { };
         /**
          * @return {?}
          */
@@ -12965,7 +13085,6 @@
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
         devModeEqual: devModeEqual,
-        UNINITIALIZED: UNINITIALIZED,
         ValueUnwrapper: ValueUnwrapper,
         RenderDebugInfo: RenderDebugInfo,
         TemplateRef_: TemplateRef_,

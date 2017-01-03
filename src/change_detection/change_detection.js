@@ -9,7 +9,7 @@ import { DefaultIterableDifferFactory } from './differs/default_iterable_differ'
 import { DefaultKeyValueDifferFactory } from './differs/default_keyvalue_differ';
 import { IterableDiffers } from './differs/iterable_differs';
 import { KeyValueDiffers } from './differs/keyvalue_differs';
-export { SimpleChange, UNINITIALIZED, ValueUnwrapper, WrappedValue, devModeEqual, looseIdentical } from './change_detection_util';
+export { SimpleChange, ValueUnwrapper, WrappedValue, devModeEqual, looseIdentical } from './change_detection_util';
 export { ChangeDetectorRef } from './change_detector_ref';
 export { ChangeDetectionStrategy, ChangeDetectorStatus, isDefaultChangeDetectionStrategy } from './constants';
 export { CollectionChangeRecord, DefaultIterableDifferFactory } from './differs/default_iterable_differ';
