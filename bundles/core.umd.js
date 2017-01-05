@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.1-35f9a1c
+ * @license Angular v4.0.0-beta.1-2dd6280
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-35f9a1c');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.1-2dd6280');
 
     /**
      * Inject decorator and metadata.
@@ -10265,6 +10265,13 @@
         return defaultKeyValueDiffers;
     }
     /**
+     * @param {?=} locale
+     * @return {?}
+     */
+    function _localeFactory(locale) {
+        return locale || 'en-US';
+    }
+    /**
      *  This module includes the providers of @angular/core that are needed
       * to bootstrap components via `ApplicationRef`.
       * *
@@ -10284,7 +10291,11 @@
                             AnimationQueue,
                             { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                             { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                            { provide: LOCALE_ID, useValue: 'en-US' },
+                            {
+                                provide: LOCALE_ID,
+                                useFactory: _localeFactory,
+                                deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                            },
                         ]
                     },] },
         ];
