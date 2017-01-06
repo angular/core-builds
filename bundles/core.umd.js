@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.4.1-28a92b2
+ * @license Angular v2.4.1-56b4296
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -631,30 +631,7 @@
         }
     ], Query));
     /**
-     * @whatItDoes Configures a content query.
-     *
-     * @howToUse
-     *
-     * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
-     *
-     * @description
-     *
-     * You can use ContentChild to get the first element or the directive matching the selector from the
-     * content DOM. If the content DOM changes, and a new child matches the selector,
-     * the property will be updated.
-     *
-     * Content queries are set before the `ngAfterContentInit` callback is called.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - the directive type or the name used for querying.
-     * * **read** - read a different token from the queried element.
-     *
-     * Let's look at an example:
-     *
-     * {@example core/di/ts/contentChild/content_child_example.ts region='Component'}
-     *
-     * **npm package**: `@angular/core`
+     * ContentChild decorator and metadata.
      *
      * @stable
      * @Annotation
@@ -668,30 +645,7 @@
         }
     ], Query);
     /**
-     * @whatItDoes Configures a view query.
-     *
-     * @howToUse
-     *
-     * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
-     *
-     * @description
-     *
-     * You can use ViewChildren to get the {@link QueryList} of elements or directives from the
-     * view DOM. Any time a child element is added, removed, or moved, the query list will be updated,
-     * and the changes observable of the query list will emit a new value.
-     *
-     * View queries are set before the `ngAfterViewInit` callback is called.
-     *
-     * **Metadata Properties**:
-     *
-     * * **selector** - the directive type or the name used for querying.
-     * * **read** - read a different token from the queried elements.
-     *
-     * Let's look at an example:
-     *
-     * {@example core/di/ts/viewChildren/view_children_example.ts region='Component'}
-     *
-     * **npm package**: `@angular/core`
+     * ViewChildren decorator and metadata.
      *
      * @stable
      * @Annotation
@@ -1149,7 +1103,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.4.1-28a92b2');
+    var /** @type {?} */ VERSION = new Version('2.4.1-56b4296');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -1774,6 +1728,13 @@
      * @stable
      */
     var /** @type {?} */ Type = Function;
+    /**
+     * @param {?} v
+     * @return {?}
+     */
+    function isType(v) {
+        return typeof v === 'function';
+    }
 
     /**
      * Attention: This regex has to hold even if the code is minified!
@@ -1886,7 +1847,10 @@
         ReflectionCapabilities.prototype.parameters = function (type) {
             // Note: only report metadata if we have at least one class decorator
             // to stay in sync with the static reflector.
-            var /** @type {?} */ parentCtor = Object.getPrototypeOf(type.prototype).constructor;
+            if (!isType(type)) {
+                return [];
+            }
+            var /** @type {?} */ parentCtor = getParentCtor(type);
             var /** @type {?} */ parameters = this._ownParameters(type, parentCtor);
             if (!parameters && parentCtor !== Object) {
                 parameters = this.parameters(parentCtor);
@@ -1921,7 +1885,10 @@
          * @return {?}
          */
         ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
-            var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
+            if (!isType(typeOrFunc)) {
+                return [];
+            }
+            var /** @type {?} */ parentCtor = getParentCtor(typeOrFunc);
             var /** @type {?} */ ownAnnotations = this._ownAnnotations(typeOrFunc, parentCtor) || [];
             var /** @type {?} */ parentAnnotations = parentCtor !== Object ? this.annotations(parentCtor) : [];
             return parentAnnotations.concat(ownAnnotations);
@@ -1961,7 +1928,10 @@
          * @return {?}
          */
         ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
-            var /** @type {?} */ parentCtor = Object.getPrototypeOf(typeOrFunc.prototype).constructor;
+            if (!isType(typeOrFunc)) {
+                return {};
+            }
+            var /** @type {?} */ parentCtor = getParentCtor(typeOrFunc);
             var /** @type {?} */ propMetadata = {};
             if (parentCtor !== Object) {
                 var /** @type {?} */ parentPropMetadata_1 = this.propMetadata(parentCtor);
@@ -2051,6 +2021,17 @@
             var /** @type {?} */ annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
             return new (annotationCls.bind.apply(annotationCls, [void 0].concat(annotationArgs)))();
         });
+    }
+    /**
+     * @param {?} ctor
+     * @return {?}
+     */
+    function getParentCtor(ctor) {
+        var /** @type {?} */ parentProto = Object.getPrototypeOf(ctor.prototype);
+        var /** @type {?} */ parentCtor = parentProto ? parentProto.constructor : null;
+        // Note: We always use `Object` as the null value
+        // to simplify checking later on.
+        return parentCtor || Object;
     }
 
     /**
@@ -8683,7 +8664,7 @@
             }
             this._loadComponent(compRef);
             if (isDevMode()) {
-                this._console.log("Angular 2 is running in the development mode. Call enableProdMode() to enable the production mode.");
+                this._console.log("Angular is running in the development mode. Call enableProdMode() to enable the production mode.");
             }
             return compRef;
         };
@@ -10165,6 +10146,13 @@
         return defaultKeyValueDiffers;
     }
     /**
+     * @param {?=} locale
+     * @return {?}
+     */
+    function _localeFactory(locale) {
+        return locale || 'en-US';
+    }
+    /**
      *  This module includes the providers of @angular/core that are needed
       * to bootstrap components via `ApplicationRef`.
       * *
@@ -10184,7 +10172,11 @@
                             AnimationQueue,
                             { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                             { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                            { provide: LOCALE_ID, useValue: 'en-US' },
+                            {
+                                provide: LOCALE_ID,
+                                useFactory: _localeFactory,
+                                deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                            },
                         ]
                     },] },
         ];

@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.4.1-28a92b2
+ * @license Angular v2.4.1-56b4296
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -762,7 +762,7 @@
                 }
                 catch (e) {
                     if (e.compType) {
-                        throw new Error(("This test module uses the component " + stringify(e.compType) + " which is using a \"templateUrl\", but they were never compiled. ") +
+                        throw new Error(("This test module uses the component " + stringify(e.compType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. ") +
                             "Please call \"TestBed.compileComponents\" before your test.");
                     }
                     else {
