@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.2-5d9cbd7
+ * @license Angular v4.0.0-beta.2-f14d549
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.2-5d9cbd7');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.2-f14d549');
 
     /**
      * Inject decorator and metadata.
@@ -4522,7 +4522,7 @@
     }());
     var /** @type {?} */ trackByIdentity = function (index, item) { return item; };
     /**
-     * @stable
+     * @deprecated v4.0.0 - Should not be part of public API.
      */
     var DefaultIterableDiffer = (function () {
         /**
@@ -4680,7 +4680,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.diff = function (collection) {
+        DefaultIterableDiffer.prototype.diff = function (collection /* |Iterable<V> */) {
             if (isBlank(collection))
                 collection = [];
             if (!isListLikeIterable(collection)) {
@@ -4701,7 +4701,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.check = function (collection) {
+        DefaultIterableDiffer.prototype.check = function (collection /* |Iterable<V> */) {
             var _this = this;
             this._reset();
             var /** @type {?} */ record = this._itHead;
@@ -4710,8 +4710,8 @@
             var /** @type {?} */ item;
             var /** @type {?} */ itemTrackBy;
             if (Array.isArray(collection)) {
-                var /** @type {?} */ list = collection;
-                this._length = collection.length;
+                var /** @type {?} */ list = (collection);
+                this._length = list.length;
                 for (var /** @type {?} */ index_1 = 0; index_1 < this._length; index_1++) {
                     item = list[index_1];
                     itemTrackBy = this._trackByFn(index_1, item);
@@ -4732,7 +4732,7 @@
             }
             else {
                 index = 0;
-                iterateListLike(collection, function (item /** TODO #9100 */) {
+                iterateListLike(collection, function (item) {
                     itemTrackBy = _this._trackByFn(index, item);
                     if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                         record = _this._mismatch(record, item, itemTrackBy, index);
@@ -4841,7 +4841,7 @@
                 else {
                     // It is a new item: add it.
                     record =
-                        this._addAfter(new CollectionChangeRecord(item, itemTrackBy), previousRecord, index);
+                        this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
                 }
             }
             return record;
@@ -4889,9 +4889,9 @@
             return record;
         };
         /**
-         *  Get rid of any excess {@link CollectionChangeRecord}s from the previous collection
+         *  Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
           * *
-          * - `record` The first excess {@link CollectionChangeRecord}.
+          * - `record` The first excess {@link IterableChangeRecord_}.
           * *
          * @param {?} record
          * @return {?}
@@ -5122,17 +5122,17 @@
          */
         DefaultIterableDiffer.prototype.toString = function () {
             var /** @type {?} */ list = [];
-            this.forEachItem(function (record /** TODO #9100 */) { return list.push(record); });
+            this.forEachItem(function (record) { return list.push(record); });
             var /** @type {?} */ previous = [];
-            this.forEachPreviousItem(function (record /** TODO #9100 */) { return previous.push(record); });
+            this.forEachPreviousItem(function (record) { return previous.push(record); });
             var /** @type {?} */ additions = [];
-            this.forEachAddedItem(function (record /** TODO #9100 */) { return additions.push(record); });
+            this.forEachAddedItem(function (record) { return additions.push(record); });
             var /** @type {?} */ moves = [];
-            this.forEachMovedItem(function (record /** TODO #9100 */) { return moves.push(record); });
+            this.forEachMovedItem(function (record) { return moves.push(record); });
             var /** @type {?} */ removals = [];
-            this.forEachRemovedItem(function (record /** TODO #9100 */) { return removals.push(record); });
+            this.forEachRemovedItem(function (record) { return removals.push(record); });
             var /** @type {?} */ identityChanges = [];
-            this.forEachIdentityChange(function (record /** TODO #9100 */) { return identityChanges.push(record); });
+            this.forEachIdentityChange(function (record) { return identityChanges.push(record); });
             return 'collection: ' + list.join(', ') + '\n' +
                 'previous: ' + previous.join(', ') + '\n' +
                 'additions: ' + additions.join(', ') + '\n' +
@@ -5145,12 +5145,12 @@
     /**
      * @stable
      */
-    var CollectionChangeRecord = (function () {
+    var IterableChangeRecord_ = (function () {
         /**
          * @param {?} item
          * @param {?} trackById
          */
-        function CollectionChangeRecord(item, trackById) {
+        function IterableChangeRecord_(item, trackById) {
             this.item = item;
             this.trackById = trackById;
             this.currentIndex = null;
@@ -5179,14 +5179,14 @@
         /**
          * @return {?}
          */
-        CollectionChangeRecord.prototype.toString = function () {
+        IterableChangeRecord_.prototype.toString = function () {
             return this.previousIndex === this.currentIndex ? stringify(this.item) :
                 stringify(this.item) + '[' +
                     stringify(this.previousIndex) + '->' + stringify(this.currentIndex) + ']';
         };
-        return CollectionChangeRecord;
+        return IterableChangeRecord_;
     }());
-    // A linked list of CollectionChangeRecords with the same CollectionChangeRecord.item
+    // A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
     var _DuplicateItemRecordList = (function () {
         function _DuplicateItemRecordList() {
             /** @internal */
@@ -5233,7 +5233,7 @@
             return null;
         };
         /**
-         *  Remove one {@link CollectionChangeRecord} from the list of duplicates.
+         *  Remove one {@link IterableChangeRecord_} from the list of duplicates.
           * *
           * Returns whether the list of duplicates is empty.
          * @param {?} record
@@ -5243,7 +5243,7 @@
             // todo(vicb)
             // assert(() {
             //  // verify that the record being removed is in the list.
-            //  for (CollectionChangeRecord cursor = _head; cursor != null; cursor = cursor._nextDup) {
+            //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
             //    if (identical(cursor, record)) return true;
             //  }
             //  return false;
@@ -5284,7 +5284,7 @@
             duplicates.add(record);
         };
         /**
-         *  Retrieve the `value` using key. Because the CollectionChangeRecord value may be one which we
+         *  Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
           * have already iterated over, we use the afterIndex to pretend it is not there.
           * *
           * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
@@ -5300,7 +5300,7 @@
             return recordList ? recordList.get(trackById, afterIndex) : null;
         };
         /**
-         *  Removes a {@link CollectionChangeRecord} from the list of duplicates.
+         *  Removes a {@link IterableChangeRecord_} from the list of duplicates.
           * *
           * The list of duplicates also is removed from the map if it gets empty.
          * @param {?} record
@@ -5362,7 +5362,9 @@
          * @param {?} cdRef
          * @return {?}
          */
-        DefaultKeyValueDifferFactory.prototype.create = function (cdRef) { return new DefaultKeyValueDiffer(); };
+        DefaultKeyValueDifferFactory.prototype.create = function (cdRef) {
+            return new DefaultKeyValueDiffer();
+        };
         return DefaultKeyValueDifferFactory;
     }());
     var DefaultKeyValueDiffer = (function () {
@@ -5484,7 +5486,7 @@
                         _this._maybeAddToChanges(newSeqRecord, value);
                     }
                     else {
-                        newSeqRecord = new KeyValueChangeRecord(key);
+                        newSeqRecord = new KeyValueChangeRecord_(key);
                         records.set(key, newSeqRecord);
                         newSeqRecord.currentValue = value;
                         _this._addToAdditions(newSeqRecord);
@@ -5698,11 +5700,11 @@
     /**
      * @stable
      */
-    var KeyValueChangeRecord = (function () {
+    var KeyValueChangeRecord_ = (function () {
         /**
          * @param {?} key
          */
-        function KeyValueChangeRecord(key) {
+        function KeyValueChangeRecord_(key) {
             this.key = key;
             this.previousValue = null;
             this.currentValue = null;
@@ -5722,13 +5724,13 @@
         /**
          * @return {?}
          */
-        KeyValueChangeRecord.prototype.toString = function () {
+        KeyValueChangeRecord_.prototype.toString = function () {
             return looseIdentical(this.previousValue, this.currentValue) ?
                 stringify(this.key) :
                 (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
                     stringify(this.currentValue) + ']');
         };
-        return KeyValueChangeRecord;
+        return KeyValueChangeRecord_;
     }());
 
     /**
@@ -5824,14 +5826,11 @@
          * @return {?}
          */
         KeyValueDiffers.create = function (factories, parent) {
-            if (isPresent(parent)) {
+            if (parent) {
                 var /** @type {?} */ copied = parent.factories.slice();
                 factories = factories.concat(copied);
-                return new KeyValueDiffers(factories);
             }
-            else {
-                return new KeyValueDiffers(factories);
-            }
+            return new KeyValueDiffers(factories);
         };
         /**
          *  Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
@@ -5859,8 +5858,7 @@
                 useFactory: function (parent) {
                     if (!parent) {
                         // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to
-                        // bootstrap(), which would override default pipes instead of extending them.
+                        // to bootstrap(), which would override default pipes instead of extending them.
                         throw new Error('Cannot extend KeyValueDiffers without a parent injector');
                     }
                     return KeyValueDiffers.create(factories, parent);
@@ -5875,12 +5873,10 @@
          */
         KeyValueDiffers.prototype.find = function (kv) {
             var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(kv); });
-            if (isPresent(factory)) {
+            if (factory) {
                 return factory;
             }
-            else {
-                throw new Error("Cannot find a differ supporting object '" + kv + "'");
-            }
+            throw new Error("Cannot find a differ supporting object '" + kv + "'");
         };
         return KeyValueDiffers;
     }());
@@ -13250,10 +13246,8 @@
     exports.ViewRef = ViewRef;
     exports.ChangeDetectionStrategy = ChangeDetectionStrategy;
     exports.ChangeDetectorRef = ChangeDetectorRef;
-    exports.CollectionChangeRecord = CollectionChangeRecord;
     exports.DefaultIterableDiffer = DefaultIterableDiffer;
     exports.IterableDiffers = IterableDiffers;
-    exports.KeyValueChangeRecord = KeyValueChangeRecord;
     exports.KeyValueDiffers = KeyValueDiffers;
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;
