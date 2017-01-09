@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.2-02dd90f
+ * @license Angular v4.0.0-beta.2-8578682
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1051,7 +1051,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.2-02dd90f');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.2-8578682');
 
     /**
      * Inject decorator and metadata.
@@ -11327,6 +11327,10 @@
       * which consists
       * of two known states (use an asterix (`*`) to refer to a dynamic starting and/or ending state).
       * *
+      * A function can also be provided as the `stateChangeExpr` argument for a transition and this
+      * function will be executed each time a state change occurs. If the value returned within the
+      * function is true then the associated animation will be run.
+      * *
       * Animation transitions are placed within an {@link trigger animation trigger}. For an transition
       * to animate to
       * a state value and persist its styles then one or more {@link state animation states} is expected
@@ -11367,6 +11371,12 @@
       * *
       * // this will capture a state change between any states
       * transition("* => *", animate("1s 0s")),
+      * *
+      * // you can also go full out and include a function
+      * transition((fromState, toState) => {
+      * // when `true` then it will allow the animation below to be invoked
+      * return fromState == "off" && toState == "on";
+      * }, animate("1s 0s"))
       * ])
       * ```
       * *
@@ -11659,11 +11669,13 @@
          * @param {?} __0
          */
         function AnimationTransitionEvent(_a) {
-            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName;
+            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName, element = _a.element, triggerName = _a.triggerName;
             this.fromState = fromState;
             this.toState = toState;
             this.totalTime = totalTime;
             this.phaseName = phaseName;
+            this.element = new ElementRef(element);
+            this.triggerName = triggerName;
         }
         return AnimationTransitionEvent;
     }());
@@ -11671,12 +11683,16 @@
     var AnimationTransition = (function () {
         /**
          * @param {?} _player
+         * @param {?} _element
+         * @param {?} _triggerName
          * @param {?} _fromState
          * @param {?} _toState
          * @param {?} _totalTime
          */
-        function AnimationTransition(_player, _fromState, _toState, _totalTime) {
+        function AnimationTransition(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
             this._player = _player;
+            this._element = _element;
+            this._triggerName = _triggerName;
             this._fromState = _fromState;
             this._toState = _toState;
             this._totalTime = _totalTime;
@@ -11690,7 +11706,9 @@
                 fromState: this._fromState,
                 toState: this._toState,
                 totalTime: this._totalTime,
-                phaseName: phaseName
+                phaseName: phaseName,
+                element: this._element,
+                triggerName: this._triggerName
             });
         };
         /**

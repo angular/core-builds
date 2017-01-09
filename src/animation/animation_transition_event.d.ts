@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ElementRef } from '../linker/element_ref';
 /**
  * An instance of this class is returned as an event parameter when an animation
  * callback is captured for an animation either during the start or done phase.
@@ -41,10 +42,14 @@ export declare class AnimationTransitionEvent {
     toState: string;
     totalTime: number;
     phaseName: string;
-    constructor({fromState, toState, totalTime, phaseName}: {
+    element: ElementRef;
+    triggerName: string;
+    constructor({fromState, toState, totalTime, phaseName, element, triggerName}: {
         fromState: string;
         toState: string;
         totalTime: number;
         phaseName: string;
+        element: any;
+        triggerName: string;
     });
 }
