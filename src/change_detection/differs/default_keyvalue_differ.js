@@ -18,7 +18,9 @@ export var DefaultKeyValueDifferFactory = (function () {
      * @param {?} cdRef
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.create = function (cdRef) { return new DefaultKeyValueDiffer(); };
+    DefaultKeyValueDifferFactory.prototype.create = function (cdRef) {
+        return new DefaultKeyValueDiffer();
+    };
     return DefaultKeyValueDifferFactory;
 }());
 export var DefaultKeyValueDiffer = (function () {
@@ -140,7 +142,7 @@ export var DefaultKeyValueDiffer = (function () {
                     _this._maybeAddToChanges(newSeqRecord, value);
                 }
                 else {
-                    newSeqRecord = new KeyValueChangeRecord(key);
+                    newSeqRecord = new KeyValueChangeRecord_(key);
                     records.set(key, newSeqRecord);
                     newSeqRecord.currentValue = value;
                     _this._addToAdditions(newSeqRecord);
@@ -374,11 +376,11 @@ function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
 /**
  * @stable
  */
-export var KeyValueChangeRecord = (function () {
+var KeyValueChangeRecord_ = (function () {
     /**
      * @param {?} key
      */
-    function KeyValueChangeRecord(key) {
+    function KeyValueChangeRecord_(key) {
         this.key = key;
         this.previousValue = null;
         this.currentValue = null;
@@ -398,32 +400,32 @@ export var KeyValueChangeRecord = (function () {
     /**
      * @return {?}
      */
-    KeyValueChangeRecord.prototype.toString = function () {
+    KeyValueChangeRecord_.prototype.toString = function () {
         return looseIdentical(this.previousValue, this.currentValue) ?
             stringify(this.key) :
             (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
                 stringify(this.currentValue) + ']');
     };
-    return KeyValueChangeRecord;
+    return KeyValueChangeRecord_;
 }());
-function KeyValueChangeRecord_tsickle_Closure_declarations() {
+function KeyValueChangeRecord__tsickle_Closure_declarations() {
     /** @type {?} */
-    KeyValueChangeRecord.prototype.previousValue;
+    KeyValueChangeRecord_.prototype.previousValue;
     /** @type {?} */
-    KeyValueChangeRecord.prototype.currentValue;
+    KeyValueChangeRecord_.prototype.currentValue;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._nextPrevious;
+    KeyValueChangeRecord_.prototype._nextPrevious;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._next;
+    KeyValueChangeRecord_.prototype._next;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._nextAdded;
+    KeyValueChangeRecord_.prototype._nextAdded;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._nextRemoved;
+    KeyValueChangeRecord_.prototype._nextRemoved;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._prevRemoved;
+    KeyValueChangeRecord_.prototype._prevRemoved;
     /** @type {?} */
-    KeyValueChangeRecord.prototype._nextChanged;
+    KeyValueChangeRecord_.prototype._nextChanged;
     /** @type {?} */
-    KeyValueChangeRecord.prototype.key;
+    KeyValueChangeRecord_.prototype.key;
 }
 //# sourceMappingURL=default_keyvalue_differ.js.map

@@ -22,7 +22,7 @@ export { RenderComponentType, Renderer, RootRenderer } from './render';
 export { COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef } from './linker';
 export { DebugElement, DebugNode, asNativeElements, getDebugNode } from './debug/debug_node';
 export { Testability, TestabilityRegistry, setTestabilityGetter } from './testability/testability';
-export { ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableDiffers, KeyValueChangeRecord, KeyValueDiffers, SimpleChange, WrappedValue } from './change_detection';
+export { ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue } from './change_detection';
 export { platformCore } from './platform_core_providers';
 export { TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID } from './i18n/tokens';
 export { ApplicationModule } from './application_module';
