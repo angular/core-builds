@@ -84,7 +84,10 @@ export var IterableDiffers = (function () {
     return IterableDiffers;
 }());
 function IterableDiffers_tsickle_Closure_declarations() {
-    /** @type {?} */
+    /**
+     * @deprecated
+     * @type {?}
+     */
     IterableDiffers.prototype.factories;
 }
 //# sourceMappingURL=iterable_differs.js.map

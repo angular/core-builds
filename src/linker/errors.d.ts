@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { BaseError, WrappedError } from '../facade/errors';
 import { DebugContext } from './debug_context';
 /**
@@ -32,7 +39,7 @@ import { DebugContext } from './debug_context';
  * @stable
  */
 export declare class ExpressionChangedAfterItHasBeenCheckedError extends BaseError {
-    constructor(oldValue: any, currValue: any);
+    constructor(oldValue: any, currValue: any, isFirstCheck: boolean);
 }
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.

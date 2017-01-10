@@ -10,7 +10,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { UNINITIALIZED } from '../change_detection/change_detection_util';
 import { BaseError, WrappedError } from '../facade/errors';
 /**
  *  An error thrown if application changes model breaking the top-down data flow.
@@ -45,10 +44,11 @@ export var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
     /**
      * @param {?} oldValue
      * @param {?} currValue
+     * @param {?} isFirstCheck
      */
-    function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
+    function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
         var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (oldValue === UNINITIALIZED) {
+        if (isFirstCheck) {
             msg +=
                 " It seems like the view has been created after its parent and its children have been dirty checked." +
                     " Has it been created in a change detection hook ?";

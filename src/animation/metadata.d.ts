@@ -39,9 +39,9 @@ export declare class AnimationStateDeclarationMetadata extends AnimationStateMet
  * @experimental Animation support is experimental.
  */
 export declare class AnimationStateTransitionMetadata extends AnimationStateMetadata {
-    stateChangeExpr: string;
+    stateChangeExpr: string | ((fromState: string, toState: string) => boolean);
     steps: AnimationMetadata;
-    constructor(stateChangeExpr: string, steps: AnimationMetadata);
+    constructor(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata);
 }
 /**
  * @experimental Animation support is experimental.
@@ -420,6 +420,10 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  * which consists
  * of two known states (use an asterix (`*`) to refer to a dynamic starting and/or ending state).
  *
+ * A function can also be provided as the `stateChangeExpr` argument for a transition and this
+ * function will be executed each time a state change occurs. If the value returned within the
+ * function is true then the associated animation will be run.
+ *
  * Animation transitions are placed within an {@link trigger animation trigger}. For an transition
  * to animate to
  * a state value and persist its styles then one or more {@link state animation states} is expected
@@ -460,6 +464,12 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *
  *   // this will capture a state change between any states
  *   transition("* => *", animate("1s 0s")),
+ *
+ *   // you can also go full out and include a function
+ *   transition((fromState, toState) => {
+ *     // when `true` then it will allow the animation below to be invoked
+ *     return fromState == "off" && toState == "on";
+ *   }, animate("1s 0s"))
  * ])
  * ```
  *
@@ -511,7 +521,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *
  * @experimental Animation support is experimental.
  */
-export declare function transition(stateChangeExpr: string, steps: AnimationMetadata | AnimationMetadata[]): AnimationStateTransitionMetadata;
+export declare function transition(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata | AnimationMetadata[]): AnimationStateTransitionMetadata;
 /**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular2's
  * animation

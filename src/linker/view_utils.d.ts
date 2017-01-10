@@ -9,13 +9,14 @@ import { AnimationQueue } from '../animation/animation_queue';
 import { SimpleChange } from '../change_detection/change_detection';
 import { ViewEncapsulation } from '../metadata/view';
 import { RenderComponentType, RenderDebugInfo, Renderer, RootRenderer } from '../render/api';
-import { Sanitizer } from '../security';
+import { Sanitizer, SecurityContext } from '../security';
+import { Type } from '../type';
+import { ComponentFactory } from './component_factory';
 import { AppView } from './view';
 export declare class ViewUtils {
     private _renderer;
     animationQueue: AnimationQueue;
     sanitizer: Sanitizer;
-    private _nextCompTypeId;
     constructor(_renderer: RootRenderer, sanitizer: Sanitizer, animationQueue: AnimationQueue);
 }
 export declare function createRenderComponentType(templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: {
@@ -24,7 +25,13 @@ export declare function createRenderComponentType(templateUrl: string, slotCount
 export declare function addToArray(e: any, array: any[]): void;
 export declare function interpolate(valueCount: number, constAndInterp: string[]): string;
 export declare function inlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
-export declare function checkBinding(throwOnChange: boolean, oldValue: any, newValue: any): boolean;
+export declare function checkBinding(view: AppView<any>, oldValue: any, newValue: any, forceUpdate: boolean): boolean;
+export declare function checkBindingChange(view: AppView<any>, oldValue: any, newValue: any, forceUpdate: boolean): SimpleChange;
+export declare function checkRenderText(view: AppView<any>, renderElement: any, oldValue: any, newValue: any, forceUpdate: boolean): void;
+export declare function checkRenderProperty(view: AppView<any>, renderElement: any, propName: string, oldValue: any, newValue: any, forceUpdate: boolean, securityContext: SecurityContext): void;
+export declare function checkRenderAttribute(view: AppView<any>, renderElement: any, attrName: string, oldValue: any, newValue: any, forceUpdate: boolean, securityContext: SecurityContext): void;
+export declare function checkRenderClass(view: AppView<any>, renderElement: any, className: string, oldValue: any, newValue: any, forceUpdate: boolean): void;
+export declare function checkRenderStyle(view: AppView<any>, renderElement: any, styleName: string, unit: string, oldValue: any, newValue: any, forceUpdate: boolean, securityContext: SecurityContext): void;
 export declare function castByValue<T>(input: any, value: T): T;
 export declare const EMPTY_ARRAY: any[];
 export declare const EMPTY_MAP: {};
@@ -113,3 +120,7 @@ export declare class InlineArrayDynamic<T> implements InlineArray<T> {
     set(index: number, value: T): void;
 }
 export declare const EMPTY_INLINE_ARRAY: InlineArray<any>;
+/**
+ * This is a private API only used by the compiler to read the view class.
+ */
+export declare function getComponentFactoryViewClass(componentFactory: ComponentFactory<any>): Type<any>;

@@ -2,12 +2,16 @@ import { AnimationTransitionEvent } from './animation_transition_event';
 export var AnimationTransition = (function () {
     /**
      * @param {?} _player
+     * @param {?} _element
+     * @param {?} _triggerName
      * @param {?} _fromState
      * @param {?} _toState
      * @param {?} _totalTime
      */
-    function AnimationTransition(_player, _fromState, _toState, _totalTime) {
+    function AnimationTransition(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
         this._player = _player;
+        this._element = _element;
+        this._triggerName = _triggerName;
         this._fromState = _fromState;
         this._toState = _toState;
         this._totalTime = _totalTime;
@@ -21,7 +25,9 @@ export var AnimationTransition = (function () {
             fromState: this._fromState,
             toState: this._toState,
             totalTime: this._totalTime,
-            phaseName: phaseName
+            phaseName: phaseName,
+            element: this._element,
+            triggerName: this._triggerName
         });
     };
     /**
@@ -47,6 +53,10 @@ export var AnimationTransition = (function () {
 function AnimationTransition_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationTransition.prototype._player;
+    /** @type {?} */
+    AnimationTransition.prototype._element;
+    /** @type {?} */
+    AnimationTransition.prototype._triggerName;
     /** @type {?} */
     AnimationTransition.prototype._fromState;
     /** @type {?} */

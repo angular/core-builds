@@ -56,6 +56,7 @@ export var AppView = (function () {
         this.cdMode = cdMode;
         this.declaredViewContainer = declaredViewContainer;
         this.numberOfChecks = 0;
+        this.throwOnChange = false;
         this.ref = new ViewRef_(this, viewUtils.animationQueue);
         if (type === ViewType.COMPONENT || type === ViewType.HOST) {
             this.renderer = viewUtils.renderComponent(componentType);
@@ -422,7 +423,8 @@ export var AppView = (function () {
         if (this.cdMode === ChangeDetectorStatus.Destroyed) {
             this.throwDestroyedError('detectChanges');
         }
-        this.detectChangesInternal(throwOnChange);
+        this.throwOnChange = throwOnChange;
+        this.detectChangesInternal();
         if (this.cdMode === ChangeDetectorStatus.CheckOnce)
             this.cdMode = ChangeDetectorStatus.Checked;
         this.numberOfChecks++;
@@ -430,10 +432,9 @@ export var AppView = (function () {
     };
     /**
      *  Overwritten by implementations
-     * @param {?} throwOnChange
      * @return {?}
      */
-    AppView.prototype.detectChangesInternal = function (throwOnChange) { };
+    AppView.prototype.detectChangesInternal = function () { };
     /**
      * @return {?}
      */
@@ -484,6 +485,8 @@ function AppView_tsickle_Closure_declarations() {
     AppView.prototype.appRef;
     /** @type {?} */
     AppView.prototype.numberOfChecks;
+    /** @type {?} */
+    AppView.prototype.throwOnChange;
     /** @type {?} */
     AppView.prototype.renderer;
     /** @type {?} */
