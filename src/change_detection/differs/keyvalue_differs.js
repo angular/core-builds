@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Optional, SkipSelf } from '../../di';
+import { isPresent } from '../../facade/lang';
 /**
  *  A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  */
@@ -22,11 +23,14 @@ export var KeyValueDiffers = (function () {
      * @return {?}
      */
     KeyValueDiffers.create = function (factories, parent) {
-        if (parent) {
+        if (isPresent(parent)) {
             var /** @type {?} */ copied = parent.factories.slice();
             factories = factories.concat(copied);
+            return new KeyValueDiffers(factories);
         }
-        return new KeyValueDiffers(factories);
+        else {
+            return new KeyValueDiffers(factories);
+        }
     };
     /**
      *  Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
@@ -54,7 +58,8 @@ export var KeyValueDiffers = (function () {
             useFactory: function (parent) {
                 if (!parent) {
                     // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                    // to bootstrap(), which would override default pipes instead of extending them.
+                    // to
+                    // bootstrap(), which would override default pipes instead of extending them.
                     throw new Error('Cannot extend KeyValueDiffers without a parent injector');
                 }
                 return KeyValueDiffers.create(factories, parent);
@@ -69,18 +74,17 @@ export var KeyValueDiffers = (function () {
      */
     KeyValueDiffers.prototype.find = function (kv) {
         var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(kv); });
-        if (factory) {
+        if (isPresent(factory)) {
             return factory;
         }
-        throw new Error("Cannot find a differ supporting object '" + kv + "'");
+        else {
+            throw new Error("Cannot find a differ supporting object '" + kv + "'");
+        }
     };
     return KeyValueDiffers;
 }());
 function KeyValueDiffers_tsickle_Closure_declarations() {
-    /**
-     * @deprecated
-     * @type {?}
-     */
+    /** @type {?} */
     KeyValueDiffers.prototype.factories;
 }
 //# sourceMappingURL=keyvalue_differs.js.map

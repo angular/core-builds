@@ -37,7 +37,6 @@ export declare abstract class AppView<T> {
     viewContainer: ViewContainer;
     appRef: ApplicationRef;
     numberOfChecks: number;
-    throwOnChange: boolean;
     renderer: Renderer;
     private _hasExternalHostElement;
     private _hostInjector;
@@ -103,7 +102,7 @@ export declare abstract class AppView<T> {
     /**
      * Overwritten by implementations
      */
-    detectChangesInternal(): void;
+    detectChangesInternal(throwOnChange: boolean): void;
     markAsCheckOnce(): void;
     markPathToRootAsCheckOnce(): void;
     eventHandler<E, R>(cb: (eventName: string, event?: E) => R): (eventName: string, event?: E) => R;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.2-9aeb8c5
+ * @license Angular v2.4.2-d43e5dd
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -8,41 +8,6 @@
     typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
     (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx));
 }(this, function (exports,rxjs_Subject,rxjs_Observable) { 'use strict';
-
-    /**
-     *  Creates a token that can be used in a DI Provider.
-      * *
-      * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
-      * *
-      * ```typescript
-      * var t = new OpaqueToken("value");
-      * *
-      * var injector = Injector.resolveAndCreate([
-      * {provide: t, useValue: "bindingValue"}
-      * ]);
-      * *
-      * expect(injector.get(t)).toEqual("bindingValue");
-      * ```
-      * *
-      * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
-      * caused by multiple providers using the same string as two different tokens.
-      * *
-      * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
-      * error messages.
-     */
-    var OpaqueToken = (function () {
-        /**
-         * @param {?} _desc
-         */
-        function OpaqueToken(_desc) {
-            this._desc = _desc;
-        }
-        /**
-         * @return {?}
-         */
-        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
-        return OpaqueToken;
-    }());
 
     /**
      * @license
@@ -508,6 +473,93 @@
         ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
         return PropDecoratorFactory;
     }
+
+    /**
+     * Inject decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
+    /**
+     * Optional decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
+    /**
+     * Injectable decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
+    /**
+     * Self decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Self = makeParamDecorator('Self', []);
+    /**
+     * SkipSelf decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
+    /**
+     * Host decorator and metadata.
+     *
+     * @stable
+     * @Annotation
+     */
+    var /** @type {?} */ Host = makeParamDecorator('Host', []);
+
+    /**
+     * Creates a token that can be used in a DI Provider.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+     *
+     * ```typescript
+     * var t = new OpaqueToken("value");
+     *
+     * var injector = Injector.resolveAndCreate([
+     *   {provide: t, useValue: "bindingValue"}
+     * ]);
+     *
+     * expect(injector.get(t)).toEqual("bindingValue");
+     * ```
+     *
+     * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
+     * caused by multiple providers using the same string as two different tokens.
+     *
+     * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
+     * error messages.
+     * @stable
+     */
+    // so that metadata is gathered for this class
+    var OpaqueToken = (function () {
+        /**
+         * @param {?} _desc
+         */
+        function OpaqueToken(_desc) {
+            this._desc = _desc;
+        }
+        /**
+         * @return {?}
+         */
+        OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
+        OpaqueToken.decorators = [
+            { type: Injectable },
+        ];
+        /** @nocollapse */
+        OpaqueToken.ctorParameters = function () { return [
+            null,
+        ]; };
+        return OpaqueToken;
+    }());
 
     /**
      * This token can be used to create a virtual provider that will populate the
@@ -1051,50 +1103,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.2-9aeb8c5');
-
-    /**
-     * Inject decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
-    /**
-     * Optional decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
-    /**
-     * Injectable decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
-    /**
-     * Self decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Self = makeParamDecorator('Self', []);
-    /**
-     * SkipSelf decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
-    /**
-     * Host decorator and metadata.
-     *
-     * @stable
-     * @Annotation
-     */
-    var /** @type {?} */ Host = makeParamDecorator('Host', []);
+    var /** @type {?} */ VERSION = new Version('2.4.2-d43e5dd');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -4522,7 +4531,7 @@
     }());
     var /** @type {?} */ trackByIdentity = function (index, item) { return item; };
     /**
-     * @deprecated v4.0.0 - Should not be part of public API.
+     * @stable
      */
     var DefaultIterableDiffer = (function () {
         /**
@@ -4680,7 +4689,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.diff = function (collection /* |Iterable<V> */) {
+        DefaultIterableDiffer.prototype.diff = function (collection) {
             if (isBlank(collection))
                 collection = [];
             if (!isListLikeIterable(collection)) {
@@ -4701,7 +4710,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.check = function (collection /* |Iterable<V> */) {
+        DefaultIterableDiffer.prototype.check = function (collection) {
             var _this = this;
             this._reset();
             var /** @type {?} */ record = this._itHead;
@@ -4710,8 +4719,8 @@
             var /** @type {?} */ item;
             var /** @type {?} */ itemTrackBy;
             if (Array.isArray(collection)) {
-                var /** @type {?} */ list = (collection);
-                this._length = list.length;
+                var /** @type {?} */ list = collection;
+                this._length = collection.length;
                 for (var /** @type {?} */ index_1 = 0; index_1 < this._length; index_1++) {
                     item = list[index_1];
                     itemTrackBy = this._trackByFn(index_1, item);
@@ -4732,7 +4741,7 @@
             }
             else {
                 index = 0;
-                iterateListLike(collection, function (item) {
+                iterateListLike(collection, function (item /** TODO #9100 */) {
                     itemTrackBy = _this._trackByFn(index, item);
                     if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                         record = _this._mismatch(record, item, itemTrackBy, index);
@@ -4841,7 +4850,7 @@
                 else {
                     // It is a new item: add it.
                     record =
-                        this._addAfter(new IterableChangeRecord_(item, itemTrackBy), previousRecord, index);
+                        this._addAfter(new CollectionChangeRecord(item, itemTrackBy), previousRecord, index);
                 }
             }
             return record;
@@ -4889,9 +4898,9 @@
             return record;
         };
         /**
-         *  Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
+         *  Get rid of any excess {@link CollectionChangeRecord}s from the previous collection
           * *
-          * - `record` The first excess {@link IterableChangeRecord_}.
+          * - `record` The first excess {@link CollectionChangeRecord}.
           * *
          * @param {?} record
          * @return {?}
@@ -5122,17 +5131,17 @@
          */
         DefaultIterableDiffer.prototype.toString = function () {
             var /** @type {?} */ list = [];
-            this.forEachItem(function (record) { return list.push(record); });
+            this.forEachItem(function (record /** TODO #9100 */) { return list.push(record); });
             var /** @type {?} */ previous = [];
-            this.forEachPreviousItem(function (record) { return previous.push(record); });
+            this.forEachPreviousItem(function (record /** TODO #9100 */) { return previous.push(record); });
             var /** @type {?} */ additions = [];
-            this.forEachAddedItem(function (record) { return additions.push(record); });
+            this.forEachAddedItem(function (record /** TODO #9100 */) { return additions.push(record); });
             var /** @type {?} */ moves = [];
-            this.forEachMovedItem(function (record) { return moves.push(record); });
+            this.forEachMovedItem(function (record /** TODO #9100 */) { return moves.push(record); });
             var /** @type {?} */ removals = [];
-            this.forEachRemovedItem(function (record) { return removals.push(record); });
+            this.forEachRemovedItem(function (record /** TODO #9100 */) { return removals.push(record); });
             var /** @type {?} */ identityChanges = [];
-            this.forEachIdentityChange(function (record) { return identityChanges.push(record); });
+            this.forEachIdentityChange(function (record /** TODO #9100 */) { return identityChanges.push(record); });
             return 'collection: ' + list.join(', ') + '\n' +
                 'previous: ' + previous.join(', ') + '\n' +
                 'additions: ' + additions.join(', ') + '\n' +
@@ -5145,12 +5154,12 @@
     /**
      * @stable
      */
-    var IterableChangeRecord_ = (function () {
+    var CollectionChangeRecord = (function () {
         /**
          * @param {?} item
          * @param {?} trackById
          */
-        function IterableChangeRecord_(item, trackById) {
+        function CollectionChangeRecord(item, trackById) {
             this.item = item;
             this.trackById = trackById;
             this.currentIndex = null;
@@ -5179,14 +5188,14 @@
         /**
          * @return {?}
          */
-        IterableChangeRecord_.prototype.toString = function () {
+        CollectionChangeRecord.prototype.toString = function () {
             return this.previousIndex === this.currentIndex ? stringify(this.item) :
                 stringify(this.item) + '[' +
                     stringify(this.previousIndex) + '->' + stringify(this.currentIndex) + ']';
         };
-        return IterableChangeRecord_;
+        return CollectionChangeRecord;
     }());
-    // A linked list of CollectionChangeRecords with the same IterableChangeRecord_.item
+    // A linked list of CollectionChangeRecords with the same CollectionChangeRecord.item
     var _DuplicateItemRecordList = (function () {
         function _DuplicateItemRecordList() {
             /** @internal */
@@ -5233,7 +5242,7 @@
             return null;
         };
         /**
-         *  Remove one {@link IterableChangeRecord_} from the list of duplicates.
+         *  Remove one {@link CollectionChangeRecord} from the list of duplicates.
           * *
           * Returns whether the list of duplicates is empty.
          * @param {?} record
@@ -5243,7 +5252,7 @@
             // todo(vicb)
             // assert(() {
             //  // verify that the record being removed is in the list.
-            //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
+            //  for (CollectionChangeRecord cursor = _head; cursor != null; cursor = cursor._nextDup) {
             //    if (identical(cursor, record)) return true;
             //  }
             //  return false;
@@ -5284,7 +5293,7 @@
             duplicates.add(record);
         };
         /**
-         *  Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+         *  Retrieve the `value` using key. Because the CollectionChangeRecord value may be one which we
           * have already iterated over, we use the afterIndex to pretend it is not there.
           * *
           * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
@@ -5300,7 +5309,7 @@
             return recordList ? recordList.get(trackById, afterIndex) : null;
         };
         /**
-         *  Removes a {@link IterableChangeRecord_} from the list of duplicates.
+         *  Removes a {@link CollectionChangeRecord} from the list of duplicates.
           * *
           * The list of duplicates also is removed from the map if it gets empty.
          * @param {?} record
@@ -5362,9 +5371,7 @@
          * @param {?} cdRef
          * @return {?}
          */
-        DefaultKeyValueDifferFactory.prototype.create = function (cdRef) {
-            return new DefaultKeyValueDiffer();
-        };
+        DefaultKeyValueDifferFactory.prototype.create = function (cdRef) { return new DefaultKeyValueDiffer(); };
         return DefaultKeyValueDifferFactory;
     }());
     var DefaultKeyValueDiffer = (function () {
@@ -5486,7 +5493,7 @@
                         _this._maybeAddToChanges(newSeqRecord, value);
                     }
                     else {
-                        newSeqRecord = new KeyValueChangeRecord_(key);
+                        newSeqRecord = new KeyValueChangeRecord(key);
                         records.set(key, newSeqRecord);
                         newSeqRecord.currentValue = value;
                         _this._addToAdditions(newSeqRecord);
@@ -5700,11 +5707,11 @@
     /**
      * @stable
      */
-    var KeyValueChangeRecord_ = (function () {
+    var KeyValueChangeRecord = (function () {
         /**
          * @param {?} key
          */
-        function KeyValueChangeRecord_(key) {
+        function KeyValueChangeRecord(key) {
             this.key = key;
             this.previousValue = null;
             this.currentValue = null;
@@ -5724,13 +5731,13 @@
         /**
          * @return {?}
          */
-        KeyValueChangeRecord_.prototype.toString = function () {
+        KeyValueChangeRecord.prototype.toString = function () {
             return looseIdentical(this.previousValue, this.currentValue) ?
                 stringify(this.key) :
                 (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
                     stringify(this.currentValue) + ']');
         };
-        return KeyValueChangeRecord_;
+        return KeyValueChangeRecord;
     }());
 
     /**
@@ -5826,11 +5833,14 @@
          * @return {?}
          */
         KeyValueDiffers.create = function (factories, parent) {
-            if (parent) {
+            if (isPresent(parent)) {
                 var /** @type {?} */ copied = parent.factories.slice();
                 factories = factories.concat(copied);
+                return new KeyValueDiffers(factories);
             }
-            return new KeyValueDiffers(factories);
+            else {
+                return new KeyValueDiffers(factories);
+            }
         };
         /**
          *  Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
@@ -5858,7 +5868,8 @@
                 useFactory: function (parent) {
                     if (!parent) {
                         // Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
-                        // to bootstrap(), which would override default pipes instead of extending them.
+                        // to
+                        // bootstrap(), which would override default pipes instead of extending them.
                         throw new Error('Cannot extend KeyValueDiffers without a parent injector');
                     }
                     return KeyValueDiffers.create(factories, parent);
@@ -5873,14 +5884,19 @@
          */
         KeyValueDiffers.prototype.find = function (kv) {
             var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(kv); });
-            if (factory) {
+            if (isPresent(factory)) {
                 return factory;
             }
-            throw new Error("Cannot find a differ supporting object '" + kv + "'");
+            else {
+                throw new Error("Cannot find a differ supporting object '" + kv + "'");
+            }
         };
         return KeyValueDiffers;
     }());
 
+    var /** @type {?} */ UNINITIALIZED = {
+        toString: function () { return 'CD_INIT_VALUE'; }
+    };
     /**
      * @param {?} a
      * @param {?} b
@@ -5960,18 +5976,16 @@
         /**
          * @param {?} previousValue
          * @param {?} currentValue
-         * @param {?} firstChange
          */
-        function SimpleChange(previousValue, currentValue, firstChange) {
+        function SimpleChange(previousValue, currentValue) {
             this.previousValue = previousValue;
             this.currentValue = currentValue;
-            this.firstChange = firstChange;
         }
         /**
          *  Check whether the new value is the first value assigned.
          * @return {?}
          */
-        SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+        SimpleChange.prototype.isFirstChange = function () { return this.previousValue === UNINITIALIZED; };
         return SimpleChange;
     }());
 
@@ -6510,11 +6524,10 @@
         /**
          * @param {?} oldValue
          * @param {?} currValue
-         * @param {?} isFirstCheck
          */
-        function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
+        function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue) {
             var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-            if (isFirstCheck) {
+            if (oldValue === UNINITIALIZED) {
                 msg +=
                     " It seems like the view has been created after its parent and its children have been dirty checked." +
                         " Has it been created in a change detection hook ?";
@@ -6568,6 +6581,7 @@
         function ViewUtils(_renderer, sanitizer, animationQueue) {
             this._renderer = _renderer;
             this.animationQueue = animationQueue;
+            this._nextCompTypeId = 0;
             this.sanitizer = sanitizer;
         }
         /**
@@ -6685,120 +6699,20 @@
         return v != null ? v.toString() : '';
     }
     /**
-     * @param {?} view
+     * @param {?} throwOnChange
      * @param {?} oldValue
      * @param {?} newValue
-     * @param {?} forceUpdate
      * @return {?}
      */
-    function checkBinding(view, oldValue, newValue, forceUpdate) {
-        var /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
-        if (view.throwOnChange) {
-            if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
-                throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
+    function checkBinding(throwOnChange, oldValue, newValue) {
+        if (throwOnChange) {
+            if (!devModeEqual(oldValue, newValue)) {
+                throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue);
             }
             return false;
         }
         else {
-            return isFirstCheck || forceUpdate || !looseIdentical(oldValue, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkBindingChange(view, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            return new SimpleChange(oldValue, newValue, view.numberOfChecks === 0);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkRenderText(view, renderElement, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            view.renderer.setText(renderElement, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} propName
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderProperty(view, renderElement, propName, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            view.renderer.setElementProperty(renderElement, propName, renderValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} attrName
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderAttribute(view, renderElement, attrName, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            renderValue = renderValue != null ? renderValue.toString() : null;
-            view.renderer.setElementAttribute(renderElement, attrName, renderValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} className
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkRenderClass(view, renderElement, className, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            view.renderer.setElementClass(renderElement, className, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} styleName
-     * @param {?} unit
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderStyle(view, renderElement, styleName, unit, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            if (renderValue != null) {
-                renderValue = renderValue.toString();
-                if (unit != null) {
-                    renderValue = renderValue + unit;
-                }
-            }
-            else {
-                renderValue = null;
-            }
-            view.renderer.setElementStyle(renderElement, styleName, renderValue);
+            return !looseIdentical(oldValue, newValue);
         }
     }
     /**
@@ -6816,11 +6730,10 @@
      * @return {?}
      */
     function pureProxy1(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0;
+        var /** @type {?} */ v0 = UNINITIALIZED;
         return function (p0) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0)) {
+            if (!looseIdentical(v0, p0)) {
                 v0 = p0;
                 result = fn(p0);
             }
@@ -6832,12 +6745,11 @@
      * @return {?}
      */
     function pureProxy2(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0;
-        var /** @type {?} */ v1;
+        var /** @type {?} */ v0 = UNINITIALIZED;
+        var /** @type {?} */ v1 = UNINITIALIZED;
         return function (p0, p1) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
                 v0 = p0;
                 v1 = p1;
                 result = fn(p0, p1);
@@ -6850,14 +6762,12 @@
      * @return {?}
      */
     function pureProxy3(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
-        var /** @type {?} */ v0;
-        var /** @type {?} */ v1;
-        var /** @type {?} */ v2;
+        var /** @type {?} */ v0 = UNINITIALIZED;
+        var /** @type {?} */ v1 = UNINITIALIZED;
+        var /** @type {?} */ v2 = UNINITIALIZED;
         return function (p0, p1, p2) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6871,13 +6781,12 @@
      * @return {?}
      */
     function pureProxy4(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3;
-        v0 = v1 = v2 = v3;
+        v0 = v1 = v2 = v3 = UNINITIALIZED;
         return function (p0, p1, p2, p3) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6892,13 +6801,12 @@
      * @return {?}
      */
     function pureProxy5(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4;
-        v0 = v1 = v2 = v3 = v4;
+        v0 = v1 = v2 = v3 = v4 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6914,14 +6822,12 @@
      * @return {?}
      */
     function pureProxy6(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5;
-        v0 = v1 = v2 = v3 = v4 = v5;
+        v0 = v1 = v2 = v3 = v4 = v5 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
-                !looseIdentical(v5, p5)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6938,14 +6844,13 @@
      * @return {?}
      */
     function pureProxy7(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
-                !looseIdentical(v5, p5) || !looseIdentical(v6, p6)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
+                !looseIdentical(v6, p6)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6963,14 +6868,13 @@
      * @return {?}
      */
     function pureProxy8(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
-                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
+                !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -6989,15 +6893,13 @@
      * @return {?}
      */
     function pureProxy9(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
-                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
-                !looseIdentical(v8, p8)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
+                !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -7017,15 +6919,14 @@
      * @return {?}
      */
     function pureProxy10(fn) {
-        var /** @type {?} */ numberOfChecks = 0;
         var /** @type {?} */ result;
         var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8, /** @type {?} */ v9;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9;
+        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9 = UNINITIALIZED;
         return function (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
-                !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
-                !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
-                !looseIdentical(v8, p8) || !looseIdentical(v9, p9)) {
+            if (!looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) ||
+                !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) ||
+                !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8) ||
+                !looseIdentical(v9, p9)) {
                 v0 = p0;
                 v1 = p1;
                 v2 = p2;
@@ -7543,14 +7444,6 @@
         return InlineArrayDynamic;
     }());
     var /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
-    /**
-     *  This is a private API only used by the compiler to read the view class.
-     * @param {?} componentFactory
-     * @return {?}
-     */
-    function getComponentFactoryViewClass(componentFactory) {
-        return componentFactory._viewClass;
-    }
 
 
     var view_utils = Object.freeze({
@@ -7560,12 +7453,6 @@
         interpolate: interpolate,
         inlineInterpolate: inlineInterpolate,
         checkBinding: checkBinding,
-        checkBindingChange: checkBindingChange,
-        checkRenderText: checkRenderText,
-        checkRenderProperty: checkRenderProperty,
-        checkRenderAttribute: checkRenderAttribute,
-        checkRenderClass: checkRenderClass,
-        checkRenderStyle: checkRenderStyle,
         castByValue: castByValue,
         EMPTY_ARRAY: EMPTY_ARRAY,
         EMPTY_MAP: EMPTY_MAP,
@@ -7590,8 +7477,7 @@
         InlineArray8: InlineArray8,
         InlineArray16: InlineArray16,
         InlineArrayDynamic: InlineArrayDynamic,
-        EMPTY_INLINE_ARRAY: EMPTY_INLINE_ARRAY,
-        getComponentFactoryViewClass: getComponentFactoryViewClass
+        EMPTY_INLINE_ARRAY: EMPTY_INLINE_ARRAY
     });
 
     /**
@@ -7776,8 +7662,8 @@
          */
         function ComponentFactory(selector, _viewClass, _componentType) {
             this.selector = selector;
-            this._componentType = _componentType;
             this._viewClass = _viewClass;
+            this._componentType = _componentType;
         }
         Object.defineProperty(ComponentFactory.prototype, "componentType", {
             /**
@@ -11322,10 +11208,6 @@
       * which consists
       * of two known states (use an asterix (`*`) to refer to a dynamic starting and/or ending state).
       * *
-      * A function can also be provided as the `stateChangeExpr` argument for a transition and this
-      * function will be executed each time a state change occurs. If the value returned within the
-      * function is true then the associated animation will be run.
-      * *
       * Animation transitions are placed within an {@link trigger animation trigger}. For an transition
       * to animate to
       * a state value and persist its styles then one or more {@link state animation states} is expected
@@ -11366,12 +11248,6 @@
       * *
       * // this will capture a state change between any states
       * transition("* => *", animate("1s 0s")),
-      * *
-      * // you can also go full out and include a function
-      * transition((fromState, toState) => {
-      * // when `true` then it will allow the animation below to be invoked
-      * return fromState == "off" && toState == "on";
-      * }, animate("1s 0s"))
       * ])
       * ```
       * *
@@ -11664,13 +11540,11 @@
          * @param {?} __0
          */
         function AnimationTransitionEvent(_a) {
-            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName, element = _a.element, triggerName = _a.triggerName;
+            var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName;
             this.fromState = fromState;
             this.toState = toState;
             this.totalTime = totalTime;
             this.phaseName = phaseName;
-            this.element = new ElementRef(element);
-            this.triggerName = triggerName;
         }
         return AnimationTransitionEvent;
     }());
@@ -11678,16 +11552,12 @@
     var AnimationTransition = (function () {
         /**
          * @param {?} _player
-         * @param {?} _element
-         * @param {?} _triggerName
          * @param {?} _fromState
          * @param {?} _toState
          * @param {?} _totalTime
          */
-        function AnimationTransition(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
+        function AnimationTransition(_player, _fromState, _toState, _totalTime) {
             this._player = _player;
-            this._element = _element;
-            this._triggerName = _triggerName;
             this._fromState = _fromState;
             this._toState = _toState;
             this._totalTime = _totalTime;
@@ -11701,9 +11571,7 @@
                 fromState: this._fromState,
                 toState: this._toState,
                 totalTime: this._totalTime,
-                phaseName: phaseName,
-                element: this._element,
-                triggerName: this._triggerName
+                phaseName: phaseName
             });
         };
         /**
@@ -12316,7 +12184,7 @@
     /**
      * @experimental
      */
-    var /** @type {?} */ EMPTY_CONTEXT = new Object();
+    var /** @type {?} */ EMPTY_CONTEXT$1 = new Object();
     var /** @type {?} */ UNDEFINED$1 = new Object();
     /**
      *  Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -12347,7 +12215,6 @@
             this.cdMode = cdMode;
             this.declaredViewContainer = declaredViewContainer;
             this.numberOfChecks = 0;
-            this.throwOnChange = false;
             this.ref = new ViewRef_(this, viewUtils.animationQueue);
             if (type === ViewType.COMPONENT || type === ViewType.HOST) {
                 this.renderer = viewUtils.renderComponent(componentType);
@@ -12393,7 +12260,7 @@
          * @return {?}
          */
         AppView.prototype.createHostView = function (rootSelectorOrNode, hostInjector, projectableNodes) {
-            this.context = (EMPTY_CONTEXT);
+            this.context = (EMPTY_CONTEXT$1);
             this._hasExternalHostElement = isPresent(rootSelectorOrNode);
             this._hostInjector = hostInjector;
             this._hostProjectableNodes = projectableNodes;
@@ -12714,8 +12581,7 @@
             if (this.cdMode === ChangeDetectorStatus.Destroyed) {
                 this.throwDestroyedError('detectChanges');
             }
-            this.throwOnChange = throwOnChange;
-            this.detectChangesInternal();
+            this.detectChangesInternal(throwOnChange);
             if (this.cdMode === ChangeDetectorStatus.CheckOnce)
                 this.cdMode = ChangeDetectorStatus.Checked;
             this.numberOfChecks++;
@@ -12723,9 +12589,10 @@
         };
         /**
          *  Overwritten by implementations
+         * @param {?} throwOnChange
          * @return {?}
          */
-        AppView.prototype.detectChangesInternal = function () { };
+        AppView.prototype.detectChangesInternal = function (throwOnChange) { };
         /**
          * @return {?}
          */
@@ -13109,6 +12976,7 @@
         DebugContext: DebugContext,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
         devModeEqual: devModeEqual,
+        UNINITIALIZED: UNINITIALIZED,
         ValueUnwrapper: ValueUnwrapper,
         RenderDebugInfo: RenderDebugInfo,
         TemplateRef_: TemplateRef_,
@@ -13245,8 +13113,10 @@
     exports.ViewRef = ViewRef;
     exports.ChangeDetectionStrategy = ChangeDetectionStrategy;
     exports.ChangeDetectorRef = ChangeDetectorRef;
+    exports.CollectionChangeRecord = CollectionChangeRecord;
     exports.DefaultIterableDiffer = DefaultIterableDiffer;
     exports.IterableDiffers = IterableDiffers;
+    exports.KeyValueChangeRecord = KeyValueChangeRecord;
     exports.KeyValueDiffers = KeyValueDiffers;
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;

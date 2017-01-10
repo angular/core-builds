@@ -183,6 +183,10 @@ function ComponentRef__tsickle_Closure_declarations() {
     ComponentRef_.prototype._component;
 }
 /**
+ * @experimental
+ */
+var /** @type {?} */ EMPTY_CONTEXT = new Object();
+/**
  * @stable
  */
 export var ComponentFactory = (function () {
@@ -193,8 +197,8 @@ export var ComponentFactory = (function () {
      */
     function ComponentFactory(selector, _viewClass, _componentType) {
         this.selector = selector;
-        this._componentType = _componentType;
         this._viewClass = _viewClass;
+        this._componentType = _componentType;
     }
     Object.defineProperty(ComponentFactory.prototype, "componentType", {
         /**
@@ -225,9 +229,9 @@ export var ComponentFactory = (function () {
 }());
 function ComponentFactory_tsickle_Closure_declarations() {
     /** @type {?} */
-    ComponentFactory.prototype._viewClass;
-    /** @type {?} */
     ComponentFactory.prototype.selector;
+    /** @type {?} */
+    ComponentFactory.prototype._viewClass;
     /** @type {?} */
     ComponentFactory.prototype._componentType;
 }

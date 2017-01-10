@@ -73,6 +73,7 @@ export declare const __core_private__: {
     StaticNodeDebugInfo: typeof debug_context.StaticNodeDebugInfo;
     _StaticNodeDebugInfo?: debug_context.StaticNodeDebugInfo;
     devModeEqual: typeof change_detection_util.devModeEqual;
+    UNINITIALIZED: typeof change_detection_util.UNINITIALIZED;
     ValueUnwrapper: typeof change_detection_util.ValueUnwrapper;
     _ValueUnwrapper?: change_detection_util.ValueUnwrapper;
     RenderDebugInfo: typeof api.RenderDebugInfo;

@@ -1,4 +1,7 @@
 export { looseIdentical } from '../facade/lang';
+export declare const UNINITIALIZED: {
+    toString: () => string;
+};
 export declare function devModeEqual(a: any, b: any): boolean;
 /**
  * Indicates that the result of a {@link Pipe} transformation has changed even though the
@@ -39,8 +42,7 @@ export declare class ValueUnwrapper {
 export declare class SimpleChange {
     previousValue: any;
     currentValue: any;
-    firstChange: boolean;
-    constructor(previousValue: any, currentValue: any, firstChange: boolean);
+    constructor(previousValue: any, currentValue: any);
     /**
      * Check whether the new value is the first value assigned.
      */

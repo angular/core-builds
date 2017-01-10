@@ -8,6 +8,9 @@
 import { areIterablesEqual, isListLikeIterable } from '../facade/collection';
 import { isPrimitive, looseIdentical } from '../facade/lang';
 export { looseIdentical } from '../facade/lang';
+export var /** @type {?} */ UNINITIALIZED = {
+    toString: function () { return 'CD_INIT_VALUE'; }
+};
 /**
  * @param {?} a
  * @param {?} b
@@ -95,18 +98,16 @@ export var SimpleChange = (function () {
     /**
      * @param {?} previousValue
      * @param {?} currentValue
-     * @param {?} firstChange
      */
-    function SimpleChange(previousValue, currentValue, firstChange) {
+    function SimpleChange(previousValue, currentValue) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
-        this.firstChange = firstChange;
     }
     /**
      *  Check whether the new value is the first value assigned.
      * @return {?}
      */
-    SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+    SimpleChange.prototype.isFirstChange = function () { return this.previousValue === UNINITIALIZED; };
     return SimpleChange;
 }());
 function SimpleChange_tsickle_Closure_declarations() {
@@ -114,7 +115,5 @@ function SimpleChange_tsickle_Closure_declarations() {
     SimpleChange.prototype.previousValue;
     /** @type {?} */
     SimpleChange.prototype.currentValue;
-    /** @type {?} */
-    SimpleChange.prototype.firstChange;
 }
 //# sourceMappingURL=change_detection_util.js.map

@@ -1,11 +1,11 @@
 import { ChangeDetectorRef } from '../change_detector_ref';
-import { KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory } from './keyvalue_differs';
-export declare class DefaultKeyValueDifferFactory<K, V> implements KeyValueDifferFactory {
+import { KeyValueDiffer, KeyValueDifferFactory } from './keyvalue_differs';
+export declare class DefaultKeyValueDifferFactory implements KeyValueDifferFactory {
     constructor();
     supports(obj: any): boolean;
-    create<K, V>(cdRef: ChangeDetectorRef): KeyValueDiffer<K, V>;
+    create(cdRef: ChangeDetectorRef): KeyValueDiffer;
 }
-export declare class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>, KeyValueChanges<K, V> {
+export declare class DefaultKeyValueDiffer implements KeyValueDiffer {
     private _records;
     private _mapHead;
     private _previousMapHead;
@@ -16,11 +16,11 @@ export declare class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>
     private _removalsHead;
     private _removalsTail;
     isDirty: boolean;
-    forEachItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
-    forEachPreviousItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
-    forEachChangedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
-    forEachAddedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
-    forEachRemovedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
+    forEachItem(fn: (r: KeyValueChangeRecord) => void): void;
+    forEachPreviousItem(fn: (r: KeyValueChangeRecord) => void): void;
+    forEachChangedItem(fn: (r: KeyValueChangeRecord) => void): void;
+    forEachAddedItem(fn: (r: KeyValueChangeRecord) => void): void;
+    forEachRemovedItem(fn: (r: KeyValueChangeRecord) => void): void;
     diff(map: Map<any, any> | {
         [k: string]: any;
     }): any;
@@ -28,13 +28,16 @@ export declare class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>
     check(map: Map<any, any> | {
         [k: string]: any;
     }): boolean;
-    private _truncate(lastRecord, record);
     private _maybeAddToChanges(record, newValue);
-    private _isInRemovals(record);
-    private _addToRemovals(record);
-    private _removeFromSeq(prev, record);
-    private _removeFromRemovals(record);
-    private _addToAdditions(record);
-    private _addToChanges(record);
+    toString(): string;
+}
+/**
+ * @stable
+ */
+export declare class KeyValueChangeRecord {
+    key: any;
+    previousValue: any;
+    currentValue: any;
+    constructor(key: any);
     toString(): string;
 }
