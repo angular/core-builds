@@ -183,10 +183,6 @@ function ComponentRef__tsickle_Closure_declarations() {
     ComponentRef_.prototype._component;
 }
 /**
- * @experimental
- */
-var /** @type {?} */ EMPTY_CONTEXT = new Object();
-/**
  * @stable
  */
 export var ComponentFactory = (function () {
