@@ -15,7 +15,6 @@ export declare class ViewUtils {
     private _renderer;
     animationQueue: AnimationQueue;
     sanitizer: Sanitizer;
-    private _nextCompTypeId;
     constructor(_renderer: RootRenderer, sanitizer: Sanitizer, animationQueue: AnimationQueue);
 }
 export declare function createRenderComponentType(templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: {

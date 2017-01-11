@@ -23,7 +23,6 @@ export var ViewUtils = (function () {
     function ViewUtils(_renderer, sanitizer, animationQueue) {
         this._renderer = _renderer;
         this.animationQueue = animationQueue;
-        this._nextCompTypeId = 0;
         this.sanitizer = sanitizer;
     }
     /**
@@ -54,8 +53,6 @@ function ViewUtils_tsickle_Closure_declarations() {
     ViewUtils.ctorParameters;
     /** @type {?} */
     ViewUtils.prototype.sanitizer;
-    /** @type {?} */
-    ViewUtils.prototype._nextCompTypeId;
     /** @type {?} */
     ViewUtils.prototype._renderer;
     /** @type {?} */

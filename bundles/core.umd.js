@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.4.2-d43e5dd
+ * @license Angular v2.4.2-d7f2a3c
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1103,7 +1103,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.4.2-d43e5dd');
+    var /** @type {?} */ VERSION = new Version('2.4.2-d7f2a3c');
 
     /**
      *  Allows to refer to references which are not yet defined.
@@ -6581,7 +6581,6 @@
         function ViewUtils(_renderer, sanitizer, animationQueue) {
             this._renderer = _renderer;
             this.animationQueue = animationQueue;
-            this._nextCompTypeId = 0;
             this.sanitizer = sanitizer;
         }
         /**
@@ -12184,7 +12183,7 @@
     /**
      * @experimental
      */
-    var /** @type {?} */ EMPTY_CONTEXT$1 = new Object();
+    var /** @type {?} */ EMPTY_CONTEXT = new Object();
     var /** @type {?} */ UNDEFINED$1 = new Object();
     /**
      *  Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -12260,7 +12259,7 @@
          * @return {?}
          */
         AppView.prototype.createHostView = function (rootSelectorOrNode, hostInjector, projectableNodes) {
-            this.context = (EMPTY_CONTEXT$1);
+            this.context = (EMPTY_CONTEXT);
             this._hasExternalHostElement = isPresent(rootSelectorOrNode);
             this._hostInjector = hostInjector;
             this._hostProjectableNodes = projectableNodes;
