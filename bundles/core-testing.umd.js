@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.3-5237b1c
+ * @license Angular v4.0.0-beta.3-d169c24
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -566,11 +566,11 @@
     /**
      * @experimental
      */
-    var ComponentFixtureAutoDetect = new _angular_core.OpaqueToken('ComponentFixtureAutoDetect');
+    var ComponentFixtureAutoDetect = new _angular_core.InjectionToken('ComponentFixtureAutoDetect');
     /**
      * @experimental
      */
-    var ComponentFixtureNoNgZone = new _angular_core.OpaqueToken('ComponentFixtureNoNgZone');
+    var ComponentFixtureNoNgZone = new _angular_core.InjectionToken('ComponentFixtureNoNgZone');
     /**
      * @whatItDoes Configures and initializes environment for unit testing and provides methods for
      * creating components and services in unit tests.

@@ -16,5 +16,5 @@ export { Injector } from './di/injector';
 export { ReflectiveInjector } from './di/reflective_injector';
 export { ResolvedReflectiveFactory } from './di/reflective_provider';
 export { ReflectiveKey } from './di/reflective_key';
-export { OpaqueToken } from './di/opaque_token';
+export { InjectionToken, OpaqueToken } from './di/injection_token';
 //# sourceMappingURL=di.js.map

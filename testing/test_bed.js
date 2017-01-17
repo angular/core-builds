@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Injector, NgModule, NgZone, OpaqueToken, ReflectiveInjector } from '@angular/core';
+import { InjectionToken, Injector, NgModule, NgZone, ReflectiveInjector } from '@angular/core';
 import { AsyncTestCompleter } from './async_test_completer';
 import { ComponentFixture } from './component_fixture';
 import { stringify } from './facade/lang';
@@ -26,11 +26,11 @@ var _nextRootElementId = 0;
 /**
  * @experimental
  */
-export var ComponentFixtureAutoDetect = new OpaqueToken('ComponentFixtureAutoDetect');
+export var ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetect');
 /**
  * @experimental
  */
-export var ComponentFixtureNoNgZone = new OpaqueToken('ComponentFixtureNoNgZone');
+export var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 /**
  * @whatItDoes Configures and initializes environment for unit testing and provides methods for
  * creating components and services in unit tests.

@@ -18,7 +18,7 @@ import { isPromise } from '../src/util/lang';
 import { ApplicationInitStatus } from './application_init';
 import { APP_BOOTSTRAP_LISTENER, PLATFORM_INITIALIZER } from './application_tokens';
 import { Console } from './console';
-import { Injectable, Injector, OpaqueToken, Optional, ReflectiveInjector } from './di';
+import { Injectable, InjectionToken, Injector, Optional, ReflectiveInjector } from './di';
 import { CompilerFactory } from './linker/compiler';
 import { ComponentFactory } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -89,7 +89,7 @@ export function createPlatform(injector) {
         throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
     }
     _platform = injector.get(PlatformRef);
-    var /** @type {?} */ inits = (injector.get(PLATFORM_INITIALIZER, null));
+    var /** @type {?} */ inits = injector.get(PLATFORM_INITIALIZER, null);
     if (inits)
         inits.forEach(function (init) { return init(); });
     return _platform;
@@ -104,7 +104,7 @@ export function createPlatform(injector) {
  */
 export function createPlatformFactory(parentPlatformFactory, name, providers) {
     if (providers === void 0) { providers = []; }
-    var /** @type {?} */ marker = new OpaqueToken("Platform: " + name);
+    var /** @type {?} */ marker = new InjectionToken("Platform: " + name);
     return function (extraProviders) {
         if (extraProviders === void 0) { extraProviders = []; }
         if (!getPlatform()) {
@@ -605,8 +605,7 @@ export var ApplicationRef_ = (function (_super) {
         this.tick();
         this._rootComponents.push(componentRef);
         // Get the listeners lazily to prevent DI cycles.
-        var /** @type {?} */ listeners = (this._injector.get(APP_BOOTSTRAP_LISTENER, [])
-            .concat(this._bootstrapListeners));
+        var /** @type {?} */ listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
         listeners.forEach(function (listener) { return listener(componentRef); });
     };
     /**

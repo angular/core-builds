@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.3-5237b1c
+ * @license Angular v4.0.0-beta.3-d169c24
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9,6 +9,11 @@
     (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx));
 }(this, function (exports,rxjs_Subject,rxjs_Observable) { 'use strict';
 
+    var __extends = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
     /**
      *  Creates a token that can be used in a DI Provider.
       * *
@@ -29,6 +34,8 @@
       * *
       * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
       * error messages.
+     * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
+      * instead.
      */
     var OpaqueToken = (function () {
         /**
@@ -43,6 +50,41 @@
         OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
         return OpaqueToken;
     }());
+    /**
+     *  Creates a token that can be used in a DI Provider.
+      * *
+      * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
+      * runtime representation) such as when injecting an interface, callable type, array or
+      * parametrized type.
+      * *
+      * `InjectionToken` is parametrize on `T` which is the type of object which will be returned by the
+      * `Injector`. This provides additional level of type safety.
+      * *
+      * ```
+      * interface MyInterface {...}
+      * var myInterface = injector.get(new InjectionToken<MyInterface>('SomeToken'));
+      * // myInterface is inferred to be MyInterface.
+      * ```
+      * *
+      * ### Example
+      * *
+      * {@example core/di/ts/injector_spec.ts region='Injector'}
+      * *
+     */
+    var InjectionToken = (function (_super) {
+        __extends(InjectionToken, _super);
+        /**
+         * @param {?} desc
+         */
+        function InjectionToken(desc) {
+            _super.call(this, desc);
+        }
+        /**
+         * @return {?}
+         */
+        InjectionToken.prototype.toString = function () { return "InjectionToken " + this._desc; };
+        return InjectionToken;
+    }(OpaqueToken));
 
     /**
      * @license
@@ -543,7 +585,7 @@
      *
      * @experimental
      */
-    var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
+    var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
     /**
      * Attribute decorator and metadata.
      *
@@ -1051,7 +1093,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.3-5237b1c');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.3-d169c24');
 
     /**
      * Inject decorator and metadata.
@@ -1137,7 +1179,7 @@
         }
     }
 
-    var __extends = (this && this.__extends) || function (d, b) {
+    var __extends$1 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -1157,7 +1199,7 @@
      * @stable
      */
     var BaseError = (function (_super) {
-        __extends(BaseError, _super);
+        __extends$1(BaseError, _super);
         /**
          * @param {?} message
          */
@@ -1214,7 +1256,7 @@
      * @stable
      */
     var WrappedError = (function (_super) {
-        __extends(WrappedError, _super);
+        __extends$1(WrappedError, _super);
         /**
          * @param {?} message
          * @param {?} error
@@ -1277,11 +1319,6 @@
         function Injector() {
         }
         /**
-         *  Retrieves an instance from the injector based on the provided token.
-          * If not found:
-          * - Throws {@link NoProviderError} if no `notFoundValue` that is not equal to
-          * Injector.THROW_IF_NOT_FOUND is given
-          * - Returns the `notFoundValue` otherwise
          * @param {?} token
          * @param {?=} notFoundValue
          * @return {?}
@@ -1299,7 +1336,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$1 = (this && this.__extends) || function (d, b) {
+    var __extends$2 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -1335,7 +1372,7 @@
      *  Base class for all errors arising from misconfigured providers.
      */
     var AbstractProviderError = (function (_super) {
-        __extends$1(AbstractProviderError, _super);
+        __extends$2(AbstractProviderError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1375,7 +1412,7 @@
       * ```
      */
     var NoProviderError = (function (_super) {
-        __extends$1(NoProviderError, _super);
+        __extends$2(NoProviderError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1405,7 +1442,7 @@
       * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
      */
     var CyclicDependencyError = (function (_super) {
-        __extends$1(CyclicDependencyError, _super);
+        __extends$2(CyclicDependencyError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1443,7 +1480,7 @@
       * ```
      */
     var InstantiationError = (function (_super) {
-        __extends$1(InstantiationError, _super);
+        __extends$2(InstantiationError, _super);
         /**
          * @param {?} injector
          * @param {?} originalException
@@ -1496,7 +1533,7 @@
       * ```
      */
     var InvalidProviderError = (function (_super) {
-        __extends$1(InvalidProviderError, _super);
+        __extends$2(InvalidProviderError, _super);
         /**
          * @param {?} provider
          */
@@ -1534,7 +1571,7 @@
       * ```
      */
     var NoAnnotationError = (function (_super) {
-        __extends$1(NoAnnotationError, _super);
+        __extends$2(NoAnnotationError, _super);
         /**
          * @param {?} typeOrFunc
          * @param {?} params
@@ -1579,7 +1616,7 @@
       * ```
      */
     var OutOfBoundsError = (function (_super) {
-        __extends$1(OutOfBoundsError, _super);
+        __extends$2(OutOfBoundsError, _super);
         /**
          * @param {?} index
          */
@@ -1601,7 +1638,7 @@
       * ```
      */
     var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
-        __extends$1(MixingMultiProvidersWithRegularProvidersError, _super);
+        __extends$2(MixingMultiProvidersWithRegularProvidersError, _super);
         /**
          * @param {?} provider1
          * @param {?} provider2
@@ -2082,7 +2119,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$2 = (this && this.__extends) || function (d, b) {
+    var __extends$3 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -2092,7 +2129,7 @@
       * to power dependency injection and compilation.
      */
     var Reflector = (function (_super) {
-        __extends$2(Reflector, _super);
+        __extends$3(Reflector, _super);
         /**
          * @param {?} reflectionCapabilities
          */
@@ -3708,7 +3745,7 @@
      * A function that will be executed when an application is initialized.
      * @experimental
      */
-    var /** @type {?} */ APP_INITIALIZER = new OpaqueToken('Application Initializer');
+    var /** @type {?} */ APP_INITIALIZER = new InjectionToken('Application Initializer');
     /**
      *  A class that reflects the state of running {@link APP_INITIALIZER}s.
       * *
@@ -3770,7 +3807,7 @@
      * using this token.
      * @experimental
      */
-    var /** @type {?} */ APP_ID = new OpaqueToken('AppId');
+    var /** @type {?} */ APP_ID = new InjectionToken('AppId');
     /**
      * @return {?}
      */
@@ -3796,7 +3833,7 @@
      * A function that will be executed when a platform is initialized.
      * @experimental
      */
-    var /** @type {?} */ PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
+    var /** @type {?} */ PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
     /**
      * All callbacks provided via this token will be called for every component that is bootstrapped.
      * Signature of the callback:
@@ -3805,12 +3842,12 @@
      *
      * @experimental
      */
-    var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
+    var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
     /**
      * A token which indicates the root directory of the application
      * @experimental
      */
-    var /** @type {?} */ PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
+    var /** @type {?} */ PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 
     var Console = (function () {
         function Console() {
@@ -3840,7 +3877,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$4 = (this && this.__extends) || function (d, b) {
+    var __extends$5 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -3850,7 +3887,7 @@
       * *
      */
     var ComponentStillLoadingError = (function (_super) {
-        __extends$4(ComponentStillLoadingError, _super);
+        __extends$5(ComponentStillLoadingError, _super);
         /**
          * @param {?} compType
          */
@@ -3955,7 +3992,7 @@
      *
      * @experimental
      */
-    var /** @type {?} */ COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
+    var /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptions');
     /**
      *  A factory for creating a Compiler
       * *
@@ -4012,7 +4049,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$6 = (this && this.__extends) || function (d, b) {
+    var __extends$7 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -4063,7 +4100,7 @@
       * Once a reference implementation of the spec is available, switch to it.
      */
     var EventEmitter = (function (_super) {
-        __extends$6(EventEmitter, _super);
+        __extends$7(EventEmitter, _super);
         /**
          *  Creates an instance of [EventEmitter], which depending on [isAsync],
           * delivers events synchronously or asynchronously.
@@ -6472,7 +6509,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$7 = (this && this.__extends) || function (d, b) {
+    var __extends$8 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -6506,7 +6543,7 @@
       * ```
      */
     var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
-        __extends$7(ExpressionChangedAfterItHasBeenCheckedError, _super);
+        __extends$8(ExpressionChangedAfterItHasBeenCheckedError, _super);
         /**
          * @param {?} oldValue
          * @param {?} currValue
@@ -6530,7 +6567,7 @@
       * be useful for debugging.
      */
     var ViewWrappedError = (function (_super) {
-        __extends$7(ViewWrappedError, _super);
+        __extends$8(ViewWrappedError, _super);
         /**
          * @param {?} originalError
          * @param {?} context
@@ -6549,7 +6586,7 @@
       * This is an internal Angular error.
      */
     var ViewDestroyedError = (function (_super) {
-        __extends$7(ViewDestroyedError, _super);
+        __extends$8(ViewDestroyedError, _super);
         /**
          * @param {?} details
          */
@@ -7601,7 +7638,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$5 = (this && this.__extends) || function (d, b) {
+    var __extends$6 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -7689,7 +7726,7 @@
         return ComponentRef;
     }());
     var ComponentRef_ = (function (_super) {
-        __extends$5(ComponentRef_, _super);
+        __extends$6(ComponentRef_, _super);
         /**
          * @param {?} _index
          * @param {?} _parentView
@@ -7814,7 +7851,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$8 = (this && this.__extends) || function (d, b) {
+    var __extends$9 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -7823,7 +7860,7 @@
      * @stable
      */
     var NoComponentFactoryError = (function (_super) {
-        __extends$8(NoComponentFactoryError, _super);
+        __extends$9(NoComponentFactoryError, _super);
         /**
          * @param {?} component
          */
@@ -8229,7 +8266,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$3 = (this && this.__extends) || function (d, b) {
+    var __extends$4 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -8292,7 +8329,7 @@
             throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
         }
         _platform = injector.get(PlatformRef);
-        var /** @type {?} */ inits = (injector.get(PLATFORM_INITIALIZER, null));
+        var /** @type {?} */ inits = injector.get(PLATFORM_INITIALIZER, null);
         if (inits)
             inits.forEach(function (init) { return init(); });
         return _platform;
@@ -8307,7 +8344,7 @@
      */
     function createPlatformFactory(parentPlatformFactory, name, providers) {
         if (providers === void 0) { providers = []; }
-        var /** @type {?} */ marker = new OpaqueToken("Platform: " + name);
+        var /** @type {?} */ marker = new InjectionToken("Platform: " + name);
         return function (extraProviders) {
             if (extraProviders === void 0) { extraProviders = []; }
             if (!getPlatform()) {
@@ -8473,7 +8510,7 @@
         }
     }
     var PlatformRef_ = (function (_super) {
-        __extends$3(PlatformRef_, _super);
+        __extends$4(PlatformRef_, _super);
         /**
          * @param {?} _injector
          */
@@ -8703,7 +8740,7 @@
         return ApplicationRef;
     }());
     var ApplicationRef_ = (function (_super) {
-        __extends$3(ApplicationRef_, _super);
+        __extends$4(ApplicationRef_, _super);
         /**
          * @param {?} _zone
          * @param {?} _console
@@ -8791,8 +8828,7 @@
             this.tick();
             this._rootComponents.push(componentRef);
             // Get the listeners lazily to prevent DI cycles.
-            var /** @type {?} */ listeners = (this._injector.get(APP_BOOTSTRAP_LISTENER, [])
-                .concat(this._bootstrapListeners));
+            var /** @type {?} */ listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
             listeners.forEach(function (listener) { return listener(componentRef); });
         };
         /**
@@ -8880,7 +8916,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$9 = (this && this.__extends) || function (d, b) {
+    var __extends$10 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -8978,7 +9014,7 @@
      * @abstract
      */
     var NgModuleInjector = (function (_super) {
-        __extends$9(NgModuleInjector, _super);
+        __extends$10(NgModuleInjector, _super);
         /**
          * @param {?} parent
          * @param {?} factories
@@ -9356,7 +9392,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$10 = (this && this.__extends) || function (d, b) {
+    var __extends$11 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -9394,7 +9430,7 @@
         return TemplateRef;
     }());
     var TemplateRef_ = (function (_super) {
-        __extends$10(TemplateRef_, _super);
+        __extends$11(TemplateRef_, _super);
         /**
          * @param {?} _parentView
          * @param {?} _nodeIndex
@@ -9743,7 +9779,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$11 = (this && this.__extends) || function (d, b) {
+    var __extends$12 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -9752,7 +9788,7 @@
      * @abstract
      */
     var ViewRef = (function (_super) {
-        __extends$11(ViewRef, _super);
+        __extends$12(ViewRef, _super);
         function ViewRef() {
             _super.apply(this, arguments);
         }
@@ -9833,7 +9869,7 @@
      * @abstract
      */
     var EmbeddedViewRef = (function (_super) {
-        __extends$11(EmbeddedViewRef, _super);
+        __extends$12(EmbeddedViewRef, _super);
         function EmbeddedViewRef() {
             _super.apply(this, arguments);
         }
@@ -9949,7 +9985,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$12 = (this && this.__extends) || function (d, b) {
+    var __extends$13 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -10042,7 +10078,7 @@
      * @experimental All debugging apis are currently experimental.
      */
     var DebugElement = (function (_super) {
-        __extends$12(DebugElement, _super);
+        __extends$13(DebugElement, _super);
         /**
          * @param {?} nativeNode
          * @param {?} parent
@@ -10237,15 +10273,15 @@
     /**
      * @experimental i18n support is experimental.
      */
-    var /** @type {?} */ LOCALE_ID = new OpaqueToken('LocaleId');
+    var /** @type {?} */ LOCALE_ID = new InjectionToken('LocaleId');
     /**
      * @experimental i18n support is experimental.
      */
-    var /** @type {?} */ TRANSLATIONS = new OpaqueToken('Translations');
+    var /** @type {?} */ TRANSLATIONS = new InjectionToken('Translations');
     /**
      * @experimental i18n support is experimental.
      */
-    var /** @type {?} */ TRANSLATIONS_FORMAT = new OpaqueToken('TranslationsFormat');
+    var /** @type {?} */ TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
 
     /**
      * @return {?}
@@ -10775,7 +10811,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$13 = (this && this.__extends) || function (d, b) {
+    var __extends$14 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -10816,7 +10852,7 @@
       * *
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
-        __extends$13(AnimationStateDeclarationMetadata, _super);
+        __extends$14(AnimationStateDeclarationMetadata, _super);
         /**
          * @param {?} stateNameExpr
          * @param {?} styles
@@ -10835,7 +10871,7 @@
       * *
      */
     var AnimationStateTransitionMetadata = (function (_super) {
-        __extends$13(AnimationStateTransitionMetadata, _super);
+        __extends$14(AnimationStateTransitionMetadata, _super);
         /**
          * @param {?} stateChangeExpr
          * @param {?} steps
@@ -10862,7 +10898,7 @@
       * *
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
-        __extends$13(AnimationKeyframesSequenceMetadata, _super);
+        __extends$14(AnimationKeyframesSequenceMetadata, _super);
         /**
          * @param {?} steps
          */
@@ -10879,7 +10915,7 @@
       * *
      */
     var AnimationStyleMetadata = (function (_super) {
-        __extends$13(AnimationStyleMetadata, _super);
+        __extends$14(AnimationStyleMetadata, _super);
         /**
          * @param {?} styles
          * @param {?=} offset
@@ -10899,7 +10935,7 @@
       * *
      */
     var AnimationAnimateMetadata = (function (_super) {
-        __extends$13(AnimationAnimateMetadata, _super);
+        __extends$14(AnimationAnimateMetadata, _super);
         /**
          * @param {?} timings
          * @param {?} styles
@@ -10915,7 +10951,7 @@
      * @abstract
      */
     var AnimationWithStepsMetadata = (function (_super) {
-        __extends$13(AnimationWithStepsMetadata, _super);
+        __extends$14(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
             _super.call(this);
         }
@@ -10936,7 +10972,7 @@
       * *
      */
     var AnimationSequenceMetadata = (function (_super) {
-        __extends$13(AnimationSequenceMetadata, _super);
+        __extends$14(AnimationSequenceMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -10961,7 +10997,7 @@
       * *
      */
     var AnimationGroupMetadata = (function (_super) {
-        __extends$13(AnimationGroupMetadata, _super);
+        __extends$14(AnimationGroupMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -12272,13 +12308,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$15 = (this && this.__extends) || function (d, b) {
+    var __extends$16 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var ElementInjector = (function (_super) {
-        __extends$15(ElementInjector, _super);
+        __extends$16(ElementInjector, _super);
         /**
          * @param {?} _view
          * @param {?} _nodeIndex
@@ -12307,7 +12343,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$14 = (this && this.__extends) || function (d, b) {
+    var __extends$15 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -12762,7 +12798,7 @@
         return AppView;
     }());
     var DebugAppView = (function (_super) {
-        __extends$14(DebugAppView, _super);
+        __extends$15(DebugAppView, _super);
         /**
          * @param {?} clazz
          * @param {?} componentType
@@ -13213,6 +13249,7 @@
     exports.ReflectiveInjector = ReflectiveInjector;
     exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
     exports.ReflectiveKey = ReflectiveKey;
+    exports.InjectionToken = InjectionToken;
     exports.OpaqueToken = OpaqueToken;
     exports.Inject = Inject;
     exports.Optional = Optional;

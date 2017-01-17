@@ -6,12 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isPromise } from '../src/util/lang';
-import { Inject, Injectable, OpaqueToken, Optional } from './di';
+import { Inject, Injectable, InjectionToken, Optional } from './di';
 /**
  * A function that will be executed when an application is initialized.
  * @experimental
  */
-export var /** @type {?} */ APP_INITIALIZER = new OpaqueToken('Application Initializer');
+export var /** @type {?} */ APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  *  A class that reflects the state of running {@link APP_INITIALIZER}s.
   * *

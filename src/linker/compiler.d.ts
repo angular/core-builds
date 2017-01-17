@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OpaqueToken } from '../di';
+import { InjectionToken } from '../di';
 import { BaseError } from '../facade/errors';
 import { ViewEncapsulation } from '../metadata';
 import { Type } from '../type';
@@ -91,7 +91,12 @@ export declare type CompilerOptions = {
  *
  * @experimental
  */
-export declare const COMPILER_OPTIONS: OpaqueToken;
+export declare const COMPILER_OPTIONS: InjectionToken<{
+    useDebug?: boolean;
+    useJit?: boolean;
+    defaultEncapsulation?: ViewEncapsulation;
+    providers?: any[];
+}[]>;
 /**
  * A factory for creating a Compiler
  *

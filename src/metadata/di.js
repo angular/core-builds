@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OpaqueToken } from '../di/opaque_token';
+import { InjectionToken } from '../di/injection_token';
 import { makeParamDecorator, makePropDecorator } from '../util/decorators';
 /**
  * This token can be used to create a virtual provider that will populate the
@@ -41,7 +41,7 @@ import { makeParamDecorator, makePropDecorator } from '../util/decorators';
  *
  * @experimental
  */
-export var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('AnalyzeForEntryComponents');
+export var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
 /**
  * Attribute decorator and metadata.
  *

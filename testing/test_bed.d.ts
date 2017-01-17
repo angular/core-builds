@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Component, Directive, Injector, NgModule, OpaqueToken, Pipe, PlatformRef, SchemaMetadata, Type } from '@angular/core';
+import { Component, Directive, InjectionToken, Injector, NgModule, Pipe, PlatformRef, SchemaMetadata, Type } from '@angular/core';
 import { ComponentFixture } from './component_fixture';
 import { MetadataOverride } from './metadata_override';
 /**
@@ -19,11 +19,11 @@ export declare class TestComponentRenderer {
 /**
  * @experimental
  */
-export declare const ComponentFixtureAutoDetect: OpaqueToken;
+export declare const ComponentFixtureAutoDetect: InjectionToken<boolean[]>;
 /**
  * @experimental
  */
-export declare const ComponentFixtureNoNgZone: OpaqueToken;
+export declare const ComponentFixtureNoNgZone: InjectionToken<boolean[]>;
 /**
  * @experimental
  */

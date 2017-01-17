@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-import { Injectable, OpaqueToken } from '../di';
+import { Injectable, InjectionToken } from '../di';
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
@@ -142,7 +142,7 @@ function Compiler_tsickle_Closure_declarations() {
  *
  * @experimental
  */
-export var /** @type {?} */ COMPILER_OPTIONS = new OpaqueToken('compilerOptions');
+export var /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptions');
 /**
  *  A factory for creating a Compiler
   * *

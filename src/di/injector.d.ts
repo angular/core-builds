@@ -1,3 +1,5 @@
+import { Type } from '../type';
+import { InjectionToken } from './injection_token';
 export declare const THROW_IF_NOT_FOUND: Object;
 /**
  * @whatItDoes Injector interface
@@ -28,6 +30,10 @@ export declare abstract class Injector {
      * - Throws {@link NoProviderError} if no `notFoundValue` that is not equal to
      * Injector.THROW_IF_NOT_FOUND is given
      * - Returns the `notFoundValue` otherwise
+     */
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T): T;
+    /**
+     * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
      */
     get(token: any, notFoundValue?: any): any;
 }

@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { OpaqueToken } from './di';
+import { InjectionToken } from './di';
 /**
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
@@ -16,7 +16,7 @@ import { OpaqueToken } from './di';
  * using this token.
  * @experimental
  */
-export var /** @type {?} */ APP_ID = new OpaqueToken('AppId');
+export var /** @type {?} */ APP_ID = new InjectionToken('AppId');
 /**
  * @return {?}
  */
@@ -42,7 +42,7 @@ function _randomChar() {
  * A function that will be executed when a platform is initialized.
  * @experimental
  */
-export var /** @type {?} */ PLATFORM_INITIALIZER = new OpaqueToken('Platform Initializer');
+export var /** @type {?} */ PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
 /**
  * All callbacks provided via this token will be called for every component that is bootstrapped.
  * Signature of the callback:
@@ -51,10 +51,10 @@ export var /** @type {?} */ PLATFORM_INITIALIZER = new OpaqueToken('Platform Ini
  *
  * @experimental
  */
-export var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new OpaqueToken('appBootstrapListener');
+export var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
 /**
  * A token which indicates the root directory of the application
  * @experimental
  */
-export var /** @type {?} */ PACKAGE_ROOT_URL = new OpaqueToken('Application Packages Root URL');
+export var /** @type {?} */ PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 //# sourceMappingURL=application_tokens.js.map
