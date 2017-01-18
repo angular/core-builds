@@ -7,7 +7,8 @@
  */
 import { Optional, SkipSelf } from '../../di';
 /**
- *  A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ * \@stable
  */
 export var KeyValueDiffers = (function () {
     /**
@@ -29,22 +30,23 @@ export var KeyValueDiffers = (function () {
         return new KeyValueDiffers(factories);
     };
     /**
-     *  Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
-      * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
-      * {@link KeyValueDiffers} instance.
-      * *
-      * The following example shows how to extend an existing list of factories,
-      * which will only be applied to the injector for this component and its children.
-      * This step is all that's required to make a new {@link KeyValueDiffer} available.
-      * *
-      * ### Example
-      * *
-      * ```
-      * viewProviders: [
-      * KeyValueDiffers.extend([new ImmutableMapDiffer()])
-      * ]
-      * })
-      * ```
+     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
+     * {\@link KeyValueDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
      * @param {?} factories
      * @return {?}
      */
@@ -78,7 +80,7 @@ export var KeyValueDiffers = (function () {
 }());
 function KeyValueDiffers_tsickle_Closure_declarations() {
     /**
-     * @deprecated
+     * @deprecated v4.0.0 - Should be private.
      * @type {?}
      */
     KeyValueDiffers.prototype.factories;

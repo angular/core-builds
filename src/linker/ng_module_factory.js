@@ -15,11 +15,12 @@ import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
 /**
- *  Represents an instance of an NgModule created via a {@link NgModuleFactory}.
-  * *
-  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
-  * NgModule Instance.
-  * *
+ * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
+ *
+ * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+ * NgModule Instance.
+ *
+ * \@stable
  * @abstract
  */
 export var NgModuleRef = (function () {
@@ -27,7 +28,7 @@ export var NgModuleRef = (function () {
     }
     Object.defineProperty(NgModuleRef.prototype, "injector", {
         /**
-         *  The injector that contains all of the providers of the NgModule.
+         * The injector that contains all of the providers of the NgModule.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -36,8 +37,8 @@ export var NgModuleRef = (function () {
     });
     Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
         /**
-         *  The ComponentFactoryResolver to get hold of the ComponentFactories
-          * declared in the `entryComponents` property of the module.
+         * The ComponentFactoryResolver to get hold of the ComponentFactories
+         * declared in the `entryComponents` property of the module.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -46,7 +47,7 @@ export var NgModuleRef = (function () {
     });
     Object.defineProperty(NgModuleRef.prototype, "instance", {
         /**
-         *  The NgModule instance.
+         * The NgModule instance.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -54,13 +55,13 @@ export var NgModuleRef = (function () {
         configurable: true
     });
     /**
-     *  Destroys the module instance and all of the data structures associated with it.
+     * Destroys the module instance and all of the data structures associated with it.
      * @abstract
      * @return {?}
      */
     NgModuleRef.prototype.destroy = function () { };
     /**
-     *  Allows to register a callback that will be called when the module is destroyed.
+     * Allows to register a callback that will be called when the module is destroyed.
      * @abstract
      * @param {?} callback
      * @return {?}
@@ -69,7 +70,7 @@ export var NgModuleRef = (function () {
     return NgModuleRef;
 }());
 /**
- * @experimental
+ * \@experimental
  */
 export var NgModuleFactory = (function () {
     /**

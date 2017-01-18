@@ -167,6 +167,7 @@ export var DefaultKeyValueDiffer = (function () {
         return this.isDirty;
     };
     /**
+     * \@internal
      * @return {?}
      */
     DefaultKeyValueDiffer.prototype._reset = function () {
@@ -339,6 +340,7 @@ export var DefaultKeyValueDiffer = (function () {
             'removals: ' + removals.join(', ') + '\n';
     };
     /**
+     * \@internal
      * @param {?} obj
      * @param {?} fn
      * @return {?}
@@ -374,7 +376,7 @@ function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
     DefaultKeyValueDiffer.prototype._removalsTail;
 }
 /**
- * @stable
+ * \@stable
  */
 var KeyValueChangeRecord_ = (function () {
     /**
@@ -413,17 +415,35 @@ function KeyValueChangeRecord__tsickle_Closure_declarations() {
     KeyValueChangeRecord_.prototype.previousValue;
     /** @type {?} */
     KeyValueChangeRecord_.prototype.currentValue;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._nextPrevious;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._next;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._nextAdded;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._nextRemoved;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._prevRemoved;
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     KeyValueChangeRecord_.prototype._nextChanged;
     /** @type {?} */
     KeyValueChangeRecord_.prototype.key;

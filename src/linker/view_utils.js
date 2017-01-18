@@ -25,6 +25,7 @@ export var ViewUtils = (function () {
         this.sanitizer = sanitizer;
     }
     /**
+     * \@internal
      * @param {?} renderComponentType
      * @return {?}
      */
@@ -1099,7 +1100,7 @@ function InlineArrayDynamic_tsickle_Closure_declarations() {
 }
 export var /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
 /**
- *  This is a private API only used by the compiler to read the view class.
+ * This is a private API only used by the compiler to read the view class.
  * @param {?} componentFactory
  * @return {?}
  */

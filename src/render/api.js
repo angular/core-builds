@@ -6,10 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { unimplemented } from '../facade/errors';
-/**
- * @experimental
- */
-// TODO (matsko): add typing for the animation function
 export var RenderComponentType = (function () {
     /**
      * @param {?} id
@@ -100,6 +96,7 @@ export var RenderDebugInfo = (function () {
     return RenderDebugInfo;
 }());
 /**
+ * \@experimental
  * @abstract
  */
 export var Renderer = (function () {
@@ -201,7 +198,7 @@ export var Renderer = (function () {
      */
     Renderer.prototype.setElementAttribute = function (renderElement, attributeName, attributeValue) { };
     /**
-     *  Used only in debug mode to serialize property changes to dom nodes as attributes.
+     * Used only in debug mode to serialize property changes to dom nodes as attributes.
      * @abstract
      * @param {?} renderElement
      * @param {?} propertyName
@@ -255,16 +252,17 @@ export var Renderer = (function () {
     return Renderer;
 }());
 /**
- *  Injectable service that provides a low-level interface for modifying the UI.
-  * *
-  * Use this service to bypass Angular's templating and make custom UI changes that can't be
-  * expressed declaratively. For example if you need to set a property or an attribute whose name is
-  * not statically known, use {@link #setElementProperty} or {@link #setElementAttribute}
-  * respectively.
-  * *
-  * If you are implementing a custom renderer, you must implement this interface.
-  * *
-  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+ * Injectable service that provides a low-level interface for modifying the UI.
+ *
+ * Use this service to bypass Angular's templating and make custom UI changes that can't be
+ * expressed declaratively. For example if you need to set a property or an attribute whose name is
+ * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
+ * respectively.
+ *
+ * If you are implementing a custom renderer, you must implement this interface.
+ *
+ * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+ * \@experimental
  * @abstract
  */
 export var RootRenderer = (function () {

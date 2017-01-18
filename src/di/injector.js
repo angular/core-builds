@@ -27,20 +27,24 @@ var _NullInjector = (function () {
     return _NullInjector;
 }());
 /**
- *  ```
-  * const injector: Injector = ...;
-  * injector.get(...);
-  * ```
-  * *
-  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
-  * *
-  * ### Example
-  * *
-  * {@example core/di/ts/injector_spec.ts region='Injector'}
-  * *
-  * `Injector` returns itself when given `Injector` as a token:
-  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
-  * *
+ * \@whatItDoes Injector interface
+ * \@howToUse
+ * ```
+ * const injector: Injector = ...;
+ * injector.get(...);
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/injector_spec.ts region='Injector'}
+ *
+ * `Injector` returns itself when given `Injector` as a token:
+ * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
+ *
+ * \@stable
  * @abstract
  */
 export var Injector = (function () {
