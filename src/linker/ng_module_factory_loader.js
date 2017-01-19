@@ -10,18 +10,15 @@
  * \@stable
  * @abstract
  */
-export var NgModuleFactoryLoader = (function () {
-    function NgModuleFactoryLoader() {
-    }
+export class NgModuleFactoryLoader {
     /**
      * @abstract
      * @param {?} path
      * @return {?}
      */
-    NgModuleFactoryLoader.prototype.load = function (path) { };
-    return NgModuleFactoryLoader;
-}());
-var /** @type {?} */ moduleFactories = new Map();
+    load(path) { }
+}
+let /** @type {?} */ moduleFactories = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
  * \@experimental
@@ -30,9 +27,9 @@ var /** @type {?} */ moduleFactories = new Map();
  * @return {?}
  */
 export function registerModuleFactory(id, factory) {
-    var /** @type {?} */ existing = moduleFactories.get(id);
+    const /** @type {?} */ existing = moduleFactories.get(id);
     if (existing) {
-        throw new Error("Duplicate module registered for " + id + " - " + existing.moduleType.name + " vs " + factory.moduleType.name);
+        throw new Error(`Duplicate module registered for ${id} - ${existing.moduleType.name} vs ${factory.moduleType.name}`);
     }
     moduleFactories.set(id, factory);
 }
@@ -51,9 +48,9 @@ export function clearModulesForTest() {
  * @return {?}
  */
 export function getModuleFactory(id) {
-    var /** @type {?} */ factory = moduleFactories.get(id);
+    const /** @type {?} */ factory = moduleFactories.get(id);
     if (!factory)
-        throw new Error("No module with ID " + id + " loaded");
+        throw new Error(`No module with ID ${id} loaded`);
     return factory;
 }
 //# sourceMappingURL=ng_module_factory_loader.js.map

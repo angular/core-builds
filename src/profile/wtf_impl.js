@@ -6,13 +6,13 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { global } from '../facade/lang';
-var /** @type {?} */ trace;
-var /** @type {?} */ events;
+let /** @type {?} */ trace;
+let /** @type {?} */ events;
 /**
  * @return {?}
  */
 export function detectWTF() {
-    var /** @type {?} */ wtf = ((global) /** TODO #9100 */)['wtf'];
+    const /** @type {?} */ wtf = ((global) /** TODO #9100 */)['wtf'];
     if (wtf) {
         trace = wtf['trace'];
         if (trace) {
@@ -27,8 +27,7 @@ export function detectWTF() {
  * @param {?=} flags
  * @return {?}
  */
-export function createScope(signature, flags) {
-    if (flags === void 0) { flags = null; }
+export function createScope(signature, flags = null) {
     return events.createScope(signature, flags);
 }
 /**

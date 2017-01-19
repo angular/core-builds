@@ -46,8 +46,8 @@ export declare abstract class AppView<T> {
     private _directRenderer;
     context: T;
     constructor(clazz: any, componentType: RenderComponentType, type: ViewType, viewUtils: ViewUtils, parentView: AppView<any>, parentIndex: number, parentElement: any, cdMode: ChangeDetectorStatus, declaredViewContainer?: ViewContainer);
-    animationContext: AnimationViewContext;
-    destroyed: boolean;
+    readonly animationContext: AnimationViewContext;
+    readonly destroyed: boolean;
     create(context: T): ComponentRef<any>;
     createHostView(rootSelectorOrNode: string | any, hostInjector: Injector, projectableNodes: any[][]): ComponentRef<any>;
     /**
@@ -82,8 +82,8 @@ export declare abstract class AppView<T> {
     attachAfter(viewContainer: ViewContainer, prevView: AppView<any>): void;
     moveAfter(viewContainer: ViewContainer, prevView: AppView<any>): void;
     private _renderAttach(viewContainer, prevView);
-    changeDetectorRef: ChangeDetectorRef;
-    flatRootNodes: any[];
+    readonly changeDetectorRef: ChangeDetectorRef;
+    readonly flatRootNodes: any[];
     projectNodes(parentElement: any, ngContentIndex: number): void;
     visitProjectedNodes<C>(ngContentIndex: number, cb: (node: any, ctx: C) => void, c: C): void;
     /**

@@ -21,10 +21,10 @@ export declare class ViewContainer {
     nestedViews: AppView<any>[];
     projectedViews: AppView<any>[];
     constructor(index: number, parentIndex: number, parentView: AppView<any>, nativeElement: any);
-    elementRef: ElementRef;
-    vcRef: ViewContainerRef_;
-    parentInjector: Injector;
-    injector: Injector;
+    readonly elementRef: ElementRef;
+    readonly vcRef: ViewContainerRef_;
+    readonly parentInjector: Injector;
+    readonly injector: Injector;
     detectChangesInNestedViews(throwOnChange: boolean): void;
     destroyNestedViews(): void;
     visitNestedViewRootNodes<C>(cb: (node: any, ctx: C) => void, c: C): void;

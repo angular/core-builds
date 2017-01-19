@@ -1,10 +1,10 @@
 import { Injectable } from '../di/metadata';
 import { NgZone } from '../zone/ng_zone';
-export var AnimationQueue = (function () {
+export class AnimationQueue {
     /**
      * @param {?} _zone
      */
-    function AnimationQueue(_zone) {
+    constructor(_zone) {
         this._zone = _zone;
         this.entries = [];
     }
@@ -12,12 +12,11 @@ export var AnimationQueue = (function () {
      * @param {?} player
      * @return {?}
      */
-    AnimationQueue.prototype.enqueue = function (player) { this.entries.push(player); };
+    enqueue(player) { this.entries.push(player); }
     /**
      * @return {?}
      */
-    AnimationQueue.prototype.flush = function () {
-        var _this = this;
+    flush() {
         // given that each animation player may set aside
         // microtasks and rely on DOM-based events, this
         // will cause Angular to run change detection after
@@ -26,21 +25,21 @@ export var AnimationQueue = (function () {
         // then those methods will automatically trigger change
         // detection by wrapping themselves inside of a zone
         if (this.entries.length) {
-            this._zone.runOutsideAngular(function () {
+            this._zone.runOutsideAngular(() => {
                 // this code is wrapped into a single promise such that the
                 // onStart and onDone player callbacks are triggered outside
                 // of the digest cycle of animations
-                Promise.resolve(null).then(function () { return _this._triggerAnimations(); });
+                Promise.resolve(null).then(() => this._triggerAnimations());
             });
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationQueue.prototype._triggerAnimations = function () {
+    _triggerAnimations() {
         NgZone.assertNotInAngularZone();
         while (this.entries.length) {
-            var /** @type {?} */ player = this.entries.shift();
+            const /** @type {?} */ player = this.entries.shift();
             // in the event that an animation throws an error then we do
             // not want to re-run animations on any previous animations
             // if they have already been kicked off beforehand
@@ -48,16 +47,15 @@ export var AnimationQueue = (function () {
                 player.play();
             }
         }
-    };
-    AnimationQueue.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    AnimationQueue.ctorParameters = function () { return [
-        { type: NgZone, },
-    ]; };
-    return AnimationQueue;
-}());
+    }
+}
+AnimationQueue.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+AnimationQueue.ctorParameters = () => [
+    { type: NgZone, },
+];
 function AnimationQueue_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationQueue.decorators;

@@ -85,8 +85,8 @@ export declare class CyclicDependencyError extends AbstractProviderError {
 export declare class InstantiationError extends WrappedError {
     constructor(injector: ReflectiveInjector, originalException: any, originalStack: any, key: ReflectiveKey);
     addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
-    message: string;
-    causeKey: ReflectiveKey;
+    readonly message: string;
+    readonly causeKey: ReflectiveKey;
 }
 /**
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}

@@ -13,7 +13,7 @@ import { makeDecorator, makePropDecorator } from '../util/decorators';
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Directive = (makeDecorator('Directive', {
+export const /** @type {?} */ Directive = (makeDecorator('Directive', {
     selector: undefined,
     inputs: undefined,
     outputs: undefined,
@@ -28,7 +28,7 @@ export var /** @type {?} */ Directive = (makeDecorator('Directive', {
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Component = (makeDecorator('Component', {
+export const /** @type {?} */ Component = (makeDecorator('Component', {
     selector: undefined,
     inputs: undefined,
     outputs: undefined,
@@ -54,7 +54,7 @@ export var /** @type {?} */ Component = (makeDecorator('Component', {
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Pipe = (makeDecorator('Pipe', {
+export const /** @type {?} */ Pipe = (makeDecorator('Pipe', {
     name: undefined,
     pure: true,
 }));
@@ -64,26 +64,26 @@ export var /** @type {?} */ Pipe = (makeDecorator('Pipe', {
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
+export const /** @type {?} */ Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
 /**
  * Output decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
+export const /** @type {?} */ Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
 /**
  * HostBinding decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
+export const /** @type {?} */ HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
 /**
  * HostListener decorator and metadata.
  *
  * @stable
  * @Annotation
  */
-export var /** @type {?} */ HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
+export const /** @type {?} */ HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
 //# sourceMappingURL=directives.js.map

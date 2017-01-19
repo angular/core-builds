@@ -92,7 +92,7 @@ export declare class AnimationAnimateMetadata extends AnimationMetadata {
  */
 export declare abstract class AnimationWithStepsMetadata extends AnimationMetadata {
     constructor();
-    steps: AnimationMetadata[];
+    readonly steps: AnimationMetadata[];
 }
 /**
  * Metadata representing the entry of animations.
@@ -104,7 +104,7 @@ export declare abstract class AnimationWithStepsMetadata extends AnimationMetada
 export declare class AnimationSequenceMetadata extends AnimationWithStepsMetadata {
     private _steps;
     constructor(_steps: AnimationMetadata[]);
-    steps: AnimationMetadata[];
+    readonly steps: AnimationMetadata[];
 }
 /**
  * Metadata representing the entry of animations.
@@ -116,7 +116,7 @@ export declare class AnimationSequenceMetadata extends AnimationWithStepsMetadat
 export declare class AnimationGroupMetadata extends AnimationWithStepsMetadata {
     private _steps;
     constructor(_steps: AnimationMetadata[]);
-    steps: AnimationMetadata[];
+    readonly steps: AnimationMetadata[];
 }
 /**
  * `animate` is an animation-specific function that is designed to be used inside of Angular2's

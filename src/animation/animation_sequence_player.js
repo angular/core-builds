@@ -7,12 +7,11 @@
  */
 import { isPresent, scheduleMicroTask } from '../facade/lang';
 import { NoOpAnimationPlayer } from './animation_player';
-export var AnimationSequencePlayer = (function () {
+export class AnimationSequencePlayer {
     /**
      * @param {?} _players
      */
-    function AnimationSequencePlayer(_players) {
-        var _this = this;
+    constructor(_players) {
         this._players = _players;
         this._currentIndex = 0;
         this._onDoneFns = [];
@@ -21,135 +20,129 @@ export var AnimationSequencePlayer = (function () {
         this._started = false;
         this._destroyed = false;
         this.parentPlayer = null;
-        this._players.forEach(function (player) { player.parentPlayer = _this; });
+        this._players.forEach(player => { player.parentPlayer = this; });
         this._onNext(false);
     }
     /**
      * @param {?} start
      * @return {?}
      */
-    AnimationSequencePlayer.prototype._onNext = function (start) {
-        var _this = this;
+    _onNext(start) {
         if (this._finished)
             return;
         if (this._players.length == 0) {
             this._activePlayer = new NoOpAnimationPlayer();
-            scheduleMicroTask(function () { return _this._onFinish(); });
+            scheduleMicroTask(() => this._onFinish());
         }
         else if (this._currentIndex >= this._players.length) {
             this._activePlayer = new NoOpAnimationPlayer();
             this._onFinish();
         }
         else {
-            var /** @type {?} */ player = this._players[this._currentIndex++];
-            player.onDone(function () { return _this._onNext(true); });
+            const /** @type {?} */ player = this._players[this._currentIndex++];
+            player.onDone(() => this._onNext(true));
             this._activePlayer = player;
             if (start) {
                 player.play();
             }
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype._onFinish = function () {
+    _onFinish() {
         if (!this._finished) {
             this._finished = true;
-            this._onDoneFns.forEach(function (fn) { return fn(); });
+            this._onDoneFns.forEach(fn => fn());
             this._onDoneFns = [];
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    AnimationSequencePlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
+    init() { this._players.forEach(player => player.init()); }
     /**
      * @param {?} fn
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
+    onStart(fn) { this._onStartFns.push(fn); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDone(fn) { this._onDoneFns.push(fn); }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
+    hasStarted() { return this._started; }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.play = function () {
+    play() {
         if (!isPresent(this.parentPlayer)) {
             this.init();
         }
         if (!this.hasStarted()) {
-            this._onStartFns.forEach(function (fn) { return fn(); });
+            this._onStartFns.forEach(fn => fn());
             this._onStartFns = [];
             this._started = true;
         }
         this._activePlayer.play();
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.pause = function () { this._activePlayer.pause(); };
+    pause() { this._activePlayer.pause(); }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.restart = function () {
+    restart() {
         this.reset();
         if (this._players.length > 0) {
             this._players[0].restart();
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.reset = function () {
-        this._players.forEach(function (player) { return player.reset(); });
+    reset() {
+        this._players.forEach(player => player.reset());
         this._destroyed = false;
         this._finished = false;
         this._started = false;
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.finish = function () {
+    finish() {
         this._onFinish();
-        this._players.forEach(function (player) { return player.finish(); });
-    };
+        this._players.forEach(player => player.finish());
+    }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.destroy = function () {
+    destroy() {
         if (!this._destroyed) {
             this._onFinish();
-            this._players.forEach(function (player) { return player.destroy(); });
+            this._players.forEach(player => player.destroy());
             this._destroyed = true;
             this._activePlayer = new NoOpAnimationPlayer();
         }
-    };
+    }
     /**
      * @param {?} p
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.setPosition = function (p) { this._players[0].setPosition(p); };
+    setPosition(p) { this._players[0].setPosition(p); }
     /**
      * @return {?}
      */
-    AnimationSequencePlayer.prototype.getPosition = function () { return this._players[0].getPosition(); };
-    Object.defineProperty(AnimationSequencePlayer.prototype, "players", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._players; },
-        enumerable: true,
-        configurable: true
-    });
-    return AnimationSequencePlayer;
-}());
+    getPosition() { return this._players[0].getPosition(); }
+    /**
+     * @return {?}
+     */
+    get players() { return this._players; }
+}
 function AnimationSequencePlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationSequencePlayer.prototype._currentIndex;

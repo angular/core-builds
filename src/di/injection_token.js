@@ -1,8 +1,3 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -26,19 +21,18 @@ var __extends = (this && this.__extends) || function (d, b) {
  * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
  * instead.
  */
-export var OpaqueToken = (function () {
+export class OpaqueToken {
     /**
      * @param {?} _desc
      */
-    function OpaqueToken(_desc) {
+    constructor(_desc) {
         this._desc = _desc;
     }
     /**
      * @return {?}
      */
-    OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
-    return OpaqueToken;
-}());
+    toString() { return `Token ${this._desc}`; }
+}
 function OpaqueToken_tsickle_Closure_declarations() {
     /** @type {?} */
     OpaqueToken.prototype._desc;
@@ -65,20 +59,18 @@ function OpaqueToken_tsickle_Closure_declarations() {
  *
  * \@stable
  */
-export var InjectionToken = (function (_super) {
-    __extends(InjectionToken, _super);
+export class InjectionToken extends OpaqueToken {
     /**
      * @param {?} desc
      */
-    function InjectionToken(desc) {
-        _super.call(this, desc);
+    constructor(desc) {
+        super(desc);
     }
     /**
      * @return {?}
      */
-    InjectionToken.prototype.toString = function () { return "InjectionToken " + this._desc; };
-    return InjectionToken;
-}(OpaqueToken));
+    toString() { return `InjectionToken ${this._desc}`; }
+}
 function InjectionToken_tsickle_Closure_declarations() {
     /** @type {?} */
     InjectionToken.prototype._differentiate_from_OpaqueToken_structurally;

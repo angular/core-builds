@@ -1,12 +1,11 @@
-export var ElementRef = (function () {
+export class ElementRef {
     /**
      * @param {?} nativeElement
      */
-    function ElementRef(nativeElement) {
+    constructor(nativeElement) {
         this.nativeElement = nativeElement;
     }
-    return ElementRef;
-}());
+}
 function ElementRef_tsickle_Closure_declarations() {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported

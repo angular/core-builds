@@ -1,4 +1,4 @@
-export var ViewType = {};
+export let ViewType = {};
 ViewType.HOST = 0;
 ViewType.COMPONENT = 1;
 ViewType.EMBEDDED = 2;

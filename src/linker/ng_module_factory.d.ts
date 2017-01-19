@@ -21,16 +21,16 @@ export declare abstract class NgModuleRef<T> {
     /**
      * The injector that contains all of the providers of the NgModule.
      */
-    injector: Injector;
+    readonly injector: Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
      * declared in the `entryComponents` property of the module.
      */
-    componentFactoryResolver: ComponentFactoryResolver;
+    readonly componentFactoryResolver: ComponentFactoryResolver;
     /**
      * The NgModule instance.
      */
-    instance: T;
+    readonly instance: T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */
@@ -49,7 +49,7 @@ export declare class NgModuleFactory<T> {
     constructor(_injectorClass: {
         new (parentInjector: Injector): NgModuleInjector<T>;
     }, _moduleType: Type<T>);
-    moduleType: Type<T>;
+    readonly moduleType: Type<T>;
     create(parentInjector: Injector): NgModuleRef<T>;
 }
 export declare abstract class NgModuleInjector<T> extends CodegenComponentFactoryResolver implements Injector, NgModuleRef<T> {
@@ -63,8 +63,8 @@ export declare abstract class NgModuleInjector<T> extends CodegenComponentFactor
     abstract createInternal(): T;
     get(token: any, notFoundValue?: any): any;
     abstract getInternal(token: any, notFoundValue: any): any;
-    injector: Injector;
-    componentFactoryResolver: ComponentFactoryResolver;
+    readonly injector: Injector;
+    readonly componentFactoryResolver: ComponentFactoryResolver;
     destroy(): void;
     onDestroy(callback: () => void): void;
     abstract destroyInternal(): void;

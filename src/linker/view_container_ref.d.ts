@@ -34,9 +34,9 @@ export declare abstract class ViewContainerRef {
      * Anchor element that specifies the location of this container in the containing View.
      * <!-- TODO: rename to anchorElement -->
      */
-    element: ElementRef;
-    injector: Injector;
-    parentInjector: Injector;
+    readonly element: ElementRef;
+    readonly injector: Injector;
+    readonly parentInjector: Injector;
     /**
      * Destroys all Views in this container.
      */
@@ -48,7 +48,7 @@ export declare abstract class ViewContainerRef {
     /**
      * Returns the number of Views currently attached to this container.
      */
-    length: number;
+    readonly length: number;
     /**
      * Instantiates an Embedded View based on the {@link TemplateRef `templateRef`} and inserts it
      * into this container at the specified `index`.
@@ -108,10 +108,10 @@ export declare class ViewContainerRef_ implements ViewContainerRef {
     private _element;
     constructor(_element: ViewContainer);
     get(index: number): ViewRef;
-    length: number;
-    element: ElementRef;
-    injector: Injector;
-    parentInjector: Injector;
+    readonly length: number;
+    readonly element: ElementRef;
+    readonly injector: Injector;
+    readonly parentInjector: Injector;
     createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, index?: number): EmbeddedViewRef<C>;
     createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][]): ComponentRef<C>;
     insert(viewRef: ViewRef, index?: number): ViewRef;

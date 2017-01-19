@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var /** @type {?} */ globalScope;
+let /** @type {?} */ globalScope;
 if (typeof window === 'undefined') {
     if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
         // TODO: Replace any with WorkerGlobalScope from lib.webworker.d.ts #3492
@@ -27,7 +27,7 @@ export function scheduleMicroTask(fn) {
 }
 // Need to declare a new variable for global here since TypeScript
 // exports the original value of the symbol.
-var /** @type {?} */ _global = globalScope;
+const /** @type {?} */ _global = globalScope;
 export { _global as global };
 /**
  * @param {?} type
@@ -56,7 +56,7 @@ export function isPresent(obj) {
 export function isBlank(obj) {
     return obj == null;
 }
-var /** @type {?} */ STRING_MAP_PROTO = Object.getPrototypeOf({});
+const /** @type {?} */ STRING_MAP_PROTO = Object.getPrototypeOf({});
 /**
  * @param {?} obj
  * @return {?}
@@ -83,36 +83,33 @@ export function stringify(token) {
         return '' + token;
     }
     if (token.overriddenName) {
-        return "" + token.overriddenName;
+        return `${token.overriddenName}`;
     }
     if (token.name) {
-        return "" + token.name;
+        return `${token.name}`;
     }
-    var /** @type {?} */ res = token.toString();
-    var /** @type {?} */ newLineIndex = res.indexOf('\n');
+    const /** @type {?} */ res = token.toString();
+    const /** @type {?} */ newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
-export var NumberWrapper = (function () {
-    function NumberWrapper() {
-    }
+export class NumberWrapper {
     /**
      * @param {?} text
      * @return {?}
      */
-    NumberWrapper.parseIntAutoRadix = function (text) {
-        var /** @type {?} */ result = parseInt(text);
+    static parseIntAutoRadix(text) {
+        const /** @type {?} */ result = parseInt(text);
         if (isNaN(result)) {
             throw new Error('Invalid integer literal when parsing ' + text);
         }
         return result;
-    };
+    }
     /**
      * @param {?} value
      * @return {?}
      */
-    NumberWrapper.isNumeric = function (value) { return !isNaN(value - parseFloat(value)); };
-    return NumberWrapper;
-}());
+    static isNumeric(value) { return !isNaN(value - parseFloat(value)); }
+}
 /**
  * @param {?} a
  * @param {?} b
@@ -150,15 +147,15 @@ export function warn(obj) {
  * @return {?}
  */
 export function setValueOnPath(global, path, value) {
-    var /** @type {?} */ parts = path.split('.');
-    var /** @type {?} */ obj = global;
+    const /** @type {?} */ parts = path.split('.');
+    let /** @type {?} */ obj = global;
     while (parts.length > 1) {
-        var /** @type {?} */ name_1 = parts.shift();
-        if (obj.hasOwnProperty(name_1) && obj[name_1] != null) {
-            obj = obj[name_1];
+        const /** @type {?} */ name = parts.shift();
+        if (obj.hasOwnProperty(name) && obj[name] != null) {
+            obj = obj[name];
         }
         else {
-            obj = obj[name_1] = {};
+            obj = obj[name] = {};
         }
     }
     if (obj === undefined || obj === null) {
@@ -166,7 +163,7 @@ export function setValueOnPath(global, path, value) {
     }
     obj[parts.shift()] = value;
 }
-var /** @type {?} */ _symbolIterator = null;
+let /** @type {?} */ _symbolIterator = null;
 /**
  * @return {?}
  */
@@ -177,9 +174,9 @@ export function getSymbolIterator() {
         }
         else {
             // es6-shim specific logic
-            var /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
-            for (var /** @type {?} */ i = 0; i < keys.length; ++i) {
-                var /** @type {?} */ key = keys[i];
+            const /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
+            for (let /** @type {?} */ i = 0; i < keys.length; ++i) {
+                const /** @type {?} */ key = keys[i];
                 if (key !== 'entries' && key !== 'size' &&
                     ((Map)).prototype[key] === Map.prototype['entries']) {
                     _symbolIterator = key;

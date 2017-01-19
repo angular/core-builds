@@ -6,25 +6,24 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isJsObject, looseIdentical, stringify } from '../../facade/lang';
-export var DefaultKeyValueDifferFactory = (function () {
-    function DefaultKeyValueDifferFactory() {
+export class DefaultKeyValueDifferFactory {
+    constructor() {
     }
     /**
      * @param {?} obj
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
+    supports(obj) { return obj instanceof Map || isJsObject(obj); }
     /**
      * @param {?} cdRef
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.create = function (cdRef) {
+    create(cdRef) {
         return new DefaultKeyValueDiffer();
-    };
-    return DefaultKeyValueDifferFactory;
-}());
-export var DefaultKeyValueDiffer = (function () {
-    function DefaultKeyValueDiffer() {
+    }
+}
+export class DefaultKeyValueDiffer {
+    constructor() {
         this._records = new Map();
         this._mapHead = null;
         this._previousMapHead = null;
@@ -35,125 +34,120 @@ export var DefaultKeyValueDiffer = (function () {
         this._removalsHead = null;
         this._removalsTail = null;
     }
-    Object.defineProperty(DefaultKeyValueDiffer.prototype, "isDirty", {
-        /**
-         * @return {?}
-         */
-        get: function () {
-            return this._additionsHead !== null || this._changesHead !== null ||
-                this._removalsHead !== null;
-        },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * @return {?}
+     */
+    get isDirty() {
+        return this._additionsHead !== null || this._changesHead !== null ||
+            this._removalsHead !== null;
+    }
     /**
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachItem = function (fn) {
-        var /** @type {?} */ record;
+    forEachItem(fn) {
+        let /** @type {?} */ record;
         for (record = this._mapHead; record !== null; record = record._next) {
             fn(record);
         }
-    };
+    }
     /**
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachPreviousItem = function (fn) {
-        var /** @type {?} */ record;
+    forEachPreviousItem(fn) {
+        let /** @type {?} */ record;
         for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
             fn(record);
         }
-    };
+    }
     /**
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachChangedItem = function (fn) {
-        var /** @type {?} */ record;
+    forEachChangedItem(fn) {
+        let /** @type {?} */ record;
         for (record = this._changesHead; record !== null; record = record._nextChanged) {
             fn(record);
         }
-    };
+    }
     /**
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachAddedItem = function (fn) {
-        var /** @type {?} */ record;
+    forEachAddedItem(fn) {
+        let /** @type {?} */ record;
         for (record = this._additionsHead; record !== null; record = record._nextAdded) {
             fn(record);
         }
-    };
+    }
     /**
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachRemovedItem = function (fn) {
-        var /** @type {?} */ record;
+    forEachRemovedItem(fn) {
+        let /** @type {?} */ record;
         for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
             fn(record);
         }
-    };
+    }
     /**
      * @param {?} map
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.diff = function (map) {
+    diff(map) {
         if (!map) {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            throw new Error("Error trying to diff '" + map + "'");
+            throw new Error(`Error trying to diff '${map}'`);
         }
         return this.check(map) ? this : null;
-    };
+    }
     /**
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.onDestroy = function () { };
+    onDestroy() { }
     /**
      * @param {?} map
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.check = function (map) {
-        var _this = this;
+    check(map) {
         this._reset();
-        var /** @type {?} */ records = this._records;
-        var /** @type {?} */ oldSeqRecord = this._mapHead;
-        var /** @type {?} */ lastOldSeqRecord = null;
-        var /** @type {?} */ lastNewSeqRecord = null;
-        var /** @type {?} */ seqChanged = false;
-        this._forEach(map, function (value, key) {
-            var /** @type {?} */ newSeqRecord;
+        const /** @type {?} */ records = this._records;
+        let /** @type {?} */ oldSeqRecord = this._mapHead;
+        let /** @type {?} */ lastOldSeqRecord = null;
+        let /** @type {?} */ lastNewSeqRecord = null;
+        let /** @type {?} */ seqChanged = false;
+        this._forEach(map, (value, key) => {
+            let /** @type {?} */ newSeqRecord;
             if (oldSeqRecord && key === oldSeqRecord.key) {
                 newSeqRecord = oldSeqRecord;
-                _this._maybeAddToChanges(newSeqRecord, value);
+                this._maybeAddToChanges(newSeqRecord, value);
             }
             else {
                 seqChanged = true;
                 if (oldSeqRecord !== null) {
-                    _this._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
-                    _this._addToRemovals(oldSeqRecord);
+                    this._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
+                    this._addToRemovals(oldSeqRecord);
                 }
                 if (records.has(key)) {
                     newSeqRecord = records.get(key);
-                    _this._maybeAddToChanges(newSeqRecord, value);
+                    this._maybeAddToChanges(newSeqRecord, value);
                 }
                 else {
                     newSeqRecord = new KeyValueChangeRecord_(key);
                     records.set(key, newSeqRecord);
                     newSeqRecord.currentValue = value;
-                    _this._addToAdditions(newSeqRecord);
+                    this._addToAdditions(newSeqRecord);
                 }
             }
             if (seqChanged) {
-                if (_this._isInRemovals(newSeqRecord)) {
-                    _this._removeFromRemovals(newSeqRecord);
+                if (this._isInRemovals(newSeqRecord)) {
+                    this._removeFromRemovals(newSeqRecord);
                 }
                 if (lastNewSeqRecord == null) {
-                    _this._mapHead = newSeqRecord;
+                    this._mapHead = newSeqRecord;
                 }
                 else {
                     lastNewSeqRecord._next = newSeqRecord;
@@ -165,14 +159,14 @@ export var DefaultKeyValueDiffer = (function () {
         });
         this._truncate(lastOldSeqRecord, oldSeqRecord);
         return this.isDirty;
-    };
+    }
     /**
      * \@internal
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._reset = function () {
+    _reset() {
         if (this.isDirty) {
-            var /** @type {?} */ record = void 0;
+            let /** @type {?} */ record;
             // Record the state of the mapping
             for (record = this._previousMapHead = this._mapHead; record !== null; record = record._next) {
                 record._nextPrevious = record._next;
@@ -187,13 +181,13 @@ export var DefaultKeyValueDiffer = (function () {
             this._additionsHead = this._additionsTail = null;
             this._removalsHead = this._removalsTail = null;
         }
-    };
+    }
     /**
      * @param {?} lastRecord
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._truncate = function (lastRecord, record) {
+    _truncate(lastRecord, record) {
         while (record !== null) {
             if (lastRecord === null) {
                 this._mapHead = null;
@@ -201,42 +195,42 @@ export var DefaultKeyValueDiffer = (function () {
             else {
                 lastRecord._next = null;
             }
-            var /** @type {?} */ nextRecord = record._next;
+            const /** @type {?} */ nextRecord = record._next;
             this._addToRemovals(record);
             lastRecord = record;
             record = nextRecord;
         }
-        for (var /** @type {?} */ rec = this._removalsHead; rec !== null; rec = rec._nextRemoved) {
+        for (let /** @type {?} */ rec = this._removalsHead; rec !== null; rec = rec._nextRemoved) {
             rec.previousValue = rec.currentValue;
             rec.currentValue = null;
             this._records.delete(rec.key);
         }
-    };
+    }
     /**
      * @param {?} record
      * @param {?} newValue
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
+    _maybeAddToChanges(record, newValue) {
         if (!looseIdentical(newValue, record.currentValue)) {
             record.previousValue = record.currentValue;
             record.currentValue = newValue;
             this._addToChanges(record);
         }
-    };
+    }
     /**
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._isInRemovals = function (record) {
+    _isInRemovals(record) {
         return record === this._removalsHead || record._nextRemoved !== null ||
             record._prevRemoved !== null;
-    };
+    }
     /**
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._addToRemovals = function (record) {
+    _addToRemovals(record) {
         if (this._removalsHead === null) {
             this._removalsHead = this._removalsTail = record;
         }
@@ -245,14 +239,14 @@ export var DefaultKeyValueDiffer = (function () {
             record._prevRemoved = this._removalsTail;
             this._removalsTail = record;
         }
-    };
+    }
     /**
      * @param {?} prev
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._removeFromSeq = function (prev, record) {
-        var /** @type {?} */ next = record._next;
+    _removeFromSeq(prev, record) {
+        const /** @type {?} */ next = record._next;
         if (prev === null) {
             this._mapHead = next;
         }
@@ -260,14 +254,14 @@ export var DefaultKeyValueDiffer = (function () {
             prev._next = next;
         }
         record._next = null;
-    };
+    }
     /**
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._removeFromRemovals = function (record) {
-        var /** @type {?} */ prev = record._prevRemoved;
-        var /** @type {?} */ next = record._nextRemoved;
+    _removeFromRemovals(record) {
+        const /** @type {?} */ prev = record._prevRemoved;
+        const /** @type {?} */ next = record._nextRemoved;
         if (prev === null) {
             this._removalsHead = next;
         }
@@ -281,12 +275,12 @@ export var DefaultKeyValueDiffer = (function () {
             next._prevRemoved = prev;
         }
         record._prevRemoved = record._nextRemoved = null;
-    };
+    }
     /**
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._addToAdditions = function (record) {
+    _addToAdditions(record) {
         if (this._additionsHead === null) {
             this._additionsHead = this._additionsTail = record;
         }
@@ -294,12 +288,12 @@ export var DefaultKeyValueDiffer = (function () {
             this._additionsTail._nextAdded = record;
             this._additionsTail = record;
         }
-    };
+    }
     /**
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._addToChanges = function (record) {
+    _addToChanges(record) {
         if (this._changesHead === null) {
             this._changesHead = this._changesTail = record;
         }
@@ -307,17 +301,17 @@ export var DefaultKeyValueDiffer = (function () {
             this._changesTail._nextChanged = record;
             this._changesTail = record;
         }
-    };
+    }
     /**
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.toString = function () {
-        var /** @type {?} */ items = [];
-        var /** @type {?} */ previous = [];
-        var /** @type {?} */ changes = [];
-        var /** @type {?} */ additions = [];
-        var /** @type {?} */ removals = [];
-        var /** @type {?} */ record;
+    toString() {
+        const /** @type {?} */ items = [];
+        const /** @type {?} */ previous = [];
+        const /** @type {?} */ changes = [];
+        const /** @type {?} */ additions = [];
+        const /** @type {?} */ removals = [];
+        let /** @type {?} */ record;
         for (record = this._mapHead; record !== null; record = record._next) {
             items.push(stringify(record));
         }
@@ -338,23 +332,22 @@ export var DefaultKeyValueDiffer = (function () {
             'additions: ' + additions.join(', ') + '\n' +
             'changes: ' + changes.join(', ') + '\n' +
             'removals: ' + removals.join(', ') + '\n';
-    };
+    }
     /**
      * \@internal
      * @param {?} obj
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
+    _forEach(obj, fn) {
         if (obj instanceof Map) {
             obj.forEach(fn);
         }
         else {
-            Object.keys(obj).forEach(function (k) { return fn(obj[k], k); });
+            Object.keys(obj).forEach(k => fn(obj[k], k));
         }
-    };
-    return DefaultKeyValueDiffer;
-}());
+    }
+}
 function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
     /** @type {?} */
     DefaultKeyValueDiffer.prototype._records;
@@ -378,11 +371,11 @@ function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-var KeyValueChangeRecord_ = (function () {
+class KeyValueChangeRecord_ {
     /**
      * @param {?} key
      */
-    function KeyValueChangeRecord_(key) {
+    constructor(key) {
         this.key = key;
         this.previousValue = null;
         this.currentValue = null;
@@ -402,14 +395,13 @@ var KeyValueChangeRecord_ = (function () {
     /**
      * @return {?}
      */
-    KeyValueChangeRecord_.prototype.toString = function () {
+    toString() {
         return looseIdentical(this.previousValue, this.currentValue) ?
             stringify(this.key) :
             (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
                 stringify(this.currentValue) + ']');
-    };
-    return KeyValueChangeRecord_;
-}());
+    }
+}
 function KeyValueChangeRecord__tsickle_Closure_declarations() {
     /** @type {?} */
     KeyValueChangeRecord_.prototype.previousValue;

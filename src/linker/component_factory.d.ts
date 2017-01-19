@@ -23,27 +23,27 @@ export declare abstract class ComponentRef<C> {
     /**
      * Location of the Host Element of this Component Instance.
      */
-    location: ElementRef;
+    readonly location: ElementRef;
     /**
      * The injector on which the component instance exists.
      */
-    injector: Injector;
+    readonly injector: Injector;
     /**
      * The instance of the Component.
      */
-    instance: C;
+    readonly instance: C;
     /**
      * The {@link ViewRef} of the Host View of this Component instance.
      */
-    hostView: ViewRef;
+    readonly hostView: ViewRef;
     /**
      * The {@link ChangeDetectorRef} of the Component instance.
      */
-    changeDetectorRef: ChangeDetectorRef;
+    readonly changeDetectorRef: ChangeDetectorRef;
     /**
      * The component type.
      */
-    componentType: Type<any>;
+    readonly componentType: Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -59,12 +59,12 @@ export declare class ComponentRef_<C> extends ComponentRef<C> {
     private _nativeElement;
     private _component;
     constructor(_index: number, _parentView: AppView<any>, _nativeElement: any, _component: C);
-    location: ElementRef;
-    injector: Injector;
-    instance: C;
-    hostView: ViewRef;
-    changeDetectorRef: ChangeDetectorRef;
-    componentType: Type<any>;
+    readonly location: ElementRef;
+    readonly injector: Injector;
+    readonly instance: C;
+    readonly hostView: ViewRef;
+    readonly changeDetectorRef: ChangeDetectorRef;
+    readonly componentType: Type<any>;
     destroy(): void;
     onDestroy(callback: Function): void;
 }
@@ -75,7 +75,7 @@ export declare class ComponentFactory<C> {
     selector: string;
     private _componentType;
     constructor(selector: string, _viewClass: Type<AppView<any>>, _componentType: Type<any>);
-    componentType: Type<any>;
+    readonly componentType: Type<any>;
     /**
      * Creates a new component.
      */

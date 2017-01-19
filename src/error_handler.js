@@ -31,12 +31,11 @@
  *
  * \@stable
  */
-export var ErrorHandler = (function () {
+export class ErrorHandler {
     /**
      * @param {?=} rethrowError
      */
-    function ErrorHandler(rethrowError) {
-        if (rethrowError === void 0) { rethrowError = true; }
+    constructor(rethrowError = true) {
         /**
          * @internal
          */
@@ -47,13 +46,13 @@ export var ErrorHandler = (function () {
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype.handleError = function (error) {
-        var /** @type {?} */ originalError = this._findOriginalError(error);
-        var /** @type {?} */ originalStack = this._findOriginalStack(error);
-        var /** @type {?} */ context = this._findContext(error);
-        this._console.error("EXCEPTION: " + this._extractMessage(error));
+    handleError(error) {
+        const /** @type {?} */ originalError = this._findOriginalError(error);
+        const /** @type {?} */ originalStack = this._findOriginalStack(error);
+        const /** @type {?} */ context = this._findContext(error);
+        this._console.error(`EXCEPTION: ${this._extractMessage(error)}`);
         if (originalError) {
-            this._console.error("ORIGINAL EXCEPTION: " + this._extractMessage(originalError));
+            this._console.error(`ORIGINAL EXCEPTION: ${this._extractMessage(originalError)}`);
         }
         if (originalStack) {
             this._console.error('ORIGINAL STACKTRACE:');
@@ -67,49 +66,49 @@ export var ErrorHandler = (function () {
         // when an error happens. If we do not rethrow, bootstrap will always succeed.
         if (this.rethrowError)
             throw error;
-    };
+    }
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._extractMessage = function (error) {
+    _extractMessage(error) {
         return error instanceof Error ? error.message : error.toString();
-    };
+    }
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._findContext = function (error) {
+    _findContext(error) {
         if (error) {
             return error.context ? error.context :
                 this._findContext(((error)).originalError);
         }
         return null;
-    };
+    }
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._findOriginalError = function (error) {
-        var /** @type {?} */ e = ((error)).originalError;
+    _findOriginalError(error) {
+        let /** @type {?} */ e = ((error)).originalError;
         while (e && ((e)).originalError) {
             e = ((e)).originalError;
         }
         return e;
-    };
+    }
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._findOriginalStack = function (error) {
+    _findOriginalStack(error) {
         if (!(error instanceof Error))
             return null;
-        var /** @type {?} */ e = error;
-        var /** @type {?} */ stack = e.stack;
+        let /** @type {?} */ e = error;
+        let /** @type {?} */ stack = e.stack;
         while (e instanceof Error && ((e)).originalError) {
             e = ((e)).originalError;
             if (e instanceof Error && e.stack) {
@@ -117,9 +116,8 @@ export var ErrorHandler = (function () {
             }
         }
         return stack;
-    };
-    return ErrorHandler;
-}());
+    }
+}
 function ErrorHandler_tsickle_Closure_declarations() {
     /**
      * \@internal

@@ -33,7 +33,7 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    elementRef: ElementRef;
+    readonly elementRef: ElementRef;
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
 }
 export declare class TemplateRef_<C> extends TemplateRef<C> {
@@ -42,5 +42,5 @@ export declare class TemplateRef_<C> extends TemplateRef<C> {
     private _nativeElement;
     constructor(_parentView: AppView<any>, _nodeIndex: number, _nativeElement: any);
     createEmbeddedView(context: C): EmbeddedViewRef<C>;
-    elementRef: ElementRef;
+    readonly elementRef: ElementRef;
 }

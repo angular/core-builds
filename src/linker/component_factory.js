@@ -5,11 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 import { unimplemented } from '../facade/errors';
 import { ElementRef } from './element_ref';
 import { ViewUtils } from './view_utils';
@@ -22,157 +17,104 @@ import { ViewUtils } from './view_utils';
  * \@stable
  * @abstract
  */
-export var ComponentRef = (function () {
-    function ComponentRef() {
-    }
-    Object.defineProperty(ComponentRef.prototype, "location", {
-        /**
-         * Location of the Host Element of this Component Instance.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ComponentRef.prototype, "injector", {
-        /**
-         * The injector on which the component instance exists.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ComponentRef.prototype, "instance", {
-        /**
-         * The instance of the Component.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+export class ComponentRef {
+    /**
+     * Location of the Host Element of this Component Instance.
+     * @return {?}
+     */
+    get location() { return unimplemented(); }
+    /**
+     * The injector on which the component instance exists.
+     * @return {?}
+     */
+    get injector() { return unimplemented(); }
+    /**
+     * The instance of the Component.
+     * @return {?}
+     */
+    get instance() { return unimplemented(); }
     ;
-    Object.defineProperty(ComponentRef.prototype, "hostView", {
-        /**
-         * The {\@link ViewRef} of the Host View of this Component instance.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * The {\@link ViewRef} of the Host View of this Component instance.
+     * @return {?}
+     */
+    get hostView() { return unimplemented(); }
     ;
-    Object.defineProperty(ComponentRef.prototype, "changeDetectorRef", {
-        /**
-         * The {\@link ChangeDetectorRef} of the Component instance.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ComponentRef.prototype, "componentType", {
-        /**
-         * The component type.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * The {\@link ChangeDetectorRef} of the Component instance.
+     * @return {?}
+     */
+    get changeDetectorRef() { return unimplemented(); }
+    /**
+     * The component type.
+     * @return {?}
+     */
+    get componentType() { return unimplemented(); }
     /**
      * Destroys the component instance and all of the data structures associated with it.
      * @abstract
      * @return {?}
      */
-    ComponentRef.prototype.destroy = function () { };
+    destroy() { }
     /**
      * Allows to register a callback that will be called when the component is destroyed.
      * @abstract
      * @param {?} callback
      * @return {?}
      */
-    ComponentRef.prototype.onDestroy = function (callback) { };
-    return ComponentRef;
-}());
-export var ComponentRef_ = (function (_super) {
-    __extends(ComponentRef_, _super);
+    onDestroy(callback) { }
+}
+export class ComponentRef_ extends ComponentRef {
     /**
      * @param {?} _index
      * @param {?} _parentView
      * @param {?} _nativeElement
      * @param {?} _component
      */
-    function ComponentRef_(_index, _parentView, _nativeElement, _component) {
-        _super.call(this);
+    constructor(_index, _parentView, _nativeElement, _component) {
+        super();
         this._index = _index;
         this._parentView = _parentView;
         this._nativeElement = _nativeElement;
         this._component = _component;
     }
-    Object.defineProperty(ComponentRef_.prototype, "location", {
-        /**
-         * @return {?}
-         */
-        get: function () { return new ElementRef(this._nativeElement); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ComponentRef_.prototype, "injector", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._parentView.injector(this._index); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ComponentRef_.prototype, "instance", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._component; },
-        enumerable: true,
-        configurable: true
-    });
-    ;
-    Object.defineProperty(ComponentRef_.prototype, "hostView", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._parentView.ref; },
-        enumerable: true,
-        configurable: true
-    });
-    ;
-    Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._parentView.ref; },
-        enumerable: true,
-        configurable: true
-    });
-    ;
-    Object.defineProperty(ComponentRef_.prototype, "componentType", {
-        /**
-         * @return {?}
-         */
-        get: function () { return (this._component.constructor); },
-        enumerable: true,
-        configurable: true
-    });
     /**
      * @return {?}
      */
-    ComponentRef_.prototype.destroy = function () { this._parentView.detachAndDestroy(); };
+    get location() { return new ElementRef(this._nativeElement); }
+    /**
+     * @return {?}
+     */
+    get injector() { return this._parentView.injector(this._index); }
+    /**
+     * @return {?}
+     */
+    get instance() { return this._component; }
+    ;
+    /**
+     * @return {?}
+     */
+    get hostView() { return this._parentView.ref; }
+    ;
+    /**
+     * @return {?}
+     */
+    get changeDetectorRef() { return this._parentView.ref; }
+    ;
+    /**
+     * @return {?}
+     */
+    get componentType() { return (this._component.constructor); }
+    /**
+     * @return {?}
+     */
+    destroy() { this._parentView.detachAndDestroy(); }
     /**
      * @param {?} callback
      * @return {?}
      */
-    ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
-    return ComponentRef_;
-}(ComponentRef));
+    onDestroy(callback) { this.hostView.onDestroy(callback); }
+}
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentRef_.prototype._index;
@@ -186,25 +128,21 @@ function ComponentRef__tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export var ComponentFactory = (function () {
+export class ComponentFactory {
     /**
      * @param {?} selector
      * @param {?} _viewClass
      * @param {?} _componentType
      */
-    function ComponentFactory(selector, _viewClass, _componentType) {
+    constructor(selector, _viewClass, _componentType) {
         this.selector = selector;
         this._componentType = _componentType;
         this._viewClass = _viewClass;
     }
-    Object.defineProperty(ComponentFactory.prototype, "componentType", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._componentType; },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * @return {?}
+     */
+    get componentType() { return this._componentType; }
     /**
      * Creates a new component.
      * @param {?} injector
@@ -212,18 +150,15 @@ export var ComponentFactory = (function () {
      * @param {?=} rootSelectorOrNode
      * @return {?}
      */
-    ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode) {
-        if (projectableNodes === void 0) { projectableNodes = null; }
-        if (rootSelectorOrNode === void 0) { rootSelectorOrNode = null; }
-        var /** @type {?} */ vu = injector.get(ViewUtils);
+    create(injector, projectableNodes = null, rootSelectorOrNode = null) {
+        const /** @type {?} */ vu = injector.get(ViewUtils);
         if (!projectableNodes) {
             projectableNodes = [];
         }
-        var /** @type {?} */ hostView = new this._viewClass(vu, null, null, null);
+        const /** @type {?} */ hostView = new this._viewClass(vu, null, null, null);
         return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
-    };
-    return ComponentFactory;
-}());
+    }
+}
 function ComponentFactory_tsickle_Closure_declarations() {
     /**
      * \@internal

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { unimplemented } from '../facade/errors';
-export var RenderComponentType = (function () {
+export class RenderComponentType {
     /**
      * @param {?} id
      * @param {?} templateUrl
@@ -15,7 +15,7 @@ export var RenderComponentType = (function () {
      * @param {?} styles
      * @param {?} animations
      */
-    function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
+    constructor(id, templateUrl, slotCount, encapsulation, styles, animations) {
         this.id = id;
         this.templateUrl = templateUrl;
         this.slotCount = slotCount;
@@ -23,8 +23,7 @@ export var RenderComponentType = (function () {
         this.styles = styles;
         this.animations = animations;
     }
-    return RenderComponentType;
-}());
+}
 function RenderComponentType_tsickle_Closure_declarations() {
     /** @type {?} */
     RenderComponentType.prototype.id;
@@ -42,73 +41,44 @@ function RenderComponentType_tsickle_Closure_declarations() {
 /**
  * @abstract
  */
-export var RenderDebugInfo = (function () {
-    function RenderDebugInfo() {
-    }
-    Object.defineProperty(RenderDebugInfo.prototype, "injector", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "component", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "providerTokens", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "references", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "context", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "source", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    return RenderDebugInfo;
-}());
+export class RenderDebugInfo {
+    /**
+     * @return {?}
+     */
+    get injector() { return unimplemented(); }
+    /**
+     * @return {?}
+     */
+    get component() { return unimplemented(); }
+    /**
+     * @return {?}
+     */
+    get providerTokens() { return unimplemented(); }
+    /**
+     * @return {?}
+     */
+    get references() { return unimplemented(); }
+    /**
+     * @return {?}
+     */
+    get context() { return unimplemented(); }
+    /**
+     * @return {?}
+     */
+    get source() { return unimplemented(); }
+}
 /**
  * \@experimental
  * @abstract
  */
-export var Renderer = (function () {
-    function Renderer() {
-    }
+export class Renderer {
     /**
      * @abstract
      * @param {?} selectorOrNode
      * @param {?=} debugInfo
      * @return {?}
      */
-    Renderer.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
+    selectRootElement(selectorOrNode, debugInfo) { }
     /**
      * @abstract
      * @param {?} parentElement
@@ -116,20 +86,20 @@ export var Renderer = (function () {
      * @param {?=} debugInfo
      * @return {?}
      */
-    Renderer.prototype.createElement = function (parentElement, name, debugInfo) { };
+    createElement(parentElement, name, debugInfo) { }
     /**
      * @abstract
      * @param {?} hostElement
      * @return {?}
      */
-    Renderer.prototype.createViewRoot = function (hostElement) { };
+    createViewRoot(hostElement) { }
     /**
      * @abstract
      * @param {?} parentElement
      * @param {?=} debugInfo
      * @return {?}
      */
-    Renderer.prototype.createTemplateAnchor = function (parentElement, debugInfo) { };
+    createTemplateAnchor(parentElement, debugInfo) { }
     /**
      * @abstract
      * @param {?} parentElement
@@ -137,34 +107,34 @@ export var Renderer = (function () {
      * @param {?=} debugInfo
      * @return {?}
      */
-    Renderer.prototype.createText = function (parentElement, value, debugInfo) { };
+    createText(parentElement, value, debugInfo) { }
     /**
      * @abstract
      * @param {?} parentElement
      * @param {?} nodes
      * @return {?}
      */
-    Renderer.prototype.projectNodes = function (parentElement, nodes) { };
+    projectNodes(parentElement, nodes) { }
     /**
      * @abstract
      * @param {?} node
      * @param {?} viewRootNodes
      * @return {?}
      */
-    Renderer.prototype.attachViewAfter = function (node, viewRootNodes) { };
+    attachViewAfter(node, viewRootNodes) { }
     /**
      * @abstract
      * @param {?} viewRootNodes
      * @return {?}
      */
-    Renderer.prototype.detachView = function (viewRootNodes) { };
+    detachView(viewRootNodes) { }
     /**
      * @abstract
      * @param {?} hostElement
      * @param {?} viewAllNodes
      * @return {?}
      */
-    Renderer.prototype.destroyView = function (hostElement, viewAllNodes) { };
+    destroyView(hostElement, viewAllNodes) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -172,7 +142,7 @@ export var Renderer = (function () {
      * @param {?} callback
      * @return {?}
      */
-    Renderer.prototype.listen = function (renderElement, name, callback) { };
+    listen(renderElement, name, callback) { }
     /**
      * @abstract
      * @param {?} target
@@ -180,7 +150,7 @@ export var Renderer = (function () {
      * @param {?} callback
      * @return {?}
      */
-    Renderer.prototype.listenGlobal = function (target, name, callback) { };
+    listenGlobal(target, name, callback) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -188,7 +158,7 @@ export var Renderer = (function () {
      * @param {?} propertyValue
      * @return {?}
      */
-    Renderer.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) { };
+    setElementProperty(renderElement, propertyName, propertyValue) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -196,7 +166,7 @@ export var Renderer = (function () {
      * @param {?} attributeValue
      * @return {?}
      */
-    Renderer.prototype.setElementAttribute = function (renderElement, attributeName, attributeValue) { };
+    setElementAttribute(renderElement, attributeName, attributeValue) { }
     /**
      * Used only in debug mode to serialize property changes to dom nodes as attributes.
      * @abstract
@@ -205,7 +175,7 @@ export var Renderer = (function () {
      * @param {?} propertyValue
      * @return {?}
      */
-    Renderer.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
+    setBindingDebugInfo(renderElement, propertyName, propertyValue) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -213,7 +183,7 @@ export var Renderer = (function () {
      * @param {?} isAdd
      * @return {?}
      */
-    Renderer.prototype.setElementClass = function (renderElement, className, isAdd) { };
+    setElementClass(renderElement, className, isAdd) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -221,7 +191,7 @@ export var Renderer = (function () {
      * @param {?} styleValue
      * @return {?}
      */
-    Renderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) { };
+    setElementStyle(renderElement, styleName, styleValue) { }
     /**
      * @abstract
      * @param {?} renderElement
@@ -229,14 +199,14 @@ export var Renderer = (function () {
      * @param {?=} args
      * @return {?}
      */
-    Renderer.prototype.invokeElementMethod = function (renderElement, methodName, args) { };
+    invokeElementMethod(renderElement, methodName, args) { }
     /**
      * @abstract
      * @param {?} renderNode
      * @param {?} text
      * @return {?}
      */
-    Renderer.prototype.setText = function (renderNode, text) { };
+    setText(renderNode, text) { }
     /**
      * @abstract
      * @param {?} element
@@ -248,9 +218,8 @@ export var Renderer = (function () {
      * @param {?=} previousPlayers
      * @return {?}
      */
-    Renderer.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { };
-    return Renderer;
-}());
+    animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { }
+}
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -265,15 +234,12 @@ export var Renderer = (function () {
  * \@experimental
  * @abstract
  */
-export var RootRenderer = (function () {
-    function RootRenderer() {
-    }
+export class RootRenderer {
     /**
      * @abstract
      * @param {?} componentType
      * @return {?}
      */
-    RootRenderer.prototype.renderComponent = function (componentType) { };
-    return RootRenderer;
-}());
+    renderComponent(componentType) { }
+}
 //# sourceMappingURL=api.js.map

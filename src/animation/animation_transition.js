@@ -1,5 +1,5 @@
 import { AnimationTransitionEvent } from './animation_transition_event';
-export var AnimationTransition = (function () {
+export class AnimationTransition {
     /**
      * @param {?} _player
      * @param {?} _element
@@ -8,7 +8,7 @@ export var AnimationTransition = (function () {
      * @param {?} _toState
      * @param {?} _totalTime
      */
-    function AnimationTransition(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
+    constructor(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
         this._player = _player;
         this._element = _element;
         this._triggerName = _triggerName;
@@ -20,7 +20,7 @@ export var AnimationTransition = (function () {
      * @param {?} phaseName
      * @return {?}
      */
-    AnimationTransition.prototype._createEvent = function (phaseName) {
+    _createEvent(phaseName) {
         return new AnimationTransitionEvent({
             fromState: this._fromState,
             toState: this._toState,
@@ -29,27 +29,24 @@ export var AnimationTransition = (function () {
             element: this._element,
             triggerName: this._triggerName
         });
-    };
+    }
     /**
      * @param {?} callback
      * @return {?}
      */
-    AnimationTransition.prototype.onStart = function (callback) {
-        var _this = this;
-        var /** @type {?} */ fn = (Zone.current.wrap(function () { return callback(_this._createEvent('start')); }, 'player.onStart'));
+    onStart(callback) {
+        const /** @type {?} */ fn = (Zone.current.wrap(() => callback(this._createEvent('start')), 'player.onStart'));
         this._player.onStart(fn);
-    };
+    }
     /**
      * @param {?} callback
      * @return {?}
      */
-    AnimationTransition.prototype.onDone = function (callback) {
-        var _this = this;
-        var /** @type {?} */ fn = (Zone.current.wrap(function () { return callback(_this._createEvent('done')); }, 'player.onDone'));
+    onDone(callback) {
+        const /** @type {?} */ fn = (Zone.current.wrap(() => callback(this._createEvent('done')), 'player.onDone'));
         this._player.onDone(fn);
-    };
-    return AnimationTransition;
-}());
+    }
+}
 function AnimationTransition_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationTransition.prototype._player;

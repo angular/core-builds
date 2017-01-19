@@ -24,15 +24,15 @@ export declare class DebugContext implements RenderDebugInfo {
     private _tplRow;
     private _tplCol;
     constructor(_view: DebugAppView<any>, _nodeIndex: number, _tplRow: number, _tplCol: number);
-    private _staticNodeInfo;
-    context: any;
-    component: any;
-    componentRenderElement: any;
-    injector: Injector;
-    renderNode: any;
-    providerTokens: any[];
-    source: string;
-    references: {
+    private readonly _staticNodeInfo;
+    readonly context: any;
+    readonly component: any;
+    readonly componentRenderElement: any;
+    readonly injector: Injector;
+    readonly renderNode: any;
+    readonly providerTokens: any[];
+    readonly source: string;
+    readonly references: {
         [key: string]: any;
     };
 }

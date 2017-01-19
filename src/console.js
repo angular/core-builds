@@ -7,26 +7,23 @@
  */
 import { Injectable } from './di';
 import { print, warn } from './facade/lang';
-export var Console = (function () {
-    function Console() {
-    }
+export class Console {
     /**
      * @param {?} message
      * @return {?}
      */
-    Console.prototype.log = function (message) { print(message); };
+    log(message) { print(message); }
     /**
      * @param {?} message
      * @return {?}
      */
-    Console.prototype.warn = function (message) { warn(message); };
-    Console.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    Console.ctorParameters = function () { return []; };
-    return Console;
-}());
+    warn(message) { warn(message); }
+}
+Console.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+Console.ctorParameters = () => [];
 function Console_tsickle_Closure_declarations() {
     /** @type {?} */
     Console.decorators;

@@ -6,12 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isPresent, scheduleMicroTask } from '../facade/lang';
-export var AnimationGroupPlayer = (function () {
+export class AnimationGroupPlayer {
     /**
      * @param {?} _players
      */
-    function AnimationGroupPlayer(_players) {
-        var _this = this;
+    constructor(_players) {
         this._players = _players;
         this._onDoneFns = [];
         this._onStartFns = [];
@@ -19,17 +18,17 @@ export var AnimationGroupPlayer = (function () {
         this._started = false;
         this._destroyed = false;
         this.parentPlayer = null;
-        var count = 0;
-        var total = this._players.length;
+        let count = 0;
+        const total = this._players.length;
         if (total == 0) {
-            scheduleMicroTask(function () { return _this._onFinish(); });
+            scheduleMicroTask(() => this._onFinish());
         }
         else {
-            this._players.forEach(function (player) {
-                player.parentPlayer = _this;
-                player.onDone(function () {
+            this._players.forEach(player => {
+                player.parentPlayer = this;
+                player.onDone(() => {
                     if (++count >= total) {
-                        _this._onFinish();
+                        this._onFinish();
                     }
                 });
             });
@@ -38,107 +37,102 @@ export var AnimationGroupPlayer = (function () {
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype._onFinish = function () {
+    _onFinish() {
         if (!this._finished) {
             this._finished = true;
-            this._onDoneFns.forEach(function (fn) { return fn(); });
+            this._onDoneFns.forEach(fn => fn());
             this._onDoneFns = [];
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    AnimationGroupPlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
+    init() { this._players.forEach(player => player.init()); }
     /**
      * @param {?} fn
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
+    onStart(fn) { this._onStartFns.push(fn); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDone(fn) { this._onDoneFns.push(fn); }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
+    hasStarted() { return this._started; }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.play = function () {
+    play() {
         if (!isPresent(this.parentPlayer)) {
             this.init();
         }
         if (!this.hasStarted()) {
-            this._onStartFns.forEach(function (fn) { return fn(); });
+            this._onStartFns.forEach(fn => fn());
             this._onStartFns = [];
             this._started = true;
         }
-        this._players.forEach(function (player) { return player.play(); });
-    };
+        this._players.forEach(player => player.play());
+    }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.pause = function () { this._players.forEach(function (player) { return player.pause(); }); };
+    pause() { this._players.forEach(player => player.pause()); }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.restart = function () { this._players.forEach(function (player) { return player.restart(); }); };
+    restart() { this._players.forEach(player => player.restart()); }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.finish = function () {
+    finish() {
         this._onFinish();
-        this._players.forEach(function (player) { return player.finish(); });
-    };
+        this._players.forEach(player => player.finish());
+    }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.destroy = function () {
+    destroy() {
         if (!this._destroyed) {
             this._onFinish();
-            this._players.forEach(function (player) { return player.destroy(); });
+            this._players.forEach(player => player.destroy());
             this._destroyed = true;
         }
-    };
+    }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.reset = function () {
-        this._players.forEach(function (player) { return player.reset(); });
+    reset() {
+        this._players.forEach(player => player.reset());
         this._destroyed = false;
         this._finished = false;
         this._started = false;
-    };
+    }
     /**
      * @param {?} p
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.setPosition = function (p) {
-        this._players.forEach(function (player) { player.setPosition(p); });
-    };
+    setPosition(p) {
+        this._players.forEach(player => { player.setPosition(p); });
+    }
     /**
      * @return {?}
      */
-    AnimationGroupPlayer.prototype.getPosition = function () {
-        var /** @type {?} */ min = 0;
-        this._players.forEach(function (player) {
-            var /** @type {?} */ p = player.getPosition();
+    getPosition() {
+        let /** @type {?} */ min = 0;
+        this._players.forEach(player => {
+            const /** @type {?} */ p = player.getPosition();
             min = Math.min(p, min);
         });
         return min;
-    };
-    Object.defineProperty(AnimationGroupPlayer.prototype, "players", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._players; },
-        enumerable: true,
-        configurable: true
-    });
-    return AnimationGroupPlayer;
-}());
+    }
+    /**
+     * @return {?}
+     */
+    get players() { return this._players; }
+}
 function AnimationGroupPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationGroupPlayer.prototype._onDoneFns;

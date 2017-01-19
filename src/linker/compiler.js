@@ -5,11 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 import { Injectable, InjectionToken } from '../di';
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
@@ -18,17 +13,15 @@ import { stringify } from '../facade/lang';
  *
  * \@stable
  */
-export var ComponentStillLoadingError = (function (_super) {
-    __extends(ComponentStillLoadingError, _super);
+export class ComponentStillLoadingError extends BaseError {
     /**
      * @param {?} compType
      */
-    function ComponentStillLoadingError(compType) {
-        _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
+    constructor(compType) {
+        super(`Can't compile synchronously as ${stringify(compType)} is still being loaded!`);
         this.compType = compType;
     }
-    return ComponentStillLoadingError;
-}(BaseError));
+}
 function ComponentStillLoadingError_tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentStillLoadingError.prototype.compType;
@@ -38,17 +31,16 @@ function ComponentStillLoadingError_tsickle_Closure_declarations() {
  *
  * \@experimental
  */
-export var ModuleWithComponentFactories = (function () {
+export class ModuleWithComponentFactories {
     /**
      * @param {?} ngModuleFactory
      * @param {?} componentFactories
      */
-    function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
+    constructor(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
     }
-    return ModuleWithComponentFactories;
-}());
+}
 function ModuleWithComponentFactories_tsickle_Closure_declarations() {
     /** @type {?} */
     ModuleWithComponentFactories.prototype.ngModuleFactory;
@@ -59,7 +51,7 @@ function ModuleWithComponentFactories_tsickle_Closure_declarations() {
  * @return {?}
  */
 function _throwError() {
-    throw new Error("Runtime compiler is not loaded");
+    throw new Error(`Runtime compiler is not loaded`);
 }
 /**
  * Low-level service for running the angular compiler during runtime
@@ -71,9 +63,7 @@ function _throwError() {
  * of components.
  * \@stable
  */
-export var Compiler = (function () {
-    function Compiler() {
-    }
+export class Compiler {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents`
@@ -81,29 +71,29 @@ export var Compiler = (function () {
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
+    compileModuleSync(moduleType) { throw _throwError(); }
     /**
      * Compiles the given NgModule and all of its components
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
+    compileModuleAsync(moduleType) { throw _throwError(); }
     /**
      * Same as {\@link compileModuleSync} but also creates ComponentFactories for all components.
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+    compileModuleAndAllComponentsSync(moduleType) {
         throw _throwError();
-    };
+    }
     /**
      * Same as {\@link compileModuleAsync} but also creates ComponentFactories for all components.
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+    compileModuleAndAllComponentsAsync(moduleType) {
         throw _throwError();
-    };
+    }
     /**
      * Exposes the CSS-style selectors that have been used in `ngContent` directives within
      * the template of the given component.
@@ -112,25 +102,24 @@ export var Compiler = (function () {
      * @param {?} component
      * @return {?}
      */
-    Compiler.prototype.getNgContentSelectors = function (component) { throw _throwError(); };
+    getNgContentSelectors(component) { throw _throwError(); }
     /**
      * Clears all caches.
      * @return {?}
      */
-    Compiler.prototype.clearCache = function () { };
+    clearCache() { }
     /**
      * Clears the cache for the given component/ngModule.
      * @param {?} type
      * @return {?}
      */
-    Compiler.prototype.clearCacheFor = function (type) { };
-    Compiler.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    Compiler.ctorParameters = function () { return []; };
-    return Compiler;
-}());
+    clearCacheFor(type) { }
+}
+Compiler.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+Compiler.ctorParameters = () => [];
 function Compiler_tsickle_Closure_declarations() {
     /** @type {?} */
     Compiler.decorators;
@@ -145,22 +134,19 @@ function Compiler_tsickle_Closure_declarations() {
  *
  * @experimental
  */
-export var /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptions');
+export const /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *
  * \@experimental
  * @abstract
  */
-export var CompilerFactory = (function () {
-    function CompilerFactory() {
-    }
+export class CompilerFactory {
     /**
      * @abstract
      * @param {?=} options
      * @return {?}
      */
-    CompilerFactory.prototype.createCompiler = function (options) { };
-    return CompilerFactory;
-}());
+    createCompiler(options) { }
+}
 //# sourceMappingURL=compiler.js.map

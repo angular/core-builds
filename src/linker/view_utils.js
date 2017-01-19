@@ -13,13 +13,13 @@ import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
 import { VERSION } from '../version';
 import { ExpressionChangedAfterItHasBeenCheckedError } from './errors';
-export var ViewUtils = (function () {
+export class ViewUtils {
     /**
      * @param {?} _renderer
      * @param {?} sanitizer
      * @param {?} animationQueue
      */
-    function ViewUtils(_renderer, sanitizer, animationQueue) {
+    constructor(_renderer, sanitizer, animationQueue) {
         this._renderer = _renderer;
         this.animationQueue = animationQueue;
         this.sanitizer = sanitizer;
@@ -29,20 +29,19 @@ export var ViewUtils = (function () {
      * @param {?} renderComponentType
      * @return {?}
      */
-    ViewUtils.prototype.renderComponent = function (renderComponentType) {
+    renderComponent(renderComponentType) {
         return this._renderer.renderComponent(renderComponentType);
-    };
-    ViewUtils.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ViewUtils.ctorParameters = function () { return [
-        { type: RootRenderer, },
-        { type: Sanitizer, },
-        { type: AnimationQueue, },
-    ]; };
-    return ViewUtils;
-}());
+    }
+}
+ViewUtils.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+ViewUtils.ctorParameters = () => [
+    { type: RootRenderer, },
+    { type: Sanitizer, },
+    { type: AnimationQueue, },
+];
 function ViewUtils_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewUtils.decorators;
@@ -58,7 +57,7 @@ function ViewUtils_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewUtils.prototype.animationQueue;
 }
-var /** @type {?} */ nextRenderComponentTypeId = 0;
+let /** @type {?} */ nextRenderComponentTypeId = 0;
 /**
  * @param {?} templateUrl
  * @param {?} slotCount
@@ -68,7 +67,7 @@ var /** @type {?} */ nextRenderComponentTypeId = 0;
  * @return {?}
  */
 export function createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
-    return new RenderComponentType("" + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
+    return new RenderComponentType(`${nextRenderComponentTypeId++}`, templateUrl, slotCount, encapsulation, styles, animations);
 }
 /**
  * @param {?} e
@@ -84,8 +83,8 @@ export function addToArray(e, array) {
  * @return {?}
  */
 export function interpolate(valueCount, constAndInterp) {
-    var /** @type {?} */ result = '';
-    for (var /** @type {?} */ i = 0; i < valueCount * 2; i = i + 2) {
+    let /** @type {?} */ result = '';
+    for (let /** @type {?} */ i = 0; i < valueCount * 2; i = i + 2) {
         result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
     }
     return result + constAndInterp[valueCount * 2];
@@ -144,7 +143,7 @@ export function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4
                 c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) +
                 c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
         default:
-            throw new Error("Does not support more than 9 expressions");
+            throw new Error(`Does not support more than 9 expressions`);
     }
 }
 /**
@@ -162,7 +161,7 @@ function _toStringWithNull(v) {
  * @return {?}
  */
 export function checkBinding(view, oldValue, newValue, forceUpdate) {
-    var /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
+    const /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
     if (view.throwOnChange) {
         if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
             throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
@@ -210,7 +209,7 @@ export function checkRenderText(view, renderElement, oldValue, newValue, forceUp
  */
 export function checkRenderProperty(view, renderElement, propName, oldValue, newValue, forceUpdate, securityContext) {
     if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-        var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+        let /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
         view.renderer.setElementProperty(renderElement, propName, renderValue);
     }
 }
@@ -226,7 +225,7 @@ export function checkRenderProperty(view, renderElement, propName, oldValue, new
  */
 export function checkRenderAttribute(view, renderElement, attrName, oldValue, newValue, forceUpdate, securityContext) {
     if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-        var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+        let /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
         renderValue = renderValue != null ? renderValue.toString() : null;
         view.renderer.setElementAttribute(renderElement, attrName, renderValue);
     }
@@ -258,7 +257,7 @@ export function checkRenderClass(view, renderElement, className, oldValue, newVa
  */
 export function checkRenderStyle(view, renderElement, styleName, unit, oldValue, newValue, forceUpdate, securityContext) {
     if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-        var /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
+        let /** @type {?} */ renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
         if (renderValue != null) {
             renderValue = renderValue.toString();
             if (unit != null) {
@@ -279,17 +278,17 @@ export function checkRenderStyle(view, renderElement, styleName, unit, oldValue,
 export function castByValue(input, value) {
     return (input);
 }
-export var /** @type {?} */ EMPTY_ARRAY = [];
-export var /** @type {?} */ EMPTY_MAP = {};
+export const /** @type {?} */ EMPTY_ARRAY = [];
+export const /** @type {?} */ EMPTY_MAP = {};
 /**
  * @param {?} fn
  * @return {?}
  */
 export function pureProxy1(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0;
-    return function (p0) {
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0;
+    return (p0) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0)) {
             v0 = p0;
             result = fn(p0);
@@ -302,11 +301,11 @@ export function pureProxy1(fn) {
  * @return {?}
  */
 export function pureProxy2(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0;
-    var /** @type {?} */ v1;
-    return function (p0, p1) {
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0;
+    let /** @type {?} */ v1;
+    return (p0, p1) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
             v0 = p0;
             v1 = p1;
@@ -320,12 +319,12 @@ export function pureProxy2(fn) {
  * @return {?}
  */
 export function pureProxy3(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0;
-    var /** @type {?} */ v1;
-    var /** @type {?} */ v2;
-    return function (p0, p1, p2) {
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0;
+    let /** @type {?} */ v1;
+    let /** @type {?} */ v2;
+    return (p0, p1, p2) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2)) {
             v0 = p0;
@@ -341,11 +340,11 @@ export function pureProxy3(fn) {
  * @return {?}
  */
 export function pureProxy4(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3;
     v0 = v1 = v2 = v3;
-    return function (p0, p1, p2, p3) {
+    return (p0, p1, p2, p3) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3)) {
             v0 = p0;
@@ -362,11 +361,11 @@ export function pureProxy4(fn) {
  * @return {?}
  */
 export function pureProxy5(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4;
     v0 = v1 = v2 = v3 = v4;
-    return function (p0, p1, p2, p3, p4) {
+    return (p0, p1, p2, p3, p4) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
             v0 = p0;
@@ -384,11 +383,11 @@ export function pureProxy5(fn) {
  * @return {?}
  */
 export function pureProxy6(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5;
     v0 = v1 = v2 = v3 = v4 = v5;
-    return function (p0, p1, p2, p3, p4, p5) {
+    return (p0, p1, p2, p3, p4, p5) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
             !looseIdentical(v5, p5)) {
@@ -408,11 +407,11 @@ export function pureProxy6(fn) {
  * @return {?}
  */
 export function pureProxy7(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6;
     v0 = v1 = v2 = v3 = v4 = v5 = v6;
-    return function (p0, p1, p2, p3, p4, p5, p6) {
+    return (p0, p1, p2, p3, p4, p5, p6) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
             !looseIdentical(v5, p5) || !looseIdentical(v6, p6)) {
@@ -433,11 +432,11 @@ export function pureProxy7(fn) {
  * @return {?}
  */
 export function pureProxy8(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7;
     v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7;
-    return function (p0, p1, p2, p3, p4, p5, p6, p7) {
+    return (p0, p1, p2, p3, p4, p5, p6, p7) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
             !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
@@ -459,11 +458,11 @@ export function pureProxy8(fn) {
  * @return {?}
  */
 export function pureProxy9(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8;
     v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8;
-    return function (p0, p1, p2, p3, p4, p5, p6, p7, p8) {
+    return (p0, p1, p2, p3, p4, p5, p6, p7, p8) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
             !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
@@ -487,11 +486,11 @@ export function pureProxy9(fn) {
  * @return {?}
  */
 export function pureProxy10(fn) {
-    var /** @type {?} */ numberOfChecks = 0;
-    var /** @type {?} */ result;
-    var /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8, /** @type {?} */ v9;
+    let /** @type {?} */ numberOfChecks = 0;
+    let /** @type {?} */ result;
+    let /** @type {?} */ v0, /** @type {?} */ v1, /** @type {?} */ v2, /** @type {?} */ v3, /** @type {?} */ v4, /** @type {?} */ v5, /** @type {?} */ v6, /** @type {?} */ v7, /** @type {?} */ v8, /** @type {?} */ v9;
     v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9;
-    return function (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) {
+    return (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) => {
         if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) ||
             !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) ||
             !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) ||
@@ -518,7 +517,7 @@ export function pureProxy10(fn) {
  * @return {?}
  */
 export function setBindingDebugInfoForChanges(renderer, el, changes) {
-    Object.keys(changes).forEach(function (propName) {
+    Object.keys(changes).forEach((propName) => {
         setBindingDebugInfo(renderer, el, propName, changes[propName].currentValue);
     });
 }
@@ -531,25 +530,19 @@ export function setBindingDebugInfoForChanges(renderer, el, changes) {
  */
 export function setBindingDebugInfo(renderer, el, propName, value) {
     try {
-        renderer.setBindingDebugInfo(el, "ng-reflect-" + camelCaseToDashCase(propName), value ? value.toString() : null);
+        renderer.setBindingDebugInfo(el, `ng-reflect-${camelCaseToDashCase(propName)}`, value ? value.toString() : null);
     }
     catch (e) {
-        renderer.setBindingDebugInfo(el, "ng-reflect-" + camelCaseToDashCase(propName), '[ERROR] Exception while trying to serialize the value');
+        renderer.setBindingDebugInfo(el, `ng-reflect-${camelCaseToDashCase(propName)}`, '[ERROR] Exception while trying to serialize the value');
     }
 }
-var /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
+const /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
 /**
  * @param {?} input
  * @return {?}
  */
 function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, function () {
-        var m = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            m[_i - 0] = arguments[_i];
-        }
-        return '-' + m[1].toLowerCase();
-    });
+    return input.replace(CAMEL_CASE_REGEXP, (...m) => '-' + m[1].toLowerCase());
 }
 /**
  * @param {?} renderer
@@ -560,8 +553,8 @@ function camelCaseToDashCase(input) {
  * @return {?}
  */
 export function createRenderElement(renderer, parentElement, name, attrs, debugInfo) {
-    var /** @type {?} */ el = renderer.createElement(parentElement, name, debugInfo);
-    for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
+    const /** @type {?} */ el = renderer.createElement(parentElement, name, debugInfo);
+    for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
         renderer.setElementAttribute(el, attrs.get(i), attrs.get(i + 1));
     }
     return el;
@@ -575,10 +568,10 @@ export function createRenderElement(renderer, parentElement, name, attrs, debugI
  * @return {?}
  */
 export function selectOrCreateRenderHostElement(renderer, elementName, attrs, rootSelectorOrNode, debugInfo) {
-    var /** @type {?} */ hostElement;
+    let /** @type {?} */ hostElement;
     if (isPresent(rootSelectorOrNode)) {
         hostElement = renderer.selectRootElement(rootSelectorOrNode, debugInfo);
-        for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
+        for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
             renderer.setElementAttribute(hostElement, attrs.get(i), attrs.get(i + 1));
         }
         renderer.setElementAttribute(hostElement, 'ng-version', VERSION.full);
@@ -596,13 +589,13 @@ export function selectOrCreateRenderHostElement(renderer, elementName, attrs, ro
  * @return {?}
  */
 export function subscribeToRenderElement(view, element, eventNamesAndTargets, listener) {
-    var /** @type {?} */ disposables = createEmptyInlineArray(eventNamesAndTargets.length / 2);
-    for (var /** @type {?} */ i = 0; i < eventNamesAndTargets.length; i += 2) {
-        var /** @type {?} */ eventName = eventNamesAndTargets.get(i);
-        var /** @type {?} */ eventTarget = eventNamesAndTargets.get(i + 1);
-        var /** @type {?} */ disposable = void 0;
+    const /** @type {?} */ disposables = createEmptyInlineArray(eventNamesAndTargets.length / 2);
+    for (let /** @type {?} */ i = 0; i < eventNamesAndTargets.length; i += 2) {
+        const /** @type {?} */ eventName = eventNamesAndTargets.get(i);
+        const /** @type {?} */ eventTarget = eventNamesAndTargets.get(i + 1);
+        let /** @type {?} */ disposable;
         if (eventTarget) {
-            disposable = view.renderer.listenGlobal(eventTarget, eventName, listener.bind(view, eventTarget + ":" + eventName));
+            disposable = view.renderer.listenGlobal(eventTarget, eventName, listener.bind(view, `${eventTarget}:${eventName}`));
         }
         else {
             disposable = view.renderer.listen(element, eventName, listener.bind(view, eventName));
@@ -616,7 +609,7 @@ export function subscribeToRenderElement(view, element, eventNamesAndTargets, li
  * @return {?}
  */
 function disposeInlineArray(disposables) {
-    for (var /** @type {?} */ i = 0; i < disposables.length; i++) {
+    for (let /** @type {?} */ i = 0; i < disposables.length; i++) {
         disposables.get(i)();
     }
 }
@@ -629,7 +622,7 @@ export function noop() { }
  * @return {?}
  */
 function createEmptyInlineArray(length) {
-    var /** @type {?} */ ctor;
+    let /** @type {?} */ ctor;
     if (length <= 2) {
         ctor = InlineArray2;
     }
@@ -647,34 +640,33 @@ function createEmptyInlineArray(length) {
     }
     return new ctor(length);
 }
-var InlineArray0 = (function () {
-    function InlineArray0() {
+class InlineArray0 {
+    constructor() {
         this.length = 0;
     }
     /**
      * @param {?} index
      * @return {?}
      */
-    InlineArray0.prototype.get = function (index) { return undefined; };
+    get(index) { return undefined; }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArray0.prototype.set = function (index, value) { };
-    return InlineArray0;
-}());
+    set(index, value) { }
+}
 function InlineArray0_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray0.prototype.length;
 }
-export var InlineArray2 = (function () {
+export class InlineArray2 {
     /**
      * @param {?} length
      * @param {?=} _v0
      * @param {?=} _v1
      */
-    function InlineArray2(length, _v0, _v1) {
+    constructor(length, _v0, _v1) {
         this.length = length;
         this._v0 = _v0;
         this._v1 = _v1;
@@ -683,7 +675,7 @@ export var InlineArray2 = (function () {
      * @param {?} index
      * @return {?}
      */
-    InlineArray2.prototype.get = function (index) {
+    get(index) {
         switch (index) {
             case 0:
                 return this._v0;
@@ -692,13 +684,13 @@ export var InlineArray2 = (function () {
             default:
                 return undefined;
         }
-    };
+    }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArray2.prototype.set = function (index, value) {
+    set(index, value) {
         switch (index) {
             case 0:
                 this._v0 = value;
@@ -707,9 +699,8 @@ export var InlineArray2 = (function () {
                 this._v1 = value;
                 break;
         }
-    };
-    return InlineArray2;
-}());
+    }
+}
 function InlineArray2_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray2.prototype.length;
@@ -718,7 +709,7 @@ function InlineArray2_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray2.prototype._v1;
 }
-export var InlineArray4 = (function () {
+export class InlineArray4 {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -726,7 +717,7 @@ export var InlineArray4 = (function () {
      * @param {?=} _v2
      * @param {?=} _v3
      */
-    function InlineArray4(length, _v0, _v1, _v2, _v3) {
+    constructor(length, _v0, _v1, _v2, _v3) {
         this.length = length;
         this._v0 = _v0;
         this._v1 = _v1;
@@ -737,7 +728,7 @@ export var InlineArray4 = (function () {
      * @param {?} index
      * @return {?}
      */
-    InlineArray4.prototype.get = function (index) {
+    get(index) {
         switch (index) {
             case 0:
                 return this._v0;
@@ -750,13 +741,13 @@ export var InlineArray4 = (function () {
             default:
                 return undefined;
         }
-    };
+    }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArray4.prototype.set = function (index, value) {
+    set(index, value) {
         switch (index) {
             case 0:
                 this._v0 = value;
@@ -771,9 +762,8 @@ export var InlineArray4 = (function () {
                 this._v3 = value;
                 break;
         }
-    };
-    return InlineArray4;
-}());
+    }
+}
 function InlineArray4_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray4.prototype.length;
@@ -786,7 +776,7 @@ function InlineArray4_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray4.prototype._v3;
 }
-export var InlineArray8 = (function () {
+export class InlineArray8 {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -798,7 +788,7 @@ export var InlineArray8 = (function () {
      * @param {?=} _v6
      * @param {?=} _v7
      */
-    function InlineArray8(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) {
+    constructor(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) {
         this.length = length;
         this._v0 = _v0;
         this._v1 = _v1;
@@ -813,7 +803,7 @@ export var InlineArray8 = (function () {
      * @param {?} index
      * @return {?}
      */
-    InlineArray8.prototype.get = function (index) {
+    get(index) {
         switch (index) {
             case 0:
                 return this._v0;
@@ -834,13 +824,13 @@ export var InlineArray8 = (function () {
             default:
                 return undefined;
         }
-    };
+    }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArray8.prototype.set = function (index, value) {
+    set(index, value) {
         switch (index) {
             case 0:
                 this._v0 = value;
@@ -867,9 +857,8 @@ export var InlineArray8 = (function () {
                 this._v7 = value;
                 break;
         }
-    };
-    return InlineArray8;
-}());
+    }
+}
 function InlineArray8_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray8.prototype.length;
@@ -890,7 +879,7 @@ function InlineArray8_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray8.prototype._v7;
 }
-export var InlineArray16 = (function () {
+export class InlineArray16 {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -910,7 +899,7 @@ export var InlineArray16 = (function () {
      * @param {?=} _v14
      * @param {?=} _v15
      */
-    function InlineArray16(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13, _v14, _v15) {
+    constructor(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13, _v14, _v15) {
         this.length = length;
         this._v0 = _v0;
         this._v1 = _v1;
@@ -933,7 +922,7 @@ export var InlineArray16 = (function () {
      * @param {?} index
      * @return {?}
      */
-    InlineArray16.prototype.get = function (index) {
+    get(index) {
         switch (index) {
             case 0:
                 return this._v0;
@@ -970,13 +959,13 @@ export var InlineArray16 = (function () {
             default:
                 return undefined;
         }
-    };
+    }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArray16.prototype.set = function (index, value) {
+    set(index, value) {
         switch (index) {
             case 0:
                 this._v0 = value;
@@ -1027,9 +1016,8 @@ export var InlineArray16 = (function () {
                 this._v15 = value;
                 break;
         }
-    };
-    return InlineArray16;
-}());
+    }
+}
 function InlineArray16_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray16.prototype.length;
@@ -1066,16 +1054,12 @@ function InlineArray16_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray16.prototype._v15;
 }
-export var InlineArrayDynamic = (function () {
+export class InlineArrayDynamic {
     /**
      * @param {?} length
      * @param {...?} values
      */
-    function InlineArrayDynamic(length) {
-        var values = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            values[_i - 1] = arguments[_i];
-        }
+    constructor(length, ...values) {
         this.length = length;
         this._values = values;
     }
@@ -1083,22 +1067,21 @@ export var InlineArrayDynamic = (function () {
      * @param {?} index
      * @return {?}
      */
-    InlineArrayDynamic.prototype.get = function (index) { return this._values[index]; };
+    get(index) { return this._values[index]; }
     /**
      * @param {?} index
      * @param {?} value
      * @return {?}
      */
-    InlineArrayDynamic.prototype.set = function (index, value) { this._values[index] = value; };
-    return InlineArrayDynamic;
-}());
+    set(index, value) { this._values[index] = value; }
+}
 function InlineArrayDynamic_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArrayDynamic.prototype._values;
     /** @type {?} */
     InlineArrayDynamic.prototype.length;
 }
-export var /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
+export const /** @type {?} */ EMPTY_INLINE_ARRAY = new InlineArray0();
 /**
  * This is a private API only used by the compiler to read the view class.
  * @param {?} componentFactory
