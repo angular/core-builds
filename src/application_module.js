@@ -35,9 +35,10 @@ export function _localeFactory(locale) {
     return locale || 'en-US';
 }
 /**
- *  This module includes the providers of @angular/core that are needed
-  * to bootstrap components via `ApplicationRef`.
-  * *
+ * This module includes the providers of \@angular/core that are needed
+ * to bootstrap components via `ApplicationRef`.
+ *
+ * \@experimental
  */
 export var ApplicationModule = (function () {
     function ApplicationModule() {

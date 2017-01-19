@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
- * @stable
+ * \@stable
  */
 export var NoComponentFactoryError = (function (_super) {
     __extends(NoComponentFactoryError, _super);
@@ -43,6 +43,7 @@ var _NullComponentFactoryResolver = (function () {
     return _NullComponentFactoryResolver;
 }());
 /**
+ * \@stable
  * @abstract
  */
 export var ComponentFactoryResolver = (function () {

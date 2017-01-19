@@ -34,6 +34,7 @@ export var ReflectionCapabilities = (function () {
         return new (t.bind.apply(t, [void 0].concat(args)))();
     }; };
     /**
+     * \@internal
      * @param {?} paramTypes
      * @param {?} paramAnnotations
      * @return {?}

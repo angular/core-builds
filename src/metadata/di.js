@@ -50,11 +50,12 @@ export var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new OpaqueToken('Anal
  */
 export var /** @type {?} */ Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
 /**
- *  Base class for query metadata.
-  * *
-  * See {@link ContentChildren}, {@link ContentChild}, {@link ViewChildren}, {@link ViewChild} for
-  * more information.
-  * *
+ * Base class for query metadata.
+ *
+ * See {\@link ContentChildren}, {\@link ContentChild}, {\@link ViewChildren}, {\@link ViewChild} for
+ * more information.
+ *
+ * \@stable
  * @abstract
  */
 export var Query = (function () {

@@ -1,5 +1,7 @@
 /**
- *  *
+ * \@whatItDoes Represents the version of Angular
+ *
+ * \@stable
  */
 export var Version = (function () {
     /**
@@ -41,5 +43,5 @@ function Version_tsickle_Closure_declarations() {
 /**
  * @stable
  */
-export var /** @type {?} */ VERSION = new Version('2.4.3-a7d2804');
+export var /** @type {?} */ VERSION = new Version('2.4.3-015878a');
 //# sourceMappingURL=version.js.map

@@ -26,6 +26,7 @@ export var ViewUtils = (function () {
         this.sanitizer = sanitizer;
     }
     /**
+     * \@internal
      * @param {?} renderComponentType
      * @return {?}
      */

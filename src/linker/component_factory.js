@@ -14,11 +14,12 @@ import { unimplemented } from '../facade/errors';
 import { ElementRef } from './element_ref';
 import { ViewUtils } from './view_utils';
 /**
- *  Represents an instance of a Component created via a {@link ComponentFactory}.
-  * *
-  * `ComponentRef` provides access to the Component Instance as well other objects related to this
-  * Component Instance and allows you to destroy the Component Instance via the {@link #destroy}
-  * method.
+ * Represents an instance of a Component created via a {\@link ComponentFactory}.
+ *
+ * `ComponentRef` provides access to the Component Instance as well other objects related to this
+ * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
+ * method.
+ * \@stable
  * @abstract
  */
 export var ComponentRef = (function () {
@@ -26,7 +27,7 @@ export var ComponentRef = (function () {
     }
     Object.defineProperty(ComponentRef.prototype, "location", {
         /**
-         *  Location of the Host Element of this Component Instance.
+         * Location of the Host Element of this Component Instance.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -35,7 +36,7 @@ export var ComponentRef = (function () {
     });
     Object.defineProperty(ComponentRef.prototype, "injector", {
         /**
-         *  The injector on which the component instance exists.
+         * The injector on which the component instance exists.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -44,7 +45,7 @@ export var ComponentRef = (function () {
     });
     Object.defineProperty(ComponentRef.prototype, "instance", {
         /**
-         *  The instance of the Component.
+         * The instance of the Component.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -54,7 +55,7 @@ export var ComponentRef = (function () {
     ;
     Object.defineProperty(ComponentRef.prototype, "hostView", {
         /**
-         *  The {@link ViewRef} of the Host View of this Component instance.
+         * The {\@link ViewRef} of the Host View of this Component instance.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -64,7 +65,7 @@ export var ComponentRef = (function () {
     ;
     Object.defineProperty(ComponentRef.prototype, "changeDetectorRef", {
         /**
-         *  The {@link ChangeDetectorRef} of the Component instance.
+         * The {\@link ChangeDetectorRef} of the Component instance.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -73,7 +74,7 @@ export var ComponentRef = (function () {
     });
     Object.defineProperty(ComponentRef.prototype, "componentType", {
         /**
-         *  The component type.
+         * The component type.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -81,13 +82,13 @@ export var ComponentRef = (function () {
         configurable: true
     });
     /**
-     *  Destroys the component instance and all of the data structures associated with it.
+     * Destroys the component instance and all of the data structures associated with it.
      * @abstract
      * @return {?}
      */
     ComponentRef.prototype.destroy = function () { };
     /**
-     *  Allows to register a callback that will be called when the component is destroyed.
+     * Allows to register a callback that will be called when the component is destroyed.
      * @abstract
      * @param {?} callback
      * @return {?}
@@ -183,7 +184,7 @@ function ComponentRef__tsickle_Closure_declarations() {
     ComponentRef_.prototype._component;
 }
 /**
- * @stable
+ * \@stable
  */
 export var ComponentFactory = (function () {
     /**
@@ -205,7 +206,7 @@ export var ComponentFactory = (function () {
         configurable: true
     });
     /**
-     *  Creates a new component.
+     * Creates a new component.
      * @param {?} injector
      * @param {?=} projectableNodes
      * @param {?=} rootSelectorOrNode

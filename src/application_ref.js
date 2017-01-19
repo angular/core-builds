@@ -29,13 +29,14 @@ var /** @type {?} */ _devMode = true;
 var /** @type {?} */ _runModeLocked = false;
 var /** @type {?} */ _platform;
 /**
- *  Disable Angular's development mode, which turns off assertions and other
-  * checks within the framework.
-  * *
-  * One important assertion this disables verifies that a change detection pass
-  * does not result in additional changes to any bindings (also known as
-  * unidirectional data flow).
-  * *
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ *
+ * \@stable
  * @return {?}
  */
 export function enableProdMode() {
@@ -45,11 +46,12 @@ export function enableProdMode() {
     _devMode = false;
 }
 /**
- *  Returns whether Angular is in development mode. After called once,
-  * the value is locked and won't change any more.
-  * *
-  * By default, this is true, unless a user calls `enableProdMode` before calling this.
-  * *
+ * Returns whether Angular is in development mode. After called once,
+ * the value is locked and won't change any more.
+ *
+ * By default, this is true, unless a user calls `enableProdMode` before calling this.
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @return {?}
  */
 export function isDevMode() {
@@ -57,8 +59,9 @@ export function isDevMode() {
     return _devMode;
 }
 /**
- *  A token for third-party components that can register themselves with NgProbe.
-  * *
+ * A token for third-party components that can register themselves with NgProbe.
+ *
+ * \@experimental
  */
 export var NgProbeToken = (function () {
     /**
@@ -78,9 +81,10 @@ function NgProbeToken_tsickle_Closure_declarations() {
     NgProbeToken.prototype.token;
 }
 /**
- *  Creates a platform.
-  * Platforms have to be eagerly created via this function.
-  * *
+ * Creates a platform.
+ * Platforms have to be eagerly created via this function.
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @param {?} injector
  * @return {?}
  */
@@ -95,8 +99,9 @@ export function createPlatform(injector) {
     return _platform;
 }
 /**
- *  Creates a factory for a platform
-  * *
+ * Creates a factory for a platform
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @param {?} parentPlatformFactory
  * @param {?} name
  * @param {?=} providers
@@ -119,9 +124,10 @@ export function createPlatformFactory(parentPlatformFactory, name, providers) {
     };
 }
 /**
- *  Checks that there currently is a platform
-  * which contains the given token as a provider.
-  * *
+ * Checks that there currently is a platform
+ * which contains the given token as a provider.
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @param {?} requiredToken
  * @return {?}
  */
@@ -136,8 +142,9 @@ export function assertPlatform(requiredToken) {
     return platform;
 }
 /**
- *  Destroy the existing platform.
-  * *
+ * Destroy the existing platform.
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @return {?}
  */
 export function destroyPlatform() {
@@ -146,46 +153,50 @@ export function destroyPlatform() {
     }
 }
 /**
- *  Returns the current platform.
-  * *
+ * Returns the current platform.
+ *
+ * \@experimental APIs related to application bootstrap are currently under review.
  * @return {?}
  */
 export function getPlatform() {
     return _platform && !_platform.destroyed ? _platform : null;
 }
 /**
- *  The Angular platform is the entry point for Angular on a web page. Each page
-  * has exactly one platform, and services (such as reflection) which are common
-  * to every Angular application running on the page are bound in its scope.
-  * *
-  * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
-  * explicitly by calling {@link createPlatform}().
-  * *
+ * The Angular platform is the entry point for Angular on a web page. Each page
+ * has exactly one platform, and services (such as reflection) which are common
+ * to every Angular application running on the page are bound in its scope.
+ *
+ * A page's platform is initialized implicitly when {\@link bootstrap}() is called, or
+ * explicitly by calling {\@link createPlatform}().
+ *
+ * \@stable
  * @abstract
  */
 export var PlatformRef = (function () {
     function PlatformRef() {
     }
     /**
-     *  Creates an instance of an `@NgModule` for the given platform
-      * for offline compilation.
-      * *
-      * ## Simple Example
-      * *
-      * ```typescript
-      * my_module.ts:
-      * *
-      * imports: [BrowserModule]
-      * })
-      * class MyModule {}
-      * *
-      * main.ts:
-      * import {MyModuleNgFactory} from './my_module.ngfactory';
-      * import {platformBrowser} from '@angular/platform-browser';
-      * *
-      * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
-      * ```
-      * *
+     * Creates an instance of an `\@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {platformBrowser} from '\@angular/platform-browser';
+     *
+     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
      * @param {?} moduleFactory
      * @return {?}
      */
@@ -193,17 +204,19 @@ export var PlatformRef = (function () {
         throw unimplemented();
     };
     /**
-     *  Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
-      * *
-      * ## Simple Example
-      * *
-      * ```typescript
-      * imports: [BrowserModule]
-      * })
-      * class MyModule {}
-      * *
-      * let moduleRef = platformBrowser().bootstrapModule(MyModule);
-      * ```
+     * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     * \@stable
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @return {?}
@@ -213,7 +226,7 @@ export var PlatformRef = (function () {
         throw unimplemented();
     };
     /**
-     *  Register a listener to be called when the platform is disposed.
+     * Register a listener to be called when the platform is disposed.
      * @abstract
      * @param {?} callback
      * @return {?}
@@ -221,8 +234,8 @@ export var PlatformRef = (function () {
     PlatformRef.prototype.onDestroy = function (callback) { };
     Object.defineProperty(PlatformRef.prototype, "injector", {
         /**
-         *  Retrieve the platform {@link Injector}, which is the parent injector for
-          * every Angular application on the page and provides singleton providers.
+         * Retrieve the platform {\@link Injector}, which is the parent injector for
+         * every Angular application on the page and provides singleton providers.
          * @return {?}
          */
         get: function () { throw unimplemented(); },
@@ -231,7 +244,7 @@ export var PlatformRef = (function () {
     });
     ;
     /**
-     *  Destroy the Angular platform and all Angular applications on the page.
+     * Destroy the Angular platform and all Angular applications on the page.
      * @abstract
      * @return {?}
      */
@@ -432,48 +445,49 @@ function PlatformRef__tsickle_Closure_declarations() {
     PlatformRef_.prototype._injector;
 }
 /**
- *  A reference to an Angular application running on a page.
-  * *
-  * For more about Angular applications, see the documentation for {@link bootstrap}.
-  * *
+ * A reference to an Angular application running on a page.
+ *
+ * For more about Angular applications, see the documentation for {\@link bootstrap}.
+ *
+ * \@stable
  * @abstract
  */
 export var ApplicationRef = (function () {
     function ApplicationRef() {
     }
     /**
-     *  Bootstrap a new component at the root level of the application.
-      * *
-      * ### Bootstrap process
-      * *
-      * When bootstrapping a new root component into an application, Angular mounts the
-      * specified application component onto DOM elements identified by the [componentType]'s
-      * selector and kicks off automatic change detection to finish initializing the component.
-      * *
-      * ### Example
-      * {@example core/ts/platform/platform.ts region='longform'}
+     * Bootstrap a new component at the root level of the application.
+     *
+     * ### Bootstrap process
+     *
+     * When bootstrapping a new root component into an application, Angular mounts the
+     * specified application component onto DOM elements identified by the [componentType]'s
+     * selector and kicks off automatic change detection to finish initializing the component.
+     *
+     * ### Example
+     * {\@example core/ts/platform/platform.ts region='longform'}
      * @abstract
      * @param {?} componentFactory
      * @return {?}
      */
     ApplicationRef.prototype.bootstrap = function (componentFactory) { };
     /**
-     *  Invoke this method to explicitly process change detection and its side-effects.
-      * *
-      * In development mode, `tick()` also performs a second change detection cycle to ensure that no
-      * further changes are detected. If additional changes are picked up during this second cycle,
-      * bindings in the app have side-effects that cannot be resolved in a single change detection
-      * pass.
-      * In this case, Angular throws an error, since an Angular application can only have one change
-      * detection pass during which all change detection must complete.
+     * Invoke this method to explicitly process change detection and its side-effects.
+     *
+     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+     * further changes are detected. If additional changes are picked up during this second cycle,
+     * bindings in the app have side-effects that cannot be resolved in a single change detection
+     * pass.
+     * In this case, Angular throws an error, since an Angular application can only have one change
+     * detection pass during which all change detection must complete.
      * @abstract
      * @return {?}
      */
     ApplicationRef.prototype.tick = function () { };
     Object.defineProperty(ApplicationRef.prototype, "componentTypes", {
         /**
-         *  Get a list of component types registered to this application.
-          * This list is populated even before the component is created.
+         * Get a list of component types registered to this application.
+         * This list is populated even before the component is created.
          * @return {?}
          */
         get: function () { return (unimplemented()); },
@@ -483,7 +497,7 @@ export var ApplicationRef = (function () {
     ;
     Object.defineProperty(ApplicationRef.prototype, "components", {
         /**
-         *  Get a list of components registered to this application.
+         * Get a list of components registered to this application.
          * @return {?}
          */
         get: function () { return (unimplemented()); },
@@ -492,22 +506,22 @@ export var ApplicationRef = (function () {
     });
     ;
     /**
-     *  Attaches a view so that it will be dirty checked.
-      * The view will be automatically detached when it is destroyed.
-      * This will throw if the view is already attached to a ViewContainer.
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
      * @param {?} view
      * @return {?}
      */
     ApplicationRef.prototype.attachView = function (view) { unimplemented(); };
     /**
-     *  Detaches a view from dirty checking again.
+     * Detaches a view from dirty checking again.
      * @param {?} view
      * @return {?}
      */
     ApplicationRef.prototype.detachView = function (view) { unimplemented(); };
     Object.defineProperty(ApplicationRef.prototype, "viewCount", {
         /**
-         *  Returns the number of attached views.
+         * Returns the number of attached views.
          * @return {?}
          */
         get: function () { return unimplemented(); },
@@ -687,7 +701,10 @@ export var ApplicationRef_ = (function (_super) {
     return ApplicationRef_;
 }(ApplicationRef));
 function ApplicationRef__tsickle_Closure_declarations() {
-    /** @type {?} */
+    /**
+     * \@internal
+     * @type {?}
+     */
     ApplicationRef_._tickScope;
     /** @type {?} */
     ApplicationRef_.decorators;

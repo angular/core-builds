@@ -12,8 +12,8 @@ import { Host, Inject, Optional, Self, SkipSelf } from './metadata';
 import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 /**
- *  `Dependency` is used by the framework to extend DI.
-  * This is internal to Angular and should not be used directly.
+ * `Dependency` is used by the framework to extend DI.
+ * This is internal to Angular and should not be used directly.
  */
 export var ReflectiveDependency = (function () {
     /**
@@ -82,8 +82,9 @@ function ResolvedReflectiveProvider__tsickle_Closure_declarations() {
     ResolvedReflectiveProvider_.prototype.multiProvider;
 }
 /**
- *  An internal resolved representation of a factory function created by resolving {@link
-  * Provider}.
+ * An internal resolved representation of a factory function created by resolving {\@link
+ * Provider}.
+ * \@experimental
  */
 export var ResolvedReflectiveFactory = (function () {
     /**
@@ -109,7 +110,7 @@ function ResolvedReflectiveFactory_tsickle_Closure_declarations() {
     ResolvedReflectiveFactory.prototype.dependencies;
 }
 /**
- *  Resolve a single provider.
+ * Resolve a single provider.
  * @param {?} provider
  * @return {?}
  */
@@ -136,10 +137,10 @@ function resolveReflectiveFactory(provider) {
     return new ResolvedReflectiveFactory(factoryFn, resolvedDeps);
 }
 /**
- *  Converts the {@link Provider} into {@link ResolvedProvider}.
-  * *
-  * {@link Injector} internally only uses {@link ResolvedProvider}, {@link Provider} contains
-  * convenience provider syntax.
+ * Converts the {\@link Provider} into {\@link ResolvedProvider}.
+ *
+ * {\@link Injector} internally only uses {\@link ResolvedProvider}, {\@link Provider} contains
+ * convenience provider syntax.
  * @param {?} provider
  * @return {?}
  */
@@ -147,7 +148,7 @@ function resolveReflectiveProvider(provider) {
     return new ResolvedReflectiveProvider_(ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)], provider.multi);
 }
 /**
- *  Resolve a list of Providers.
+ * Resolve a list of Providers.
  * @param {?} providers
  * @return {?}
  */
@@ -158,9 +159,9 @@ export function resolveReflectiveProviders(providers) {
     return Array.from(resolvedProviderMap.values());
 }
 /**
- *  Merges a list of ResolvedProviders into a list where
-  * each key is contained exactly once and multi providers
-  * have been merged.
+ * Merges a list of ResolvedProviders into a list where
+ * each key is contained exactly once and multi providers
+ * have been merged.
  * @param {?} providers
  * @param {?} normalizedProvidersMap
  * @return {?}
