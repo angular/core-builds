@@ -10,154 +10,163 @@ import { scheduleMicroTask } from '../facade/lang';
  * \@experimental Animation support is experimental.
  * @abstract
  */
-export class AnimationPlayer {
+export var AnimationPlayer = (function () {
+    function AnimationPlayer() {
+    }
     /**
      * @abstract
      * @param {?} fn
      * @return {?}
      */
-    onDone(fn) { }
+    AnimationPlayer.prototype.onDone = function (fn) { };
     /**
      * @abstract
      * @param {?} fn
      * @return {?}
      */
-    onStart(fn) { }
+    AnimationPlayer.prototype.onStart = function (fn) { };
     /**
      * @abstract
      * @return {?}
      */
-    init() { }
+    AnimationPlayer.prototype.init = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    hasStarted() { }
+    AnimationPlayer.prototype.hasStarted = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    play() { }
+    AnimationPlayer.prototype.play = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    pause() { }
+    AnimationPlayer.prototype.pause = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    restart() { }
+    AnimationPlayer.prototype.restart = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    finish() { }
+    AnimationPlayer.prototype.finish = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    destroy() { }
+    AnimationPlayer.prototype.destroy = function () { };
     /**
      * @abstract
      * @return {?}
      */
-    reset() { }
+    AnimationPlayer.prototype.reset = function () { };
     /**
      * @abstract
      * @param {?} p
      * @return {?}
      */
-    setPosition(p) { }
+    AnimationPlayer.prototype.setPosition = function (p) { };
     /**
      * @abstract
      * @return {?}
      */
-    getPosition() { }
-    /**
-     * @return {?}
-     */
-    get parentPlayer() { throw new Error('NOT IMPLEMENTED: Base Class'); }
-    /**
-     * @param {?} player
-     * @return {?}
-     */
-    set parentPlayer(player) { throw new Error('NOT IMPLEMENTED: Base Class'); }
-}
-export class NoOpAnimationPlayer {
-    constructor() {
+    AnimationPlayer.prototype.getPosition = function () { };
+    Object.defineProperty(AnimationPlayer.prototype, "parentPlayer", {
+        /**
+         * @return {?}
+         */
+        get: function () { throw new Error('NOT IMPLEMENTED: Base Class'); },
+        /**
+         * @param {?} player
+         * @return {?}
+         */
+        set: function (player) { throw new Error('NOT IMPLEMENTED: Base Class'); },
+        enumerable: true,
+        configurable: true
+    });
+    return AnimationPlayer;
+}());
+export var NoOpAnimationPlayer = (function () {
+    function NoOpAnimationPlayer() {
+        var _this = this;
         this._onDoneFns = [];
         this._onStartFns = [];
         this._started = false;
         this.parentPlayer = null;
-        scheduleMicroTask(() => this._onFinish());
+        scheduleMicroTask(function () { return _this._onFinish(); });
     }
     /**
      * \@internal
      * @return {?}
      */
-    _onFinish() {
-        this._onDoneFns.forEach(fn => fn());
+    NoOpAnimationPlayer.prototype._onFinish = function () {
+        this._onDoneFns.forEach(function (fn) { return fn(); });
         this._onDoneFns = [];
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    onStart(fn) { this._onStartFns.push(fn); }
+    NoOpAnimationPlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
     /**
      * @param {?} fn
      * @return {?}
      */
-    onDone(fn) { this._onDoneFns.push(fn); }
+    NoOpAnimationPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     /**
      * @return {?}
      */
-    hasStarted() { return this._started; }
+    NoOpAnimationPlayer.prototype.hasStarted = function () { return this._started; };
     /**
      * @return {?}
      */
-    init() { }
+    NoOpAnimationPlayer.prototype.init = function () { };
     /**
      * @return {?}
      */
-    play() {
+    NoOpAnimationPlayer.prototype.play = function () {
         if (!this.hasStarted()) {
-            this._onStartFns.forEach(fn => fn());
+            this._onStartFns.forEach(function (fn) { return fn(); });
             this._onStartFns = [];
         }
         this._started = true;
-    }
+    };
     /**
      * @return {?}
      */
-    pause() { }
+    NoOpAnimationPlayer.prototype.pause = function () { };
     /**
      * @return {?}
      */
-    restart() { }
+    NoOpAnimationPlayer.prototype.restart = function () { };
     /**
      * @return {?}
      */
-    finish() { this._onFinish(); }
+    NoOpAnimationPlayer.prototype.finish = function () { this._onFinish(); };
     /**
      * @return {?}
      */
-    destroy() { }
+    NoOpAnimationPlayer.prototype.destroy = function () { };
     /**
      * @return {?}
      */
-    reset() { }
+    NoOpAnimationPlayer.prototype.reset = function () { };
     /**
      * @param {?} p
      * @return {?}
      */
-    setPosition(p) { }
+    NoOpAnimationPlayer.prototype.setPosition = function (p) { };
     /**
      * @return {?}
      */
-    getPosition() { return 0; }
-}
+    NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
+    return NoOpAnimationPlayer;
+}());
 function NoOpAnimationPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     NoOpAnimationPlayer.prototype._onDoneFns;

@@ -5,60 +5,73 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
  * \@stable
  */
-export class NoComponentFactoryError extends BaseError {
+export var NoComponentFactoryError = (function (_super) {
+    __extends(NoComponentFactoryError, _super);
     /**
      * @param {?} component
      */
-    constructor(component) {
-        super(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
+    function NoComponentFactoryError(component) {
+        _super.call(this, "No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
         this.component = component;
     }
-}
+    return NoComponentFactoryError;
+}(BaseError));
 function NoComponentFactoryError_tsickle_Closure_declarations() {
     /** @type {?} */
     NoComponentFactoryError.prototype.component;
 }
-class _NullComponentFactoryResolver {
+var _NullComponentFactoryResolver = (function () {
+    function _NullComponentFactoryResolver() {
+    }
     /**
      * @param {?} component
      * @return {?}
      */
-    resolveComponentFactory(component) {
+    _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
         throw new NoComponentFactoryError(component);
-    }
-}
+    };
+    return _NullComponentFactoryResolver;
+}());
 /**
  * \@stable
  * @abstract
  */
-export class ComponentFactoryResolver {
+export var ComponentFactoryResolver = (function () {
+    function ComponentFactoryResolver() {
+    }
     /**
      * @abstract
      * @param {?} component
      * @return {?}
      */
-    resolveComponentFactory(component) { }
-}
-ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    ComponentFactoryResolver.prototype.resolveComponentFactory = function (component) { };
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+    return ComponentFactoryResolver;
+}());
 function ComponentFactoryResolver_tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentFactoryResolver.NULL;
 }
-export class CodegenComponentFactoryResolver {
+export var CodegenComponentFactoryResolver = (function () {
     /**
      * @param {?} factories
      * @param {?} _parent
      */
-    constructor(factories, _parent) {
+    function CodegenComponentFactoryResolver(factories, _parent) {
         this._parent = _parent;
         this._factories = new Map();
-        for (let i = 0; i < factories.length; i++) {
-            const factory = factories[i];
+        for (var i = 0; i < factories.length; i++) {
+            var factory = factories[i];
             this._factories.set(factory.componentType, factory);
         }
     }
@@ -66,14 +79,15 @@ export class CodegenComponentFactoryResolver {
      * @param {?} component
      * @return {?}
      */
-    resolveComponentFactory(component) {
-        let /** @type {?} */ result = this._factories.get(component);
+    CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+        var /** @type {?} */ result = this._factories.get(component);
         if (!result) {
             result = this._parent.resolveComponentFactory(component);
         }
         return result;
-    }
-}
+    };
+    return CodegenComponentFactoryResolver;
+}());
 function CodegenComponentFactoryResolver_tsickle_Closure_declarations() {
     /** @type {?} */
     CodegenComponentFactoryResolver.prototype._factories;

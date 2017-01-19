@@ -2,7 +2,9 @@
  * \@stable
  * @abstract
  */
-export class ChangeDetectorRef {
+export var ChangeDetectorRef = (function () {
+    function ChangeDetectorRef() {
+    }
     /**
      * Marks all {\@link ChangeDetectionStrategy#OnPush} ancestors as to be checked.
      *
@@ -41,7 +43,7 @@ export class ChangeDetectorRef {
      * @abstract
      * @return {?}
      */
-    markForCheck() { }
+    ChangeDetectorRef.prototype.markForCheck = function () { };
     /**
      * Detaches the change detector from the change detector tree.
      *
@@ -97,7 +99,7 @@ export class ChangeDetectorRef {
      * @abstract
      * @return {?}
      */
-    detach() { }
+    ChangeDetectorRef.prototype.detach = function () { };
     /**
      * Checks the change detector and its children.
      *
@@ -122,7 +124,7 @@ export class ChangeDetectorRef {
      * @abstract
      * @return {?}
      */
-    detectChanges() { }
+    ChangeDetectorRef.prototype.detectChanges = function () { };
     /**
      * Checks the change detector and its children, and throws if any changes are detected.
      *
@@ -131,7 +133,7 @@ export class ChangeDetectorRef {
      * @abstract
      * @return {?}
      */
-    checkNoChanges() { }
+    ChangeDetectorRef.prototype.checkNoChanges = function () { };
     /**
      * Reattach the change detector to the change detector tree.
      *
@@ -188,6 +190,7 @@ export class ChangeDetectorRef {
      * @abstract
      * @return {?}
      */
-    reattach() { }
-}
+    ChangeDetectorRef.prototype.reattach = function () { };
+    return ChangeDetectorRef;
+}());
 //# sourceMappingURL=change_detector_ref.js.map

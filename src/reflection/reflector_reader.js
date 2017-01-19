@@ -3,31 +3,33 @@
  * to power dependency injection and compilation.
  * @abstract
  */
-export class ReflectorReader {
+export var ReflectorReader = (function () {
+    function ReflectorReader() {
+    }
     /**
      * @abstract
      * @param {?} typeOrFunc
      * @return {?}
      */
-    parameters(typeOrFunc) { }
+    ReflectorReader.prototype.parameters = function (typeOrFunc) { };
     /**
      * @abstract
      * @param {?} typeOrFunc
      * @return {?}
      */
-    annotations(typeOrFunc) { }
+    ReflectorReader.prototype.annotations = function (typeOrFunc) { };
     /**
      * @abstract
      * @param {?} typeOrFunc
      * @return {?}
      */
-    propMetadata(typeOrFunc) { }
+    ReflectorReader.prototype.propMetadata = function (typeOrFunc) { };
     /**
      * @abstract
      * @param {?} typeOrFunc
      * @return {?}
      */
-    importUri(typeOrFunc) { }
+    ReflectorReader.prototype.importUri = function (typeOrFunc) { };
     /**
      * @abstract
      * @param {?} name
@@ -35,13 +37,14 @@ export class ReflectorReader {
      * @param {?} runtime
      * @return {?}
      */
-    resolveIdentifier(name, moduleUrl, runtime) { }
+    ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { };
     /**
      * @abstract
      * @param {?} identifier
      * @param {?} name
      * @return {?}
      */
-    resolveEnum(identifier, name) { }
-}
+    ReflectorReader.prototype.resolveEnum = function (identifier, name) { };
+    return ReflectorReader;
+}());
 //# sourceMappingURL=reflector_reader.js.map

@@ -7,21 +7,25 @@
  */
 import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
-const /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
-export const /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-class _NullInjector {
+var /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
+export var /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+var _NullInjector = (function () {
+    function _NullInjector() {
+    }
     /**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
      */
-    get(token, notFoundValue = _THROW_IF_NOT_FOUND) {
+    _NullInjector.prototype.get = function (token, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
-            throw new Error(`No provider for ${stringify(token)}!`);
+            throw new Error("No provider for " + stringify(token) + "!");
         }
         return notFoundValue;
-    }
-}
+    };
+    return _NullInjector;
+}());
 /**
  * \@whatItDoes Injector interface
  * \@howToUse
@@ -43,16 +47,19 @@ class _NullInjector {
  * \@stable
  * @abstract
  */
-export class Injector {
+export var Injector = (function () {
+    function Injector() {
+    }
     /**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
      */
-    get(token, notFoundValue) { return unimplemented(); }
-}
-Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-Injector.NULL = new _NullInjector();
+    Injector.prototype.get = function (token, notFoundValue) { return unimplemented(); };
+    Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    Injector.NULL = new _NullInjector();
+    return Injector;
+}());
 function Injector_tsickle_Closure_declarations() {
     /** @type {?} */
     Injector.THROW_IF_NOT_FOUND;

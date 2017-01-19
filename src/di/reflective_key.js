@@ -23,37 +23,46 @@ import { resolveForwardRef } from './forward_ref';
  * providers.
  * \@experimental
  */
-export class ReflectiveKey {
+export var ReflectiveKey = (function () {
     /**
      * Private
      * @param {?} token
      * @param {?} id
      */
-    constructor(token, id) {
+    function ReflectiveKey(token, id) {
         this.token = token;
         this.id = id;
         if (!token) {
             throw new Error('Token must be defined!');
         }
     }
-    /**
-     * Returns a stringified token.
-     * @return {?}
-     */
-    get displayName() { return stringify(this.token); }
+    Object.defineProperty(ReflectiveKey.prototype, "displayName", {
+        /**
+         * Returns a stringified token.
+         * @return {?}
+         */
+        get: function () { return stringify(this.token); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Retrieves a `Key` for a token.
      * @param {?} token
      * @return {?}
      */
-    static get(token) {
+    ReflectiveKey.get = function (token) {
         return _globalKeyRegistry.get(resolveForwardRef(token));
-    }
-    /**
-     * @return {?} the number of keys registered in the system.
-     */
-    static get numberOfKeys() { return _globalKeyRegistry.numberOfKeys; }
-}
+    };
+    Object.defineProperty(ReflectiveKey, "numberOfKeys", {
+        /**
+         * @return {?} the number of keys registered in the system.
+         */
+        get: function () { return _globalKeyRegistry.numberOfKeys; },
+        enumerable: true,
+        configurable: true
+    });
+    return ReflectiveKey;
+}());
 function ReflectiveKey_tsickle_Closure_declarations() {
     /** @type {?} */
     ReflectiveKey.prototype.token;
@@ -63,32 +72,37 @@ function ReflectiveKey_tsickle_Closure_declarations() {
 /**
  * \@internal
  */
-export class KeyRegistry {
-    constructor() {
+export var KeyRegistry = (function () {
+    function KeyRegistry() {
         this._allKeys = new Map();
     }
     /**
      * @param {?} token
      * @return {?}
      */
-    get(token) {
+    KeyRegistry.prototype.get = function (token) {
         if (token instanceof ReflectiveKey)
             return token;
         if (this._allKeys.has(token)) {
             return this._allKeys.get(token);
         }
-        const /** @type {?} */ newKey = new ReflectiveKey(token, ReflectiveKey.numberOfKeys);
+        var /** @type {?} */ newKey = new ReflectiveKey(token, ReflectiveKey.numberOfKeys);
         this._allKeys.set(token, newKey);
         return newKey;
-    }
-    /**
-     * @return {?}
-     */
-    get numberOfKeys() { return this._allKeys.size; }
-}
+    };
+    Object.defineProperty(KeyRegistry.prototype, "numberOfKeys", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._allKeys.size; },
+        enumerable: true,
+        configurable: true
+    });
+    return KeyRegistry;
+}());
 function KeyRegistry_tsickle_Closure_declarations() {
     /** @type {?} */
     KeyRegistry.prototype._allKeys;
 }
-const /** @type {?} */ _globalKeyRegistry = new KeyRegistry();
+var /** @type {?} */ _globalKeyRegistry = new KeyRegistry();
 //# sourceMappingURL=reflective_key.js.map

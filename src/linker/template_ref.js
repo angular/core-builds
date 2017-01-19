@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { ElementRef } from './element_ref';
 /**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.
@@ -20,26 +25,34 @@ import { ElementRef } from './element_ref';
  * \@stable
  * @abstract
  */
-export class TemplateRef {
-    /**
-     * @return {?}
-     */
-    get elementRef() { return null; }
+export var TemplateRef = (function () {
+    function TemplateRef() {
+    }
+    Object.defineProperty(TemplateRef.prototype, "elementRef", {
+        /**
+         * @return {?}
+         */
+        get: function () { return null; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @abstract
      * @param {?} context
      * @return {?}
      */
-    createEmbeddedView(context) { }
-}
-export class TemplateRef_ extends TemplateRef {
+    TemplateRef.prototype.createEmbeddedView = function (context) { };
+    return TemplateRef;
+}());
+export var TemplateRef_ = (function (_super) {
+    __extends(TemplateRef_, _super);
     /**
      * @param {?} _parentView
      * @param {?} _nodeIndex
      * @param {?} _nativeElement
      */
-    constructor(_parentView, _nodeIndex, _nativeElement) {
-        super();
+    function TemplateRef_(_parentView, _nodeIndex, _nativeElement) {
+        _super.call(this);
         this._parentView = _parentView;
         this._nodeIndex = _nodeIndex;
         this._nativeElement = _nativeElement;
@@ -48,16 +61,21 @@ export class TemplateRef_ extends TemplateRef {
      * @param {?} context
      * @return {?}
      */
-    createEmbeddedView(context) {
-        const /** @type {?} */ view = this._parentView.createEmbeddedViewInternal(this._nodeIndex);
+    TemplateRef_.prototype.createEmbeddedView = function (context) {
+        var /** @type {?} */ view = this._parentView.createEmbeddedViewInternal(this._nodeIndex);
         view.create(context || ({}));
         return view.ref;
-    }
-    /**
-     * @return {?}
-     */
-    get elementRef() { return new ElementRef(this._nativeElement); }
-}
+    };
+    Object.defineProperty(TemplateRef_.prototype, "elementRef", {
+        /**
+         * @return {?}
+         */
+        get: function () { return new ElementRef(this._nativeElement); },
+        enumerable: true,
+        configurable: true
+    });
+    return TemplateRef_;
+}(TemplateRef));
 function TemplateRef__tsickle_Closure_declarations() {
     /** @type {?} */
     TemplateRef_.prototype._parentView;

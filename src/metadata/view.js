@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export let ViewEncapsulation = {};
+export var ViewEncapsulation = {};
 ViewEncapsulation.Emulated = 0;
 ViewEncapsulation.Native = 1;
 ViewEncapsulation.None = 2;
@@ -37,11 +37,12 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  *
  * {\@link Component}
  */
-export class ViewMetadata {
+export var ViewMetadata = (function () {
     /**
      * @param {?=} __0
      */
-    constructor({ templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation } = {}) {
+    function ViewMetadata(_a) {
+        var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
         this.templateUrl = templateUrl;
         this.template = template;
         this.styleUrls = styleUrls;
@@ -50,7 +51,8 @@ export class ViewMetadata {
         this.animations = animations;
         this.interpolation = interpolation;
     }
-}
+    return ViewMetadata;
+}());
 function ViewMetadata_tsickle_Closure_declarations() {
     /**
      * {\@link Component.templateUrl}

@@ -1,3 +1,8 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 /**
  * Convenience to throw an Error with 'unimplemented' as the message.
  * @return {?}
@@ -8,46 +13,60 @@ export function unimplemented() {
 /**
  * \@stable
  */
-export class BaseError extends Error {
+export var BaseError = (function (_super) {
+    __extends(BaseError, _super);
     /**
      * @param {?} message
      */
-    constructor(message) {
-        super(message);
+    function BaseError(message) {
+        _super.call(this, message);
         // Errors don't use current this, instead they create a new instance.
         // We have to do forward all of our api to the nativeInstance.
         // TODO(bradfordcsmith): Remove this hack when
         //     google/closure-compiler/issues/2102 is fixed.
-        const nativeError = new Error(message);
+        var nativeError = new Error(message);
         this._nativeError = nativeError;
     }
+    Object.defineProperty(BaseError.prototype, "message", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._nativeError.message; },
+        /**
+         * @param {?} message
+         * @return {?}
+         */
+        set: function (message) { this._nativeError.message = message; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseError.prototype, "name", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._nativeError.name; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseError.prototype, "stack", {
+        /**
+         * @return {?}
+         */
+        get: function () { return ((this._nativeError)).stack; },
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        set: function (value) { ((this._nativeError)).stack = value; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @return {?}
      */
-    get message() { return this._nativeError.message; }
-    /**
-     * @param {?} message
-     * @return {?}
-     */
-    set message(message) { this._nativeError.message = message; }
-    /**
-     * @return {?}
-     */
-    get name() { return this._nativeError.name; }
-    /**
-     * @return {?}
-     */
-    get stack() { return ((this._nativeError)).stack; }
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    set stack(value) { ((this._nativeError)).stack = value; }
-    /**
-     * @return {?}
-     */
-    toString() { return this._nativeError.toString(); }
-}
+    BaseError.prototype.toString = function () { return this._nativeError.toString(); };
+    return BaseError;
+}(Error));
 function BaseError_tsickle_Closure_declarations() {
     /**
      * \@internal *
@@ -58,23 +77,29 @@ function BaseError_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export class WrappedError extends BaseError {
+export var WrappedError = (function (_super) {
+    __extends(WrappedError, _super);
     /**
      * @param {?} message
      * @param {?} error
      */
-    constructor(message, error) {
-        super(`${message} caused by: ${error instanceof Error ? error.message : error}`);
+    function WrappedError(message, error) {
+        _super.call(this, message + " caused by: " + (error instanceof Error ? error.message : error));
         this.originalError = error;
     }
-    /**
-     * @return {?}
-     */
-    get stack() {
-        return (((this.originalError instanceof Error ? this.originalError : this._nativeError)))
-            .stack;
-    }
-}
+    Object.defineProperty(WrappedError.prototype, "stack", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return (((this.originalError instanceof Error ? this.originalError : this._nativeError)))
+                .stack;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return WrappedError;
+}(BaseError));
 function WrappedError_tsickle_Closure_declarations() {
     /** @type {?} */
     WrappedError.prototype.originalError;

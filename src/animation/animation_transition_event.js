@@ -30,11 +30,12 @@ import { ElementRef } from '../linker/element_ref';
  *
  * \@experimental Animation support is experimental.
  */
-export class AnimationTransitionEvent {
+export var AnimationTransitionEvent = (function () {
     /**
      * @param {?} __0
      */
-    constructor({ fromState, toState, totalTime, phaseName, element, triggerName }) {
+    function AnimationTransitionEvent(_a) {
+        var fromState = _a.fromState, toState = _a.toState, totalTime = _a.totalTime, phaseName = _a.phaseName, element = _a.element, triggerName = _a.triggerName;
         this.fromState = fromState;
         this.toState = toState;
         this.totalTime = totalTime;
@@ -42,7 +43,8 @@ export class AnimationTransitionEvent {
         this.element = new ElementRef(element);
         this.triggerName = triggerName;
     }
-}
+    return AnimationTransitionEvent;
+}());
 function AnimationTransitionEvent_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationTransitionEvent.prototype.fromState;

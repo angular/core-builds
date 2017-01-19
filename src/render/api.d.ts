@@ -27,14 +27,14 @@ export declare class RenderComponentType {
     });
 }
 export declare abstract class RenderDebugInfo {
-    readonly injector: Injector;
-    readonly component: any;
-    readonly providerTokens: any[];
-    readonly references: {
+    injector: Injector;
+    component: any;
+    providerTokens: any[];
+    references: {
         [key: string]: any;
     };
-    readonly context: any;
-    readonly source: string;
+    context: any;
+    source: string;
 }
 export interface DirectRenderer {
     remove(node: any): void;

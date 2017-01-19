@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { BaseError, WrappedError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
@@ -12,8 +17,8 @@ import { stringify } from '../facade/lang';
  * @return {?}
  */
 function findFirstClosedCycle(keys) {
-    const /** @type {?} */ res = [];
-    for (let /** @type {?} */ i = 0; i < keys.length; ++i) {
+    var /** @type {?} */ res = [];
+    for (var /** @type {?} */ i = 0; i < keys.length; ++i) {
         if (res.indexOf(keys[i]) > -1) {
             res.push(keys[i]);
             return res;
@@ -28,8 +33,8 @@ function findFirstClosedCycle(keys) {
  */
 function constructResolvingPath(keys) {
     if (keys.length > 1) {
-        const /** @type {?} */ reversed = findFirstClosedCycle(keys.slice().reverse());
-        const /** @type {?} */ tokenStrs = reversed.map(k => stringify(k.token));
+        var /** @type {?} */ reversed = findFirstClosedCycle(keys.slice().reverse());
+        var /** @type {?} */ tokenStrs = reversed.map(function (k) { return stringify(k.token); });
         return ' (' + tokenStrs.join(' -> ') + ')';
     }
     return '';
@@ -38,14 +43,15 @@ function constructResolvingPath(keys) {
  * Base class for all errors arising from misconfigured providers.
  * \@stable
  */
-export class AbstractProviderError extends BaseError {
+export var AbstractProviderError = (function (_super) {
+    __extends(AbstractProviderError, _super);
     /**
      * @param {?} injector
      * @param {?} key
      * @param {?} constructResolvingMessage
      */
-    constructor(injector, key, constructResolvingMessage) {
-        super('DI Error');
+    function AbstractProviderError(injector, key, constructResolvingMessage) {
+        _super.call(this, 'DI Error');
         this.keys = [key];
         this.injectors = [injector];
         this.constructResolvingMessage = constructResolvingMessage;
@@ -56,12 +62,13 @@ export class AbstractProviderError extends BaseError {
      * @param {?} key
      * @return {?}
      */
-    addKey(injector, key) {
+    AbstractProviderError.prototype.addKey = function (injector, key) {
         this.injectors.push(injector);
         this.keys.push(key);
         this.message = this.constructResolvingMessage(this.keys);
-    }
-}
+    };
+    return AbstractProviderError;
+}(BaseError));
 function AbstractProviderError_tsickle_Closure_declarations() {
     /**
      * \@internal
@@ -99,18 +106,20 @@ function AbstractProviderError_tsickle_Closure_declarations() {
  * ```
  * \@stable
  */
-export class NoProviderError extends AbstractProviderError {
+export var NoProviderError = (function (_super) {
+    __extends(NoProviderError, _super);
     /**
      * @param {?} injector
      * @param {?} key
      */
-    constructor(injector, key) {
-        super(injector, key, function (keys) {
-            const first = stringify(keys[0].token);
-            return `No provider for ${first}!${constructResolvingPath(keys)}`;
+    function NoProviderError(injector, key) {
+        _super.call(this, injector, key, function (keys) {
+            var first = stringify(keys[0].token);
+            return "No provider for " + first + "!" + constructResolvingPath(keys);
         });
     }
-}
+    return NoProviderError;
+}(AbstractProviderError));
 /**
  * Thrown when dependencies form a cycle.
  *
@@ -128,17 +137,19 @@ export class NoProviderError extends AbstractProviderError {
  * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
  * \@stable
  */
-export class CyclicDependencyError extends AbstractProviderError {
+export var CyclicDependencyError = (function (_super) {
+    __extends(CyclicDependencyError, _super);
     /**
      * @param {?} injector
      * @param {?} key
      */
-    constructor(injector, key) {
-        super(injector, key, function (keys) {
-            return `Cannot instantiate cyclic dependency!${constructResolvingPath(keys)}`;
+    function CyclicDependencyError(injector, key) {
+        _super.call(this, injector, key, function (keys) {
+            return "Cannot instantiate cyclic dependency!" + constructResolvingPath(keys);
         });
     }
-}
+    return CyclicDependencyError;
+}(AbstractProviderError));
 /**
  * Thrown when a constructing type returns with an Error.
  *
@@ -165,15 +176,16 @@ export class CyclicDependencyError extends AbstractProviderError {
  * ```
  * \@stable
  */
-export class InstantiationError extends WrappedError {
+export var InstantiationError = (function (_super) {
+    __extends(InstantiationError, _super);
     /**
      * @param {?} injector
      * @param {?} originalException
      * @param {?} originalStack
      * @param {?} key
      */
-    constructor(injector, originalException, originalStack, key) {
-        super('DI Error', originalException);
+    function InstantiationError(injector, originalException, originalStack, key) {
+        _super.call(this, 'DI Error', originalException);
         this.keys = [key];
         this.injectors = [injector];
     }
@@ -182,22 +194,31 @@ export class InstantiationError extends WrappedError {
      * @param {?} key
      * @return {?}
      */
-    addKey(injector, key) {
+    InstantiationError.prototype.addKey = function (injector, key) {
         this.injectors.push(injector);
         this.keys.push(key);
-    }
-    /**
-     * @return {?}
-     */
-    get message() {
-        const /** @type {?} */ first = stringify(this.keys[0].token);
-        return `${this.originalError.message}: Error during instantiation of ${first}!${constructResolvingPath(this.keys)}.`;
-    }
-    /**
-     * @return {?}
-     */
-    get causeKey() { return this.keys[0]; }
-}
+    };
+    Object.defineProperty(InstantiationError.prototype, "message", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            var /** @type {?} */ first = stringify(this.keys[0].token);
+            return this.originalError.message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(InstantiationError.prototype, "causeKey", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this.keys[0]; },
+        enumerable: true,
+        configurable: true
+    });
+    return InstantiationError;
+}(WrappedError));
 function InstantiationError_tsickle_Closure_declarations() {
     /**
      * \@internal
@@ -221,14 +242,16 @@ function InstantiationError_tsickle_Closure_declarations() {
  * ```
  * \@stable
  */
-export class InvalidProviderError extends BaseError {
+export var InvalidProviderError = (function (_super) {
+    __extends(InvalidProviderError, _super);
     /**
      * @param {?} provider
      */
-    constructor(provider) {
-        super(`Invalid provider - only instances of Provider and Type are allowed, got: ${provider}`);
+    function InvalidProviderError(provider) {
+        _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
     }
-}
+    return InvalidProviderError;
+}(BaseError));
 /**
  * Thrown when the class has no annotation information.
  *
@@ -258,23 +281,24 @@ export class InvalidProviderError extends BaseError {
  * ```
  * \@stable
  */
-export class NoAnnotationError extends BaseError {
+export var NoAnnotationError = (function (_super) {
+    __extends(NoAnnotationError, _super);
     /**
      * @param {?} typeOrFunc
      * @param {?} params
      */
-    constructor(typeOrFunc, params) {
-        super(NoAnnotationError._genMessage(typeOrFunc, params));
+    function NoAnnotationError(typeOrFunc, params) {
+        _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
     }
     /**
      * @param {?} typeOrFunc
      * @param {?} params
      * @return {?}
      */
-    static _genMessage(typeOrFunc, params) {
-        const /** @type {?} */ signature = [];
-        for (let /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
-            const /** @type {?} */ parameter = params[i];
+    NoAnnotationError._genMessage = function (typeOrFunc, params) {
+        var /** @type {?} */ signature = [];
+        for (var /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
+            var /** @type {?} */ parameter = params[i];
             if (!parameter || parameter.length == 0) {
                 signature.push('?');
             }
@@ -286,8 +310,9 @@ export class NoAnnotationError extends BaseError {
             signature.join(', ') + '). ' +
             'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
             stringify(typeOrFunc) + '\' is decorated with Injectable.';
-    }
-}
+    };
+    return NoAnnotationError;
+}(BaseError));
 /**
  * Thrown when getting an object by index.
  *
@@ -302,14 +327,16 @@ export class NoAnnotationError extends BaseError {
  * ```
  * \@stable
  */
-export class OutOfBoundsError extends BaseError {
+export var OutOfBoundsError = (function (_super) {
+    __extends(OutOfBoundsError, _super);
     /**
      * @param {?} index
      */
-    constructor(index) {
-        super(`Index ${index} is out-of-bounds.`);
+    function OutOfBoundsError(index) {
+        _super.call(this, "Index " + index + " is out-of-bounds.");
     }
-}
+    return OutOfBoundsError;
+}(BaseError));
 /**
  * Thrown when a multi provider and a regular provider are bound to the same token.
  *
@@ -322,14 +349,16 @@ export class OutOfBoundsError extends BaseError {
  * ])).toThrowError();
  * ```
  */
-export class MixingMultiProvidersWithRegularProvidersError extends BaseError {
+export var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
+    __extends(MixingMultiProvidersWithRegularProvidersError, _super);
     /**
      * @param {?} provider1
      * @param {?} provider2
      */
-    constructor(provider1, provider2) {
-        super('Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
+    function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
+        _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
             provider2.toString());
     }
-}
+    return MixingMultiProvidersWithRegularProvidersError;
+}(BaseError));
 //# sourceMappingURL=reflective_errors.js.map

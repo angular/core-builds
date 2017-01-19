@@ -11,11 +11,11 @@ import { getTypeNameForDebugging, isPresent } from '../../facade/lang';
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * \@stable
  */
-export class IterableDiffers {
+export var IterableDiffers = (function () {
     /**
      * @param {?} factories
      */
-    constructor(factories) {
+    function IterableDiffers(factories) {
         this.factories = factories;
     }
     /**
@@ -23,16 +23,16 @@ export class IterableDiffers {
      * @param {?=} parent
      * @return {?}
      */
-    static create(factories, parent) {
+    IterableDiffers.create = function (factories, parent) {
         if (isPresent(parent)) {
-            const /** @type {?} */ copied = parent.factories.slice();
+            var /** @type {?} */ copied = parent.factories.slice();
             factories = factories.concat(copied);
             return new IterableDiffers(factories);
         }
         else {
             return new IterableDiffers(factories);
         }
-    }
+    };
     /**
      * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
      * inherited {\@link IterableDiffers} instance with the provided factories and return a new
@@ -54,10 +54,10 @@ export class IterableDiffers {
      * @param {?} factories
      * @return {?}
      */
-    static extend(factories) {
+    IterableDiffers.extend = function (factories) {
         return {
             provide: IterableDiffers,
-            useFactory: (parent) => {
+            useFactory: function (parent) {
                 if (!parent) {
                     // Typically would occur when calling IterableDiffers.extend inside of dependencies passed
                     // to
@@ -69,21 +69,22 @@ export class IterableDiffers {
             // Dependency technically isn't optional, but we can provide a better error message this way.
             deps: [[IterableDiffers, new SkipSelf(), new Optional()]]
         };
-    }
+    };
     /**
      * @param {?} iterable
      * @return {?}
      */
-    find(iterable) {
-        const /** @type {?} */ factory = this.factories.find(f => f.supports(iterable));
+    IterableDiffers.prototype.find = function (iterable) {
+        var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(iterable); });
         if (isPresent(factory)) {
             return factory;
         }
         else {
-            throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
+            throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
         }
-    }
-}
+    };
+    return IterableDiffers;
+}());
 function IterableDiffers_tsickle_Closure_declarations() {
     /**
      * @deprecated v4.0.0 - Should be private

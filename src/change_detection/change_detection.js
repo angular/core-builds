@@ -20,11 +20,11 @@ export { KeyValueDiffers } from './differs/keyvalue_differs';
 /**
  * Structural diffing for `Object`s and `Map`s.
  */
-const /** @type {?} */ keyValDiff = [new DefaultKeyValueDifferFactory()];
+var /** @type {?} */ keyValDiff = [new DefaultKeyValueDifferFactory()];
 /**
  * Structural diffing for `Iterable` types such as `Array`s.
  */
-const /** @type {?} */ iterableDiff = [new DefaultIterableDifferFactory()];
-export const /** @type {?} */ defaultIterableDiffers = new IterableDiffers(iterableDiff);
-export const /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+var /** @type {?} */ iterableDiff = [new DefaultIterableDifferFactory()];
+export var /** @type {?} */ defaultIterableDiffers = new IterableDiffers(iterableDiff);
+export var /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 //# sourceMappingURL=change_detection.js.map

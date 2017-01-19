@@ -7,8 +7,8 @@
  */
 import { Injectable, Optional } from '../di';
 import { Compiler } from './compiler';
-const /** @type {?} */ _SEPARATOR = '#';
-const /** @type {?} */ FACTORY_CLASS_SUFFIX = 'NgFactory';
+var /** @type {?} */ _SEPARATOR = '#';
+var /** @type {?} */ FACTORY_CLASS_SUFFIX = 'NgFactory';
 /**
  * Configuration for SystemJsNgModuleLoader.
  * token.
@@ -16,8 +16,11 @@ const /** @type {?} */ FACTORY_CLASS_SUFFIX = 'NgFactory';
  * \@experimental
  * @abstract
  */
-export class SystemJsNgModuleLoaderConfig {
-}
+export var SystemJsNgModuleLoaderConfig = (function () {
+    function SystemJsNgModuleLoaderConfig() {
+    }
+    return SystemJsNgModuleLoaderConfig;
+}());
 function SystemJsNgModuleLoaderConfig_tsickle_Closure_declarations() {
     /**
      * Prefix to add when computing the name of the factory module for a given module name.
@@ -30,7 +33,7 @@ function SystemJsNgModuleLoaderConfig_tsickle_Closure_declarations() {
      */
     SystemJsNgModuleLoaderConfig.prototype.factoryPathSuffix;
 }
-const /** @type {?} */ DEFAULT_CONFIG = {
+var /** @type {?} */ DEFAULT_CONFIG = {
     factoryPathPrefix: '',
     factoryPathSuffix: '.ngfactory',
 };
@@ -38,12 +41,12 @@ const /** @type {?} */ DEFAULT_CONFIG = {
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * \@experimental
  */
-export class SystemJsNgModuleLoader {
+export var SystemJsNgModuleLoader = (function () {
     /**
      * @param {?} _compiler
      * @param {?=} config
      */
-    constructor(_compiler, config) {
+    function SystemJsNgModuleLoader(_compiler, config) {
         this._compiler = _compiler;
         this._config = config || DEFAULT_CONFIG;
     }
@@ -51,48 +54,50 @@ export class SystemJsNgModuleLoader {
      * @param {?} path
      * @return {?}
      */
-    load(path) {
-        const /** @type {?} */ offlineMode = this._compiler instanceof Compiler;
+    SystemJsNgModuleLoader.prototype.load = function (path) {
+        var /** @type {?} */ offlineMode = this._compiler instanceof Compiler;
         return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
-    }
+    };
     /**
      * @param {?} path
      * @return {?}
      */
-    loadAndCompile(path) {
-        let [module, exportName] = path.split(_SEPARATOR);
+    SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
+        var _this = this;
+        var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         if (exportName === undefined) {
             exportName = 'default';
         }
         return System.import(module)
-            .then((module) => module[exportName])
-            .then((type) => checkNotEmpty(type, module, exportName))
-            .then((type) => this._compiler.compileModuleAsync(type));
-    }
+            .then(function (module) { return module[exportName]; })
+            .then(function (type) { return checkNotEmpty(type, module, exportName); })
+            .then(function (type) { return _this._compiler.compileModuleAsync(type); });
+    };
     /**
      * @param {?} path
      * @return {?}
      */
-    loadFactory(path) {
-        let [module, exportName] = path.split(_SEPARATOR);
-        let /** @type {?} */ factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+    SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
+        var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
+        var /** @type {?} */ factoryClassSuffix = FACTORY_CLASS_SUFFIX;
         if (exportName === undefined) {
             exportName = 'default';
             factoryClassSuffix = '';
         }
         return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix)
-            .then((module) => module[exportName + factoryClassSuffix])
-            .then((factory) => checkNotEmpty(factory, module, exportName));
-    }
-}
-SystemJsNgModuleLoader.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-SystemJsNgModuleLoader.ctorParameters = () => [
-    { type: Compiler, },
-    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
-];
+            .then(function (module) { return module[exportName + factoryClassSuffix]; })
+            .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
+    };
+    SystemJsNgModuleLoader.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = function () { return [
+        { type: Compiler, },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+    ]; };
+    return SystemJsNgModuleLoader;
+}());
 function SystemJsNgModuleLoader_tsickle_Closure_declarations() {
     /** @type {?} */
     SystemJsNgModuleLoader.decorators;
@@ -114,7 +119,7 @@ function SystemJsNgModuleLoader_tsickle_Closure_declarations() {
  */
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
-        throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);
+        throw new Error("Cannot find '" + exportName + "' in '" + modulePath + "'");
     }
     return value;
 }

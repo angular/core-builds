@@ -1,4 +1,4 @@
-export let SecurityContext = {};
+export var SecurityContext = {};
 SecurityContext.NONE = 0;
 SecurityContext.HTML = 1;
 SecurityContext.STYLE = 2;
@@ -17,13 +17,16 @@ SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
  * \@stable
  * @abstract
  */
-export class Sanitizer {
+export var Sanitizer = (function () {
+    function Sanitizer() {
+    }
     /**
      * @abstract
      * @param {?} context
      * @param {?} value
      * @return {?}
      */
-    sanitize(context, value) { }
-}
+    Sanitizer.prototype.sanitize = function (context, value) { };
+    return Sanitizer;
+}());
 //# sourceMappingURL=security.js.map

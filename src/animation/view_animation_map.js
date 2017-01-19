@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isPresent } from '../facade/lang';
-export class ViewAnimationMap {
-    constructor() {
+export var ViewAnimationMap = (function () {
+    function ViewAnimationMap() {
         this._map = new Map();
         this._allPlayers = [];
     }
@@ -16,64 +16,66 @@ export class ViewAnimationMap {
      * @param {?} animationName
      * @return {?}
      */
-    find(element, animationName) {
-        const /** @type {?} */ playersByAnimation = this._map.get(element);
+    ViewAnimationMap.prototype.find = function (element, animationName) {
+        var /** @type {?} */ playersByAnimation = this._map.get(element);
         if (isPresent(playersByAnimation)) {
             return playersByAnimation[animationName];
         }
-    }
+    };
     /**
      * @param {?} element
      * @return {?}
      */
-    findAllPlayersByElement(element) {
-        const /** @type {?} */ el = this._map.get(element);
-        return el ? Object.keys(el).map(k => el[k]) : [];
-    }
+    ViewAnimationMap.prototype.findAllPlayersByElement = function (element) {
+        var /** @type {?} */ el = this._map.get(element);
+        return el ? Object.keys(el).map(function (k) { return el[k]; }) : [];
+    };
     /**
      * @param {?} element
      * @param {?} animationName
      * @param {?} player
      * @return {?}
      */
-    set(element, animationName, player) {
-        let /** @type {?} */ playersByAnimation = this._map.get(element);
+    ViewAnimationMap.prototype.set = function (element, animationName, player) {
+        var /** @type {?} */ playersByAnimation = this._map.get(element);
         if (!isPresent(playersByAnimation)) {
             playersByAnimation = {};
         }
-        const /** @type {?} */ existingEntry = playersByAnimation[animationName];
+        var /** @type {?} */ existingEntry = playersByAnimation[animationName];
         if (isPresent(existingEntry)) {
             this.remove(element, animationName);
         }
         playersByAnimation[animationName] = player;
         this._allPlayers.push(player);
         this._map.set(element, playersByAnimation);
-    }
+    };
     /**
      * @return {?}
      */
-    getAllPlayers() { return this._allPlayers; }
+    ViewAnimationMap.prototype.getAllPlayers = function () { return this._allPlayers; };
     /**
      * @param {?} element
      * @param {?} animationName
      * @param {?=} targetPlayer
      * @return {?}
      */
-    remove(element, animationName, targetPlayer = null) {
-        const /** @type {?} */ playersByAnimation = this._map.get(element);
+    ViewAnimationMap.prototype.remove = function (element, animationName, targetPlayer) {
+        if (targetPlayer === void 0) { targetPlayer = null; }
+        var /** @type {?} */ playersByAnimation = this._map.get(element);
         if (playersByAnimation) {
-            const /** @type {?} */ player = playersByAnimation[animationName];
+            var /** @type {?} */ player = playersByAnimation[animationName];
             if (!targetPlayer || player === targetPlayer) {
                 delete playersByAnimation[animationName];
-                const /** @type {?} */ index = this._allPlayers.indexOf(player);
+                var /** @type {?} */ index = this._allPlayers.indexOf(player);
                 this._allPlayers.splice(index, 1);
                 if (Object.keys(playersByAnimation).length === 0) {
                     this._map.delete(element);
                 }
             }
         }
-    }
-}
+    };
+    return ViewAnimationMap;
+}());
 function ViewAnimationMap_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewAnimationMap.prototype._map;

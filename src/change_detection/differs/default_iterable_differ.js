@@ -7,32 +7,33 @@
  */
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
 import { isBlank, looseIdentical, stringify } from '../../facade/lang';
-export class DefaultIterableDifferFactory {
-    constructor() {
+export var DefaultIterableDifferFactory = (function () {
+    function DefaultIterableDifferFactory() {
     }
     /**
      * @param {?} obj
      * @return {?}
      */
-    supports(obj) { return isListLikeIterable(obj); }
+    DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
     /**
      * @param {?} cdRef
      * @param {?=} trackByFn
      * @return {?}
      */
-    create(cdRef, trackByFn) {
+    DefaultIterableDifferFactory.prototype.create = function (cdRef, trackByFn) {
         return new DefaultIterableDiffer(trackByFn);
-    }
-}
-const /** @type {?} */ trackByIdentity = (index, item) => item;
+    };
+    return DefaultIterableDifferFactory;
+}());
+var /** @type {?} */ trackByIdentity = function (index, item) { return item; };
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
  */
-export class DefaultIterableDiffer {
+export var DefaultIterableDiffer = (function () {
     /**
      * @param {?=} _trackByFn
      */
-    constructor(_trackByFn) {
+    function DefaultIterableDiffer(_trackByFn) {
         this._trackByFn = _trackByFn;
         this._length = null;
         this._collection = null;
@@ -51,43 +52,51 @@ export class DefaultIterableDiffer {
         this._identityChangesTail = null;
         this._trackByFn = this._trackByFn || trackByIdentity;
     }
-    /**
-     * @return {?}
-     */
-    get collection() { return this._collection; }
-    /**
-     * @return {?}
-     */
-    get length() { return this._length; }
+    Object.defineProperty(DefaultIterableDiffer.prototype, "collection", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._collection; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DefaultIterableDiffer.prototype, "length", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._length; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachItem(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachItem = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._itHead; record !== null; record = record._next) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachOperation(fn) {
-        let /** @type {?} */ nextIt = this._itHead;
-        let /** @type {?} */ nextRemove = this._removalsHead;
-        let /** @type {?} */ addRemoveOffset = 0;
-        let /** @type {?} */ moveOffsets = null;
+    DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
+        var /** @type {?} */ nextIt = this._itHead;
+        var /** @type {?} */ nextRemove = this._removalsHead;
+        var /** @type {?} */ addRemoveOffset = 0;
+        var /** @type {?} */ moveOffsets = null;
         while (nextIt || nextRemove) {
             // Figure out which is the next record to process
             // Order: remove, add, move
-            const /** @type {?} */ record = !nextRemove ||
+            var /** @type {?} */ record = !nextRemove ||
                 nextIt &&
                     nextIt.currentIndex < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
                 nextIt :
                 nextRemove;
-            const /** @type {?} */ adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
-            const /** @type {?} */ currentIndex = record.currentIndex;
+            var /** @type {?} */ adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
+            var /** @type {?} */ currentIndex = record.currentIndex;
             // consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
             if (record === nextRemove) {
                 addRemoveOffset--;
@@ -102,17 +111,17 @@ export class DefaultIterableDiffer {
                     // INVARIANT:  currentIndex < previousIndex
                     if (!moveOffsets)
                         moveOffsets = [];
-                    const /** @type {?} */ localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                    const /** @type {?} */ localCurrentIndex = currentIndex - addRemoveOffset;
+                    var /** @type {?} */ localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
+                    var /** @type {?} */ localCurrentIndex = currentIndex - addRemoveOffset;
                     if (localMovePreviousIndex != localCurrentIndex) {
-                        for (let /** @type {?} */ i = 0; i < localMovePreviousIndex; i++) {
-                            const /** @type {?} */ offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
-                            const /** @type {?} */ index = offset + i;
+                        for (var /** @type {?} */ i = 0; i < localMovePreviousIndex; i++) {
+                            var /** @type {?} */ offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
+                            var /** @type {?} */ index = offset + i;
                             if (localCurrentIndex <= index && index < localMovePreviousIndex) {
                                 moveOffsets[i] = offset + 1;
                             }
                         }
-                        const /** @type {?} */ previousIndex = record.previousIndex;
+                        var /** @type {?} */ previousIndex = record.previousIndex;
                         moveOffsets[previousIndex] = localCurrentIndex - localMovePreviousIndex;
                     }
                 }
@@ -121,66 +130,66 @@ export class DefaultIterableDiffer {
                 fn(record, adjPreviousIndex, currentIndex);
             }
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachPreviousItem(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachAddedItem(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachAddedItem = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._additionsHead; record !== null; record = record._nextAdded) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachMovedItem(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachMovedItem = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._movesHead; record !== null; record = record._nextMoved) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachRemovedItem(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachRemovedItem = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} fn
      * @return {?}
      */
-    forEachIdentityChange(fn) {
-        let /** @type {?} */ record;
+    DefaultIterableDiffer.prototype.forEachIdentityChange = function (fn) {
+        var /** @type {?} */ record;
         for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
             fn(record);
         }
-    }
+    };
     /**
      * @param {?} collection
      * @return {?}
      */
-    diff(collection /* |Iterable<V> */) {
+    DefaultIterableDiffer.prototype.diff = function (collection /* |Iterable<V> */) {
         if (isBlank(collection))
             collection = [];
         if (!isListLikeIterable(collection)) {
-            throw new Error(`Error trying to diff '${collection}'`);
+            throw new Error("Error trying to diff '" + collection + "'");
         }
         if (this.check(collection)) {
             return this;
@@ -188,36 +197,37 @@ export class DefaultIterableDiffer {
         else {
             return null;
         }
-    }
+    };
     /**
      * @return {?}
      */
-    onDestroy() { }
+    DefaultIterableDiffer.prototype.onDestroy = function () { };
     /**
      * @param {?} collection
      * @return {?}
      */
-    check(collection /* |Iterable<V> */) {
+    DefaultIterableDiffer.prototype.check = function (collection /* |Iterable<V> */) {
+        var _this = this;
         this._reset();
-        let /** @type {?} */ record = this._itHead;
-        let /** @type {?} */ mayBeDirty = false;
-        let /** @type {?} */ index;
-        let /** @type {?} */ item;
-        let /** @type {?} */ itemTrackBy;
+        var /** @type {?} */ record = this._itHead;
+        var /** @type {?} */ mayBeDirty = false;
+        var /** @type {?} */ index;
+        var /** @type {?} */ item;
+        var /** @type {?} */ itemTrackBy;
         if (Array.isArray(collection)) {
-            const /** @type {?} */ list = (collection);
+            var /** @type {?} */ list = (collection);
             this._length = list.length;
-            for (let /** @type {?} */ index = 0; index < this._length; index++) {
-                item = list[index];
-                itemTrackBy = this._trackByFn(index, item);
+            for (var /** @type {?} */ index_1 = 0; index_1 < this._length; index_1++) {
+                item = list[index_1];
+                itemTrackBy = this._trackByFn(index_1, item);
                 if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
+                    record = this._mismatch(record, item, itemTrackBy, index_1);
                     mayBeDirty = true;
                 }
                 else {
                     if (mayBeDirty) {
                         // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                        record = this._verifyReinsertion(record, item, itemTrackBy, index_1);
                     }
                     if (!looseIdentical(record.item, item))
                         this._addIdentityChange(record, item);
@@ -227,19 +237,19 @@ export class DefaultIterableDiffer {
         }
         else {
             index = 0;
-            iterateListLike(collection, (item) => {
-                itemTrackBy = this._trackByFn(index, item);
+            iterateListLike(collection, function (item) {
+                itemTrackBy = _this._trackByFn(index, item);
                 if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                    record = this._mismatch(record, item, itemTrackBy, index);
+                    record = _this._mismatch(record, item, itemTrackBy, index);
                     mayBeDirty = true;
                 }
                 else {
                     if (mayBeDirty) {
                         // TODO(misko): can we limit this to duplicates only?
-                        record = this._verifyReinsertion(record, item, itemTrackBy, index);
+                        record = _this._verifyReinsertion(record, item, itemTrackBy, index);
                     }
                     if (!looseIdentical(record.item, item))
-                        this._addIdentityChange(record, item);
+                        _this._addIdentityChange(record, item);
                 }
                 record = record._next;
                 index++;
@@ -249,14 +259,18 @@ export class DefaultIterableDiffer {
         this._truncate(record);
         this._collection = collection;
         return this.isDirty;
-    }
-    /**
-     * @return {?}
-     */
-    get isDirty() {
-        return this._additionsHead !== null || this._movesHead !== null ||
-            this._removalsHead !== null || this._identityChangesHead !== null;
-    }
+    };
+    Object.defineProperty(DefaultIterableDiffer.prototype, "isDirty", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this._additionsHead !== null || this._movesHead !== null ||
+                this._removalsHead !== null || this._identityChangesHead !== null;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Reset the state of the change objects to show no changes. This means set previousKey to
      * currentKey, and clear all of the queues (additions, moves, removals).
@@ -266,10 +280,10 @@ export class DefaultIterableDiffer {
      * \@internal
      * @return {?}
      */
-    _reset() {
+    DefaultIterableDiffer.prototype._reset = function () {
         if (this.isDirty) {
-            let /** @type {?} */ record;
-            let /** @type {?} */ nextRecord;
+            var /** @type {?} */ record = void 0;
+            var /** @type {?} */ nextRecord = void 0;
             for (record = this._previousItHead = this._itHead; record !== null; record = record._next) {
                 record._nextPrevious = record._next;
             }
@@ -285,7 +299,7 @@ export class DefaultIterableDiffer {
             this._removalsHead = this._removalsTail = null;
             this._identityChangesHead = this._identityChangesTail = null;
         }
-    }
+    };
     /**
      * This is the core function which handles differences between collections.
      *
@@ -301,9 +315,9 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _mismatch(record, item, itemTrackBy, index) {
+    DefaultIterableDiffer.prototype._mismatch = function (record, item, itemTrackBy, index) {
         // The previous record after which we will append the current one.
-        let /** @type {?} */ previousRecord;
+        var /** @type {?} */ previousRecord;
         if (record === null) {
             previousRecord = this._itTail;
         }
@@ -338,7 +352,7 @@ export class DefaultIterableDiffer {
             }
         }
         return record;
-    }
+    };
     /**
      * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
      *
@@ -371,8 +385,8 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _verifyReinsertion(record, item, itemTrackBy, index) {
-        let /** @type {?} */ reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy);
+    DefaultIterableDiffer.prototype._verifyReinsertion = function (record, item, itemTrackBy, index) {
+        var /** @type {?} */ reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy);
         if (reinsertRecord !== null) {
             record = this._reinsertAfter(reinsertRecord, record._prev, index);
         }
@@ -381,7 +395,7 @@ export class DefaultIterableDiffer {
             this._addToMoves(record, index);
         }
         return record;
-    }
+    };
     /**
      * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
      *
@@ -391,10 +405,10 @@ export class DefaultIterableDiffer {
      * @param {?} record
      * @return {?}
      */
-    _truncate(record) {
+    DefaultIterableDiffer.prototype._truncate = function (record) {
         // Anything after that needs to be removed;
         while (record !== null) {
-            const /** @type {?} */ nextRecord = record._next;
+            var /** @type {?} */ nextRecord = record._next;
             this._addToRemovals(this._unlink(record));
             record = nextRecord;
         }
@@ -416,7 +430,7 @@ export class DefaultIterableDiffer {
         if (this._identityChangesTail !== null) {
             this._identityChangesTail._nextIdentityChange = null;
         }
-    }
+    };
     /**
      * \@internal
      * @param {?} record
@@ -424,12 +438,12 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _reinsertAfter(record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._reinsertAfter = function (record, prevRecord, index) {
         if (this._unlinkedRecords !== null) {
             this._unlinkedRecords.remove(record);
         }
-        const /** @type {?} */ prev = record._prevRemoved;
-        const /** @type {?} */ next = record._nextRemoved;
+        var /** @type {?} */ prev = record._prevRemoved;
+        var /** @type {?} */ next = record._nextRemoved;
         if (prev === null) {
             this._removalsHead = next;
         }
@@ -445,7 +459,7 @@ export class DefaultIterableDiffer {
         this._insertAfter(record, prevRecord, index);
         this._addToMoves(record, index);
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
@@ -453,12 +467,12 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _moveAfter(record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._moveAfter = function (record, prevRecord, index) {
         this._unlink(record);
         this._insertAfter(record, prevRecord, index);
         this._addToMoves(record, index);
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
@@ -466,7 +480,7 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _addAfter(record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._addAfter = function (record, prevRecord, index) {
         this._insertAfter(record, prevRecord, index);
         if (this._additionsTail === null) {
             // todo(vicb)
@@ -480,7 +494,7 @@ export class DefaultIterableDiffer {
             this._additionsTail = this._additionsTail._nextAdded = record;
         }
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
@@ -488,12 +502,12 @@ export class DefaultIterableDiffer {
      * @param {?} index
      * @return {?}
      */
-    _insertAfter(record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._insertAfter = function (record, prevRecord, index) {
         // todo(vicb)
         // assert(record != prevRecord);
         // assert(record._next === null);
         // assert(record._prev === null);
-        const /** @type {?} */ next = prevRecord === null ? this._itHead : prevRecord._next;
+        var /** @type {?} */ next = prevRecord === null ? this._itHead : prevRecord._next;
         // todo(vicb)
         // assert(next != record);
         // assert(prevRecord != record);
@@ -517,26 +531,26 @@ export class DefaultIterableDiffer {
         this._linkedRecords.put(record);
         record.currentIndex = index;
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
      * @return {?}
      */
-    _remove(record) {
+    DefaultIterableDiffer.prototype._remove = function (record) {
         return this._addToRemovals(this._unlink(record));
-    }
+    };
     /**
      * \@internal
      * @param {?} record
      * @return {?}
      */
-    _unlink(record) {
+    DefaultIterableDiffer.prototype._unlink = function (record) {
         if (this._linkedRecords !== null) {
             this._linkedRecords.remove(record);
         }
-        const /** @type {?} */ prev = record._prev;
-        const /** @type {?} */ next = record._next;
+        var /** @type {?} */ prev = record._prev;
+        var /** @type {?} */ next = record._next;
         // todo(vicb)
         // assert((record._prev = null) === null);
         // assert((record._next = null) === null);
@@ -553,14 +567,14 @@ export class DefaultIterableDiffer {
             next._prev = prev;
         }
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
      * @param {?} toIndex
      * @return {?}
      */
-    _addToMoves(record, toIndex) {
+    DefaultIterableDiffer.prototype._addToMoves = function (record, toIndex) {
         // todo(vicb)
         // assert(record._nextMoved === null);
         if (record.previousIndex === toIndex) {
@@ -577,12 +591,12 @@ export class DefaultIterableDiffer {
             this._movesTail = this._movesTail._nextMoved = record;
         }
         return record;
-    }
+    };
     /**
      * @param {?} record
      * @return {?}
      */
-    _addToRemovals(record) {
+    DefaultIterableDiffer.prototype._addToRemovals = function (record) {
         if (this._unlinkedRecords === null) {
             this._unlinkedRecords = new _DuplicateMap();
         }
@@ -603,14 +617,14 @@ export class DefaultIterableDiffer {
             this._removalsTail = this._removalsTail._nextRemoved = record;
         }
         return record;
-    }
+    };
     /**
      * \@internal
      * @param {?} record
      * @param {?} item
      * @return {?}
      */
-    _addIdentityChange(record, item) {
+    DefaultIterableDiffer.prototype._addIdentityChange = function (record, item) {
         record.item = item;
         if (this._identityChangesTail === null) {
             this._identityChangesTail = this._identityChangesHead = record;
@@ -619,31 +633,32 @@ export class DefaultIterableDiffer {
             this._identityChangesTail = this._identityChangesTail._nextIdentityChange = record;
         }
         return record;
-    }
+    };
     /**
      * @return {?}
      */
-    toString() {
-        const /** @type {?} */ list = [];
-        this.forEachItem((record) => list.push(record));
-        const /** @type {?} */ previous = [];
-        this.forEachPreviousItem((record) => previous.push(record));
-        const /** @type {?} */ additions = [];
-        this.forEachAddedItem((record) => additions.push(record));
-        const /** @type {?} */ moves = [];
-        this.forEachMovedItem((record) => moves.push(record));
-        const /** @type {?} */ removals = [];
-        this.forEachRemovedItem((record) => removals.push(record));
-        const /** @type {?} */ identityChanges = [];
-        this.forEachIdentityChange((record) => identityChanges.push(record));
+    DefaultIterableDiffer.prototype.toString = function () {
+        var /** @type {?} */ list = [];
+        this.forEachItem(function (record) { return list.push(record); });
+        var /** @type {?} */ previous = [];
+        this.forEachPreviousItem(function (record) { return previous.push(record); });
+        var /** @type {?} */ additions = [];
+        this.forEachAddedItem(function (record) { return additions.push(record); });
+        var /** @type {?} */ moves = [];
+        this.forEachMovedItem(function (record) { return moves.push(record); });
+        var /** @type {?} */ removals = [];
+        this.forEachRemovedItem(function (record) { return removals.push(record); });
+        var /** @type {?} */ identityChanges = [];
+        this.forEachIdentityChange(function (record) { return identityChanges.push(record); });
         return 'collection: ' + list.join(', ') + '\n' +
             'previous: ' + previous.join(', ') + '\n' +
             'additions: ' + additions.join(', ') + '\n' +
             'moves: ' + moves.join(', ') + '\n' +
             'removals: ' + removals.join(', ') + '\n' +
             'identityChanges: ' + identityChanges.join(', ') + '\n';
-    }
-}
+    };
+    return DefaultIterableDiffer;
+}());
 function DefaultIterableDiffer_tsickle_Closure_declarations() {
     /** @type {?} */
     DefaultIterableDiffer.prototype._length;
@@ -681,12 +696,12 @@ function DefaultIterableDiffer_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export class IterableChangeRecord_ {
+export var IterableChangeRecord_ = (function () {
     /**
      * @param {?} item
      * @param {?} trackById
      */
-    constructor(item, trackById) {
+    function IterableChangeRecord_(item, trackById) {
         this.item = item;
         this.trackById = trackById;
         this.currentIndex = null;
@@ -715,12 +730,13 @@ export class IterableChangeRecord_ {
     /**
      * @return {?}
      */
-    toString() {
+    IterableChangeRecord_.prototype.toString = function () {
         return this.previousIndex === this.currentIndex ? stringify(this.item) :
             stringify(this.item) + '[' +
                 stringify(this.previousIndex) + '->' + stringify(this.currentIndex) + ']';
-    }
-}
+    };
+    return IterableChangeRecord_;
+}());
 function IterableChangeRecord__tsickle_Closure_declarations() {
     /** @type {?} */
     IterableChangeRecord_.prototype.currentIndex;
@@ -781,8 +797,8 @@ function IterableChangeRecord__tsickle_Closure_declarations() {
     /** @type {?} */
     IterableChangeRecord_.prototype.trackById;
 }
-class _DuplicateItemRecordList {
-    constructor() {
+var _DuplicateItemRecordList = (function () {
+    function _DuplicateItemRecordList() {
         /** @internal */
         this._head = null;
         /** @internal */
@@ -795,7 +811,7 @@ class _DuplicateItemRecordList {
      * @param {?} record
      * @return {?}
      */
-    add(record) {
+    _DuplicateItemRecordList.prototype.add = function (record) {
         if (this._head === null) {
             this._head = this._tail = record;
             record._nextDup = null;
@@ -810,14 +826,14 @@ class _DuplicateItemRecordList {
             record._nextDup = null;
             this._tail = record;
         }
-    }
+    };
     /**
      * @param {?} trackById
      * @param {?} afterIndex
      * @return {?}
      */
-    get(trackById, afterIndex) {
-        let /** @type {?} */ record;
+    _DuplicateItemRecordList.prototype.get = function (trackById, afterIndex) {
+        var /** @type {?} */ record;
         for (record = this._head; record !== null; record = record._nextDup) {
             if ((afterIndex === null || afterIndex < record.currentIndex) &&
                 looseIdentical(record.trackById, trackById)) {
@@ -825,7 +841,7 @@ class _DuplicateItemRecordList {
             }
         }
         return null;
-    }
+    };
     /**
      * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
      *
@@ -833,7 +849,7 @@ class _DuplicateItemRecordList {
      * @param {?} record
      * @return {?}
      */
-    remove(record) {
+    _DuplicateItemRecordList.prototype.remove = function (record) {
         // todo(vicb)
         // assert(() {
         //  // verify that the record being removed is in the list.
@@ -842,8 +858,8 @@ class _DuplicateItemRecordList {
         //  }
         //  return false;
         //});
-        const /** @type {?} */ prev = record._prevDup;
-        const /** @type {?} */ next = record._nextDup;
+        var /** @type {?} */ prev = record._prevDup;
+        var /** @type {?} */ next = record._nextDup;
         if (prev === null) {
             this._head = next;
         }
@@ -857,8 +873,9 @@ class _DuplicateItemRecordList {
             next._prevDup = prev;
         }
         return this._head === null;
-    }
-}
+    };
+    return _DuplicateItemRecordList;
+}());
 function _DuplicateItemRecordList_tsickle_Closure_declarations() {
     /**
      * \@internal
@@ -871,23 +888,23 @@ function _DuplicateItemRecordList_tsickle_Closure_declarations() {
      */
     _DuplicateItemRecordList.prototype._tail;
 }
-class _DuplicateMap {
-    constructor() {
+var _DuplicateMap = (function () {
+    function _DuplicateMap() {
         this.map = new Map();
     }
     /**
      * @param {?} record
      * @return {?}
      */
-    put(record) {
-        const /** @type {?} */ key = record.trackById;
-        let /** @type {?} */ duplicates = this.map.get(key);
+    _DuplicateMap.prototype.put = function (record) {
+        var /** @type {?} */ key = record.trackById;
+        var /** @type {?} */ duplicates = this.map.get(key);
         if (!duplicates) {
             duplicates = new _DuplicateItemRecordList();
             this.map.set(key, duplicates);
         }
         duplicates.add(record);
-    }
+    };
     /**
      * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
      * have already iterated over, we use the afterIndex to pretend it is not there.
@@ -898,11 +915,12 @@ class _DuplicateMap {
      * @param {?=} afterIndex
      * @return {?}
      */
-    get(trackById, afterIndex = null) {
-        const /** @type {?} */ key = trackById;
-        const /** @type {?} */ recordList = this.map.get(key);
+    _DuplicateMap.prototype.get = function (trackById, afterIndex) {
+        if (afterIndex === void 0) { afterIndex = null; }
+        var /** @type {?} */ key = trackById;
+        var /** @type {?} */ recordList = this.map.get(key);
         return recordList ? recordList.get(trackById, afterIndex) : null;
-    }
+    };
     /**
      * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
      *
@@ -910,28 +928,33 @@ class _DuplicateMap {
      * @param {?} record
      * @return {?}
      */
-    remove(record) {
-        const /** @type {?} */ key = record.trackById;
-        const /** @type {?} */ recordList = this.map.get(key);
+    _DuplicateMap.prototype.remove = function (record) {
+        var /** @type {?} */ key = record.trackById;
+        var /** @type {?} */ recordList = this.map.get(key);
         // Remove the list of duplicates when it gets empty
         if (recordList.remove(record)) {
             this.map.delete(key);
         }
         return record;
-    }
+    };
+    Object.defineProperty(_DuplicateMap.prototype, "isEmpty", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this.map.size === 0; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @return {?}
      */
-    get isEmpty() { return this.map.size === 0; }
+    _DuplicateMap.prototype.clear = function () { this.map.clear(); };
     /**
      * @return {?}
      */
-    clear() { this.map.clear(); }
-    /**
-     * @return {?}
-     */
-    toString() { return '_DuplicateMap(' + stringify(this.map) + ')'; }
-}
+    _DuplicateMap.prototype.toString = function () { return '_DuplicateMap(' + stringify(this.map) + ')'; };
+    return _DuplicateMap;
+}());
 function _DuplicateMap_tsickle_Closure_declarations() {
     /** @type {?} */
     _DuplicateMap.prototype.map;
@@ -943,10 +966,10 @@ function _DuplicateMap_tsickle_Closure_declarations() {
  * @return {?}
  */
 function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
-    const /** @type {?} */ previousIndex = item.previousIndex;
+    var /** @type {?} */ previousIndex = item.previousIndex;
     if (previousIndex === null)
         return previousIndex;
-    let /** @type {?} */ moveOffset = 0;
+    var /** @type {?} */ moveOffset = 0;
     if (moveOffsets && previousIndex < moveOffsets.length) {
         moveOffset = moveOffsets[previousIndex];
     }

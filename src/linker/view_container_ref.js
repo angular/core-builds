@@ -27,39 +27,57 @@ import { wtfCreateScope, wtfLeave } from '../profile/profile';
  * \@stable
  * @abstract
  */
-export class ViewContainerRef {
-    /**
-     * Anchor element that specifies the location of this container in the containing View.
-     * <!-- TODO: rename to anchorElement -->
-     * @return {?}
-     */
-    get element() { return (unimplemented()); }
-    /**
-     * @return {?}
-     */
-    get injector() { return (unimplemented()); }
-    /**
-     * @return {?}
-     */
-    get parentInjector() { return (unimplemented()); }
+export var ViewContainerRef = (function () {
+    function ViewContainerRef() {
+    }
+    Object.defineProperty(ViewContainerRef.prototype, "element", {
+        /**
+         * Anchor element that specifies the location of this container in the containing View.
+         * <!-- TODO: rename to anchorElement -->
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Destroys all Views in this container.
      * @abstract
      * @return {?}
      */
-    clear() { }
+    ViewContainerRef.prototype.clear = function () { };
     /**
      * Returns the {\@link ViewRef} for the View located in this container at the specified index.
      * @abstract
      * @param {?} index
      * @return {?}
      */
-    get(index) { }
-    /**
-     * Returns the number of Views currently attached to this container.
-     * @return {?}
-     */
-    get length() { return (unimplemented()); }
+    ViewContainerRef.prototype.get = function (index) { };
+    Object.defineProperty(ViewContainerRef.prototype, "length", {
+        /**
+         * Returns the number of Views currently attached to this container.
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     ;
     /**
      * Instantiates an Embedded View based on the {\@link TemplateRef `templateRef`} and inserts it
@@ -74,7 +92,7 @@ export class ViewContainerRef {
      * @param {?=} index
      * @return {?}
      */
-    createEmbeddedView(templateRef, context, index) { }
+    ViewContainerRef.prototype.createEmbeddedView = function (templateRef, context, index) { };
     /**
      * Instantiates a single {\@link Component} and inserts its Host View into this container at the
      * specified `index`.
@@ -94,7 +112,7 @@ export class ViewContainerRef {
      * @param {?=} projectableNodes
      * @return {?}
      */
-    createComponent(componentFactory, index, injector, projectableNodes) { }
+    ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) { };
     /**
      * Inserts a View identified by a {\@link ViewRef} into the container at the specified `index`.
      *
@@ -106,7 +124,7 @@ export class ViewContainerRef {
      * @param {?=} index
      * @return {?}
      */
-    insert(viewRef, index) { }
+    ViewContainerRef.prototype.insert = function (viewRef, index) { };
     /**
      * Moves a View identified by a {\@link ViewRef} into the container at the specified `index`.
      *
@@ -116,7 +134,7 @@ export class ViewContainerRef {
      * @param {?} currentIndex
      * @return {?}
      */
-    move(viewRef, currentIndex) { }
+    ViewContainerRef.prototype.move = function (viewRef, currentIndex) { };
     /**
      * Returns the index of the View, specified via {\@link ViewRef}, within the current container or
      * `-1` if this container doesn't contain the View.
@@ -124,7 +142,7 @@ export class ViewContainerRef {
      * @param {?} viewRef
      * @return {?}
      */
-    indexOf(viewRef) { }
+    ViewContainerRef.prototype.indexOf = function (viewRef) { };
     /**
      * Destroys a View attached to this container at the specified `index`.
      *
@@ -133,7 +151,7 @@ export class ViewContainerRef {
      * @param {?=} index
      * @return {?}
      */
-    remove(index) { }
+    ViewContainerRef.prototype.remove = function (index) { };
     /**
      * Use along with {\@link #insert} to move a View within the current container.
      *
@@ -142,13 +160,14 @@ export class ViewContainerRef {
      * @param {?=} index
      * @return {?}
      */
-    detach(index) { }
-}
-export class ViewContainerRef_ {
+    ViewContainerRef.prototype.detach = function (index) { };
+    return ViewContainerRef;
+}());
+export var ViewContainerRef_ = (function () {
     /**
      * @param {?} _element
      */
-    constructor(_element) {
+    function ViewContainerRef_(_element) {
         this._element = _element;
         /** @internal */
         this._createComponentInContainerScope = wtfCreateScope('ViewContainerRef#createComponent()');
@@ -163,37 +182,55 @@ export class ViewContainerRef_ {
      * @param {?} index
      * @return {?}
      */
-    get(index) { return this._element.nestedViews[index].ref; }
-    /**
-     * @return {?}
-     */
-    get length() {
-        const /** @type {?} */ views = this._element.nestedViews;
-        return isPresent(views) ? views.length : 0;
-    }
-    /**
-     * @return {?}
-     */
-    get element() { return this._element.elementRef; }
-    /**
-     * @return {?}
-     */
-    get injector() { return this._element.injector; }
-    /**
-     * @return {?}
-     */
-    get parentInjector() { return this._element.parentInjector; }
+    ViewContainerRef_.prototype.get = function (index) { return this._element.nestedViews[index].ref; };
+    Object.defineProperty(ViewContainerRef_.prototype, "length", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            var /** @type {?} */ views = this._element.nestedViews;
+            return isPresent(views) ? views.length : 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef_.prototype, "element", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._element.elementRef; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef_.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._element.injector; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._element.parentInjector; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @param {?} templateRef
      * @param {?=} context
      * @param {?=} index
      * @return {?}
      */
-    createEmbeddedView(templateRef, context = null, index = -1) {
-        const /** @type {?} */ viewRef = templateRef.createEmbeddedView(context);
+    ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+        if (context === void 0) { context = null; }
+        if (index === void 0) { index = -1; }
+        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context);
         this.insert(viewRef, index);
         return viewRef;
-    }
+    };
     /**
      * @param {?} componentFactory
      * @param {?=} index
@@ -201,79 +238,86 @@ export class ViewContainerRef_ {
      * @param {?=} projectableNodes
      * @return {?}
      */
-    createComponent(componentFactory, index = -1, injector = null, projectableNodes = null) {
-        const /** @type {?} */ s = this._createComponentInContainerScope();
-        const /** @type {?} */ contextInjector = injector || this._element.parentInjector;
-        const /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes);
+    ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) {
+        if (index === void 0) { index = -1; }
+        if (injector === void 0) { injector = null; }
+        if (projectableNodes === void 0) { projectableNodes = null; }
+        var /** @type {?} */ s = this._createComponentInContainerScope();
+        var /** @type {?} */ contextInjector = injector || this._element.parentInjector;
+        var /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes);
         this.insert(componentRef.hostView, index);
         return wtfLeave(s, componentRef);
-    }
+    };
     /**
      * @param {?} viewRef
      * @param {?=} index
      * @return {?}
      */
-    insert(viewRef, index = -1) {
-        const /** @type {?} */ s = this._insertScope();
+    ViewContainerRef_.prototype.insert = function (viewRef, index) {
+        if (index === void 0) { index = -1; }
+        var /** @type {?} */ s = this._insertScope();
         if (index == -1)
             index = this.length;
-        const /** @type {?} */ viewRef_ = (viewRef);
+        var /** @type {?} */ viewRef_ = (viewRef);
         this._element.attachView(viewRef_.internalView, index);
         return wtfLeave(s, viewRef_);
-    }
+    };
     /**
      * @param {?} viewRef
      * @param {?} currentIndex
      * @return {?}
      */
-    move(viewRef, currentIndex) {
-        const /** @type {?} */ s = this._insertScope();
+    ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+        var /** @type {?} */ s = this._insertScope();
         if (currentIndex == -1)
             return;
-        const /** @type {?} */ viewRef_ = (viewRef);
+        var /** @type {?} */ viewRef_ = (viewRef);
         this._element.moveView(viewRef_.internalView, currentIndex);
         return wtfLeave(s, viewRef_);
-    }
+    };
     /**
      * @param {?} viewRef
      * @return {?}
      */
-    indexOf(viewRef) {
+    ViewContainerRef_.prototype.indexOf = function (viewRef) {
         return this._element.nestedViews.indexOf(((viewRef)).internalView);
-    }
+    };
     /**
      * @param {?=} index
      * @return {?}
      */
-    remove(index = -1) {
-        const /** @type {?} */ s = this._removeScope();
+    ViewContainerRef_.prototype.remove = function (index) {
+        if (index === void 0) { index = -1; }
+        var /** @type {?} */ s = this._removeScope();
         if (index == -1)
             index = this.length - 1;
-        const /** @type {?} */ view = this._element.detachView(index);
+        var /** @type {?} */ view = this._element.detachView(index);
         view.destroy();
         // view is intentionally not returned to the client.
         wtfLeave(s);
-    }
+    };
     /**
      * @param {?=} index
      * @return {?}
      */
-    detach(index = -1) {
-        const /** @type {?} */ s = this._detachScope();
+    ViewContainerRef_.prototype.detach = function (index) {
+        if (index === void 0) { index = -1; }
+        var /** @type {?} */ s = this._detachScope();
         if (index == -1)
             index = this.length - 1;
-        const /** @type {?} */ view = this._element.detachView(index);
+        var /** @type {?} */ view = this._element.detachView(index);
         return wtfLeave(s, view.ref);
-    }
+    };
     /**
      * @return {?}
      */
-    clear() {
-        for (let /** @type {?} */ i = this.length - 1; i >= 0; i--) {
+    ViewContainerRef_.prototype.clear = function () {
+        for (var /** @type {?} */ i = this.length - 1; i >= 0; i--) {
             this.remove(i);
         }
-    }
-}
+    };
+    return ViewContainerRef_;
+}());
 function ViewContainerRef__tsickle_Closure_declarations() {
     /**
      * \@internal

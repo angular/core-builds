@@ -14,7 +14,7 @@ import { makeDecorator } from '../util/decorators';
  *
  * @stable
  */
-export const /** @type {?} */ CUSTOM_ELEMENTS_SCHEMA = {
+export var /** @type {?} */ CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
 };
 /**
@@ -22,7 +22,7 @@ export const /** @type {?} */ CUSTOM_ELEMENTS_SCHEMA = {
  *
  * @experimental
  */
-export const /** @type {?} */ NO_ERRORS_SCHEMA = {
+export var /** @type {?} */ NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
 /**
@@ -31,7 +31,7 @@ export const /** @type {?} */ NO_ERRORS_SCHEMA = {
  * @stable
  * @Annotation
  */
-export const /** @type {?} */ NgModule = (makeDecorator('NgModule', {
+export var /** @type {?} */ NgModule = (makeDecorator('NgModule', {
     providers: undefined,
     declarations: undefined,
     imports: undefined,

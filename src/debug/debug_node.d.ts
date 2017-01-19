@@ -22,14 +22,14 @@ export declare class DebugNode {
     listeners: EventListener[];
     parent: DebugElement;
     constructor(nativeNode: any, parent: DebugNode, _debugInfo: RenderDebugInfo);
-    readonly injector: Injector;
-    readonly componentInstance: any;
-    readonly context: any;
-    readonly references: {
+    injector: Injector;
+    componentInstance: any;
+    context: any;
+    references: {
         [key: string]: any;
     };
-    readonly providerTokens: any[];
-    readonly source: string;
+    providerTokens: any[];
+    source: string;
 }
 /**
  * @experimental All debugging apis are currently experimental.
@@ -57,7 +57,7 @@ export declare class DebugElement extends DebugNode {
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];
-    readonly children: DebugElement[];
+    children: DebugElement[];
     triggerEventHandler(eventName: string, eventObj: any): void;
 }
 /**

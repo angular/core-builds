@@ -14,11 +14,11 @@ import { NgZone } from '../zone/ng_zone';
  * application on the page will have an instance of Testability.
  * \@experimental
  */
-export class Testability {
+export var Testability = (function () {
     /**
      * @param {?} _ngZone
      */
-    constructor(_ngZone) {
+    function Testability(_ngZone) {
         this._ngZone = _ngZone;
         /** @internal */
         this._pendingCount = 0;
@@ -39,81 +39,83 @@ export class Testability {
      * \@internal
      * @return {?}
      */
-    _watchAngularEvents() {
+    Testability.prototype._watchAngularEvents = function () {
+        var _this = this;
         this._ngZone.onUnstable.subscribe({
-            next: () => {
-                this._didWork = true;
-                this._isZoneStable = false;
+            next: function () {
+                _this._didWork = true;
+                _this._isZoneStable = false;
             }
         });
-        this._ngZone.runOutsideAngular(() => {
-            this._ngZone.onStable.subscribe({
-                next: () => {
+        this._ngZone.runOutsideAngular(function () {
+            _this._ngZone.onStable.subscribe({
+                next: function () {
                     NgZone.assertNotInAngularZone();
-                    scheduleMicroTask(() => {
-                        this._isZoneStable = true;
-                        this._runCallbacksIfReady();
+                    scheduleMicroTask(function () {
+                        _this._isZoneStable = true;
+                        _this._runCallbacksIfReady();
                     });
                 }
             });
         });
-    }
+    };
     /**
      * @return {?}
      */
-    increasePendingRequestCount() {
+    Testability.prototype.increasePendingRequestCount = function () {
         this._pendingCount += 1;
         this._didWork = true;
         return this._pendingCount;
-    }
+    };
     /**
      * @return {?}
      */
-    decreasePendingRequestCount() {
+    Testability.prototype.decreasePendingRequestCount = function () {
         this._pendingCount -= 1;
         if (this._pendingCount < 0) {
             throw new Error('pending async requests below zero');
         }
         this._runCallbacksIfReady();
         return this._pendingCount;
-    }
+    };
     /**
      * @return {?}
      */
-    isStable() {
+    Testability.prototype.isStable = function () {
         return this._isZoneStable && this._pendingCount == 0 && !this._ngZone.hasPendingMacrotasks;
-    }
+    };
     /**
      * \@internal
      * @return {?}
      */
-    _runCallbacksIfReady() {
+    Testability.prototype._runCallbacksIfReady = function () {
+        var _this = this;
         if (this.isStable()) {
             // Schedules the call backs in a new frame so that it is always async.
-            scheduleMicroTask(() => {
-                while (this._callbacks.length !== 0) {
-                    (this._callbacks.pop())(this._didWork);
+            scheduleMicroTask(function () {
+                while (_this._callbacks.length !== 0) {
+                    (_this._callbacks.pop())(_this._didWork);
                 }
-                this._didWork = false;
+                _this._didWork = false;
             });
         }
         else {
             // Not Ready
             this._didWork = true;
         }
-    }
+    };
     /**
      * @param {?} callback
      * @return {?}
      */
-    whenStable(callback) {
+    Testability.prototype.whenStable = function (callback) {
         this._callbacks.push(callback);
         this._runCallbacksIfReady();
-    }
+    };
     /**
      * @return {?}
      */
-    getPendingRequestCount() { return this._pendingCount; }
+    Testability.prototype.getPendingRequestCount = function () { return this._pendingCount; };
     /**
      * @deprecated use findProviders
      * @param {?} using
@@ -121,28 +123,29 @@ export class Testability {
      * @param {?} exactMatch
      * @return {?}
      */
-    findBindings(using, provider, exactMatch) {
+    Testability.prototype.findBindings = function (using, provider, exactMatch) {
         // TODO(juliemr): implement.
         return [];
-    }
+    };
     /**
      * @param {?} using
      * @param {?} provider
      * @param {?} exactMatch
      * @return {?}
      */
-    findProviders(using, provider, exactMatch) {
+    Testability.prototype.findProviders = function (using, provider, exactMatch) {
         // TODO(juliemr): implement.
         return [];
-    }
-}
-Testability.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-Testability.ctorParameters = () => [
-    { type: NgZone, },
-];
+    };
+    Testability.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Testability.ctorParameters = function () { return [
+        { type: NgZone, },
+    ]; };
+    return Testability;
+}());
 function Testability_tsickle_Closure_declarations() {
     /** @type {?} */
     Testability.decorators;
@@ -181,8 +184,8 @@ function Testability_tsickle_Closure_declarations() {
  * A global registry of {\@link Testability} instances for specific elements.
  * \@experimental
  */
-export class TestabilityRegistry {
-    constructor() {
+export var TestabilityRegistry = (function () {
+    function TestabilityRegistry() {
         /** @internal */
         this._applications = new Map();
         _testabilityGetter.addToWindow(this);
@@ -192,36 +195,38 @@ export class TestabilityRegistry {
      * @param {?} testability
      * @return {?}
      */
-    registerApplication(token, testability) {
+    TestabilityRegistry.prototype.registerApplication = function (token, testability) {
         this._applications.set(token, testability);
-    }
+    };
     /**
      * @param {?} elem
      * @return {?}
      */
-    getTestability(elem) { return this._applications.get(elem); }
+    TestabilityRegistry.prototype.getTestability = function (elem) { return this._applications.get(elem); };
     /**
      * @return {?}
      */
-    getAllTestabilities() { return Array.from(this._applications.values()); }
+    TestabilityRegistry.prototype.getAllTestabilities = function () { return Array.from(this._applications.values()); };
     /**
      * @return {?}
      */
-    getAllRootElements() { return Array.from(this._applications.keys()); }
+    TestabilityRegistry.prototype.getAllRootElements = function () { return Array.from(this._applications.keys()); };
     /**
      * @param {?} elem
      * @param {?=} findInAncestors
      * @return {?}
      */
-    findTestabilityInTree(elem, findInAncestors = true) {
+    TestabilityRegistry.prototype.findTestabilityInTree = function (elem, findInAncestors) {
+        if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
-    }
-}
-TestabilityRegistry.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-TestabilityRegistry.ctorParameters = () => [];
+    };
+    TestabilityRegistry.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = function () { return []; };
+    return TestabilityRegistry;
+}());
 function TestabilityRegistry_tsickle_Closure_declarations() {
     /** @type {?} */
     TestabilityRegistry.decorators;
@@ -236,22 +241,25 @@ function TestabilityRegistry_tsickle_Closure_declarations() {
      */
     TestabilityRegistry.prototype._applications;
 }
-class _NoopGetTestability {
+var _NoopGetTestability = (function () {
+    function _NoopGetTestability() {
+    }
     /**
      * @param {?} registry
      * @return {?}
      */
-    addToWindow(registry) { }
+    _NoopGetTestability.prototype.addToWindow = function (registry) { };
     /**
      * @param {?} registry
      * @param {?} elem
      * @param {?} findInAncestors
      * @return {?}
      */
-    findTestabilityInTree(registry, elem, findInAncestors) {
+    _NoopGetTestability.prototype.findTestabilityInTree = function (registry, elem, findInAncestors) {
         return null;
-    }
-}
+    };
+    return _NoopGetTestability;
+}());
 /**
  * Set the {\@link GetTestability} implementation used by the Angular testing framework.
  * \@experimental
@@ -261,5 +269,5 @@ class _NoopGetTestability {
 export function setTestabilityGetter(getter) {
     _testabilityGetter = getter;
 }
-let /** @type {?} */ _testabilityGetter = new _NoopGetTestability();
+var /** @type {?} */ _testabilityGetter = new _NoopGetTestability();
 //# sourceMappingURL=testability.js.map

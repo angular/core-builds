@@ -43,19 +43,20 @@ export function devModeEqual(a, b) {
  * ```
  * \@stable
  */
-export class WrappedValue {
+export var WrappedValue = (function () {
     /**
      * @param {?} wrapped
      */
-    constructor(wrapped) {
+    function WrappedValue(wrapped) {
         this.wrapped = wrapped;
     }
     /**
      * @param {?} value
      * @return {?}
      */
-    static wrap(value) { return new WrappedValue(value); }
-}
+    WrappedValue.wrap = function (value) { return new WrappedValue(value); };
+    return WrappedValue;
+}());
 function WrappedValue_tsickle_Closure_declarations() {
     /** @type {?} */
     WrappedValue.prototype.wrapped;
@@ -63,26 +64,27 @@ function WrappedValue_tsickle_Closure_declarations() {
 /**
  * Helper class for unwrapping WrappedValue s
  */
-export class ValueUnwrapper {
-    constructor() {
+export var ValueUnwrapper = (function () {
+    function ValueUnwrapper() {
         this.hasWrappedValue = false;
     }
     /**
      * @param {?} value
      * @return {?}
      */
-    unwrap(value) {
+    ValueUnwrapper.prototype.unwrap = function (value) {
         if (value instanceof WrappedValue) {
             this.hasWrappedValue = true;
             return value.wrapped;
         }
         return value;
-    }
+    };
     /**
      * @return {?}
      */
-    reset() { this.hasWrappedValue = false; }
-}
+    ValueUnwrapper.prototype.reset = function () { this.hasWrappedValue = false; };
+    return ValueUnwrapper;
+}());
 function ValueUnwrapper_tsickle_Closure_declarations() {
     /** @type {?} */
     ValueUnwrapper.prototype.hasWrappedValue;
@@ -91,13 +93,13 @@ function ValueUnwrapper_tsickle_Closure_declarations() {
  * Represents a basic change from a previous to a new value.
  * \@stable
  */
-export class SimpleChange {
+export var SimpleChange = (function () {
     /**
      * @param {?} previousValue
      * @param {?} currentValue
      * @param {?} firstChange
      */
-    constructor(previousValue, currentValue, firstChange) {
+    function SimpleChange(previousValue, currentValue, firstChange) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
         this.firstChange = firstChange;
@@ -106,8 +108,9 @@ export class SimpleChange {
      * Check whether the new value is the first value assigned.
      * @return {?}
      */
-    isFirstChange() { return this.firstChange; }
-}
+    SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+    return SimpleChange;
+}());
 function SimpleChange_tsickle_Closure_declarations() {
     /** @type {?} */
     SimpleChange.prototype.previousValue;

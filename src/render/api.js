@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { unimplemented } from '../facade/errors';
-export class RenderComponentType {
+export var RenderComponentType = (function () {
     /**
      * @param {?} id
      * @param {?} templateUrl
@@ -15,7 +15,7 @@ export class RenderComponentType {
      * @param {?} styles
      * @param {?} animations
      */
-    constructor(id, templateUrl, slotCount, encapsulation, styles, animations) {
+    function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
         this.id = id;
         this.templateUrl = templateUrl;
         this.slotCount = slotCount;
@@ -23,7 +23,8 @@ export class RenderComponentType {
         this.styles = styles;
         this.animations = animations;
     }
-}
+    return RenderComponentType;
+}());
 function RenderComponentType_tsickle_Closure_declarations() {
     /** @type {?} */
     RenderComponentType.prototype.id;
@@ -41,44 +42,73 @@ function RenderComponentType_tsickle_Closure_declarations() {
 /**
  * @abstract
  */
-export class RenderDebugInfo {
-    /**
-     * @return {?}
-     */
-    get injector() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get component() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get providerTokens() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get references() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get context() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get source() { return unimplemented(); }
-}
+export var RenderDebugInfo = (function () {
+    function RenderDebugInfo() {
+    }
+    Object.defineProperty(RenderDebugInfo.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RenderDebugInfo.prototype, "component", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RenderDebugInfo.prototype, "providerTokens", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RenderDebugInfo.prototype, "references", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RenderDebugInfo.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RenderDebugInfo.prototype, "source", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    return RenderDebugInfo;
+}());
 /**
  * \@experimental
  * @abstract
  */
-export class Renderer {
+export var Renderer = (function () {
+    function Renderer() {
+    }
     /**
      * @abstract
      * @param {?} selectorOrNode
      * @param {?=} debugInfo
      * @return {?}
      */
-    selectRootElement(selectorOrNode, debugInfo) { }
+    Renderer.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
     /**
      * @abstract
      * @param {?} parentElement
@@ -86,20 +116,20 @@ export class Renderer {
      * @param {?=} debugInfo
      * @return {?}
      */
-    createElement(parentElement, name, debugInfo) { }
+    Renderer.prototype.createElement = function (parentElement, name, debugInfo) { };
     /**
      * @abstract
      * @param {?} hostElement
      * @return {?}
      */
-    createViewRoot(hostElement) { }
+    Renderer.prototype.createViewRoot = function (hostElement) { };
     /**
      * @abstract
      * @param {?} parentElement
      * @param {?=} debugInfo
      * @return {?}
      */
-    createTemplateAnchor(parentElement, debugInfo) { }
+    Renderer.prototype.createTemplateAnchor = function (parentElement, debugInfo) { };
     /**
      * @abstract
      * @param {?} parentElement
@@ -107,34 +137,34 @@ export class Renderer {
      * @param {?=} debugInfo
      * @return {?}
      */
-    createText(parentElement, value, debugInfo) { }
+    Renderer.prototype.createText = function (parentElement, value, debugInfo) { };
     /**
      * @abstract
      * @param {?} parentElement
      * @param {?} nodes
      * @return {?}
      */
-    projectNodes(parentElement, nodes) { }
+    Renderer.prototype.projectNodes = function (parentElement, nodes) { };
     /**
      * @abstract
      * @param {?} node
      * @param {?} viewRootNodes
      * @return {?}
      */
-    attachViewAfter(node, viewRootNodes) { }
+    Renderer.prototype.attachViewAfter = function (node, viewRootNodes) { };
     /**
      * @abstract
      * @param {?} viewRootNodes
      * @return {?}
      */
-    detachView(viewRootNodes) { }
+    Renderer.prototype.detachView = function (viewRootNodes) { };
     /**
      * @abstract
      * @param {?} hostElement
      * @param {?} viewAllNodes
      * @return {?}
      */
-    destroyView(hostElement, viewAllNodes) { }
+    Renderer.prototype.destroyView = function (hostElement, viewAllNodes) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -142,7 +172,7 @@ export class Renderer {
      * @param {?} callback
      * @return {?}
      */
-    listen(renderElement, name, callback) { }
+    Renderer.prototype.listen = function (renderElement, name, callback) { };
     /**
      * @abstract
      * @param {?} target
@@ -150,7 +180,7 @@ export class Renderer {
      * @param {?} callback
      * @return {?}
      */
-    listenGlobal(target, name, callback) { }
+    Renderer.prototype.listenGlobal = function (target, name, callback) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -158,7 +188,7 @@ export class Renderer {
      * @param {?} propertyValue
      * @return {?}
      */
-    setElementProperty(renderElement, propertyName, propertyValue) { }
+    Renderer.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -166,7 +196,7 @@ export class Renderer {
      * @param {?} attributeValue
      * @return {?}
      */
-    setElementAttribute(renderElement, attributeName, attributeValue) { }
+    Renderer.prototype.setElementAttribute = function (renderElement, attributeName, attributeValue) { };
     /**
      * Used only in debug mode to serialize property changes to dom nodes as attributes.
      * @abstract
@@ -175,7 +205,7 @@ export class Renderer {
      * @param {?} propertyValue
      * @return {?}
      */
-    setBindingDebugInfo(renderElement, propertyName, propertyValue) { }
+    Renderer.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -183,7 +213,7 @@ export class Renderer {
      * @param {?} isAdd
      * @return {?}
      */
-    setElementClass(renderElement, className, isAdd) { }
+    Renderer.prototype.setElementClass = function (renderElement, className, isAdd) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -191,7 +221,7 @@ export class Renderer {
      * @param {?} styleValue
      * @return {?}
      */
-    setElementStyle(renderElement, styleName, styleValue) { }
+    Renderer.prototype.setElementStyle = function (renderElement, styleName, styleValue) { };
     /**
      * @abstract
      * @param {?} renderElement
@@ -199,14 +229,14 @@ export class Renderer {
      * @param {?=} args
      * @return {?}
      */
-    invokeElementMethod(renderElement, methodName, args) { }
+    Renderer.prototype.invokeElementMethod = function (renderElement, methodName, args) { };
     /**
      * @abstract
      * @param {?} renderNode
      * @param {?} text
      * @return {?}
      */
-    setText(renderNode, text) { }
+    Renderer.prototype.setText = function (renderNode, text) { };
     /**
      * @abstract
      * @param {?} element
@@ -218,8 +248,9 @@ export class Renderer {
      * @param {?=} previousPlayers
      * @return {?}
      */
-    animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { }
-}
+    Renderer.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { };
+    return Renderer;
+}());
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -234,12 +265,15 @@ export class Renderer {
  * \@experimental
  * @abstract
  */
-export class RootRenderer {
+export var RootRenderer = (function () {
+    function RootRenderer() {
+    }
     /**
      * @abstract
      * @param {?} componentType
      * @return {?}
      */
-    renderComponent(componentType) { }
-}
+    RootRenderer.prototype.renderComponent = function (componentType) { };
+    return RootRenderer;
+}());
 //# sourceMappingURL=api.js.map

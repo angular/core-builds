@@ -6,12 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isBlank } from '../facade/lang';
-export let ChangeDetectionStrategy = {};
+export var ChangeDetectionStrategy = {};
 ChangeDetectionStrategy.OnPush = 0;
 ChangeDetectionStrategy.Default = 1;
 ChangeDetectionStrategy[ChangeDetectionStrategy.OnPush] = "OnPush";
 ChangeDetectionStrategy[ChangeDetectionStrategy.Default] = "Default";
-export let ChangeDetectorStatus = {};
+export var ChangeDetectorStatus = {};
 ChangeDetectorStatus.CheckOnce = 0;
 ChangeDetectorStatus.Checked = 1;
 ChangeDetectorStatus.CheckAlways = 2;

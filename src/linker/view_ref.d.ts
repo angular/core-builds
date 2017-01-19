@@ -16,7 +16,7 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Destroys the view and all of the data structures associated with it.
      */
     abstract destroy(): void;
-    readonly destroyed: boolean;
+    destroyed: boolean;
     abstract onDestroy(callback: Function): any;
 }
 /**
@@ -74,17 +74,17 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * @experimental
  */
 export declare abstract class EmbeddedViewRef<C> extends ViewRef {
-    readonly context: C;
-    readonly rootNodes: any[];
+    context: C;
+    rootNodes: any[];
 }
 export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRef {
     private _view;
     animationQueue: AnimationQueue;
     constructor(_view: AppView<C>, animationQueue: AnimationQueue);
-    readonly internalView: AppView<C>;
-    readonly rootNodes: any[];
-    readonly context: C;
-    readonly destroyed: boolean;
+    internalView: AppView<C>;
+    rootNodes: any[];
+    context: C;
+    destroyed: boolean;
     markForCheck(): void;
     detach(): void;
     detectChanges(): void;

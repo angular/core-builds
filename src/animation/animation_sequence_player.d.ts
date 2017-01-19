@@ -24,5 +24,5 @@ export declare class AnimationSequencePlayer implements AnimationPlayer {
     destroy(): void;
     setPosition(p: number): void;
     getPosition(): number;
-    readonly players: AnimationPlayer[];
+    players: AnimationPlayer[];
 }

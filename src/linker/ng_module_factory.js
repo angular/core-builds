@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { Injector, THROW_IF_NOT_FOUND } from '../di/injector';
 import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
@@ -18,84 +23,105 @@ import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './com
  * \@stable
  * @abstract
  */
-export class NgModuleRef {
-    /**
-     * The injector that contains all of the providers of the NgModule.
-     * @return {?}
-     */
-    get injector() { return unimplemented(); }
-    /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
-     * declared in the `entryComponents` property of the module.
-     * @return {?}
-     */
-    get componentFactoryResolver() { return unimplemented(); }
-    /**
-     * The NgModule instance.
-     * @return {?}
-     */
-    get instance() { return unimplemented(); }
+export var NgModuleRef = (function () {
+    function NgModuleRef() {
+    }
+    Object.defineProperty(NgModuleRef.prototype, "injector", {
+        /**
+         * The injector that contains all of the providers of the NgModule.
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
+        /**
+         * The ComponentFactoryResolver to get hold of the ComponentFactories
+         * declared in the `entryComponents` property of the module.
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgModuleRef.prototype, "instance", {
+        /**
+         * The NgModule instance.
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Destroys the module instance and all of the data structures associated with it.
      * @abstract
      * @return {?}
      */
-    destroy() { }
+    NgModuleRef.prototype.destroy = function () { };
     /**
      * Allows to register a callback that will be called when the module is destroyed.
      * @abstract
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) { }
-}
+    NgModuleRef.prototype.onDestroy = function (callback) { };
+    return NgModuleRef;
+}());
 /**
  * \@experimental
  */
-export class NgModuleFactory {
+export var NgModuleFactory = (function () {
     /**
      * @param {?} _injectorClass
      * @param {?} _moduleType
      */
-    constructor(_injectorClass, _moduleType) {
+    function NgModuleFactory(_injectorClass, _moduleType) {
         this._injectorClass = _injectorClass;
         this._moduleType = _moduleType;
     }
-    /**
-     * @return {?}
-     */
-    get moduleType() { return this._moduleType; }
+    Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._moduleType; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @param {?} parentInjector
      * @return {?}
      */
-    create(parentInjector) {
+    NgModuleFactory.prototype.create = function (parentInjector) {
         if (!parentInjector) {
             parentInjector = Injector.NULL;
         }
-        const /** @type {?} */ instance = new this._injectorClass(parentInjector);
+        var /** @type {?} */ instance = new this._injectorClass(parentInjector);
         instance.create();
         return instance;
-    }
-}
+    };
+    return NgModuleFactory;
+}());
 function NgModuleFactory_tsickle_Closure_declarations() {
     /** @type {?} */
     NgModuleFactory.prototype._injectorClass;
     /** @type {?} */
     NgModuleFactory.prototype._moduleType;
 }
-const /** @type {?} */ _UNDEFINED = new Object();
+var /** @type {?} */ _UNDEFINED = new Object();
 /**
  * @abstract
  */
-export class NgModuleInjector extends CodegenComponentFactoryResolver {
+export var NgModuleInjector = (function (_super) {
+    __extends(NgModuleInjector, _super);
     /**
      * @param {?} parent
      * @param {?} factories
      * @param {?} bootstrapFactories
      */
-    constructor(parent, factories, bootstrapFactories) {
-        super(factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
+    function NgModuleInjector(parent, factories, bootstrapFactories) {
+        _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
         this.parent = parent;
         this.bootstrapFactories = bootstrapFactories;
         this._destroyListeners = [];
@@ -104,61 +130,71 @@ export class NgModuleInjector extends CodegenComponentFactoryResolver {
     /**
      * @return {?}
      */
-    create() { this.instance = this.createInternal(); }
+    NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
     /**
      * @abstract
      * @return {?}
      */
-    createInternal() { }
+    NgModuleInjector.prototype.createInternal = function () { };
     /**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
      */
-    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
+    NgModuleInjector.prototype.get = function (token, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
         if (token === Injector || token === ComponentFactoryResolver) {
             return this;
         }
-        const /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
+        var /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
         return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
-    }
+    };
     /**
      * @abstract
      * @param {?} token
      * @param {?} notFoundValue
      * @return {?}
      */
-    getInternal(token, notFoundValue) { }
+    NgModuleInjector.prototype.getInternal = function (token, notFoundValue) { };
+    Object.defineProperty(NgModuleInjector.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(NgModuleInjector.prototype, "componentFactoryResolver", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @return {?}
      */
-    get injector() { return this; }
-    /**
-     * @return {?}
-     */
-    get componentFactoryResolver() { return this; }
-    /**
-     * @return {?}
-     */
-    destroy() {
+    NgModuleInjector.prototype.destroy = function () {
         if (this._destroyed) {
-            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
+            throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
         }
         this._destroyed = true;
         this.destroyInternal();
-        this._destroyListeners.forEach((listener) => listener());
-    }
+        this._destroyListeners.forEach(function (listener) { return listener(); });
+    };
     /**
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) { this._destroyListeners.push(callback); }
+    NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
     /**
      * @abstract
      * @return {?}
      */
-    destroyInternal() { }
-}
+    NgModuleInjector.prototype.destroyInternal = function () { };
+    return NgModuleInjector;
+}(CodegenComponentFactoryResolver));
 function NgModuleInjector_tsickle_Closure_declarations() {
     /** @type {?} */
     NgModuleInjector.prototype._destroyListeners;

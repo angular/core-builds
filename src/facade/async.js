@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { Subject } from 'rxjs/Subject';
 export { Observable } from 'rxjs/Observable';
 export { Subject } from 'rxjs/Subject';
@@ -55,59 +60,62 @@ export { Subject } from 'rxjs/Subject';
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
  */
-export class EventEmitter extends Subject {
+export var EventEmitter = (function (_super) {
+    __extends(EventEmitter, _super);
     /**
      * Creates an instance of [EventEmitter], which depending on [isAsync],
      * delivers events synchronously or asynchronously.
      * @param {?=} isAsync
      */
-    constructor(isAsync = false) {
-        super();
+    function EventEmitter(isAsync) {
+        if (isAsync === void 0) { isAsync = false; }
+        _super.call(this);
         this.__isAsync = isAsync;
     }
     /**
      * @param {?=} value
      * @return {?}
      */
-    emit(value) { super.next(value); }
+    EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
     /**
      * @param {?=} generatorOrNext
      * @param {?=} error
      * @param {?=} complete
      * @return {?}
      */
-    subscribe(generatorOrNext, error, complete) {
-        let /** @type {?} */ schedulerFn;
-        let /** @type {?} */ errorFn = (err) => null;
-        let /** @type {?} */ completeFn = () => null;
+    EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
+        var /** @type {?} */ schedulerFn;
+        var /** @type {?} */ errorFn = function (err) { return null; };
+        var /** @type {?} */ completeFn = function () { return null; };
         if (generatorOrNext && typeof generatorOrNext === 'object') {
-            schedulerFn = this.__isAsync ? (value) => {
-                setTimeout(() => generatorOrNext.next(value));
-            } : (value) => { generatorOrNext.next(value); };
+            schedulerFn = this.__isAsync ? function (value) {
+                setTimeout(function () { return generatorOrNext.next(value); });
+            } : function (value) { generatorOrNext.next(value); };
             if (generatorOrNext.error) {
-                errorFn = this.__isAsync ? (err) => { setTimeout(() => generatorOrNext.error(err)); } :
-                        (err) => { generatorOrNext.error(err); };
+                errorFn = this.__isAsync ? function (err) { setTimeout(function () { return generatorOrNext.error(err); }); } :
+                    function (err) { generatorOrNext.error(err); };
             }
             if (generatorOrNext.complete) {
-                completeFn = this.__isAsync ? () => { setTimeout(() => generatorOrNext.complete()); } :
-                        () => { generatorOrNext.complete(); };
+                completeFn = this.__isAsync ? function () { setTimeout(function () { return generatorOrNext.complete(); }); } :
+                    function () { generatorOrNext.complete(); };
             }
         }
         else {
-            schedulerFn = this.__isAsync ? (value) => { setTimeout(() => generatorOrNext(value)); } :
-                    (value) => { generatorOrNext(value); };
+            schedulerFn = this.__isAsync ? function (value) { setTimeout(function () { return generatorOrNext(value); }); } :
+                function (value) { generatorOrNext(value); };
             if (error) {
                 errorFn =
-                    this.__isAsync ? (err) => { setTimeout(() => error(err)); } : (err) => { error(err); };
+                    this.__isAsync ? function (err) { setTimeout(function () { return error(err); }); } : function (err) { error(err); };
             }
             if (complete) {
                 completeFn =
-                    this.__isAsync ? () => { setTimeout(() => complete()); } : () => { complete(); };
+                    this.__isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
             }
         }
-        return super.subscribe(schedulerFn, errorFn, completeFn);
-    }
-}
+        return _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
+    };
+    return EventEmitter;
+}(Subject));
 function EventEmitter_tsickle_Closure_declarations() {
     /** @type {?} */
     EventEmitter.prototype.__isAsync;

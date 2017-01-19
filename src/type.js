@@ -15,7 +15,7 @@
  *
  * @stable
  */
-export const /** @type {?} */ Type = Function;
+export var /** @type {?} */ Type = Function;
 /**
  * @param {?} v
  * @return {?}

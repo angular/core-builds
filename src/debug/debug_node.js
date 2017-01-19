@@ -5,17 +5,23 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export class EventListener {
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+export var EventListener = (function () {
     /**
      * @param {?} name
      * @param {?} callback
      */
-    constructor(name, callback) {
+    function EventListener(name, callback) {
         this.name = name;
         this.callback = callback;
     }
     ;
-}
+    return EventListener;
+}());
 function EventListener_tsickle_Closure_declarations() {
     /** @type {?} */
     EventListener.prototype.name;
@@ -25,13 +31,13 @@ function EventListener_tsickle_Closure_declarations() {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-export class DebugNode {
+export var DebugNode = (function () {
     /**
      * @param {?} nativeNode
      * @param {?} parent
      * @param {?} _debugInfo
      */
-    constructor(nativeNode, parent, _debugInfo) {
+    function DebugNode(nativeNode, parent, _debugInfo) {
         this._debugInfo = _debugInfo;
         this.nativeNode = nativeNode;
         if (parent && parent instanceof DebugElement) {
@@ -42,33 +48,58 @@ export class DebugNode {
         }
         this.listeners = [];
     }
-    /**
-     * @return {?}
-     */
-    get injector() { return this._debugInfo ? this._debugInfo.injector : null; }
-    /**
-     * @return {?}
-     */
-    get componentInstance() { return this._debugInfo ? this._debugInfo.component : null; }
-    /**
-     * @return {?}
-     */
-    get context() { return this._debugInfo ? this._debugInfo.context : null; }
-    /**
-     * @return {?}
-     */
-    get references() {
-        return this._debugInfo ? this._debugInfo.references : null;
-    }
-    /**
-     * @return {?}
-     */
-    get providerTokens() { return this._debugInfo ? this._debugInfo.providerTokens : null; }
-    /**
-     * @return {?}
-     */
-    get source() { return this._debugInfo ? this._debugInfo.source : null; }
-}
+    Object.defineProperty(DebugNode.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._debugInfo ? this._debugInfo.injector : null; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugNode.prototype, "componentInstance", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._debugInfo ? this._debugInfo.component : null; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugNode.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._debugInfo ? this._debugInfo.context : null; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugNode.prototype, "references", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return this._debugInfo ? this._debugInfo.references : null;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugNode.prototype, "providerTokens", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._debugInfo ? this._debugInfo.providerTokens : null; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugNode.prototype, "source", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._debugInfo ? this._debugInfo.source : null; },
+        enumerable: true,
+        configurable: true
+    });
+    return DebugNode;
+}());
 function DebugNode_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugNode.prototype.nativeNode;
@@ -82,14 +113,15 @@ function DebugNode_tsickle_Closure_declarations() {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-export class DebugElement extends DebugNode {
+export var DebugElement = (function (_super) {
+    __extends(DebugElement, _super);
     /**
      * @param {?} nativeNode
      * @param {?} parent
      * @param {?} _debugInfo
      */
-    constructor(nativeNode, parent, _debugInfo) {
-        super(nativeNode, parent, _debugInfo);
+    function DebugElement(nativeNode, parent, _debugInfo) {
+        _super.call(this, nativeNode, parent, _debugInfo);
         this.properties = {};
         this.attributes = {};
         this.classes = {};
@@ -101,88 +133,93 @@ export class DebugElement extends DebugNode {
      * @param {?} child
      * @return {?}
      */
-    addChild(child) {
+    DebugElement.prototype.addChild = function (child) {
         if (child) {
             this.childNodes.push(child);
             child.parent = this;
         }
-    }
+    };
     /**
      * @param {?} child
      * @return {?}
      */
-    removeChild(child) {
-        const /** @type {?} */ childIndex = this.childNodes.indexOf(child);
+    DebugElement.prototype.removeChild = function (child) {
+        var /** @type {?} */ childIndex = this.childNodes.indexOf(child);
         if (childIndex !== -1) {
             child.parent = null;
             this.childNodes.splice(childIndex, 1);
         }
-    }
+    };
     /**
      * @param {?} child
      * @param {?} newChildren
      * @return {?}
      */
-    insertChildrenAfter(child, newChildren) {
-        const /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
+    DebugElement.prototype.insertChildrenAfter = function (child, newChildren) {
+        var /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
-            const /** @type {?} */ previousChildren = this.childNodes.slice(0, siblingIndex + 1);
-            const /** @type {?} */ nextChildren = this.childNodes.slice(siblingIndex + 1);
+            var /** @type {?} */ previousChildren = this.childNodes.slice(0, siblingIndex + 1);
+            var /** @type {?} */ nextChildren = this.childNodes.slice(siblingIndex + 1);
             this.childNodes = previousChildren.concat(newChildren, nextChildren);
-            for (let /** @type {?} */ i = 0; i < newChildren.length; ++i) {
-                const /** @type {?} */ newChild = newChildren[i];
+            for (var /** @type {?} */ i = 0; i < newChildren.length; ++i) {
+                var /** @type {?} */ newChild = newChildren[i];
                 if (newChild.parent) {
                     newChild.parent.removeChild(newChild);
                 }
                 newChild.parent = this;
             }
         }
-    }
+    };
     /**
      * @param {?} predicate
      * @return {?}
      */
-    query(predicate) {
-        const /** @type {?} */ results = this.queryAll(predicate);
+    DebugElement.prototype.query = function (predicate) {
+        var /** @type {?} */ results = this.queryAll(predicate);
         return results[0] || null;
-    }
+    };
     /**
      * @param {?} predicate
      * @return {?}
      */
-    queryAll(predicate) {
-        const /** @type {?} */ matches = [];
+    DebugElement.prototype.queryAll = function (predicate) {
+        var /** @type {?} */ matches = [];
         _queryElementChildren(this, predicate, matches);
         return matches;
-    }
+    };
     /**
      * @param {?} predicate
      * @return {?}
      */
-    queryAllNodes(predicate) {
-        const /** @type {?} */ matches = [];
+    DebugElement.prototype.queryAllNodes = function (predicate) {
+        var /** @type {?} */ matches = [];
         _queryNodeChildren(this, predicate, matches);
         return matches;
-    }
-    /**
-     * @return {?}
-     */
-    get children() {
-        return (this.childNodes.filter((node) => node instanceof DebugElement));
-    }
+    };
+    Object.defineProperty(DebugElement.prototype, "children", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            return (this.childNodes.filter(function (node) { return node instanceof DebugElement; }));
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @param {?} eventName
      * @param {?} eventObj
      * @return {?}
      */
-    triggerEventHandler(eventName, eventObj) {
-        this.listeners.forEach((listener) => {
+    DebugElement.prototype.triggerEventHandler = function (eventName, eventObj) {
+        this.listeners.forEach(function (listener) {
             if (listener.name == eventName) {
                 listener.callback(eventObj);
             }
         });
-    }
-}
+    };
+    return DebugElement;
+}(DebugNode));
 function DebugElement_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugElement.prototype.name;
@@ -205,7 +242,7 @@ function DebugElement_tsickle_Closure_declarations() {
  * @return {?}
  */
 export function asNativeElements(debugEls) {
-    return debugEls.map((el) => el.nativeElement);
+    return debugEls.map(function (el) { return el.nativeElement; });
 }
 /**
  * @param {?} element
@@ -214,7 +251,7 @@ export function asNativeElements(debugEls) {
  * @return {?}
  */
 function _queryElementChildren(element, predicate, matches) {
-    element.childNodes.forEach(node => {
+    element.childNodes.forEach(function (node) {
         if (node instanceof DebugElement) {
             if (predicate(node)) {
                 matches.push(node);
@@ -231,7 +268,7 @@ function _queryElementChildren(element, predicate, matches) {
  */
 function _queryNodeChildren(parentNode, predicate, matches) {
     if (parentNode instanceof DebugElement) {
-        parentNode.childNodes.forEach(node => {
+        parentNode.childNodes.forEach(function (node) {
             if (predicate(node)) {
                 matches.push(node);
             }
@@ -242,7 +279,7 @@ function _queryNodeChildren(parentNode, predicate, matches) {
     }
 }
 // Need to keep the nodes in a global Map so that multiple angular apps are supported.
-const /** @type {?} */ _nativeNodeToDebugNode = new Map();
+var /** @type {?} */ _nativeNodeToDebugNode = new Map();
 /**
  * \@experimental
  * @param {?} nativeNode

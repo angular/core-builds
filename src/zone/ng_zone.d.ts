@@ -127,29 +127,29 @@ export declare class NgZone {
     /**
      * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
      */
-    readonly onUnstable: EventEmitter<any>;
+    onUnstable: EventEmitter<any>;
     /**
      * Notifies when there is no more microtasks enqueue in the current VM Turn.
      * This is a hint for Angular to do change detection, which may enqueue more microtasks.
      * For this reason this event can fire multiple times per VM Turn.
      */
-    readonly onMicrotaskEmpty: EventEmitter<any>;
+    onMicrotaskEmpty: EventEmitter<any>;
     /**
      * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
      * implies we are about to relinquish VM turn.
      * This event gets called just once.
      */
-    readonly onStable: EventEmitter<any>;
+    onStable: EventEmitter<any>;
     /**
      * Notify that an error has been delivered.
      */
-    readonly onError: EventEmitter<any>;
+    onError: EventEmitter<any>;
     /**
      * Whether there are no outstanding microtasks or macrotasks.
      */
-    readonly isStable: boolean;
-    readonly hasPendingMicrotasks: boolean;
-    readonly hasPendingMacrotasks: boolean;
+    isStable: boolean;
+    hasPendingMicrotasks: boolean;
+    hasPendingMacrotasks: boolean;
     private checkStable();
     private forkInnerZoneWithAngularBehavior();
     private onEnter();

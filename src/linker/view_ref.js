@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ChangeDetectorStatus } from '../change_detection/constants';
 import { unimplemented } from '../facade/errors';
@@ -12,24 +17,33 @@ import { unimplemented } from '../facade/errors';
  * \@stable
  * @abstract
  */
-export class ViewRef extends ChangeDetectorRef {
+export var ViewRef = (function (_super) {
+    __extends(ViewRef, _super);
+    function ViewRef() {
+        _super.apply(this, arguments);
+    }
     /**
      * Destroys the view and all of the data structures associated with it.
      * @abstract
      * @return {?}
      */
-    destroy() { }
-    /**
-     * @return {?}
-     */
-    get destroyed() { return (unimplemented()); }
+    ViewRef.prototype.destroy = function () { };
+    Object.defineProperty(ViewRef.prototype, "destroyed", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @abstract
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) { }
-}
+    ViewRef.prototype.onDestroy = function (callback) { };
+    return ViewRef;
+}(ChangeDetectorRef));
 /**
  * Represents an Angular View.
  *
@@ -85,85 +99,115 @@ export class ViewRef extends ChangeDetectorRef {
  * \@experimental
  * @abstract
  */
-export class EmbeddedViewRef extends ViewRef {
-    /**
-     * @return {?}
-     */
-    get context() { return unimplemented(); }
-    /**
-     * @return {?}
-     */
-    get rootNodes() { return (unimplemented()); }
+export var EmbeddedViewRef = (function (_super) {
+    __extends(EmbeddedViewRef, _super);
+    function EmbeddedViewRef() {
+        _super.apply(this, arguments);
+    }
+    Object.defineProperty(EmbeddedViewRef.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EmbeddedViewRef.prototype, "rootNodes", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     ;
-}
-export class ViewRef_ {
+    return EmbeddedViewRef;
+}(ViewRef));
+export var ViewRef_ = (function () {
     /**
      * @param {?} _view
      * @param {?} animationQueue
      */
-    constructor(_view, animationQueue) {
+    function ViewRef_(_view, animationQueue) {
         this._view = _view;
         this.animationQueue = animationQueue;
         this._view = _view;
         this._originalMode = this._view.cdMode;
     }
+    Object.defineProperty(ViewRef_.prototype, "internalView", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._view; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewRef_.prototype, "rootNodes", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._view.flatRootNodes; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewRef_.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._view.context; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewRef_.prototype, "destroyed", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._view.destroyed; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @return {?}
      */
-    get internalView() { return this._view; }
+    ViewRef_.prototype.markForCheck = function () { this._view.markPathToRootAsCheckOnce(); };
     /**
      * @return {?}
      */
-    get rootNodes() { return this._view.flatRootNodes; }
+    ViewRef_.prototype.detach = function () { this._view.cdMode = ChangeDetectorStatus.Detached; };
     /**
      * @return {?}
      */
-    get context() { return this._view.context; }
-    /**
-     * @return {?}
-     */
-    get destroyed() { return this._view.destroyed; }
-    /**
-     * @return {?}
-     */
-    markForCheck() { this._view.markPathToRootAsCheckOnce(); }
-    /**
-     * @return {?}
-     */
-    detach() { this._view.cdMode = ChangeDetectorStatus.Detached; }
-    /**
-     * @return {?}
-     */
-    detectChanges() {
+    ViewRef_.prototype.detectChanges = function () {
         this._view.detectChanges(false);
         this.animationQueue.flush();
-    }
+    };
     /**
      * @return {?}
      */
-    checkNoChanges() { this._view.detectChanges(true); }
+    ViewRef_.prototype.checkNoChanges = function () { this._view.detectChanges(true); };
     /**
      * @return {?}
      */
-    reattach() {
+    ViewRef_.prototype.reattach = function () {
         this._view.cdMode = this._originalMode;
         this.markForCheck();
-    }
+    };
     /**
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) {
+    ViewRef_.prototype.onDestroy = function (callback) {
         if (!this._view.disposables) {
             this._view.disposables = [];
         }
         this._view.disposables.push(callback);
-    }
+    };
     /**
      * @return {?}
      */
-    destroy() { this._view.detachAndDestroy(); }
-}
+    ViewRef_.prototype.destroy = function () { this._view.detachAndDestroy(); };
+    return ViewRef_;
+}());
 function ViewRef__tsickle_Closure_declarations() {
     /**
      * \@internal

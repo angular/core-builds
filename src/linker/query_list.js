@@ -31,51 +31,67 @@ import { getSymbolIterator } from '../facade/lang';
  * ```
  * \@stable
  */
-export class QueryList {
-    constructor() {
+export var QueryList = (function () {
+    function QueryList() {
         this._dirty = true;
         this._results = [];
         this._emitter = new EventEmitter();
     }
-    /**
-     * @return {?}
-     */
-    get changes() { return this._emitter; }
-    /**
-     * @return {?}
-     */
-    get length() { return this._results.length; }
-    /**
-     * @return {?}
-     */
-    get first() { return this._results[0]; }
-    /**
-     * @return {?}
-     */
-    get last() { return this._results[this.length - 1]; }
+    Object.defineProperty(QueryList.prototype, "changes", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._emitter; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(QueryList.prototype, "length", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._results.length; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(QueryList.prototype, "first", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._results[0]; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(QueryList.prototype, "last", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._results[this.length - 1]; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
      * @param {?} fn
      * @return {?}
      */
-    map(fn) { return this._results.map(fn); }
+    QueryList.prototype.map = function (fn) { return this._results.map(fn); };
     /**
      * See
      * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
      * @param {?} fn
      * @return {?}
      */
-    filter(fn) {
+    QueryList.prototype.filter = function (fn) {
         return this._results.filter(fn);
-    }
+    };
     /**
      * See
      * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
      * @param {?} fn
      * @return {?}
      */
-    find(fn) { return this._results.find(fn); }
+    QueryList.prototype.find = function (fn) { return this._results.find(fn); };
     /**
      * See
      * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
@@ -83,60 +99,65 @@ export class QueryList {
      * @param {?} init
      * @return {?}
      */
-    reduce(fn, init) {
+    QueryList.prototype.reduce = function (fn, init) {
         return this._results.reduce(fn, init);
-    }
+    };
     /**
      * See
      * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
      * @param {?} fn
      * @return {?}
      */
-    forEach(fn) { this._results.forEach(fn); }
+    QueryList.prototype.forEach = function (fn) { this._results.forEach(fn); };
     /**
      * See
      * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
      * @param {?} fn
      * @return {?}
      */
-    some(fn) {
+    QueryList.prototype.some = function (fn) {
         return this._results.some(fn);
-    }
+    };
     /**
      * @return {?}
      */
-    toArray() { return this._results.slice(); }
+    QueryList.prototype.toArray = function () { return this._results.slice(); };
     /**
      * @return {?}
      */
-    [getSymbolIterator()]() { return ((this._results))[getSymbolIterator()](); }
+    QueryList.prototype[getSymbolIterator()] = function () { return ((this._results))[getSymbolIterator()](); };
     /**
      * @return {?}
      */
-    toString() { return this._results.toString(); }
+    QueryList.prototype.toString = function () { return this._results.toString(); };
     /**
      * @param {?} res
      * @return {?}
      */
-    reset(res) {
+    QueryList.prototype.reset = function (res) {
         this._results = ListWrapper.flatten(res);
         this._dirty = false;
-    }
+    };
     /**
      * @return {?}
      */
-    notifyOnChanges() { this._emitter.emit(this); }
-    /**
-     * internal
-     * @return {?}
-     */
-    setDirty() { this._dirty = true; }
+    QueryList.prototype.notifyOnChanges = function () { this._emitter.emit(this); };
     /**
      * internal
      * @return {?}
      */
-    get dirty() { return this._dirty; }
-}
+    QueryList.prototype.setDirty = function () { this._dirty = true; };
+    Object.defineProperty(QueryList.prototype, "dirty", {
+        /**
+         * internal
+         * @return {?}
+         */
+        get: function () { return this._dirty; },
+        enumerable: true,
+        configurable: true
+    });
+    return QueryList;
+}());
 function QueryList_tsickle_Closure_declarations() {
     /** @type {?} */
     QueryList.prototype._dirty;
