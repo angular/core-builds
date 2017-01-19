@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.3-1200cf2
+ * @license Angular v4.0.0-beta.4-b049217
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.3-1200cf2');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.4-b049217');
 
     /**
      * Inject decorator and metadata.
@@ -1225,11 +1225,7 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * Convenience to throw an Error with 'unimplemented' as the message.
      * @return {?}
      */
     function unimplemented() {
@@ -3808,11 +3804,7 @@
     }
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * Determine if the argument is shaped like a Promise
      * @param {?} obj
      * @return {?}
      */

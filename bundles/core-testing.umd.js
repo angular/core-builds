@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.3-1200cf2
+ * @license Angular v4.0.0-beta.4-b049217
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -441,6 +441,9 @@
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
+    /**
+     * Convenience to throw an Error with 'unimplemented' as the message.
+     */
     function unimplemented() {
         throw new Error('unimplemented');
     }

@@ -43,5 +43,5 @@ function Version_tsickle_Closure_declarations() {
 /**
  * @stable
  */
-export var /** @type {?} */ VERSION = new Version('4.0.0-beta.3-1200cf2');
+export var /** @type {?} */ VERSION = new Version('4.0.0-beta.4-b049217');
 //# sourceMappingURL=version.js.map
