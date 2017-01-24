@@ -10615,6 +10615,9 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * \@experimental
+     */
     var AnimationKeyframe = (function () {
         /**
          * @param {?} offset
@@ -11799,11 +11802,7 @@
     }
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * \@experimental
      */
     var AnimationStyles = (function () {
         /**
@@ -13363,6 +13362,8 @@
     exports.ErrorHandler = ErrorHandler;
     exports.AnimationTransitionEvent = AnimationTransitionEvent;
     exports.AnimationPlayer = AnimationPlayer;
+    exports.AnimationStyles = AnimationStyles;
+    exports.AnimationKeyframe = AnimationKeyframe;
     exports.Sanitizer = Sanitizer;
     exports.SecurityContext = SecurityContext;
     exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
