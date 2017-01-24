@@ -6,6 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AnimationStyles } from './animation_styles';
+/**
+ * @experimental
+ */
 export declare class AnimationKeyframe {
     offset: number;
     styles: AnimationStyles;
