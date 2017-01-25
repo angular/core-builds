@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.4.4-84542d8
+ * @license Angular v2.4.5-7ed39eb
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1117,7 +1117,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.4.4-84542d8');
+    var /** @type {?} */ VERSION = new Version('2.4.5-7ed39eb');
 
     /**
      * Allows to refer to references which are not yet defined.
@@ -1168,11 +1168,7 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * Convenience to throw an Error with 'unimplemented' as the message.
      * @return {?}
      */
     function unimplemented() {
@@ -3756,11 +3752,7 @@
     }
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * Determine if the argument is shaped like a Promise
      * @param {?} obj
      * @return {?}
      */
@@ -10456,6 +10448,16 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
+    /**
+     * `AnimationKeyframe` consists of a series of styles (contained within {\@link AnimationStyles
+     * `AnimationStyles`})
+     * and an offset value indicating when those styles are applied within the `duration/delay/easing`
+     * timings.
+     * `AnimationKeyframe` is mostly an internal class which is designed to be used alongside {\@link
+     * Renderer#animate-anchor `Renderer.animate`}.
+     *
+     * \@experimental Animation support is experimental
+     */
     var AnimationKeyframe = (function () {
         /**
          * @param {?} offset
@@ -11635,6 +11637,16 @@
      *
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * `AnimationStyles` consists of a collection of key/value maps containing CSS-based style data
+     * that can either be used as initial styling data or apart of a series of keyframes within an
+     * animation.
+     * This class is mostly internal, and it is designed to be used alongside
+     * {\@link AnimationKeyframe `AnimationKeyframe`} and {\@link Renderer#animate-anchor
+     * `Renderer.animate`}.
+     *
+     * \@experimental Animation support is experimental
      */
     var AnimationStyles = (function () {
         /**
@@ -13186,6 +13198,8 @@
     exports.ErrorHandler = ErrorHandler;
     exports.AnimationTransitionEvent = AnimationTransitionEvent;
     exports.AnimationPlayer = AnimationPlayer;
+    exports.AnimationStyles = AnimationStyles;
+    exports.AnimationKeyframe = AnimationKeyframe;
     exports.Sanitizer = Sanitizer;
     exports.SecurityContext = SecurityContext;
     exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
