@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 export class RenderComponentType {
     /**
      * @param {?} id
@@ -43,29 +42,35 @@ function RenderComponentType_tsickle_Closure_declarations() {
  */
 export class RenderDebugInfo {
     /**
+     * @abstract
      * @return {?}
      */
-    get injector() { return unimplemented(); }
+    injector() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get component() { return unimplemented(); }
+    component() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get providerTokens() { return unimplemented(); }
+    providerTokens() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get references() { return unimplemented(); }
+    references() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get context() { return unimplemented(); }
+    context() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get source() { return unimplemented(); }
+    source() { }
 }
 /**
  * \@experimental

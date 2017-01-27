@@ -18,3 +18,11 @@ export declare const TRANSLATIONS: InjectionToken<string>;
  * @experimental i18n support is experimental.
  */
 export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
+/**
+ * @experimental i18n support is experimental.
+ */
+export declare enum MissingTranslationStrategy {
+    Error = 0,
+    Warning = 1,
+    Ignore = 2,
+}

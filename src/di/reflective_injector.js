@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { Injector, THROW_IF_NOT_FOUND } from './injector';
 import { Self, SkipSelf } from './metadata';
 import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_errors';
@@ -597,9 +596,10 @@ export class ReflectiveInjector {
      * var child = parent.resolveAndCreateChild([]);
      * expect(child.parent).toBe(parent);
      * ```
+     * @abstract
      * @return {?}
      */
-    get parent() { return unimplemented(); }
+    parent() { }
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -626,10 +626,11 @@ export class ReflectiveInjector {
      * This function is slower than the corresponding `createChildFromResolved`
      * because it needs to resolve the passed-in providers first.
      * See {\@link Injector#resolve} and {\@link Injector#createChildFromResolved}.
+     * @abstract
      * @param {?} providers
      * @return {?}
      */
-    resolveAndCreateChild(providers) { return unimplemented(); }
+    resolveAndCreateChild(providers) { }
     /**
      * Creates a child injector from previously resolved providers.
      *
@@ -654,12 +655,11 @@ export class ReflectiveInjector {
      * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
      * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
      * ```
+     * @abstract
      * @param {?} providers
      * @return {?}
      */
-    createChildFromResolved(providers) {
-        return unimplemented();
-    }
+    createChildFromResolved(providers) { }
     /**
      * Resolves a provider and instantiates an object in the context of the injector.
      *
@@ -683,10 +683,11 @@ export class ReflectiveInjector {
      * expect(car.engine).toBe(injector.get(Engine));
      * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
      * ```
+     * @abstract
      * @param {?} provider
      * @return {?}
      */
-    resolveAndInstantiate(provider) { return unimplemented(); }
+    resolveAndInstantiate(provider) { }
     /**
      * Instantiates an object using a resolved provider in the context of the injector.
      *
@@ -710,10 +711,11 @@ export class ReflectiveInjector {
      * expect(car.engine).toBe(injector.get(Engine));
      * expect(car).not.toBe(injector.instantiateResolved(carProvider));
      * ```
+     * @abstract
      * @param {?} provider
      * @return {?}
      */
-    instantiateResolved(provider) { return unimplemented(); }
+    instantiateResolved(provider) { }
     /**
      * @abstract
      * @param {?} token

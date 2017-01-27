@@ -24,7 +24,7 @@ export { DebugElement, DebugNode, asNativeElements, getDebugNode } from './debug
 export { Testability, TestabilityRegistry, setTestabilityGetter } from './testability/testability';
 export { ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue } from './change_detection';
 export { platformCore } from './platform_core_providers';
-export { TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID } from './i18n/tokens';
+export { TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy } from './i18n/tokens';
 export { ApplicationModule } from './application_module';
 export { wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange } from './profile/profile';
 export { Type } from './type';

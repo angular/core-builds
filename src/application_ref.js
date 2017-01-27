@@ -7,7 +7,6 @@
  */
 import { ErrorHandler } from '../src/error_handler';
 import { ListWrapper } from '../src/facade/collection';
-import { unimplemented } from '../src/facade/errors';
 import { stringify } from '../src/facade/lang';
 import { isPromise } from '../src/util/lang';
 import { ApplicationInitStatus } from './application_init';
@@ -187,12 +186,11 @@ export class PlatformRef {
      * ```
      *
      * \@experimental APIs related to application bootstrap are currently under review.
+     * @abstract
      * @param {?} moduleFactory
      * @return {?}
      */
-    bootstrapModuleFactory(moduleFactory) {
-        throw unimplemented();
-    }
+    bootstrapModuleFactory(moduleFactory) { }
     /**
      * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
      *
@@ -207,13 +205,12 @@ export class PlatformRef {
      * let moduleRef = platformBrowser().bootstrapModule(MyModule);
      * ```
      * \@stable
+     * @abstract
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @return {?}
      */
-    bootstrapModule(moduleType, compilerOptions = []) {
-        throw unimplemented();
-    }
+    bootstrapModule(moduleType, compilerOptions) { }
     /**
      * Register a listener to be called when the platform is disposed.
      * @abstract
@@ -224,10 +221,10 @@ export class PlatformRef {
     /**
      * Retrieve the platform {\@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
+     * @abstract
      * @return {?}
      */
-    get injector() { throw unimplemented(); }
-    ;
+    injector() { }
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      * @abstract
@@ -235,9 +232,10 @@ export class PlatformRef {
      */
     destroy() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get destroyed() { throw unimplemented(); }
+    destroyed() { }
 }
 /**
  * @param {?} errorHandler
@@ -450,35 +448,38 @@ export class ApplicationRef {
     /**
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
+     * @abstract
      * @return {?}
      */
-    get componentTypes() { return (unimplemented()); }
-    ;
+    componentTypes() { }
     /**
      * Get a list of components registered to this application.
+     * @abstract
      * @return {?}
      */
-    get components() { return (unimplemented()); }
-    ;
+    components() { }
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
+     * @abstract
      * @param {?} view
      * @return {?}
      */
-    attachView(view) { unimplemented(); }
+    attachView(view) { }
     /**
      * Detaches a view from dirty checking again.
+     * @abstract
      * @param {?} view
      * @return {?}
      */
-    detachView(view) { unimplemented(); }
+    detachView(view) { }
     /**
      * Returns the number of attached views.
+     * @abstract
      * @return {?}
      */
-    get viewCount() { return unimplemented(); }
+    viewCount() { }
 }
 export class ApplicationRef_ extends ApplicationRef {
     /**

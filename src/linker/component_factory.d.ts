@@ -23,27 +23,27 @@ export declare abstract class ComponentRef<C> {
     /**
      * Location of the Host Element of this Component Instance.
      */
-    readonly location: ElementRef;
+    readonly abstract location: ElementRef;
     /**
      * The injector on which the component instance exists.
      */
-    readonly injector: Injector;
+    readonly abstract injector: Injector;
     /**
      * The instance of the Component.
      */
-    readonly instance: C;
+    readonly abstract instance: C;
     /**
      * The {@link ViewRef} of the Host View of this Component instance.
      */
-    readonly hostView: ViewRef;
+    readonly abstract hostView: ViewRef;
     /**
      * The {@link ChangeDetectorRef} of the Component instance.
      */
-    readonly changeDetectorRef: ChangeDetectorRef;
+    readonly abstract changeDetectorRef: ChangeDetectorRef;
     /**
      * The component type.
      */
-    readonly componentType: Type<any>;
+    readonly abstract componentType: Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */

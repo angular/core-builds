@@ -7,7 +7,6 @@
  */
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ChangeDetectorStatus } from '../change_detection/constants';
-import { unimplemented } from '../facade/errors';
 /**
  * \@stable
  * @abstract
@@ -20,9 +19,10 @@ export class ViewRef extends ChangeDetectorRef {
      */
     destroy() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get destroyed() { return (unimplemented()); }
+    destroyed() { }
     /**
      * @abstract
      * @param {?} callback
@@ -87,14 +87,15 @@ export class ViewRef extends ChangeDetectorRef {
  */
 export class EmbeddedViewRef extends ViewRef {
     /**
+     * @abstract
      * @return {?}
      */
-    get context() { return unimplemented(); }
+    context() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get rootNodes() { return (unimplemented()); }
-    ;
+    rootNodes() { }
 }
 export class ViewRef_ {
     /**

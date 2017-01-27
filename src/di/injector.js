@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 const /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
 export const /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
@@ -45,11 +44,25 @@ class _NullInjector {
  */
 export class Injector {
     /**
+     * Retrieves an instance from the injector based on the provided token.
+     * If not found:
+     * - Throws {\@link NoProviderError} if no `notFoundValue` that is not equal to
+     * Injector.THROW_IF_NOT_FOUND is given
+     * - Returns the `notFoundValue` otherwise
+     * @abstract
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
      */
-    get(token, notFoundValue) { return unimplemented(); }
+    get(token, notFoundValue) { }
+    /**
+     * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
+     * @abstract
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    get(token, notFoundValue) { }
 }
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new _NullInjector();

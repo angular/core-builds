@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector, THROW_IF_NOT_FOUND } from '../di/injector';
-import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
 /**
@@ -21,20 +20,23 @@ import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './com
 export class NgModuleRef {
     /**
      * The injector that contains all of the providers of the NgModule.
+     * @abstract
      * @return {?}
      */
-    get injector() { return unimplemented(); }
+    injector() { }
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
      * declared in the `entryComponents` property of the module.
+     * @abstract
      * @return {?}
      */
-    get componentFactoryResolver() { return unimplemented(); }
+    componentFactoryResolver() { }
     /**
      * The NgModule instance.
+     * @abstract
      * @return {?}
      */
-    get instance() { return unimplemented(); }
+    instance() { }
     /**
      * Destroys the module instance and all of the data structures associated with it.
      * @abstract

@@ -21,16 +21,16 @@ export declare abstract class NgModuleRef<T> {
     /**
      * The injector that contains all of the providers of the NgModule.
      */
-    readonly injector: Injector;
+    readonly abstract injector: Injector;
     /**
      * The ComponentFactoryResolver to get hold of the ComponentFactories
      * declared in the `entryComponents` property of the module.
      */
-    readonly componentFactoryResolver: ComponentFactoryResolver;
+    readonly abstract componentFactoryResolver: ComponentFactoryResolver;
     /**
      * The NgModule instance.
      */
-    readonly instance: T;
+    readonly abstract instance: T;
     /**
      * Destroys the module instance and all of the data structures associated with it.
      */

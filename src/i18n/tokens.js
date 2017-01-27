@@ -18,4 +18,11 @@ export const /** @type {?} */ TRANSLATIONS = new InjectionToken('Translations');
  * @experimental i18n support is experimental.
  */
 export const /** @type {?} */ TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+export let MissingTranslationStrategy = {};
+MissingTranslationStrategy.Error = 0;
+MissingTranslationStrategy.Warning = 1;
+MissingTranslationStrategy.Ignore = 2;
+MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
+MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
+MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
 //# sourceMappingURL=tokens.js.map

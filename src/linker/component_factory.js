@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { ElementRef } from './element_ref';
 import { ViewUtils } from './view_utils';
 /**
@@ -20,36 +19,40 @@ import { ViewUtils } from './view_utils';
 export class ComponentRef {
     /**
      * Location of the Host Element of this Component Instance.
+     * @abstract
      * @return {?}
      */
-    get location() { return unimplemented(); }
+    location() { }
     /**
      * The injector on which the component instance exists.
+     * @abstract
      * @return {?}
      */
-    get injector() { return unimplemented(); }
+    injector() { }
     /**
      * The instance of the Component.
+     * @abstract
      * @return {?}
      */
-    get instance() { return unimplemented(); }
-    ;
+    instance() { }
     /**
      * The {\@link ViewRef} of the Host View of this Component instance.
+     * @abstract
      * @return {?}
      */
-    get hostView() { return unimplemented(); }
-    ;
+    hostView() { }
     /**
      * The {\@link ChangeDetectorRef} of the Component instance.
+     * @abstract
      * @return {?}
      */
-    get changeDetectorRef() { return unimplemented(); }
+    changeDetectorRef() { }
     /**
      * The component type.
+     * @abstract
      * @return {?}
      */
-    get componentType() { return unimplemented(); }
+    componentType() { }
     /**
      * Destroys the component instance and all of the data structures associated with it.
      * @abstract

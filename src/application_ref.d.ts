@@ -113,7 +113,7 @@ export declare abstract class PlatformRef {
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
+    abstract bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
@@ -129,7 +129,7 @@ export declare abstract class PlatformRef {
      * ```
      * @stable
      */
-    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    abstract bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     /**
      * Register a listener to be called when the platform is disposed.
      */
@@ -138,12 +138,12 @@ export declare abstract class PlatformRef {
      * Retrieve the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
-    readonly injector: Injector;
+    readonly abstract injector: Injector;
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      */
     abstract destroy(): void;
-    readonly destroyed: boolean;
+    readonly abstract destroyed: boolean;
 }
 export declare class PlatformRef_ extends PlatformRef {
     private _injector;
@@ -197,25 +197,25 @@ export declare abstract class ApplicationRef {
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
      */
-    readonly componentTypes: Type<any>[];
+    readonly abstract componentTypes: Type<any>[];
     /**
      * Get a list of components registered to this application.
      */
-    readonly components: ComponentRef<any>[];
+    readonly abstract components: ComponentRef<any>[];
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
      */
-    attachView(view: ViewRef): void;
+    abstract attachView(view: ViewRef): void;
     /**
      * Detaches a view from dirty checking again.
      */
-    detachView(view: ViewRef): void;
+    abstract detachView(view: ViewRef): void;
     /**
      * Returns the number of attached views.
      */
-    readonly viewCount: any;
+    readonly abstract viewCount: number;
 }
 export declare class ApplicationRef_ extends ApplicationRef {
     private _zone;

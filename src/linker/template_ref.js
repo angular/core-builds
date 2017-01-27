@@ -22,9 +22,10 @@ import { ElementRef } from './element_ref';
  */
 export class TemplateRef {
     /**
+     * @abstract
      * @return {?}
      */
-    get elementRef() { return null; }
+    elementRef() { }
     /**
      * @abstract
      * @param {?} context

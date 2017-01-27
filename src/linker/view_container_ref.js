@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 /**
@@ -31,17 +30,20 @@ export class ViewContainerRef {
     /**
      * Anchor element that specifies the location of this container in the containing View.
      * <!-- TODO: rename to anchorElement -->
+     * @abstract
      * @return {?}
      */
-    get element() { return (unimplemented()); }
+    element() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get injector() { return (unimplemented()); }
+    injector() { }
     /**
+     * @abstract
      * @return {?}
      */
-    get parentInjector() { return (unimplemented()); }
+    parentInjector() { }
     /**
      * Destroys all Views in this container.
      * @abstract
@@ -57,10 +59,10 @@ export class ViewContainerRef {
     get(index) { }
     /**
      * Returns the number of Views currently attached to this container.
+     * @abstract
      * @return {?}
      */
-    get length() { return (unimplemented()); }
-    ;
+    length() { }
     /**
      * Instantiates an Embedded View based on the {\@link TemplateRef `templateRef`} and inserts it
      * into this container at the specified `index`.

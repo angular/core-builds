@@ -34,9 +34,9 @@ export declare abstract class ViewContainerRef {
      * Anchor element that specifies the location of this container in the containing View.
      * <!-- TODO: rename to anchorElement -->
      */
-    readonly element: ElementRef;
-    readonly injector: Injector;
-    readonly parentInjector: Injector;
+    readonly abstract element: ElementRef;
+    readonly abstract injector: Injector;
+    readonly abstract parentInjector: Injector;
     /**
      * Destroys all Views in this container.
      */
@@ -48,7 +48,7 @@ export declare abstract class ViewContainerRef {
     /**
      * Returns the number of Views currently attached to this container.
      */
-    readonly length: number;
+    readonly abstract length: number;
     /**
      * Instantiates an Embedded View based on the {@link TemplateRef `templateRef`} and inserts it
      * into this container at the specified `index`.
