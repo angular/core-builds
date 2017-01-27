@@ -8,7 +8,7 @@
 import { reflector } from '../reflection/reflection';
 import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
-import { Host, Inject, Optional, Self, SkipSelf } from './metadata';
+import { Inject, Optional, Self, SkipSelf } from './metadata';
 import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 /**
@@ -19,23 +19,19 @@ export var ReflectiveDependency = (function () {
     /**
      * @param {?} key
      * @param {?} optional
-     * @param {?} lowerBoundVisibility
-     * @param {?} upperBoundVisibility
-     * @param {?} properties
+     * @param {?} visibility
      */
-    function ReflectiveDependency(key, optional, lowerBoundVisibility, upperBoundVisibility, properties) {
+    function ReflectiveDependency(key, optional, visibility) {
         this.key = key;
         this.optional = optional;
-        this.lowerBoundVisibility = lowerBoundVisibility;
-        this.upperBoundVisibility = upperBoundVisibility;
-        this.properties = properties;
+        this.visibility = visibility;
     }
     /**
      * @param {?} key
      * @return {?}
      */
     ReflectiveDependency.fromKey = function (key) {
-        return new ReflectiveDependency(key, false, null, null, []);
+        return new ReflectiveDependency(key, false, null);
     };
     return ReflectiveDependency;
 }());
@@ -45,11 +41,7 @@ function ReflectiveDependency_tsickle_Closure_declarations() {
     /** @type {?} */
     ReflectiveDependency.prototype.optional;
     /** @type {?} */
-    ReflectiveDependency.prototype.lowerBoundVisibility;
-    /** @type {?} */
-    ReflectiveDependency.prototype.upperBoundVisibility;
-    /** @type {?} */
-    ReflectiveDependency.prototype.properties;
+    ReflectiveDependency.prototype.visibility;
 }
 var /** @type {?} */ _EMPTY_LIST = [];
 export var ResolvedReflectiveProvider_ = (function () {
@@ -252,19 +244,17 @@ function _dependenciesFor(typeOrFunc) {
  * @return {?}
  */
 function _extractToken(typeOrFunc, metadata, params) {
-    var /** @type {?} */ depProps = [];
     var /** @type {?} */ token = null;
     var /** @type {?} */ optional = false;
     if (!Array.isArray(metadata)) {
         if (metadata instanceof Inject) {
-            return _createDependency(metadata.token, optional, null, null, depProps);
+            return _createDependency(metadata.token, optional, null);
         }
         else {
-            return _createDependency(metadata, optional, null, null, depProps);
+            return _createDependency(metadata, optional, null);
         }
     }
-    var /** @type {?} */ lowerBoundVisibility = null;
-    var /** @type {?} */ upperBoundVisibility = null;
+    var /** @type {?} */ visibility = null;
     for (var /** @type {?} */ i = 0; i < metadata.length; ++i) {
         var /** @type {?} */ paramMetadata = metadata[i];
         if (paramMetadata instanceof Type) {
@@ -276,19 +266,13 @@ function _extractToken(typeOrFunc, metadata, params) {
         else if (paramMetadata instanceof Optional) {
             optional = true;
         }
-        else if (paramMetadata instanceof Self) {
-            upperBoundVisibility = paramMetadata;
-        }
-        else if (paramMetadata instanceof Host) {
-            upperBoundVisibility = paramMetadata;
-        }
-        else if (paramMetadata instanceof SkipSelf) {
-            lowerBoundVisibility = paramMetadata;
+        else if (paramMetadata instanceof Self || paramMetadata instanceof SkipSelf) {
+            visibility = paramMetadata;
         }
     }
     token = resolveForwardRef(token);
     if (token != null) {
-        return _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps);
+        return _createDependency(token, optional, visibility);
     }
     else {
         throw new NoAnnotationError(typeOrFunc, params);
@@ -297,12 +281,10 @@ function _extractToken(typeOrFunc, metadata, params) {
 /**
  * @param {?} token
  * @param {?} optional
- * @param {?} lowerBoundVisibility
- * @param {?} upperBoundVisibility
- * @param {?} depProps
+ * @param {?} visibility
  * @return {?}
  */
-function _createDependency(token, optional, lowerBoundVisibility, upperBoundVisibility, depProps) {
-    return new ReflectiveDependency(ReflectiveKey.get(token), optional, lowerBoundVisibility, upperBoundVisibility, depProps);
+function _createDependency(token, optional, visibility) {
+    return new ReflectiveDependency(ReflectiveKey.get(token), optional, visibility);
 }
 //# sourceMappingURL=reflective_provider.js.map
