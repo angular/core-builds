@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { Injector, THROW_IF_NOT_FOUND } from './injector';
 import { Self, SkipSelf } from './metadata';
 import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_errors';
@@ -593,26 +592,23 @@ export var ReflectiveInjector = (function () {
         if (parent === void 0) { parent = null; }
         return new ReflectiveInjector_(ReflectiveProtoInjector.fromResolvedProviders(providers), parent);
     };
-    Object.defineProperty(ReflectiveInjector.prototype, "parent", {
-        /**
-         * Parent of this injector.
-         *
-         * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
-         * -->
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
-         *
-         * ```typescript
-         * var parent = ReflectiveInjector.resolveAndCreate([]);
-         * var child = parent.resolveAndCreateChild([]);
-         * expect(child.parent).toBe(parent);
-         * ```
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * Parent of this injector.
+     *
+     * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
+     * -->
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
+     *
+     * ```typescript
+     * var parent = ReflectiveInjector.resolveAndCreate([]);
+     * var child = parent.resolveAndCreateChild([]);
+     * expect(child.parent).toBe(parent);
+     * ```
+     * @abstract
+     * @return {?}
+     */
+    ReflectiveInjector.prototype.parent = function () { };
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -639,10 +635,11 @@ export var ReflectiveInjector = (function () {
      * This function is slower than the corresponding `createChildFromResolved`
      * because it needs to resolve the passed-in providers first.
      * See {\@link Injector#resolve} and {\@link Injector#createChildFromResolved}.
+     * @abstract
      * @param {?} providers
      * @return {?}
      */
-    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return unimplemented(); };
+    ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { };
     /**
      * Creates a child injector from previously resolved providers.
      *
@@ -667,12 +664,11 @@ export var ReflectiveInjector = (function () {
      * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
      * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
      * ```
+     * @abstract
      * @param {?} providers
      * @return {?}
      */
-    ReflectiveInjector.prototype.createChildFromResolved = function (providers) {
-        return unimplemented();
-    };
+    ReflectiveInjector.prototype.createChildFromResolved = function (providers) { };
     /**
      * Resolves a provider and instantiates an object in the context of the injector.
      *
@@ -696,10 +692,11 @@ export var ReflectiveInjector = (function () {
      * expect(car.engine).toBe(injector.get(Engine));
      * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
      * ```
+     * @abstract
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { return unimplemented(); };
+    ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { };
     /**
      * Instantiates an object using a resolved provider in the context of the injector.
      *
@@ -723,10 +720,11 @@ export var ReflectiveInjector = (function () {
      * expect(car.engine).toBe(injector.get(Engine));
      * expect(car).not.toBe(injector.instantiateResolved(carProvider));
      * ```
+     * @abstract
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector.prototype.instantiateResolved = function (provider) { return unimplemented(); };
+    ReflectiveInjector.prototype.instantiateResolved = function (provider) { };
     /**
      * @abstract
      * @param {?} token

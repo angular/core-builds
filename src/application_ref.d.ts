@@ -113,7 +113,7 @@ export declare abstract class PlatformRef {
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
+    abstract bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
@@ -129,7 +129,7 @@ export declare abstract class PlatformRef {
      * ```
      * @stable
      */
-    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
+    abstract bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     /**
      * Register a listener to be called when the platform is disposed.
      */
@@ -207,15 +207,15 @@ export declare abstract class ApplicationRef {
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
      */
-    attachView(view: ViewRef): void;
+    abstract attachView(view: ViewRef): void;
     /**
      * Detaches a view from dirty checking again.
      */
-    detachView(view: ViewRef): void;
+    abstract detachView(view: ViewRef): void;
     /**
      * Returns the number of attached views.
      */
-    viewCount: any;
+    viewCount: number;
 }
 export declare class ApplicationRef_ extends ApplicationRef {
     private _zone;

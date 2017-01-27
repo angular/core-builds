@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 import { stringify } from '../facade/lang';
 var /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
 export var /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
@@ -56,11 +55,12 @@ export var Injector = (function () {
      * - Throws {\@link NoProviderError} if no `notFoundValue` that is not equal to
      * Injector.THROW_IF_NOT_FOUND is given
      * - Returns the `notFoundValue` otherwise
+     * @abstract
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
      */
-    Injector.prototype.get = function (token, notFoundValue) { return unimplemented(); };
+    Injector.prototype.get = function (token, notFoundValue) { };
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new _NullInjector();
     return Injector;
