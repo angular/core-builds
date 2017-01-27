@@ -7,6 +7,7 @@
  */
 import { InjectionToken } from '../di';
 import { BaseError } from '../facade/errors';
+import { MissingTranslationStrategy } from '../i18n/tokens';
 import { ViewEncapsulation } from '../metadata';
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
@@ -85,6 +86,7 @@ export declare type CompilerOptions = {
     useJit?: boolean;
     defaultEncapsulation?: ViewEncapsulation;
     providers?: any[];
+    missingTranslation?: MissingTranslationStrategy;
 };
 /**
  * Token to provide CompilerOptions in the platform injector.
@@ -96,6 +98,7 @@ export declare const COMPILER_OPTIONS: InjectionToken<{
     useJit?: boolean;
     defaultEncapsulation?: ViewEncapsulation;
     providers?: any[];
+    missingTranslation?: MissingTranslationStrategy;
 }[]>;
 /**
  * A factory for creating a Compiler
