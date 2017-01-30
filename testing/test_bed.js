@@ -281,11 +281,11 @@ export var TestBed = (function () {
         var result = this._moduleRef.injector.get(token, UNDEFINED);
         return result === UNDEFINED ? this._compiler.injector.get(token, notFoundValue) : result;
     };
-    TestBed.prototype.execute = function (tokens, fn) {
+    TestBed.prototype.execute = function (tokens, fn, context) {
         var _this = this;
         this._initIfNeeded();
         var params = tokens.map(function (t) { return _this.get(t); });
-        return fn.apply(void 0, params);
+        return fn.apply(context, params);
     };
     TestBed.prototype.overrideModule = function (ngModule, override) {
         this._assertNotInstantiated('overrideModule', 'override module metadata');
@@ -360,19 +360,21 @@ export function getTestBed() {
 export function inject(tokens, fn) {
     var testBed = getTestBed();
     if (tokens.indexOf(AsyncTestCompleter) >= 0) {
+        // Not using an arrow function to preserve context passed from call site
         return function () {
+            var _this = this;
             // Return an async test method that returns a Promise if AsyncTestCompleter is one of
-            // the
-            // injected tokens.
+            // the injected tokens.
             return testBed.compileComponents().then(function () {
                 var completer = testBed.get(AsyncTestCompleter);
-                testBed.execute(tokens, fn);
+                testBed.execute(tokens, fn, _this);
                 return completer.promise;
             });
         };
     }
     else {
-        return function () { return testBed.execute(tokens, fn); };
+        // Not using an arrow function to preserve context passed from call site
+        return function () { return testBed.execute(tokens, fn, this); };
     }
 }
 /**
@@ -389,10 +391,11 @@ export var InjectSetupWrapper = (function () {
         }
     };
     InjectSetupWrapper.prototype.inject = function (tokens, fn) {
-        var _this = this;
+        var self = this;
+        // Not using an arrow function to preserve context passed from call site
         return function () {
-            _this._addModule();
-            return inject(tokens, fn)();
+            self._addModule();
+            return inject(tokens, fn).call(this);
         };
     };
     return InjectSetupWrapper;
@@ -400,12 +403,13 @@ export var InjectSetupWrapper = (function () {
 export function withModule(moduleDef, fn) {
     if (fn === void 0) { fn = null; }
     if (fn) {
+        // Not using an arrow function to preserve context passed from call site
         return function () {
             var testBed = getTestBed();
             if (moduleDef) {
                 testBed.configureTestingModule(moduleDef);
             }
-            return fn();
+            return fn.apply(this);
         };
     }
     return new InjectSetupWrapper(function () { return moduleDef; });

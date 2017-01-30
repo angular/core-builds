@@ -266,7 +266,8 @@ export var ViewContainerRef_ = (function () {
      * @return {?}
      */
     ViewContainerRef_.prototype.indexOf = function (viewRef) {
-        return this._element.nestedViews.indexOf(((viewRef)).internalView);
+        return this.length ? this._element.nestedViews.indexOf(((viewRef)).internalView) :
+            -1;
     };
     /**
      * @param {?=} index
