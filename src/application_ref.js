@@ -381,6 +381,7 @@ export class PlatformRef_ extends PlatformRef {
             throw new Error(`The module ${stringify(moduleRef.instance.constructor)} was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ` +
                 `Please define one of these.`);
         }
+        this._modules.push(moduleRef);
     }
 }
 PlatformRef_.decorators = [

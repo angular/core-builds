@@ -241,7 +241,8 @@ export class ViewContainerRef_ {
      * @return {?}
      */
     indexOf(viewRef) {
-        return this._element.nestedViews.indexOf(((viewRef)).internalView);
+        return this.length ? this._element.nestedViews.indexOf(((viewRef)).internalView) :
+            -1;
     }
     /**
      * @param {?=} index
