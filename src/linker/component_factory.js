@@ -75,6 +75,10 @@ export var ComponentRef = (function () {
     ComponentRef.prototype.onDestroy = function (callback) { };
     return ComponentRef;
 }());
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export var ComponentRef_ = (function (_super) {
     __extends(ComponentRef_, _super);
     /**

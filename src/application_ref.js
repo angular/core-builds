@@ -271,6 +271,10 @@ function _callAndReportToErrorHandler(errorHandler, callback) {
         throw e;
     }
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export var PlatformRef_ = (function (_super) {
     __extends(PlatformRef_, _super);
     /**
@@ -511,6 +515,10 @@ export var ApplicationRef = (function () {
     ApplicationRef.prototype.viewCount = function () { };
     return ApplicationRef;
 }());
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export var ApplicationRef_ = (function (_super) {
     __extends(ApplicationRef_, _super);
     /**

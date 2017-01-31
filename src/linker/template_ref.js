@@ -41,6 +41,10 @@ export var TemplateRef = (function () {
     TemplateRef.prototype.createEmbeddedView = function (context) { };
     return TemplateRef;
 }());
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export var TemplateRef_ = (function (_super) {
     __extends(TemplateRef_, _super);
     /**

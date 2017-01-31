@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.5-104c157
+ * @license Angular v4.0.0-beta.5-2205829
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.5-104c157');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.5-2205829');
 
     /**
      * Inject decorator and metadata.
@@ -1276,6 +1276,7 @@
         Injector.prototype.get = function (token, notFoundValue) { };
         /**
          * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
+         * @suppress {duplicate}
          * @abstract
          * @param {?} token
          * @param {?=} notFoundValue
@@ -7342,6 +7343,10 @@
         ComponentRef.prototype.onDestroy = function (callback) { };
         return ComponentRef;
     }());
+    /**
+     * workaround https://github.com/angular/tsickle/issues/350
+     * @suppress {checkTypes}
+     */
     var ComponentRef_ = (function (_super) {
         __extends$6(ComponentRef_, _super);
         /**
@@ -8135,6 +8140,10 @@
             throw e;
         }
     }
+    /**
+     * workaround https://github.com/angular/tsickle/issues/350
+     * @suppress {checkTypes}
+     */
     var PlatformRef_ = (function (_super) {
         __extends$4(PlatformRef_, _super);
         /**
@@ -8358,6 +8367,10 @@
         ApplicationRef.prototype.viewCount = function () { };
         return ApplicationRef;
     }());
+    /**
+     * workaround https://github.com/angular/tsickle/issues/350
+     * @suppress {checkTypes}
+     */
     var ApplicationRef_ = (function (_super) {
         __extends$4(ApplicationRef_, _super);
         /**
@@ -9045,6 +9058,10 @@
         TemplateRef.prototype.createEmbeddedView = function (context) { };
         return TemplateRef;
     }());
+    /**
+     * workaround https://github.com/angular/tsickle/issues/350
+     * @suppress {checkTypes}
+     */
     var TemplateRef_ = (function (_super) {
         __extends$11(TemplateRef_, _super);
         /**

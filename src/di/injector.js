@@ -63,6 +63,7 @@ export var Injector = (function () {
     Injector.prototype.get = function (token, notFoundValue) { };
     /**
      * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
+     * @suppress {duplicate}
      * @abstract
      * @param {?} token
      * @param {?=} notFoundValue
