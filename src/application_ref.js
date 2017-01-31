@@ -260,6 +260,10 @@ function _callAndReportToErrorHandler(errorHandler, callback) {
         throw e;
     }
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export class PlatformRef_ extends PlatformRef {
     /**
      * @param {?} _injector
@@ -482,6 +486,10 @@ export class ApplicationRef {
      */
     viewCount() { }
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export class ApplicationRef_ extends ApplicationRef {
     /**
      * @param {?} _zone

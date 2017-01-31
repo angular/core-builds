@@ -33,6 +33,10 @@ export class TemplateRef {
      */
     createEmbeddedView(context) { }
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export class TemplateRef_ extends TemplateRef {
     /**
      * @param {?} _parentView

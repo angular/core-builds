@@ -67,6 +67,10 @@ export class ComponentRef {
      */
     onDestroy(callback) { }
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export class ComponentRef_ extends ComponentRef {
     /**
      * @param {?} _index

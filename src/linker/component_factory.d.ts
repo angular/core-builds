@@ -53,6 +53,10 @@ export declare abstract class ComponentRef<C> {
      */
     abstract onDestroy(callback: Function): void;
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export declare class ComponentRef_<C> extends ComponentRef<C> {
     private _index;
     private _parentView;

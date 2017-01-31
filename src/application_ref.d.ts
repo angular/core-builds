@@ -145,6 +145,10 @@ export declare abstract class PlatformRef {
     abstract destroy(): void;
     readonly abstract destroyed: boolean;
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export declare class PlatformRef_ extends PlatformRef {
     private _injector;
     private _modules;
@@ -217,6 +221,10 @@ export declare abstract class ApplicationRef {
      */
     readonly abstract viewCount: number;
 }
+/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */
 export declare class ApplicationRef_ extends ApplicationRef {
     private _zone;
     private _console;
