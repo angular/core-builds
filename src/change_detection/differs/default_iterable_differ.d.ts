@@ -1,9 +1,9 @@
 import { ChangeDetectorRef } from '../change_detector_ref';
-import { IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, TrackByFn } from './iterable_differs';
+import { IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, NgIterable, TrackByFunction } from './iterable_differs';
 export declare class DefaultIterableDifferFactory implements IterableDifferFactory {
     constructor();
     supports(obj: Object): boolean;
-    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFn): DefaultIterableDiffer<V>;
+    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFunction<any>): DefaultIterableDiffer<V>;
 }
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
@@ -25,8 +25,8 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     private _removalsTail;
     private _identityChangesHead;
     private _identityChangesTail;
-    constructor(_trackByFn?: TrackByFn);
-    collection: any;
+    constructor(_trackByFn?: TrackByFunction<V>);
+    collection: NgIterable<V>;
     length: number;
     forEachItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachOperation(fn: (item: IterableChangeRecord_<V>, previousIndex: number, currentIndex: number) => void): void;
@@ -35,9 +35,9 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     forEachMovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachRemovedItem(fn: (record: IterableChangeRecord_<V>) => void): void;
     forEachIdentityChange(fn: (record: IterableChangeRecord_<V>) => void): void;
-    diff(collection: V[] | Set<V>[] | any): DefaultIterableDiffer<V>;
+    diff(collection: NgIterable<V>): DefaultIterableDiffer<V>;
     onDestroy(): void;
-    check(collection: V[] | Set<V>[] | any): boolean;
+    check(collection: NgIterable<V>): boolean;
     isDirty: boolean;
     private _addToRemovals(record);
     toString(): string;

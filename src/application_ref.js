@@ -371,26 +371,15 @@ export var PlatformRef_ = (function (_super) {
     /**
      * @param {?} moduleType
      * @param {?=} compilerOptions
-     * @param {?} ngZone
-     * @param {?=} componentFactoryCallback
+     * @param {?=} ngZone
      * @return {?}
      */
-    PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone, componentFactoryCallback) {
+    PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
         var _this = this;
         if (compilerOptions === void 0) { compilerOptions = []; }
+        if (ngZone === void 0) { ngZone = null; }
         var /** @type {?} */ compilerFactory = this.injector.get(CompilerFactory);
         var /** @type {?} */ compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
-        // ugly internal api hack: generate host component factories for all declared components and
-        // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
-        // factories.
-        if (componentFactoryCallback) {
-            return compiler.compileModuleAndAllComponentsAsync(moduleType)
-                .then(function (_a) {
-                var ngModuleFactory = _a.ngModuleFactory, componentFactories = _a.componentFactories;
-                componentFactoryCallback(componentFactories);
-                return _this._bootstrapModuleFactoryWithZone(ngModuleFactory, ngZone);
-            });
-        }
         return compiler.compileModuleAsync(moduleType)
             .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
     };
