@@ -4,10 +4,10 @@
  * License: MIT
  */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Subject'), require('rxjs/Observable')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Subject', 'rxjs/Observable'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx));
-}(this, function (exports,rxjs_Subject,rxjs_Observable) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/symbol/observable'), require('rxjs/Subject'), require('rxjs/Observable')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/symbol/observable', 'rxjs/Subject', 'rxjs/Observable'], factory) :
+    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.rxjs_symbol_observable,global.Rx,global.Rx));
+}(this, function (exports,rxjs_symbol_observable,rxjs_Subject,rxjs_Observable) { 'use strict';
 
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -3369,6 +3369,14 @@
         // allow any Promise/A+ compliant thenable.
         // It's up to the caller to ensure that obj.then conforms to the spec
         return !!obj && typeof obj.then === 'function';
+    }
+    /**
+     * Determine if the argument is an Observable
+     * @param {?} obj
+     * @return {?}
+     */
+    function isObservable(obj) {
+        return !!(obj && obj[rxjs_symbol_observable.$$observable]);
     }
 
     /**
@@ -12841,6 +12849,7 @@
         FILL_STYLE_FLAG: FILL_STYLE_FLAG,
         ComponentStillLoadingError: ComponentStillLoadingError,
         isPromise: isPromise,
+        isObservable: isObservable,
         AnimationTransition: AnimationTransition
     };
 
