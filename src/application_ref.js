@@ -349,23 +349,12 @@ export class PlatformRef_ extends PlatformRef {
     /**
      * @param {?} moduleType
      * @param {?=} compilerOptions
-     * @param {?} ngZone
-     * @param {?=} componentFactoryCallback
+     * @param {?=} ngZone
      * @return {?}
      */
-    _bootstrapModuleWithZone(moduleType, compilerOptions = [], ngZone, componentFactoryCallback) {
+    _bootstrapModuleWithZone(moduleType, compilerOptions = [], ngZone = null) {
         const /** @type {?} */ compilerFactory = this.injector.get(CompilerFactory);
         const /** @type {?} */ compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
-        // ugly internal api hack: generate host component factories for all declared components and
-        // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
-        // factories.
-        if (componentFactoryCallback) {
-            return compiler.compileModuleAndAllComponentsAsync(moduleType)
-                .then(({ ngModuleFactory, componentFactories }) => {
-                componentFactoryCallback(componentFactories);
-                return this._bootstrapModuleFactoryWithZone(ngModuleFactory, ngZone);
-            });
-        }
         return compiler.compileModuleAsync(moduleType)
             .then((moduleFactory) => this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone));
     }

@@ -176,7 +176,7 @@ export class DefaultIterableDiffer {
      * @param {?} collection
      * @return {?}
      */
-    diff(collection /* |Iterable<V> */) {
+    diff(collection) {
         if (isBlank(collection))
             collection = [];
         if (!isListLikeIterable(collection)) {
@@ -197,7 +197,7 @@ export class DefaultIterableDiffer {
      * @param {?} collection
      * @return {?}
      */
-    check(collection /* |Iterable<V> */) {
+    check(collection) {
         this._reset();
         let /** @type {?} */ record = this._itHead;
         let /** @type {?} */ mayBeDirty = false;
@@ -205,10 +205,9 @@ export class DefaultIterableDiffer {
         let /** @type {?} */ item;
         let /** @type {?} */ itemTrackBy;
         if (Array.isArray(collection)) {
-            const /** @type {?} */ list = (collection);
-            this._length = list.length;
+            this._length = collection.length;
             for (let /** @type {?} */ index = 0; index < this._length; index++) {
-                item = list[index];
+                item = collection[index];
                 itemTrackBy = this._trackByFn(index, item);
                 if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                     record = this._mismatch(record, item, itemTrackBy, index);

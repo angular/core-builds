@@ -4342,7 +4342,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.diff = function (collection /* |Iterable<V> */) {
+        DefaultIterableDiffer.prototype.diff = function (collection) {
             if (isBlank(collection))
                 collection = [];
             if (!isListLikeIterable(collection)) {
@@ -4363,7 +4363,7 @@
          * @param {?} collection
          * @return {?}
          */
-        DefaultIterableDiffer.prototype.check = function (collection /* |Iterable<V> */) {
+        DefaultIterableDiffer.prototype.check = function (collection) {
             var _this = this;
             this._reset();
             var /** @type {?} */ record = this._itHead;
@@ -4372,10 +4372,9 @@
             var /** @type {?} */ item;
             var /** @type {?} */ itemTrackBy;
             if (Array.isArray(collection)) {
-                var /** @type {?} */ list = (collection);
-                this._length = list.length;
+                this._length = collection.length;
                 for (var /** @type {?} */ index_1 = 0; index_1 < this._length; index_1++) {
-                    item = list[index_1];
+                    item = collection[index_1];
                     itemTrackBy = this._trackByFn(index_1, item);
                     if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
                         record = this._mismatch(record, item, itemTrackBy, index_1);
@@ -8248,26 +8247,15 @@
         /**
          * @param {?} moduleType
          * @param {?=} compilerOptions
-         * @param {?} ngZone
-         * @param {?=} componentFactoryCallback
+         * @param {?=} ngZone
          * @return {?}
          */
-        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone, componentFactoryCallback) {
+        PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
             var _this = this;
             if (compilerOptions === void 0) { compilerOptions = []; }
+            if (ngZone === void 0) { ngZone = null; }
             var /** @type {?} */ compilerFactory = this.injector.get(CompilerFactory);
             var /** @type {?} */ compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
-            // ugly internal api hack: generate host component factories for all declared components and
-            // pass the factories into the callback - this is used by UpdateAdapter to get hold of all
-            // factories.
-            if (componentFactoryCallback) {
-                return compiler.compileModuleAndAllComponentsAsync(moduleType)
-                    .then(function (_a) {
-                    var ngModuleFactory = _a.ngModuleFactory, componentFactories = _a.componentFactories;
-                    componentFactoryCallback(componentFactories);
-                    return _this._bootstrapModuleFactoryWithZone(ngModuleFactory, ngZone);
-                });
-            }
             return compiler.compileModuleAsync(moduleType)
                 .then(function (moduleFactory) { return _this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone); });
         };

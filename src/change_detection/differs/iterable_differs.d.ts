@@ -8,6 +8,12 @@
 import { Provider } from '../../di';
 import { ChangeDetectorRef } from '../change_detector_ref';
 /**
+ * A type describing supported interable types.
+ *
+ * @stable
+ */
+export declare type NgIterable<T> = Array<T> | Iterable<T>;
+/**
  * A strategy for tracking changes over time to an iterable. Used by {@link NgFor} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
@@ -21,7 +27,7 @@ export interface IterableDiffer<V> {
      * @returns an object describing the difference. The return value is only valid until the next
      * `diff()` invocation.
      */
-    diff(object: V[] | Set<V> | any): IterableChanges<V>;
+    diff(object: NgIterable<V>): IterableChanges<V>;
 }
 /**
  * An object describing the changes in the `Iterable` collection since last time
@@ -87,13 +93,21 @@ export interface IterableChangeRecord<V> {
 export interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
 }
 /**
- * An optional function passed into {@link NgFor} that defines how to track
- * items in an iterable (e.g. by index or id)
+ * Nolonger used.
  *
- * @stable
+ * @deprecated v4.0.0 - Use TrackByFunction instead
  */
 export interface TrackByFn {
     (index: number, item: any): any;
+}
+/**
+ * An optional function passed into {@link NgForOf} that defines how to track
+ * items in an iterable (e.g. fby index or id)
+ *
+ * @stable
+ */
+export interface TrackByFunction<T> {
+    (index: number, item: T): any;
 }
 /**
  * Provides a factory for {@link IterableDiffer}.
@@ -102,7 +116,7 @@ export interface TrackByFn {
  */
 export interface IterableDifferFactory {
     supports(objects: any): boolean;
-    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFn): IterableDiffer<V>;
+    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
 }
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
