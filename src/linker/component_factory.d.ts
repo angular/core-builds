@@ -77,9 +77,8 @@ export declare class ComponentRef_<C> extends ComponentRef<C> {
  */
 export declare class ComponentFactory<C> {
     selector: string;
-    private _componentType;
-    constructor(selector: string, _viewClass: Type<AppView<any>>, _componentType: Type<any>);
-    readonly componentType: Type<any>;
+    componentType: Type<any>;
+    constructor(selector: string, _viewClass: Type<AppView<any>>, componentType: Type<any>);
     /**
      * Creates a new component.
      */
