@@ -12,7 +12,6 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 import { ErrorHandler } from '../src/error_handler';
 import { ListWrapper } from '../src/facade/collection';
-import { unimplemented } from '../src/facade/errors';
 import { stringify } from '../src/facade/lang';
 import { isPromise } from '../src/util/lang';
 import { ApplicationInitStatus } from './application_init';
@@ -197,12 +196,11 @@ export var PlatformRef = (function () {
      * ```
      *
      * \@experimental APIs related to application bootstrap are currently under review.
+     * @abstract
      * @param {?} moduleFactory
      * @return {?}
      */
-    PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
-        throw unimplemented();
-    };
+    PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) { };
     /**
      * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
      *
@@ -217,14 +215,12 @@ export var PlatformRef = (function () {
      * let moduleRef = platformBrowser().bootstrapModule(MyModule);
      * ```
      * \@stable
+     * @abstract
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @return {?}
      */
-    PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
-        if (compilerOptions === void 0) { compilerOptions = []; }
-        throw unimplemented();
-    };
+    PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) { };
     /**
      * Register a listener to be called when the platform is disposed.
      * @abstract
@@ -232,31 +228,24 @@ export var PlatformRef = (function () {
      * @return {?}
      */
     PlatformRef.prototype.onDestroy = function (callback) { };
-    Object.defineProperty(PlatformRef.prototype, "injector", {
-        /**
-         * Retrieve the platform {\@link Injector}, which is the parent injector for
-         * every Angular application on the page and provides singleton providers.
-         * @return {?}
-         */
-        get: function () { throw unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    ;
+    /**
+     * Retrieve the platform {\@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     * @abstract
+     * @return {?}
+     */
+    PlatformRef.prototype.injector = function () { };
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      * @abstract
      * @return {?}
      */
     PlatformRef.prototype.destroy = function () { };
-    Object.defineProperty(PlatformRef.prototype, "destroyed", {
-        /**
-         * @return {?}
-         */
-        get: function () { throw unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * @abstract
+     * @return {?}
+     */
+    PlatformRef.prototype.destroyed = function () { };
     return PlatformRef;
 }());
 /**
@@ -417,6 +406,7 @@ export var PlatformRef_ = (function (_super) {
             throw new Error(("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
                 "Please define one of these.");
         }
+        this._modules.push(moduleRef);
     };
     PlatformRef_.decorators = [
         { type: Injectable },
@@ -484,50 +474,41 @@ export var ApplicationRef = (function () {
      * @return {?}
      */
     ApplicationRef.prototype.tick = function () { };
-    Object.defineProperty(ApplicationRef.prototype, "componentTypes", {
-        /**
-         * Get a list of component types registered to this application.
-         * This list is populated even before the component is created.
-         * @return {?}
-         */
-        get: function () { return (unimplemented()); },
-        enumerable: true,
-        configurable: true
-    });
-    ;
-    Object.defineProperty(ApplicationRef.prototype, "components", {
-        /**
-         * Get a list of components registered to this application.
-         * @return {?}
-         */
-        get: function () { return (unimplemented()); },
-        enumerable: true,
-        configurable: true
-    });
-    ;
+    /**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     * @abstract
+     * @return {?}
+     */
+    ApplicationRef.prototype.componentTypes = function () { };
+    /**
+     * Get a list of components registered to this application.
+     * @abstract
+     * @return {?}
+     */
+    ApplicationRef.prototype.components = function () { };
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
+     * @abstract
      * @param {?} view
      * @return {?}
      */
-    ApplicationRef.prototype.attachView = function (view) { unimplemented(); };
+    ApplicationRef.prototype.attachView = function (view) { };
     /**
      * Detaches a view from dirty checking again.
+     * @abstract
      * @param {?} view
      * @return {?}
      */
-    ApplicationRef.prototype.detachView = function (view) { unimplemented(); };
-    Object.defineProperty(ApplicationRef.prototype, "viewCount", {
-        /**
-         * Returns the number of attached views.
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    ApplicationRef.prototype.detachView = function (view) { };
+    /**
+     * Returns the number of attached views.
+     * @abstract
+     * @return {?}
+     */
+    ApplicationRef.prototype.viewCount = function () { };
     return ApplicationRef;
 }());
 export var ApplicationRef_ = (function (_super) {

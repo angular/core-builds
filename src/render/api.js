@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { unimplemented } from '../facade/errors';
 export var RenderComponentType = (function () {
     /**
      * @param {?} id
@@ -45,54 +44,36 @@ function RenderComponentType_tsickle_Closure_declarations() {
 export var RenderDebugInfo = (function () {
     function RenderDebugInfo() {
     }
-    Object.defineProperty(RenderDebugInfo.prototype, "injector", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "component", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "providerTokens", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "references", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "context", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderDebugInfo.prototype, "source", {
-        /**
-         * @return {?}
-         */
-        get: function () { return unimplemented(); },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.injector = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.component = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.providerTokens = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.references = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.context = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugInfo.prototype.source = function () { };
     return RenderDebugInfo;
 }());
 /**

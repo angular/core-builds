@@ -28,14 +28,11 @@ import { ElementRef } from './element_ref';
 export var TemplateRef = (function () {
     function TemplateRef() {
     }
-    Object.defineProperty(TemplateRef.prototype, "elementRef", {
-        /**
-         * @return {?}
-         */
-        get: function () { return null; },
-        enumerable: true,
-        configurable: true
-    });
+    /**
+     * @abstract
+     * @return {?}
+     */
+    TemplateRef.prototype.elementRef = function () { };
     /**
      * @abstract
      * @param {?} context
