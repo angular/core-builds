@@ -173,21 +173,13 @@ export var ComponentFactory = (function () {
     /**
      * @param {?} selector
      * @param {?} _viewClass
-     * @param {?} _componentType
+     * @param {?} componentType
      */
-    function ComponentFactory(selector, _viewClass, _componentType) {
+    function ComponentFactory(selector, _viewClass, componentType) {
         this.selector = selector;
-        this._componentType = _componentType;
+        this.componentType = componentType;
         this._viewClass = _viewClass;
     }
-    Object.defineProperty(ComponentFactory.prototype, "componentType", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._componentType; },
-        enumerable: true,
-        configurable: true
-    });
     /**
      * Creates a new component.
      * @param {?} injector
@@ -216,6 +208,6 @@ function ComponentFactory_tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentFactory.prototype.selector;
     /** @type {?} */
-    ComponentFactory.prototype._componentType;
+    ComponentFactory.prototype.componentType;
 }
 //# sourceMappingURL=component_factory.js.map

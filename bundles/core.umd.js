@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.6-fb91b2f
+ * @license Angular v4.0.0-beta.6-41db177
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-fb91b2f');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-41db177');
 
     /**
      * Inject decorator and metadata.
@@ -7438,21 +7438,13 @@
         /**
          * @param {?} selector
          * @param {?} _viewClass
-         * @param {?} _componentType
+         * @param {?} componentType
          */
-        function ComponentFactory(selector, _viewClass, _componentType) {
+        function ComponentFactory(selector, _viewClass, componentType) {
             this.selector = selector;
-            this._componentType = _componentType;
+            this.componentType = componentType;
             this._viewClass = _viewClass;
         }
-        Object.defineProperty(ComponentFactory.prototype, "componentType", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this._componentType; },
-            enumerable: true,
-            configurable: true
-        });
         /**
          * Creates a new component.
          * @param {?} injector
