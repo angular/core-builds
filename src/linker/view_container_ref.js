@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { unimplemented } from '../facade/errors';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 /**
@@ -29,23 +30,32 @@ import { wtfCreateScope, wtfLeave } from '../profile/profile';
 export var ViewContainerRef = (function () {
     function ViewContainerRef() {
     }
-    /**
-     * Anchor element that specifies the location of this container in the containing View.
-     * <!-- TODO: rename to anchorElement -->
-     * @abstract
-     * @return {?}
-     */
-    ViewContainerRef.prototype.element = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    ViewContainerRef.prototype.injector = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    ViewContainerRef.prototype.parentInjector = function () { };
+    Object.defineProperty(ViewContainerRef.prototype, "element", {
+        /**
+         * Anchor element that specifies the location of this container in the containing View.
+         * <!-- TODO: rename to anchorElement -->
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef.prototype, "injector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Destroys all Views in this container.
      * @abstract
@@ -59,12 +69,16 @@ export var ViewContainerRef = (function () {
      * @return {?}
      */
     ViewContainerRef.prototype.get = function (index) { };
-    /**
-     * Returns the number of Views currently attached to this container.
-     * @abstract
-     * @return {?}
-     */
-    ViewContainerRef.prototype.length = function () { };
+    Object.defineProperty(ViewContainerRef.prototype, "length", {
+        /**
+         * Returns the number of Views currently attached to this container.
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
     /**
      * Instantiates an Embedded View based on the {\@link TemplateRef `templateRef`} and inserts it
      * into this container at the specified `index`.

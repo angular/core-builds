@@ -1,5 +1,5 @@
 /**
- * @license Angular v2.4.5-8d4aa82
+ * @license Angular v2.4.5-7ed39eb
  * (c) 2010-2016 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1117,7 +1117,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('2.4.5-8d4aa82');
+    var /** @type {?} */ VERSION = new Version('2.4.5-7ed39eb');
 
     /**
      * Allows to refer to references which are not yet defined.
@@ -1162,76 +1162,23 @@
         }
     }
 
-    var /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
-    var /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-    var _NullInjector = (function () {
-        function _NullInjector() {
-        }
-        /**
-         * @param {?} token
-         * @param {?=} notFoundValue
-         * @return {?}
-         */
-        _NullInjector.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
-            if (notFoundValue === _THROW_IF_NOT_FOUND) {
-                throw new Error("No provider for " + stringify(token) + "!");
-            }
-            return notFoundValue;
-        };
-        return _NullInjector;
-    }());
-    /**
-     * \@whatItDoes Injector interface
-     * \@howToUse
-     * ```
-     * const injector: Injector = ...;
-     * injector.get(...);
-     * ```
-     *
-     * \@description
-     * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
-     *
-     * ### Example
-     *
-     * {\@example core/di/ts/injector_spec.ts region='Injector'}
-     *
-     * `Injector` returns itself when given `Injector` as a token:
-     * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
-     *
-     * \@stable
-     * @abstract
-     */
-    var Injector = (function () {
-        function Injector() {
-        }
-        /**
-         * Retrieves an instance from the injector based on the provided token.
-         * If not found:
-         * - Throws {\@link NoProviderError} if no `notFoundValue` that is not equal to
-         * Injector.THROW_IF_NOT_FOUND is given
-         * - Returns the `notFoundValue` otherwise
-         * @abstract
-         * @param {?} token
-         * @param {?=} notFoundValue
-         * @return {?}
-         */
-        Injector.prototype.get = function (token, notFoundValue) { };
-        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-        Injector.NULL = new _NullInjector();
-        return Injector;
-    }());
-
-    var __extends$1 = (this && this.__extends) || function (d, b) {
+    var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     /**
+     * Convenience to throw an Error with 'unimplemented' as the message.
+     * @return {?}
+     */
+    function unimplemented() {
+        throw new Error('unimplemented');
+    }
+    /**
      * \@stable
      */
     var BaseError = (function (_super) {
-        __extends$1(BaseError, _super);
+        __extends(BaseError, _super);
         /**
          * @param {?} message
          */
@@ -1288,7 +1235,7 @@
      * \@stable
      */
     var WrappedError = (function (_super) {
-        __extends$1(WrappedError, _super);
+        __extends(WrappedError, _super);
         /**
          * @param {?} message
          * @param {?} error
@@ -1311,6 +1258,65 @@
         return WrappedError;
     }(BaseError));
 
+    var /** @type {?} */ _THROW_IF_NOT_FOUND = new Object();
+    var /** @type {?} */ THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    var _NullInjector = (function () {
+        function _NullInjector() {
+        }
+        /**
+         * @param {?} token
+         * @param {?=} notFoundValue
+         * @return {?}
+         */
+        _NullInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
+            if (notFoundValue === _THROW_IF_NOT_FOUND) {
+                throw new Error("No provider for " + stringify(token) + "!");
+            }
+            return notFoundValue;
+        };
+        return _NullInjector;
+    }());
+    /**
+     * \@whatItDoes Injector interface
+     * \@howToUse
+     * ```
+     * const injector: Injector = ...;
+     * injector.get(...);
+     * ```
+     *
+     * \@description
+     * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+     *
+     * ### Example
+     *
+     * {\@example core/di/ts/injector_spec.ts region='Injector'}
+     *
+     * `Injector` returns itself when given `Injector` as a token:
+     * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
+     *
+     * \@stable
+     * @abstract
+     */
+    var Injector = (function () {
+        function Injector() {
+        }
+        /**
+         * Retrieves an instance from the injector based on the provided token.
+         * If not found:
+         * - Throws {\@link NoProviderError} if no `notFoundValue` that is not equal to
+         * Injector.THROW_IF_NOT_FOUND is given
+         * - Returns the `notFoundValue` otherwise
+         * @param {?} token
+         * @param {?=} notFoundValue
+         * @return {?}
+         */
+        Injector.prototype.get = function (token, notFoundValue) { return unimplemented(); };
+        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+        Injector.NULL = new _NullInjector();
+        return Injector;
+    }());
+
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -1318,7 +1324,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends = (this && this.__extends) || function (d, b) {
+    var __extends$1 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -1355,7 +1361,7 @@
      * \@stable
      */
     var AbstractProviderError = (function (_super) {
-        __extends(AbstractProviderError, _super);
+        __extends$1(AbstractProviderError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1396,7 +1402,7 @@
      * \@stable
      */
     var NoProviderError = (function (_super) {
-        __extends(NoProviderError, _super);
+        __extends$1(NoProviderError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1427,7 +1433,7 @@
      * \@stable
      */
     var CyclicDependencyError = (function (_super) {
-        __extends(CyclicDependencyError, _super);
+        __extends$1(CyclicDependencyError, _super);
         /**
          * @param {?} injector
          * @param {?} key
@@ -1466,7 +1472,7 @@
      * \@stable
      */
     var InstantiationError = (function (_super) {
-        __extends(InstantiationError, _super);
+        __extends$1(InstantiationError, _super);
         /**
          * @param {?} injector
          * @param {?} originalException
@@ -1520,7 +1526,7 @@
      * \@stable
      */
     var InvalidProviderError = (function (_super) {
-        __extends(InvalidProviderError, _super);
+        __extends$1(InvalidProviderError, _super);
         /**
          * @param {?} provider
          */
@@ -1559,7 +1565,7 @@
      * \@stable
      */
     var NoAnnotationError = (function (_super) {
-        __extends(NoAnnotationError, _super);
+        __extends$1(NoAnnotationError, _super);
         /**
          * @param {?} typeOrFunc
          * @param {?} params
@@ -1605,7 +1611,7 @@
      * \@stable
      */
     var OutOfBoundsError = (function (_super) {
-        __extends(OutOfBoundsError, _super);
+        __extends$1(OutOfBoundsError, _super);
         /**
          * @param {?} index
          */
@@ -1627,7 +1633,7 @@
      * ```
      */
     var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
-        __extends(MixingMultiProvidersWithRegularProvidersError, _super);
+        __extends$1(MixingMultiProvidersWithRegularProvidersError, _super);
         /**
          * @param {?} provider1
          * @param {?} provider2
@@ -2967,23 +2973,26 @@
             if (parent === void 0) { parent = null; }
             return new ReflectiveInjector_(ReflectiveProtoInjector.fromResolvedProviders(providers), parent);
         };
-        /**
-         * Parent of this injector.
-         *
-         * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
-         * -->
-         *
-         * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
-         *
-         * ```typescript
-         * var parent = ReflectiveInjector.resolveAndCreate([]);
-         * var child = parent.resolveAndCreateChild([]);
-         * expect(child.parent).toBe(parent);
-         * ```
-         * @abstract
-         * @return {?}
-         */
-        ReflectiveInjector.prototype.parent = function () { };
+        Object.defineProperty(ReflectiveInjector.prototype, "parent", {
+            /**
+             * Parent of this injector.
+             *
+             * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
+             * -->
+             *
+             * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
+             *
+             * ```typescript
+             * var parent = ReflectiveInjector.resolveAndCreate([]);
+             * var child = parent.resolveAndCreateChild([]);
+             * expect(child.parent).toBe(parent);
+             * ```
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Resolves an array of providers and creates a child injector from those providers.
          *
@@ -3010,11 +3019,10 @@
          * This function is slower than the corresponding `createChildFromResolved`
          * because it needs to resolve the passed-in providers first.
          * See {\@link Injector#resolve} and {\@link Injector#createChildFromResolved}.
-         * @abstract
          * @param {?} providers
          * @return {?}
          */
-        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { };
+        ReflectiveInjector.prototype.resolveAndCreateChild = function (providers) { return unimplemented(); };
         /**
          * Creates a child injector from previously resolved providers.
          *
@@ -3039,11 +3047,12 @@
          * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
          * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
          * ```
-         * @abstract
          * @param {?} providers
          * @return {?}
          */
-        ReflectiveInjector.prototype.createChildFromResolved = function (providers) { };
+        ReflectiveInjector.prototype.createChildFromResolved = function (providers) {
+            return unimplemented();
+        };
         /**
          * Resolves a provider and instantiates an object in the context of the injector.
          *
@@ -3067,11 +3076,10 @@
          * expect(car.engine).toBe(injector.get(Engine));
          * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
          * ```
-         * @abstract
          * @param {?} provider
          * @return {?}
          */
-        ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { };
+        ReflectiveInjector.prototype.resolveAndInstantiate = function (provider) { return unimplemented(); };
         /**
          * Instantiates an object using a resolved provider in the context of the injector.
          *
@@ -3095,11 +3103,10 @@
          * expect(car.engine).toBe(injector.get(Engine));
          * expect(car).not.toBe(injector.instantiateResolved(carProvider));
          * ```
-         * @abstract
          * @param {?} provider
          * @return {?}
          */
-        ReflectiveInjector.prototype.instantiateResolved = function (provider) { };
+        ReflectiveInjector.prototype.instantiateResolved = function (provider) { return unimplemented(); };
         /**
          * @abstract
          * @param {?} token
@@ -6252,13 +6259,6 @@
     var /** @type {?} */ defaultIterableDiffers = new IterableDiffers(iterableDiff);
     var /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var RenderComponentType = (function () {
         /**
          * @param {?} id
@@ -6284,36 +6284,54 @@
     var RenderDebugInfo = (function () {
         function RenderDebugInfo() {
         }
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.injector = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.component = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.providerTokens = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.references = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.context = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugInfo.prototype.source = function () { };
+        Object.defineProperty(RenderDebugInfo.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RenderDebugInfo.prototype, "component", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RenderDebugInfo.prototype, "providerTokens", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RenderDebugInfo.prototype, "references", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RenderDebugInfo.prototype, "context", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RenderDebugInfo.prototype, "source", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         return RenderDebugInfo;
     }());
     /**
@@ -7560,42 +7578,62 @@
     var ComponentRef = (function () {
         function ComponentRef() {
         }
-        /**
-         * Location of the Host Element of this Component Instance.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.location = function () { };
-        /**
-         * The injector on which the component instance exists.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.injector = function () { };
-        /**
-         * The instance of the Component.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.instance = function () { };
-        /**
-         * The {\@link ViewRef} of the Host View of this Component instance.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.hostView = function () { };
-        /**
-         * The {\@link ChangeDetectorRef} of the Component instance.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.changeDetectorRef = function () { };
-        /**
-         * The component type.
-         * @abstract
-         * @return {?}
-         */
-        ComponentRef.prototype.componentType = function () { };
+        Object.defineProperty(ComponentRef.prototype, "location", {
+            /**
+             * Location of the Host Element of this Component Instance.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef.prototype, "injector", {
+            /**
+             * The injector on which the component instance exists.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef.prototype, "instance", {
+            /**
+             * The instance of the Component.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ComponentRef.prototype, "hostView", {
+            /**
+             * The {\@link ViewRef} of the Host View of this Component instance.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ComponentRef.prototype, "changeDetectorRef", {
+            /**
+             * The {\@link ChangeDetectorRef} of the Component instance.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef.prototype, "componentType", {
+            /**
+             * The component type.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Destroys the component instance and all of the data structures associated with it.
          * @abstract
@@ -8329,11 +8367,12 @@
          * ```
          *
          * \@experimental APIs related to application bootstrap are currently under review.
-         * @abstract
          * @param {?} moduleFactory
          * @return {?}
          */
-        PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) { };
+        PlatformRef.prototype.bootstrapModuleFactory = function (moduleFactory) {
+            throw unimplemented();
+        };
         /**
          * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
          *
@@ -8348,12 +8387,14 @@
          * let moduleRef = platformBrowser().bootstrapModule(MyModule);
          * ```
          * \@stable
-         * @abstract
          * @param {?} moduleType
          * @param {?=} compilerOptions
          * @return {?}
          */
-        PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) { };
+        PlatformRef.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+            if (compilerOptions === void 0) { compilerOptions = []; }
+            throw unimplemented();
+        };
         /**
          * Register a listener to be called when the platform is disposed.
          * @abstract
@@ -8361,24 +8402,31 @@
          * @return {?}
          */
         PlatformRef.prototype.onDestroy = function (callback) { };
-        /**
-         * Retrieve the platform {\@link Injector}, which is the parent injector for
-         * every Angular application on the page and provides singleton providers.
-         * @abstract
-         * @return {?}
-         */
-        PlatformRef.prototype.injector = function () { };
+        Object.defineProperty(PlatformRef.prototype, "injector", {
+            /**
+             * Retrieve the platform {\@link Injector}, which is the parent injector for
+             * every Angular application on the page and provides singleton providers.
+             * @return {?}
+             */
+            get: function () { throw unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
         /**
          * Destroy the Angular platform and all Angular applications on the page.
          * @abstract
          * @return {?}
          */
         PlatformRef.prototype.destroy = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        PlatformRef.prototype.destroyed = function () { };
+        Object.defineProperty(PlatformRef.prototype, "destroyed", {
+            /**
+             * @return {?}
+             */
+            get: function () { throw unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         return PlatformRef;
     }());
     /**
@@ -8589,41 +8637,50 @@
          * @return {?}
          */
         ApplicationRef.prototype.tick = function () { };
-        /**
-         * Get a list of component types registered to this application.
-         * This list is populated even before the component is created.
-         * @abstract
-         * @return {?}
-         */
-        ApplicationRef.prototype.componentTypes = function () { };
-        /**
-         * Get a list of components registered to this application.
-         * @abstract
-         * @return {?}
-         */
-        ApplicationRef.prototype.components = function () { };
+        Object.defineProperty(ApplicationRef.prototype, "componentTypes", {
+            /**
+             * Get a list of component types registered to this application.
+             * This list is populated even before the component is created.
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ApplicationRef.prototype, "components", {
+            /**
+             * Get a list of components registered to this application.
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
         /**
          * Attaches a view so that it will be dirty checked.
          * The view will be automatically detached when it is destroyed.
          * This will throw if the view is already attached to a ViewContainer.
-         * @abstract
          * @param {?} view
          * @return {?}
          */
-        ApplicationRef.prototype.attachView = function (view) { };
+        ApplicationRef.prototype.attachView = function (view) { unimplemented(); };
         /**
          * Detaches a view from dirty checking again.
-         * @abstract
          * @param {?} view
          * @return {?}
          */
-        ApplicationRef.prototype.detachView = function (view) { };
-        /**
-         * Returns the number of attached views.
-         * @abstract
-         * @return {?}
-         */
-        ApplicationRef.prototype.viewCount = function () { };
+        ApplicationRef.prototype.detachView = function (view) { unimplemented(); };
+        Object.defineProperty(ApplicationRef.prototype, "viewCount", {
+            /**
+             * Returns the number of attached views.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         return ApplicationRef;
     }());
     var ApplicationRef_ = (function (_super) {
@@ -8821,25 +8878,34 @@
     var NgModuleRef = (function () {
         function NgModuleRef() {
         }
-        /**
-         * The injector that contains all of the providers of the NgModule.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.injector = function () { };
-        /**
-         * The ComponentFactoryResolver to get hold of the ComponentFactories
-         * declared in the `entryComponents` property of the module.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.componentFactoryResolver = function () { };
-        /**
-         * The NgModule instance.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.instance = function () { };
+        Object.defineProperty(NgModuleRef.prototype, "injector", {
+            /**
+             * The injector that contains all of the providers of the NgModule.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleRef.prototype, "componentFactoryResolver", {
+            /**
+             * The ComponentFactoryResolver to get hold of the ComponentFactories
+             * declared in the `entryComponents` property of the module.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleRef.prototype, "instance", {
+            /**
+             * The NgModule instance.
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Destroys the module instance and all of the data structures associated with it.
          * @abstract
@@ -9301,11 +9367,14 @@
     var TemplateRef = (function () {
         function TemplateRef() {
         }
-        /**
-         * @abstract
-         * @return {?}
-         */
-        TemplateRef.prototype.elementRef = function () { };
+        Object.defineProperty(TemplateRef.prototype, "elementRef", {
+            /**
+             * @return {?}
+             */
+            get: function () { return null; },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * @abstract
          * @param {?} context
@@ -9369,23 +9438,32 @@
     var ViewContainerRef = (function () {
         function ViewContainerRef() {
         }
-        /**
-         * Anchor element that specifies the location of this container in the containing View.
-         * <!-- TODO: rename to anchorElement -->
-         * @abstract
-         * @return {?}
-         */
-        ViewContainerRef.prototype.element = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        ViewContainerRef.prototype.injector = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        ViewContainerRef.prototype.parentInjector = function () { };
+        Object.defineProperty(ViewContainerRef.prototype, "element", {
+            /**
+             * Anchor element that specifies the location of this container in the containing View.
+             * <!-- TODO: rename to anchorElement -->
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef.prototype, "parentInjector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * Destroys all Views in this container.
          * @abstract
@@ -9399,12 +9477,16 @@
          * @return {?}
          */
         ViewContainerRef.prototype.get = function (index) { };
-        /**
-         * Returns the number of Views currently attached to this container.
-         * @abstract
-         * @return {?}
-         */
-        ViewContainerRef.prototype.length = function () { };
+        Object.defineProperty(ViewContainerRef.prototype, "length", {
+            /**
+             * Returns the number of Views currently attached to this container.
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
         /**
          * Instantiates an Embedded View based on the {\@link TemplateRef `templateRef`} and inserts it
          * into this container at the specified `index`.
@@ -9672,11 +9754,14 @@
          * @return {?}
          */
         ViewRef.prototype.destroy = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        ViewRef.prototype.destroyed = function () { };
+        Object.defineProperty(ViewRef.prototype, "destroyed", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * @abstract
          * @param {?} callback
@@ -9745,16 +9830,23 @@
         function EmbeddedViewRef() {
             _super.apply(this, arguments);
         }
-        /**
-         * @abstract
-         * @return {?}
-         */
-        EmbeddedViewRef.prototype.context = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        EmbeddedViewRef.prototype.rootNodes = function () { };
+        Object.defineProperty(EmbeddedViewRef.prototype, "context", {
+            /**
+             * @return {?}
+             */
+            get: function () { return unimplemented(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(EmbeddedViewRef.prototype, "rootNodes", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (unimplemented()); },
+            enumerable: true,
+            configurable: true
+        });
+        ;
         return EmbeddedViewRef;
     }(ViewRef));
     var ViewRef_ = (function () {

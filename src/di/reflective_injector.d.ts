@@ -244,7 +244,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * because it needs to resolve the passed-in providers first.
      * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
      */
-    abstract resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
+    resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     /**
      * Creates a child injector from previously resolved providers.
      *
@@ -270,7 +270,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
      * ```
      */
-    abstract createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
+    createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
     /**
      * Resolves a provider and instantiates an object in the context of the injector.
      *
@@ -295,7 +295,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
      * ```
      */
-    abstract resolveAndInstantiate(provider: Provider): any;
+    resolveAndInstantiate(provider: Provider): any;
     /**
      * Instantiates an object using a resolved provider in the context of the injector.
      *
@@ -320,7 +320,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(car).not.toBe(injector.instantiateResolved(carProvider));
      * ```
      */
-    abstract instantiateResolved(provider: ResolvedReflectiveProvider): any;
+    instantiateResolved(provider: ResolvedReflectiveProvider): any;
     abstract get(token: any, notFoundValue?: any): any;
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {

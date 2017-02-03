@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ChangeDetectorStatus } from '../change_detection/constants';
+import { unimplemented } from '../facade/errors';
 /**
  * \@stable
  * @abstract
@@ -27,11 +28,14 @@ export var ViewRef = (function (_super) {
      * @return {?}
      */
     ViewRef.prototype.destroy = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    ViewRef.prototype.destroyed = function () { };
+    Object.defineProperty(ViewRef.prototype, "destroyed", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @abstract
      * @param {?} callback
@@ -100,16 +104,23 @@ export var EmbeddedViewRef = (function (_super) {
     function EmbeddedViewRef() {
         _super.apply(this, arguments);
     }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    EmbeddedViewRef.prototype.context = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    EmbeddedViewRef.prototype.rootNodes = function () { };
+    Object.defineProperty(EmbeddedViewRef.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () { return unimplemented(); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EmbeddedViewRef.prototype, "rootNodes", {
+        /**
+         * @return {?}
+         */
+        get: function () { return (unimplemented()); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
     return EmbeddedViewRef;
 }(ViewRef));
 export var ViewRef_ = (function () {
