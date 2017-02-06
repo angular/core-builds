@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.6-41db177
+ * @license Angular v4.0.0-beta.6-80b66ed
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-41db177');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-80b66ed');
 
     /**
      * Inject decorator and metadata.
@@ -3793,6 +3793,7 @@
      *   -->
      *
      * ### Example
+     *
      * ```
      * import {Component, NgZone} from '\@angular/core';
      * import {NgIf} from '\@angular/common';
@@ -3847,6 +3848,7 @@
      *   }
      * }
      * ```
+     *
      * \@experimental
      */
     var NgZone = (function () {
