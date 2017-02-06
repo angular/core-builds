@@ -3793,6 +3793,7 @@
      *   -->
      *
      * ### Example
+     *
      * ```
      * import {Component, NgZone} from '\@angular/core';
      * import {NgIf} from '\@angular/common';
@@ -3847,6 +3848,7 @@
      *   }
      * }
      * ```
+     *
      * \@experimental
      */
     var NgZone = (function () {
