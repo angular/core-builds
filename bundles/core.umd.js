@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.6-80b66ed
+ * @license Angular v4.0.0-beta.6-d4ffa47
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-80b66ed');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-d4ffa47');
 
     /**
      * Inject decorator and metadata.
