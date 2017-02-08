@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isDevMode } from '../application_ref';
-import { BindingType, NodeType, Refs, asElementData, asTextData } from './types';
+import { BindingType, NodeType, asElementData, asTextData } from './types';
 import { checkAndUpdateBinding, sliceErrorStack, unwrapValue } from './util';
 /**
  * @param {?} ngContentIndex
@@ -58,15 +58,10 @@ export function textDef(ngContentIndex, constants) {
 export function createText(view, renderHost, def) {
     var /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
     var /** @type {?} */ renderNode;
-    if (view.renderer) {
-        var /** @type {?} */ debugContext = isDevMode() ? Refs.createDebugContext(view, def.index) : undefined;
-        renderNode = view.renderer.createText(parentNode, def.text.prefix, debugContext);
-    }
-    else {
-        renderNode = document.createTextNode(def.text.prefix);
-        if (parentNode) {
-            parentNode.appendChild(renderNode);
-        }
+    var /** @type {?} */ renderer = view.root.renderer;
+    renderNode = renderer.createText(def.text.prefix);
+    if (parentNode) {
+        renderer.appendChild(parentNode, renderNode);
     }
     return { renderText: renderNode };
 }
@@ -148,12 +143,7 @@ export function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, 
         }
         value = def.text.prefix + value;
         var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-        if (view.renderer) {
-            view.renderer.setText(renderNode, value);
-        }
-        else {
-            renderNode.nodeValue = value;
-        }
+        view.root.renderer.setText(renderNode, value);
     }
 }
 /**
@@ -179,12 +169,7 @@ export function checkAndUpdateTextDynamic(view, def, values) {
         }
         value = def.text.prefix + value;
         var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-        if (view.renderer) {
-            view.renderer.setText(renderNode, value);
-        }
-        else {
-            renderNode.nodeValue = value;
-        }
+        view.root.renderer.setText(renderNode, value);
     }
 }
 /**

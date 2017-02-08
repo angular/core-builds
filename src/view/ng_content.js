@@ -54,13 +54,6 @@ export function appendNgContent(view, renderHost, def) {
         return;
     }
     var /** @type {?} */ ngContentIndex = def.ngContent.index;
-    if (view.renderer) {
-        var /** @type {?} */ projectedNodes = [];
-        visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.Collect, undefined, undefined, projectedNodes);
-        view.renderer.projectNodes(parentEl, projectedNodes);
-    }
-    else {
-        visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, undefined, undefined);
-    }
+    visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, undefined, undefined);
 }
 //# sourceMappingURL=ng_content.js.map

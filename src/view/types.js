@@ -5,6 +5,16 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+export var ArgumentType = {};
+ArgumentType.Inline = 0;
+ArgumentType.Dynamic = 1;
+ArgumentType[ArgumentType.Inline] = "Inline";
+ArgumentType[ArgumentType.Dynamic] = "Dynamic";
 export var ViewFlags = {};
 ViewFlags.None = 0;
 ViewFlags.DirectDom = 2;
@@ -183,120 +193,93 @@ export function asPureExpressionData(view, index) {
 export function asQueryList(view, index) {
     return (view.nodes[index]);
 }
-export var EntryAction = {};
-EntryAction.CheckAndUpdate = 0;
-EntryAction.CheckNoChanges = 1;
-EntryAction.Create = 2;
-EntryAction.Destroy = 3;
-EntryAction.HandleEvent = 4;
-EntryAction[EntryAction.CheckAndUpdate] = "CheckAndUpdate";
-EntryAction[EntryAction.CheckNoChanges] = "CheckNoChanges";
-EntryAction[EntryAction.Create] = "Create";
-EntryAction[EntryAction.Destroy] = "Destroy";
-EntryAction[EntryAction.HandleEvent] = "HandleEvent";
 /**
- * This class is used to prevent cycles in the source files.
  * @abstract
  */
-var Refs = (function () {
-    function Refs() {
+var RenderDebugContext = (function () {
+    function RenderDebugContext() {
     }
     /**
-     * @param {?} instance
+     * @abstract
      * @return {?}
      */
-    Refs.setInstance = function (instance) { Refs.instance = instance; };
-    /**
-     * @param {?} selector
-     * @param {?} viewDefFactory
-     * @return {?}
-     */
-    Refs.createComponentFactory = function (selector, viewDefFactory) {
-        return Refs.instance.createComponentFactory(selector, viewDefFactory);
-    };
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    Refs.createViewRef = function (data) { return Refs.instance.createViewRef(data); };
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    Refs.createViewContainerRef = function (view, elIndex) {
-        return Refs.instance.createViewContainerRef(view, elIndex);
-    };
-    /**
-     * @param {?} parentView
-     * @param {?} def
-     * @return {?}
-     */
-    Refs.createTemplateRef = function (parentView, def) {
-        return Refs.instance.createTemplateRef(parentView, def);
-    };
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    Refs.createInjector = function (view, elIndex) {
-        return Refs.instance.createInjector(view, elIndex);
-    };
-    /**
-     * @param {?} view
-     * @param {?} nodeIndex
-     * @return {?}
-     */
-    Refs.createDebugContext = function (view, nodeIndex) {
-        return Refs.instance.createDebugContext(view, nodeIndex);
-    };
+    RenderDebugContext.prototype.injector = function () { };
     /**
      * @abstract
-     * @param {?} selector
-     * @param {?} viewDefFactory
      * @return {?}
      */
-    Refs.prototype.createComponentFactory = function (selector, viewDefFactory) { };
+    RenderDebugContext.prototype.component = function () { };
     /**
      * @abstract
-     * @param {?} data
      * @return {?}
      */
-    Refs.prototype.createViewRef = function (data) { };
+    RenderDebugContext.prototype.providerTokens = function () { };
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} elIndex
      * @return {?}
      */
-    Refs.prototype.createViewContainerRef = function (view, elIndex) { };
+    RenderDebugContext.prototype.references = function () { };
     /**
      * @abstract
-     * @param {?} parentView
-     * @param {?} def
      * @return {?}
      */
-    Refs.prototype.createTemplateRef = function (parentView, def) { };
+    RenderDebugContext.prototype.context = function () { };
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} elIndex
      * @return {?}
      */
-    Refs.prototype.createInjector = function (view, elIndex) { };
+    RenderDebugContext.prototype.source = function () { };
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} nodeIndex
      * @return {?}
      */
-    Refs.prototype.createDebugContext = function (view, nodeIndex) { };
-    return Refs;
+    RenderDebugContext.prototype.componentRenderElement = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.renderNode = function () { };
+    return RenderDebugContext;
 }());
-export { Refs };
-function Refs_tsickle_Closure_declarations() {
-    /** @type {?} */
-    Refs.instance;
-}
+export { RenderDebugContext };
+/**
+ * @abstract
+ */
+var DebugContext = (function (_super) {
+    __extends(DebugContext, _super);
+    function DebugContext() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.view = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.nodeIndex = function () { };
+    return DebugContext;
+}(RenderDebugContext));
+export { DebugContext };
+/**
+ * This object is used to prevent cycles in the source files and to have a place where
+ * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+ */
+export var /** @type {?} */ Services = {
+    setCurrentNode: undefined,
+    createRootView: undefined,
+    createEmbeddedView: undefined,
+    checkAndUpdateView: undefined,
+    checkNoChangesView: undefined,
+    destroyView: undefined,
+    attachEmbeddedView: undefined,
+    detachEmbeddedView: undefined,
+    moveEmbeddedView: undefined,
+    resolveDep: undefined,
+    createDebugContext: undefined,
+    handleEvent: undefined,
+    updateView: undefined,
+};
 //# sourceMappingURL=types.js.map

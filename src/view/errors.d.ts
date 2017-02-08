@@ -1,6 +1,6 @@
-import { DebugContext, EntryAction } from './types';
+import { DebugContext } from './types';
 export declare function expressionChangedAfterItHasBeenCheckedError(context: DebugContext, oldValue: any, currValue: any, isFirstCheck: boolean): Error;
 export declare function viewWrappedDebugError(originalError: any, context: DebugContext): Error;
 export declare function viewDebugError(msg: string, context: DebugContext): Error;
 export declare function isViewDebugError(err: Error): boolean;
-export declare function viewDestroyedError(action: EntryAction): Error;
+export declare function viewDestroyedError(action: string): Error;

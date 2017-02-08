@@ -10,7 +10,6 @@ export declare function _providerDef(flags: NodeFlags, matchedQueries: [string, 
 }, outputs?: {
     [name: string]: string;
 }, component?: () => ViewDefinition): NodeDef;
-export declare function tokenKey(token: any): string;
 export declare function createProviderInstance(view: ViewData, def: NodeDef): any;
 export declare function checkAndUpdateProviderInline(view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any): void;
 export declare function checkAndUpdateProviderDynamic(view: ViewData, def: NodeDef, values: any[]): void;

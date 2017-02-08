@@ -5,39 +5,33 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { isDevMode } from '../application_ref';
 import { WrappedValue, devModeEqual } from '../change_detection/change_detection';
-import { looseIdentical } from '../facade/lang';
-import { expressionChangedAfterItHasBeenCheckedError, isViewDebugError, viewDestroyedError, viewWrappedDebugError } from './errors';
-import { NodeFlags, NodeType, Refs, ViewFlags, ViewState, asElementData, asProviderData, asTextData } from './types';
+import { looseIdentical, stringify } from '../facade/lang';
+import { expressionChangedAfterItHasBeenCheckedError } from './errors';
+import { NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asTextData } from './types';
+var /** @type {?} */ _tokenKeyCache = new Map();
 /**
- * @param {?} renderer
- * @param {?} renderNode
- * @param {?} propName
+ * @param {?} token
+ * @return {?}
+ */
+export function tokenKey(token) {
+    var /** @type {?} */ key = _tokenKeyCache.get(token);
+    if (!key) {
+        key = stringify(token) + '_' + _tokenKeyCache.size;
+        _tokenKeyCache.set(token, key);
+    }
+    return key;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
  * @param {?} value
  * @return {?}
  */
-export function setBindingDebugInfo(renderer, renderNode, propName, value) {
-    try {
-        renderer.setBindingDebugInfo(renderNode, "ng-reflect-" + camelCaseToDashCase(propName), value ? value.toString() : null);
-    }
-    catch (e) {
-        renderer.setBindingDebugInfo(renderNode, "ng-reflect-" + camelCaseToDashCase(propName), '[ERROR] Exception while trying to serialize the value');
-    }
-}
-var /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
-/**
- * @param {?} input
- * @return {?}
- */
-function camelCaseToDashCase(input) {
-    return input.replace(CAMEL_CASE_REGEXP, function () {
-        var m = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            m[_i] = arguments[_i];
-        }
-        return '-' + m[1].toLowerCase();
-    });
+export function checkBinding(view, def, bindingIdx, value) {
+    var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+    return !!(view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value);
 }
 /**
  * @param {?} view
@@ -49,7 +43,7 @@ function camelCaseToDashCase(input) {
 export function checkBindingNoChanges(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
     if ((view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value)) {
-        throw expressionChangedAfterItHasBeenCheckedError(Refs.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
     }
 }
 /**
@@ -82,7 +76,6 @@ export function checkAndUpdateBinding(view, def, bindingIdx, value) {
  * @return {?}
  */
 export function dispatchEvent(view, nodeIndex, eventName, event) {
-    setCurrentNode(view, nodeIndex);
     var /** @type {?} */ currView = view;
     while (currView) {
         if (currView.def.flags & ViewFlags.OnPush) {
@@ -90,7 +83,7 @@ export function dispatchEvent(view, nodeIndex, eventName, event) {
         }
         currView = currView.parent;
     }
-    return view.def.handleEvent(view, nodeIndex, eventName, event);
+    return Services.handleEvent(view, nodeIndex, eventName, event);
 }
 /**
  * @param {?} value
@@ -199,82 +192,6 @@ export function sliceErrorStack(start, end) {
     }
     return lines.slice(start, end).join('\n');
 }
-var /** @type {?} */ _currentAction;
-var /** @type {?} */ _currentView;
-var /** @type {?} */ _currentNodeIndex;
-/**
- * @return {?}
- */
-export function currentView() {
-    return _currentView;
-}
-/**
- * @return {?}
- */
-export function currentNodeIndex() {
-    return _currentNodeIndex;
-}
-/**
- * @return {?}
- */
-export function currentAction() {
-    return _currentAction;
-}
-/**
- * Set the node that is currently worked on.
- * It needs to be called whenever we call user code,
- * or code of the framework that might throw as a valid use case.
- * @param {?} view
- * @param {?} nodeIndex
- * @return {?}
- */
-export function setCurrentNode(view, nodeIndex) {
-    if (view.state & ViewState.Destroyed) {
-        throw viewDestroyedError(_currentAction);
-    }
-    _currentView = view;
-    _currentNodeIndex = nodeIndex;
-}
-/**
- * Adds a try/catch handler around the given function to wrap all
- * errors that occur into new errors that contain the current debug info
- * set via setCurrentNode.
- * @param {?} action
- * @param {?} fn
- * @return {?}
- */
-export function entryAction(action, fn) {
-    return (function (arg) {
-        var /** @type {?} */ oldAction = _currentAction;
-        var /** @type {?} */ oldView = _currentView;
-        var /** @type {?} */ oldNodeIndex = _currentNodeIndex;
-        _currentAction = action;
-        // Note: We can't call `isDevMode()` outside of this closure as
-        // it might not have been initialized.
-        var /** @type {?} */ result = isDevMode() ? callWithTryCatch(fn, arg) : fn(arg);
-        _currentAction = oldAction;
-        _currentView = oldView;
-        _currentNodeIndex = oldNodeIndex;
-        return result;
-    });
-}
-/**
- * @param {?} fn
- * @param {?} arg
- * @return {?}
- */
-function callWithTryCatch(fn, arg) {
-    try {
-        return fn(arg);
-    }
-    catch (e) {
-        if (isViewDebugError(e) || !_currentView) {
-            throw e;
-        }
-        var /** @type {?} */ debugContext = Refs.createDebugContext(_currentView, _currentNodeIndex);
-        throw viewWrappedDebugError(e, debugContext);
-    }
-}
 /**
  * @param {?} view
  * @return {?}
@@ -341,7 +258,7 @@ export function visitProjectedRenderNodes(view, ngContentIndex, action, parentNo
         var /** @type {?} */ projectedNodes = view.root.projectableNodes[ngContentIndex];
         if (projectedNodes) {
             for (var /** @type {?} */ i = 0; i < projectedNodes.length; i++) {
-                execRenderNodeAction(projectedNodes[i], action, parentNode, nextSibling, target);
+                execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
             }
         }
     }
@@ -361,7 +278,7 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
     }
     else {
         var /** @type {?} */ rn = renderNode(view, nodeDef);
-        execRenderNodeAction(rn, action, parentNode, nextSibling, target);
+        execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
         if (nodeDef.flags & NodeFlags.HasEmbeddedViews) {
             var /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).embeddedViews;
             if (embeddedViews) {
@@ -373,6 +290,7 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
     }
 }
 /**
+ * @param {?} view
  * @param {?} renderNode
  * @param {?} action
  * @param {?} parentNode
@@ -380,16 +298,17 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
  * @param {?} target
  * @return {?}
  */
-function execRenderNodeAction(renderNode, action, parentNode, nextSibling, target) {
+function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
+    var /** @type {?} */ renderer = view.root.renderer;
     switch (action) {
         case RenderNodeAction.AppendChild:
-            parentNode.appendChild(renderNode);
+            renderer.appendChild(parentNode, renderNode);
             break;
         case RenderNodeAction.InsertBefore:
-            parentNode.insertBefore(renderNode, nextSibling);
+            renderer.insertBefore(parentNode, renderNode, nextSibling);
             break;
         case RenderNodeAction.RemoveChild:
-            parentNode.removeChild(renderNode);
+            renderer.removeChild(parentNode, renderNode);
             break;
         case RenderNodeAction.Collect:
             target.push(renderNode);
