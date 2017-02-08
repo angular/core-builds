@@ -1,11 +1,4 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { BaseError, WrappedError } from '../facade/errors';
+/// <reference types="node" />
 import { DebugContext } from './debug_context';
 /**
  * An error thrown if application changes model breaking the top-down data flow.
@@ -36,33 +29,20 @@ import { DebugContext } from './debug_context';
  *   }
  * }
  * ```
- * @stable
  */
-export declare class ExpressionChangedAfterItHasBeenCheckedError extends BaseError {
-    constructor(oldValue: any, currValue: any, isFirstCheck: boolean);
-}
+export declare function expressionChangedAfterItHasBeenCheckedError(oldValue: any, currValue: any, isFirstCheck: boolean): Error;
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
  *
  * This error wraps the original exception to attach additional contextual information that can
  * be useful for debugging.
- * @stable
  */
-export declare class ViewWrappedError extends WrappedError {
-    /**
-     * DebugContext
-     */
-    context: DebugContext;
-    constructor(originalError: any, context: DebugContext);
-}
+export declare function viewWrappedError(originalError: any, context: DebugContext): Error;
 /**
- * Thrown when a destroyed view is used.
- *
- * This error indicates a bug in the framework.
- *
- * This is an internal Angular error.
- * @stable
- */
-export declare class ViewDestroyedError extends BaseError {
-    constructor(details: string);
-}
+* Thrown when a destroyed view is used.
+*
+* This error indicates a bug in the framework.
+*
+* This is an internal Angular error.
+*/
+export declare function viewDestroyedError(details: string): Error;

@@ -5,23 +5,23 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
- * \@stable
+ * @param {?} component
+ * @return {?}
  */
-export class NoComponentFactoryError extends BaseError {
-    /**
-     * @param {?} component
-     */
-    constructor(component) {
-        super(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
-        this.component = component;
-    }
+export function noComponentFactoryError(component) {
+    const /** @type {?} */ error = Error(`No component factory found for ${stringify(component)}. Did you add it to @NgModule.entryComponents?`);
+    ((error))[ERROR_COMPONENT] = component;
+    return error;
 }
-function NoComponentFactoryError_tsickle_Closure_declarations() {
-    /** @type {?} */
-    NoComponentFactoryError.prototype.component;
+const /** @type {?} */ ERROR_COMPONENT = 'ngComponent';
+/**
+ * @param {?} error
+ * @return {?}
+ */
+export function getComponent(error) {
+    return ((error))[ERROR_COMPONENT];
 }
 class _NullComponentFactoryResolver {
     /**
@@ -29,7 +29,7 @@ class _NullComponentFactoryResolver {
      * @return {?}
      */
     resolveComponentFactory(component) {
-        throw new NoComponentFactoryError(component);
+        throw noComponentFactoryError(component);
     }
 }
 /**

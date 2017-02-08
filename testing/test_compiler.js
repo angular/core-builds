@@ -6,7 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Compiler } from '@angular/core';
-import { unimplemented } from './facade/errors';
+function unimplemented() {
+    throw Error('unimplemented');
+}
 /**
  * Special interface to the compiler only used by testing
  *

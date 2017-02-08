@@ -9,7 +9,7 @@ import { reflector } from '../reflection/reflection';
 import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
 import { Inject, Optional, Self, SkipSelf } from './metadata';
-import { InvalidProviderError, MixingMultiProvidersWithRegularProvidersError, NoAnnotationError } from './reflective_errors';
+import { invalidProviderError, mixingMultiProvidersWithRegularProvidersError, noAnnotationError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -157,7 +157,7 @@ export function mergeResolvedReflectiveProviders(providers, normalizedProvidersM
         const /** @type {?} */ existing = normalizedProvidersMap.get(provider.key.id);
         if (existing) {
             if (provider.multiProvider !== existing.multiProvider) {
-                throw new MixingMultiProvidersWithRegularProvidersError(existing, provider);
+                throw mixingMultiProvidersWithRegularProvidersError(existing, provider);
             }
             if (provider.multiProvider) {
                 for (let /** @type {?} */ j = 0; j < provider.resolvedFactories.length; j++) {
@@ -198,7 +198,7 @@ function _normalizeProviders(providers, res) {
             _normalizeProviders(b, res);
         }
         else {
-            throw new InvalidProviderError(b);
+            throw invalidProviderError(b);
         }
     });
     return res;
@@ -226,7 +226,7 @@ function _dependenciesFor(typeOrFunc) {
     if (!params)
         return [];
     if (params.some(p => p == null)) {
-        throw new NoAnnotationError(typeOrFunc, params);
+        throw noAnnotationError(typeOrFunc, params);
     }
     return params.map(p => _extractToken(typeOrFunc, p, params));
 }
@@ -268,7 +268,7 @@ function _extractToken(typeOrFunc, metadata, params) {
         return _createDependency(token, optional, visibility);
     }
     else {
-        throw new NoAnnotationError(typeOrFunc, params);
+        throw noAnnotationError(typeOrFunc, params);
     }
 }
 /**

@@ -7,12 +7,13 @@
  */
 import { ChangeDetectorStatus } from '../change_detection/change_detection';
 import { THROW_IF_NOT_FOUND } from '../di/injector';
+import { getType } from '../errors';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { AnimationViewContext } from './animation_view_context';
 import { DebugContext } from './debug_context';
 import { ElementInjector } from './element_injector';
-import { ExpressionChangedAfterItHasBeenCheckedError, ViewDestroyedError, ViewWrappedError } from './errors';
+import { expressionChangedAfterItHasBeenCheckedError, viewDestroyedError, viewWrappedError } from './errors';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
 import { addToArray } from './view_utils';
@@ -442,7 +443,7 @@ export class AppView {
      * @param {?} details
      * @return {?}
      */
-    throwDestroyedError(details) { throw new ViewDestroyedError(details); }
+    throwDestroyedError(details) { throw viewDestroyedError(details); }
 }
 function AppView_tsickle_Closure_declarations() {
     /** @type {?} */
@@ -616,12 +617,12 @@ export class DebugAppView extends AppView {
      * @return {?}
      */
     _rethrowWithContext(e) {
-        if (!(e instanceof ViewWrappedError)) {
-            if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedError)) {
+        if (!(getType(e) == viewWrappedError)) {
+            if (!(getType(e) == expressionChangedAfterItHasBeenCheckedError)) {
                 this.cdMode = ChangeDetectorStatus.Errored;
             }
             if (isPresent(this._currentDebugContext)) {
-                throw new ViewWrappedError(e, this._currentDebugContext);
+                throw viewWrappedError(e, this._currentDebugContext);
             }
         }
     }

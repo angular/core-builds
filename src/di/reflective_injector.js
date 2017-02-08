@@ -7,7 +7,7 @@
  */
 import { Injector, THROW_IF_NOT_FOUND } from './injector';
 import { Self, SkipSelf } from './metadata';
-import { AbstractProviderError, CyclicDependencyError, InstantiationError, NoProviderError, OutOfBoundsError } from './reflective_errors';
+import { cyclicDependencyError, instantiationError, noProviderError, outOfBoundsError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
 import { resolveReflectiveProviders } from './reflective_provider';
 // Threshold for the dynamic version
@@ -358,7 +358,7 @@ export class ReflectiveInjector_ {
      */
     getProviderAtIndex(index) {
         if (index < 0 || index >= this._providers.length) {
-            throw new OutOfBoundsError(index);
+            throw outOfBoundsError(index);
         }
         return this._providers[index];
     }
@@ -369,7 +369,7 @@ export class ReflectiveInjector_ {
      */
     _new(provider) {
         if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
-            throw new CyclicDependencyError(this, provider.key);
+            throw cyclicDependencyError(this, provider.key);
         }
         return this._instantiateProvider(provider);
     }
@@ -406,7 +406,7 @@ export class ReflectiveInjector_ {
                 ResolvedReflectiveFactory.dependencies.map(dep => this._getByReflectiveDependency(dep));
         }
         catch (e) {
-            if (e instanceof AbstractProviderError || e instanceof InstantiationError) {
+            if (e.addKey) {
                 e.addKey(this, provider.key);
             }
             throw e;
@@ -416,7 +416,7 @@ export class ReflectiveInjector_ {
             obj = factory(...deps);
         }
         catch (e) {
-            throw new InstantiationError(this, e, e.stack, provider.key);
+            throw instantiationError(this, e, e.stack, provider.key);
         }
         return obj;
     }
@@ -470,7 +470,7 @@ export class ReflectiveInjector_ {
             return notFoundValue;
         }
         else {
-            throw new NoProviderError(this, key);
+            throw noProviderError(this, key);
         }
     }
     /**

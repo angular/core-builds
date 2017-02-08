@@ -6,26 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injectable, InjectionToken } from '../di';
-import { BaseError } from '../facade/errors';
-import { stringify } from '../facade/lang';
-/**
- * Indicates that a component is still being loaded in a synchronous compile.
- *
- * \@stable
- */
-export class ComponentStillLoadingError extends BaseError {
-    /**
-     * @param {?} compType
-     */
-    constructor(compType) {
-        super(`Can't compile synchronously as ${stringify(compType)} is still being loaded!`);
-        this.compType = compType;
-    }
-}
-function ComponentStillLoadingError_tsickle_Closure_declarations() {
-    /** @type {?} */
-    ComponentStillLoadingError.prototype.compType;
-}
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
@@ -66,8 +46,7 @@ function _throwError() {
 export class Compiler {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
-     * in `entryComponents`
-     * have to be inlined. Otherwise throws a {\@link ComponentStillLoadingError}.
+     * in `entryComponents` have to be inlined.
      * @param {?} moduleType
      * @return {?}
      */

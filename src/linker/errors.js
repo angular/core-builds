@@ -5,7 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BaseError, WrappedError } from '../facade/errors';
+import { wrappedError } from '../error_handler';
+import { ERROR_DEBUG_CONTEXT, ERROR_TYPE } from '../errors';
 /**
  * An error thrown if application changes model breaking the top-down data flow.
  *
@@ -35,47 +36,36 @@ import { BaseError, WrappedError } from '../facade/errors';
  *   }
  * }
  * ```
- * \@stable
+ * @param {?} oldValue
+ * @param {?} currValue
+ * @param {?} isFirstCheck
+ * @return {?}
  */
-export class ExpressionChangedAfterItHasBeenCheckedError extends BaseError {
-    /**
-     * @param {?} oldValue
-     * @param {?} currValue
-     * @param {?} isFirstCheck
-     */
-    constructor(oldValue, currValue, isFirstCheck) {
-        let msg = `Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
-        if (isFirstCheck) {
-            msg +=
-                ` It seems like the view has been created after its parent and its children have been dirty checked.` +
-                    ` Has it been created in a change detection hook ?`;
-        }
-        super(msg);
+export function expressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
+    let /** @type {?} */ msg = `Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
+    if (isFirstCheck) {
+        msg +=
+            ` It seems like the view has been created after its parent and its children have been dirty checked.` +
+                ` Has it been created in a change detection hook ?`;
     }
+    const /** @type {?} */ error = Error(msg);
+    ((error))[ERROR_TYPE] = expressionChangedAfterItHasBeenCheckedError;
+    return error;
 }
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
  *
  * This error wraps the original exception to attach additional contextual information that can
  * be useful for debugging.
- * \@stable
+ * @param {?} originalError
+ * @param {?} context
+ * @return {?}
  */
-export class ViewWrappedError extends WrappedError {
-    /**
-     * @param {?} originalError
-     * @param {?} context
-     */
-    constructor(originalError, context) {
-        super(`Error in ${context.source}`, originalError);
-        this.context = context;
-    }
-}
-function ViewWrappedError_tsickle_Closure_declarations() {
-    /**
-     * DebugContext
-     * @type {?}
-     */
-    ViewWrappedError.prototype.context;
+export function viewWrappedError(originalError, context) {
+    const /** @type {?} */ error = wrappedError(`Error in ${context.source}`, originalError);
+    ((error))[ERROR_DEBUG_CONTEXT] = context;
+    ((error))[ERROR_TYPE] = viewWrappedError;
+    return error;
 }
 /**
  * Thrown when a destroyed view is used.
@@ -83,14 +73,10 @@ function ViewWrappedError_tsickle_Closure_declarations() {
  * This error indicates a bug in the framework.
  *
  * This is an internal Angular error.
- * \@stable
+ * @param {?} details
+ * @return {?}
  */
-export class ViewDestroyedError extends BaseError {
-    /**
-     * @param {?} details
-     */
-    constructor(details) {
-        super(`Attempt to use a destroyed view: ${details}`);
-    }
+export function viewDestroyedError(details) {
+    return Error(`Attempt to use a destroyed view: ${details}`);
 }
 //# sourceMappingURL=errors.js.map
