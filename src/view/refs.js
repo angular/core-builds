@@ -315,9 +315,7 @@ class ViewRef_ {
     /**
      * @param {?} _view
      */
-    constructor(_view) {
-        this._view = _view;
-    }
+    constructor(_view) { this._view = _view; }
     /**
      * @return {?}
      */
@@ -541,7 +539,7 @@ function findHostElement(view) {
  * @return {?}
  */
 function collectReferences(view, nodeDef, references) {
-    for (let queryId in nodeDef.matchedQueries) {
+    for (let /** @type {?} */ queryId in nodeDef.matchedQueries) {
         if (queryId.startsWith('#')) {
             references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
         }

@@ -14,9 +14,7 @@ export class KeyValueDiffers {
     /**
      * @param {?} factories
      */
-    constructor(factories) {
-        this.factories = factories;
-    }
+    constructor(factories) { this.factories = factories; }
     /**
      * @param {?} factories
      * @param {?=} parent

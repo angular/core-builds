@@ -27,7 +27,7 @@ export function attachEmbeddedView(elementData, viewIndex, view) {
         }
         projectedViews.push(view);
     }
-    for (let queryId in view.def.nodeMatchedQueries) {
+    for (let /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
         dirtyParentQuery(queryId, view);
     }
     const /** @type {?} */ prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
@@ -50,7 +50,7 @@ export function detachEmbeddedView(elementData, viewIndex) {
         const /** @type {?} */ projectedViews = dvcElementData.projectedViews;
         removeFromArray(projectedViews, projectedViews.indexOf(view));
     }
-    for (let queryId in view.def.nodeMatchedQueries) {
+    for (let /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
         dirtyParentQuery(queryId, view);
     }
     renderDetachEmbeddedView(elementData, view);
@@ -72,7 +72,7 @@ export function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
     addToArray(embeddedViews, newViewIndex, view);
     // Note: Don't need to change projectedViews as the order in there
     // as always invalid...
-    for (let queryId in view.def.nodeMatchedQueries) {
+    for (let /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
         dirtyParentQuery(queryId, view);
     }
     renderDetachEmbeddedView(elementData, view);

@@ -63,9 +63,7 @@ export class InjectionToken extends OpaqueToken {
     /**
      * @param {?} desc
      */
-    constructor(desc) {
-        super(desc);
-    }
+    constructor(desc) { super(desc); }
     /**
      * @return {?}
      */

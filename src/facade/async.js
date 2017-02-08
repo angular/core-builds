@@ -86,16 +86,16 @@ export class EventEmitter extends Subject {
             } : (value) => { generatorOrNext.next(value); };
             if (generatorOrNext.error) {
                 errorFn = this.__isAsync ? (err) => { setTimeout(() => generatorOrNext.error(err)); } :
-                        (err) => { generatorOrNext.error(err); };
+                    (err) => { generatorOrNext.error(err); };
             }
             if (generatorOrNext.complete) {
                 completeFn = this.__isAsync ? () => { setTimeout(() => generatorOrNext.complete()); } :
-                        () => { generatorOrNext.complete(); };
+                    () => { generatorOrNext.complete(); };
             }
         }
         else {
             schedulerFn = this.__isAsync ? (value) => { setTimeout(() => generatorOrNext(value)); } :
-                    (value) => { generatorOrNext(value); };
+                (value) => { generatorOrNext(value); };
             if (error) {
                 errorFn =
                     this.__isAsync ? (err) => { setTimeout(() => error(err)); } : (err) => { error(err); };

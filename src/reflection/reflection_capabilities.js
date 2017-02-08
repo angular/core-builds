@@ -10,14 +10,12 @@ import { Type, isType } from '../type';
 /**
  * Attention: This regex has to hold even if the code is minified!
  */
-export const /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?\S+\.apply\(this,\s*arguments\)/;
+export const /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?(\S+\s+!==\s+null\s+&&\s+)?\S+\.apply\(this,\s*arguments\)/;
 export class ReflectionCapabilities {
     /**
      * @param {?=} reflect
      */
-    constructor(reflect) {
-        this._reflect = reflect || global.Reflect;
-    }
+    constructor(reflect) { this._reflect = reflect || global.Reflect; }
     /**
      * @return {?}
      */
@@ -228,13 +226,13 @@ export class ReflectionCapabilities {
      * @param {?} name
      * @return {?}
      */
-    getter(name) { return ((new Function('o', 'return o.' + name + ';'))); }
+    getter(name) { return (new Function('o', 'return o.' + name + ';')); }
     /**
      * @param {?} name
      * @return {?}
      */
     setter(name) {
-        return ((new Function('o', 'v', 'return o.' + name + ' = v;')));
+        return (new Function('o', 'v', 'return o.' + name + ' = v;'));
     }
     /**
      * @param {?} name
@@ -243,7 +241,7 @@ export class ReflectionCapabilities {
     method(name) {
         const /** @type {?} */ functionBody = `if (!o.${name}) throw new Error('"${name}" is undefined');
         return o.${name}.apply(o, args);`;
-        return ((new Function('o', 'args', functionBody)));
+        return (new Function('o', 'args', functionBody));
     }
     /**
      * @param {?} type

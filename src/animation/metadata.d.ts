@@ -1,7 +1,7 @@
 /**
  * @experimental Animation support is experimental.
  */
-export declare const AUTO_STYLE: string;
+export declare const AUTO_STYLE = "*";
 /**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {@link trigger trigger

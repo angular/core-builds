@@ -17,10 +17,10 @@ export class StringMapWrapper {
      */
     static merge(m1, m2) {
         const /** @type {?} */ m = {};
-        for (const k of Object.keys(m1)) {
+        for (const /** @type {?} */ k of Object.keys(m1)) {
             m[k] = m1[k];
         }
-        for (const k of Object.keys(m2)) {
+        for (const /** @type {?} */ k of Object.keys(m2)) {
             m[k] = m2[k];
         }
         return m;

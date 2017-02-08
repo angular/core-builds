@@ -160,7 +160,7 @@ export function Class(clsDef) {
             throw new Error(`Class definition 'extends' property must be a constructor function was: ${stringify(clsDef.extends)}`);
         }
     }
-    for (const key in clsDef) {
+    for (const /** @type {?} */ key in clsDef) {
         if (key !== 'extends' && key !== 'prototype' && clsDef.hasOwnProperty(key)) {
             proto[key] = applyParams(clsDef[key], key);
         }
@@ -230,7 +230,7 @@ function makeMetadataCtor(props) {
                 this[prop[0]] = argVal === undefined ? prop[1] : argVal;
             }
             else {
-                for (const propName in prop) {
+                for (const /** @type {?} */ propName in prop) {
                     this[propName] =
                         argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
                 }

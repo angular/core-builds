@@ -1,4 +1,3 @@
-/// <reference types="node" />
 /**
  * @whatItDoes Provides a hook for centralized exception handling.
  *

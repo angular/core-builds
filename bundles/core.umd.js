@@ -78,7 +78,7 @@
          * @param {?} desc
          */
         function InjectionToken(desc) {
-            _super.call(this, desc);
+            return _super.call(this, desc) || this;
         }
         /**
          * @return {?}
@@ -380,7 +380,7 @@
                 throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
             }
         }
-        for (var key in clsDef) {
+        for (var /** @type {?} */ key in clsDef) {
             if (key !== 'extends' && key !== 'prototype' && clsDef.hasOwnProperty(key)) {
                 proto[key] = applyParams(clsDef[key], key);
             }
@@ -434,7 +434,7 @@
         if (parentClass) {
             DecoratorFactory.prototype = Object.create(parentClass.prototype);
         }
-        DecoratorFactory.prototype.toString = function () { return ("@" + name); };
+        DecoratorFactory.prototype.toString = function () { return "@" + name; };
         ((DecoratorFactory)).annotationCls = DecoratorFactory;
         return DecoratorFactory;
     }
@@ -447,7 +447,7 @@
             var _this = this;
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             props.forEach(function (prop, i) {
                 var /** @type {?} */ argVal = args[i];
@@ -456,7 +456,7 @@
                     _this[prop[0]] = argVal === undefined ? prop[1] : argVal;
                 }
                 else {
-                    for (var propName in prop) {
+                    for (var /** @type {?} */ propName in prop) {
                         _this[propName] =
                             argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
                     }
@@ -479,7 +479,7 @@
         function ParamDecoratorFactory() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             if (this instanceof ParamDecoratorFactory) {
                 metaCtor.apply(this, args);
@@ -511,7 +511,7 @@
         if (parentClass) {
             ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
         }
-        ParamDecoratorFactory.prototype.toString = function () { return ("@" + name); };
+        ParamDecoratorFactory.prototype.toString = function () { return "@" + name; };
         ((ParamDecoratorFactory)).annotationCls = ParamDecoratorFactory;
         return ParamDecoratorFactory;
     }
@@ -530,7 +530,7 @@
         function PropDecoratorFactory() {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             if (this instanceof PropDecoratorFactory) {
                 metaCtor.apply(this, args);
@@ -548,7 +548,7 @@
         if (parentClass) {
             PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
         }
-        PropDecoratorFactory.prototype.toString = function () { return ("@" + name); };
+        PropDecoratorFactory.prototype.toString = function () { return "@" + name; };
         ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
         return PropDecoratorFactory;
     }
@@ -1283,10 +1283,10 @@
          * @return {?}
          */
         Injector.prototype.get = function (token, notFoundValue) { };
-        Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-        Injector.NULL = new _NullInjector();
         return Injector;
     }());
+    Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    Injector.NULL = new _NullInjector();
 
     /**
      * @license
@@ -1793,7 +1793,13 @@
      *
      * @stable
      */
-    var /** @type {?} */ Type = Function;
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */ var /** @type {?} */ Type = Function;
     /**
      * @param {?} v
      * @return {?}
@@ -1805,7 +1811,7 @@
     /**
      * Attention: This regex has to hold even if the code is minified!
      */
-    var /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?\S+\.apply\(this,\s*arguments\)/;
+    var /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?(\S+\s+!==\s+null\s+&&\s+)?\S+\.apply\(this,\s*arguments\)/;
     var ReflectionCapabilities = (function () {
         /**
          * @param {?=} reflect
@@ -1824,7 +1830,7 @@
         ReflectionCapabilities.prototype.factory = function (t) { return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             return new (t.bind.apply(t, [void 0].concat(args)))();
         }; };
@@ -2031,13 +2037,13 @@
          * @param {?} name
          * @return {?}
          */
-        ReflectionCapabilities.prototype.getter = function (name) { return ((new Function('o', 'return o.' + name + ';'))); };
+        ReflectionCapabilities.prototype.getter = function (name) { return (new Function('o', 'return o.' + name + ';')); };
         /**
          * @param {?} name
          * @return {?}
          */
         ReflectionCapabilities.prototype.setter = function (name) {
-            return ((new Function('o', 'v', 'return o.' + name + ' = v;')));
+            return (new Function('o', 'v', 'return o.' + name + ' = v;'));
         };
         /**
          * @param {?} name
@@ -2045,7 +2051,7 @@
          */
         ReflectionCapabilities.prototype.method = function (name) {
             var /** @type {?} */ functionBody = "if (!o." + name + ") throw new Error('\"" + name + "\" is undefined');\n        return o." + name + ".apply(o, args);";
-            return ((new Function('o', 'args', functionBody)));
+            return (new Function('o', 'args', functionBody));
         };
         /**
          * @param {?} type
@@ -2173,8 +2179,9 @@
          * @param {?} reflectionCapabilities
          */
         function Reflector(reflectionCapabilities) {
-            _super.call(this);
-            this.reflectionCapabilities = reflectionCapabilities;
+            var _this = _super.call(this) || this;
+            _this.reflectionCapabilities = reflectionCapabilities;
+            return _this;
         }
         /**
          * @param {?} caps
@@ -3285,15 +3292,15 @@
             enumerable: true,
             configurable: true
         });
-        ApplicationInitStatus.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        ApplicationInitStatus.ctorParameters = function () { return [
-            { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
-        ]; };
         return ApplicationInitStatus;
     }());
+    ApplicationInitStatus.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ApplicationInitStatus.ctorParameters = function () { return [
+        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+    ]; };
 
     /**
      * A DI Token representing a unique string id assigned to the application by Angular and used
@@ -3360,13 +3367,13 @@
          * @return {?}
          */
         Console.prototype.warn = function (message) { warn(message); };
-        Console.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        Console.ctorParameters = function () { return []; };
         return Console;
     }());
+    Console.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Console.ctorParameters = function () { return []; };
 
     /**
      * Combination of NgModuleFactory and ComponentFactorys.
@@ -3452,13 +3459,13 @@
          * @return {?}
          */
         Compiler.prototype.clearCacheFor = function (type) { };
-        Compiler.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        Compiler.ctorParameters = function () { return []; };
         return Compiler;
     }());
+    Compiler.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Compiler.ctorParameters = function () { return []; };
     /**
      * Token to provide CompilerOptions in the platform injector.
      *
@@ -3561,8 +3568,9 @@
          */
         function EventEmitter(isAsync) {
             if (isAsync === void 0) { isAsync = false; }
-            _super.call(this);
-            this.__isAsync = isAsync;
+            var _this = _super.call(this) || this;
+            _this.__isAsync = isAsync;
+            return _this;
         }
         /**
          * @param {?=} value
@@ -3986,15 +3994,15 @@
                 }
             }
         };
-        AnimationQueue.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        AnimationQueue.ctorParameters = function () { return [
-            { type: NgZone, },
-        ]; };
         return AnimationQueue;
     }());
+    AnimationQueue.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    AnimationQueue.ctorParameters = function () { return [
+        { type: NgZone, },
+    ]; };
 
     var DefaultIterableDifferFactory = (function () {
         function DefaultIterableDifferFactory() {
@@ -6064,17 +6072,17 @@
         ViewUtils.prototype.renderComponent = function (renderComponentType) {
             return this._renderer.renderComponent(renderComponentType);
         };
-        ViewUtils.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        ViewUtils.ctorParameters = function () { return [
-            { type: RootRenderer, },
-            { type: Sanitizer, },
-            { type: AnimationQueue, },
-        ]; };
         return ViewUtils;
     }());
+    ViewUtils.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ViewUtils.ctorParameters = function () { return [
+        { type: RootRenderer, },
+        { type: Sanitizer, },
+        { type: AnimationQueue, },
+    ]; };
     var /** @type {?} */ nextRenderComponentTypeId = 0;
     /**
      * @param {?} templateUrl
@@ -6563,7 +6571,7 @@
         return input.replace(CAMEL_CASE_REGEXP, function () {
             var m = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                m[_i - 0] = arguments[_i];
+                m[_i] = arguments[_i];
             }
             return '-' + m[1].toLowerCase();
         });
@@ -7169,11 +7177,12 @@
          * @param {?} _component
          */
         function ComponentRef_(_index, _parentView, _nativeElement, _component) {
-            _super.call(this);
-            this._index = _index;
-            this._parentView = _parentView;
-            this._nativeElement = _nativeElement;
-            this._component = _component;
+            var _this = _super.call(this) || this;
+            _this._index = _index;
+            _this._parentView = _parentView;
+            _this._nativeElement = _nativeElement;
+            _this._component = _component;
+            return _this;
         }
         Object.defineProperty(ComponentRef_.prototype, "location", {
             /**
@@ -7306,9 +7315,9 @@
          * @return {?}
          */
         ComponentFactoryResolver.prototype.resolveComponentFactory = function (component) { };
-        ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
         return ComponentFactoryResolver;
     }());
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     var CodegenComponentFactoryResolver = (function () {
         /**
          * @param {?} factories
@@ -7590,15 +7599,15 @@
             // TODO(juliemr): implement.
             return [];
         };
-        Testability.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        Testability.ctorParameters = function () { return [
-            { type: NgZone, },
-        ]; };
         return Testability;
     }());
+    Testability.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Testability.ctorParameters = function () { return [
+        { type: NgZone, },
+    ]; };
     /**
      * A global registry of {\@link Testability} instances for specific elements.
      * \@experimental
@@ -7639,13 +7648,13 @@
             if (findInAncestors === void 0) { findInAncestors = true; }
             return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
         };
-        TestabilityRegistry.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        TestabilityRegistry.ctorParameters = function () { return []; };
         return TestabilityRegistry;
     }());
+    TestabilityRegistry.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = function () { return []; };
     var _NoopGetTestability = (function () {
         function _NoopGetTestability() {
         }
@@ -7939,11 +7948,12 @@
          * @param {?} _injector
          */
         function PlatformRef_(_injector) {
-            _super.call(this);
-            this._injector = _injector;
-            this._modules = [];
-            this._destroyListeners = [];
-            this._destroyed = false;
+            var _this = _super.call(this) || this;
+            _this._injector = _injector;
+            _this._modules = [];
+            _this._destroyListeners = [];
+            _this._destroyed = false;
+            return _this;
         }
         /**
          * @param {?} callback
@@ -8054,20 +8064,20 @@
                 moduleRef.instance.ngDoBootstrap(appRef);
             }
             else {
-                throw new Error(("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
+                throw new Error("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. " +
                     "Please define one of these.");
             }
             this._modules.push(moduleRef);
         };
-        PlatformRef_.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        PlatformRef_.ctorParameters = function () { return [
-            { type: Injector, },
-        ]; };
         return PlatformRef_;
     }(PlatformRef));
+    PlatformRef_.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    PlatformRef_.ctorParameters = function () { return [
+        { type: Injector, },
+    ]; };
     /**
      * A reference to an Angular application running on a page.
      *
@@ -8162,24 +8172,24 @@
          * @param {?} _testability
          */
         function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
-            var _this = this;
-            _super.call(this);
-            this._zone = _zone;
-            this._console = _console;
-            this._injector = _injector;
-            this._exceptionHandler = _exceptionHandler;
-            this._componentFactoryResolver = _componentFactoryResolver;
-            this._initStatus = _initStatus;
-            this._testabilityRegistry = _testabilityRegistry;
-            this._testability = _testability;
-            this._bootstrapListeners = [];
-            this._rootComponents = [];
-            this._rootComponentTypes = [];
-            this._views = [];
-            this._runningTick = false;
-            this._enforceNoNewChanges = false;
-            this._enforceNoNewChanges = isDevMode();
-            this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+            var _this = _super.call(this) || this;
+            _this._zone = _zone;
+            _this._console = _console;
+            _this._injector = _injector;
+            _this._exceptionHandler = _exceptionHandler;
+            _this._componentFactoryResolver = _componentFactoryResolver;
+            _this._initStatus = _initStatus;
+            _this._testabilityRegistry = _testabilityRegistry;
+            _this._testability = _testability;
+            _this._bootstrapListeners = [];
+            _this._rootComponents = [];
+            _this._rootComponentTypes = [];
+            _this._views = [];
+            _this._runningTick = false;
+            _this._enforceNoNewChanges = false;
+            _this._enforceNoNewChanges = isDevMode();
+            _this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+            return _this;
         }
         /**
          * @param {?} viewRef
@@ -8300,24 +8310,24 @@
             enumerable: true,
             configurable: true
         });
-        /** @internal */
-        ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-        ApplicationRef_.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        ApplicationRef_.ctorParameters = function () { return [
-            { type: NgZone, },
-            { type: Console, },
-            { type: Injector, },
-            { type: ErrorHandler, },
-            { type: ComponentFactoryResolver, },
-            { type: ApplicationInitStatus, },
-            { type: TestabilityRegistry, decorators: [{ type: Optional },] },
-            { type: Testability, decorators: [{ type: Optional },] },
-        ]; };
         return ApplicationRef_;
     }(ApplicationRef));
+    /** @internal */
+    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+    ApplicationRef_.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ApplicationRef_.ctorParameters = function () { return [
+        { type: NgZone, },
+        { type: Console, },
+        { type: Injector, },
+        { type: ErrorHandler, },
+        { type: ComponentFactoryResolver, },
+        { type: ApplicationInitStatus, },
+        { type: TestabilityRegistry, decorators: [{ type: Optional },] },
+        { type: Testability, decorators: [{ type: Optional },] },
+    ]; };
 
     /**
      * @license
@@ -8423,11 +8433,12 @@
          * @param {?} bootstrapFactories
          */
         function NgModuleInjector(parent, factories, bootstrapFactories) {
-            _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
-            this.parent = parent;
-            this.bootstrapFactories = bootstrapFactories;
-            this._destroyListeners = [];
-            this._destroyed = false;
+            var _this = _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL)) || this;
+            _this.parent = parent;
+            _this.bootstrapFactories = bootstrapFactories;
+            _this._destroyListeners = [];
+            _this._destroyed = false;
+            return _this;
         }
         /**
          * @return {?}
@@ -8771,16 +8782,16 @@
                 .then(function (module) { return module[exportName + factoryClassSuffix]; })
                 .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
         };
-        SystemJsNgModuleLoader.decorators = [
-            { type: Injectable },
-        ];
-        /** @nocollapse */
-        SystemJsNgModuleLoader.ctorParameters = function () { return [
-            { type: Compiler, },
-            { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
-        ]; };
         return SystemJsNgModuleLoader;
     }());
+    SystemJsNgModuleLoader.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = function () { return [
+        { type: Compiler, },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+    ]; };
     /**
      * @param {?} value
      * @param {?} modulePath
@@ -8848,10 +8859,11 @@
          * @param {?} _nativeElement
          */
         function TemplateRef_(_parentView, _nodeIndex, _nativeElement) {
-            _super.call(this);
-            this._parentView = _parentView;
-            this._nodeIndex = _nodeIndex;
-            this._nativeElement = _nativeElement;
+            var _this = _super.call(this) || this;
+            _this._parentView = _parentView;
+            _this._nodeIndex = _nodeIndex;
+            _this._nativeElement = _nativeElement;
+            return _this;
         }
         /**
          * @param {?} context
@@ -9191,7 +9203,7 @@
     var ViewRef = (function (_super) {
         __extends$7(ViewRef, _super);
         function ViewRef() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         /**
          * Destroys the view and all of the data structures associated with it.
@@ -9270,7 +9282,7 @@
     var EmbeddedViewRef = (function (_super) {
         __extends$7(EmbeddedViewRef, _super);
         function EmbeddedViewRef() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         /**
          * @abstract
@@ -9477,13 +9489,14 @@
          * @param {?} _debugInfo
          */
         function DebugElement(nativeNode, parent, _debugInfo) {
-            _super.call(this, nativeNode, parent, _debugInfo);
-            this.properties = {};
-            this.attributes = {};
-            this.classes = {};
-            this.styles = {};
-            this.childNodes = [];
-            this.nativeElement = nativeNode;
+            var _this = _super.call(this, nativeNode, parent, _debugInfo) || this;
+            _this.properties = {};
+            _this.attributes = {};
+            _this.classes = {};
+            _this.styles = {};
+            _this.childNodes = [];
+            _this.nativeElement = nativeNode;
+            return _this;
         }
         /**
          * @param {?} child
@@ -9712,30 +9725,30 @@
     var ApplicationModule = (function () {
         function ApplicationModule() {
         }
-        ApplicationModule.decorators = [
-            { type: NgModule, args: [{
-                        providers: [
-                            ApplicationRef_,
-                            { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                            ApplicationInitStatus,
-                            Compiler,
-                            APP_ID_RANDOM_PROVIDER,
-                            ViewUtils,
-                            AnimationQueue,
-                            { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                            { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                            {
-                                provide: LOCALE_ID,
-                                useFactory: _localeFactory,
-                                deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-                            },
-                        ]
-                    },] },
-        ];
-        /** @nocollapse */
-        ApplicationModule.ctorParameters = function () { return []; };
         return ApplicationModule;
     }());
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{
+                    providers: [
+                        ApplicationRef_,
+                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                        ApplicationInitStatus,
+                        Compiler,
+                        APP_ID_RANDOM_PROVIDER,
+                        ViewUtils,
+                        AnimationQueue,
+                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                        {
+                            provide: LOCALE_ID,
+                            useFactory: _localeFactory,
+                            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                        },
+                    ]
+                },] },
+    ];
+    /** @nocollapse */
+    ApplicationModule.ctorParameters = function () { return []; };
 
     /**
      * @license
@@ -9744,7 +9757,14 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var /** @type {?} */ FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */ var /** @type {?} */ FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
+    // TODO (matsko): change to boolean
     var /** @type {?} */ ANY_STATE = '*';
     var /** @type {?} */ DEFAULT_STATE = '*';
     var /** @type {?} */ EMPTY_STATE = 'void';
@@ -10275,9 +10295,10 @@
          * @param {?} styles
          */
         function AnimationStateDeclarationMetadata(stateNameExpr, styles) {
-            _super.call(this);
-            this.stateNameExpr = stateNameExpr;
-            this.styles = styles;
+            var _this = _super.call(this) || this;
+            _this.stateNameExpr = stateNameExpr;
+            _this.styles = styles;
+            return _this;
         }
         return AnimationStateDeclarationMetadata;
     }(AnimationStateMetadata));
@@ -10295,9 +10316,10 @@
          * @param {?} steps
          */
         function AnimationStateTransitionMetadata(stateChangeExpr, steps) {
-            _super.call(this);
-            this.stateChangeExpr = stateChangeExpr;
-            this.steps = steps;
+            var _this = _super.call(this) || this;
+            _this.stateChangeExpr = stateChangeExpr;
+            _this.steps = steps;
+            return _this;
         }
         return AnimationStateTransitionMetadata;
     }(AnimationStateMetadata));
@@ -10323,8 +10345,9 @@
          * @param {?} steps
          */
         function AnimationKeyframesSequenceMetadata(steps) {
-            _super.call(this);
-            this.steps = steps;
+            var _this = _super.call(this) || this;
+            _this.steps = steps;
+            return _this;
         }
         return AnimationKeyframesSequenceMetadata;
     }(AnimationMetadata));
@@ -10343,9 +10366,10 @@
          */
         function AnimationStyleMetadata(styles, offset) {
             if (offset === void 0) { offset = null; }
-            _super.call(this);
-            this.styles = styles;
-            this.offset = offset;
+            var _this = _super.call(this) || this;
+            _this.styles = styles;
+            _this.offset = offset;
+            return _this;
         }
         return AnimationStyleMetadata;
     }(AnimationMetadata));
@@ -10363,9 +10387,10 @@
          * @param {?} styles
          */
         function AnimationAnimateMetadata(timings, styles) {
-            _super.call(this);
-            this.timings = timings;
-            this.styles = styles;
+            var _this = _super.call(this) || this;
+            _this.timings = timings;
+            _this.styles = styles;
+            return _this;
         }
         return AnimationAnimateMetadata;
     }(AnimationMetadata));
@@ -10376,7 +10401,7 @@
     var AnimationWithStepsMetadata = (function (_super) {
         __extends$9(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
-            _super.call(this);
+            return _super.call(this) || this;
         }
         Object.defineProperty(AnimationWithStepsMetadata.prototype, "steps", {
             /**
@@ -10401,8 +10426,9 @@
          * @param {?} _steps
          */
         function AnimationSequenceMetadata(_steps) {
-            _super.call(this);
-            this._steps = _steps;
+            var _this = _super.call(this) || this;
+            _this._steps = _steps;
+            return _this;
         }
         Object.defineProperty(AnimationSequenceMetadata.prototype, "steps", {
             /**
@@ -10427,8 +10453,9 @@
          * @param {?} _steps
          */
         function AnimationGroupMetadata(_steps) {
-            _super.call(this);
-            this._steps = _steps;
+            var _this = _super.call(this) || this;
+            _this._steps = _steps;
+            return _this;
         }
         Object.defineProperty(AnimationGroupMetadata.prototype, "steps", {
             /**
@@ -10644,14 +10671,14 @@
         var /** @type {?} */ input;
         var /** @type {?} */ offset = null;
         if (typeof tokens === 'string') {
-            input = [(tokens)];
+            input = [/** @type {?} */ (tokens)];
         }
         else {
             if (Array.isArray(tokens)) {
                 input = (tokens);
             }
             else {
-                input = [(tokens)];
+                input = [/** @type {?} */ (tokens)];
             }
             input.forEach(function (entry) {
                 var /** @type {?} */ entryOffset = ((entry) /** TODO #9100 */)['offset'];
@@ -11766,9 +11793,10 @@
          * @param {?} _nodeIndex
          */
         function ElementInjector(_view, _nodeIndex) {
-            _super.call(this);
-            this._view = _view;
-            this._nodeIndex = _nodeIndex;
+            var _this = _super.call(this) || this;
+            _this._view = _view;
+            _this._nodeIndex = _nodeIndex;
+            return _this;
         }
         /**
          * @param {?} token
@@ -12259,9 +12287,10 @@
          */
         function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos, declaredViewContainer) {
             if (declaredViewContainer === void 0) { declaredViewContainer = null; }
-            _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer);
-            this.staticNodeDebugInfos = staticNodeDebugInfos;
-            this._currentDebugContext = null;
+            var _this = _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer) || this;
+            _this.staticNodeDebugInfos = staticNodeDebugInfos;
+            _this._currentDebugContext = null;
+            return _this;
         }
         /**
          * @param {?} context

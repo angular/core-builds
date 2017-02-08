@@ -69,7 +69,7 @@ export function _providerDef(flags, matchedQueries, childCount, type, token, val
     }
     const /** @type {?} */ bindings = [];
     if (props) {
-        for (let prop in props) {
+        for (let /** @type {?} */ prop in props) {
             const [bindingIndex, nonMinifiedName] = props[prop];
             bindings[bindingIndex] = {
                 type: BindingType.ProviderProperty,
@@ -81,7 +81,7 @@ export function _providerDef(flags, matchedQueries, childCount, type, token, val
     }
     const /** @type {?} */ outputDefs = [];
     if (outputs) {
-        for (let propName in outputs) {
+        for (let /** @type {?} */ propName in outputs) {
             outputDefs.push({ propName, eventName: outputs[propName] });
         }
     }

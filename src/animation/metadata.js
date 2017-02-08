@@ -166,9 +166,7 @@ function AnimationAnimateMetadata_tsickle_Closure_declarations() {
  * @abstract
  */
 export class AnimationWithStepsMetadata extends AnimationMetadata {
-    constructor() {
-        super();
-    }
+    constructor() { super(); }
     /**
      * @return {?}
      */
@@ -425,14 +423,14 @@ export function style(tokens) {
     let /** @type {?} */ input;
     let /** @type {?} */ offset = null;
     if (typeof tokens === 'string') {
-        input = [(tokens)];
+        input = [/** @type {?} */ (tokens)];
     }
     else {
         if (Array.isArray(tokens)) {
             input = (tokens);
         }
         else {
-            input = [(tokens)];
+            input = [/** @type {?} */ (tokens)];
         }
         input.forEach(entry => {
             const /** @type {?} */ entryOffset = ((entry) /** TODO #9100 */)['offset'];

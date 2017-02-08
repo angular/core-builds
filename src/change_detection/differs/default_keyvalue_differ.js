@@ -7,8 +7,7 @@
  */
 import { isJsObject, looseIdentical, stringify } from '../../facade/lang';
 export class DefaultKeyValueDifferFactory {
-    constructor() {
-    }
+    constructor() { }
     /**
      * @param {?} obj
      * @return {?}

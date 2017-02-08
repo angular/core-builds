@@ -171,7 +171,7 @@ export function createElement(view, renderHost, def) {
         }
     }
     if (elDef.attrs) {
-        for (let attrName in elDef.attrs) {
+        for (let /** @type {?} */ attrName in elDef.attrs) {
             if (view.renderer) {
                 view.renderer.setElementAttribute(el, attrName, elDef.attrs[attrName]);
             }

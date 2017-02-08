@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * Public Test Library for unit testing Angular2 Applications. Assumes that you are running
+ * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
+ * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
+ */
 import { resetFakeAsyncZone } from './fake_async';
 import { TestBed } from './test_bed';
 const _global = (typeof window === 'undefined' ? global : window);

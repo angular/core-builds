@@ -8,8 +8,7 @@
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
 import { isBlank, looseIdentical, stringify } from '../../facade/lang';
 export class DefaultIterableDifferFactory {
-    constructor() {
-    }
+    constructor() { }
     /**
      * @param {?} obj
      * @return {?}

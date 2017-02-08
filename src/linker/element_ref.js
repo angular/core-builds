@@ -2,9 +2,7 @@ export class ElementRef {
     /**
      * @param {?} nativeElement
      */
-    constructor(nativeElement) {
-        this.nativeElement = nativeElement;
-    }
+    constructor(nativeElement) { this.nativeElement = nativeElement; }
 }
 function ElementRef_tsickle_Closure_declarations() {
     /**
