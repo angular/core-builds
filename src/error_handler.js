@@ -32,7 +32,7 @@ import { ERROR_ORIGINAL_ERROR, getDebugContext, getOriginalError } from './error
  *
  * \@stable
  */
-export var ErrorHandler = (function () {
+var ErrorHandler = (function () {
     /**
      * @param {?=} rethrowError
      */
@@ -121,6 +121,7 @@ export var ErrorHandler = (function () {
     };
     return ErrorHandler;
 }());
+export { ErrorHandler };
 function ErrorHandler_tsickle_Closure_declarations() {
     /**
      * \@internal

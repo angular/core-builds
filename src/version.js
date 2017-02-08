@@ -3,7 +3,7 @@
  *
  * \@stable
  */
-export var Version = (function () {
+var Version = (function () {
     /**
      * @param {?} full
      */
@@ -36,6 +36,7 @@ export var Version = (function () {
     });
     return Version;
 }());
+export { Version };
 function Version_tsickle_Closure_declarations() {
     /** @type {?} */
     Version.prototype.full;
@@ -43,5 +44,5 @@ function Version_tsickle_Closure_declarations() {
 /**
  * @stable
  */
-export var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-c33fda2');
+export var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-7a4c255');
 //# sourceMappingURL=version.js.map

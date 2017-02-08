@@ -1,4 +1,4 @@
-export var ElementRef = (function () {
+var ElementRef = (function () {
     /**
      * @param {?} nativeElement
      */
@@ -7,6 +7,7 @@ export var ElementRef = (function () {
     }
     return ElementRef;
 }());
+export { ElementRef };
 function ElementRef_tsickle_Closure_declarations() {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported

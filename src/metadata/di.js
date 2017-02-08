@@ -58,11 +58,12 @@ export var /** @type {?} */ Attribute = makeParamDecorator('Attribute', [['attri
  * \@stable
  * @abstract
  */
-export var Query = (function () {
+var Query = (function () {
     function Query() {
     }
     return Query;
 }());
+export { Query };
 /**
  * ContentChildren decorator and metadata.
  *

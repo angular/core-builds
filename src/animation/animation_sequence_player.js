@@ -7,7 +7,7 @@
  */
 import { isPresent, scheduleMicroTask } from '../facade/lang';
 import { NoOpAnimationPlayer } from './animation_player';
-export var AnimationSequencePlayer = (function () {
+var AnimationSequencePlayer = (function () {
     /**
      * @param {?} _players
      */
@@ -150,6 +150,7 @@ export var AnimationSequencePlayer = (function () {
     });
     return AnimationSequencePlayer;
 }());
+export { AnimationSequencePlayer };
 function AnimationSequencePlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationSequencePlayer.prototype._currentIndex;

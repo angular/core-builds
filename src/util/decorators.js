@@ -160,7 +160,7 @@ export function Class(clsDef) {
             throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
         }
     }
-    for (var key in clsDef) {
+    for (var /** @type {?} */ key in clsDef) {
         if (key !== 'extends' && key !== 'prototype' && clsDef.hasOwnProperty(key)) {
             proto[key] = applyParams(clsDef[key], key);
         }
@@ -214,7 +214,7 @@ export function makeDecorator(name, props, parentClass, chainFn) {
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    DecoratorFactory.prototype.toString = function () { return ("@" + name); };
+    DecoratorFactory.prototype.toString = function () { return "@" + name; };
     ((DecoratorFactory)).annotationCls = DecoratorFactory;
     return DecoratorFactory;
 }
@@ -227,7 +227,7 @@ function makeMetadataCtor(props) {
         var _this = this;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         props.forEach(function (prop, i) {
             var /** @type {?} */ argVal = args[i];
@@ -236,7 +236,7 @@ function makeMetadataCtor(props) {
                 _this[prop[0]] = argVal === undefined ? prop[1] : argVal;
             }
             else {
-                for (var propName in prop) {
+                for (var /** @type {?} */ propName in prop) {
                     _this[propName] =
                         argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
                 }
@@ -259,7 +259,7 @@ export function makeParamDecorator(name, props, parentClass) {
     function ParamDecoratorFactory() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         if (this instanceof ParamDecoratorFactory) {
             metaCtor.apply(this, args);
@@ -291,7 +291,7 @@ export function makeParamDecorator(name, props, parentClass) {
     if (parentClass) {
         ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    ParamDecoratorFactory.prototype.toString = function () { return ("@" + name); };
+    ParamDecoratorFactory.prototype.toString = function () { return "@" + name; };
     ((ParamDecoratorFactory)).annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
 }
@@ -310,7 +310,7 @@ export function makePropDecorator(name, props, parentClass) {
     function PropDecoratorFactory() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         if (this instanceof PropDecoratorFactory) {
             metaCtor.apply(this, args);
@@ -328,7 +328,7 @@ export function makePropDecorator(name, props, parentClass) {
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    PropDecoratorFactory.prototype.toString = function () { return ("@" + name); };
+    PropDecoratorFactory.prototype.toString = function () { return "@" + name; };
     ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
     return PropDecoratorFactory;
 }

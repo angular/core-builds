@@ -43,7 +43,7 @@ export function devModeEqual(a, b) {
  * ```
  * \@stable
  */
-export var WrappedValue = (function () {
+var WrappedValue = (function () {
     /**
      * @param {?} wrapped
      */
@@ -57,6 +57,7 @@ export var WrappedValue = (function () {
     WrappedValue.wrap = function (value) { return new WrappedValue(value); };
     return WrappedValue;
 }());
+export { WrappedValue };
 function WrappedValue_tsickle_Closure_declarations() {
     /** @type {?} */
     WrappedValue.prototype.wrapped;
@@ -64,7 +65,7 @@ function WrappedValue_tsickle_Closure_declarations() {
 /**
  * Helper class for unwrapping WrappedValue s
  */
-export var ValueUnwrapper = (function () {
+var ValueUnwrapper = (function () {
     function ValueUnwrapper() {
         this.hasWrappedValue = false;
     }
@@ -85,6 +86,7 @@ export var ValueUnwrapper = (function () {
     ValueUnwrapper.prototype.reset = function () { this.hasWrappedValue = false; };
     return ValueUnwrapper;
 }());
+export { ValueUnwrapper };
 function ValueUnwrapper_tsickle_Closure_declarations() {
     /** @type {?} */
     ValueUnwrapper.prototype.hasWrappedValue;
@@ -93,7 +95,7 @@ function ValueUnwrapper_tsickle_Closure_declarations() {
  * Represents a basic change from a previous to a new value.
  * \@stable
  */
-export var SimpleChange = (function () {
+var SimpleChange = (function () {
     /**
      * @param {?} previousValue
      * @param {?} currentValue
@@ -111,6 +113,7 @@ export var SimpleChange = (function () {
     SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
     return SimpleChange;
 }());
+export { SimpleChange };
 function SimpleChange_tsickle_Closure_declarations() {
     /** @type {?} */
     SimpleChange.prototype.previousValue;

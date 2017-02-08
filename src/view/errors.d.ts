@@ -1,4 +1,3 @@
-
 import { DebugContext, EntryAction } from './types';
 export declare function expressionChangedAfterItHasBeenCheckedError(context: DebugContext, oldValue: any, currValue: any, isFirstCheck: boolean): Error;
 export declare function viewWrappedDebugError(originalError: any, context: DebugContext): Error;

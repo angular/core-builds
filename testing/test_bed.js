@@ -16,12 +16,13 @@ var UNDEFINED = new Object();
  *
  * @experimental
  */
-export var TestComponentRenderer = (function () {
+var TestComponentRenderer = (function () {
     function TestComponentRenderer() {
     }
     TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
     return TestComponentRenderer;
 }());
+export { TestComponentRenderer };
 var _nextRootElementId = 0;
 /**
  * @experimental
@@ -40,7 +41,7 @@ export var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZo
  *
  * @stable
  */
-export var TestBed = (function () {
+var TestBed = (function () {
     function TestBed() {
         this._instantiated = false;
         this._compiler = null;
@@ -226,7 +227,7 @@ export var TestBed = (function () {
             }
             catch (e) {
                 if (getComponentType(e)) {
-                    throw new Error(("This test module uses the component " + stringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. ") +
+                    throw new Error("This test module uses the component " + stringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -248,13 +249,13 @@ export var TestBed = (function () {
         var DynamicTestModule = (function () {
             function DynamicTestModule() {
             }
-            DynamicTestModule.decorators = [
-                { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
-            ];
-            /** @nocollapse */
-            DynamicTestModule.ctorParameters = function () { return []; };
             return DynamicTestModule;
         }());
+        DynamicTestModule.decorators = [
+            { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+        ];
+        /** @nocollapse */
+        DynamicTestModule.ctorParameters = function () { return []; };
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler =
             compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
@@ -266,7 +267,7 @@ export var TestBed = (function () {
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
-            throw new Error(("Cannot " + methodDescription + " when the test module has already been instantiated. ") +
+            throw new Error("Cannot " + methodDescription + " when the test module has already been instantiated. " +
                 ("Make sure you are not using `inject` before `" + methodName + "`."));
         }
     };
@@ -326,6 +327,7 @@ export var TestBed = (function () {
     };
     return TestBed;
 }());
+export { TestBed };
 var _testBed = null;
 /**
  * @experimental
@@ -380,7 +382,7 @@ export function inject(tokens, fn) {
 /**
  * @experimental
  */
-export var InjectSetupWrapper = (function () {
+var InjectSetupWrapper = (function () {
     function InjectSetupWrapper(_moduleDef) {
         this._moduleDef = _moduleDef;
     }
@@ -400,6 +402,7 @@ export var InjectSetupWrapper = (function () {
     };
     return InjectSetupWrapper;
 }());
+export { InjectSetupWrapper };
 export function withModule(moduleDef, fn) {
     if (fn === void 0) { fn = null; }
     if (fn) {

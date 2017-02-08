@@ -22,7 +22,7 @@ export var /** @type {?} */ AUTO_STYLE = '*';
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationEntryMetadata = (function () {
+var AnimationEntryMetadata = (function () {
     /**
      * @param {?} name
      * @param {?} definitions
@@ -33,6 +33,7 @@ export var AnimationEntryMetadata = (function () {
     }
     return AnimationEntryMetadata;
 }());
+export { AnimationEntryMetadata };
 function AnimationEntryMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationEntryMetadata.prototype.name;
@@ -43,11 +44,12 @@ function AnimationEntryMetadata_tsickle_Closure_declarations() {
  * \@experimental Animation support is experimental.
  * @abstract
  */
-export var AnimationStateMetadata = (function () {
+var AnimationStateMetadata = (function () {
     function AnimationStateMetadata() {
     }
     return AnimationStateMetadata;
 }());
+export { AnimationStateMetadata };
 /**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {\@link state state animation
@@ -55,19 +57,21 @@ export var AnimationStateMetadata = (function () {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationStateDeclarationMetadata = (function (_super) {
+var AnimationStateDeclarationMetadata = (function (_super) {
     __extends(AnimationStateDeclarationMetadata, _super);
     /**
      * @param {?} stateNameExpr
      * @param {?} styles
      */
     function AnimationStateDeclarationMetadata(stateNameExpr, styles) {
-        _super.call(this);
-        this.stateNameExpr = stateNameExpr;
-        this.styles = styles;
+        var _this = _super.call(this) || this;
+        _this.stateNameExpr = stateNameExpr;
+        _this.styles = styles;
+        return _this;
     }
     return AnimationStateDeclarationMetadata;
 }(AnimationStateMetadata));
+export { AnimationStateDeclarationMetadata };
 function AnimationStateDeclarationMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationStateDeclarationMetadata.prototype.stateNameExpr;
@@ -81,19 +85,21 @@ function AnimationStateDeclarationMetadata_tsickle_Closure_declarations() {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationStateTransitionMetadata = (function (_super) {
+var AnimationStateTransitionMetadata = (function (_super) {
     __extends(AnimationStateTransitionMetadata, _super);
     /**
      * @param {?} stateChangeExpr
      * @param {?} steps
      */
     function AnimationStateTransitionMetadata(stateChangeExpr, steps) {
-        _super.call(this);
-        this.stateChangeExpr = stateChangeExpr;
-        this.steps = steps;
+        var _this = _super.call(this) || this;
+        _this.stateChangeExpr = stateChangeExpr;
+        _this.steps = steps;
+        return _this;
     }
     return AnimationStateTransitionMetadata;
 }(AnimationStateMetadata));
+export { AnimationStateTransitionMetadata };
 function AnimationStateTransitionMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationStateTransitionMetadata.prototype.stateChangeExpr;
@@ -104,11 +110,12 @@ function AnimationStateTransitionMetadata_tsickle_Closure_declarations() {
  * \@experimental Animation support is experimental.
  * @abstract
  */
-export var AnimationMetadata = (function () {
+var AnimationMetadata = (function () {
     function AnimationMetadata() {
     }
     return AnimationMetadata;
 }());
+export { AnimationMetadata };
 /**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {\@link keyframes keyframes
@@ -116,17 +123,19 @@ export var AnimationMetadata = (function () {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationKeyframesSequenceMetadata = (function (_super) {
+var AnimationKeyframesSequenceMetadata = (function (_super) {
     __extends(AnimationKeyframesSequenceMetadata, _super);
     /**
      * @param {?} steps
      */
     function AnimationKeyframesSequenceMetadata(steps) {
-        _super.call(this);
-        this.steps = steps;
+        var _this = _super.call(this) || this;
+        _this.steps = steps;
+        return _this;
     }
     return AnimationKeyframesSequenceMetadata;
 }(AnimationMetadata));
+export { AnimationKeyframesSequenceMetadata };
 function AnimationKeyframesSequenceMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationKeyframesSequenceMetadata.prototype.steps;
@@ -138,7 +147,7 @@ function AnimationKeyframesSequenceMetadata_tsickle_Closure_declarations() {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationStyleMetadata = (function (_super) {
+var AnimationStyleMetadata = (function (_super) {
     __extends(AnimationStyleMetadata, _super);
     /**
      * @param {?} styles
@@ -146,12 +155,14 @@ export var AnimationStyleMetadata = (function (_super) {
      */
     function AnimationStyleMetadata(styles, offset) {
         if (offset === void 0) { offset = null; }
-        _super.call(this);
-        this.styles = styles;
-        this.offset = offset;
+        var _this = _super.call(this) || this;
+        _this.styles = styles;
+        _this.offset = offset;
+        return _this;
     }
     return AnimationStyleMetadata;
 }(AnimationMetadata));
+export { AnimationStyleMetadata };
 function AnimationStyleMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationStyleMetadata.prototype.styles;
@@ -165,19 +176,21 @@ function AnimationStyleMetadata_tsickle_Closure_declarations() {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationAnimateMetadata = (function (_super) {
+var AnimationAnimateMetadata = (function (_super) {
     __extends(AnimationAnimateMetadata, _super);
     /**
      * @param {?} timings
      * @param {?} styles
      */
     function AnimationAnimateMetadata(timings, styles) {
-        _super.call(this);
-        this.timings = timings;
-        this.styles = styles;
+        var _this = _super.call(this) || this;
+        _this.timings = timings;
+        _this.styles = styles;
+        return _this;
     }
     return AnimationAnimateMetadata;
 }(AnimationMetadata));
+export { AnimationAnimateMetadata };
 function AnimationAnimateMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationAnimateMetadata.prototype.timings;
@@ -188,10 +201,10 @@ function AnimationAnimateMetadata_tsickle_Closure_declarations() {
  * \@experimental Animation support is experimental.
  * @abstract
  */
-export var AnimationWithStepsMetadata = (function (_super) {
+var AnimationWithStepsMetadata = (function (_super) {
     __extends(AnimationWithStepsMetadata, _super);
     function AnimationWithStepsMetadata() {
-        _super.call(this);
+        return _super.call(this) || this;
     }
     Object.defineProperty(AnimationWithStepsMetadata.prototype, "steps", {
         /**
@@ -203,6 +216,7 @@ export var AnimationWithStepsMetadata = (function (_super) {
     });
     return AnimationWithStepsMetadata;
 }(AnimationMetadata));
+export { AnimationWithStepsMetadata };
 /**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {\@link sequence sequence
@@ -210,14 +224,15 @@ export var AnimationWithStepsMetadata = (function (_super) {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationSequenceMetadata = (function (_super) {
+var AnimationSequenceMetadata = (function (_super) {
     __extends(AnimationSequenceMetadata, _super);
     /**
      * @param {?} _steps
      */
     function AnimationSequenceMetadata(_steps) {
-        _super.call(this);
-        this._steps = _steps;
+        var _this = _super.call(this) || this;
+        _this._steps = _steps;
+        return _this;
     }
     Object.defineProperty(AnimationSequenceMetadata.prototype, "steps", {
         /**
@@ -229,6 +244,7 @@ export var AnimationSequenceMetadata = (function (_super) {
     });
     return AnimationSequenceMetadata;
 }(AnimationWithStepsMetadata));
+export { AnimationSequenceMetadata };
 function AnimationSequenceMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationSequenceMetadata.prototype._steps;
@@ -240,14 +256,15 @@ function AnimationSequenceMetadata_tsickle_Closure_declarations() {
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationGroupMetadata = (function (_super) {
+var AnimationGroupMetadata = (function (_super) {
     __extends(AnimationGroupMetadata, _super);
     /**
      * @param {?} _steps
      */
     function AnimationGroupMetadata(_steps) {
-        _super.call(this);
-        this._steps = _steps;
+        var _this = _super.call(this) || this;
+        _this._steps = _steps;
+        return _this;
     }
     Object.defineProperty(AnimationGroupMetadata.prototype, "steps", {
         /**
@@ -259,6 +276,7 @@ export var AnimationGroupMetadata = (function (_super) {
     });
     return AnimationGroupMetadata;
 }(AnimationWithStepsMetadata));
+export { AnimationGroupMetadata };
 function AnimationGroupMetadata_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationGroupMetadata.prototype._steps;
@@ -467,14 +485,14 @@ export function style(tokens) {
     var /** @type {?} */ input;
     var /** @type {?} */ offset = null;
     if (typeof tokens === 'string') {
-        input = [(tokens)];
+        input = [/** @type {?} */ (tokens)];
     }
     else {
         if (Array.isArray(tokens)) {
             input = (tokens);
         }
         else {
-            input = [(tokens)];
+            input = [/** @type {?} */ (tokens)];
         }
         input.forEach(function (entry) {
             var /** @type {?} */ entryOffset = ((entry) /** TODO #9100 */)['offset'];

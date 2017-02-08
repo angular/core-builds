@@ -9,7 +9,7 @@ import { getSymbolIterator, isJsObject } from './lang';
 /**
  * Wraps Javascript Objects
  */
-export var StringMapWrapper = (function () {
+var StringMapWrapper = (function () {
     function StringMapWrapper() {
     }
     /**
@@ -50,7 +50,8 @@ export var StringMapWrapper = (function () {
     };
     return StringMapWrapper;
 }());
-export var ListWrapper = (function () {
+export { StringMapWrapper };
+var ListWrapper = (function () {
     function ListWrapper() {
     }
     /**
@@ -118,6 +119,7 @@ export var ListWrapper = (function () {
     };
     return ListWrapper;
 }());
+export { ListWrapper };
 /**
  * @param {?} obj
  * @return {?}

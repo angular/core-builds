@@ -7,7 +7,7 @@
  */
 import { isPresent } from '../facade/lang';
 import { DebugElement, DebugNode, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from './debug_node';
-export var DebugDomRootRenderer = (function () {
+var DebugDomRootRenderer = (function () {
     /**
      * @param {?} _delegate
      */
@@ -23,11 +23,12 @@ export var DebugDomRootRenderer = (function () {
     };
     return DebugDomRootRenderer;
 }());
+export { DebugDomRootRenderer };
 function DebugDomRootRenderer_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugDomRootRenderer.prototype._delegate;
 }
-export var DebugDomRenderer = (function () {
+var DebugDomRenderer = (function () {
     /**
      * @param {?} _delegate
      */
@@ -253,6 +254,7 @@ export var DebugDomRenderer = (function () {
     };
     return DebugDomRenderer;
 }());
+export { DebugDomRenderer };
 function DebugDomRenderer_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugDomRenderer.prototype._delegate;

@@ -33,10 +33,10 @@ export declare class QueryList<T> {
     private _dirty;
     private _results;
     private _emitter;
-    changes: Observable<any>;
-    length: number;
-    first: T;
-    last: T;
+    readonly changes: Observable<any>;
+    readonly length: number;
+    readonly first: T;
+    readonly last: T;
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
@@ -74,5 +74,5 @@ export declare class QueryList<T> {
     /** internal */
     setDirty(): void;
     /** internal */
-    dirty: boolean;
+    readonly dirty: boolean;
 }

@@ -1,10 +1,17 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { AUTO_STYLE } from '@angular/core';
-export var MockAnimationPlayer = (function () {
+var MockAnimationPlayer = (function () {
     function MockAnimationPlayer(startingStyles, keyframes, previousPlayers) {
-        var _this = this;
         if (startingStyles === void 0) { startingStyles = {}; }
         if (keyframes === void 0) { keyframes = []; }
         if (previousPlayers === void 0) { previousPlayers = []; }
+        var _this = this;
         this.startingStyles = startingStyles;
         this.keyframes = keyframes;
         this._onDoneFns = [];
@@ -83,4 +90,5 @@ export var MockAnimationPlayer = (function () {
     };
     return MockAnimationPlayer;
 }());
+export { MockAnimationPlayer };
 //# sourceMappingURL=mock_animation_player.js.map

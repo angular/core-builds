@@ -72,7 +72,7 @@ export function _providerDef(flags, matchedQueries, childCount, type, token, val
     }
     var /** @type {?} */ bindings = [];
     if (props) {
-        for (var prop in props) {
+        for (var /** @type {?} */ prop in props) {
             var _a = props[prop], bindingIndex = _a[0], nonMinifiedName = _a[1];
             bindings[bindingIndex] = {
                 type: BindingType.ProviderProperty,
@@ -84,7 +84,7 @@ export function _providerDef(flags, matchedQueries, childCount, type, token, val
     }
     var /** @type {?} */ outputDefs = [];
     if (outputs) {
-        for (var propName in outputs) {
+        for (var /** @type {?} */ propName in outputs) {
             outputDefs.push({ propName: propName, eventName: outputs[propName] });
         }
     }

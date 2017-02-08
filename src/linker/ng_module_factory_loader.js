@@ -10,7 +10,7 @@
  * \@stable
  * @abstract
  */
-export var NgModuleFactoryLoader = (function () {
+var NgModuleFactoryLoader = (function () {
     function NgModuleFactoryLoader() {
     }
     /**
@@ -21,6 +21,7 @@ export var NgModuleFactoryLoader = (function () {
     NgModuleFactoryLoader.prototype.load = function (path) { };
     return NgModuleFactoryLoader;
 }());
+export { NgModuleFactoryLoader };
 var /** @type {?} */ moduleFactories = new Map();
 /**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.

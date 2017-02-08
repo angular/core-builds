@@ -19,10 +19,10 @@ function unimplemented() {
  *
  * @experimental
  */
-export var TestingCompiler = (function (_super) {
+var TestingCompiler = (function (_super) {
     __extends(TestingCompiler, _super);
     function TestingCompiler() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Object.defineProperty(TestingCompiler.prototype, "injector", {
         get: function () { throw unimplemented(); },
@@ -43,14 +43,16 @@ export var TestingCompiler = (function (_super) {
     };
     return TestingCompiler;
 }(Compiler));
+export { TestingCompiler };
 /**
  * A factory for creating a Compiler
  *
  * @experimental
  */
-export var TestingCompilerFactory = (function () {
+var TestingCompilerFactory = (function () {
     function TestingCompilerFactory() {
     }
     return TestingCompilerFactory;
 }());
+export { TestingCompilerFactory };
 //# sourceMappingURL=test_compiler.js.map

@@ -26,7 +26,7 @@ var __extends = (this && this.__extends) || function (d, b) {
  * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
  * instead.
  */
-export var OpaqueToken = (function () {
+var OpaqueToken = (function () {
     /**
      * @param {?} _desc
      */
@@ -39,6 +39,7 @@ export var OpaqueToken = (function () {
     OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
     return OpaqueToken;
 }());
+export { OpaqueToken };
 function OpaqueToken_tsickle_Closure_declarations() {
     /** @type {?} */
     OpaqueToken.prototype._desc;
@@ -65,13 +66,13 @@ function OpaqueToken_tsickle_Closure_declarations() {
  *
  * \@stable
  */
-export var InjectionToken = (function (_super) {
+var InjectionToken = (function (_super) {
     __extends(InjectionToken, _super);
     /**
      * @param {?} desc
      */
     function InjectionToken(desc) {
-        _super.call(this, desc);
+        return _super.call(this, desc) || this;
     }
     /**
      * @return {?}
@@ -79,6 +80,7 @@ export var InjectionToken = (function (_super) {
     InjectionToken.prototype.toString = function () { return "InjectionToken " + this._desc; };
     return InjectionToken;
 }(OpaqueToken));
+export { InjectionToken };
 function InjectionToken_tsickle_Closure_declarations() {
     /** @type {?} */
     InjectionToken.prototype._differentiate_from_OpaqueToken_structurally;

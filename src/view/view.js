@@ -111,7 +111,7 @@ export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compone
  * @return {?}
  */
 function copyInto(source, target) {
-    for (var prop in source) {
+    for (var /** @type {?} */ prop in source) {
         target[prop] = source[prop];
     }
 }

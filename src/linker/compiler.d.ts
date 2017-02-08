@@ -82,13 +82,7 @@ export declare type CompilerOptions = {
  *
  * @experimental
  */
-export declare const COMPILER_OPTIONS: InjectionToken<{
-    useDebug?: boolean;
-    useJit?: boolean;
-    defaultEncapsulation?: ViewEncapsulation;
-    providers?: any[];
-    missingTranslation?: MissingTranslationStrategy;
-}[]>;
+export declare const COMPILER_OPTIONS: InjectionToken<CompilerOptions[]>;
 /**
  * A factory for creating a Compiler
  *

@@ -11,16 +11,17 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { Injector, THROW_IF_NOT_FOUND } from '../di/injector';
-export var ElementInjector = (function (_super) {
+var ElementInjector = (function (_super) {
     __extends(ElementInjector, _super);
     /**
      * @param {?} _view
      * @param {?} _nodeIndex
      */
     function ElementInjector(_view, _nodeIndex) {
-        _super.call(this);
-        this._view = _view;
-        this._nodeIndex = _nodeIndex;
+        var _this = _super.call(this) || this;
+        _this._view = _view;
+        _this._nodeIndex = _nodeIndex;
+        return _this;
     }
     /**
      * @param {?} token
@@ -33,6 +34,7 @@ export var ElementInjector = (function (_super) {
     };
     return ElementInjector;
 }(Injector));
+export { ElementInjector };
 function ElementInjector_tsickle_Closure_declarations() {
     /** @type {?} */
     ElementInjector.prototype._view;

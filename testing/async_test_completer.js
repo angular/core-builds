@@ -8,7 +8,7 @@
 /**
  * Injectable completer that allows signaling completion of an asynchronous test. Used internally.
  */
-export var AsyncTestCompleter = (function () {
+var AsyncTestCompleter = (function () {
     function AsyncTestCompleter() {
         var _this = this;
         this._promise = new Promise(function (res, rej) {
@@ -25,4 +25,5 @@ export var AsyncTestCompleter = (function () {
     });
     return AsyncTestCompleter;
 }());
+export { AsyncTestCompleter };
 //# sourceMappingURL=async_test_completer.js.map

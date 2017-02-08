@@ -2,7 +2,7 @@
  * \@stable
  * @abstract
  */
-export var ChangeDetectorRef = (function () {
+var ChangeDetectorRef = (function () {
     function ChangeDetectorRef() {
     }
     /**
@@ -193,4 +193,5 @@ export var ChangeDetectorRef = (function () {
     ChangeDetectorRef.prototype.reattach = function () { };
     return ChangeDetectorRef;
 }());
+export { ChangeDetectorRef };
 //# sourceMappingURL=change_detector_ref.js.map

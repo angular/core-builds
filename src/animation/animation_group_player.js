@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isPresent, scheduleMicroTask } from '../facade/lang';
-export var AnimationGroupPlayer = (function () {
+var AnimationGroupPlayer = (function () {
     /**
      * @param {?} _players
      */
@@ -139,6 +139,7 @@ export var AnimationGroupPlayer = (function () {
     });
     return AnimationGroupPlayer;
 }());
+export { AnimationGroupPlayer };
 function AnimationGroupPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationGroupPlayer.prototype._onDoneFns;

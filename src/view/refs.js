@@ -22,7 +22,7 @@ var /** @type {?} */ EMPTY_CONTEXT = new Object();
 export function createRefs() {
     return new Refs_();
 }
-export var Refs_ = (function () {
+var Refs_ = (function () {
     function Refs_() {
     }
     /**
@@ -70,6 +70,7 @@ export var Refs_ = (function () {
     };
     return Refs_;
 }());
+export { Refs_ };
 var ComponentFactory_ = (function () {
     /**
      * @param {?} selector
@@ -646,7 +647,7 @@ function findHostElement(view) {
  * @return {?}
  */
 function collectReferences(view, nodeDef, references) {
-    for (var queryId in nodeDef.matchedQueries) {
+    for (var /** @type {?} */ queryId in nodeDef.matchedQueries) {
         if (queryId.startsWith('#')) {
             references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
         }

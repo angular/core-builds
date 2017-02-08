@@ -78,7 +78,7 @@ import { EventEmitter } from '../facade/async';
  *
  * \@experimental
  */
-export var NgZone = (function () {
+var NgZone = (function () {
     /**
      * @param {?} __0
      */
@@ -333,6 +333,7 @@ export var NgZone = (function () {
     NgZone.prototype.triggerError = function (error) { this._onErrorEvents.emit(error); };
     return NgZone;
 }());
+export { NgZone };
 function NgZone_tsickle_Closure_declarations() {
     /** @type {?} */
     NgZone.prototype.outer;

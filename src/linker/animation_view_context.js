@@ -1,7 +1,14 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { AnimationGroupPlayer } from '../animation/animation_group_player';
 import { AnimationSequencePlayer } from '../animation/animation_sequence_player';
 import { ViewAnimationMap } from '../animation/view_animation_map';
-export var AnimationViewContext = (function () {
+var AnimationViewContext = (function () {
     /**
      * @param {?} _animationQueue
      */
@@ -57,6 +64,7 @@ export var AnimationViewContext = (function () {
     };
     return AnimationViewContext;
 }());
+export { AnimationViewContext };
 function AnimationViewContext_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationViewContext.prototype._players;

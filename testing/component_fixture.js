@@ -12,7 +12,7 @@ import { scheduleMicroTask } from './facade/lang';
  *
  * @stable
  */
-export var ComponentFixture = (function () {
+var ComponentFixture = (function () {
     function ComponentFixture(componentRef, ngZone, _autoDetect) {
         var _this = this;
         this.componentRef = componentRef;
@@ -158,4 +158,5 @@ export var ComponentFixture = (function () {
     };
     return ComponentFixture;
 }());
+export { ComponentFixture };
 //# sourceMappingURL=component_fixture.js.map

@@ -42,7 +42,7 @@ export function fakeAsync(fn) {
     return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         var proxyZoneSpec = ProxyZoneSpec.assertPresent();
         if (_inFakeAsyncCall) {
@@ -67,7 +67,7 @@ export function fakeAsync(fn) {
                 proxyZoneSpec.setDelegate(lastProxyZoneSpec);
             }
             if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                throw new Error((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
+                throw new Error(_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " " +
                     "periodic timer(s) still in the queue.");
             }
             if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {

@@ -7,7 +7,7 @@
  */
 import { isBlank, isPresent } from '../facade/lang';
 import { ViewType } from './view_type';
-export var StaticNodeDebugInfo = (function () {
+var StaticNodeDebugInfo = (function () {
     /**
      * @param {?} providerTokens
      * @param {?} componentToken
@@ -20,6 +20,7 @@ export var StaticNodeDebugInfo = (function () {
     }
     return StaticNodeDebugInfo;
 }());
+export { StaticNodeDebugInfo };
 function StaticNodeDebugInfo_tsickle_Closure_declarations() {
     /** @type {?} */
     StaticNodeDebugInfo.prototype.providerTokens;
@@ -28,7 +29,7 @@ function StaticNodeDebugInfo_tsickle_Closure_declarations() {
     /** @type {?} */
     StaticNodeDebugInfo.prototype.refTokens;
 }
-export var DebugContext = (function () {
+var DebugContext = (function () {
     /**
      * @param {?} _view
      * @param {?} _nodeIndex
@@ -160,6 +161,7 @@ export var DebugContext = (function () {
     });
     return DebugContext;
 }());
+export { DebugContext };
 function DebugContext_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugContext.prototype._view;

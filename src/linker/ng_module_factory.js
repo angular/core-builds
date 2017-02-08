@@ -22,7 +22,7 @@ import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './com
  * \@stable
  * @abstract
  */
-export var NgModuleRef = (function () {
+var NgModuleRef = (function () {
     function NgModuleRef() {
     }
     /**
@@ -59,10 +59,11 @@ export var NgModuleRef = (function () {
     NgModuleRef.prototype.onDestroy = function (callback) { };
     return NgModuleRef;
 }());
+export { NgModuleRef };
 /**
  * \@experimental
  */
-export var NgModuleFactory = (function () {
+var NgModuleFactory = (function () {
     /**
      * @param {?} _injectorClass
      * @param {?} _moduleType
@@ -93,6 +94,7 @@ export var NgModuleFactory = (function () {
     };
     return NgModuleFactory;
 }());
+export { NgModuleFactory };
 function NgModuleFactory_tsickle_Closure_declarations() {
     /** @type {?} */
     NgModuleFactory.prototype._injectorClass;
@@ -103,7 +105,7 @@ var /** @type {?} */ _UNDEFINED = new Object();
 /**
  * @abstract
  */
-export var NgModuleInjector = (function (_super) {
+var NgModuleInjector = (function (_super) {
     __extends(NgModuleInjector, _super);
     /**
      * @param {?} parent
@@ -111,11 +113,12 @@ export var NgModuleInjector = (function (_super) {
      * @param {?} bootstrapFactories
      */
     function NgModuleInjector(parent, factories, bootstrapFactories) {
-        _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
-        this.parent = parent;
-        this.bootstrapFactories = bootstrapFactories;
-        this._destroyListeners = [];
-        this._destroyed = false;
+        var _this = _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL)) || this;
+        _this.parent = parent;
+        _this.bootstrapFactories = bootstrapFactories;
+        _this._destroyListeners = [];
+        _this._destroyed = false;
+        return _this;
     }
     /**
      * @return {?}
@@ -185,6 +188,7 @@ export var NgModuleInjector = (function (_super) {
     NgModuleInjector.prototype.destroyInternal = function () { };
     return NgModuleInjector;
 }(CodegenComponentFactoryResolver));
+export { NgModuleInjector };
 function NgModuleInjector_tsickle_Closure_declarations() {
     /** @type {?} */
     NgModuleInjector.prototype._destroyListeners;

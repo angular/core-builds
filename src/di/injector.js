@@ -46,7 +46,7 @@ var _NullInjector = (function () {
  * \@stable
  * @abstract
  */
-export var Injector = (function () {
+var Injector = (function () {
     function Injector() {
     }
     /**
@@ -70,10 +70,11 @@ export var Injector = (function () {
      * @return {?}
      */
     Injector.prototype.get = function (token, notFoundValue) { };
-    Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-    Injector.NULL = new _NullInjector();
     return Injector;
 }());
+export { Injector };
+Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+Injector.NULL = new _NullInjector();
 function Injector_tsickle_Closure_declarations() {
     /** @type {?} */
     Injector.THROW_IF_NOT_FOUND;

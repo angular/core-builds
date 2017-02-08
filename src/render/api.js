@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-export var RenderComponentType = (function () {
+var RenderComponentType = (function () {
     /**
      * @param {?} id
      * @param {?} templateUrl
@@ -24,6 +24,7 @@ export var RenderComponentType = (function () {
     }
     return RenderComponentType;
 }());
+export { RenderComponentType };
 function RenderComponentType_tsickle_Closure_declarations() {
     /** @type {?} */
     RenderComponentType.prototype.id;
@@ -41,7 +42,7 @@ function RenderComponentType_tsickle_Closure_declarations() {
 /**
  * @abstract
  */
-export var RenderDebugInfo = (function () {
+var RenderDebugInfo = (function () {
     function RenderDebugInfo() {
     }
     /**
@@ -76,11 +77,12 @@ export var RenderDebugInfo = (function () {
     RenderDebugInfo.prototype.source = function () { };
     return RenderDebugInfo;
 }());
+export { RenderDebugInfo };
 /**
  * \@experimental
  * @abstract
  */
-export var Renderer = (function () {
+var Renderer = (function () {
     function Renderer() {
     }
     /**
@@ -232,6 +234,7 @@ export var Renderer = (function () {
     Renderer.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { };
     return Renderer;
 }());
+export { Renderer };
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -246,7 +249,7 @@ export var Renderer = (function () {
  * \@experimental
  * @abstract
  */
-export var RootRenderer = (function () {
+var RootRenderer = (function () {
     function RootRenderer() {
     }
     /**
@@ -257,4 +260,5 @@ export var RootRenderer = (function () {
     RootRenderer.prototype.renderComponent = function (componentType) { };
     return RootRenderer;
 }());
+export { RootRenderer };
 //# sourceMappingURL=api.js.map

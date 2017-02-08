@@ -13,7 +13,7 @@ import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
 import { VERSION } from '../version';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
-export var ViewUtils = (function () {
+var ViewUtils = (function () {
     /**
      * @param {?} _renderer
      * @param {?} sanitizer
@@ -32,17 +32,18 @@ export var ViewUtils = (function () {
     ViewUtils.prototype.renderComponent = function (renderComponentType) {
         return this._renderer.renderComponent(renderComponentType);
     };
-    ViewUtils.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ViewUtils.ctorParameters = function () { return [
-        { type: RootRenderer, },
-        { type: Sanitizer, },
-        { type: AnimationQueue, },
-    ]; };
     return ViewUtils;
 }());
+export { ViewUtils };
+ViewUtils.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+ViewUtils.ctorParameters = function () { return [
+    { type: RootRenderer, },
+    { type: Sanitizer, },
+    { type: AnimationQueue, },
+]; };
 function ViewUtils_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewUtils.decorators;
@@ -546,7 +547,7 @@ function camelCaseToDashCase(input) {
     return input.replace(CAMEL_CASE_REGEXP, function () {
         var m = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            m[_i - 0] = arguments[_i];
+            m[_i] = arguments[_i];
         }
         return '-' + m[1].toLowerCase();
     });
@@ -668,7 +669,7 @@ function InlineArray0_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray0.prototype.length;
 }
-export var InlineArray2 = (function () {
+var InlineArray2 = (function () {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -710,6 +711,7 @@ export var InlineArray2 = (function () {
     };
     return InlineArray2;
 }());
+export { InlineArray2 };
 function InlineArray2_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray2.prototype.length;
@@ -718,7 +720,7 @@ function InlineArray2_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray2.prototype._v1;
 }
-export var InlineArray4 = (function () {
+var InlineArray4 = (function () {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -774,6 +776,7 @@ export var InlineArray4 = (function () {
     };
     return InlineArray4;
 }());
+export { InlineArray4 };
 function InlineArray4_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray4.prototype.length;
@@ -786,7 +789,7 @@ function InlineArray4_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray4.prototype._v3;
 }
-export var InlineArray8 = (function () {
+var InlineArray8 = (function () {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -870,6 +873,7 @@ export var InlineArray8 = (function () {
     };
     return InlineArray8;
 }());
+export { InlineArray8 };
 function InlineArray8_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray8.prototype.length;
@@ -890,7 +894,7 @@ function InlineArray8_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray8.prototype._v7;
 }
-export var InlineArray16 = (function () {
+var InlineArray16 = (function () {
     /**
      * @param {?} length
      * @param {?=} _v0
@@ -1030,6 +1034,7 @@ export var InlineArray16 = (function () {
     };
     return InlineArray16;
 }());
+export { InlineArray16 };
 function InlineArray16_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray16.prototype.length;
@@ -1066,7 +1071,7 @@ function InlineArray16_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArray16.prototype._v15;
 }
-export var InlineArrayDynamic = (function () {
+var InlineArrayDynamic = (function () {
     /**
      * @param {?} length
      * @param {...?} values
@@ -1092,6 +1097,7 @@ export var InlineArrayDynamic = (function () {
     InlineArrayDynamic.prototype.set = function (index, value) { this._values[index] = value; };
     return InlineArrayDynamic;
 }());
+export { InlineArrayDynamic };
 function InlineArrayDynamic_tsickle_Closure_declarations() {
     /** @type {?} */
     InlineArrayDynamic.prototype._values;

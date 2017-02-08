@@ -23,7 +23,7 @@ import { resolveForwardRef } from './forward_ref';
  * providers.
  * \@experimental
  */
-export var ReflectiveKey = (function () {
+var ReflectiveKey = (function () {
     /**
      * Private
      * @param {?} token
@@ -63,6 +63,7 @@ export var ReflectiveKey = (function () {
     });
     return ReflectiveKey;
 }());
+export { ReflectiveKey };
 function ReflectiveKey_tsickle_Closure_declarations() {
     /** @type {?} */
     ReflectiveKey.prototype.token;
@@ -72,7 +73,7 @@ function ReflectiveKey_tsickle_Closure_declarations() {
 /**
  * \@internal
  */
-export var KeyRegistry = (function () {
+var KeyRegistry = (function () {
     function KeyRegistry() {
         this._allKeys = new Map();
     }
@@ -100,6 +101,7 @@ export var KeyRegistry = (function () {
     });
     return KeyRegistry;
 }());
+export { KeyRegistry };
 function KeyRegistry_tsickle_Closure_declarations() {
     /** @type {?} */
     KeyRegistry.prototype._allKeys;

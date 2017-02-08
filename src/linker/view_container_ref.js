@@ -26,7 +26,7 @@ import { wtfCreateScope, wtfLeave } from '../profile/profile';
  * \@stable
  * @abstract
  */
-export var ViewContainerRef = (function () {
+var ViewContainerRef = (function () {
     function ViewContainerRef() {
     }
     /**
@@ -149,7 +149,8 @@ export var ViewContainerRef = (function () {
     ViewContainerRef.prototype.detach = function (index) { };
     return ViewContainerRef;
 }());
-export var ViewContainerRef_ = (function () {
+export { ViewContainerRef };
+var ViewContainerRef_ = (function () {
     /**
      * @param {?} _element
      */
@@ -305,6 +306,7 @@ export var ViewContainerRef_ = (function () {
     };
     return ViewContainerRef_;
 }());
+export { ViewContainerRef_ };
 function ViewContainerRef__tsickle_Closure_declarations() {
     /**
      * \@internal

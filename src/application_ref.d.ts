@@ -138,12 +138,12 @@ export declare abstract class PlatformRef {
      * Retrieve the platform {@link Injector}, which is the parent injector for
      * every Angular application on the page and provides singleton providers.
      */
-    injector: Injector;
+    readonly abstract injector: Injector;
     /**
      * Destroy the Angular platform and all Angular applications on the page.
      */
     abstract destroy(): void;
-    destroyed: boolean;
+    readonly abstract destroyed: boolean;
 }
 /**
  * workaround https://github.com/angular/tsickle/issues/350
@@ -156,8 +156,8 @@ export declare class PlatformRef_ extends PlatformRef {
     private _destroyed;
     constructor(_injector: Injector);
     onDestroy(callback: () => void): void;
-    injector: Injector;
-    destroyed: boolean;
+    readonly injector: Injector;
+    readonly destroyed: boolean;
     destroy(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
     private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
@@ -201,11 +201,11 @@ export declare abstract class ApplicationRef {
      * Get a list of component types registered to this application.
      * This list is populated even before the component is created.
      */
-    componentTypes: Type<any>[];
+    readonly abstract componentTypes: Type<any>[];
     /**
      * Get a list of components registered to this application.
      */
-    components: ComponentRef<any>[];
+    readonly abstract components: ComponentRef<any>[];
     /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
@@ -219,7 +219,7 @@ export declare abstract class ApplicationRef {
     /**
      * Returns the number of attached views.
      */
-    viewCount: number;
+    readonly abstract viewCount: number;
 }
 /**
  * workaround https://github.com/angular/tsickle/issues/350
@@ -248,7 +248,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _unloadComponent(componentRef);
     tick(): void;
     ngOnDestroy(): void;
-    viewCount: number;
-    componentTypes: Type<any>[];
-    components: ComponentRef<any>[];
+    readonly viewCount: number;
+    readonly componentTypes: Type<any>[];
+    readonly components: ComponentRef<any>[];
 }

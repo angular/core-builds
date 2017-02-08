@@ -1,6 +1,13 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Injectable } from '../di/metadata';
 import { NgZone } from '../zone/ng_zone';
-export var AnimationQueue = (function () {
+var AnimationQueue = (function () {
     /**
      * @param {?} _zone
      */
@@ -49,15 +56,16 @@ export var AnimationQueue = (function () {
             }
         }
     };
-    AnimationQueue.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    AnimationQueue.ctorParameters = function () { return [
-        { type: NgZone, },
-    ]; };
     return AnimationQueue;
 }());
+export { AnimationQueue };
+AnimationQueue.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+AnimationQueue.ctorParameters = function () { return [
+    { type: NgZone, },
+]; };
 function AnimationQueue_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationQueue.decorators;

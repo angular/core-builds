@@ -15,14 +15,15 @@ import { ReflectorReader } from './reflector_reader';
  * Provides access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  */
-export var Reflector = (function (_super) {
+var Reflector = (function (_super) {
     __extends(Reflector, _super);
     /**
      * @param {?} reflectionCapabilities
      */
     function Reflector(reflectionCapabilities) {
-        _super.call(this);
-        this.reflectionCapabilities = reflectionCapabilities;
+        var _this = _super.call(this) || this;
+        _this.reflectionCapabilities = reflectionCapabilities;
+        return _this;
     }
     /**
      * @param {?} caps
@@ -102,6 +103,7 @@ export var Reflector = (function (_super) {
     };
     return Reflector;
 }(ReflectorReader));
+export { Reflector };
 function Reflector_tsickle_Closure_declarations() {
     /** @type {?} */
     Reflector.prototype.reflectionCapabilities;

@@ -21,7 +21,7 @@ import { ViewUtils } from './view_utils';
  * \@stable
  * @abstract
  */
-export var ComponentRef = (function () {
+var ComponentRef = (function () {
     function ComponentRef() {
     }
     /**
@@ -75,11 +75,12 @@ export var ComponentRef = (function () {
     ComponentRef.prototype.onDestroy = function (callback) { };
     return ComponentRef;
 }());
+export { ComponentRef };
 /**
  * workaround https://github.com/angular/tsickle/issues/350
  * @suppress {checkTypes}
  */
-export var ComponentRef_ = (function (_super) {
+var ComponentRef_ = (function (_super) {
     __extends(ComponentRef_, _super);
     /**
      * @param {?} _index
@@ -88,11 +89,12 @@ export var ComponentRef_ = (function (_super) {
      * @param {?} _component
      */
     function ComponentRef_(_index, _parentView, _nativeElement, _component) {
-        _super.call(this);
-        this._index = _index;
-        this._parentView = _parentView;
-        this._nativeElement = _nativeElement;
-        this._component = _component;
+        var _this = _super.call(this) || this;
+        _this._index = _index;
+        _this._parentView = _parentView;
+        _this._nativeElement = _nativeElement;
+        _this._component = _component;
+        return _this;
     }
     Object.defineProperty(ComponentRef_.prototype, "location", {
         /**
@@ -156,6 +158,7 @@ export var ComponentRef_ = (function (_super) {
     ComponentRef_.prototype.onDestroy = function (callback) { this.hostView.onDestroy(callback); };
     return ComponentRef_;
 }(ComponentRef));
+export { ComponentRef_ };
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentRef_.prototype._index;
@@ -169,7 +172,7 @@ function ComponentRef__tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export var ComponentFactory = (function () {
+var ComponentFactory = (function () {
     /**
      * @param {?} selector
      * @param {?} _viewClass
@@ -199,6 +202,7 @@ export var ComponentFactory = (function () {
     };
     return ComponentFactory;
 }());
+export { ComponentFactory };
 function ComponentFactory_tsickle_Closure_declarations() {
     /**
      * \@internal

@@ -7,7 +7,7 @@
  */
 import { isListLikeIterable, iterateListLike } from '../../facade/collection';
 import { isBlank, looseIdentical, stringify } from '../../facade/lang';
-export var DefaultIterableDifferFactory = (function () {
+var DefaultIterableDifferFactory = (function () {
     function DefaultIterableDifferFactory() {
     }
     /**
@@ -25,11 +25,12 @@ export var DefaultIterableDifferFactory = (function () {
     };
     return DefaultIterableDifferFactory;
 }());
+export { DefaultIterableDifferFactory };
 var /** @type {?} */ trackByIdentity = function (index, item) { return item; };
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
  */
-export var DefaultIterableDiffer = (function () {
+var DefaultIterableDiffer = (function () {
     /**
      * @param {?=} _trackByFn
      */
@@ -658,6 +659,7 @@ export var DefaultIterableDiffer = (function () {
     };
     return DefaultIterableDiffer;
 }());
+export { DefaultIterableDiffer };
 function DefaultIterableDiffer_tsickle_Closure_declarations() {
     /** @type {?} */
     DefaultIterableDiffer.prototype._length;
@@ -695,7 +697,7 @@ function DefaultIterableDiffer_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export var IterableChangeRecord_ = (function () {
+var IterableChangeRecord_ = (function () {
     /**
      * @param {?} item
      * @param {?} trackById
@@ -736,6 +738,7 @@ export var IterableChangeRecord_ = (function () {
     };
     return IterableChangeRecord_;
 }());
+export { IterableChangeRecord_ };
 function IterableChangeRecord__tsickle_Closure_declarations() {
     /** @type {?} */
     IterableChangeRecord_.prototype.currentIndex;

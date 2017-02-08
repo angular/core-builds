@@ -12,7 +12,7 @@ import { ViewType } from './view_type';
  * A ViewContainer is created for elements that have a ViewContainerRef
  * to keep track of the nested views.
  */
-export var ViewContainer = (function () {
+var ViewContainer = (function () {
     /**
      * @param {?} index
      * @param {?} parentIndex
@@ -180,6 +180,7 @@ export var ViewContainer = (function () {
     };
     return ViewContainer;
 }());
+export { ViewContainer };
 function ViewContainer_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewContainer.prototype.nestedViews;

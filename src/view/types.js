@@ -128,11 +128,12 @@ ViewState[ViewState.Destroyed] = "Destroyed";
  * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
  * purposes.
  */
-export var NodeData = (function () {
+var NodeData = (function () {
     function NodeData() {
     }
     return NodeData;
 }());
+export { NodeData };
 function NodeData_tsickle_Closure_declarations() {
     /** @type {?} */
     NodeData.prototype.__brand;
@@ -197,7 +198,7 @@ EntryAction[EntryAction.HandleEvent] = "HandleEvent";
  * This class is used to prevent cycles in the source files.
  * @abstract
  */
-export var Refs = (function () {
+var Refs = (function () {
     function Refs() {
     }
     /**
@@ -293,6 +294,7 @@ export var Refs = (function () {
     Refs.prototype.createDebugContext = function (view, nodeIndex) { };
     return Refs;
 }());
+export { Refs };
 function Refs_tsickle_Closure_declarations() {
     /** @type {?} */
     Refs.instance;

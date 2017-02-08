@@ -85,7 +85,7 @@ export function stringify(token) {
     var /** @type {?} */ newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
-export var NumberWrapper = (function () {
+var NumberWrapper = (function () {
     function NumberWrapper() {
     }
     /**
@@ -106,6 +106,7 @@ export var NumberWrapper = (function () {
     NumberWrapper.isNumeric = function (value) { return !isNaN(value - parseFloat(value)); };
     return NumberWrapper;
 }());
+export { NumberWrapper };
 /**
  * @param {?} a
  * @param {?} b

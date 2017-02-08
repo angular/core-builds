@@ -17,7 +17,7 @@ SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
  * \@stable
  * @abstract
  */
-export var Sanitizer = (function () {
+var Sanitizer = (function () {
     function Sanitizer() {
     }
     /**
@@ -29,4 +29,5 @@ export var Sanitizer = (function () {
     Sanitizer.prototype.sanitize = function (context, value) { };
     return Sanitizer;
 }());
+export { Sanitizer };
 //# sourceMappingURL=security.js.map

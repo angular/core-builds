@@ -37,7 +37,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  *
  * {\@link Component}
  */
-export var ViewMetadata = (function () {
+var ViewMetadata = (function () {
     /**
      * @param {?=} __0
      */
@@ -53,6 +53,7 @@ export var ViewMetadata = (function () {
     }
     return ViewMetadata;
 }());
+export { ViewMetadata };
 function ViewMetadata_tsickle_Closure_declarations() {
     /**
      * {\@link Component.templateUrl}

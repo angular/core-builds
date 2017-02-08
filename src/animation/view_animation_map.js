@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isPresent } from '../facade/lang';
-export var ViewAnimationMap = (function () {
+var ViewAnimationMap = (function () {
     function ViewAnimationMap() {
         this._map = new Map();
         this._allPlayers = [];
@@ -76,6 +76,7 @@ export var ViewAnimationMap = (function () {
     };
     return ViewAnimationMap;
 }());
+export { ViewAnimationMap };
 function ViewAnimationMap_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewAnimationMap.prototype._map;

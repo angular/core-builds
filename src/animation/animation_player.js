@@ -10,7 +10,7 @@ import { scheduleMicroTask } from '../facade/lang';
  * \@experimental Animation support is experimental.
  * @abstract
  */
-export var AnimationPlayer = (function () {
+var AnimationPlayer = (function () {
     function AnimationPlayer() {
     }
     /**
@@ -91,7 +91,8 @@ export var AnimationPlayer = (function () {
     });
     return AnimationPlayer;
 }());
-export var NoOpAnimationPlayer = (function () {
+export { AnimationPlayer };
+var NoOpAnimationPlayer = (function () {
     function NoOpAnimationPlayer() {
         var _this = this;
         this._onDoneFns = [];
@@ -167,6 +168,7 @@ export var NoOpAnimationPlayer = (function () {
     NoOpAnimationPlayer.prototype.getPosition = function () { return 0; };
     return NoOpAnimationPlayer;
 }());
+export { NoOpAnimationPlayer };
 function NoOpAnimationPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     NoOpAnimationPlayer.prototype._onDoneFns;

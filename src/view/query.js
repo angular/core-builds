@@ -17,7 +17,7 @@ import { declaredViewContainer } from './util';
  */
 export function queryDef(flags, id, bindings) {
     var /** @type {?} */ bindingDefs = [];
-    for (var propName in bindings) {
+    for (var /** @type {?} */ propName in bindings) {
         var /** @type {?} */ bindingType = bindings[propName];
         bindingDefs.push({ propName: propName, bindingType: bindingType });
     }

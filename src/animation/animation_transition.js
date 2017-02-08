@@ -1,5 +1,5 @@
 import { AnimationTransitionEvent } from './animation_transition_event';
-export var AnimationTransition = (function () {
+var AnimationTransition = (function () {
     /**
      * @param {?} _player
      * @param {?} _element
@@ -50,6 +50,7 @@ export var AnimationTransition = (function () {
     };
     return AnimationTransition;
 }());
+export { AnimationTransition };
 function AnimationTransition_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationTransition.prototype._player;

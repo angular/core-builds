@@ -25,7 +25,7 @@ import { ElementRef } from './element_ref';
  * \@stable
  * @abstract
  */
-export var TemplateRef = (function () {
+var TemplateRef = (function () {
     function TemplateRef() {
     }
     /**
@@ -41,11 +41,12 @@ export var TemplateRef = (function () {
     TemplateRef.prototype.createEmbeddedView = function (context) { };
     return TemplateRef;
 }());
+export { TemplateRef };
 /**
  * workaround https://github.com/angular/tsickle/issues/350
  * @suppress {checkTypes}
  */
-export var TemplateRef_ = (function (_super) {
+var TemplateRef_ = (function (_super) {
     __extends(TemplateRef_, _super);
     /**
      * @param {?} _parentView
@@ -53,10 +54,11 @@ export var TemplateRef_ = (function (_super) {
      * @param {?} _nativeElement
      */
     function TemplateRef_(_parentView, _nodeIndex, _nativeElement) {
-        _super.call(this);
-        this._parentView = _parentView;
-        this._nodeIndex = _nodeIndex;
-        this._nativeElement = _nativeElement;
+        var _this = _super.call(this) || this;
+        _this._parentView = _parentView;
+        _this._nodeIndex = _nodeIndex;
+        _this._nativeElement = _nativeElement;
+        return _this;
     }
     /**
      * @param {?} context
@@ -77,6 +79,7 @@ export var TemplateRef_ = (function (_super) {
     });
     return TemplateRef_;
 }(TemplateRef));
+export { TemplateRef_ };
 function TemplateRef__tsickle_Closure_declarations() {
     /** @type {?} */
     TemplateRef_.prototype._parentView;

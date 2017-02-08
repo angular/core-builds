@@ -3,7 +3,7 @@
  * to power dependency injection and compilation.
  * @abstract
  */
-export var ReflectorReader = (function () {
+var ReflectorReader = (function () {
     function ReflectorReader() {
     }
     /**
@@ -47,4 +47,5 @@ export var ReflectorReader = (function () {
     ReflectorReader.prototype.resolveEnum = function (identifier, name) { };
     return ReflectorReader;
 }());
+export { ReflectorReader };
 //# sourceMappingURL=reflector_reader.js.map

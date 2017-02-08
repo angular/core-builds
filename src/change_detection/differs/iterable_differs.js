@@ -11,7 +11,7 @@ import { getTypeNameForDebugging, isPresent } from '../../facade/lang';
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * \@stable
  */
-export var IterableDiffers = (function () {
+var IterableDiffers = (function () {
     /**
      * @param {?} factories
      */
@@ -85,6 +85,7 @@ export var IterableDiffers = (function () {
     };
     return IterableDiffers;
 }());
+export { IterableDiffers };
 function IterableDiffers_tsickle_Closure_declarations() {
     /**
      * @deprecated v4.0.0 - Should be private

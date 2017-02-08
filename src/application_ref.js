@@ -62,7 +62,7 @@ export function isDevMode() {
  *
  * \@experimental
  */
-export var NgProbeToken = (function () {
+var NgProbeToken = (function () {
     /**
      * @param {?} name
      * @param {?} token
@@ -73,6 +73,7 @@ export var NgProbeToken = (function () {
     }
     return NgProbeToken;
 }());
+export { NgProbeToken };
 function NgProbeToken_tsickle_Closure_declarations() {
     /** @type {?} */
     NgProbeToken.prototype.name;
@@ -171,7 +172,7 @@ export function getPlatform() {
  * \@stable
  * @abstract
  */
-export var PlatformRef = (function () {
+var PlatformRef = (function () {
     function PlatformRef() {
     }
     /**
@@ -248,6 +249,7 @@ export var PlatformRef = (function () {
     PlatformRef.prototype.destroyed = function () { };
     return PlatformRef;
 }());
+export { PlatformRef };
 /**
  * @param {?} errorHandler
  * @param {?} callback
@@ -275,17 +277,18 @@ function _callAndReportToErrorHandler(errorHandler, callback) {
  * workaround https://github.com/angular/tsickle/issues/350
  * @suppress {checkTypes}
  */
-export var PlatformRef_ = (function (_super) {
+var PlatformRef_ = (function (_super) {
     __extends(PlatformRef_, _super);
     /**
      * @param {?} _injector
      */
     function PlatformRef_(_injector) {
-        _super.call(this);
-        this._injector = _injector;
-        this._modules = [];
-        this._destroyListeners = [];
-        this._destroyed = false;
+        var _this = _super.call(this) || this;
+        _this._injector = _injector;
+        _this._modules = [];
+        _this._destroyListeners = [];
+        _this._destroyed = false;
+        return _this;
     }
     /**
      * @param {?} callback
@@ -396,20 +399,21 @@ export var PlatformRef_ = (function (_super) {
             moduleRef.instance.ngDoBootstrap(appRef);
         }
         else {
-            throw new Error(("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. ") +
+            throw new Error("The module " + stringify(moduleRef.instance.constructor) + " was bootstrapped, but it does not declare \"@NgModule.bootstrap\" components nor a \"ngDoBootstrap\" method. " +
                 "Please define one of these.");
         }
         this._modules.push(moduleRef);
     };
-    PlatformRef_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    PlatformRef_.ctorParameters = function () { return [
-        { type: Injector, },
-    ]; };
     return PlatformRef_;
 }(PlatformRef));
+export { PlatformRef_ };
+PlatformRef_.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+PlatformRef_.ctorParameters = function () { return [
+    { type: Injector, },
+]; };
 function PlatformRef__tsickle_Closure_declarations() {
     /** @type {?} */
     PlatformRef_.decorators;
@@ -435,7 +439,7 @@ function PlatformRef__tsickle_Closure_declarations() {
  * \@stable
  * @abstract
  */
-export var ApplicationRef = (function () {
+var ApplicationRef = (function () {
     function ApplicationRef() {
     }
     /**
@@ -504,11 +508,12 @@ export var ApplicationRef = (function () {
     ApplicationRef.prototype.viewCount = function () { };
     return ApplicationRef;
 }());
+export { ApplicationRef };
 /**
  * workaround https://github.com/angular/tsickle/issues/350
  * @suppress {checkTypes}
  */
-export var ApplicationRef_ = (function (_super) {
+var ApplicationRef_ = (function (_super) {
     __extends(ApplicationRef_, _super);
     /**
      * @param {?} _zone
@@ -521,24 +526,24 @@ export var ApplicationRef_ = (function (_super) {
      * @param {?} _testability
      */
     function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
-        var _this = this;
-        _super.call(this);
-        this._zone = _zone;
-        this._console = _console;
-        this._injector = _injector;
-        this._exceptionHandler = _exceptionHandler;
-        this._componentFactoryResolver = _componentFactoryResolver;
-        this._initStatus = _initStatus;
-        this._testabilityRegistry = _testabilityRegistry;
-        this._testability = _testability;
-        this._bootstrapListeners = [];
-        this._rootComponents = [];
-        this._rootComponentTypes = [];
-        this._views = [];
-        this._runningTick = false;
-        this._enforceNoNewChanges = false;
-        this._enforceNoNewChanges = isDevMode();
-        this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+        var _this = _super.call(this) || this;
+        _this._zone = _zone;
+        _this._console = _console;
+        _this._injector = _injector;
+        _this._exceptionHandler = _exceptionHandler;
+        _this._componentFactoryResolver = _componentFactoryResolver;
+        _this._initStatus = _initStatus;
+        _this._testabilityRegistry = _testabilityRegistry;
+        _this._testability = _testability;
+        _this._bootstrapListeners = [];
+        _this._rootComponents = [];
+        _this._rootComponentTypes = [];
+        _this._views = [];
+        _this._runningTick = false;
+        _this._enforceNoNewChanges = false;
+        _this._enforceNoNewChanges = isDevMode();
+        _this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+        return _this;
     }
     /**
      * @param {?} viewRef
@@ -659,24 +664,25 @@ export var ApplicationRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    /** @internal */
-    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef_.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ApplicationRef_.ctorParameters = function () { return [
-        { type: NgZone, },
-        { type: Console, },
-        { type: Injector, },
-        { type: ErrorHandler, },
-        { type: ComponentFactoryResolver, },
-        { type: ApplicationInitStatus, },
-        { type: TestabilityRegistry, decorators: [{ type: Optional },] },
-        { type: Testability, decorators: [{ type: Optional },] },
-    ]; };
     return ApplicationRef_;
 }(ApplicationRef));
+export { ApplicationRef_ };
+/** @internal */
+ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+ApplicationRef_.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+ApplicationRef_.ctorParameters = function () { return [
+    { type: NgZone, },
+    { type: Console, },
+    { type: Injector, },
+    { type: ErrorHandler, },
+    { type: ComponentFactoryResolver, },
+    { type: ApplicationInitStatus, },
+    { type: TestabilityRegistry, decorators: [{ type: Optional },] },
+    { type: Testability, decorators: [{ type: Optional },] },
+]; };
 function ApplicationRef__tsickle_Closure_declarations() {
     /**
      * \@internal

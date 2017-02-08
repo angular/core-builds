@@ -10,7 +10,7 @@ import { Optional, SkipSelf } from '../../di';
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  * \@stable
  */
-export var KeyValueDiffers = (function () {
+var KeyValueDiffers = (function () {
     /**
      * @param {?} factories
      */
@@ -78,6 +78,7 @@ export var KeyValueDiffers = (function () {
     };
     return KeyValueDiffers;
 }());
+export { KeyValueDiffers };
 function KeyValueDiffers_tsickle_Closure_declarations() {
     /**
      * @deprecated v4.0.0 - Should be private.

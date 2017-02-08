@@ -17,7 +17,7 @@ export var /** @type {?} */ APP_INITIALIZER = new InjectionToken('Application In
  *
  * \@experimental
  */
-export var ApplicationInitStatus = (function () {
+var ApplicationInitStatus = (function () {
     /**
      * @param {?} appInits
      */
@@ -54,15 +54,16 @@ export var ApplicationInitStatus = (function () {
         enumerable: true,
         configurable: true
     });
-    ApplicationInitStatus.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    ApplicationInitStatus.ctorParameters = function () { return [
-        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
-    ]; };
     return ApplicationInitStatus;
 }());
+export { ApplicationInitStatus };
+ApplicationInitStatus.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+ApplicationInitStatus.ctorParameters = function () { return [
+    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+]; };
 function ApplicationInitStatus_tsickle_Closure_declarations() {
     /** @type {?} */
     ApplicationInitStatus.decorators;

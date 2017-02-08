@@ -15,7 +15,7 @@
  *
  * \@experimental Animation support is experimental
  */
-export var AnimationKeyframe = (function () {
+var AnimationKeyframe = (function () {
     /**
      * @param {?} offset
      * @param {?} styles
@@ -26,6 +26,7 @@ export var AnimationKeyframe = (function () {
     }
     return AnimationKeyframe;
 }());
+export { AnimationKeyframe };
 function AnimationKeyframe_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationKeyframe.prototype.offset;

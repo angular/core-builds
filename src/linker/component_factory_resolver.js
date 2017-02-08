@@ -39,7 +39,7 @@ var _NullComponentFactoryResolver = (function () {
  * \@stable
  * @abstract
  */
-export var ComponentFactoryResolver = (function () {
+var ComponentFactoryResolver = (function () {
     function ComponentFactoryResolver() {
     }
     /**
@@ -48,14 +48,15 @@ export var ComponentFactoryResolver = (function () {
      * @return {?}
      */
     ComponentFactoryResolver.prototype.resolveComponentFactory = function (component) { };
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     return ComponentFactoryResolver;
 }());
+export { ComponentFactoryResolver };
+ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
 function ComponentFactoryResolver_tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentFactoryResolver.NULL;
 }
-export var CodegenComponentFactoryResolver = (function () {
+var CodegenComponentFactoryResolver = (function () {
     /**
      * @param {?} factories
      * @param {?} _parent
@@ -81,6 +82,7 @@ export var CodegenComponentFactoryResolver = (function () {
     };
     return CodegenComponentFactoryResolver;
 }());
+export { CodegenComponentFactoryResolver };
 function CodegenComponentFactoryResolver_tsickle_Closure_declarations() {
     /** @type {?} */
     CodegenComponentFactoryResolver.prototype._factories;

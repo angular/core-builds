@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-export var EventListener = (function () {
+var EventListener = (function () {
     /**
      * @param {?} name
      * @param {?} callback
@@ -22,6 +22,7 @@ export var EventListener = (function () {
     ;
     return EventListener;
 }());
+export { EventListener };
 function EventListener_tsickle_Closure_declarations() {
     /** @type {?} */
     EventListener.prototype.name;
@@ -31,7 +32,7 @@ function EventListener_tsickle_Closure_declarations() {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-export var DebugNode = (function () {
+var DebugNode = (function () {
     /**
      * @param {?} nativeNode
      * @param {?} parent
@@ -100,6 +101,7 @@ export var DebugNode = (function () {
     });
     return DebugNode;
 }());
+export { DebugNode };
 function DebugNode_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugNode.prototype.nativeNode;
@@ -113,7 +115,7 @@ function DebugNode_tsickle_Closure_declarations() {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-export var DebugElement = (function (_super) {
+var DebugElement = (function (_super) {
     __extends(DebugElement, _super);
     /**
      * @param {?} nativeNode
@@ -121,13 +123,14 @@ export var DebugElement = (function (_super) {
      * @param {?} _debugInfo
      */
     function DebugElement(nativeNode, parent, _debugInfo) {
-        _super.call(this, nativeNode, parent, _debugInfo);
-        this.properties = {};
-        this.attributes = {};
-        this.classes = {};
-        this.styles = {};
-        this.childNodes = [];
-        this.nativeElement = nativeNode;
+        var _this = _super.call(this, nativeNode, parent, _debugInfo) || this;
+        _this.properties = {};
+        _this.attributes = {};
+        _this.classes = {};
+        _this.styles = {};
+        _this.childNodes = [];
+        _this.nativeElement = nativeNode;
+        return _this;
     }
     /**
      * @param {?} child
@@ -220,6 +223,7 @@ export var DebugElement = (function (_super) {
     };
     return DebugElement;
 }(DebugNode));
+export { DebugElement };
 function DebugElement_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugElement.prototype.name;

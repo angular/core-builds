@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { ElementRef } from '../linker/element_ref';
 /**
  * An instance of this class is returned as an event parameter when an animation
@@ -30,7 +37,7 @@ import { ElementRef } from '../linker/element_ref';
  *
  * \@experimental Animation support is experimental.
  */
-export var AnimationTransitionEvent = (function () {
+var AnimationTransitionEvent = (function () {
     /**
      * @param {?} __0
      */
@@ -45,6 +52,7 @@ export var AnimationTransitionEvent = (function () {
     }
     return AnimationTransitionEvent;
 }());
+export { AnimationTransitionEvent };
 function AnimationTransitionEvent_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationTransitionEvent.prototype.fromState;

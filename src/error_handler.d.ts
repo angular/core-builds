@@ -1,4 +1,3 @@
-
 /**
  * @whatItDoes Provides a hook for centralized exception handling.
  *

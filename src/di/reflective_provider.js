@@ -15,7 +15,7 @@ import { ReflectiveKey } from './reflective_key';
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
-export var ReflectiveDependency = (function () {
+var ReflectiveDependency = (function () {
     /**
      * @param {?} key
      * @param {?} optional
@@ -35,6 +35,7 @@ export var ReflectiveDependency = (function () {
     };
     return ReflectiveDependency;
 }());
+export { ReflectiveDependency };
 function ReflectiveDependency_tsickle_Closure_declarations() {
     /** @type {?} */
     ReflectiveDependency.prototype.key;
@@ -44,7 +45,7 @@ function ReflectiveDependency_tsickle_Closure_declarations() {
     ReflectiveDependency.prototype.visibility;
 }
 var /** @type {?} */ _EMPTY_LIST = [];
-export var ResolvedReflectiveProvider_ = (function () {
+var ResolvedReflectiveProvider_ = (function () {
     /**
      * @param {?} key
      * @param {?} resolvedFactories
@@ -65,6 +66,7 @@ export var ResolvedReflectiveProvider_ = (function () {
     });
     return ResolvedReflectiveProvider_;
 }());
+export { ResolvedReflectiveProvider_ };
 function ResolvedReflectiveProvider__tsickle_Closure_declarations() {
     /** @type {?} */
     ResolvedReflectiveProvider_.prototype.key;
@@ -78,7 +80,7 @@ function ResolvedReflectiveProvider__tsickle_Closure_declarations() {
  * Provider}.
  * \@experimental
  */
-export var ResolvedReflectiveFactory = (function () {
+var ResolvedReflectiveFactory = (function () {
     /**
      * @param {?} factory
      * @param {?} dependencies
@@ -89,6 +91,7 @@ export var ResolvedReflectiveFactory = (function () {
     }
     return ResolvedReflectiveFactory;
 }());
+export { ResolvedReflectiveFactory };
 function ResolvedReflectiveFactory_tsickle_Closure_declarations() {
     /**
      * Factory function which can return an instance of an object represented by a key.

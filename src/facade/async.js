@@ -60,7 +60,7 @@ export { Subject } from 'rxjs/Subject';
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
  */
-export var EventEmitter = (function (_super) {
+var EventEmitter = (function (_super) {
     __extends(EventEmitter, _super);
     /**
      * Creates an instance of [EventEmitter], which depending on [isAsync],
@@ -69,8 +69,9 @@ export var EventEmitter = (function (_super) {
      */
     function EventEmitter(isAsync) {
         if (isAsync === void 0) { isAsync = false; }
-        _super.call(this);
-        this.__isAsync = isAsync;
+        var _this = _super.call(this) || this;
+        _this.__isAsync = isAsync;
+        return _this;
     }
     /**
      * @param {?=} value
@@ -116,6 +117,7 @@ export var EventEmitter = (function (_super) {
     };
     return EventEmitter;
 }(Subject));
+export { EventEmitter };
 function EventEmitter_tsickle_Closure_declarations() {
     /** @type {?} */
     EventEmitter.prototype.__isAsync;

@@ -48,7 +48,7 @@ var /** @type {?} */ UNDEFINED = new Object();
  * \@stable
  * @abstract
  */
-export var ReflectiveInjector = (function () {
+var ReflectiveInjector = (function () {
     function ReflectiveInjector() {
     }
     /**
@@ -295,7 +295,8 @@ export var ReflectiveInjector = (function () {
     ReflectiveInjector.prototype.get = function (token, notFoundValue) { };
     return ReflectiveInjector;
 }());
-export var ReflectiveInjector_ = (function () {
+export { ReflectiveInjector };
+var ReflectiveInjector_ = (function () {
     /**
      * Private
      * @param {?} _providers
@@ -542,6 +543,7 @@ export var ReflectiveInjector_ = (function () {
     ReflectiveInjector_.prototype.toString = function () { return this.displayName; };
     return ReflectiveInjector_;
 }());
+export { ReflectiveInjector_ };
 function ReflectiveInjector__tsickle_Closure_declarations() {
     /**
      * \@internal

@@ -15,7 +15,7 @@
  *
  * \@experimental Animation support is experimental
  */
-export var AnimationStyles = (function () {
+var AnimationStyles = (function () {
     /**
      * @param {?} styles
      */
@@ -24,6 +24,7 @@ export var AnimationStyles = (function () {
     }
     return AnimationStyles;
 }());
+export { AnimationStyles };
 function AnimationStyles_tsickle_Closure_declarations() {
     /** @type {?} */
     AnimationStyles.prototype.styles;

@@ -33,7 +33,7 @@ var /** @type {?} */ UNDEFINED = new Object();
  *
  * @abstract
  */
-export var AppView = (function () {
+var AppView = (function () {
     /**
      * @param {?} clazz
      * @param {?} componentType
@@ -471,6 +471,7 @@ export var AppView = (function () {
     AppView.prototype.throwDestroyedError = function (details) { throw viewDestroyedError(details); };
     return AppView;
 }());
+export { AppView };
 function AppView_tsickle_Closure_declarations() {
     /** @type {?} */
     AppView.prototype.ref;
@@ -521,7 +522,7 @@ function AppView_tsickle_Closure_declarations() {
     /** @type {?} */
     AppView.prototype.declaredViewContainer;
 }
-export var DebugAppView = (function (_super) {
+var DebugAppView = (function (_super) {
     __extends(DebugAppView, _super);
     /**
      * @param {?} clazz
@@ -537,9 +538,10 @@ export var DebugAppView = (function (_super) {
      */
     function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos, declaredViewContainer) {
         if (declaredViewContainer === void 0) { declaredViewContainer = null; }
-        _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer);
-        this.staticNodeDebugInfos = staticNodeDebugInfos;
-        this._currentDebugContext = null;
+        var _this = _super.call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer) || this;
+        _this.staticNodeDebugInfos = staticNodeDebugInfos;
+        _this._currentDebugContext = null;
+        return _this;
     }
     /**
      * @param {?} context
@@ -675,6 +677,7 @@ export var DebugAppView = (function (_super) {
     };
     return DebugAppView;
 }(AppView));
+export { DebugAppView };
 function DebugAppView_tsickle_Closure_declarations() {
     /** @type {?} */
     DebugAppView.prototype._currentDebugContext;

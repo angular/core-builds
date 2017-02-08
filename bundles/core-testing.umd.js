@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.6-c33fda2
+ * @license Angular v4.0.0-beta.6-7a4c255
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -327,7 +327,7 @@
         return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             var proxyZoneSpec = ProxyZoneSpec.assertPresent();
             if (_inFakeAsyncCall) {
@@ -352,7 +352,7 @@
                     proxyZoneSpec.setDelegate(lastProxyZoneSpec);
                 }
                 if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                    throw new Error((_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " ") +
+                    throw new Error(_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length + " " +
                         "periodic timer(s) still in the queue.");
                 }
                 if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
@@ -458,7 +458,7 @@
     var TestingCompiler = (function (_super) {
         __extends(TestingCompiler, _super);
         function TestingCompiler() {
-            _super.apply(this, arguments);
+            return _super !== null && _super.apply(this, arguments) || this;
         }
         Object.defineProperty(TestingCompiler.prototype, "injector", {
             get: function () { throw unimplemented(); },
@@ -706,7 +706,7 @@
                 }
                 catch (e) {
                     if (getComponentType(e)) {
-                        throw new Error(("This test module uses the component " + stringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. ") +
+                        throw new Error("This test module uses the component " + stringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                             "Please call \"TestBed.compileComponents\" before your test.");
                     }
                     else {
@@ -728,13 +728,13 @@
             var DynamicTestModule = (function () {
                 function DynamicTestModule() {
                 }
-                DynamicTestModule.decorators = [
-                    { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
-                ];
-                /** @nocollapse */
-                DynamicTestModule.ctorParameters = function () { return []; };
                 return DynamicTestModule;
             }());
+            DynamicTestModule.decorators = [
+                { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+            ];
+            /** @nocollapse */
+            DynamicTestModule.ctorParameters = function () { return []; };
             var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
             this._compiler =
                 compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
@@ -746,7 +746,7 @@
         };
         TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
             if (this._instantiated) {
-                throw new Error(("Cannot " + methodDescription + " when the test module has already been instantiated. ") +
+                throw new Error("Cannot " + methodDescription + " when the test module has already been instantiated. " +
                     ("Make sure you are not using `inject` before `" + methodName + "`."));
             }
         };
@@ -910,20 +910,12 @@
     // work.
     var __core_private_testing_placeholder__ = '';
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-
     var MockAnimationPlayer = (function () {
         function MockAnimationPlayer(startingStyles, keyframes, previousPlayers) {
-            var _this = this;
             if (startingStyles === void 0) { startingStyles = {}; }
             if (keyframes === void 0) { keyframes = []; }
             if (previousPlayers === void 0) { previousPlayers = []; }
+            var _this = this;
             this.startingStyles = startingStyles;
             this.keyframes = keyframes;
             this._onDoneFns = [];

@@ -11,7 +11,7 @@ import { Injectable, InjectionToken } from '../di';
  *
  * \@experimental
  */
-export var ModuleWithComponentFactories = (function () {
+var ModuleWithComponentFactories = (function () {
     /**
      * @param {?} ngModuleFactory
      * @param {?} componentFactories
@@ -22,6 +22,7 @@ export var ModuleWithComponentFactories = (function () {
     }
     return ModuleWithComponentFactories;
 }());
+export { ModuleWithComponentFactories };
 function ModuleWithComponentFactories_tsickle_Closure_declarations() {
     /** @type {?} */
     ModuleWithComponentFactories.prototype.ngModuleFactory;
@@ -44,7 +45,7 @@ function _throwError() {
  * of components.
  * \@stable
  */
-export var Compiler = (function () {
+var Compiler = (function () {
     function Compiler() {
     }
     /**
@@ -96,13 +97,14 @@ export var Compiler = (function () {
      * @return {?}
      */
     Compiler.prototype.clearCacheFor = function (type) { };
-    Compiler.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    Compiler.ctorParameters = function () { return []; };
     return Compiler;
 }());
+export { Compiler };
+Compiler.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+Compiler.ctorParameters = function () { return []; };
 function Compiler_tsickle_Closure_declarations() {
     /** @type {?} */
     Compiler.decorators;
@@ -124,7 +126,7 @@ export var /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptio
  * \@experimental
  * @abstract
  */
-export var CompilerFactory = (function () {
+var CompilerFactory = (function () {
     function CompilerFactory() {
     }
     /**
@@ -135,4 +137,5 @@ export var CompilerFactory = (function () {
     CompilerFactory.prototype.createCompiler = function (options) { };
     return CompilerFactory;
 }());
+export { CompilerFactory };
 //# sourceMappingURL=compiler.js.map

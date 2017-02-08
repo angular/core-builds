@@ -40,33 +40,34 @@ export function _localeFactory(locale) {
  *
  * \@experimental
  */
-export var ApplicationModule = (function () {
+var ApplicationModule = (function () {
     function ApplicationModule() {
     }
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{
-                    providers: [
-                        ApplicationRef_,
-                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                        ApplicationInitStatus,
-                        Compiler,
-                        APP_ID_RANDOM_PROVIDER,
-                        ViewUtils,
-                        AnimationQueue,
-                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        {
-                            provide: LOCALE_ID,
-                            useFactory: _localeFactory,
-                            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-                        },
-                    ]
-                },] },
-    ];
-    /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return []; };
     return ApplicationModule;
 }());
+export { ApplicationModule };
+ApplicationModule.decorators = [
+    { type: NgModule, args: [{
+                providers: [
+                    ApplicationRef_,
+                    { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                    ApplicationInitStatus,
+                    Compiler,
+                    APP_ID_RANDOM_PROVIDER,
+                    ViewUtils,
+                    AnimationQueue,
+                    { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                    {
+                        provide: LOCALE_ID,
+                        useFactory: _localeFactory,
+                        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                    },
+                ]
+            },] },
+];
+/** @nocollapse */
+ApplicationModule.ctorParameters = function () { return []; };
 function ApplicationModule_tsickle_Closure_declarations() {
     /** @type {?} */
     ApplicationModule.decorators;

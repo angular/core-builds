@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isJsObject, looseIdentical, stringify } from '../../facade/lang';
-export var DefaultKeyValueDifferFactory = (function () {
+var DefaultKeyValueDifferFactory = (function () {
     function DefaultKeyValueDifferFactory() {
     }
     /**
@@ -23,7 +23,8 @@ export var DefaultKeyValueDifferFactory = (function () {
     };
     return DefaultKeyValueDifferFactory;
 }());
-export var DefaultKeyValueDiffer = (function () {
+export { DefaultKeyValueDifferFactory };
+var DefaultKeyValueDiffer = (function () {
     function DefaultKeyValueDiffer() {
         this._records = new Map();
         this._mapHead = null;
@@ -355,6 +356,7 @@ export var DefaultKeyValueDiffer = (function () {
     };
     return DefaultKeyValueDiffer;
 }());
+export { DefaultKeyValueDiffer };
 function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
     /** @type {?} */
     DefaultKeyValueDiffer.prototype._records;

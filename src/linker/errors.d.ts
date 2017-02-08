@@ -1,4 +1,3 @@
-
 import { DebugContext } from './debug_context';
 /**
  * An error thrown if application changes model breaking the top-down data flow.

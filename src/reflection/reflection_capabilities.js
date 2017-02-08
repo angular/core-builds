@@ -10,8 +10,8 @@ import { Type, isType } from '../type';
 /**
  * Attention: This regex has to hold even if the code is minified!
  */
-export var /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?\S+\.apply\(this,\s*arguments\)/;
-export var ReflectionCapabilities = (function () {
+export var /** @type {?} */ DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?(\S+\s+!==\s+null\s+&&\s+)?\S+\.apply\(this,\s*arguments\)/;
+var ReflectionCapabilities = (function () {
     /**
      * @param {?=} reflect
      */
@@ -29,7 +29,7 @@ export var ReflectionCapabilities = (function () {
     ReflectionCapabilities.prototype.factory = function (t) { return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return new (t.bind.apply(t, [void 0].concat(args)))();
     }; };
@@ -236,13 +236,13 @@ export var ReflectionCapabilities = (function () {
      * @param {?} name
      * @return {?}
      */
-    ReflectionCapabilities.prototype.getter = function (name) { return ((new Function('o', 'return o.' + name + ';'))); };
+    ReflectionCapabilities.prototype.getter = function (name) { return (new Function('o', 'return o.' + name + ';')); };
     /**
      * @param {?} name
      * @return {?}
      */
     ReflectionCapabilities.prototype.setter = function (name) {
-        return ((new Function('o', 'v', 'return o.' + name + ' = v;')));
+        return (new Function('o', 'v', 'return o.' + name + ' = v;'));
     };
     /**
      * @param {?} name
@@ -250,7 +250,7 @@ export var ReflectionCapabilities = (function () {
      */
     ReflectionCapabilities.prototype.method = function (name) {
         var /** @type {?} */ functionBody = "if (!o." + name + ") throw new Error('\"" + name + "\" is undefined');\n        return o." + name + ".apply(o, args);";
-        return ((new Function('o', 'args', functionBody)));
+        return (new Function('o', 'args', functionBody));
     };
     /**
      * @param {?} type
@@ -279,6 +279,7 @@ export var ReflectionCapabilities = (function () {
     ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
     return ReflectionCapabilities;
 }());
+export { ReflectionCapabilities };
 function ReflectionCapabilities_tsickle_Closure_declarations() {
     /** @type {?} */
     ReflectionCapabilities.prototype._reflect;

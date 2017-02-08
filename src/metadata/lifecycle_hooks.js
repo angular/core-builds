@@ -42,7 +42,7 @@ export var /** @type {?} */ LIFECYCLE_HOOKS_VALUES = [
  * \@stable
  * @abstract
  */
-export var OnChanges = (function () {
+var OnChanges = (function () {
     function OnChanges() {
     }
     /**
@@ -53,6 +53,7 @@ export var OnChanges = (function () {
     OnChanges.prototype.ngOnChanges = function (changes) { };
     return OnChanges;
 }());
+export { OnChanges };
 /**
  * \@whatItDoes Lifecycle hook that is called after data-bound properties of a directive are
  * initialized.
@@ -69,7 +70,7 @@ export var OnChanges = (function () {
  * \@stable
  * @abstract
  */
-export var OnInit = (function () {
+var OnInit = (function () {
     function OnInit() {
     }
     /**
@@ -79,6 +80,7 @@ export var OnInit = (function () {
     OnInit.prototype.ngOnInit = function () { };
     return OnInit;
 }());
+export { OnInit };
 /**
  * \@whatItDoes Lifecycle hook that is called when Angular dirty checks a directive.
  * \@howToUse
@@ -101,7 +103,7 @@ export var OnInit = (function () {
  * \@stable
  * @abstract
  */
-export var DoCheck = (function () {
+var DoCheck = (function () {
     function DoCheck() {
     }
     /**
@@ -111,6 +113,7 @@ export var DoCheck = (function () {
     DoCheck.prototype.ngDoCheck = function () { };
     return DoCheck;
 }());
+export { DoCheck };
 /**
  * \@whatItDoes Lifecycle hook that is called when a directive, pipe or service is destroyed.
  * \@howToUse
@@ -125,7 +128,7 @@ export var DoCheck = (function () {
  * \@stable
  * @abstract
  */
-export var OnDestroy = (function () {
+var OnDestroy = (function () {
     function OnDestroy() {
     }
     /**
@@ -135,6 +138,7 @@ export var OnDestroy = (function () {
     OnDestroy.prototype.ngOnDestroy = function () { };
     return OnDestroy;
 }());
+export { OnDestroy };
 /**
  *
  * \@whatItDoes Lifecycle hook that is called after a directive's content has been fully
@@ -148,7 +152,7 @@ export var OnDestroy = (function () {
  * \@stable
  * @abstract
  */
-export var AfterContentInit = (function () {
+var AfterContentInit = (function () {
     function AfterContentInit() {
     }
     /**
@@ -158,6 +162,7 @@ export var AfterContentInit = (function () {
     AfterContentInit.prototype.ngAfterContentInit = function () { };
     return AfterContentInit;
 }());
+export { AfterContentInit };
 /**
  * \@whatItDoes Lifecycle hook that is called after every check of a directive's content.
  * \@howToUse
@@ -169,7 +174,7 @@ export var AfterContentInit = (function () {
  * \@stable
  * @abstract
  */
-export var AfterContentChecked = (function () {
+var AfterContentChecked = (function () {
     function AfterContentChecked() {
     }
     /**
@@ -179,6 +184,7 @@ export var AfterContentChecked = (function () {
     AfterContentChecked.prototype.ngAfterContentChecked = function () { };
     return AfterContentChecked;
 }());
+export { AfterContentChecked };
 /**
  * \@whatItDoes Lifecycle hook that is called after a component's view has been fully
  * initialized.
@@ -191,7 +197,7 @@ export var AfterContentChecked = (function () {
  * \@stable
  * @abstract
  */
-export var AfterViewInit = (function () {
+var AfterViewInit = (function () {
     function AfterViewInit() {
     }
     /**
@@ -201,6 +207,7 @@ export var AfterViewInit = (function () {
     AfterViewInit.prototype.ngAfterViewInit = function () { };
     return AfterViewInit;
 }());
+export { AfterViewInit };
 /**
  * \@whatItDoes Lifecycle hook that is called after every check of a component's view.
  * \@howToUse
@@ -212,7 +219,7 @@ export var AfterViewInit = (function () {
  * \@stable
  * @abstract
  */
-export var AfterViewChecked = (function () {
+var AfterViewChecked = (function () {
     function AfterViewChecked() {
     }
     /**
@@ -222,4 +229,5 @@ export var AfterViewChecked = (function () {
     AfterViewChecked.prototype.ngAfterViewChecked = function () { };
     return AfterViewChecked;
 }());
+export { AfterViewChecked };
 //# sourceMappingURL=lifecycle_hooks.js.map

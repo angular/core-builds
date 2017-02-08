@@ -14,7 +14,7 @@ import { NgZone } from '../zone/ng_zone';
  * application on the page will have an instance of Testability.
  * \@experimental
  */
-export var Testability = (function () {
+var Testability = (function () {
     /**
      * @param {?} _ngZone
      */
@@ -137,15 +137,16 @@ export var Testability = (function () {
         // TODO(juliemr): implement.
         return [];
     };
-    Testability.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    Testability.ctorParameters = function () { return [
-        { type: NgZone, },
-    ]; };
     return Testability;
 }());
+export { Testability };
+Testability.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+Testability.ctorParameters = function () { return [
+    { type: NgZone, },
+]; };
 function Testability_tsickle_Closure_declarations() {
     /** @type {?} */
     Testability.decorators;
@@ -184,7 +185,7 @@ function Testability_tsickle_Closure_declarations() {
  * A global registry of {\@link Testability} instances for specific elements.
  * \@experimental
  */
-export var TestabilityRegistry = (function () {
+var TestabilityRegistry = (function () {
     function TestabilityRegistry() {
         /** @internal */
         this._applications = new Map();
@@ -220,13 +221,14 @@ export var TestabilityRegistry = (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
-    TestabilityRegistry.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    TestabilityRegistry.ctorParameters = function () { return []; };
     return TestabilityRegistry;
 }());
+export { TestabilityRegistry };
+TestabilityRegistry.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+TestabilityRegistry.ctorParameters = function () { return []; };
 function TestabilityRegistry_tsickle_Closure_declarations() {
     /** @type {?} */
     TestabilityRegistry.decorators;

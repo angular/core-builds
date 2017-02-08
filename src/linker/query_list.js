@@ -31,7 +31,7 @@ import { getSymbolIterator } from '../facade/lang';
  * ```
  * \@stable
  */
-export var QueryList = (function () {
+var QueryList = (function () {
     function QueryList() {
         this._dirty = true;
         this._results = [];
@@ -158,6 +158,7 @@ export var QueryList = (function () {
     });
     return QueryList;
 }());
+export { QueryList };
 function QueryList_tsickle_Closure_declarations() {
     /** @type {?} */
     QueryList.prototype._dirty;

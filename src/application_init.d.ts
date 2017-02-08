@@ -13,6 +13,6 @@ export declare class ApplicationInitStatus {
     private _donePromise;
     private _done;
     constructor(appInits: (() => any)[]);
-    done: boolean;
-    donePromise: Promise<any>;
+    readonly done: boolean;
+    readonly donePromise: Promise<any>;
 }

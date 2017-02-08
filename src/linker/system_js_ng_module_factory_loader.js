@@ -16,11 +16,12 @@ var /** @type {?} */ FACTORY_CLASS_SUFFIX = 'NgFactory';
  * \@experimental
  * @abstract
  */
-export var SystemJsNgModuleLoaderConfig = (function () {
+var SystemJsNgModuleLoaderConfig = (function () {
     function SystemJsNgModuleLoaderConfig() {
     }
     return SystemJsNgModuleLoaderConfig;
 }());
+export { SystemJsNgModuleLoaderConfig };
 function SystemJsNgModuleLoaderConfig_tsickle_Closure_declarations() {
     /**
      * Prefix to add when computing the name of the factory module for a given module name.
@@ -41,7 +42,7 @@ var /** @type {?} */ DEFAULT_CONFIG = {
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * \@experimental
  */
-export var SystemJsNgModuleLoader = (function () {
+var SystemJsNgModuleLoader = (function () {
     /**
      * @param {?} _compiler
      * @param {?=} config
@@ -88,16 +89,17 @@ export var SystemJsNgModuleLoader = (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
-    SystemJsNgModuleLoader.decorators = [
-        { type: Injectable },
-    ];
-    /** @nocollapse */
-    SystemJsNgModuleLoader.ctorParameters = function () { return [
-        { type: Compiler, },
-        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
-    ]; };
     return SystemJsNgModuleLoader;
 }());
+export { SystemJsNgModuleLoader };
+SystemJsNgModuleLoader.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+SystemJsNgModuleLoader.ctorParameters = function () { return [
+    { type: Compiler, },
+    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+]; };
 function SystemJsNgModuleLoader_tsickle_Closure_declarations() {
     /** @type {?} */
     SystemJsNgModuleLoader.decorators;

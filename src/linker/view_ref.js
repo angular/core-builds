@@ -16,10 +16,10 @@ import { ChangeDetectorStatus } from '../change_detection/constants';
  * \@stable
  * @abstract
  */
-export var ViewRef = (function (_super) {
+var ViewRef = (function (_super) {
     __extends(ViewRef, _super);
     function ViewRef() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * Destroys the view and all of the data structures associated with it.
@@ -40,6 +40,7 @@ export var ViewRef = (function (_super) {
     ViewRef.prototype.onDestroy = function (callback) { };
     return ViewRef;
 }(ChangeDetectorRef));
+export { ViewRef };
 /**
  * Represents an Angular View.
  *
@@ -95,10 +96,10 @@ export var ViewRef = (function (_super) {
  * \@experimental
  * @abstract
  */
-export var EmbeddedViewRef = (function (_super) {
+var EmbeddedViewRef = (function (_super) {
     __extends(EmbeddedViewRef, _super);
     function EmbeddedViewRef() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * @abstract
@@ -112,7 +113,8 @@ export var EmbeddedViewRef = (function (_super) {
     EmbeddedViewRef.prototype.rootNodes = function () { };
     return EmbeddedViewRef;
 }(ViewRef));
-export var ViewRef_ = (function () {
+export { EmbeddedViewRef };
+var ViewRef_ = (function () {
     /**
      * @param {?} _view
      * @param {?} animationQueue
@@ -197,6 +199,7 @@ export var ViewRef_ = (function () {
     ViewRef_.prototype.destroy = function () { this._view.detachAndDestroy(); };
     return ViewRef_;
 }());
+export { ViewRef_ };
 function ViewRef__tsickle_Closure_declarations() {
     /**
      * \@internal

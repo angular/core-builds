@@ -1,4 +1,3 @@
-
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 export declare function noComponentFactoryError(component: Function): Error;
