@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ERROR_DEBUG_CONTEXT, ERROR_ORIGINAL_ERROR, getDebugContext } from '../errors';
-import { EntryAction, ViewState } from './types';
+import { ViewState } from './types';
 /**
  * @param {?} context
  * @param {?} oldValue
@@ -15,7 +15,7 @@ import { EntryAction, ViewState } from './types';
  * @return {?}
  */
 export function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
-    let /** @type {?} */ msg = `Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
+    let /** @type {?} */ msg = `ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '${oldValue}'. Current value: '${currValue}'.`;
     if (isFirstCheck) {
         msg +=
             ` It seems like the view has been created after its parent and its children have been dirty checked.` +
@@ -57,6 +57,6 @@ export function isViewDebugError(err) {
  * @return {?}
  */
 export function viewDestroyedError(action) {
-    return new Error(`View has been used after destroy for ${EntryAction[action]}`);
+    return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
 }
 //# sourceMappingURL=errors.js.map

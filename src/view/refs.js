@@ -7,91 +7,28 @@
  */
 import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
-import { RootRenderer } from '../render/api';
-import { Sanitizer } from '../security';
-import { resolveDep, tokenKey } from './provider';
-import { getQueryValue } from './query';
-import { DepFlags, NodeType, ViewState, asElementData, asProviderData } from './types';
-import { findElementDef, isComponentView, parentDiIndex, renderNode, resolveViewDefinition, rootRenderNodes } from './util';
-import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
-import { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
+import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
+import { parentDiIndex, resolveViewDefinition, rootRenderNodes, tokenKey } from './util';
 const /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
+ * @param {?} selector
+ * @param {?} componentType
+ * @param {?} viewDefFactory
  * @return {?}
  */
-export function createRefs() {
-    return new Refs_();
-}
-export class Refs_ {
-    /**
-     * @param {?} selector
-     * @param {?} viewDefFactory
-     * @return {?}
-     */
-    createComponentFactory(selector, viewDefFactory) {
-        return new ComponentFactory_(selector, viewDefFactory);
-    }
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    createViewRef(data) { return new ViewRef_(data); }
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    createViewContainerRef(view, elIndex) {
-        return new ViewContainerRef_(view, elIndex);
-    }
-    /**
-     * @param {?} parentView
-     * @param {?} def
-     * @return {?}
-     */
-    createTemplateRef(parentView, def) {
-        return new TemplateRef_(parentView, def);
-    }
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    createInjector(view, elIndex) { return new Injector_(view, elIndex); }
-    /**
-     * @param {?} view
-     * @param {?} nodeIndex
-     * @return {?}
-     */
-    createDebugContext(view, nodeIndex) {
-        return new DebugContext_(view, nodeIndex);
-    }
+export function createComponentFactory(selector, componentType, viewDefFactory) {
+    return new ComponentFactory_(selector, componentType, viewDefFactory);
 }
 class ComponentFactory_ {
     /**
      * @param {?} selector
-     * @param {?} viewDefFactory
+     * @param {?} componentType
+     * @param {?} _viewDefFactory
      */
-    constructor(selector, viewDefFactory) {
+    constructor(selector, componentType, _viewDefFactory) {
         this.selector = selector;
-        const viewDef = this._viewDef = resolveViewDefinition(viewDefFactory);
-        const len = viewDef.nodes.length;
-        for (let i = 0; i < len; i++) {
-            const nodeDef = viewDef.nodes[i];
-            if (nodeDef.provider && nodeDef.provider.component) {
-                this._componentNodeIndex = i;
-                break;
-            }
-        }
-        if (this._componentNodeIndex == null) {
-            throw new Error(`Illegal State: Could not find a component in the view definition!`);
-        }
-    }
-    /**
-     * @return {?}
-     */
-    get componentType() {
-        return this._viewDef.nodes[this._componentNodeIndex].provider.value;
+        this.componentType = componentType;
+        this._viewClass = _viewDefFactory;
     }
     /**
      * Creates a new component.
@@ -101,43 +38,46 @@ class ComponentFactory_ {
      * @return {?}
      */
     create(injector, projectableNodes = null, rootSelectorOrNode = null) {
-        if (!projectableNodes) {
-            projectableNodes = [];
+        const /** @type {?} */ viewDef = resolveViewDefinition(this._viewClass);
+        let /** @type {?} */ componentNodeIndex;
+        const /** @type {?} */ len = viewDef.nodes.length;
+        for (let /** @type {?} */ i = 0; i < len; i++) {
+            const /** @type {?} */ nodeDef = viewDef.nodes[i];
+            if (nodeDef.provider && nodeDef.provider.component) {
+                componentNodeIndex = i;
+                break;
+            }
         }
-        if (!rootSelectorOrNode) {
-            rootSelectorOrNode = this.selector;
+        if (componentNodeIndex == null) {
+            throw new Error(`Illegal State: Could not find a component in the view definition!`);
         }
-        const /** @type {?} */ renderer = injector.get(RootRenderer);
-        const /** @type {?} */ sanitizer = injector.get(Sanitizer);
-        const /** @type {?} */ root = { injector, projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer, renderer };
-        const /** @type {?} */ view = createRootView(root, this._viewDef, EMPTY_CONTEXT);
-        const /** @type {?} */ component = asProviderData(view, this._componentNodeIndex).instance;
-        return new ComponentRef_(view, component);
+        const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
+        const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
+        return new ComponentRef_(view, new ViewRef_(view), component);
     }
 }
 function ComponentFactory__tsickle_Closure_declarations() {
     /**
-     * Only needed so that we can implement ComponentFactory
+     * We are not renaming this field as the old ComponentFactory is using it.
      * \@internal
      * @type {?}
      */
     ComponentFactory_.prototype._viewClass;
     /** @type {?} */
-    ComponentFactory_.prototype._viewDef;
-    /** @type {?} */
-    ComponentFactory_.prototype._componentNodeIndex;
-    /** @type {?} */
     ComponentFactory_.prototype.selector;
+    /** @type {?} */
+    ComponentFactory_.prototype.componentType;
 }
 class ComponentRef_ {
     /**
      * @param {?} _view
+     * @param {?} _viewRef
      * @param {?} _component
      */
-    constructor(_view, _component) {
+    constructor(_view, _viewRef, _component) {
         this._view = _view;
+        this._viewRef = _viewRef;
         this._component = _component;
-        this._viewRef = new ViewRef_(_view);
     }
     /**
      * @return {?}
@@ -178,11 +118,19 @@ class ComponentRef_ {
 }
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
-    ComponentRef_.prototype._viewRef;
-    /** @type {?} */
     ComponentRef_.prototype._view;
     /** @type {?} */
+    ComponentRef_.prototype._viewRef;
+    /** @type {?} */
     ComponentRef_.prototype._component;
+}
+/**
+ * @param {?} view
+ * @param {?} elIndex
+ * @return {?}
+ */
+export function createViewContainerRef(view, elIndex) {
+    return new ViewContainerRef_(view, elIndex);
 }
 class ViewContainerRef_ {
     /**
@@ -220,8 +168,8 @@ class ViewContainerRef_ {
     clear() {
         const /** @type {?} */ len = this._data.embeddedViews.length;
         for (let /** @type {?} */ i = len - 1; i >= 0; i--) {
-            const /** @type {?} */ view = detachEmbeddedView(this._data, i);
-            destroyView(view);
+            const /** @type {?} */ view = Services.detachEmbeddedView(this._data, i);
+            Services.destroyView(view);
         }
     }
     /**
@@ -265,7 +213,7 @@ class ViewContainerRef_ {
      */
     insert(viewRef, index) {
         const /** @type {?} */ viewData = ((viewRef))._view;
-        attachEmbeddedView(this._data, index, viewData);
+        Services.attachEmbeddedView(this._data, index, viewData);
         return viewRef;
     }
     /**
@@ -275,7 +223,7 @@ class ViewContainerRef_ {
      */
     move(viewRef, currentIndex) {
         const /** @type {?} */ previousIndex = this._data.embeddedViews.indexOf(viewRef._view);
-        moveEmbeddedView(this._data, previousIndex, currentIndex);
+        Services.moveEmbeddedView(this._data, previousIndex, currentIndex);
         return viewRef;
     }
     /**
@@ -290,8 +238,8 @@ class ViewContainerRef_ {
      * @return {?}
      */
     remove(index) {
-        const /** @type {?} */ viewData = detachEmbeddedView(this._data, index);
-        destroyView(viewData);
+        const /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
+        Services.destroyView(viewData);
     }
     /**
      * @param {?=} index
@@ -299,7 +247,7 @@ class ViewContainerRef_ {
      */
     detach(index) {
         const /** @type {?} */ view = this.get(index);
-        detachEmbeddedView(this._data, index);
+        Services.detachEmbeddedView(this._data, index);
         return view;
     }
 }
@@ -310,6 +258,13 @@ function ViewContainerRef__tsickle_Closure_declarations() {
     ViewContainerRef_.prototype._view;
     /** @type {?} */
     ViewContainerRef_.prototype._elIndex;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+export function createChangeDetectorRef(view) {
+    return new ViewRef_(view);
 }
 class ViewRef_ {
     /**
@@ -339,11 +294,11 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    detectChanges() { checkAndUpdateView(this._view); }
+    detectChanges() { Services.checkAndUpdateView(this._view); }
     /**
      * @return {?}
      */
-    checkNoChanges() { checkNoChangesView(this._view); }
+    checkNoChanges() { Services.checkNoChangesView(this._view); }
     /**
      * @return {?}
      */
@@ -356,7 +311,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    destroy() { destroyView(this._view); }
+    destroy() { Services.destroyView(this._view); }
 }
 function ViewRef__tsickle_Closure_declarations() {
     /**
@@ -364,6 +319,14 @@ function ViewRef__tsickle_Closure_declarations() {
      * @type {?}
      */
     ViewRef_.prototype._view;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @return {?}
+ */
+export function createTemplateRef(view, def) {
+    return new TemplateRef_(view, def);
 }
 class TemplateRef_ {
     /**
@@ -379,7 +342,7 @@ class TemplateRef_ {
      * @return {?}
      */
     createEmbeddedView(context) {
-        return new ViewRef_(createEmbeddedView(this._parentView, this._def, context));
+        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, context));
     }
     /**
      * @return {?}
@@ -393,6 +356,14 @@ function TemplateRef__tsickle_Closure_declarations() {
     TemplateRef_.prototype._parentView;
     /** @type {?} */
     TemplateRef_.prototype._def;
+}
+/**
+ * @param {?} view
+ * @param {?} elIndex
+ * @return {?}
+ */
+export function createInjector(view, elIndex) {
+    return new Injector_(view, elIndex);
 }
 class Injector_ {
     /**
@@ -409,7 +380,7 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        return resolveDep(this.view, undefined, this.elIndex, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
+        return Services.resolveDep(this.view, undefined, this.elIndex, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
 function Injector__tsickle_Closure_declarations() {
@@ -417,132 +388,5 @@ function Injector__tsickle_Closure_declarations() {
     Injector_.prototype.view;
     /** @type {?} */
     Injector_.prototype.elIndex;
-}
-class DebugContext_ {
-    /**
-     * @param {?} view
-     * @param {?} nodeIndex
-     */
-    constructor(view, nodeIndex) {
-        this.view = view;
-        this.nodeIndex = nodeIndex;
-        if (nodeIndex == null) {
-            this.nodeIndex = nodeIndex = view.parentIndex;
-            this.view = view = view.parent;
-        }
-        this.nodeDef = view.def.nodes[nodeIndex];
-        this.elDef = findElementDef(view, nodeIndex);
-    }
-    /**
-     * @return {?}
-     */
-    get injector() { return new Injector_(this.view, this.elDef.index); }
-    /**
-     * @return {?}
-     */
-    get component() { return this.view.component; }
-    /**
-     * @return {?}
-     */
-    get providerTokens() {
-        const /** @type {?} */ tokens = [];
-        if (this.elDef) {
-            for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                const /** @type {?} */ childDef = this.view.def.nodes[i];
-                if (childDef.type === NodeType.Provider) {
-                    tokens.push(childDef.provider.token);
-                }
-                else {
-                    i += childDef.childCount;
-                }
-            }
-        }
-        return tokens;
-    }
-    /**
-     * @return {?}
-     */
-    get references() {
-        const /** @type {?} */ references = {};
-        if (this.elDef) {
-            collectReferences(this.view, this.elDef, references);
-            for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                const /** @type {?} */ childDef = this.view.def.nodes[i];
-                if (childDef.type === NodeType.Provider) {
-                    collectReferences(this.view, childDef, references);
-                }
-                else {
-                    i += childDef.childCount;
-                }
-            }
-        }
-        return references;
-    }
-    /**
-     * @return {?}
-     */
-    get context() { return this.view.context; }
-    /**
-     * @return {?}
-     */
-    get source() {
-        if (this.nodeDef.type === NodeType.Text) {
-            return this.nodeDef.text.source;
-        }
-        else {
-            return this.elDef.element.source;
-        }
-    }
-    /**
-     * @return {?}
-     */
-    get componentRenderElement() {
-        const /** @type {?} */ elData = findHostElement(this.view);
-        return elData ? elData.renderElement : undefined;
-    }
-    /**
-     * @return {?}
-     */
-    get renderNode() {
-        let /** @type {?} */ nodeDef = this.nodeDef.type === NodeType.Text ? this.nodeDef : this.elDef;
-        return renderNode(this.view, nodeDef);
-    }
-}
-function DebugContext__tsickle_Closure_declarations() {
-    /** @type {?} */
-    DebugContext_.prototype.nodeDef;
-    /** @type {?} */
-    DebugContext_.prototype.elDef;
-    /** @type {?} */
-    DebugContext_.prototype.view;
-    /** @type {?} */
-    DebugContext_.prototype.nodeIndex;
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function findHostElement(view) {
-    while (view && !isComponentView(view)) {
-        view = view.parent;
-    }
-    if (view.parent) {
-        const /** @type {?} */ hostData = asElementData(view.parent, view.parentIndex);
-        return hostData;
-    }
-    return undefined;
-}
-/**
- * @param {?} view
- * @param {?} nodeDef
- * @param {?} references
- * @return {?}
- */
-function collectReferences(view, nodeDef, references) {
-    for (let /** @type {?} */ queryId in nodeDef.matchedQueries) {
-        if (queryId.startsWith('#')) {
-            references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
-        }
-    }
 }
 //# sourceMappingURL=refs.js.map

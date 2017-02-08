@@ -5,9 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { resolveDep, tokenKey } from './provider';
-import { BindingType, DepFlags, NodeType, PureExpressionType, asPureExpressionData } from './types';
-import { checkAndUpdateBinding, unwrapValue } from './util';
+import { BindingType, DepFlags, NodeType, PureExpressionType, Services, asPureExpressionData } from './types';
+import { checkAndUpdateBinding, tokenKey, unwrapValue } from './util';
 /**
  * @param {?} pipeToken
  * @param {?} argCount
@@ -79,7 +78,7 @@ function _pureExpressionDef(type, propertyNames, pipeDep) {
  */
 export function createPureExpression(view, def) {
     const /** @type {?} */ pipe = def.pureExpression.pipeDep ?
-        resolveDep(view, def.index, def.parent, def.pureExpression.pipeDep) :
+        Services.resolveDep(view, def.index, def.parent, def.pureExpression.pipeDep) :
         undefined;
     return { value: undefined, pipe };
 }
@@ -134,6 +133,7 @@ export function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4
             if (checkAndUpdateBinding(view, def, 0, v0))
                 changed = true;
     }
+    const /** @type {?} */ data = asPureExpressionData(view, def.index);
     if (changed) {
         v0 = unwrapValue(v0);
         v1 = unwrapValue(v1);
@@ -145,7 +145,6 @@ export function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4
         v7 = unwrapValue(v7);
         v8 = unwrapValue(v8);
         v9 = unwrapValue(v9);
-        const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
@@ -237,6 +236,7 @@ export function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4
         }
         data.value = value;
     }
+    return data.value;
 }
 /**
  * @param {?} view
@@ -254,8 +254,8 @@ export function checkAndUpdatePureExpressionDynamic(view, def, values) {
             changed = true;
         }
     }
+    const /** @type {?} */ data = asPureExpressionData(view, def.index);
     if (changed) {
-        const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
@@ -280,5 +280,6 @@ export function checkAndUpdatePureExpressionDynamic(view, def, values) {
         }
         data.value = value;
     }
+    return data.value;
 }
 //# sourceMappingURL=pure_expression.js.map

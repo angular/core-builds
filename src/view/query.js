@@ -7,7 +7,8 @@
  */
 import { ElementRef } from '../linker/element_ref';
 import { QueryList } from '../linker/query_list';
-import { NodeFlags, NodeType, QueryBindingType, QueryValueType, Refs, asElementData, asProviderData, asQueryList } from './types';
+import { createTemplateRef, createViewContainerRef } from './refs';
+import { NodeFlags, NodeType, QueryBindingType, QueryValueType, asElementData, asProviderData, asQueryList } from './types';
 import { declaredViewContainer } from './util';
 /**
  * @param {?} flags
@@ -177,10 +178,10 @@ export function getQueryValue(view, nodeDef, queryId) {
                 value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
                 break;
             case QueryValueType.TemplateRef:
-                value = Refs.createTemplateRef(view, nodeDef);
+                value = createTemplateRef(view, nodeDef);
                 break;
             case QueryValueType.ViewContainerRef:
-                value = Refs.createViewContainerRef(view, nodeDef.index);
+                value = createViewContainerRef(view, nodeDef.index);
                 break;
             case QueryValueType.Provider:
                 value = asProviderData(view, nodeDef.index).instance;

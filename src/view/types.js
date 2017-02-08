@@ -5,6 +5,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+export let ArgumentType = {};
+ArgumentType.Inline = 0;
+ArgumentType.Dynamic = 1;
+ArgumentType[ArgumentType.Inline] = "Inline";
+ArgumentType[ArgumentType.Dynamic] = "Dynamic";
 export let ViewFlags = {};
 ViewFlags.None = 0;
 ViewFlags.DirectDom = 2;
@@ -179,116 +184,83 @@ export function asPureExpressionData(view, index) {
 export function asQueryList(view, index) {
     return (view.nodes[index]);
 }
-export let EntryAction = {};
-EntryAction.CheckAndUpdate = 0;
-EntryAction.CheckNoChanges = 1;
-EntryAction.Create = 2;
-EntryAction.Destroy = 3;
-EntryAction.HandleEvent = 4;
-EntryAction[EntryAction.CheckAndUpdate] = "CheckAndUpdate";
-EntryAction[EntryAction.CheckNoChanges] = "CheckNoChanges";
-EntryAction[EntryAction.Create] = "Create";
-EntryAction[EntryAction.Destroy] = "Destroy";
-EntryAction[EntryAction.HandleEvent] = "HandleEvent";
 /**
- * This class is used to prevent cycles in the source files.
  * @abstract
  */
-export class Refs {
-    /**
-     * @param {?} instance
-     * @return {?}
-     */
-    static setInstance(instance) { Refs.instance = instance; }
-    /**
-     * @param {?} selector
-     * @param {?} viewDefFactory
-     * @return {?}
-     */
-    static createComponentFactory(selector, viewDefFactory) {
-        return Refs.instance.createComponentFactory(selector, viewDefFactory);
-    }
-    /**
-     * @param {?} data
-     * @return {?}
-     */
-    static createViewRef(data) { return Refs.instance.createViewRef(data); }
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    static createViewContainerRef(view, elIndex) {
-        return Refs.instance.createViewContainerRef(view, elIndex);
-    }
-    /**
-     * @param {?} parentView
-     * @param {?} def
-     * @return {?}
-     */
-    static createTemplateRef(parentView, def) {
-        return Refs.instance.createTemplateRef(parentView, def);
-    }
-    /**
-     * @param {?} view
-     * @param {?} elIndex
-     * @return {?}
-     */
-    static createInjector(view, elIndex) {
-        return Refs.instance.createInjector(view, elIndex);
-    }
-    /**
-     * @param {?} view
-     * @param {?} nodeIndex
-     * @return {?}
-     */
-    static createDebugContext(view, nodeIndex) {
-        return Refs.instance.createDebugContext(view, nodeIndex);
-    }
+export class RenderDebugContext {
     /**
      * @abstract
-     * @param {?} selector
-     * @param {?} viewDefFactory
      * @return {?}
      */
-    createComponentFactory(selector, viewDefFactory) { }
+    injector() { }
     /**
      * @abstract
-     * @param {?} data
      * @return {?}
      */
-    createViewRef(data) { }
+    component() { }
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} elIndex
      * @return {?}
      */
-    createViewContainerRef(view, elIndex) { }
+    providerTokens() { }
     /**
      * @abstract
-     * @param {?} parentView
-     * @param {?} def
      * @return {?}
      */
-    createTemplateRef(parentView, def) { }
+    references() { }
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} elIndex
      * @return {?}
      */
-    createInjector(view, elIndex) { }
+    context() { }
     /**
      * @abstract
-     * @param {?} view
-     * @param {?} nodeIndex
      * @return {?}
      */
-    createDebugContext(view, nodeIndex) { }
+    source() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    componentRenderElement() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    renderNode() { }
 }
-function Refs_tsickle_Closure_declarations() {
-    /** @type {?} */
-    Refs.instance;
+/**
+ * @abstract
+ */
+export class DebugContext extends RenderDebugContext {
+    /**
+     * @abstract
+     * @return {?}
+     */
+    view() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    nodeIndex() { }
 }
+/**
+ * This object is used to prevent cycles in the source files and to have a place where
+ * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+ */
+export const /** @type {?} */ Services = {
+    setCurrentNode: undefined,
+    createRootView: undefined,
+    createEmbeddedView: undefined,
+    checkAndUpdateView: undefined,
+    checkNoChangesView: undefined,
+    destroyView: undefined,
+    attachEmbeddedView: undefined,
+    detachEmbeddedView: undefined,
+    moveEmbeddedView: undefined,
+    resolveDep: undefined,
+    createDebugContext: undefined,
+    handleEvent: undefined,
+    updateView: undefined,
+};
 //# sourceMappingURL=types.js.map

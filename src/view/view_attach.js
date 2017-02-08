@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { dirtyParentQuery } from './query';
-import { RenderNodeAction, declaredViewContainer, renderNode, rootRenderNodes, visitRootRenderNodes } from './util';
+import { RenderNodeAction, declaredViewContainer, renderNode, visitRootRenderNodes } from './util';
 /**
  * @param {?} elementData
  * @param {?} viewIndex
@@ -88,17 +88,11 @@ export function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
  */
 function renderAttachEmbeddedView(elementData, prevView, view) {
     const /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
-    if (view.renderer) {
-        view.renderer.attachViewAfter(prevRenderNode, rootRenderNodes(view));
-    }
-    else {
-        const /** @type {?} */ parentNode = prevRenderNode.parentNode;
-        const /** @type {?} */ nextSibling = prevRenderNode.nextSibling;
-        if (parentNode) {
-            const /** @type {?} */ action = nextSibling ? RenderNodeAction.InsertBefore : RenderNodeAction.AppendChild;
-            visitRootRenderNodes(view, action, parentNode, nextSibling, undefined);
-        }
-    }
+    const /** @type {?} */ parentNode = view.root.renderer.parentNode(prevRenderNode);
+    const /** @type {?} */ nextSibling = view.root.renderer.nextSibling(prevRenderNode);
+    // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+    // However, browsers automatically do `appendChild` when there is no `nextSibling`.
+    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
 }
 /**
  * @param {?} elementData
@@ -106,15 +100,8 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
  * @return {?}
  */
 function renderDetachEmbeddedView(elementData, view) {
-    if (view.renderer) {
-        view.renderer.detachView(rootRenderNodes(view));
-    }
-    else {
-        const /** @type {?} */ parentNode = elementData.renderElement.parentNode;
-        if (parentNode) {
-            visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
-        }
-    }
+    const /** @type {?} */ parentNode = view.root.renderer.parentNode(elementData.renderElement);
+    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
 }
 /**
  * @param {?} arr

@@ -12,18 +12,20 @@ import { callLifecycleHooksChildrenFirst, checkAndUpdateProviderDynamic, checkAn
 import { checkAndUpdatePureExpressionDynamic, checkAndUpdatePureExpressionInline, createPureExpression } from './pure_expression';
 import { checkAndUpdateQuery, createQuery } from './query';
 import { checkAndUpdateTextDynamic, checkAndUpdateTextInline, createText } from './text';
-import { EntryAction, NodeFlags, NodeType, Refs, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList } from './types';
-import { checkBindingNoChanges, currentAction, currentNodeIndex, currentView, entryAction, isComponentView, resolveViewDefinition, setCurrentNode } from './util';
+import { ArgumentType, NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList } from './types';
+import { checkBindingNoChanges, isComponentView, resolveViewDefinition } from './util';
 const /** @type {?} */ NOOP = () => undefined;
 /**
  * @param {?} flags
  * @param {?} nodesWithoutIndices
  * @param {?=} update
  * @param {?=} handleEvent
- * @param {?=} componentType
+ * @param {?=} compId
+ * @param {?=} encapsulation
+ * @param {?=} styles
  * @return {?}
  */
-export function viewDef(flags, nodesWithoutIndices, update, handleEvent, componentType) {
+export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compId, encapsulation, styles) {
     // clone nodes and set auto calculated values
     if (nodesWithoutIndices.length === 0) {
         throw new Error(`Illegal State: Views without nodes are not allowed!`);
@@ -95,12 +97,14 @@ export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compone
         }
         currentParent = newParent;
     }
+    const /** @type {?} */ componentDef = compId ? ({ id: compId, encapsulation, styles }) : undefined;
     return {
         nodeFlags: viewNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags,
         nodes: nodes, reverseChildNodes,
         update: update || NOOP,
-        handleEvent: handleEvent || NOOP, componentType,
+        handleEvent: handleEvent || NOOP,
+        component: componentDef,
         bindingCount: viewBindingCount,
         disposableCount: viewDisposableCount, lastRootNode
     };
@@ -197,17 +201,30 @@ function validateNode(parent, node) {
  * @return {?}
  */
 function cloneAndModifyNode(nodeDef, values) {
-    const /** @type {?} */ clonedNode = ({});
-    copyInto(nodeDef, clonedNode);
-    clonedNode.index = values.index;
-    clonedNode.bindingIndex = values.bindingIndex;
-    clonedNode.disposableIndex = values.disposableIndex;
-    clonedNode.parent = values.parent;
-    clonedNode.reverseChildIndex = values.reverseChildIndex;
-    // Note: We can't set the value immediately, as we need to walk the children first.
-    clonedNode.childFlags = 0;
-    clonedNode.childMatchedQueries = {};
-    return clonedNode;
+    // Attention: don't use copyInto here to prevent v8 from treating this object
+    // as a dictionary!
+    return {
+        type: nodeDef.type,
+        index: values.index,
+        reverseChildIndex: values.reverseChildIndex,
+        parent: values.parent,
+        childFlags: 0,
+        childMatchedQueries: {},
+        bindingIndex: values.bindingIndex,
+        disposableIndex: values.disposableIndex,
+        flags: nodeDef.flags,
+        matchedQueries: nodeDef.matchedQueries,
+        ngContentIndex: nodeDef.ngContentIndex,
+        childCount: nodeDef.childCount,
+        bindings: nodeDef.bindings,
+        disposableCount: nodeDef.disposableCount,
+        element: nodeDef.element,
+        provider: nodeDef.provider,
+        text: nodeDef.text,
+        pureExpression: nodeDef.pureExpression,
+        query: nodeDef.query,
+        ngContent: nodeDef.ngContent
+    };
 }
 /**
  * @param {?} elementDef
@@ -215,10 +232,16 @@ function cloneAndModifyNode(nodeDef, values) {
  * @return {?}
  */
 function cloneAndModifyElement(elementDef, values) {
-    const /** @type {?} */ clonedElement = ({});
-    copyInto(elementDef, clonedElement);
-    clonedElement.providerIndices = values.providerIndices;
-    return clonedElement;
+    // Attention: don't use copyInto here to prevent v8 from treating this object
+    // as a dictionary!
+    return {
+        name: elementDef.name,
+        attrs: elementDef.attrs,
+        outputs: elementDef.outputs,
+        template: elementDef.template,
+        providerIndices: values.providerIndices,
+        source: elementDef.source
+    };
 }
 /**
  * @param {?} parent
@@ -255,14 +278,6 @@ export function createRootView(root, def, context) {
  */
 function createView(root, parent, parentIndex, def) {
     const /** @type {?} */ nodes = new Array(def.nodes.length);
-    let /** @type {?} */ renderer;
-    if (def.flags != null && (def.flags & ViewFlags.DirectDom)) {
-        renderer = null;
-    }
-    else {
-        renderer =
-            def.componentType ? root.renderer.renderComponent(def.componentType) : parent.renderer;
-    }
     const /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
     const /** @type {?} */ view = {
         def,
@@ -270,7 +285,7 @@ function createView(root, parent, parentIndex, def) {
         parentIndex,
         context: undefined,
         component: undefined, nodes,
-        state: ViewState.FirstCheck | ViewState.ChecksEnabled, renderer, root,
+        state: ViewState.FirstCheck | ViewState.ChecksEnabled, root,
         oldValues: new Array(def.bindingCount), disposables
     };
     return view;
@@ -285,26 +300,20 @@ function initView(view, component, context) {
     view.component = component;
     view.context = context;
 }
-const /** @type {?} */ createViewNodes = entryAction(EntryAction.CheckNoChanges, _createViewNodes);
 /**
  * @param {?} view
  * @return {?}
  */
-function _createViewNodes(view) {
+function createViewNodes(view) {
     let /** @type {?} */ renderHost;
     if (isComponentView(view)) {
         renderHost = asElementData(view.parent, view.parentIndex).renderElement;
-        if (view.renderer) {
-            renderHost = view.renderer.createViewRoot(renderHost);
-        }
     }
     const /** @type {?} */ def = view.def;
     const /** @type {?} */ nodes = view.nodes;
     for (let /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = def.nodes[i];
-        // As the current node is being created, we have to use
-        // the parent node as the current node for error messages, ...
-        setCurrentNode(view, nodeDef.parent);
+        Services.setCurrentNode(view, i);
         switch (nodeDef.type) {
             case NodeType.Element:
                 nodes[i] = (createElement(view, renderHost, nodeDef));
@@ -346,25 +355,23 @@ function _createViewNodes(view) {
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
 }
-export const /** @type {?} */ checkNoChangesView = entryAction(EntryAction.CheckNoChanges, _checkNoChangesView);
 /**
  * @param {?} view
  * @return {?}
  */
-function _checkNoChangesView(view) {
-    view.def.update(view);
+export function checkNoChangesView(view) {
+    Services.updateView(checkNoChangesNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
     execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckNoChanges);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
     execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckNoChanges);
 }
-export const /** @type {?} */ checkAndUpdateView = entryAction(EntryAction.CheckAndUpdate, _checkAndUpdateView);
 /**
  * @param {?} view
  * @return {?}
  */
-function _checkAndUpdateView(view) {
-    view.def.update(view);
+export function checkAndUpdateView(view) {
+    Services.updateView(checkAndUpdateNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
@@ -379,6 +386,9 @@ function _checkAndUpdateView(view) {
     view.state &= ~ViewState.FirstCheck;
 }
 /**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
  * @param {?=} v0
  * @param {?=} v1
  * @param {?=} v2
@@ -391,71 +401,84 @@ function _checkAndUpdateView(view) {
  * @param {?=} v9
  * @return {?}
  */
-export function checkNodeInline(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    const /** @type {?} */ action = currentAction();
-    const /** @type {?} */ view = currentView();
-    const /** @type {?} */ nodeIndex = currentNodeIndex();
-    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-    switch (action) {
-        case EntryAction.CheckNoChanges:
-            checkNodeNoChangesInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-            break;
-        case EntryAction.CheckAndUpdate:
-            switch (nodeDef.type) {
-                case NodeType.Element:
-                    checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                    break;
-                case NodeType.Text:
-                    checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                    break;
-                case NodeType.Provider:
-                    checkAndUpdateProviderInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                    break;
-                case NodeType.PureExpression:
-                    checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                    break;
-            }
-            break;
-        default:
-            throw new Error(`Illegal State: In action ${EntryAction[action]}`);
+function checkAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    if (argStyle === ArgumentType.Inline) {
+        return checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
-    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
-        undefined;
+    else {
+        return checkAndUpdateNodeDynamic(view, nodeIndex, v0);
+    }
 }
 /**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */
+function checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    switch (nodeDef.type) {
+        case NodeType.Element:
+            return checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        case NodeType.Text:
+            return checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        case NodeType.Provider:
+            return checkAndUpdateProviderInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        case NodeType.PureExpression:
+            return checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
  * @param {?} values
  * @return {?}
  */
-export function checkNodeDynamic(values) {
-    const /** @type {?} */ action = currentAction();
-    const /** @type {?} */ view = currentView();
-    const /** @type {?} */ nodeIndex = currentNodeIndex();
+function checkAndUpdateNodeDynamic(view, nodeIndex, values) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-    switch (action) {
-        case EntryAction.CheckNoChanges:
-            checkNodeNoChangesDynamic(view, nodeIndex, values);
-            break;
-        case EntryAction.CheckAndUpdate:
-            switch (nodeDef.type) {
-                case NodeType.Element:
-                    checkAndUpdateElementDynamic(view, nodeDef, values);
-                    break;
-                case NodeType.Text:
-                    checkAndUpdateTextDynamic(view, nodeDef, values);
-                    break;
-                case NodeType.Provider:
-                    checkAndUpdateProviderDynamic(view, nodeDef, values);
-                    break;
-                case NodeType.PureExpression:
-                    checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
-                    break;
-            }
-            break;
-        default:
-            throw new Error(`Illegal State: In action ${EntryAction[action]}`);
+    switch (nodeDef.type) {
+        case NodeType.Element:
+            return checkAndUpdateElementDynamic(view, nodeDef, values);
+        case NodeType.Text:
+            return checkAndUpdateTextDynamic(view, nodeDef, values);
+        case NodeType.Provider:
+            return checkAndUpdateProviderDynamic(view, nodeDef, values);
+        case NodeType.PureExpression:
+            return checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
     }
-    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
-        undefined;
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */
+function checkNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    if (argStyle === ArgumentType.Inline) {
+        return checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+    }
+    else {
+        return checkNoChangesNodeDynamic(view, nodeIndex, v0);
+    }
 }
 /**
  * @param {?} view
@@ -472,7 +495,7 @@ export function checkNodeDynamic(values) {
  * @param {?} v9
  * @return {?}
  */
-function checkNodeNoChangesInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     // Note: fallthrough is intended!
     switch (nodeDef.bindings.length) {
@@ -497,7 +520,8 @@ function checkNodeNoChangesInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v
         case 1:
             checkBindingNoChanges(view, nodeDef, 0, v0);
     }
-    return undefined;
+    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
+        undefined;
 }
 /**
  * @param {?} view
@@ -505,11 +529,13 @@ function checkNodeNoChangesInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v
  * @param {?} values
  * @return {?}
  */
-function checkNodeNoChangesDynamic(view, nodeIndex, values) {
+function checkNoChangesNodeDynamic(view, nodeIndex, values) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     for (let /** @type {?} */ i = 0; i < values.length; i++) {
         checkBindingNoChanges(view, nodeDef, i, values[i]);
     }
+    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
+        undefined;
 }
 /**
  * @param {?} view
@@ -519,15 +545,14 @@ function checkNodeNoChangesDynamic(view, nodeIndex, values) {
 function checkNoChangesQuery(view, nodeDef) {
     const /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
     if (queryList.dirty) {
-        throw expressionChangedAfterItHasBeenCheckedError(Refs.createDebugContext(view, nodeDef.index), `Query ${nodeDef.query.id} not dirty`, `Query ${nodeDef.query.id} dirty`, (view.state & ViewState.FirstCheck) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), `Query ${nodeDef.query.id} not dirty`, `Query ${nodeDef.query.id} dirty`, (view.state & ViewState.FirstCheck) !== 0);
     }
 }
-export const /** @type {?} */ destroyView = entryAction(EntryAction.Destroy, _destroyView);
 /**
  * @param {?} view
  * @return {?}
  */
-function _destroyView(view) {
+export function destroyView(view) {
     callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
     if (view.disposables) {
         for (let /** @type {?} */ i = 0; i < view.disposables.length; i++) {
@@ -612,20 +637,20 @@ function callViewAction(view, action) {
         case ViewAction.CheckNoChanges:
             if ((viewState & ViewState.ChecksEnabled) &&
                 (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
-                _checkNoChangesView(view);
+                checkNoChangesView(view);
             }
             break;
         case ViewAction.CheckAndUpdate:
             if ((viewState & ViewState.ChecksEnabled) &&
                 (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
-                _checkAndUpdateView(view);
+                checkAndUpdateView(view);
             }
             break;
         case ViewAction.Destroy:
-            _destroyView(view);
+            destroyView(view);
             break;
         case ViewAction.CreateViewNodes:
-            _createViewNodes(view);
+            createViewNodes(view);
             break;
     }
 }
@@ -648,7 +673,7 @@ function execQueriesAction(view, queryFlags, action) {
     for (let /** @type {?} */ i = 0; i < nodeCount; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
         if (nodeDef.flags & queryFlags) {
-            setCurrentNode(view, nodeDef.index);
+            Services.setCurrentNode(view, nodeDef.index);
             switch (action) {
                 case QueryAction.CheckAndUpdate:
                     checkAndUpdateQuery(view, nodeDef);

@@ -7,16 +7,12 @@
  */
 import { PipeTransform } from '../change_detection/change_detection';
 import { Injector } from '../di';
-import { ComponentFactory } from '../linker/component_factory';
 import { QueryList } from '../linker/query_list';
-import { TemplateRef } from '../linker/template_ref';
-import { ViewContainerRef } from '../linker/view_container_ref';
-import { ViewRef } from '../linker/view_ref';
-import { RenderComponentType, RenderDebugInfo, Renderer, RootRenderer } from '../render/api';
+import { ViewEncapsulation } from '../metadata/view';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
     flags: ViewFlags;
-    componentType: RenderComponentType;
+    component: ComponentDefinition;
     update: ViewUpdateFn;
     handleEvent: ViewHandleEventFn;
     /**
@@ -43,8 +39,15 @@ export interface ViewDefinition {
     };
 }
 export declare type ViewDefinitionFactory = () => ViewDefinition;
-export declare type ViewUpdateFn = (view: ViewData) => void;
+export declare type ViewUpdateFn = (check: NodeCheckFn, view: ViewData) => void;
+export declare function _nodeCheckFn(view: ViewData, nodeIndex: number, argStyle: ArgumentType.Dynamic, values: any[]): any;
+export declare function _nodeCheckFn(view: ViewData, nodeIndex: number, argStyle: ArgumentType.Inline, v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any;
+export declare type NodeCheckFn = typeof _nodeCheckFn;
 export declare type ViewHandleEventFn = (view: ViewData, nodeIndex: number, eventName: string, event: any) => boolean;
+export declare enum ArgumentType {
+    Inline = 0,
+    Dynamic = 1,
+}
 /**
  * Bitmask for ViewDefintion.flags.
  */
@@ -52,6 +55,11 @@ export declare enum ViewFlags {
     None = 0,
     DirectDom = 2,
     OnPush = 4,
+}
+export interface ComponentDefinition {
+    id: string;
+    encapsulation: ViewEncapsulation;
+    styles: string[];
 }
 /**
  * A node definition in the view.
@@ -237,7 +245,6 @@ export interface NgContentDef {
  */
 export interface ViewData {
     def: ViewDefinition;
-    renderer: Renderer;
     root: RootData;
     parentIndex: number;
     parent: ViewData;
@@ -333,39 +340,77 @@ export declare function asQueryList(view: ViewData, index: number): QueryList<an
 export interface RootData {
     injector: Injector;
     projectableNodes: any[][];
-    selectorOrNode: string | any;
-    renderer: RootRenderer;
+    element: any;
+    renderer: RendererV2;
     sanitizer: Sanitizer;
 }
-export declare enum EntryAction {
-    CheckAndUpdate = 0,
-    CheckNoChanges = 1,
-    Create = 2,
-    Destroy = 3,
-    HandleEvent = 4,
+/**
+ * TODO(tbosch): move this interface into @angular/core/src/render/api,
+ * and implement it in @angular/platform-browser, ...
+ */
+export interface RendererV2 {
+    createElement(name: string, debugInfo?: RenderDebugContext): any;
+    createComment(value: string, debugInfo?: RenderDebugContext): any;
+    createText(value: string, debugInfo?: RenderDebugContext): any;
+    appendChild(parent: any, newChild: any): void;
+    insertBefore(parent: any, newChild: any, refChild: any): void;
+    removeChild(parent: any, oldChild: any): void;
+    selectRootElement(selectorOrNode: string | any, debugInfo?: RenderDebugContext): any;
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     */
+    parentNode(node: any): any;
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     */
+    nextSibling(node: any): any;
+    setAttribute(el: any, name: string, value: string): void;
+    removeAttribute(el: any, name: string): void;
+    addClass(el: any, name: string): void;
+    removeClass(el: any, name: string): void;
+    setStyle(el: any, style: string, value: any): void;
+    removeStyle(el: any, style: string): void;
+    setProperty(el: any, name: string, value: any): void;
+    setText(node: any, value: string): void;
+    listen(target: 'window' | 'document' | any, eventName: string, callback: (event: any) => boolean): () => void;
 }
-export interface DebugContext extends RenderDebugInfo {
-    view: ViewData;
-    nodeIndex: number;
-    componentRenderElement: any;
-    renderNode: any;
+export declare abstract class RenderDebugContext {
+    readonly abstract injector: Injector;
+    readonly abstract component: any;
+    readonly abstract providerTokens: any[];
+    readonly abstract references: {
+        [key: string]: any;
+    };
+    readonly abstract context: any;
+    readonly abstract source: string;
+    readonly abstract componentRenderElement: any;
+    readonly abstract renderNode: any;
+}
+export declare abstract class DebugContext extends RenderDebugContext {
+    readonly abstract view: ViewData;
+    readonly abstract nodeIndex: number;
+}
+export interface Services {
+    setCurrentNode(view: ViewData, nodeIndex: number): void;
+    createRootView(injector: Injector, projectableNodes: any[][], rootSelectorOrNode: string | any, def: ViewDefinition, context?: any): ViewData;
+    createEmbeddedView(parent: ViewData, anchorDef: NodeDef, context?: any): ViewData;
+    checkAndUpdateView(view: ViewData): void;
+    checkNoChangesView(view: ViewData): void;
+    attachEmbeddedView(elementData: ElementData, viewIndex: number, view: ViewData): void;
+    detachEmbeddedView(elementData: ElementData, viewIndex: number): ViewData;
+    moveEmbeddedView(elementData: ElementData, oldViewIndex: number, newViewIndex: number): ViewData;
+    destroyView(view: ViewData): void;
+    resolveDep(view: ViewData, requestNodeIndex: number, elIndex: number, depDef: DepDef, notFoundValue?: any): any;
+    createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
+    handleEvent: ViewHandleEventFn;
+    updateView: ViewUpdateFn;
 }
 /**
- * This class is used to prevent cycles in the source files.
+ * This object is used to prevent cycles in the source files and to have a place where
+ * debug mode can hook it. It is lazily filled when `isDevMode` is known.
  */
-export declare abstract class Refs {
-    private static instance;
-    static setInstance(instance: Refs): void;
-    static createComponentFactory(selector: string, viewDefFactory: ViewDefinitionFactory): ComponentFactory<any>;
-    static createViewRef(data: ViewData): ViewRef;
-    static createViewContainerRef(view: ViewData, elIndex: number): ViewContainerRef;
-    static createTemplateRef(parentView: ViewData, def: NodeDef): TemplateRef<any>;
-    static createInjector(view: ViewData, elIndex: number): Injector;
-    static createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
-    abstract createComponentFactory(selector: string, viewDefFactory: ViewDefinitionFactory): ComponentFactory<any>;
-    abstract createViewRef(data: ViewData): ViewRef;
-    abstract createViewContainerRef(view: ViewData, elIndex: number): ViewContainerRef;
-    abstract createTemplateRef(parentView: ViewData, def: NodeDef): TemplateRef<any>;
-    abstract createInjector(view: ViewData, elIndex: number): Injector;
-    abstract createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
-}
+export declare const Services: Services;

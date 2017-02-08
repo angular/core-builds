@@ -7,8 +7,8 @@
  */
 import { isDevMode } from '../application_ref';
 import { SecurityContext } from '../security';
-import { BindingType, EntryAction, NodeFlags, NodeType, Refs, ViewFlags, asElementData } from './types';
-import { checkAndUpdateBinding, dispatchEvent, entryAction, setBindingDebugInfo, sliceErrorStack, unwrapValue } from './util';
+import { BindingType, NodeFlags, NodeType, asElementData } from './types';
+import { checkAndUpdateBinding, dispatchEvent, sliceErrorStack, unwrapValue } from './util';
 /**
  * @param {?} flags
  * @param {?} matchedQueries
@@ -89,7 +89,7 @@ export function elementDef(flags, matchedQueries, ngContentIndex, childCount, na
                 securityContext = (entry[2]);
                 break;
         }
-        bindingDefs[i] = { type: bindingType, name, nonMinfiedName: name, securityContext, suffix };
+        bindingDefs[i] = { type: bindingType, name, nonMinifiedName: name, securityContext, suffix };
     }
     outputs = outputs || [];
     const /** @type {?} */ outputDefs = new Array(outputs.length);
@@ -143,72 +143,29 @@ export function elementDef(flags, matchedQueries, ngContentIndex, childCount, na
  */
 export function createElement(view, renderHost, def) {
     const /** @type {?} */ elDef = def.element;
-    const /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
+    const /** @type {?} */ rootElement = view.root.element;
+    const /** @type {?} */ renderer = view.root.renderer;
     let /** @type {?} */ el;
-    if (view.parent || !rootSelectorOrNode) {
+    if (view.parent || !rootElement) {
         const /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
-        if (view.renderer) {
-            const /** @type {?} */ debugContext = isDevMode() ? Refs.createDebugContext(view, def.index) : undefined;
-            el = elDef.name ? view.renderer.createElement(parentNode, elDef.name, debugContext) :
-                view.renderer.createTemplateAnchor(parentNode, debugContext);
-        }
-        else {
-            el = elDef.name ? document.createElement(elDef.name) : document.createComment('');
-            if (parentNode) {
-                parentNode.appendChild(el);
-            }
+        el = elDef.name ? renderer.createElement(elDef.name) : renderer.createComment('');
+        if (parentNode) {
+            renderer.appendChild(parentNode, el);
         }
     }
     else {
-        if (view.renderer) {
-            const /** @type {?} */ debugContext = isDevMode() ? Refs.createDebugContext(view, def.index) : undefined;
-            el = view.renderer.selectRootElement(rootSelectorOrNode, debugContext);
-        }
-        else {
-            el = typeof rootSelectorOrNode === 'string' ? document.querySelector(rootSelectorOrNode) :
-                rootSelectorOrNode;
-            el.textContent = '';
-        }
+        el = rootElement;
     }
     if (elDef.attrs) {
         for (let /** @type {?} */ attrName in elDef.attrs) {
-            if (view.renderer) {
-                view.renderer.setElementAttribute(el, attrName, elDef.attrs[attrName]);
-            }
-            else {
-                el.setAttribute(attrName, elDef.attrs[attrName]);
-            }
+            renderer.setAttribute(el, attrName, elDef.attrs[attrName]);
         }
     }
     if (elDef.outputs.length) {
         for (let /** @type {?} */ i = 0; i < elDef.outputs.length; i++) {
             const /** @type {?} */ output = elDef.outputs[i];
-            let /** @type {?} */ disposable;
-            if (view.renderer) {
-                const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, output.eventName);
-                if (output.target) {
-                    disposable = (view.renderer.listenGlobal(output.target, output.eventName, handleEventClosure));
-                }
-                else {
-                    disposable = (view.renderer.listen(el, output.eventName, handleEventClosure));
-                }
-            }
-            else {
-                let /** @type {?} */ target;
-                switch (output.target) {
-                    case 'window':
-                        target = window;
-                        break;
-                    case 'document':
-                        target = document;
-                        break;
-                    default:
-                        target = el;
-                }
-                const /** @type {?} */ handleEventClosure = directDomEventHandlerClosure(view, def.index, output.eventName);
-                target.addEventListener(output.eventName, handleEventClosure);
-                disposable = target.removeEventListener.bind(target, output.eventName, handleEventClosure);
-            }
+            const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, output.eventName);
+            const /** @type {?} */ disposable = (renderer.listen(output.target || el, output.eventName, handleEventClosure));
             view.disposables[def.disposableIndex + i] = disposable;
         }
     }
@@ -225,22 +182,7 @@ export function createElement(view, renderHost, def) {
  * @return {?}
  */
 function renderEventHandlerClosure(view, index, eventName) {
-    return entryAction(EntryAction.HandleEvent, (event) => dispatchEvent(view, index, eventName, event));
-}
-/**
- * @param {?} view
- * @param {?} index
- * @param {?} eventName
- * @return {?}
- */
-function directDomEventHandlerClosure(view, index, eventName) {
-    return entryAction(EntryAction.HandleEvent, (event) => {
-        const /** @type {?} */ result = dispatchEvent(view, index, eventName, event);
-        if (result === false) {
-            event.preventDefault();
-        }
-        return result;
-    });
+    return (event) => dispatchEvent(view, index, eventName, event);
 }
 /**
  * @param {?} view
@@ -335,16 +277,12 @@ function setElementAttribute(view, binding, renderNode, name, value) {
     const /** @type {?} */ securityContext = binding.securityContext;
     let /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     renderValue = renderValue != null ? renderValue.toString() : null;
-    if (view.renderer) {
-        view.renderer.setElementAttribute(renderNode, name, renderValue);
+    const /** @type {?} */ renderer = view.root.renderer;
+    if (value != null) {
+        renderer.setAttribute(renderNode, name, renderValue);
     }
     else {
-        if (value != null) {
-            renderNode.setAttribute(name, renderValue);
-        }
-        else {
-            renderNode.removeAttribute(name);
-        }
+        renderer.removeAttribute(renderNode, name);
     }
 }
 /**
@@ -355,16 +293,12 @@ function setElementAttribute(view, binding, renderNode, name, value) {
  * @return {?}
  */
 function setElementClass(view, renderNode, name, value) {
-    if (view.renderer) {
-        view.renderer.setElementClass(renderNode, name, value);
+    const /** @type {?} */ renderer = view.root.renderer;
+    if (value) {
+        renderer.addClass(renderNode, name);
     }
     else {
-        if (value) {
-            renderNode.classList.add(name);
-        }
-        else {
-            renderNode.classList.remove(name);
-        }
+        renderer.removeClass(renderNode, name);
     }
 }
 /**
@@ -387,18 +321,12 @@ function setElementStyle(view, binding, renderNode, name, value) {
     else {
         renderValue = null;
     }
-    if (view.renderer) {
-        view.renderer.setElementStyle(renderNode, name, renderValue);
+    const /** @type {?} */ renderer = view.root.renderer;
+    if (renderValue != null) {
+        renderer.setStyle(renderNode, name, renderValue);
     }
     else {
-        if (renderValue != null) {
-            renderNode.style[name] = renderValue;
-        }
-        else {
-            // IE requires '' instead of null
-            // see https://github.com/angular/angular/issues/7916
-            ((renderNode.style))[name] = '';
-        }
+        renderer.removeStyle(renderNode, name);
     }
 }
 /**
@@ -412,14 +340,6 @@ function setElementStyle(view, binding, renderNode, name, value) {
 function setElementProperty(view, binding, renderNode, name, value) {
     const /** @type {?} */ securityContext = binding.securityContext;
     let /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
-    if (view.renderer) {
-        view.renderer.setElementProperty(renderNode, name, renderValue);
-        if (isDevMode() && (view.def.flags & ViewFlags.DirectDom) === 0) {
-            setBindingDebugInfo(view.renderer, renderNode, name, renderValue);
-        }
-    }
-    else {
-        renderNode[name] = renderValue;
-    }
+    view.root.renderer.setProperty(renderNode, name, renderValue);
 }
 //# sourceMappingURL=element.js.map
