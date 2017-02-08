@@ -5,30 +5,23 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-import { BaseError } from '../facade/errors';
 import { stringify } from '../facade/lang';
 /**
- * \@stable
+ * @param {?} component
+ * @return {?}
  */
-export var NoComponentFactoryError = (function (_super) {
-    __extends(NoComponentFactoryError, _super);
-    /**
-     * @param {?} component
-     */
-    function NoComponentFactoryError(component) {
-        _super.call(this, "No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
-        this.component = component;
-    }
-    return NoComponentFactoryError;
-}(BaseError));
-function NoComponentFactoryError_tsickle_Closure_declarations() {
-    /** @type {?} */
-    NoComponentFactoryError.prototype.component;
+export function noComponentFactoryError(component) {
+    var /** @type {?} */ error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
+    ((error))[ERROR_COMPONENT] = component;
+    return error;
+}
+var /** @type {?} */ ERROR_COMPONENT = 'ngComponent';
+/**
+ * @param {?} error
+ * @return {?}
+ */
+export function getComponent(error) {
+    return ((error))[ERROR_COMPONENT];
 }
 var _NullComponentFactoryResolver = (function () {
     function _NullComponentFactoryResolver() {
@@ -38,7 +31,7 @@ var _NullComponentFactoryResolver = (function () {
      * @return {?}
      */
     _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-        throw new NoComponentFactoryError(component);
+        throw noComponentFactoryError(component);
     };
     return _NullComponentFactoryResolver;
 }());

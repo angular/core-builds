@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.6-2e14130
+ * @license Angular v4.0.0-beta.6-c33fda2
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-2e14130');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.6-c33fda2');
 
     /**
      * Inject decorator and metadata.
@@ -1288,95 +1288,6 @@
         return Injector;
     }());
 
-    var __extends$2 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-    /**
-     * \@stable
-     */
-    var BaseError = (function (_super) {
-        __extends$2(BaseError, _super);
-        /**
-         * @param {?} message
-         */
-        function BaseError(message) {
-            _super.call(this, message);
-            // Errors don't use current this, instead they create a new instance.
-            // We have to do forward all of our api to the nativeInstance.
-            // TODO(bradfordcsmith): Remove this hack when
-            //     google/closure-compiler/issues/2102 is fixed.
-            var nativeError = new Error(message);
-            this._nativeError = nativeError;
-        }
-        Object.defineProperty(BaseError.prototype, "message", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this._nativeError.message; },
-            /**
-             * @param {?} message
-             * @return {?}
-             */
-            set: function (message) { this._nativeError.message = message; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(BaseError.prototype, "name", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this._nativeError.name; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(BaseError.prototype, "stack", {
-            /**
-             * @return {?}
-             */
-            get: function () { return ((this._nativeError)).stack; },
-            /**
-             * @param {?} value
-             * @return {?}
-             */
-            set: function (value) { ((this._nativeError)).stack = value; },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * @return {?}
-         */
-        BaseError.prototype.toString = function () { return this._nativeError.toString(); };
-        return BaseError;
-    }(Error));
-    /**
-     * \@stable
-     */
-    var WrappedError = (function (_super) {
-        __extends$2(WrappedError, _super);
-        /**
-         * @param {?} message
-         * @param {?} error
-         */
-        function WrappedError(message, error) {
-            _super.call(this, message + " caused by: " + (error instanceof Error ? error.message : error));
-            this.originalError = error;
-        }
-        Object.defineProperty(WrappedError.prototype, "stack", {
-            /**
-             * @return {?}
-             */
-            get: function () {
-                return (((this.originalError instanceof Error ? this.originalError : this._nativeError)))
-                    .stack;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return WrappedError;
-    }(BaseError));
-
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -1384,11 +1295,159 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$1 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
+    var /** @type {?} */ ERROR_TYPE = 'ngType';
+    var /** @type {?} */ ERROR_COMPONENT_TYPE = 'ngComponentType';
+    var /** @type {?} */ ERROR_DEBUG_CONTEXT = 'ngDebugContext';
+    var /** @type {?} */ ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    function getType(error) {
+        return ((error))[ERROR_TYPE];
+    }
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    function getDebugContext(error) {
+        return ((error))[ERROR_DEBUG_CONTEXT];
+    }
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    function getOriginalError(error) {
+        return ((error))[ERROR_ORIGINAL_ERROR];
+    }
+
+    /**
+     * \@whatItDoes Provides a hook for centralized exception handling.
+     *
+     * \@description
+     *
+     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
+     * intercept error handling, write a custom exception handler that replaces this default as
+     * appropriate for your app.
+     *
+     * ### Example
+     *
+     * ```
+     * class MyErrorHandler implements ErrorHandler {
+     *   handleError(error) {
+     *     // do something with the exception
+     *   }
+     * }
+     *
+     * \@NgModule({
+     *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
+     * })
+     * class MyModule {}
+     * ```
+     *
+     * \@stable
+     */
+    var ErrorHandler = (function () {
+        /**
+         * @param {?=} rethrowError
+         */
+        function ErrorHandler(rethrowError) {
+            if (rethrowError === void 0) { rethrowError = true; }
+            /**
+             * @internal
+             */
+            this._console = console;
+            this.rethrowError = rethrowError;
+        }
+        /**
+         * @param {?} error
+         * @return {?}
+         */
+        ErrorHandler.prototype.handleError = function (error) {
+            this._console.error("EXCEPTION: " + this._extractMessage(error));
+            if (error instanceof Error) {
+                var /** @type {?} */ originalError = this._findOriginalError(error);
+                var /** @type {?} */ originalStack = this._findOriginalStack(error);
+                var /** @type {?} */ context = this._findContext(error);
+                if (originalError) {
+                    this._console.error("ORIGINAL EXCEPTION: " + this._extractMessage(originalError));
+                }
+                if (originalStack) {
+                    this._console.error('ORIGINAL STACKTRACE:');
+                    this._console.error(originalStack);
+                }
+                if (context) {
+                    this._console.error('ERROR CONTEXT:');
+                    this._console.error(context);
+                }
+            }
+            // We rethrow exceptions, so operations like 'bootstrap' will result in an error
+            // when an error happens. If we do not rethrow, bootstrap will always succeed.
+            if (this.rethrowError)
+                throw error;
+        };
+        /**
+         * \@internal
+         * @param {?} error
+         * @return {?}
+         */
+        ErrorHandler.prototype._extractMessage = function (error) {
+            return error instanceof Error ? error.message : error.toString();
+        };
+        /**
+         * \@internal
+         * @param {?} error
+         * @return {?}
+         */
+        ErrorHandler.prototype._findContext = function (error) {
+            if (error) {
+                return getDebugContext(error) ? getDebugContext(error) :
+                    this._findContext(getOriginalError(error));
+            }
+            return null;
+        };
+        /**
+         * \@internal
+         * @param {?} error
+         * @return {?}
+         */
+        ErrorHandler.prototype._findOriginalError = function (error) {
+            var /** @type {?} */ e = getOriginalError(error);
+            while (e && getOriginalError(e)) {
+                e = getOriginalError(e);
+            }
+            return e;
+        };
+        /**
+         * \@internal
+         * @param {?} error
+         * @return {?}
+         */
+        ErrorHandler.prototype._findOriginalStack = function (error) {
+            var /** @type {?} */ e = error;
+            var /** @type {?} */ stack = e.stack;
+            while (e instanceof Error && getOriginalError(e)) {
+                e = getOriginalError(e);
+                if (e instanceof Error && e.stack) {
+                    stack = e.stack;
+                }
+            }
+            return stack;
+        };
+        return ErrorHandler;
+    }());
+    /**
+     * @param {?} message
+     * @param {?} originalError
+     * @return {?}
+     */
+    function wrappedError(message, originalError) {
+        var /** @type {?} */ msg = message + " caused by: " + (originalError instanceof Error ? originalError.message : originalError);
+        var /** @type {?} */ error = Error(msg);
+        ((error))[ERROR_ORIGINAL_ERROR] = originalError;
+        return error;
+    }
+
     /**
      * @param {?} keys
      * @return {?}
@@ -1417,35 +1476,33 @@
         return '';
     }
     /**
-     * Base class for all errors arising from misconfigured providers.
-     * \@stable
+     * @param {?} injector
+     * @param {?} key
+     * @param {?} constructResolvingMessage
+     * @param {?=} originalError
+     * @return {?}
      */
-    var AbstractProviderError = (function (_super) {
-        __extends$1(AbstractProviderError, _super);
-        /**
-         * @param {?} injector
-         * @param {?} key
-         * @param {?} constructResolvingMessage
-         */
-        function AbstractProviderError(injector, key, constructResolvingMessage) {
-            _super.call(this, 'DI Error');
-            this.keys = [key];
-            this.injectors = [injector];
-            this.constructResolvingMessage = constructResolvingMessage;
-            this.message = this.constructResolvingMessage(this.keys);
-        }
-        /**
-         * @param {?} injector
-         * @param {?} key
-         * @return {?}
-         */
-        AbstractProviderError.prototype.addKey = function (injector, key) {
-            this.injectors.push(injector);
-            this.keys.push(key);
-            this.message = this.constructResolvingMessage(this.keys);
-        };
-        return AbstractProviderError;
-    }(BaseError));
+    function injectionError(injector, key, constructResolvingMessage, originalError) {
+        var /** @type {?} */ error = ((originalError ? wrappedError('', originalError) : Error()));
+        error.addKey = addKey;
+        error.keys = [key];
+        error.injectors = [injector];
+        error.constructResolvingMessage = constructResolvingMessage;
+        error.message = error.constructResolvingMessage();
+        ((error))[ERROR_ORIGINAL_ERROR] = originalError;
+        return error;
+    }
+    /**
+     * @this {?}
+     * @param {?} injector
+     * @param {?} key
+     * @return {?}
+     */
+    function addKey(injector, key) {
+        this.injectors.push(injector);
+        this.keys.push(key);
+        this.message = this.constructResolvingMessage();
+    }
     /**
      * Thrown when trying to retrieve a dependency by key from {\@link Injector}, but the
      * {\@link Injector} does not have a {\@link Provider} for the given key.
@@ -1459,22 +1516,16 @@
      *
      * expect(() => Injector.resolveAndCreate([A])).toThrowError();
      * ```
-     * \@stable
+     * @param {?} injector
+     * @param {?} key
+     * @return {?}
      */
-    var NoProviderError = (function (_super) {
-        __extends$1(NoProviderError, _super);
-        /**
-         * @param {?} injector
-         * @param {?} key
-         */
-        function NoProviderError(injector, key) {
-            _super.call(this, injector, key, function (keys) {
-                var first = stringify(keys[0].token);
-                return "No provider for " + first + "!" + constructResolvingPath(keys);
-            });
-        }
-        return NoProviderError;
-    }(AbstractProviderError));
+    function noProviderError(injector, key) {
+        return injectionError(injector, key, function () {
+            var /** @type {?} */ first = stringify(this.keys[0].token);
+            return "No provider for " + first + "!" + constructResolvingPath(this.keys);
+        });
+    }
     /**
      * Thrown when dependencies form a cycle.
      *
@@ -1490,21 +1541,15 @@
      * ```
      *
      * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
-     * \@stable
+     * @param {?} injector
+     * @param {?} key
+     * @return {?}
      */
-    var CyclicDependencyError = (function (_super) {
-        __extends$1(CyclicDependencyError, _super);
-        /**
-         * @param {?} injector
-         * @param {?} key
-         */
-        function CyclicDependencyError(injector, key) {
-            _super.call(this, injector, key, function (keys) {
-                return "Cannot instantiate cyclic dependency!" + constructResolvingPath(keys);
-            });
-        }
-        return CyclicDependencyError;
-    }(AbstractProviderError));
+    function cyclicDependencyError(injector, key) {
+        return injectionError(injector, key, function () {
+            return "Cannot instantiate cyclic dependency!" + constructResolvingPath(this.keys);
+        });
+    }
     /**
      * Thrown when a constructing type returns with an Error.
      *
@@ -1529,51 +1574,18 @@
      *   expect(e.originalStack).toBeDefined();
      * }
      * ```
-     * \@stable
+     * @param {?} injector
+     * @param {?} originalException
+     * @param {?} originalStack
+     * @param {?} key
+     * @return {?}
      */
-    var InstantiationError = (function (_super) {
-        __extends$1(InstantiationError, _super);
-        /**
-         * @param {?} injector
-         * @param {?} originalException
-         * @param {?} originalStack
-         * @param {?} key
-         */
-        function InstantiationError(injector, originalException, originalStack, key) {
-            _super.call(this, 'DI Error', originalException);
-            this.keys = [key];
-            this.injectors = [injector];
-        }
-        /**
-         * @param {?} injector
-         * @param {?} key
-         * @return {?}
-         */
-        InstantiationError.prototype.addKey = function (injector, key) {
-            this.injectors.push(injector);
-            this.keys.push(key);
-        };
-        Object.defineProperty(InstantiationError.prototype, "message", {
-            /**
-             * @return {?}
-             */
-            get: function () {
-                var /** @type {?} */ first = stringify(this.keys[0].token);
-                return this.originalError.message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(InstantiationError.prototype, "causeKey", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this.keys[0]; },
-            enumerable: true,
-            configurable: true
-        });
-        return InstantiationError;
-    }(WrappedError));
+    function instantiationError(injector, originalException, originalStack, key) {
+        return injectionError(injector, key, function () {
+            var /** @type {?} */ first = stringify(this.keys[0].token);
+            return getOriginalError(this).message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
+        }, originalException);
+    }
     /**
      * Thrown when an object other then {\@link Provider} (or `Type`) is passed to {\@link Injector}
      * creation.
@@ -1583,18 +1595,12 @@
      * ```typescript
      * expect(() => Injector.resolveAndCreate(["not a type"])).toThrowError();
      * ```
-     * \@stable
+     * @param {?} provider
+     * @return {?}
      */
-    var InvalidProviderError = (function (_super) {
-        __extends$1(InvalidProviderError, _super);
-        /**
-         * @param {?} provider
-         */
-        function InvalidProviderError(provider) {
-            _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
-        }
-        return InvalidProviderError;
-    }(BaseError));
+    function invalidProviderError(provider) {
+        return Error("Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
+    }
     /**
      * Thrown when the class has no annotation information.
      *
@@ -1623,39 +1629,26 @@
      * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
      * ```
      * \@stable
+     * @param {?} typeOrFunc
+     * @param {?} params
+     * @return {?}
      */
-    var NoAnnotationError = (function (_super) {
-        __extends$1(NoAnnotationError, _super);
-        /**
-         * @param {?} typeOrFunc
-         * @param {?} params
-         */
-        function NoAnnotationError(typeOrFunc, params) {
-            _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
-        }
-        /**
-         * @param {?} typeOrFunc
-         * @param {?} params
-         * @return {?}
-         */
-        NoAnnotationError._genMessage = function (typeOrFunc, params) {
-            var /** @type {?} */ signature = [];
-            for (var /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
-                var /** @type {?} */ parameter = params[i];
-                if (!parameter || parameter.length == 0) {
-                    signature.push('?');
-                }
-                else {
-                    signature.push(parameter.map(stringify).join(' '));
-                }
+    function noAnnotationError(typeOrFunc, params) {
+        var /** @type {?} */ signature = [];
+        for (var /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
+            var /** @type {?} */ parameter = params[i];
+            if (!parameter || parameter.length == 0) {
+                signature.push('?');
             }
-            return 'Cannot resolve all parameters for \'' + stringify(typeOrFunc) + '\'(' +
-                signature.join(', ') + '). ' +
-                'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
-                stringify(typeOrFunc) + '\' is decorated with Injectable.';
-        };
-        return NoAnnotationError;
-    }(BaseError));
+            else {
+                signature.push(parameter.map(stringify).join(' '));
+            }
+        }
+        return Error('Cannot resolve all parameters for \'' + stringify(typeOrFunc) + '\'(' +
+            signature.join(', ') + '). ' +
+            'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
+            stringify(typeOrFunc) + '\' is decorated with Injectable.');
+    }
     /**
      * Thrown when getting an object by index.
      *
@@ -1669,17 +1662,12 @@
      * expect(() => injector.getAt(100)).toThrowError();
      * ```
      * \@stable
+     * @param {?} index
+     * @return {?}
      */
-    var OutOfBoundsError = (function (_super) {
-        __extends$1(OutOfBoundsError, _super);
-        /**
-         * @param {?} index
-         */
-        function OutOfBoundsError(index) {
-            _super.call(this, "Index " + index + " is out-of-bounds.");
-        }
-        return OutOfBoundsError;
-    }(BaseError));
+    function outOfBoundsError(index) {
+        return Error("Index " + index + " is out-of-bounds.");
+    }
     /**
      * Thrown when a multi provider and a regular provider are bound to the same token.
      *
@@ -1691,19 +1679,13 @@
      *   { provide: "Strings", useValue: "string2", multi: false}
      * ])).toThrowError();
      * ```
+     * @param {?} provider1
+     * @param {?} provider2
+     * @return {?}
      */
-    var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
-        __extends$1(MixingMultiProvidersWithRegularProvidersError, _super);
-        /**
-         * @param {?} provider1
-         * @param {?} provider2
-         */
-        function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
-            _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
-                provider2.toString());
-        }
-        return MixingMultiProvidersWithRegularProvidersError;
-    }(BaseError));
+    function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
+        return Error("Cannot mix multi providers and regular providers, got: " + provider1 + " " + provider2);
+    }
 
     /**
      * A unique object used for retrieving items from the {\@link ReflectiveInjector}.
@@ -2176,7 +2158,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$3 = (this && this.__extends) || function (d, b) {
+    var __extends$1 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -2186,7 +2168,7 @@
      * to power dependency injection and compilation.
      */
     var Reflector = (function (_super) {
-        __extends$3(Reflector, _super);
+        __extends$1(Reflector, _super);
         /**
          * @param {?} reflectionCapabilities
          */
@@ -2404,7 +2386,7 @@
             var /** @type {?} */ existing = normalizedProvidersMap.get(provider.key.id);
             if (existing) {
                 if (provider.multiProvider !== existing.multiProvider) {
-                    throw new MixingMultiProvidersWithRegularProvidersError(existing, provider);
+                    throw mixingMultiProvidersWithRegularProvidersError(existing, provider);
                 }
                 if (provider.multiProvider) {
                     for (var /** @type {?} */ j = 0; j < provider.resolvedFactories.length; j++) {
@@ -2445,7 +2427,7 @@
                 _normalizeProviders(b, res);
             }
             else {
-                throw new InvalidProviderError(b);
+                throw invalidProviderError(b);
             }
         });
         return res;
@@ -2473,7 +2455,7 @@
         if (!params)
             return [];
         if (params.some(function (p) { return p == null; })) {
-            throw new NoAnnotationError(typeOrFunc, params);
+            throw noAnnotationError(typeOrFunc, params);
         }
         return params.map(function (p) { return _extractToken(typeOrFunc, p, params); });
     }
@@ -2515,7 +2497,7 @@
             return _createDependency(token, optional, visibility);
         }
         else {
-            throw new NoAnnotationError(typeOrFunc, params);
+            throw noAnnotationError(typeOrFunc, params);
         }
     }
     /**
@@ -2887,7 +2869,7 @@
          */
         ReflectiveInjector_.prototype.getProviderAtIndex = function (index) {
             if (index < 0 || index >= this._providers.length) {
-                throw new OutOfBoundsError(index);
+                throw outOfBoundsError(index);
             }
             return this._providers[index];
         };
@@ -2898,7 +2880,7 @@
          */
         ReflectiveInjector_.prototype._new = function (provider) {
             if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
-                throw new CyclicDependencyError(this, provider.key);
+                throw cyclicDependencyError(this, provider.key);
             }
             return this._instantiateProvider(provider);
         };
@@ -2936,7 +2918,7 @@
                     ResolvedReflectiveFactory.dependencies.map(function (dep) { return _this._getByReflectiveDependency(dep); });
             }
             catch (e) {
-                if (e instanceof AbstractProviderError || e instanceof InstantiationError) {
+                if (e.addKey) {
                     e.addKey(this, provider.key);
                 }
                 throw e;
@@ -2946,7 +2928,7 @@
                 obj = factory.apply(void 0, deps);
             }
             catch (e) {
-                throw new InstantiationError(this, e, e.stack, provider.key);
+                throw instantiationError(this, e, e.stack, provider.key);
             }
             return obj;
         };
@@ -3000,7 +2982,7 @@
                 return notFoundValue;
             }
             else {
-                throw new NoProviderError(this, key);
+                throw noProviderError(this, key);
             }
         };
         /**
@@ -3073,129 +3055,6 @@
         }
         return res;
     }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * \@whatItDoes Provides a hook for centralized exception handling.
-     *
-     * \@description
-     *
-     * The default implementation of `ErrorHandler` prints error messages to the `console`. To
-     * intercept error handling, write a custom exception handler that replaces this default as
-     * appropriate for your app.
-     *
-     * ### Example
-     *
-     * ```
-     * class MyErrorHandler implements ErrorHandler {
-     *   handleError(error) {
-     *     // do something with the exception
-     *   }
-     * }
-     *
-     * \@NgModule({
-     *   providers: [{provide: ErrorHandler, useClass: MyErrorHandler}]
-     * })
-     * class MyModule {}
-     * ```
-     *
-     * \@stable
-     */
-    var ErrorHandler = (function () {
-        /**
-         * @param {?=} rethrowError
-         */
-        function ErrorHandler(rethrowError) {
-            if (rethrowError === void 0) { rethrowError = true; }
-            /**
-             * @internal
-             */
-            this._console = console;
-            this.rethrowError = rethrowError;
-        }
-        /**
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype.handleError = function (error) {
-            var /** @type {?} */ originalError = this._findOriginalError(error);
-            var /** @type {?} */ originalStack = this._findOriginalStack(error);
-            var /** @type {?} */ context = this._findContext(error);
-            this._console.error("EXCEPTION: " + this._extractMessage(error));
-            if (originalError) {
-                this._console.error("ORIGINAL EXCEPTION: " + this._extractMessage(originalError));
-            }
-            if (originalStack) {
-                this._console.error('ORIGINAL STACKTRACE:');
-                this._console.error(originalStack);
-            }
-            if (context) {
-                this._console.error('ERROR CONTEXT:');
-                this._console.error(context);
-            }
-            // We rethrow exceptions, so operations like 'bootstrap' will result in an error
-            // when an error happens. If we do not rethrow, bootstrap will always succeed.
-            if (this.rethrowError)
-                throw error;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._extractMessage = function (error) {
-            return error instanceof Error ? error.message : error.toString();
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._findContext = function (error) {
-            if (error) {
-                return error.context ? error.context :
-                    this._findContext(((error)).originalError);
-            }
-            return null;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._findOriginalError = function (error) {
-            var /** @type {?} */ e = ((error)).originalError;
-            while (e && ((e)).originalError) {
-                e = ((e)).originalError;
-            }
-            return e;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._findOriginalStack = function (error) {
-            if (!(error instanceof Error))
-                return null;
-            var /** @type {?} */ e = error;
-            var /** @type {?} */ stack = e.stack;
-            while (e instanceof Error && ((e)).originalError) {
-                e = ((e)).originalError;
-                if (e instanceof Error && e.stack) {
-                    stack = e.stack;
-                }
-            }
-            return stack;
-        };
-        return ErrorHandler;
-    }());
 
     /**
      * Wraps Javascript Objects
@@ -3510,34 +3369,6 @@
     }());
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var __extends$5 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-    /**
-     * Indicates that a component is still being loaded in a synchronous compile.
-     *
-     * \@stable
-     */
-    var ComponentStillLoadingError = (function (_super) {
-        __extends$5(ComponentStillLoadingError, _super);
-        /**
-         * @param {?} compType
-         */
-        function ComponentStillLoadingError(compType) {
-            _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
-            this.compType = compType;
-        }
-        return ComponentStillLoadingError;
-    }(BaseError));
-    /**
      * Combination of NgModuleFactory and ComponentFactorys.
      *
      * \@experimental
@@ -3574,8 +3405,7 @@
         }
         /**
          * Compiles the given NgModule and all of its components. All templates of the components listed
-         * in `entryComponents`
-         * have to be inlined. Otherwise throws a {\@link ComponentStillLoadingError}.
+         * in `entryComponents` have to be inlined.
          * @param {?} moduleType
          * @return {?}
          */
@@ -3670,7 +3500,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$7 = (this && this.__extends) || function (d, b) {
+    var __extends$4 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -3723,7 +3553,7 @@
      * \@stable
      */
     var EventEmitter = (function (_super) {
-        __extends$7(EventEmitter, _super);
+        __extends$4(EventEmitter, _super);
         /**
          * Creates an instance of [EventEmitter], which depending on [isAsync],
          * delivers events synchronously or asynchronously.
@@ -6143,18 +5973,6 @@
     }());
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var __extends$8 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-    /**
      * An error thrown if application changes model breaking the top-down data flow.
      *
      * This exception is only thrown in dev mode.
@@ -6183,63 +6001,49 @@
      *   }
      * }
      * ```
-     * \@stable
+     * @param {?} oldValue
+     * @param {?} currValue
+     * @param {?} isFirstCheck
+     * @return {?}
      */
-    var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
-        __extends$8(ExpressionChangedAfterItHasBeenCheckedError, _super);
-        /**
-         * @param {?} oldValue
-         * @param {?} currValue
-         * @param {?} isFirstCheck
-         */
-        function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
-            var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-            if (isFirstCheck) {
-                msg +=
-                    " It seems like the view has been created after its parent and its children have been dirty checked." +
-                        " Has it been created in a change detection hook ?";
-            }
-            _super.call(this, msg);
+    function expressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
+        var /** @type {?} */ msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+        if (isFirstCheck) {
+            msg +=
+                " It seems like the view has been created after its parent and its children have been dirty checked." +
+                    " Has it been created in a change detection hook ?";
         }
-        return ExpressionChangedAfterItHasBeenCheckedError;
-    }(BaseError));
+        var /** @type {?} */ error = Error(msg);
+        ((error))[ERROR_TYPE] = expressionChangedAfterItHasBeenCheckedError;
+        return error;
+    }
     /**
      * Thrown when an exception was raised during view creation, change detection or destruction.
      *
      * This error wraps the original exception to attach additional contextual information that can
      * be useful for debugging.
-     * \@stable
+     * @param {?} originalError
+     * @param {?} context
+     * @return {?}
      */
-    var ViewWrappedError = (function (_super) {
-        __extends$8(ViewWrappedError, _super);
-        /**
-         * @param {?} originalError
-         * @param {?} context
-         */
-        function ViewWrappedError(originalError, context) {
-            _super.call(this, "Error in " + context.source, originalError);
-            this.context = context;
-        }
-        return ViewWrappedError;
-    }(WrappedError));
+    function viewWrappedError(originalError, context) {
+        var /** @type {?} */ error = wrappedError("Error in " + context.source, originalError);
+        ((error))[ERROR_DEBUG_CONTEXT] = context;
+        ((error))[ERROR_TYPE] = viewWrappedError;
+        return error;
+    }
     /**
      * Thrown when a destroyed view is used.
      *
      * This error indicates a bug in the framework.
      *
      * This is an internal Angular error.
-     * \@stable
+     * @param {?} details
+     * @return {?}
      */
-    var ViewDestroyedError = (function (_super) {
-        __extends$8(ViewDestroyedError, _super);
-        /**
-         * @param {?} details
-         */
-        function ViewDestroyedError(details) {
-            _super.call(this, "Attempt to use a destroyed view: " + details);
-        }
-        return ViewDestroyedError;
-    }(BaseError));
+    function viewDestroyedError(details) {
+        return Error("Attempt to use a destroyed view: " + details);
+    }
 
     var ViewUtils = (function () {
         /**
@@ -6378,7 +6182,7 @@
         var /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
         if (view.throwOnChange) {
             if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
-                throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
+                throw expressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
             }
             return false;
         }
@@ -7284,7 +7088,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$6 = (this && this.__extends) || function (d, b) {
+    var __extends$3 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -7357,7 +7161,7 @@
      * @suppress {checkTypes}
      */
     var ComponentRef_ = (function (_super) {
-        __extends$6(ComponentRef_, _super);
+        __extends$3(ComponentRef_, _super);
         /**
          * @param {?} _index
          * @param {?} _parentView
@@ -7468,31 +7272,15 @@
     }());
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * @param {?} component
+     * @return {?}
      */
-    var __extends$9 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-    /**
-     * \@stable
-     */
-    var NoComponentFactoryError = (function (_super) {
-        __extends$9(NoComponentFactoryError, _super);
-        /**
-         * @param {?} component
-         */
-        function NoComponentFactoryError(component) {
-            _super.call(this, "No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
-            this.component = component;
-        }
-        return NoComponentFactoryError;
-    }(BaseError));
+    function noComponentFactoryError(component) {
+        var /** @type {?} */ error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
+        ((error))[ERROR_COMPONENT] = component;
+        return error;
+    }
+    var /** @type {?} */ ERROR_COMPONENT = 'ngComponent';
     var _NullComponentFactoryResolver = (function () {
         function _NullComponentFactoryResolver() {
         }
@@ -7501,7 +7289,7 @@
          * @return {?}
          */
         _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            throw new NoComponentFactoryError(component);
+            throw noComponentFactoryError(component);
         };
         return _NullComponentFactoryResolver;
     }());
@@ -7895,7 +7683,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$4 = (this && this.__extends) || function (d, b) {
+    var __extends$2 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -8146,7 +7934,7 @@
      * @suppress {checkTypes}
      */
     var PlatformRef_ = (function (_super) {
-        __extends$4(PlatformRef_, _super);
+        __extends$2(PlatformRef_, _super);
         /**
          * @param {?} _injector
          */
@@ -8362,7 +8150,7 @@
      * @suppress {checkTypes}
      */
     var ApplicationRef_ = (function (_super) {
-        __extends$4(ApplicationRef_, _super);
+        __extends$2(ApplicationRef_, _super);
         /**
          * @param {?} _zone
          * @param {?} _console
@@ -8538,7 +8326,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$10 = (this && this.__extends) || function (d, b) {
+    var __extends$5 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -8628,7 +8416,7 @@
      * @abstract
      */
     var NgModuleInjector = (function (_super) {
-        __extends$10(NgModuleInjector, _super);
+        __extends$5(NgModuleInjector, _super);
         /**
          * @param {?} parent
          * @param {?} factories
@@ -9013,7 +8801,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$11 = (this && this.__extends) || function (d, b) {
+    var __extends$6 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -9053,7 +8841,7 @@
      * @suppress {checkTypes}
      */
     var TemplateRef_ = (function (_super) {
-        __extends$11(TemplateRef_, _super);
+        __extends$6(TemplateRef_, _super);
         /**
          * @param {?} _parentView
          * @param {?} _nodeIndex
@@ -9391,7 +9179,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$12 = (this && this.__extends) || function (d, b) {
+    var __extends$7 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -9401,7 +9189,7 @@
      * @abstract
      */
     var ViewRef = (function (_super) {
-        __extends$12(ViewRef, _super);
+        __extends$7(ViewRef, _super);
         function ViewRef() {
             _super.apply(this, arguments);
         }
@@ -9480,7 +9268,7 @@
      * @abstract
      */
     var EmbeddedViewRef = (function (_super) {
-        __extends$12(EmbeddedViewRef, _super);
+        __extends$7(EmbeddedViewRef, _super);
         function EmbeddedViewRef() {
             _super.apply(this, arguments);
         }
@@ -9589,7 +9377,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$13 = (this && this.__extends) || function (d, b) {
+    var __extends$8 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -9682,7 +9470,7 @@
      * \@experimental All debugging apis are currently experimental.
      */
     var DebugElement = (function (_super) {
-        __extends$13(DebugElement, _super);
+        __extends$8(DebugElement, _super);
         /**
          * @param {?} nativeNode
          * @param {?} parent
@@ -10437,7 +10225,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$14 = (this && this.__extends) || function (d, b) {
+    var __extends$9 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -10481,7 +10269,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
-        __extends$14(AnimationStateDeclarationMetadata, _super);
+        __extends$9(AnimationStateDeclarationMetadata, _super);
         /**
          * @param {?} stateNameExpr
          * @param {?} styles
@@ -10501,7 +10289,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateTransitionMetadata = (function (_super) {
-        __extends$14(AnimationStateTransitionMetadata, _super);
+        __extends$9(AnimationStateTransitionMetadata, _super);
         /**
          * @param {?} stateChangeExpr
          * @param {?} steps
@@ -10530,7 +10318,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
-        __extends$14(AnimationKeyframesSequenceMetadata, _super);
+        __extends$9(AnimationKeyframesSequenceMetadata, _super);
         /**
          * @param {?} steps
          */
@@ -10548,7 +10336,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStyleMetadata = (function (_super) {
-        __extends$14(AnimationStyleMetadata, _super);
+        __extends$9(AnimationStyleMetadata, _super);
         /**
          * @param {?} styles
          * @param {?=} offset
@@ -10569,7 +10357,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationAnimateMetadata = (function (_super) {
-        __extends$14(AnimationAnimateMetadata, _super);
+        __extends$9(AnimationAnimateMetadata, _super);
         /**
          * @param {?} timings
          * @param {?} styles
@@ -10586,7 +10374,7 @@
      * @abstract
      */
     var AnimationWithStepsMetadata = (function (_super) {
-        __extends$14(AnimationWithStepsMetadata, _super);
+        __extends$9(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
             _super.call(this);
         }
@@ -10608,7 +10396,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationSequenceMetadata = (function (_super) {
-        __extends$14(AnimationSequenceMetadata, _super);
+        __extends$9(AnimationSequenceMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -10634,7 +10422,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationGroupMetadata = (function (_super) {
-        __extends$14(AnimationGroupMetadata, _super);
+        __extends$9(AnimationGroupMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -11966,13 +11754,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$16 = (this && this.__extends) || function (d, b) {
+    var __extends$11 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var ElementInjector = (function (_super) {
-        __extends$16(ElementInjector, _super);
+        __extends$11(ElementInjector, _super);
         /**
          * @param {?} _view
          * @param {?} _nodeIndex
@@ -12001,7 +11789,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$15 = (this && this.__extends) || function (d, b) {
+    var __extends$10 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -12452,11 +12240,11 @@
          * @param {?} details
          * @return {?}
          */
-        AppView.prototype.throwDestroyedError = function (details) { throw new ViewDestroyedError(details); };
+        AppView.prototype.throwDestroyedError = function (details) { throw viewDestroyedError(details); };
         return AppView;
     }());
     var DebugAppView = (function (_super) {
-        __extends$15(DebugAppView, _super);
+        __extends$10(DebugAppView, _super);
         /**
          * @param {?} clazz
          * @param {?} componentType
@@ -12580,12 +12368,12 @@
          * @return {?}
          */
         DebugAppView.prototype._rethrowWithContext = function (e) {
-            if (!(e instanceof ViewWrappedError)) {
-                if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedError)) {
+            if (!(getType(e) == viewWrappedError)) {
+                if (!(getType(e) == expressionChangedAfterItHasBeenCheckedError)) {
                     this.cdMode = ChangeDetectorStatus.Errored;
                 }
                 if (isPresent(this._currentDebugContext)) {
-                    throw new ViewWrappedError(e, this._currentDebugContext);
+                    throw viewWrappedError(e, this._currentDebugContext);
                 }
             }
         };
@@ -12829,10 +12617,10 @@
         DEFAULT_STATE: DEFAULT_STATE,
         EMPTY_STATE: EMPTY_STATE,
         FILL_STYLE_FLAG: FILL_STYLE_FLAG,
-        ComponentStillLoadingError: ComponentStillLoadingError,
         isPromise: isPromise,
         isObservable: isObservable,
-        AnimationTransition: AnimationTransition
+        AnimationTransition: AnimationTransition,
+        ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE
     };
 
     exports.createPlatform = createPlatform;

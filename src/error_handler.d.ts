@@ -1,3 +1,4 @@
+
 /**
  * @whatItDoes Provides a hook for centralized exception handling.
  *
@@ -28,3 +29,4 @@ export declare class ErrorHandler {
     constructor(rethrowError?: boolean);
     handleError(error: any): void;
 }
+export declare function wrappedError(message: string, originalError: any): Error;

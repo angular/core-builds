@@ -5,34 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 import { Injectable, InjectionToken } from '../di';
-import { BaseError } from '../facade/errors';
-import { stringify } from '../facade/lang';
-/**
- * Indicates that a component is still being loaded in a synchronous compile.
- *
- * \@stable
- */
-export var ComponentStillLoadingError = (function (_super) {
-    __extends(ComponentStillLoadingError, _super);
-    /**
-     * @param {?} compType
-     */
-    function ComponentStillLoadingError(compType) {
-        _super.call(this, "Can't compile synchronously as " + stringify(compType) + " is still being loaded!");
-        this.compType = compType;
-    }
-    return ComponentStillLoadingError;
-}(BaseError));
-function ComponentStillLoadingError_tsickle_Closure_declarations() {
-    /** @type {?} */
-    ComponentStillLoadingError.prototype.compType;
-}
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
@@ -76,8 +49,7 @@ export var Compiler = (function () {
     }
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
-     * in `entryComponents`
-     * have to be inlined. Otherwise throws a {\@link ComponentStillLoadingError}.
+     * in `entryComponents` have to be inlined.
      * @param {?} moduleType
      * @return {?}
      */

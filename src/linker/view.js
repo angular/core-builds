@@ -12,12 +12,13 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 import { ChangeDetectorStatus } from '../change_detection/change_detection';
 import { THROW_IF_NOT_FOUND } from '../di/injector';
+import { getType } from '../errors';
 import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 import { AnimationViewContext } from './animation_view_context';
 import { DebugContext } from './debug_context';
 import { ElementInjector } from './element_injector';
-import { ExpressionChangedAfterItHasBeenCheckedError, ViewDestroyedError, ViewWrappedError } from './errors';
+import { expressionChangedAfterItHasBeenCheckedError, viewDestroyedError, viewWrappedError } from './errors';
 import { ViewRef_ } from './view_ref';
 import { ViewType } from './view_type';
 import { addToArray } from './view_utils';
@@ -467,7 +468,7 @@ export var AppView = (function () {
      * @param {?} details
      * @return {?}
      */
-    AppView.prototype.throwDestroyedError = function (details) { throw new ViewDestroyedError(details); };
+    AppView.prototype.throwDestroyedError = function (details) { throw viewDestroyedError(details); };
     return AppView;
 }());
 function AppView_tsickle_Closure_declarations() {
@@ -645,12 +646,12 @@ export var DebugAppView = (function (_super) {
      * @return {?}
      */
     DebugAppView.prototype._rethrowWithContext = function (e) {
-        if (!(e instanceof ViewWrappedError)) {
-            if (!(e instanceof ExpressionChangedAfterItHasBeenCheckedError)) {
+        if (!(getType(e) == viewWrappedError)) {
+            if (!(getType(e) == expressionChangedAfterItHasBeenCheckedError)) {
                 this.cdMode = ChangeDetectorStatus.Errored;
             }
             if (isPresent(this._currentDebugContext)) {
-                throw new ViewWrappedError(e, this._currentDebugContext);
+                throw viewWrappedError(e, this._currentDebugContext);
             }
         }
     };

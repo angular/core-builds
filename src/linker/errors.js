@@ -5,12 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-import { BaseError, WrappedError } from '../facade/errors';
+import { wrappedError } from '../error_handler';
+import { ERROR_DEBUG_CONTEXT, ERROR_TYPE } from '../errors';
 /**
  * An error thrown if application changes model breaking the top-down data flow.
  *
@@ -40,51 +36,36 @@ import { BaseError, WrappedError } from '../facade/errors';
  *   }
  * }
  * ```
- * \@stable
+ * @param {?} oldValue
+ * @param {?} currValue
+ * @param {?} isFirstCheck
+ * @return {?}
  */
-export var ExpressionChangedAfterItHasBeenCheckedError = (function (_super) {
-    __extends(ExpressionChangedAfterItHasBeenCheckedError, _super);
-    /**
-     * @param {?} oldValue
-     * @param {?} currValue
-     * @param {?} isFirstCheck
-     */
-    function ExpressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
-        var msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (isFirstCheck) {
-            msg +=
-                " It seems like the view has been created after its parent and its children have been dirty checked." +
-                    " Has it been created in a change detection hook ?";
-        }
-        _super.call(this, msg);
+export function expressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
+    var /** @type {?} */ msg = "Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+    if (isFirstCheck) {
+        msg +=
+            " It seems like the view has been created after its parent and its children have been dirty checked." +
+                " Has it been created in a change detection hook ?";
     }
-    return ExpressionChangedAfterItHasBeenCheckedError;
-}(BaseError));
+    var /** @type {?} */ error = Error(msg);
+    ((error))[ERROR_TYPE] = expressionChangedAfterItHasBeenCheckedError;
+    return error;
+}
 /**
  * Thrown when an exception was raised during view creation, change detection or destruction.
  *
  * This error wraps the original exception to attach additional contextual information that can
  * be useful for debugging.
- * \@stable
+ * @param {?} originalError
+ * @param {?} context
+ * @return {?}
  */
-export var ViewWrappedError = (function (_super) {
-    __extends(ViewWrappedError, _super);
-    /**
-     * @param {?} originalError
-     * @param {?} context
-     */
-    function ViewWrappedError(originalError, context) {
-        _super.call(this, "Error in " + context.source, originalError);
-        this.context = context;
-    }
-    return ViewWrappedError;
-}(WrappedError));
-function ViewWrappedError_tsickle_Closure_declarations() {
-    /**
-     * DebugContext
-     * @type {?}
-     */
-    ViewWrappedError.prototype.context;
+export function viewWrappedError(originalError, context) {
+    var /** @type {?} */ error = wrappedError("Error in " + context.source, originalError);
+    ((error))[ERROR_DEBUG_CONTEXT] = context;
+    ((error))[ERROR_TYPE] = viewWrappedError;
+    return error;
 }
 /**
  * Thrown when a destroyed view is used.
@@ -92,16 +73,10 @@ function ViewWrappedError_tsickle_Closure_declarations() {
  * This error indicates a bug in the framework.
  *
  * This is an internal Angular error.
- * \@stable
+ * @param {?} details
+ * @return {?}
  */
-export var ViewDestroyedError = (function (_super) {
-    __extends(ViewDestroyedError, _super);
-    /**
-     * @param {?} details
-     */
-    function ViewDestroyedError(details) {
-        _super.call(this, "Attempt to use a destroyed view: " + details);
-    }
-    return ViewDestroyedError;
-}(BaseError));
+export function viewDestroyedError(details) {
+    return Error("Attempt to use a destroyed view: " + details);
+}
 //# sourceMappingURL=errors.js.map

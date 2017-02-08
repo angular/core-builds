@@ -5,12 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-import { BaseError, WrappedError } from '../facade/errors';
+import { wrappedError } from '../error_handler';
+import { ERROR_ORIGINAL_ERROR, getOriginalError } from '../errors';
 import { stringify } from '../facade/lang';
 /**
  * @param {?} keys
@@ -40,56 +36,32 @@ function constructResolvingPath(keys) {
     return '';
 }
 /**
- * Base class for all errors arising from misconfigured providers.
- * \@stable
+ * @param {?} injector
+ * @param {?} key
+ * @param {?} constructResolvingMessage
+ * @param {?=} originalError
+ * @return {?}
  */
-export var AbstractProviderError = (function (_super) {
-    __extends(AbstractProviderError, _super);
-    /**
-     * @param {?} injector
-     * @param {?} key
-     * @param {?} constructResolvingMessage
-     */
-    function AbstractProviderError(injector, key, constructResolvingMessage) {
-        _super.call(this, 'DI Error');
-        this.keys = [key];
-        this.injectors = [injector];
-        this.constructResolvingMessage = constructResolvingMessage;
-        this.message = this.constructResolvingMessage(this.keys);
-    }
-    /**
-     * @param {?} injector
-     * @param {?} key
-     * @return {?}
-     */
-    AbstractProviderError.prototype.addKey = function (injector, key) {
-        this.injectors.push(injector);
-        this.keys.push(key);
-        this.message = this.constructResolvingMessage(this.keys);
-    };
-    return AbstractProviderError;
-}(BaseError));
-function AbstractProviderError_tsickle_Closure_declarations() {
-    /**
-     * \@internal
-     * @type {?}
-     */
-    AbstractProviderError.prototype.message;
-    /**
-     * \@internal
-     * @type {?}
-     */
-    AbstractProviderError.prototype.keys;
-    /**
-     * \@internal
-     * @type {?}
-     */
-    AbstractProviderError.prototype.injectors;
-    /**
-     * \@internal
-     * @type {?}
-     */
-    AbstractProviderError.prototype.constructResolvingMessage;
+function injectionError(injector, key, constructResolvingMessage, originalError) {
+    var /** @type {?} */ error = ((originalError ? wrappedError('', originalError) : Error()));
+    error.addKey = addKey;
+    error.keys = [key];
+    error.injectors = [injector];
+    error.constructResolvingMessage = constructResolvingMessage;
+    error.message = error.constructResolvingMessage();
+    ((error))[ERROR_ORIGINAL_ERROR] = originalError;
+    return error;
+}
+/**
+ * @this {?}
+ * @param {?} injector
+ * @param {?} key
+ * @return {?}
+ */
+function addKey(injector, key) {
+    this.injectors.push(injector);
+    this.keys.push(key);
+    this.message = this.constructResolvingMessage();
 }
 /**
  * Thrown when trying to retrieve a dependency by key from {\@link Injector}, but the
@@ -104,22 +76,16 @@ function AbstractProviderError_tsickle_Closure_declarations() {
  *
  * expect(() => Injector.resolveAndCreate([A])).toThrowError();
  * ```
- * \@stable
+ * @param {?} injector
+ * @param {?} key
+ * @return {?}
  */
-export var NoProviderError = (function (_super) {
-    __extends(NoProviderError, _super);
-    /**
-     * @param {?} injector
-     * @param {?} key
-     */
-    function NoProviderError(injector, key) {
-        _super.call(this, injector, key, function (keys) {
-            var first = stringify(keys[0].token);
-            return "No provider for " + first + "!" + constructResolvingPath(keys);
-        });
-    }
-    return NoProviderError;
-}(AbstractProviderError));
+export function noProviderError(injector, key) {
+    return injectionError(injector, key, function () {
+        var /** @type {?} */ first = stringify(this.keys[0].token);
+        return "No provider for " + first + "!" + constructResolvingPath(this.keys);
+    });
+}
 /**
  * Thrown when dependencies form a cycle.
  *
@@ -135,21 +101,15 @@ export var NoProviderError = (function (_super) {
  * ```
  *
  * Retrieving `A` or `B` throws a `CyclicDependencyError` as the graph above cannot be constructed.
- * \@stable
+ * @param {?} injector
+ * @param {?} key
+ * @return {?}
  */
-export var CyclicDependencyError = (function (_super) {
-    __extends(CyclicDependencyError, _super);
-    /**
-     * @param {?} injector
-     * @param {?} key
-     */
-    function CyclicDependencyError(injector, key) {
-        _super.call(this, injector, key, function (keys) {
-            return "Cannot instantiate cyclic dependency!" + constructResolvingPath(keys);
-        });
-    }
-    return CyclicDependencyError;
-}(AbstractProviderError));
+export function cyclicDependencyError(injector, key) {
+    return injectionError(injector, key, function () {
+        return "Cannot instantiate cyclic dependency!" + constructResolvingPath(this.keys);
+    });
+}
 /**
  * Thrown when a constructing type returns with an Error.
  *
@@ -174,62 +134,17 @@ export var CyclicDependencyError = (function (_super) {
  *   expect(e.originalStack).toBeDefined();
  * }
  * ```
- * \@stable
+ * @param {?} injector
+ * @param {?} originalException
+ * @param {?} originalStack
+ * @param {?} key
+ * @return {?}
  */
-export var InstantiationError = (function (_super) {
-    __extends(InstantiationError, _super);
-    /**
-     * @param {?} injector
-     * @param {?} originalException
-     * @param {?} originalStack
-     * @param {?} key
-     */
-    function InstantiationError(injector, originalException, originalStack, key) {
-        _super.call(this, 'DI Error', originalException);
-        this.keys = [key];
-        this.injectors = [injector];
-    }
-    /**
-     * @param {?} injector
-     * @param {?} key
-     * @return {?}
-     */
-    InstantiationError.prototype.addKey = function (injector, key) {
-        this.injectors.push(injector);
-        this.keys.push(key);
-    };
-    Object.defineProperty(InstantiationError.prototype, "message", {
-        /**
-         * @return {?}
-         */
-        get: function () {
-            var /** @type {?} */ first = stringify(this.keys[0].token);
-            return this.originalError.message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(InstantiationError.prototype, "causeKey", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this.keys[0]; },
-        enumerable: true,
-        configurable: true
-    });
-    return InstantiationError;
-}(WrappedError));
-function InstantiationError_tsickle_Closure_declarations() {
-    /**
-     * \@internal
-     * @type {?}
-     */
-    InstantiationError.prototype.keys;
-    /**
-     * \@internal
-     * @type {?}
-     */
-    InstantiationError.prototype.injectors;
+export function instantiationError(injector, originalException, originalStack, key) {
+    return injectionError(injector, key, function () {
+        var /** @type {?} */ first = stringify(this.keys[0].token);
+        return getOriginalError(this).message + ": Error during instantiation of " + first + "!" + constructResolvingPath(this.keys) + ".";
+    }, originalException);
 }
 /**
  * Thrown when an object other then {\@link Provider} (or `Type`) is passed to {\@link Injector}
@@ -240,18 +155,12 @@ function InstantiationError_tsickle_Closure_declarations() {
  * ```typescript
  * expect(() => Injector.resolveAndCreate(["not a type"])).toThrowError();
  * ```
- * \@stable
+ * @param {?} provider
+ * @return {?}
  */
-export var InvalidProviderError = (function (_super) {
-    __extends(InvalidProviderError, _super);
-    /**
-     * @param {?} provider
-     */
-    function InvalidProviderError(provider) {
-        _super.call(this, "Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
-    }
-    return InvalidProviderError;
-}(BaseError));
+export function invalidProviderError(provider) {
+    return Error("Invalid provider - only instances of Provider and Type are allowed, got: " + provider);
+}
 /**
  * Thrown when the class has no annotation information.
  *
@@ -280,39 +189,26 @@ export var InvalidProviderError = (function (_super) {
  * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
  * ```
  * \@stable
+ * @param {?} typeOrFunc
+ * @param {?} params
+ * @return {?}
  */
-export var NoAnnotationError = (function (_super) {
-    __extends(NoAnnotationError, _super);
-    /**
-     * @param {?} typeOrFunc
-     * @param {?} params
-     */
-    function NoAnnotationError(typeOrFunc, params) {
-        _super.call(this, NoAnnotationError._genMessage(typeOrFunc, params));
-    }
-    /**
-     * @param {?} typeOrFunc
-     * @param {?} params
-     * @return {?}
-     */
-    NoAnnotationError._genMessage = function (typeOrFunc, params) {
-        var /** @type {?} */ signature = [];
-        for (var /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
-            var /** @type {?} */ parameter = params[i];
-            if (!parameter || parameter.length == 0) {
-                signature.push('?');
-            }
-            else {
-                signature.push(parameter.map(stringify).join(' '));
-            }
+export function noAnnotationError(typeOrFunc, params) {
+    var /** @type {?} */ signature = [];
+    for (var /** @type {?} */ i = 0, /** @type {?} */ ii = params.length; i < ii; i++) {
+        var /** @type {?} */ parameter = params[i];
+        if (!parameter || parameter.length == 0) {
+            signature.push('?');
         }
-        return 'Cannot resolve all parameters for \'' + stringify(typeOrFunc) + '\'(' +
-            signature.join(', ') + '). ' +
-            'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
-            stringify(typeOrFunc) + '\' is decorated with Injectable.';
-    };
-    return NoAnnotationError;
-}(BaseError));
+        else {
+            signature.push(parameter.map(stringify).join(' '));
+        }
+    }
+    return Error('Cannot resolve all parameters for \'' + stringify(typeOrFunc) + '\'(' +
+        signature.join(', ') + '). ' +
+        'Make sure that all the parameters are decorated with Inject or have valid type annotations and that \'' +
+        stringify(typeOrFunc) + '\' is decorated with Injectable.');
+}
 /**
  * Thrown when getting an object by index.
  *
@@ -326,17 +222,12 @@ export var NoAnnotationError = (function (_super) {
  * expect(() => injector.getAt(100)).toThrowError();
  * ```
  * \@stable
+ * @param {?} index
+ * @return {?}
  */
-export var OutOfBoundsError = (function (_super) {
-    __extends(OutOfBoundsError, _super);
-    /**
-     * @param {?} index
-     */
-    function OutOfBoundsError(index) {
-        _super.call(this, "Index " + index + " is out-of-bounds.");
-    }
-    return OutOfBoundsError;
-}(BaseError));
+export function outOfBoundsError(index) {
+    return Error("Index " + index + " is out-of-bounds.");
+}
 /**
  * Thrown when a multi provider and a regular provider are bound to the same token.
  *
@@ -348,17 +239,11 @@ export var OutOfBoundsError = (function (_super) {
  *   { provide: "Strings", useValue: "string2", multi: false}
  * ])).toThrowError();
  * ```
+ * @param {?} provider1
+ * @param {?} provider2
+ * @return {?}
  */
-export var MixingMultiProvidersWithRegularProvidersError = (function (_super) {
-    __extends(MixingMultiProvidersWithRegularProvidersError, _super);
-    /**
-     * @param {?} provider1
-     * @param {?} provider2
-     */
-    function MixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
-        _super.call(this, 'Cannot mix multi providers and regular providers, got: ' + provider1.toString() + ' ' +
-            provider2.toString());
-    }
-    return MixingMultiProvidersWithRegularProvidersError;
-}(BaseError));
+export function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
+    return Error("Cannot mix multi providers and regular providers, got: " + provider1 + " " + provider2);
+}
 //# sourceMappingURL=reflective_errors.js.map

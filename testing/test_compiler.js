@@ -11,7 +11,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 import { Compiler } from '@angular/core';
-import { unimplemented } from './facade/errors';
+function unimplemented() {
+    throw Error('unimplemented');
+}
 /**
  * Special interface to the compiler only used by testing
  *

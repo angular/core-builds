@@ -1,20 +1,8 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { BaseError } from '../facade/errors';
+
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
-/**
- * @stable
- */
-export declare class NoComponentFactoryError extends BaseError {
-    component: Function;
-    constructor(component: Function);
-}
+export declare function noComponentFactoryError(component: Function): Error;
+export declare function getComponent(error: Error): Type<any>;
 /**
  * @stable
  */

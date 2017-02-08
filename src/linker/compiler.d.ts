@@ -6,21 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { InjectionToken } from '../di';
-import { BaseError } from '../facade/errors';
 import { MissingTranslationStrategy } from '../i18n/tokens';
 import { ViewEncapsulation } from '../metadata';
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
 import { NgModuleFactory } from './ng_module_factory';
-/**
- * Indicates that a component is still being loaded in a synchronous compile.
- *
- * @stable
- */
-export declare class ComponentStillLoadingError extends BaseError {
-    compType: Type<any>;
-    constructor(compType: Type<any>);
-}
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
@@ -44,8 +34,7 @@ export declare class ModuleWithComponentFactories<T> {
 export declare class Compiler {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
-     * in `entryComponents`
-     * have to be inlined. Otherwise throws a {@link ComponentStillLoadingError}.
+     * in `entryComponents` have to be inlined.
      */
     compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T>;
     /**

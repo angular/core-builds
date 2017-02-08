@@ -12,7 +12,7 @@ import { isPresent, looseIdentical } from '../facade/lang';
 import { RenderComponentType, RootRenderer } from '../render/api';
 import { Sanitizer } from '../security';
 import { VERSION } from '../version';
-import { ExpressionChangedAfterItHasBeenCheckedError } from './errors';
+import { expressionChangedAfterItHasBeenCheckedError } from './errors';
 export var ViewUtils = (function () {
     /**
      * @param {?} _renderer
@@ -165,7 +165,7 @@ export function checkBinding(view, oldValue, newValue, forceUpdate) {
     var /** @type {?} */ isFirstCheck = view.numberOfChecks === 0;
     if (view.throwOnChange) {
         if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
-            throw new ExpressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
+            throw expressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
         }
         return false;
     }
