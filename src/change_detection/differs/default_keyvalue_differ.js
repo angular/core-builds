@@ -15,10 +15,11 @@ var DefaultKeyValueDifferFactory = (function () {
      */
     DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
     /**
-     * @param {?} cdRef
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cd
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.create = function (cdRef) {
+    DefaultKeyValueDifferFactory.prototype.create = function (cd) {
         return new DefaultKeyValueDiffer();
     };
     return DefaultKeyValueDifferFactory;

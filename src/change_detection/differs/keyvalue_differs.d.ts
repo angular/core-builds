@@ -94,7 +94,11 @@ export interface KeyValueDifferFactory {
     /**
      * Create a `KeyValueDiffer`.
      */
-    create<K, V>(cdRef: ChangeDetectorRef): KeyValueDiffer<K, V>;
+    create<K, V>(): KeyValueDiffer<K, V>;
+    /**
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     */
+    create<K, V>(_cdr?: ChangeDetectorRef): KeyValueDiffer<K, V>;
 }
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.

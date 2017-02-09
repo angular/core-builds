@@ -16,12 +16,13 @@ var DefaultIterableDifferFactory = (function () {
      */
     DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
     /**
-     * @param {?} cdRef
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cdRefOrTrackBy
      * @param {?=} trackByFn
      * @return {?}
      */
-    DefaultIterableDifferFactory.prototype.create = function (cdRef, trackByFn) {
-        return new DefaultIterableDiffer(trackByFn);
+    DefaultIterableDifferFactory.prototype.create = function (cdRefOrTrackBy, trackByFn) {
+        return new DefaultIterableDiffer(trackByFn || (cdRefOrTrackBy));
     };
     return DefaultIterableDifferFactory;
 }());
