@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Observable } from 'rxjs/Observable';
 import { ErrorHandler } from '../src/error_handler';
 import { ApplicationInitStatus } from './application_init';
 import { Console } from './console';
@@ -220,6 +221,10 @@ export declare abstract class ApplicationRef {
      * Returns the number of attached views.
      */
     readonly abstract viewCount: number;
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     */
+    readonly abstract isStable: Observable<boolean>;
 }
 /**
  * workaround https://github.com/angular/tsickle/issues/350
@@ -240,6 +245,8 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _views;
     private _runningTick;
     private _enforceNoNewChanges;
+    private _isStable;
+    private _stable;
     constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
     attachView(viewRef: ViewRef): void;
     detachView(viewRef: ViewRef): void;
@@ -251,4 +258,5 @@ export declare class ApplicationRef_ extends ApplicationRef {
     readonly viewCount: number;
     readonly componentTypes: Type<any>[];
     readonly components: ComponentRef<any>[];
+    readonly isStable: Observable<boolean>;
 }

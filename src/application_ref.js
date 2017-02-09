@@ -5,9 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Observable } from 'rxjs/Observable';
+import { merge } from 'rxjs/observable/merge';
+import { share } from 'rxjs/operator/share';
 import { ErrorHandler } from '../src/error_handler';
 import { ListWrapper } from '../src/facade/collection';
-import { stringify } from '../src/facade/lang';
+import { scheduleMicroTask, stringify } from '../src/facade/lang';
 import { isPromise } from '../src/util/lang';
 import { ApplicationInitStatus } from './application_init';
 import { APP_BOOTSTRAP_LISTENER, PLATFORM_INITIALIZER } from './application_tokens';
@@ -474,6 +477,12 @@ export class ApplicationRef {
      * @return {?}
      */
     viewCount() { }
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     * @abstract
+     * @return {?}
+     */
+    isStable() { }
 }
 /**
  * workaround https://github.com/angular/tsickle/issues/350
@@ -506,8 +515,43 @@ export class ApplicationRef_ extends ApplicationRef {
         this._views = [];
         this._runningTick = false;
         this._enforceNoNewChanges = false;
+        this._stable = true;
         this._enforceNoNewChanges = isDevMode();
         this._zone.onMicrotaskEmpty.subscribe({ next: () => { this._zone.run(() => { this.tick(); }); } });
+        const isCurrentlyStable = new Observable((observer) => {
+            this._stable = this._zone.isStable && !this._zone.hasPendingMacrotasks &&
+                !this._zone.hasPendingMicrotasks;
+            this._zone.runOutsideAngular(() => {
+                observer.next(this._stable);
+                observer.complete();
+            });
+        });
+        const isStable = new Observable((observer) => {
+            const stableSub = this._zone.onStable.subscribe(() => {
+                NgZone.assertNotInAngularZone();
+                // Check whether there are no pending macro/micro tasks in the next tick
+                // to allow for NgZone to update the state.
+                scheduleMicroTask(() => {
+                    if (!this._stable && !this._zone.hasPendingMacrotasks &&
+                        !this._zone.hasPendingMicrotasks) {
+                        this._stable = true;
+                        observer.next(true);
+                    }
+                });
+            });
+            const unstableSub = this._zone.onUnstable.subscribe(() => {
+                NgZone.assertInAngularZone();
+                if (this._stable) {
+                    this._stable = false;
+                    this._zone.runOutsideAngular(() => { observer.next(false); });
+                }
+            });
+            return () => {
+                stableSub.unsubscribe();
+                unstableSub.unsubscribe();
+            };
+        });
+        this._isStable = merge(isCurrentlyStable, share.call(isStable));
     }
     /**
      * @param {?} viewRef
@@ -615,6 +659,10 @@ export class ApplicationRef_ extends ApplicationRef {
      * @return {?}
      */
     get components() { return this._rootComponents; }
+    /**
+     * @return {?}
+     */
+    get isStable() { return this._isStable; }
 }
 /** @internal */
 ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
@@ -657,6 +705,10 @@ function ApplicationRef__tsickle_Closure_declarations() {
     ApplicationRef_.prototype._runningTick;
     /** @type {?} */
     ApplicationRef_.prototype._enforceNoNewChanges;
+    /** @type {?} */
+    ApplicationRef_.prototype._isStable;
+    /** @type {?} */
+    ApplicationRef_.prototype._stable;
     /** @type {?} */
     ApplicationRef_.prototype._zone;
     /** @type {?} */

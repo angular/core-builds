@@ -4,10 +4,10 @@
  * License: MIT
  */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/symbol/observable'), require('rxjs/Subject'), require('rxjs/Observable')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/symbol/observable', 'rxjs/Subject', 'rxjs/Observable'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.rxjs_symbol_observable,global.Rx,global.Rx));
-}(this, function (exports,rxjs_symbol_observable,rxjs_Subject,rxjs_Observable) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/symbol/observable'), require('rxjs/Subject')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/symbol/observable', 'rxjs/Subject'], factory) :
+    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.rxjs_observable_merge,global.rxjs_operator_share,global.rxjs_symbol_observable,global.Rx));
+}(this, function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_symbol_observable,rxjs_Subject) { 'use strict';
 
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -8153,6 +8153,12 @@
          * @return {?}
          */
         ApplicationRef.prototype.viewCount = function () { };
+        /**
+         * Returns an Observable that indicates when the application is stable or unstable.
+         * @abstract
+         * @return {?}
+         */
+        ApplicationRef.prototype.isStable = function () { };
         return ApplicationRef;
     }());
     /**
@@ -8187,8 +8193,43 @@
             _this._views = [];
             _this._runningTick = false;
             _this._enforceNoNewChanges = false;
+            _this._stable = true;
             _this._enforceNoNewChanges = isDevMode();
             _this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+            var isCurrentlyStable = new rxjs_Observable.Observable(function (observer) {
+                _this._stable = _this._zone.isStable && !_this._zone.hasPendingMacrotasks &&
+                    !_this._zone.hasPendingMicrotasks;
+                _this._zone.runOutsideAngular(function () {
+                    observer.next(_this._stable);
+                    observer.complete();
+                });
+            });
+            var isStable = new rxjs_Observable.Observable(function (observer) {
+                var stableSub = _this._zone.onStable.subscribe(function () {
+                    NgZone.assertNotInAngularZone();
+                    // Check whether there are no pending macro/micro tasks in the next tick
+                    // to allow for NgZone to update the state.
+                    scheduleMicroTask(function () {
+                        if (!_this._stable && !_this._zone.hasPendingMacrotasks &&
+                            !_this._zone.hasPendingMicrotasks) {
+                            _this._stable = true;
+                            observer.next(true);
+                        }
+                    });
+                });
+                var unstableSub = _this._zone.onUnstable.subscribe(function () {
+                    NgZone.assertInAngularZone();
+                    if (_this._stable) {
+                        _this._stable = false;
+                        _this._zone.runOutsideAngular(function () { observer.next(false); });
+                    }
+                });
+                return function () {
+                    stableSub.unsubscribe();
+                    unstableSub.unsubscribe();
+                };
+            });
+            _this._isStable = rxjs_observable_merge.merge(isCurrentlyStable, rxjs_operator_share.share.call(isStable));
             return _this;
         }
         /**
@@ -8307,6 +8348,14 @@
              * @return {?}
              */
             get: function () { return this._rootComponents; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ApplicationRef_.prototype, "isStable", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._isStable; },
             enumerable: true,
             configurable: true
         });
