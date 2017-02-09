@@ -16,5 +16,5 @@ export { textDef } from './text';
 export { rootRenderNodes } from './util';
 export { viewDef } from './view';
 export { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
-export { _nodeCheckFn, ArgumentType, ViewFlags, NodeType, NodeFlags, BindingType, QueryValueType, ProviderType, DepFlags, PureExpressionType, QueryBindingType, ViewState, NodeData, asTextData, asElementData, asProviderData, asPureExpressionData, asQueryList, RenderDebugContext, DebugContext, Services } from './types';
+export { ArgumentType, ViewFlags, NodeType, NodeFlags, BindingType, QueryValueType, ProviderType, DepFlags, PureExpressionType, QueryBindingType, ViewState, NodeData, asTextData, asElementData, asProviderData, asPureExpressionData, asQueryList, RenderDebugContext, DebugContext, Services } from './types';
 //# sourceMappingURL=index.js.map
