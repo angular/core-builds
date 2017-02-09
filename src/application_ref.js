@@ -10,9 +10,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+import { Observable } from 'rxjs/Observable';
+import { merge } from 'rxjs/observable/merge';
+import { share } from 'rxjs/operator/share';
 import { ErrorHandler } from '../src/error_handler';
 import { ListWrapper } from '../src/facade/collection';
-import { stringify } from '../src/facade/lang';
+import { scheduleMicroTask, stringify } from '../src/facade/lang';
 import { isPromise } from '../src/util/lang';
 import { ApplicationInitStatus } from './application_init';
 import { APP_BOOTSTRAP_LISTENER, PLATFORM_INITIALIZER } from './application_tokens';
@@ -506,6 +509,12 @@ var ApplicationRef = (function () {
      * @return {?}
      */
     ApplicationRef.prototype.viewCount = function () { };
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     * @abstract
+     * @return {?}
+     */
+    ApplicationRef.prototype.isStable = function () { };
     return ApplicationRef;
 }());
 export { ApplicationRef };
@@ -541,8 +550,43 @@ var ApplicationRef_ = (function (_super) {
         _this._views = [];
         _this._runningTick = false;
         _this._enforceNoNewChanges = false;
+        _this._stable = true;
         _this._enforceNoNewChanges = isDevMode();
         _this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
+        var isCurrentlyStable = new Observable(function (observer) {
+            _this._stable = _this._zone.isStable && !_this._zone.hasPendingMacrotasks &&
+                !_this._zone.hasPendingMicrotasks;
+            _this._zone.runOutsideAngular(function () {
+                observer.next(_this._stable);
+                observer.complete();
+            });
+        });
+        var isStable = new Observable(function (observer) {
+            var stableSub = _this._zone.onStable.subscribe(function () {
+                NgZone.assertNotInAngularZone();
+                // Check whether there are no pending macro/micro tasks in the next tick
+                // to allow for NgZone to update the state.
+                scheduleMicroTask(function () {
+                    if (!_this._stable && !_this._zone.hasPendingMacrotasks &&
+                        !_this._zone.hasPendingMicrotasks) {
+                        _this._stable = true;
+                        observer.next(true);
+                    }
+                });
+            });
+            var unstableSub = _this._zone.onUnstable.subscribe(function () {
+                NgZone.assertInAngularZone();
+                if (_this._stable) {
+                    _this._stable = false;
+                    _this._zone.runOutsideAngular(function () { observer.next(false); });
+                }
+            });
+            return function () {
+                stableSub.unsubscribe();
+                unstableSub.unsubscribe();
+            };
+        });
+        _this._isStable = merge(isCurrentlyStable, share.call(isStable));
         return _this;
     }
     /**
@@ -664,6 +708,14 @@ var ApplicationRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(ApplicationRef_.prototype, "isStable", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this._isStable; },
+        enumerable: true,
+        configurable: true
+    });
     return ApplicationRef_;
 }(ApplicationRef));
 export { ApplicationRef_ };
@@ -708,6 +760,10 @@ function ApplicationRef__tsickle_Closure_declarations() {
     ApplicationRef_.prototype._runningTick;
     /** @type {?} */
     ApplicationRef_.prototype._enforceNoNewChanges;
+    /** @type {?} */
+    ApplicationRef_.prototype._isStable;
+    /** @type {?} */
+    ApplicationRef_.prototype._stable;
     /** @type {?} */
     ApplicationRef_.prototype._zone;
     /** @type {?} */
