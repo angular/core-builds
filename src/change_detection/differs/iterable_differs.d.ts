@@ -116,7 +116,11 @@ export interface TrackByFunction<T> {
  */
 export interface IterableDifferFactory {
     supports(objects: any): boolean;
-    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
+    create<V>(trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
+    /**
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     */
+    create<V>(_cdr?: ChangeDetectorRef | TrackByFunction<V>, trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
 }
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.

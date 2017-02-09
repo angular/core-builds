@@ -14,10 +14,11 @@ export class DefaultKeyValueDifferFactory {
      */
     supports(obj) { return obj instanceof Map || isJsObject(obj); }
     /**
-     * @param {?} cdRef
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cd
      * @return {?}
      */
-    create(cdRef) {
+    create(cd) {
         return new DefaultKeyValueDiffer();
     }
 }

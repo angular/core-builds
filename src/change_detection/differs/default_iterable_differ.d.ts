@@ -1,9 +1,8 @@
-import { ChangeDetectorRef } from '../change_detector_ref';
 import { IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, NgIterable, TrackByFunction } from './iterable_differs';
 export declare class DefaultIterableDifferFactory implements IterableDifferFactory {
     constructor();
     supports(obj: Object): boolean;
-    create<V>(cdRef: ChangeDetectorRef, trackByFn?: TrackByFunction<any>): DefaultIterableDiffer<V>;
+    create<V>(trackByFn?: TrackByFunction<any>): DefaultIterableDiffer<V>;
 }
 /**
  * @deprecated v4.0.0 - Should not be part of public API.

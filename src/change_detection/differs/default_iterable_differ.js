@@ -15,12 +15,13 @@ export class DefaultIterableDifferFactory {
      */
     supports(obj) { return isListLikeIterable(obj); }
     /**
-     * @param {?} cdRef
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cdRefOrTrackBy
      * @param {?=} trackByFn
      * @return {?}
      */
-    create(cdRef, trackByFn) {
-        return new DefaultIterableDiffer(trackByFn);
+    create(cdRefOrTrackBy, trackByFn) {
+        return new DefaultIterableDiffer(trackByFn || (cdRefOrTrackBy));
     }
 }
 const /** @type {?} */ trackByIdentity = (index, item) => item;
