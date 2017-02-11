@@ -9708,286 +9708,10 @@
     }
 
     /**
-     * @return {?}
-     */
-    function _reflector() {
-        return reflector;
-    }
-    var /** @type {?} */ _CORE_PLATFORM_PROVIDERS = [
-        PlatformRef_,
-        { provide: PlatformRef, useExisting: PlatformRef_ },
-        { provide: Reflector, useFactory: _reflector, deps: [] },
-        { provide: ReflectorReader, useExisting: Reflector },
-        TestabilityRegistry,
-        Console,
-    ];
-    /**
-     * This platform has to be included in any other platform
-     *
-     * @experimental
-     */
-    var /** @type {?} */ platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
-
-    /**
-     * @experimental i18n support is experimental.
-     */
-    var /** @type {?} */ LOCALE_ID = new InjectionToken('LocaleId');
-    /**
-     * @experimental i18n support is experimental.
-     */
-    var /** @type {?} */ TRANSLATIONS = new InjectionToken('Translations');
-    /**
-     * @experimental i18n support is experimental.
-     */
-    var /** @type {?} */ TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-    var MissingTranslationStrategy = {};
-    MissingTranslationStrategy.Error = 0;
-    MissingTranslationStrategy.Warning = 1;
-    MissingTranslationStrategy.Ignore = 2;
-    MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
-    MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
-    MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
-
-    /**
-     * @return {?}
-     */
-    function _iterableDiffersFactory() {
-        return defaultIterableDiffers;
-    }
-    /**
-     * @return {?}
-     */
-    function _keyValueDiffersFactory() {
-        return defaultKeyValueDiffers;
-    }
-    /**
-     * @param {?=} locale
-     * @return {?}
-     */
-    function _localeFactory(locale) {
-        return locale || 'en-US';
-    }
-    /**
-     * This module includes the providers of \@angular/core that are needed
-     * to bootstrap components via `ApplicationRef`.
-     *
-     * \@experimental
-     */
-    var ApplicationModule = (function () {
-        function ApplicationModule() {
-        }
-        return ApplicationModule;
-    }());
-    ApplicationModule.decorators = [
-        { type: NgModule, args: [{
-                    providers: [
-                        ApplicationRef_,
-                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                        ApplicationInitStatus,
-                        Compiler,
-                        APP_ID_RANDOM_PROVIDER,
-                        ViewUtils,
-                        AnimationQueue,
-                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                        {
-                            provide: LOCALE_ID,
-                            useFactory: _localeFactory,
-                            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-                        },
-                    ]
-                },] },
-    ];
-    /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return []; };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */ var /** @type {?} */ FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
-    // TODO (matsko): change to boolean
-    var /** @type {?} */ ANY_STATE = '*';
-    var /** @type {?} */ DEFAULT_STATE = '*';
-    var /** @type {?} */ EMPTY_STATE = 'void';
-
-    var AnimationGroupPlayer = (function () {
-        /**
-         * @param {?} _players
-         */
-        function AnimationGroupPlayer(_players) {
-            var _this = this;
-            this._players = _players;
-            this._onDoneFns = [];
-            this._onStartFns = [];
-            this._finished = false;
-            this._started = false;
-            this._destroyed = false;
-            this.parentPlayer = null;
-            var count = 0;
-            var total = this._players.length;
-            if (total == 0) {
-                scheduleMicroTask(function () { return _this._onFinish(); });
-            }
-            else {
-                this._players.forEach(function (player) {
-                    player.parentPlayer = _this;
-                    player.onDone(function () {
-                        if (++count >= total) {
-                            _this._onFinish();
-                        }
-                    });
-                });
-            }
-        }
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype._onFinish = function () {
-            if (!this._finished) {
-                this._finished = true;
-                this._onDoneFns.forEach(function (fn) { return fn(); });
-                this._onDoneFns = [];
-            }
-        };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
-        /**
-         * @param {?} fn
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
-        /**
-         * @param {?} fn
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.play = function () {
-            if (!isPresent(this.parentPlayer)) {
-                this.init();
-            }
-            if (!this.hasStarted()) {
-                this._onStartFns.forEach(function (fn) { return fn(); });
-                this._onStartFns = [];
-                this._started = true;
-            }
-            this._players.forEach(function (player) { return player.play(); });
-        };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.pause = function () { this._players.forEach(function (player) { return player.pause(); }); };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.restart = function () { this._players.forEach(function (player) { return player.restart(); }); };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.finish = function () {
-            this._onFinish();
-            this._players.forEach(function (player) { return player.finish(); });
-        };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.destroy = function () {
-            if (!this._destroyed) {
-                this._onFinish();
-                this._players.forEach(function (player) { return player.destroy(); });
-                this._destroyed = true;
-            }
-        };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.reset = function () {
-            this._players.forEach(function (player) { return player.reset(); });
-            this._destroyed = false;
-            this._finished = false;
-            this._started = false;
-        };
-        /**
-         * @param {?} p
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.setPosition = function (p) {
-            this._players.forEach(function (player) { player.setPosition(p); });
-        };
-        /**
-         * @return {?}
-         */
-        AnimationGroupPlayer.prototype.getPosition = function () {
-            var /** @type {?} */ min = 0;
-            this._players.forEach(function (player) {
-                var /** @type {?} */ p = player.getPosition();
-                min = Math.min(p, min);
-            });
-            return min;
-        };
-        Object.defineProperty(AnimationGroupPlayer.prototype, "players", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this._players; },
-            enumerable: true,
-            configurable: true
-        });
-        return AnimationGroupPlayer;
-    }());
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * `AnimationKeyframe` consists of a series of styles (contained within {\@link AnimationStyles
-     * `AnimationStyles`})
-     * and an offset value indicating when those styles are applied within the `duration/delay/easing`
-     * timings.
-     * `AnimationKeyframe` is mostly an internal class which is designed to be used alongside {\@link
-     * Renderer#animate-anchor `Renderer.animate`}.
-     *
-     * \@experimental Animation support is experimental
-     */
-    var AnimationKeyframe = (function () {
-        /**
-         * @param {?} offset
-         * @param {?} styles
-         */
-        function AnimationKeyframe(offset, styles) {
-            this.offset = offset;
-            this.styles = styles;
-        }
-        return AnimationKeyframe;
-    }());
-
-    /**
      * \@experimental Animation support is experimental.
      * @abstract
      */
-    var AnimationPlayer = (function () {
+    var AnimationPlayer_ = (function () {
         function AnimationPlayer() {
         }
         /**
@@ -10002,6 +9726,12 @@
          * @return {?}
          */
         AnimationPlayer.prototype.onStart = function (fn) { };
+        /**
+         * @abstract
+         * @param {?} fn
+         * @return {?}
+         */
+        AnimationPlayer.prototype.onDestroy = function (fn) { };
         /**
          * @abstract
          * @return {?}
@@ -10073,17 +9803,22 @@
             var _this = this;
             this._onDoneFns = [];
             this._onStartFns = [];
+            this._onDestroyFns = [];
             this._started = false;
+            this._destroyed = false;
+            this._finished = false;
             this.parentPlayer = null;
             scheduleMicroTask(function () { return _this._onFinish(); });
         }
         /**
-         * \@internal
          * @return {?}
          */
         NoOpAnimationPlayer.prototype._onFinish = function () {
-            this._onDoneFns.forEach(function (fn) { return fn(); });
-            this._onDoneFns = [];
+            if (!this._finished) {
+                this._finished = true;
+                this._onDoneFns.forEach(function (fn) { return fn(); });
+                this._onDoneFns = [];
+            }
         };
         /**
          * @param {?} fn
@@ -10095,6 +9830,11 @@
          * @return {?}
          */
         NoOpAnimationPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
+        /**
+         * @param {?} fn
+         * @return {?}
+         */
+        NoOpAnimationPlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
         /**
          * @return {?}
          */
@@ -10128,7 +9868,14 @@
         /**
          * @return {?}
          */
-        NoOpAnimationPlayer.prototype.destroy = function () { };
+        NoOpAnimationPlayer.prototype.destroy = function () {
+            if (!this._destroyed) {
+                this._destroyed = true;
+                this.finish();
+                this._onDestroyFns.forEach(function (fn) { return fn(); });
+                this._onDestroyFns = [];
+            }
+        };
         /**
          * @return {?}
          */
@@ -10145,6 +9892,4749 @@
         return NoOpAnimationPlayer;
     }());
 
+    var __extends$9 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+    /**
+     * \@experimental Transition support is experimental.
+     * @abstract
+     */
+    var TransitionEngine = (function () {
+        function TransitionEngine() {
+        }
+        /**
+         * @abstract
+         * @param {?} container
+         * @param {?} element
+         * @return {?}
+         */
+        TransitionEngine.prototype.insertNode = function (container, element) { };
+        /**
+         * @abstract
+         * @param {?} element
+         * @return {?}
+         */
+        TransitionEngine.prototype.removeNode = function (element) { };
+        /**
+         * @abstract
+         * @param {?} element
+         * @param {?} instructions
+         * @return {?}
+         */
+        TransitionEngine.prototype.process = function (element, instructions) { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        TransitionEngine.prototype.triggerAnimations = function () { };
+        return TransitionEngine;
+    }());
+    /**
+     * \@experimental Transition support is experimental.
+     */
+    var NoOpTransitionEngine = (function (_super) {
+        __extends$9(NoOpTransitionEngine, _super);
+        function NoOpTransitionEngine() {
+            return _super.call(this) || this;
+        }
+        /**
+         * @param {?} container
+         * @param {?} element
+         * @return {?}
+         */
+        NoOpTransitionEngine.prototype.insertNode = function (container, element) { container.appendChild(element); };
+        /**
+         * @param {?} element
+         * @return {?}
+         */
+        NoOpTransitionEngine.prototype.removeNode = function (element) { remove(element); };
+        /**
+         * @param {?} element
+         * @param {?} instructions
+         * @return {?}
+         */
+        NoOpTransitionEngine.prototype.process = function (element, instructions) {
+            return new NoOpAnimationPlayer();
+        };
+        /**
+         * @return {?}
+         */
+        NoOpTransitionEngine.prototype.triggerAnimations = function () { };
+        return NoOpTransitionEngine;
+    }(TransitionEngine));
+    /**
+     * @param {?} element
+     * @return {?}
+     */
+    function remove(element) {
+        element.parentNode.removeChild(element);
+    }
+
+    /**
+     * @return {?}
+     */
+    function _reflector() {
+        return reflector;
+    }
+    var /** @type {?} */ _CORE_PLATFORM_PROVIDERS = [
+        PlatformRef_,
+        { provide: PlatformRef, useExisting: PlatformRef_ },
+        { provide: Reflector, useFactory: _reflector, deps: [] },
+        { provide: ReflectorReader, useExisting: Reflector },
+        { provide: TransitionEngine, useClass: NoOpTransitionEngine },
+        TestabilityRegistry,
+        Console,
+    ];
+    /**
+     * This platform has to be included in any other platform
+     *
+     * @experimental
+     */
+    var /** @type {?} */ platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var /** @type {?} */ LOCALE_ID = new InjectionToken('LocaleId');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var /** @type {?} */ TRANSLATIONS = new InjectionToken('Translations');
+    /**
+     * @experimental i18n support is experimental.
+     */
+    var /** @type {?} */ TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+    var MissingTranslationStrategy = {};
+    MissingTranslationStrategy.Error = 0;
+    MissingTranslationStrategy.Warning = 1;
+    MissingTranslationStrategy.Ignore = 2;
+    MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
+    MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
+    MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    var __extends$10 = (this && this.__extends) || function (d, b) {
+        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+    var ArgumentType = {};
+    ArgumentType.Inline = 0;
+    ArgumentType.Dynamic = 1;
+    ArgumentType[ArgumentType.Inline] = "Inline";
+    ArgumentType[ArgumentType.Dynamic] = "Dynamic";
+    var ViewFlags = {};
+    ViewFlags.None = 0;
+    ViewFlags.OnPush = 2;
+    ViewFlags[ViewFlags.None] = "None";
+    ViewFlags[ViewFlags.OnPush] = "OnPush";
+    var NodeType = {};
+    NodeType.Element = 0;
+    NodeType.Text = 1;
+    NodeType.Provider = 2;
+    NodeType.PureExpression = 3;
+    NodeType.Query = 4;
+    NodeType.NgContent = 5;
+    NodeType[NodeType.Element] = "Element";
+    NodeType[NodeType.Text] = "Text";
+    NodeType[NodeType.Provider] = "Provider";
+    NodeType[NodeType.PureExpression] = "PureExpression";
+    NodeType[NodeType.Query] = "Query";
+    NodeType[NodeType.NgContent] = "NgContent";
+    var NodeFlags = {};
+    NodeFlags.None = 0;
+    NodeFlags.OnInit = 1;
+    NodeFlags.OnDestroy = 2;
+    NodeFlags.DoCheck = 4;
+    NodeFlags.OnChanges = 8;
+    NodeFlags.AfterContentInit = 16;
+    NodeFlags.AfterContentChecked = 32;
+    NodeFlags.AfterViewInit = 64;
+    NodeFlags.AfterViewChecked = 128;
+    NodeFlags.HasEmbeddedViews = 256;
+    NodeFlags.HasComponent = 512;
+    NodeFlags.HasContentQuery = 1024;
+    NodeFlags.HasViewQuery = 2048;
+    NodeFlags.LazyProvider = 4096;
+    NodeFlags[NodeFlags.None] = "None";
+    NodeFlags[NodeFlags.OnInit] = "OnInit";
+    NodeFlags[NodeFlags.OnDestroy] = "OnDestroy";
+    NodeFlags[NodeFlags.DoCheck] = "DoCheck";
+    NodeFlags[NodeFlags.OnChanges] = "OnChanges";
+    NodeFlags[NodeFlags.AfterContentInit] = "AfterContentInit";
+    NodeFlags[NodeFlags.AfterContentChecked] = "AfterContentChecked";
+    NodeFlags[NodeFlags.AfterViewInit] = "AfterViewInit";
+    NodeFlags[NodeFlags.AfterViewChecked] = "AfterViewChecked";
+    NodeFlags[NodeFlags.HasEmbeddedViews] = "HasEmbeddedViews";
+    NodeFlags[NodeFlags.HasComponent] = "HasComponent";
+    NodeFlags[NodeFlags.HasContentQuery] = "HasContentQuery";
+    NodeFlags[NodeFlags.HasViewQuery] = "HasViewQuery";
+    NodeFlags[NodeFlags.LazyProvider] = "LazyProvider";
+    var BindingType = {};
+    BindingType.ElementAttribute = 0;
+    BindingType.ElementClass = 1;
+    BindingType.ElementStyle = 2;
+    BindingType.ElementProperty = 3;
+    BindingType.ProviderProperty = 4;
+    BindingType.Interpolation = 5;
+    BindingType.PureExpressionProperty = 6;
+    BindingType[BindingType.ElementAttribute] = "ElementAttribute";
+    BindingType[BindingType.ElementClass] = "ElementClass";
+    BindingType[BindingType.ElementStyle] = "ElementStyle";
+    BindingType[BindingType.ElementProperty] = "ElementProperty";
+    BindingType[BindingType.ProviderProperty] = "ProviderProperty";
+    BindingType[BindingType.Interpolation] = "Interpolation";
+    BindingType[BindingType.PureExpressionProperty] = "PureExpressionProperty";
+    var QueryValueType = {};
+    QueryValueType.ElementRef = 0;
+    QueryValueType.RenderElement = 1;
+    QueryValueType.TemplateRef = 2;
+    QueryValueType.ViewContainerRef = 3;
+    QueryValueType.Provider = 4;
+    QueryValueType[QueryValueType.ElementRef] = "ElementRef";
+    QueryValueType[QueryValueType.RenderElement] = "RenderElement";
+    QueryValueType[QueryValueType.TemplateRef] = "TemplateRef";
+    QueryValueType[QueryValueType.ViewContainerRef] = "ViewContainerRef";
+    QueryValueType[QueryValueType.Provider] = "Provider";
+    var ProviderType = {};
+    ProviderType.Value = 0;
+    ProviderType.Class = 1;
+    ProviderType.Factory = 2;
+    ProviderType.UseExisting = 3;
+    ProviderType[ProviderType.Value] = "Value";
+    ProviderType[ProviderType.Class] = "Class";
+    ProviderType[ProviderType.Factory] = "Factory";
+    ProviderType[ProviderType.UseExisting] = "UseExisting";
+    var DepFlags = {};
+    DepFlags.None = 0;
+    DepFlags.SkipSelf = 1;
+    DepFlags.Optional = 2;
+    DepFlags.Value = 8;
+    DepFlags[DepFlags.None] = "None";
+    DepFlags[DepFlags.SkipSelf] = "SkipSelf";
+    DepFlags[DepFlags.Optional] = "Optional";
+    DepFlags[DepFlags.Value] = "Value";
+    var PureExpressionType = {};
+    PureExpressionType.Array = 0;
+    PureExpressionType.Object = 1;
+    PureExpressionType.Pipe = 2;
+    PureExpressionType[PureExpressionType.Array] = "Array";
+    PureExpressionType[PureExpressionType.Object] = "Object";
+    PureExpressionType[PureExpressionType.Pipe] = "Pipe";
+    var QueryBindingType = {};
+    QueryBindingType.First = 0;
+    QueryBindingType.All = 1;
+    QueryBindingType[QueryBindingType.First] = "First";
+    QueryBindingType[QueryBindingType.All] = "All";
+    var ViewState = {};
+    ViewState.FirstCheck = 1;
+    ViewState.ChecksEnabled = 2;
+    ViewState.Errored = 4;
+    ViewState.Destroyed = 8;
+    ViewState[ViewState.FirstCheck] = "FirstCheck";
+    ViewState[ViewState.ChecksEnabled] = "ChecksEnabled";
+    ViewState[ViewState.Errored] = "Errored";
+    ViewState[ViewState.Destroyed] = "Destroyed";
+    /**
+     * Node instance data.
+     *
+     * We have a separate type per NodeType to save memory
+     * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
+     *
+     * To keep our code monomorphic,
+     * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
+     * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
+     * purposes.
+     */
+    var NodeData = (function () {
+        function NodeData() {
+        }
+        return NodeData;
+    }());
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function asTextData(view, index) {
+        return (view.nodes[index]);
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function asElementData(view, index) {
+        return (view.nodes[index]);
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function asProviderData(view, index) {
+        return (view.nodes[index]);
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function asPureExpressionData(view, index) {
+        return (view.nodes[index]);
+    }
+    /**
+     * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function asQueryList(view, index) {
+        return (view.nodes[index]);
+    }
+    /**
+     * @abstract
+     */
+    var RenderDebugContext = (function () {
+        function RenderDebugContext() {
+        }
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.injector = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.component = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.providerTokens = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.references = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.context = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.source = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.componentRenderElement = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.renderNode = function () { };
+        return RenderDebugContext;
+    }());
+    /**
+     * @abstract
+     */
+    var DebugContext = (function (_super) {
+        __extends$10(DebugContext, _super);
+        function DebugContext() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.view = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.nodeIndex = function () { };
+        return DebugContext;
+    }(RenderDebugContext));
+    /**
+     * This object is used to prevent cycles in the source files and to have a place where
+     * debug mode can hook it. It is lazily filled when `isDevMode` is known.
+     */
+    var /** @type {?} */ Services = {
+        setCurrentNode: undefined,
+        createRootView: undefined,
+        createEmbeddedView: undefined,
+        checkAndUpdateView: undefined,
+        checkNoChangesView: undefined,
+        destroyView: undefined,
+        attachEmbeddedView: undefined,
+        detachEmbeddedView: undefined,
+        moveEmbeddedView: undefined,
+        resolveDep: undefined,
+        createDebugContext: undefined,
+        handleEvent: undefined,
+        updateView: undefined,
+    };
+
+    /**
+     * @param {?} context
+     * @param {?} oldValue
+     * @param {?} currValue
+     * @param {?} isFirstCheck
+     * @return {?}
+     */
+    function expressionChangedAfterItHasBeenCheckedError$1(context, oldValue, currValue, isFirstCheck) {
+        var /** @type {?} */ msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+        if (isFirstCheck) {
+            msg +=
+                " It seems like the view has been created after its parent and its children have been dirty checked." +
+                    " Has it been created in a change detection hook ?";
+        }
+        return viewDebugError(msg, context);
+    }
+    /**
+     * @param {?} originalError
+     * @param {?} context
+     * @return {?}
+     */
+    function viewWrappedDebugError(originalError, context) {
+        var /** @type {?} */ err = viewDebugError(originalError.message, context);
+        ((err))[ERROR_ORIGINAL_ERROR] = originalError;
+        return err;
+    }
+    /**
+     * @param {?} msg
+     * @param {?} context
+     * @return {?}
+     */
+    function viewDebugError(msg, context) {
+        var /** @type {?} */ err = new Error(msg);
+        ((err))[ERROR_DEBUG_CONTEXT] = context;
+        err.stack = context.source;
+        context.view.state |= ViewState.Errored;
+        return err;
+    }
+    /**
+     * @param {?} err
+     * @return {?}
+     */
+    function isViewDebugError(err) {
+        return !!getDebugContext(err);
+    }
+    /**
+     * @param {?} action
+     * @return {?}
+     */
+    function viewDestroyedError$1(action) {
+        return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
+    }
+
+    var /** @type {?} */ _tokenKeyCache = new Map();
+    /**
+     * @param {?} token
+     * @return {?}
+     */
+    function tokenKey(token) {
+        var /** @type {?} */ key = _tokenKeyCache.get(token);
+        if (!key) {
+            key = stringify(token) + '_' + _tokenKeyCache.size;
+            _tokenKeyCache.set(token, key);
+        }
+        return key;
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} bindingIdx
+     * @param {?} value
+     * @return {?}
+     */
+    function checkBinding$1(view, def, bindingIdx, value) {
+        var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+        return !!(view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value);
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} bindingIdx
+     * @param {?} value
+     * @return {?}
+     */
+    function checkBindingNoChanges(view, def, bindingIdx, value) {
+        var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+        if ((view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value)) {
+            throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} bindingIdx
+     * @param {?} value
+     * @return {?}
+     */
+    function checkAndUpdateBinding(view, def, bindingIdx, value) {
+        var /** @type {?} */ oldValues = view.oldValues;
+        if ((view.state & ViewState.FirstCheck) ||
+            !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+            oldValues[def.bindingIndex + bindingIdx] = value;
+            if (def.flags & NodeFlags.HasComponent) {
+                var /** @type {?} */ compView = asProviderData(view, def.index).componentView;
+                if (compView.def.flags & ViewFlags.OnPush) {
+                    compView.state |= ViewState.ChecksEnabled;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} eventName
+     * @param {?} event
+     * @return {?}
+     */
+    function dispatchEvent(view, nodeIndex, eventName, event) {
+        var /** @type {?} */ currView = view;
+        while (currView) {
+            if (currView.def.flags & ViewFlags.OnPush) {
+                currView.state |= ViewState.ChecksEnabled;
+            }
+            currView = currView.parent;
+        }
+        return Services.handleEvent(view, nodeIndex, eventName, event);
+    }
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    function unwrapValue(value) {
+        if (value instanceof WrappedValue) {
+            value = value.wrapped;
+        }
+        return value;
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function declaredViewContainer(view) {
+        if (view.parent) {
+            var /** @type {?} */ parentView = view.parent;
+            return asElementData(parentView, view.parentIndex);
+        }
+        return undefined;
+    }
+    /**
+     * for component views, this is the same as parentIndex.
+     * for embedded views, this is the index of the parent node
+     * that contains the view container.
+     * @param {?} view
+     * @return {?}
+     */
+    function viewParentDiIndex(view) {
+        if (view.parent && view.context !== view.component) {
+            var /** @type {?} */ parentNodeDef = view.parent.def.nodes[view.parentIndex];
+            return parentNodeDef.parent;
+        }
+        return view.parentIndex;
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @return {?}
+     */
+    function renderNode(view, def) {
+        switch (def.type) {
+            case NodeType.Element:
+                return asElementData(view, def.index).renderElement;
+            case NodeType.Text:
+                return asTextData(view, def.index).renderText;
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} index
+     * @return {?}
+     */
+    function nodeValue(view, index) {
+        var /** @type {?} */ def = view.def.nodes[index];
+        switch (def.type) {
+            case NodeType.Element:
+                return asElementData(view, def.index).renderElement;
+            case NodeType.Text:
+                return asTextData(view, def.index).renderText;
+            case NodeType.Provider:
+                return asProviderData(view, def.index).instance;
+        }
+        return undefined;
+    }
+    /**
+     * @param {?} queryId
+     * @return {?}
+     */
+    function queryIdIsReference(queryId) {
+        return queryId.startsWith('#');
+    }
+    /**
+     * @param {?} target
+     * @param {?} name
+     * @return {?}
+     */
+    function elementEventFullName(target, name) {
+        return target ? target + ":" + name : name;
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function isComponentView(view) {
+        return view.component === view.context && !!view.parent;
+    }
+    var /** @type {?} */ VIEW_DEFINITION_CACHE = new WeakMap();
+    /**
+     * @param {?} factory
+     * @return {?}
+     */
+    function resolveViewDefinition(factory) {
+        var /** @type {?} */ value = VIEW_DEFINITION_CACHE.get(factory);
+        if (!value) {
+            value = factory();
+            VIEW_DEFINITION_CACHE.set(factory, value);
+        }
+        return value;
+    }
+    /**
+     * @param {?} start
+     * @param {?} end
+     * @return {?}
+     */
+    function sliceErrorStack(start, end) {
+        var /** @type {?} */ err;
+        try {
+            throw new Error();
+        }
+        catch (e) {
+            err = e;
+        }
+        var /** @type {?} */ stack = err.stack || '';
+        var /** @type {?} */ lines = stack.split('\n');
+        if (lines[0].startsWith('Error')) {
+            // Chrome always adds the message to the stack as well...
+            start++;
+            end++;
+        }
+        return lines.slice(start, end).join('\n');
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function rootRenderNodes(view) {
+        var /** @type {?} */ renderNodes = [];
+        visitRootRenderNodes(view, RenderNodeAction.Collect, undefined, undefined, renderNodes);
+        return renderNodes;
+    }
+    var RenderNodeAction = {};
+    RenderNodeAction.Collect = 0;
+    RenderNodeAction.AppendChild = 1;
+    RenderNodeAction.InsertBefore = 2;
+    RenderNodeAction.RemoveChild = 3;
+    RenderNodeAction[RenderNodeAction.Collect] = "Collect";
+    RenderNodeAction[RenderNodeAction.AppendChild] = "AppendChild";
+    RenderNodeAction[RenderNodeAction.InsertBefore] = "InsertBefore";
+    RenderNodeAction[RenderNodeAction.RemoveChild] = "RemoveChild";
+    /**
+     * @param {?} view
+     * @param {?} action
+     * @param {?} parentNode
+     * @param {?} nextSibling
+     * @param {?} target
+     * @return {?}
+     */
+    function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+        var /** @type {?} */ len = view.def.nodes.length;
+        for (var /** @type {?} */ i = 0; i < len; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+            // jump to next sibling
+            i += nodeDef.childCount;
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} ngContentIndex
+     * @param {?} action
+     * @param {?} parentNode
+     * @param {?} nextSibling
+     * @param {?} target
+     * @return {?}
+     */
+    function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nextSibling, target) {
+        var /** @type {?} */ compView = view;
+        while (compView && !isComponentView(compView)) {
+            compView = compView.parent;
+        }
+        var /** @type {?} */ hostView = compView.parent;
+        var /** @type {?} */ hostElDef = hostView.def.nodes[compView.parentIndex];
+        var /** @type {?} */ startIndex = hostElDef.index + 1;
+        var /** @type {?} */ endIndex = hostElDef.index + hostElDef.childCount;
+        for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
+            var /** @type {?} */ nodeDef = hostView.def.nodes[i];
+            if (nodeDef.ngContentIndex === ngContentIndex) {
+                visitRenderNode(hostView, nodeDef, action, parentNode, nextSibling, target);
+            }
+            // jump to next sibling
+            i += nodeDef.childCount;
+        }
+        if (!hostView.parent) {
+            // a root view
+            var /** @type {?} */ projectedNodes = view.root.projectableNodes[ngContentIndex];
+            if (projectedNodes) {
+                for (var /** @type {?} */ i = 0; i < projectedNodes.length; i++) {
+                    execRenderNodeAction(view, projectedNodes[i], action, parentNode, nextSibling, target);
+                }
+            }
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @param {?} action
+     * @param {?} parentNode
+     * @param {?} nextSibling
+     * @param {?} target
+     * @return {?}
+     */
+    function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
+        if (nodeDef.type === NodeType.NgContent) {
+            visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
+        }
+        else {
+            var /** @type {?} */ rn = renderNode(view, nodeDef);
+            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+            if (nodeDef.flags & NodeFlags.HasEmbeddedViews) {
+                var /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).embeddedViews;
+                if (embeddedViews) {
+                    for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                        visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderNode
+     * @param {?} action
+     * @param {?} parentNode
+     * @param {?} nextSibling
+     * @param {?} target
+     * @return {?}
+     */
+    function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
+        var /** @type {?} */ renderer = view.root.renderer;
+        switch (action) {
+            case RenderNodeAction.AppendChild:
+                renderer.appendChild(parentNode, renderNode);
+                break;
+            case RenderNodeAction.InsertBefore:
+                renderer.insertBefore(parentNode, renderNode, nextSibling);
+                break;
+            case RenderNodeAction.RemoveChild:
+                renderer.removeChild(parentNode, renderNode);
+                break;
+            case RenderNodeAction.Collect:
+                target.push(renderNode);
+                break;
+        }
+    }
+
+    /**
+     * @param {?} flags
+     * @param {?} matchedQueries
+     * @param {?} ngContentIndex
+     * @param {?} childCount
+     * @param {?=} templateFactory
+     * @return {?}
+     */
+    function anchorDef(flags, matchedQueries, ngContentIndex, childCount, templateFactory) {
+        var /** @type {?} */ matchedQueryDefs = {};
+        if (matchedQueries) {
+            matchedQueries.forEach(function (_a) {
+                var queryId = _a[0], valueType = _a[1];
+                matchedQueryDefs[queryId] = valueType;
+            });
+        }
+        // skip the call to sliceErrorStack itself + the call to this function.
+        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
+        var /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
+        return {
+            type: NodeType.Element,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: flags,
+            matchedQueries: matchedQueryDefs, ngContentIndex: ngContentIndex, childCount: childCount,
+            bindings: [],
+            disposableCount: 0,
+            element: {
+                name: undefined,
+                attrs: undefined,
+                outputs: [], template: template,
+                // will bet set by the view definition
+                providerIndices: undefined, source: source,
+            },
+            provider: undefined,
+            text: undefined,
+            pureExpression: undefined,
+            query: undefined,
+            ngContent: undefined
+        };
+    }
+    /**
+     * @param {?} flags
+     * @param {?} matchedQueries
+     * @param {?} ngContentIndex
+     * @param {?} childCount
+     * @param {?} name
+     * @param {?=} fixedAttrs
+     * @param {?=} bindings
+     * @param {?=} outputs
+     * @return {?}
+     */
+    function elementDef(flags, matchedQueries, ngContentIndex, childCount, name, fixedAttrs, bindings, outputs) {
+        if (fixedAttrs === void 0) { fixedAttrs = {}; }
+        // skip the call to sliceErrorStack itself + the call to this function.
+        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
+        var /** @type {?} */ matchedQueryDefs = {};
+        if (matchedQueries) {
+            matchedQueries.forEach(function (_a) {
+                var queryId = _a[0], valueType = _a[1];
+                matchedQueryDefs[queryId] = valueType;
+            });
+        }
+        bindings = bindings || [];
+        var /** @type {?} */ bindingDefs = new Array(bindings.length);
+        for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
+            var /** @type {?} */ entry = bindings[i];
+            var /** @type {?} */ bindingDef = void 0;
+            var /** @type {?} */ bindingType = entry[0];
+            var /** @type {?} */ name_1 = entry[1];
+            var /** @type {?} */ securityContext = void 0;
+            var /** @type {?} */ suffix = void 0;
+            switch (bindingType) {
+                case BindingType.ElementStyle:
+                    suffix = (entry[2]);
+                    break;
+                case BindingType.ElementAttribute:
+                case BindingType.ElementProperty:
+                    securityContext = (entry[2]);
+                    break;
+            }
+            bindingDefs[i] = { type: bindingType, name: name_1, nonMinifiedName: name_1, securityContext: securityContext, suffix: suffix };
+        }
+        outputs = outputs || [];
+        var /** @type {?} */ outputDefs = new Array(outputs.length);
+        for (var /** @type {?} */ i = 0; i < outputs.length; i++) {
+            var /** @type {?} */ output = outputs[i];
+            var /** @type {?} */ target = void 0;
+            var /** @type {?} */ eventName = void 0;
+            if (Array.isArray(output)) {
+                target = output[0], eventName = output[1];
+            }
+            else {
+                eventName = output;
+            }
+            outputDefs[i] = { eventName: eventName, target: target };
+        }
+        return {
+            type: NodeType.Element,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: flags,
+            matchedQueries: matchedQueryDefs, ngContentIndex: ngContentIndex, childCount: childCount,
+            bindings: bindingDefs,
+            disposableCount: outputDefs.length,
+            element: {
+                name: name,
+                attrs: fixedAttrs,
+                outputs: outputDefs,
+                template: undefined,
+                // will bet set by the view definition
+                providerIndices: undefined, source: source,
+            },
+            provider: undefined,
+            text: undefined,
+            pureExpression: undefined,
+            query: undefined,
+            ngContent: undefined
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderHost
+     * @param {?} def
+     * @return {?}
+     */
+    function createElement(view, renderHost, def) {
+        var /** @type {?} */ elDef = def.element;
+        var /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
+        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ el;
+        if (view.parent || !rootSelectorOrNode) {
+            var /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
+            el = elDef.name ? renderer.createElement(elDef.name) : renderer.createComment('');
+            if (parentNode) {
+                renderer.appendChild(parentNode, el);
+            }
+        }
+        else {
+            el = renderer.selectRootElement(rootSelectorOrNode);
+        }
+        if (elDef.attrs) {
+            for (var /** @type {?} */ attrName in elDef.attrs) {
+                renderer.setAttribute(el, attrName, elDef.attrs[attrName]);
+            }
+        }
+        if (elDef.outputs.length) {
+            for (var /** @type {?} */ i = 0; i < elDef.outputs.length; i++) {
+                var /** @type {?} */ output = elDef.outputs[i];
+                var /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, elementEventFullName(output.target, output.eventName));
+                var /** @type {?} */ disposable = (renderer.listen(output.target || el, output.eventName, handleEventClosure));
+                view.disposables[def.disposableIndex + i] = disposable;
+            }
+        }
+        return {
+            renderElement: el,
+            embeddedViews: (def.flags & NodeFlags.HasEmbeddedViews) ? [] : undefined,
+            projectedViews: undefined
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} index
+     * @param {?} eventName
+     * @return {?}
+     */
+    function renderEventHandlerClosure(view, index, eventName) {
+        return function (event) { return dispatchEvent(view, index, eventName, event); };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} v0
+     * @param {?} v1
+     * @param {?} v2
+     * @param {?} v3
+     * @param {?} v4
+     * @param {?} v5
+     * @param {?} v6
+     * @param {?} v7
+     * @param {?} v8
+     * @param {?} v9
+     * @return {?}
+     */
+    function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        // Note: fallthrough is intended!
+        switch (def.bindings.length) {
+            case 10:
+                checkAndUpdateElementValue(view, def, 9, v9);
+            case 9:
+                checkAndUpdateElementValue(view, def, 8, v8);
+            case 8:
+                checkAndUpdateElementValue(view, def, 7, v7);
+            case 7:
+                checkAndUpdateElementValue(view, def, 6, v6);
+            case 6:
+                checkAndUpdateElementValue(view, def, 5, v5);
+            case 5:
+                checkAndUpdateElementValue(view, def, 4, v4);
+            case 4:
+                checkAndUpdateElementValue(view, def, 3, v3);
+            case 3:
+                checkAndUpdateElementValue(view, def, 2, v2);
+            case 2:
+                checkAndUpdateElementValue(view, def, 1, v1);
+            case 1:
+                checkAndUpdateElementValue(view, def, 0, v0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} values
+     * @return {?}
+     */
+    function checkAndUpdateElementDynamic(view, def, values) {
+        for (var /** @type {?} */ i = 0; i < values.length; i++) {
+            checkAndUpdateElementValue(view, def, i, values[i]);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} bindingIdx
+     * @param {?} value
+     * @return {?}
+     */
+    function checkAndUpdateElementValue(view, def, bindingIdx, value) {
+        if (!checkAndUpdateBinding(view, def, bindingIdx, value)) {
+            return;
+        }
+        value = unwrapValue(value);
+        var /** @type {?} */ binding = def.bindings[bindingIdx];
+        var /** @type {?} */ name = binding.name;
+        var /** @type {?} */ renderNode = asElementData(view, def.index).renderElement;
+        switch (binding.type) {
+            case BindingType.ElementAttribute:
+                setElementAttribute(view, binding, renderNode, name, value);
+                break;
+            case BindingType.ElementClass:
+                setElementClass(view, renderNode, name, value);
+                break;
+            case BindingType.ElementStyle:
+                setElementStyle(view, binding, renderNode, name, value);
+                break;
+            case BindingType.ElementProperty:
+                setElementProperty(view, binding, renderNode, name, value);
+                break;
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} binding
+     * @param {?} renderNode
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    function setElementAttribute(view, binding, renderNode, name, value) {
+        var /** @type {?} */ securityContext = binding.securityContext;
+        var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
+        renderValue = renderValue != null ? renderValue.toString() : null;
+        var /** @type {?} */ renderer = view.root.renderer;
+        if (value != null) {
+            renderer.setAttribute(renderNode, name, renderValue);
+        }
+        else {
+            renderer.removeAttribute(renderNode, name);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderNode
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    function setElementClass(view, renderNode, name, value) {
+        var /** @type {?} */ renderer = view.root.renderer;
+        if (value) {
+            renderer.addClass(renderNode, name);
+        }
+        else {
+            renderer.removeClass(renderNode, name);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} binding
+     * @param {?} renderNode
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    function setElementStyle(view, binding, renderNode, name, value) {
+        var /** @type {?} */ renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, value);
+        if (renderValue != null) {
+            renderValue = renderValue.toString();
+            var /** @type {?} */ unit = binding.suffix;
+            if (unit != null) {
+                renderValue = renderValue + unit;
+            }
+        }
+        else {
+            renderValue = null;
+        }
+        var /** @type {?} */ renderer = view.root.renderer;
+        if (renderValue != null) {
+            renderer.setStyle(renderNode, name, renderValue);
+        }
+        else {
+            renderer.removeStyle(renderNode, name);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} binding
+     * @param {?} renderNode
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    function setElementProperty(view, binding, renderNode, name, value) {
+        var /** @type {?} */ securityContext = binding.securityContext;
+        var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
+        view.root.renderer.setProperty(renderNode, name, renderValue);
+    }
+
+    /**
+     * @param {?} ngContentIndex
+     * @param {?} index
+     * @return {?}
+     */
+    function ngContentDef(ngContentIndex, index) {
+        return {
+            type: NodeType.NgContent,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: 0,
+            matchedQueries: {}, ngContentIndex: ngContentIndex,
+            childCount: 0,
+            bindings: [],
+            disposableCount: 0,
+            element: undefined,
+            provider: undefined,
+            text: undefined,
+            pureExpression: undefined,
+            query: undefined,
+            ngContent: { index: index }
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderHost
+     * @param {?} def
+     * @return {?}
+     */
+    function appendNgContent(view, renderHost, def) {
+        if (def.ngContentIndex != null) {
+            // Do nothing if we are reprojected!
+            return;
+        }
+        var /** @type {?} */ parentEl = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
+        if (!parentEl) {
+            // Nothing to do if there is no parent element.
+            return;
+        }
+        var /** @type {?} */ ngContentIndex = def.ngContent.index;
+        visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, undefined, undefined);
+    }
+
+    var /** @type {?} */ EMPTY_CONTEXT = new Object();
+    /**
+     * @param {?} selector
+     * @param {?} componentType
+     * @param {?} viewDefFactory
+     * @return {?}
+     */
+    function createComponentFactory(selector, componentType, viewDefFactory) {
+        return new ComponentFactory_(selector, componentType, viewDefFactory);
+    }
+    var ComponentFactory_ = (function () {
+        /**
+         * @param {?} selector
+         * @param {?} componentType
+         * @param {?} _viewDefFactory
+         */
+        function ComponentFactory_(selector, componentType, _viewDefFactory) {
+            this.selector = selector;
+            this.componentType = componentType;
+            this._viewClass = _viewDefFactory;
+        }
+        /**
+         * Creates a new component.
+         * @param {?} injector
+         * @param {?=} projectableNodes
+         * @param {?=} rootSelectorOrNode
+         * @return {?}
+         */
+        ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode) {
+            if (projectableNodes === void 0) { projectableNodes = null; }
+            if (rootSelectorOrNode === void 0) { rootSelectorOrNode = null; }
+            var /** @type {?} */ viewDef = resolveViewDefinition(this._viewClass);
+            var /** @type {?} */ componentNodeIndex;
+            var /** @type {?} */ len = viewDef.nodes.length;
+            for (var /** @type {?} */ i = 0; i < len; i++) {
+                var /** @type {?} */ nodeDef = viewDef.nodes[i];
+                if (nodeDef.provider && nodeDef.provider.component) {
+                    componentNodeIndex = i;
+                    break;
+                }
+            }
+            if (componentNodeIndex == null) {
+                throw new Error("Illegal State: Could not find a component in the view definition!");
+            }
+            var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
+            var /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
+            return new ComponentRef_$1(view, new ViewRef_$1(view), component);
+        };
+        return ComponentFactory_;
+    }());
+    var ComponentRef_$1 = (function () {
+        /**
+         * @param {?} _view
+         * @param {?} _viewRef
+         * @param {?} _component
+         */
+        function ComponentRef_(_view, _viewRef, _component) {
+            this._view = _view;
+            this._viewRef = _viewRef;
+            this._component = _component;
+        }
+        Object.defineProperty(ComponentRef_.prototype, "location", {
+            /**
+             * @return {?}
+             */
+            get: function () { return new ElementRef(asElementData(this._view, 0).renderElement); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef_.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return new Injector_(this._view, 0); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentRef_.prototype, "instance", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._component; },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ComponentRef_.prototype, "hostView", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._viewRef; },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._viewRef; },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(ComponentRef_.prototype, "componentType", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (this._component.constructor); },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @return {?}
+         */
+        ComponentRef_.prototype.destroy = function () { this._viewRef.destroy(); };
+        /**
+         * @param {?} callback
+         * @return {?}
+         */
+        ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
+        return ComponentRef_;
+    }());
+    /**
+     * @param {?} view
+     * @param {?} elIndex
+     * @return {?}
+     */
+    function createViewContainerRef(view, elIndex) {
+        return new ViewContainerRef_$1(view, elIndex);
+    }
+    var ViewContainerRef_$1 = (function () {
+        /**
+         * @param {?} _view
+         * @param {?} _elIndex
+         */
+        function ViewContainerRef_(_view, _elIndex) {
+            this._view = _view;
+            this._elIndex = _elIndex;
+            this._data = asElementData(_view, _elIndex);
+        }
+        Object.defineProperty(ViewContainerRef_.prototype, "element", {
+            /**
+             * @return {?}
+             */
+            get: function () { return new ElementRef(this._data.renderElement); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return new Injector_(this._view, this._elIndex); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                var /** @type {?} */ view = this._view;
+                var /** @type {?} */ elIndex = view.def.nodes[this._elIndex].parent;
+                while (elIndex == null && view) {
+                    elIndex = viewParentDiIndex(view);
+                    view = view.parent;
+                }
+                return view ? new Injector_(view, elIndex) : this._view.root.injector;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.clear = function () {
+            var /** @type {?} */ len = this._data.embeddedViews.length;
+            for (var /** @type {?} */ i = len - 1; i >= 0; i--) {
+                var /** @type {?} */ view = Services.detachEmbeddedView(this._data, i);
+                Services.destroyView(view);
+            }
+        };
+        /**
+         * @param {?} index
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.get = function (index) { return new ViewRef_$1(this._data.embeddedViews[index]); };
+        Object.defineProperty(ViewContainerRef_.prototype, "length", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._data.embeddedViews.length; },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        /**
+         * @param {?} templateRef
+         * @param {?=} context
+         * @param {?=} index
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
+            var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context || ({}));
+            this.insert(viewRef, index);
+            return viewRef;
+        };
+        /**
+         * @param {?} componentFactory
+         * @param {?=} index
+         * @param {?=} injector
+         * @param {?=} projectableNodes
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) {
+            var /** @type {?} */ contextInjector = injector || this.parentInjector;
+            var /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes);
+            this.insert(componentRef.hostView, index);
+            return componentRef;
+        };
+        /**
+         * @param {?} viewRef
+         * @param {?=} index
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.insert = function (viewRef, index) {
+            var /** @type {?} */ viewData = ((viewRef))._view;
+            Services.attachEmbeddedView(this._data, index, viewData);
+            return viewRef;
+        };
+        /**
+         * @param {?} viewRef
+         * @param {?} currentIndex
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+            var /** @type {?} */ previousIndex = this._data.embeddedViews.indexOf(viewRef._view);
+            Services.moveEmbeddedView(this._data, previousIndex, currentIndex);
+            return viewRef;
+        };
+        /**
+         * @param {?} viewRef
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.indexOf = function (viewRef) {
+            return this._data.embeddedViews.indexOf(((viewRef))._view);
+        };
+        /**
+         * @param {?=} index
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.remove = function (index) {
+            var /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
+            Services.destroyView(viewData);
+        };
+        /**
+         * @param {?=} index
+         * @return {?}
+         */
+        ViewContainerRef_.prototype.detach = function (index) {
+            var /** @type {?} */ view = this.get(index);
+            Services.detachEmbeddedView(this._data, index);
+            return view;
+        };
+        return ViewContainerRef_;
+    }());
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function createChangeDetectorRef(view) {
+        return new ViewRef_$1(view);
+    }
+    var ViewRef_$1 = (function () {
+        /**
+         * @param {?} _view
+         */
+        function ViewRef_(_view) {
+            this._view = _view;
+        }
+        Object.defineProperty(ViewRef_.prototype, "rootNodes", {
+            /**
+             * @return {?}
+             */
+            get: function () { return rootRenderNodes(this._view); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewRef_.prototype, "context", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._view.context; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewRef_.prototype, "destroyed", {
+            /**
+             * @return {?}
+             */
+            get: function () { return (this._view.state & ViewState.Destroyed) !== 0; },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.markForCheck = function () { this.reattach(); };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.detach = function () { this._view.state &= ~ViewState.ChecksEnabled; };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.detectChanges = function () { Services.checkAndUpdateView(this._view); };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.checkNoChanges = function () { Services.checkNoChangesView(this._view); };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.reattach = function () { this._view.state |= ViewState.ChecksEnabled; };
+        /**
+         * @param {?} callback
+         * @return {?}
+         */
+        ViewRef_.prototype.onDestroy = function (callback) { this._view.disposables.push(/** @type {?} */ (callback)); };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.destroy = function () { Services.destroyView(this._view); };
+        return ViewRef_;
+    }());
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @return {?}
+     */
+    function createTemplateRef(view, def) {
+        return new TemplateRef_$1(view, def);
+    }
+    var TemplateRef_$1 = (function () {
+        /**
+         * @param {?} _parentView
+         * @param {?} _def
+         */
+        function TemplateRef_(_parentView, _def) {
+            this._parentView = _parentView;
+            this._def = _def;
+        }
+        /**
+         * @param {?} context
+         * @return {?}
+         */
+        TemplateRef_.prototype.createEmbeddedView = function (context) {
+            return new ViewRef_$1(Services.createEmbeddedView(this._parentView, this._def, context));
+        };
+        Object.defineProperty(TemplateRef_.prototype, "elementRef", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                return new ElementRef(asElementData(this._parentView, this._def.index).renderElement);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return TemplateRef_;
+    }());
+    /**
+     * @param {?} view
+     * @param {?} elIndex
+     * @return {?}
+     */
+    function createInjector(view, elIndex) {
+        return new Injector_(view, elIndex);
+    }
+    var Injector_ = (function () {
+        /**
+         * @param {?} view
+         * @param {?} elIndex
+         */
+        function Injector_(view, elIndex) {
+            this.view = view;
+            this.elIndex = elIndex;
+        }
+        /**
+         * @param {?} token
+         * @param {?=} notFoundValue
+         * @return {?}
+         */
+        Injector_.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+            return Services.resolveDep(this.view, undefined, this.elIndex, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        };
+        return Injector_;
+    }());
+
+    var /** @type {?} */ RendererV1TokenKey = tokenKey(Renderer);
+    var /** @type {?} */ ElementRefTokenKey = tokenKey(ElementRef);
+    var /** @type {?} */ ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
+    var /** @type {?} */ TemplateRefTokenKey = tokenKey(TemplateRef);
+    var /** @type {?} */ ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
+    var /** @type {?} */ InjectorRefTokenKey = tokenKey(Injector);
+    var /** @type {?} */ NOT_CREATED = new Object();
+    /**
+     * @param {?} flags
+     * @param {?} matchedQueries
+     * @param {?} childCount
+     * @param {?} ctor
+     * @param {?} deps
+     * @param {?=} props
+     * @param {?=} outputs
+     * @param {?=} component
+     * @return {?}
+     */
+    function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component) {
+        return _providerDef(flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, props, outputs, component);
+    }
+    /**
+     * @param {?} flags
+     * @param {?} matchedQueries
+     * @param {?} type
+     * @param {?} token
+     * @param {?} value
+     * @param {?} deps
+     * @return {?}
+     */
+    function providerDef(flags, matchedQueries, type, token, value, deps) {
+        return _providerDef(flags, matchedQueries, 0, type, token, value, deps);
+    }
+    /**
+     * @param {?} flags
+     * @param {?} matchedQueries
+     * @param {?} childCount
+     * @param {?} type
+     * @param {?} token
+     * @param {?} value
+     * @param {?} deps
+     * @param {?=} props
+     * @param {?=} outputs
+     * @param {?=} component
+     * @return {?}
+     */
+    function _providerDef(flags, matchedQueries, childCount, type, token, value, deps, props, outputs, component) {
+        var /** @type {?} */ matchedQueryDefs = {};
+        if (matchedQueries) {
+            matchedQueries.forEach(function (_a) {
+                var queryId = _a[0], valueType = _a[1];
+                matchedQueryDefs[queryId] = valueType;
+            });
+        }
+        var /** @type {?} */ bindings = [];
+        if (props) {
+            for (var /** @type {?} */ prop in props) {
+                var _a = props[prop], bindingIndex = _a[0], nonMinifiedName = _a[1];
+                bindings[bindingIndex] = {
+                    type: BindingType.ProviderProperty,
+                    name: prop, nonMinifiedName: nonMinifiedName,
+                    securityContext: undefined,
+                    suffix: undefined
+                };
+            }
+        }
+        var /** @type {?} */ outputDefs = [];
+        if (outputs) {
+            for (var /** @type {?} */ propName in outputs) {
+                outputDefs.push({ propName: propName, eventName: outputs[propName] });
+            }
+        }
+        var /** @type {?} */ depDefs = deps.map(function (value) {
+            var /** @type {?} */ token;
+            var /** @type {?} */ flags;
+            if (Array.isArray(value)) {
+                flags = value[0], token = value[1];
+            }
+            else {
+                flags = DepFlags.None;
+                token = value;
+            }
+            return { flags: flags, token: token, tokenKey: tokenKey(token) };
+        });
+        if (component) {
+            flags = flags | NodeFlags.HasComponent;
+        }
+        return {
+            type: NodeType.Provider,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: flags,
+            matchedQueries: matchedQueryDefs,
+            ngContentIndex: undefined, childCount: childCount, bindings: bindings,
+            disposableCount: outputDefs.length,
+            element: undefined,
+            provider: {
+                type: type,
+                token: token,
+                tokenKey: tokenKey(token), value: value,
+                deps: depDefs,
+                outputs: outputDefs, component: component
+            },
+            text: undefined,
+            pureExpression: undefined,
+            query: undefined,
+            ngContent: undefined
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @return {?}
+     */
+    function createProviderInstance(view, def) {
+        var /** @type {?} */ providerDef = def.provider;
+        return def.flags & NodeFlags.LazyProvider ? NOT_CREATED : createInstance(view, def);
+    }
+    /**
+     * @param {?} view
+     * @param {?} index
+     * @param {?} eventName
+     * @return {?}
+     */
+    function eventHandlerClosure(view, index, eventName) {
+        return function (event) { return dispatchEvent(view, index, eventName, event); };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} v0
+     * @param {?} v1
+     * @param {?} v2
+     * @param {?} v3
+     * @param {?} v4
+     * @param {?} v5
+     * @param {?} v6
+     * @param {?} v7
+     * @param {?} v8
+     * @param {?} v9
+     * @return {?}
+     */
+    function checkAndUpdateProviderInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var /** @type {?} */ provider = asProviderData(view, def.index).instance;
+        var /** @type {?} */ changes;
+        // Note: fallthrough is intended!
+        switch (def.bindings.length) {
+            case 10:
+                changes = checkAndUpdateProp(view, provider, def, 9, v9, changes);
+            case 9:
+                changes = checkAndUpdateProp(view, provider, def, 8, v8, changes);
+            case 8:
+                changes = checkAndUpdateProp(view, provider, def, 7, v7, changes);
+            case 7:
+                changes = checkAndUpdateProp(view, provider, def, 6, v6, changes);
+            case 6:
+                changes = checkAndUpdateProp(view, provider, def, 5, v5, changes);
+            case 5:
+                changes = checkAndUpdateProp(view, provider, def, 4, v4, changes);
+            case 4:
+                changes = checkAndUpdateProp(view, provider, def, 3, v3, changes);
+            case 3:
+                changes = checkAndUpdateProp(view, provider, def, 2, v2, changes);
+            case 2:
+                changes = checkAndUpdateProp(view, provider, def, 1, v1, changes);
+            case 1:
+                changes = checkAndUpdateProp(view, provider, def, 0, v0, changes);
+        }
+        if (changes) {
+            provider.ngOnChanges(changes);
+        }
+        if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+            provider.ngOnInit();
+        }
+        if (def.flags & NodeFlags.DoCheck) {
+            provider.ngDoCheck();
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} values
+     * @return {?}
+     */
+    function checkAndUpdateProviderDynamic(view, def, values) {
+        var /** @type {?} */ provider = asProviderData(view, def.index).instance;
+        var /** @type {?} */ changes;
+        for (var /** @type {?} */ i = 0; i < values.length; i++) {
+            changes = checkAndUpdateProp(view, provider, def, i, values[i], changes);
+        }
+        if (changes) {
+            provider.ngOnChanges(changes);
+        }
+        if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+            provider.ngOnInit();
+        }
+        if (def.flags & NodeFlags.DoCheck) {
+            provider.ngDoCheck();
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @return {?}
+     */
+    function createInstance(view, nodeDef) {
+        var /** @type {?} */ providerDef = nodeDef.provider;
+        var /** @type {?} */ injectable;
+        switch (providerDef.type) {
+            case ProviderType.Class:
+                injectable =
+                    createClass(view, nodeDef.index, nodeDef.parent, providerDef.value, providerDef.deps);
+                break;
+            case ProviderType.Factory:
+                injectable =
+                    callFactory(view, nodeDef.index, nodeDef.parent, providerDef.value, providerDef.deps);
+                break;
+            case ProviderType.UseExisting:
+                injectable = resolveDep(view, nodeDef.index, nodeDef.parent, providerDef.deps[0]);
+                break;
+            case ProviderType.Value:
+                injectable = providerDef.value;
+                break;
+        }
+        if (providerDef.outputs.length) {
+            for (var /** @type {?} */ i = 0; i < providerDef.outputs.length; i++) {
+                var /** @type {?} */ output = providerDef.outputs[i];
+                var /** @type {?} */ subscription = injectable[output.propName].subscribe(eventHandlerClosure(view, nodeDef.parent, output.eventName));
+                view.disposables[nodeDef.disposableIndex + i] = subscription.unsubscribe.bind(subscription);
+            }
+        }
+        return injectable;
+    }
+    /**
+     * @param {?} view
+     * @param {?} requestorNodeIndex
+     * @param {?} elIndex
+     * @param {?} ctor
+     * @param {?} deps
+     * @return {?}
+     */
+    function createClass(view, requestorNodeIndex, elIndex, ctor, deps) {
+        var /** @type {?} */ len = deps.length;
+        var /** @type {?} */ injectable;
+        switch (len) {
+            case 0:
+                injectable = new ctor();
+                break;
+            case 1:
+                injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]));
+                break;
+            case 2:
+                injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]));
+                break;
+            case 3:
+                injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]), resolveDep(view, requestorNodeIndex, elIndex, deps[2]));
+                break;
+            default:
+                var /** @type {?} */ depValues = new Array(len);
+                for (var /** @type {?} */ i = 0; i < len; i++) {
+                    depValues[i] = resolveDep(view, requestorNodeIndex, elIndex, deps[i]);
+                }
+                injectable = new (ctor.bind.apply(ctor, [void 0].concat(depValues)))();
+        }
+        return injectable;
+    }
+    /**
+     * @param {?} view
+     * @param {?} requestorNodeIndex
+     * @param {?} elIndex
+     * @param {?} factory
+     * @param {?} deps
+     * @return {?}
+     */
+    function callFactory(view, requestorNodeIndex, elIndex, factory, deps) {
+        var /** @type {?} */ len = deps.length;
+        var /** @type {?} */ injectable;
+        switch (len) {
+            case 0:
+                injectable = factory();
+                break;
+            case 1:
+                injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]));
+                break;
+            case 2:
+                injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]));
+                break;
+            case 3:
+                injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]), resolveDep(view, requestorNodeIndex, elIndex, deps[2]));
+                break;
+            default:
+                var /** @type {?} */ depValues = Array(len);
+                for (var /** @type {?} */ i = 0; i < len; i++) {
+                    depValues[i] = resolveDep(view, requestorNodeIndex, elIndex, deps[i]);
+                }
+                injectable = factory.apply(void 0, depValues);
+        }
+        return injectable;
+    }
+    /**
+     * @param {?} view
+     * @param {?} requestNodeIndex
+     * @param {?} elIndex
+     * @param {?} depDef
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function resolveDep(view, requestNodeIndex, elIndex, depDef, notFoundValue) {
+        if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
+        if (depDef.flags & DepFlags.Value) {
+            return depDef.token;
+        }
+        var /** @type {?} */ startView = view;
+        if (depDef.flags & DepFlags.Optional) {
+            notFoundValue = null;
+        }
+        var /** @type {?} */ tokenKey = depDef.tokenKey;
+        if (depDef.flags & DepFlags.SkipSelf) {
+            requestNodeIndex = null;
+            elIndex = view.def.nodes[elIndex].parent;
+            while (elIndex == null && view) {
+                elIndex = viewParentDiIndex(view);
+                view = view.parent;
+            }
+        }
+        while (view) {
+            var /** @type {?} */ elDef = view.def.nodes[elIndex];
+            switch (tokenKey) {
+                case RendererV1TokenKey: {
+                    var /** @type {?} */ compView = view;
+                    while (compView && !isComponentView(compView)) {
+                        compView = compView.parent;
+                    }
+                    var /** @type {?} */ rootRenderer = view.root.injector.get(RootRenderer);
+                    // Note: Don't fill in the styles as they have been installed already!
+                    return rootRenderer.renderComponent(new RenderComponentType(view.def.component.id, '', 0, view.def.component.encapsulation, [], {}));
+                }
+                case ElementRefTokenKey:
+                    return new ElementRef(asElementData(view, elIndex).renderElement);
+                case ViewContainerRefTokenKey:
+                    return createViewContainerRef(view, elIndex);
+                case TemplateRefTokenKey:
+                    return createTemplateRef(view, elDef);
+                case ChangeDetectorRefTokenKey:
+                    var /** @type {?} */ cdView = view;
+                    // If we are still checking dependencies on the initial element...
+                    if (requestNodeIndex != null) {
+                        var /** @type {?} */ requestorNodeDef = view.def.nodes[requestNodeIndex];
+                        if (requestorNodeDef.flags & NodeFlags.HasComponent) {
+                            cdView = asProviderData(view, requestNodeIndex).componentView;
+                        }
+                    }
+                    return createChangeDetectorRef(cdView);
+                case InjectorRefTokenKey:
+                    return createInjector(view, elIndex);
+                default:
+                    var /** @type {?} */ providerIndex = elDef.element.providerIndices[tokenKey];
+                    if (providerIndex != null) {
+                        var /** @type {?} */ providerData = asProviderData(view, providerIndex);
+                        if (providerData.instance === NOT_CREATED) {
+                            providerData.instance = createInstance(view, view.def.nodes[providerIndex]);
+                        }
+                        return providerData.instance;
+                    }
+            }
+            requestNodeIndex = null;
+            elIndex = viewParentDiIndex(view);
+            view = view.parent;
+        }
+        return startView.root.injector.get(depDef.token, notFoundValue);
+    }
+    /**
+     * @param {?} view
+     * @param {?} provider
+     * @param {?} def
+     * @param {?} bindingIdx
+     * @param {?} value
+     * @param {?} changes
+     * @return {?}
+     */
+    function checkAndUpdateProp(view, provider, def, bindingIdx, value, changes) {
+        var /** @type {?} */ change;
+        var /** @type {?} */ changed;
+        if (def.flags & NodeFlags.OnChanges) {
+            var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
+            changed = checkAndUpdateBinding(view, def, bindingIdx, value);
+            change = changed ?
+                new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0) :
+                null;
+        }
+        else {
+            changed = checkAndUpdateBinding(view, def, bindingIdx, value);
+        }
+        if (changed) {
+            value = unwrapValue(value);
+            var /** @type {?} */ binding = def.bindings[bindingIdx];
+            var /** @type {?} */ propName = binding.name;
+            // Note: This is still safe with Closure Compiler as
+            // the user passed in the property name as an object has to `providerDef`,
+            // so Closure Compiler will have renamed the property correctly already.
+            provider[propName] = value;
+            if (change) {
+                changes = changes || {};
+                changes[binding.nonMinifiedName] = change;
+            }
+        }
+        return changes;
+    }
+    /**
+     * @param {?} view
+     * @param {?} lifecycles
+     * @return {?}
+     */
+    function callLifecycleHooksChildrenFirst(view, lifecycles) {
+        if (!(view.def.nodeFlags & lifecycles)) {
+            return;
+        }
+        var /** @type {?} */ len = view.def.nodes.length;
+        for (var /** @type {?} */ i = 0; i < len; i++) {
+            // We use the provider post order to call providers of children first.
+            var /** @type {?} */ nodeDef = view.def.reverseChildNodes[i];
+            var /** @type {?} */ nodeIndex = nodeDef.index;
+            if (nodeDef.flags & lifecycles) {
+                // a leaf
+                Services.setCurrentNode(view, nodeIndex);
+                callProviderLifecycles(asProviderData(view, nodeIndex).instance, nodeDef.flags & lifecycles);
+            }
+            else if ((nodeDef.childFlags & lifecycles) === 0) {
+                // a parent with leafs
+                // no child matches one of the lifecycles,
+                // then skip the children
+                i += nodeDef.childCount;
+            }
+        }
+    }
+    /**
+     * @param {?} provider
+     * @param {?} lifecycles
+     * @return {?}
+     */
+    function callProviderLifecycles(provider, lifecycles) {
+        if (lifecycles & NodeFlags.AfterContentInit) {
+            provider.ngAfterContentInit();
+        }
+        if (lifecycles & NodeFlags.AfterContentChecked) {
+            provider.ngAfterContentChecked();
+        }
+        if (lifecycles & NodeFlags.AfterViewInit) {
+            provider.ngAfterViewInit();
+        }
+        if (lifecycles & NodeFlags.AfterViewChecked) {
+            provider.ngAfterViewChecked();
+        }
+        if (lifecycles & NodeFlags.OnDestroy) {
+            provider.ngOnDestroy();
+        }
+    }
+
+    /**
+     * @param {?} pipeToken
+     * @param {?} argCount
+     * @return {?}
+     */
+    function purePipeDef(pipeToken, argCount) {
+        return _pureExpressionDef(PureExpressionType.Pipe, new Array(argCount), { token: pipeToken, tokenKey: tokenKey(pipeToken), flags: DepFlags.None });
+    }
+    /**
+     * @param {?} argCount
+     * @return {?}
+     */
+    function pureArrayDef(argCount) {
+        return _pureExpressionDef(PureExpressionType.Array, new Array(argCount), undefined);
+    }
+    /**
+     * @param {?} propertyNames
+     * @return {?}
+     */
+    function pureObjectDef(propertyNames) {
+        return _pureExpressionDef(PureExpressionType.Object, propertyNames, undefined);
+    }
+    /**
+     * @param {?} type
+     * @param {?} propertyNames
+     * @param {?} pipeDep
+     * @return {?}
+     */
+    function _pureExpressionDef(type, propertyNames, pipeDep) {
+        var /** @type {?} */ bindings = new Array(propertyNames.length);
+        for (var /** @type {?} */ i = 0; i < propertyNames.length; i++) {
+            var /** @type {?} */ prop = propertyNames[i];
+            bindings[i] = {
+                type: BindingType.PureExpressionProperty,
+                name: prop,
+                nonMinifiedName: prop,
+                securityContext: undefined,
+                suffix: undefined
+            };
+        }
+        return {
+            type: NodeType.PureExpression,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: 0,
+            matchedQueries: {},
+            ngContentIndex: undefined,
+            childCount: 0, bindings: bindings,
+            disposableCount: 0,
+            element: undefined,
+            provider: undefined,
+            text: undefined,
+            pureExpression: { type: type, pipeDep: pipeDep },
+            query: undefined,
+            ngContent: undefined
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @return {?}
+     */
+    function createPureExpression(view, def) {
+        var /** @type {?} */ pipe = def.pureExpression.pipeDep ?
+            Services.resolveDep(view, def.index, def.parent, def.pureExpression.pipeDep) :
+            undefined;
+        return { value: undefined, pipe: pipe };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} v0
+     * @param {?} v1
+     * @param {?} v2
+     * @param {?} v3
+     * @param {?} v4
+     * @param {?} v5
+     * @param {?} v6
+     * @param {?} v7
+     * @param {?} v8
+     * @param {?} v9
+     * @return {?}
+     */
+    function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var /** @type {?} */ bindings = def.bindings;
+        var /** @type {?} */ changed = false;
+        // Note: fallthrough is intended!
+        switch (bindings.length) {
+            case 10:
+                if (checkAndUpdateBinding(view, def, 9, v9))
+                    changed = true;
+            case 9:
+                if (checkAndUpdateBinding(view, def, 8, v8))
+                    changed = true;
+            case 8:
+                if (checkAndUpdateBinding(view, def, 7, v7))
+                    changed = true;
+            case 7:
+                if (checkAndUpdateBinding(view, def, 6, v6))
+                    changed = true;
+            case 6:
+                if (checkAndUpdateBinding(view, def, 5, v5))
+                    changed = true;
+            case 5:
+                if (checkAndUpdateBinding(view, def, 4, v4))
+                    changed = true;
+            case 4:
+                if (checkAndUpdateBinding(view, def, 3, v3))
+                    changed = true;
+            case 3:
+                if (checkAndUpdateBinding(view, def, 2, v2))
+                    changed = true;
+            case 2:
+                if (checkAndUpdateBinding(view, def, 1, v1))
+                    changed = true;
+            case 1:
+                if (checkAndUpdateBinding(view, def, 0, v0))
+                    changed = true;
+        }
+        var /** @type {?} */ data = asPureExpressionData(view, def.index);
+        if (changed) {
+            v0 = unwrapValue(v0);
+            v1 = unwrapValue(v1);
+            v2 = unwrapValue(v2);
+            v3 = unwrapValue(v3);
+            v4 = unwrapValue(v4);
+            v5 = unwrapValue(v5);
+            v6 = unwrapValue(v6);
+            v7 = unwrapValue(v7);
+            v8 = unwrapValue(v8);
+            v9 = unwrapValue(v9);
+            var /** @type {?} */ value = void 0;
+            switch (def.pureExpression.type) {
+                case PureExpressionType.Array:
+                    value = new Array(bindings.length);
+                    // Note: fallthrough is intended!
+                    switch (bindings.length) {
+                        case 10:
+                            value[9] = v9;
+                        case 9:
+                            value[8] = v8;
+                        case 8:
+                            value[7] = v7;
+                        case 7:
+                            value[6] = v6;
+                        case 6:
+                            value[5] = v5;
+                        case 5:
+                            value[4] = v4;
+                        case 4:
+                            value[3] = v3;
+                        case 3:
+                            value[2] = v2;
+                        case 2:
+                            value[1] = v1;
+                        case 1:
+                            value[0] = v0;
+                    }
+                    break;
+                case PureExpressionType.Object:
+                    value = {};
+                    // Note: fallthrough is intended!
+                    switch (bindings.length) {
+                        case 10:
+                            value[bindings[9].name] = v9;
+                        case 9:
+                            value[bindings[8].name] = v8;
+                        case 8:
+                            value[bindings[7].name] = v7;
+                        case 7:
+                            value[bindings[6].name] = v6;
+                        case 6:
+                            value[bindings[5].name] = v5;
+                        case 5:
+                            value[bindings[4].name] = v4;
+                        case 4:
+                            value[bindings[3].name] = v3;
+                        case 3:
+                            value[bindings[2].name] = v2;
+                        case 2:
+                            value[bindings[1].name] = v1;
+                        case 1:
+                            value[bindings[0].name] = v0;
+                    }
+                    break;
+                case PureExpressionType.Pipe:
+                    switch (bindings.length) {
+                        case 10:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+                            break;
+                        case 9:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7, v8);
+                            break;
+                        case 8:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7);
+                            break;
+                        case 7:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6);
+                            break;
+                        case 6:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4, v5);
+                            break;
+                        case 5:
+                            value = data.pipe.transform(v0, v1, v2, v3, v4);
+                            break;
+                        case 4:
+                            value = data.pipe.transform(v0, v1, v2, v3);
+                            break;
+                        case 3:
+                            value = data.pipe.transform(v0, v1, v2);
+                            break;
+                        case 2:
+                            value = data.pipe.transform(v0, v1);
+                            break;
+                        case 1:
+                            value = data.pipe.transform(v0);
+                            break;
+                    }
+                    break;
+            }
+            data.value = value;
+        }
+        return data.value;
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} values
+     * @return {?}
+     */
+    function checkAndUpdatePureExpressionDynamic(view, def, values) {
+        var /** @type {?} */ bindings = def.bindings;
+        var /** @type {?} */ changed = false;
+        for (var /** @type {?} */ i = 0; i < values.length; i++) {
+            // Note: We need to loop over all values, so that
+            // the old values are updates as well!
+            if (checkAndUpdateBinding(view, def, i, values[i])) {
+                changed = true;
+            }
+        }
+        var /** @type {?} */ data = asPureExpressionData(view, def.index);
+        if (changed) {
+            var /** @type {?} */ value = void 0;
+            switch (def.pureExpression.type) {
+                case PureExpressionType.Array:
+                    value = new Array(values.length);
+                    for (var /** @type {?} */ i = 0; i < values.length; i++) {
+                        value[i] = unwrapValue(values[i]);
+                    }
+                    break;
+                case PureExpressionType.Object:
+                    value = {};
+                    for (var /** @type {?} */ i = 0; i < values.length; i++) {
+                        value[bindings[i].name] = unwrapValue(values[i]);
+                    }
+                    break;
+                case PureExpressionType.Pipe:
+                    var /** @type {?} */ params = new Array(values.length);
+                    for (var /** @type {?} */ i = 0; i < values.length; i++) {
+                        params[i] = unwrapValue(values[i]);
+                    }
+                    value = (_a = data.pipe).transform.apply(_a, params);
+                    break;
+            }
+            data.value = value;
+        }
+        return data.value;
+        var _a;
+    }
+
+    /**
+     * @param {?} flags
+     * @param {?} id
+     * @param {?} bindings
+     * @return {?}
+     */
+    function queryDef(flags, id, bindings) {
+        var /** @type {?} */ bindingDefs = [];
+        for (var /** @type {?} */ propName in bindings) {
+            var /** @type {?} */ bindingType = bindings[propName];
+            bindingDefs.push({ propName: propName, bindingType: bindingType });
+        }
+        return {
+            type: NodeType.Query,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: flags,
+            ngContentIndex: undefined,
+            matchedQueries: {},
+            childCount: 0,
+            bindings: [],
+            disposableCount: 0,
+            element: undefined,
+            provider: undefined,
+            text: undefined,
+            pureExpression: undefined,
+            query: { id: id, bindings: bindingDefs },
+            ngContent: undefined
+        };
+    }
+    /**
+     * @return {?}
+     */
+    function createQuery() {
+        return new QueryList();
+    }
+    /**
+     * @param {?} queryId
+     * @param {?} view
+     * @return {?}
+     */
+    function dirtyParentQuery(queryId, view) {
+        var /** @type {?} */ nodeIndex = view.parentIndex;
+        view = view.parent;
+        var /** @type {?} */ queryIdx;
+        while (view) {
+            var /** @type {?} */ elementDef = view.def.nodes[nodeIndex];
+            queryIdx = elementDef.element.providerIndices[queryId];
+            if (queryIdx != null) {
+                break;
+            }
+            nodeIndex = view.parentIndex;
+            view = view.parent;
+        }
+        if (!view) {
+            throw new Error("Illegal State: Tried to dirty parent query " + queryId + " but the query could not be found!");
+        }
+        asQueryList(view, queryIdx).setDirty();
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @return {?}
+     */
+    function checkAndUpdateQuery(view, nodeDef) {
+        var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
+        if (!queryList.dirty) {
+            return;
+        }
+        var /** @type {?} */ queryId = nodeDef.query.id;
+        var /** @type {?} */ providerDef = view.def.nodes[nodeDef.parent];
+        var /** @type {?} */ providerData = asProviderData(view, providerDef.index);
+        var /** @type {?} */ newValues;
+        if (nodeDef.flags & NodeFlags.HasContentQuery) {
+            var /** @type {?} */ elementDef = view.def.nodes[providerDef.parent];
+            newValues = calcQueryValues(view, elementDef.index, elementDef.index + elementDef.childCount, queryId, []);
+        }
+        else if (nodeDef.flags & NodeFlags.HasViewQuery) {
+            var /** @type {?} */ compView = providerData.componentView;
+            newValues = calcQueryValues(compView, 0, compView.def.nodes.length - 1, queryId, []);
+        }
+        queryList.reset(newValues);
+        var /** @type {?} */ boundValue;
+        var /** @type {?} */ bindings = nodeDef.query.bindings;
+        for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
+            var /** @type {?} */ binding = bindings[i];
+            switch (binding.bindingType) {
+                case QueryBindingType.First:
+                    boundValue = queryList.first;
+                    break;
+                case QueryBindingType.All:
+                    boundValue = queryList;
+                    break;
+            }
+            providerData.instance[binding.propName] = boundValue;
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} startIndex
+     * @param {?} endIndex
+     * @param {?} queryId
+     * @param {?} values
+     * @return {?}
+     */
+    function calcQueryValues(view, startIndex, endIndex, queryId, values) {
+        var /** @type {?} */ len = view.def.nodes.length;
+        for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            var /** @type {?} */ value = getQueryValue(view, nodeDef, queryId);
+            if (value != null) {
+                // a match
+                values.push(value);
+            }
+            if (nodeDef.flags & NodeFlags.HasEmbeddedViews &&
+                queryId in nodeDef.element.template.nodeMatchedQueries) {
+                // check embedded views that were attached at the place of their template.
+                var /** @type {?} */ elementData = asElementData(view, i);
+                var /** @type {?} */ embeddedViews = elementData.embeddedViews;
+                for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                    var /** @type {?} */ embeddedView = embeddedViews[k];
+                    var /** @type {?} */ dvc = declaredViewContainer(embeddedView);
+                    if (dvc && dvc === elementData) {
+                        calcQueryValues(embeddedView, 0, embeddedView.def.nodes.length - 1, queryId, values);
+                    }
+                }
+                var /** @type {?} */ projectedViews = elementData.projectedViews;
+                if (projectedViews) {
+                    for (var /** @type {?} */ k = 0; k < projectedViews.length; k++) {
+                        var /** @type {?} */ projectedView = projectedViews[k];
+                        calcQueryValues(projectedView, 0, projectedView.def.nodes.length - 1, queryId, values);
+                    }
+                }
+            }
+            if (!(queryId in nodeDef.childMatchedQueries)) {
+                // If don't check descendants, skip the children.
+                // Or: no child matches the query, then skip the children as well.
+                i += nodeDef.childCount;
+            }
+        }
+        return values;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @param {?} queryId
+     * @return {?}
+     */
+    function getQueryValue(view, nodeDef, queryId) {
+        var /** @type {?} */ queryValueType = (nodeDef.matchedQueries[queryId]);
+        if (queryValueType != null) {
+            // a match
+            var /** @type {?} */ value = void 0;
+            switch (queryValueType) {
+                case QueryValueType.RenderElement:
+                    value = asElementData(view, nodeDef.index).renderElement;
+                    break;
+                case QueryValueType.ElementRef:
+                    value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
+                    break;
+                case QueryValueType.TemplateRef:
+                    value = createTemplateRef(view, nodeDef);
+                    break;
+                case QueryValueType.ViewContainerRef:
+                    value = createViewContainerRef(view, nodeDef.index);
+                    break;
+                case QueryValueType.Provider:
+                    value = asProviderData(view, nodeDef.index).instance;
+                    break;
+            }
+            return value;
+        }
+    }
+
+    var DirectDomRenderer = (function () {
+        function DirectDomRenderer() {
+        }
+        /**
+         * @param {?} name
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.createElement = function (name) { return document.createElement(name); };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.createComment = function (value) { return document.createComment(value); };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.createText = function (value) { return document.createTextNode(value); };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.appendChild = function (parent, newChild) { parent.appendChild(newChild); };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.insertBefore = function (parent, newChild, refChild) {
+            if (parent) {
+                parent.insertBefore(newChild, refChild);
+            }
+        };
+        /**
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.removeChild = function (parent, oldChild) {
+            if (parent) {
+                parent.removeChild(oldChild);
+            }
+        };
+        /**
+         * @param {?} selectorOrNode
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
+            var /** @type {?} */ el;
+            if (typeof selectorOrNode === 'string') {
+                el = document.querySelector(selectorOrNode);
+            }
+            else {
+                el = selectorOrNode;
+            }
+            el.textContent = '';
+            return el;
+        };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.parentNode = function (node) { return node.parentNode; };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.nextSibling = function (node) { return node.nextSiblibng; };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.setAttribute = function (el, name, value) { return el.setAttribute(name, value); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.removeAttribute = function (el, name) { el.removeAttribute(name); };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @param {?} propertyValue
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) { };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.addClass = function (el, name) { el.classList.add(name); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.removeClass = function (el, name) { el.classList.remove(name); };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.setStyle = function (el, style, value) { el.style[style] = value; };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.removeStyle = function (el, style) {
+            // IE requires '' instead of null
+            // see https://github.com/angular/angular/issues/7916
+            ((el.style))[style] = '';
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.setProperty = function (el, name, value) { el[name] = value; };
+        /**
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.setText = function (node, value) { node.nodeValue = value; };
+        /**
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        DirectDomRenderer.prototype.listen = function (target, eventName, callback) {
+            var /** @type {?} */ renderTarget;
+            switch (target) {
+                case 'window':
+                    renderTarget = window;
+                    break;
+                case 'document':
+                    renderTarget = document;
+                    break;
+                default:
+                    renderTarget = target;
+            }
+            var /** @type {?} */ closure = function (event) {
+                if (callback(event) === false) {
+                    event.preventDefault();
+                }
+            };
+            renderTarget.addEventListener(eventName, closure);
+            return function () { return renderTarget.removeEventListener(eventName, closure); };
+        };
+        return DirectDomRenderer;
+    }());
+    var /** @type {?} */ EMPTY_V1_RENDER_COMPONENT_TYPE = new RenderComponentType('EMPTY', '', 0, ViewEncapsulation.None, [], {});
+    /**
+     * A temporal implementation of `Renderer` until we migrated our current renderer
+     * in all packages to the new API.
+     *
+     * Note that this is not complete, e.g. does not support shadow dom, view encapsulation, ...!
+     */
+    var LegacyRendererAdapter = (function () {
+        /**
+         * @param {?} rootDelegate
+         */
+        function LegacyRendererAdapter(rootDelegate) {
+            this._delegate = rootDelegate.renderComponent(EMPTY_V1_RENDER_COMPONENT_TYPE);
+        }
+        /**
+         * @param {?} name
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.createElement = function (name, debugInfo) {
+            return this._delegate.createElement(null, name, debugInfo);
+        };
+        /**
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.createComment = function (value, debugInfo) {
+            return this._delegate.createTemplateAnchor(null, debugInfo);
+        };
+        /**
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.createText = function (value, debugInfo) {
+            return this._delegate.createText(null, value, debugInfo);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.appendChild = function (parent, newChild) { this._delegate.projectNodes(parent, [newChild]); };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.insertBefore = function (parent, newChild, refChild) {
+            if (refChild) {
+                this._delegate.attachViewAfter(refChild.previousSibling, [newChild]);
+            }
+            else {
+                this.appendChild(parent, newChild);
+            }
+        };
+        /**
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.removeChild = function (parent, oldChild) {
+            if (parent) {
+                this._delegate.detachView([oldChild]);
+            }
+        };
+        /**
+         * @param {?} selectorOrNode
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
+            return this._delegate.selectRootElement(selectorOrNode, debugInfo);
+        };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.parentNode = function (node) { return node.parentNode; };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.nextSibling = function (node) { return node.nextSibling; };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.setAttribute = function (el, name, value) {
+            this._delegate.setElementAttribute(el, name, value);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.removeAttribute = function (el, name) {
+            this._delegate.setElementAttribute(el, name, null);
+        };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @param {?} propertyValue
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
+            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+        };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.removeBindingDebugInfo = function (el, propertyName) {
+            this._delegate.setBindingDebugInfo(el, propertyName, null);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.addClass = function (el, name) { this._delegate.setElementClass(el, name, true); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.removeClass = function (el, name) { this._delegate.setElementClass(el, name, false); };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.setStyle = function (el, style, value) {
+            this._delegate.setElementStyle(el, style, value);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.removeStyle = function (el, style) { this._delegate.setElementStyle(el, style, null); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.setProperty = function (el, name, value) {
+            this._delegate.setElementProperty(el, name, value);
+        };
+        /**
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.setText = function (node, value) { this._delegate.setText(node, value); };
+        /**
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        LegacyRendererAdapter.prototype.listen = function (target, eventName, callback) {
+            if (typeof target === 'string') {
+                return (this._delegate.listenGlobal(target, eventName, callback));
+            }
+            else {
+                return (this._delegate.listen(target, eventName, callback));
+            }
+        };
+        return LegacyRendererAdapter;
+    }());
+
+    /**
+     * @param {?} ngContentIndex
+     * @param {?} constants
+     * @return {?}
+     */
+    function textDef(ngContentIndex, constants) {
+        // skip the call to sliceErrorStack itself + the call to this function.
+        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
+        var /** @type {?} */ bindings = new Array(constants.length - 1);
+        for (var /** @type {?} */ i = 1; i < constants.length; i++) {
+            bindings[i - 1] = {
+                type: BindingType.Interpolation,
+                name: undefined,
+                nonMinifiedName: undefined,
+                securityContext: undefined,
+                suffix: constants[i]
+            };
+        }
+        return {
+            type: NodeType.Text,
+            // will bet set by the view definition
+            index: undefined,
+            reverseChildIndex: undefined,
+            parent: undefined,
+            childFlags: undefined,
+            childMatchedQueries: undefined,
+            bindingIndex: undefined,
+            disposableIndex: undefined,
+            // regular values
+            flags: 0,
+            matchedQueries: {}, ngContentIndex: ngContentIndex,
+            childCount: 0, bindings: bindings,
+            disposableCount: 0,
+            element: undefined,
+            provider: undefined,
+            text: { prefix: constants[0], source: source },
+            pureExpression: undefined,
+            query: undefined,
+            ngContent: undefined
+        };
+    }
+    /**
+     * @param {?} view
+     * @param {?} renderHost
+     * @param {?} def
+     * @return {?}
+     */
+    function createText(view, renderHost, def) {
+        var /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
+        var /** @type {?} */ renderNode;
+        var /** @type {?} */ renderer = view.root.renderer;
+        renderNode = renderer.createText(def.text.prefix);
+        if (parentNode) {
+            renderer.appendChild(parentNode, renderNode);
+        }
+        return { renderText: renderNode };
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} v0
+     * @param {?} v1
+     * @param {?} v2
+     * @param {?} v3
+     * @param {?} v4
+     * @param {?} v5
+     * @param {?} v6
+     * @param {?} v7
+     * @param {?} v8
+     * @param {?} v9
+     * @return {?}
+     */
+    function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var /** @type {?} */ bindings = def.bindings;
+        var /** @type {?} */ changed = false;
+        // Note: fallthrough is intended!
+        switch (bindings.length) {
+            case 10:
+                if (checkAndUpdateBinding(view, def, 9, v9))
+                    changed = true;
+            case 9:
+                if (checkAndUpdateBinding(view, def, 8, v8))
+                    changed = true;
+            case 8:
+                if (checkAndUpdateBinding(view, def, 7, v7))
+                    changed = true;
+            case 7:
+                if (checkAndUpdateBinding(view, def, 6, v6))
+                    changed = true;
+            case 6:
+                if (checkAndUpdateBinding(view, def, 5, v5))
+                    changed = true;
+            case 5:
+                if (checkAndUpdateBinding(view, def, 4, v4))
+                    changed = true;
+            case 4:
+                if (checkAndUpdateBinding(view, def, 3, v3))
+                    changed = true;
+            case 3:
+                if (checkAndUpdateBinding(view, def, 2, v2))
+                    changed = true;
+            case 2:
+                if (checkAndUpdateBinding(view, def, 1, v1))
+                    changed = true;
+            case 1:
+                if (checkAndUpdateBinding(view, def, 0, v0))
+                    changed = true;
+        }
+        if (changed) {
+            var /** @type {?} */ value = '';
+            // Note: fallthrough is intended!
+            switch (bindings.length) {
+                case 10:
+                    value = _addInterpolationPart(v9, bindings[9]);
+                case 9:
+                    value = _addInterpolationPart(v8, bindings[8]) + value;
+                case 8:
+                    value = _addInterpolationPart(v7, bindings[7]) + value;
+                case 7:
+                    value = _addInterpolationPart(v6, bindings[6]) + value;
+                case 6:
+                    value = _addInterpolationPart(v5, bindings[5]) + value;
+                case 5:
+                    value = _addInterpolationPart(v4, bindings[4]) + value;
+                case 4:
+                    value = _addInterpolationPart(v3, bindings[3]) + value;
+                case 3:
+                    value = _addInterpolationPart(v2, bindings[2]) + value;
+                case 2:
+                    value = _addInterpolationPart(v1, bindings[1]) + value;
+                case 1:
+                    value = _addInterpolationPart(v0, bindings[0]) + value;
+            }
+            value = def.text.prefix + value;
+            var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
+            view.root.renderer.setText(renderNode, value);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} def
+     * @param {?} values
+     * @return {?}
+     */
+    function checkAndUpdateTextDynamic(view, def, values) {
+        var /** @type {?} */ bindings = def.bindings;
+        var /** @type {?} */ changed = false;
+        for (var /** @type {?} */ i = 0; i < values.length; i++) {
+            // Note: We need to loop over all values, so that
+            // the old values are updates as well!
+            if (checkAndUpdateBinding(view, def, i, values[i])) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            var /** @type {?} */ value = '';
+            for (var /** @type {?} */ i = 0; i < values.length; i++) {
+                value = value + _addInterpolationPart(values[i], bindings[i]);
+            }
+            value = def.text.prefix + value;
+            var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
+            view.root.renderer.setText(renderNode, value);
+        }
+    }
+    /**
+     * @param {?} value
+     * @param {?} binding
+     * @return {?}
+     */
+    function _addInterpolationPart(value, binding) {
+        value = unwrapValue(value);
+        var /** @type {?} */ valueStr = value != null ? value.toString() : '';
+        return valueStr + binding.suffix;
+    }
+
+    var /** @type {?} */ NOOP = function () { return undefined; };
+    /**
+     * @param {?} flags
+     * @param {?} nodesWithoutIndices
+     * @param {?=} update
+     * @param {?=} handleEvent
+     * @param {?=} compId
+     * @param {?=} encapsulation
+     * @param {?=} styles
+     * @return {?}
+     */
+    function viewDef(flags, nodesWithoutIndices, update, handleEvent, compId, encapsulation, styles) {
+        // clone nodes and set auto calculated values
+        if (nodesWithoutIndices.length === 0) {
+            throw new Error("Illegal State: Views without nodes are not allowed!");
+        }
+        var /** @type {?} */ nodes = new Array(nodesWithoutIndices.length);
+        var /** @type {?} */ reverseChildNodes = new Array(nodesWithoutIndices.length);
+        var /** @type {?} */ viewBindingCount = 0;
+        var /** @type {?} */ viewDisposableCount = 0;
+        var /** @type {?} */ viewNodeFlags = 0;
+        var /** @type {?} */ viewMatchedQueries = {};
+        var /** @type {?} */ currentParent = null;
+        var /** @type {?} */ lastRootNode = null;
+        for (var /** @type {?} */ i = 0; i < nodesWithoutIndices.length; i++) {
+            while (currentParent && i > currentParent.index + currentParent.childCount) {
+                var /** @type {?} */ newParent = nodes[currentParent.parent];
+                if (newParent) {
+                    newParent.childFlags |= currentParent.childFlags;
+                    copyQueryMatchesInto(currentParent.childMatchedQueries, newParent.childMatchedQueries);
+                }
+                currentParent = newParent;
+            }
+            var /** @type {?} */ nodeWithoutIndices = nodesWithoutIndices[i];
+            var /** @type {?} */ reverseChildIndex = calculateReverseChildIndex(currentParent, i, nodeWithoutIndices.childCount, nodesWithoutIndices.length);
+            var /** @type {?} */ node = cloneAndModifyNode(nodeWithoutIndices, {
+                index: i,
+                parent: currentParent ? currentParent.index : undefined,
+                bindingIndex: viewBindingCount,
+                disposableIndex: viewDisposableCount, reverseChildIndex: reverseChildIndex,
+            });
+            if (node.element) {
+                node.element = cloneAndModifyElement(node.element, {
+                    // Use protoypical inheritance to not get O(n^2) complexity...
+                    providerIndices: Object.create(currentParent ? currentParent.element.providerIndices : null),
+                });
+            }
+            nodes[i] = node;
+            reverseChildNodes[reverseChildIndex] = node;
+            validateNode(currentParent, node, nodesWithoutIndices.length);
+            viewNodeFlags |= node.flags;
+            copyQueryMatchesInto(node.matchedQueries, viewMatchedQueries);
+            viewBindingCount += node.bindings.length;
+            viewDisposableCount += node.disposableCount;
+            if (currentParent) {
+                currentParent.childFlags |= node.flags;
+                copyQueryMatchesInto(node.matchedQueries, currentParent.childMatchedQueries);
+                if (node.element && node.element.template) {
+                    copyQueryMatchesInto(node.element.template.nodeMatchedQueries, currentParent.childMatchedQueries);
+                }
+            }
+            if (!currentParent) {
+                lastRootNode = node;
+            }
+            if (node.provider) {
+                currentParent.element.providerIndices[node.provider.tokenKey] = i;
+            }
+            if (node.query) {
+                var /** @type {?} */ elementDef = nodes[currentParent.parent];
+                elementDef.element.providerIndices[node.query.id] = i;
+            }
+            if (node.childCount) {
+                currentParent = node;
+            }
+        }
+        while (currentParent) {
+            var /** @type {?} */ newParent = nodes[currentParent.parent];
+            if (newParent) {
+                newParent.childFlags |= currentParent.childFlags;
+                copyQueryMatchesInto(currentParent.childMatchedQueries, newParent.childMatchedQueries);
+            }
+            currentParent = newParent;
+        }
+        var /** @type {?} */ componentDef = compId ? ({ id: compId, encapsulation: encapsulation, styles: styles }) : undefined;
+        return {
+            nodeFlags: viewNodeFlags,
+            nodeMatchedQueries: viewMatchedQueries, flags: flags,
+            nodes: nodes, reverseChildNodes: reverseChildNodes,
+            update: update || NOOP,
+            handleEvent: handleEvent || NOOP,
+            component: componentDef,
+            bindingCount: viewBindingCount,
+            disposableCount: viewDisposableCount, lastRootNode: lastRootNode
+        };
+    }
+    /**
+     * @param {?} source
+     * @param {?} target
+     * @return {?}
+     */
+    function copyQueryMatchesInto(source, target) {
+        for (var /** @type {?} */ prop in source) {
+            if (!queryIdIsReference(prop)) {
+                target[prop] = true;
+            }
+        }
+    }
+    /**
+     * @param {?} currentParent
+     * @param {?} i
+     * @param {?} childCount
+     * @param {?} nodeCount
+     * @return {?}
+     */
+    function calculateReverseChildIndex(currentParent, i, childCount, nodeCount) {
+        // Notes about reverse child order:
+        // - Every node is directly before its children, in dfs and reverse child order.
+        // - node.childCount contains all children, in dfs and reverse child order.
+        // - In dfs order, every node is before its first child
+        // - In reverse child order, every node is before its last child
+        // Algorithm, main idea:
+        // - In reverse child order, the ranges for each child + its transitive children are mirrored
+        //   regarding their position inside of their parent
+        // Visualization:
+        // Given the following tree:
+        // Nodes: n0
+        //             n1         n2
+        //                n11 n12    n21 n22
+        // dfs:    0   1   2   3  4   5   6
+        // result: 0   4   6   5  1   3   2
+        //
+        // Example:
+        // Current node = 1
+        // 1) lastChildIndex = 3
+        // 2) lastChildOffsetRelativeToParentInDfsOrder = 2
+        // 3) parentEndIndexInReverseChildOrder = 6
+        // 4) result = 4
+        var /** @type {?} */ lastChildOffsetRelativeToParentInDfsOrder;
+        var /** @type {?} */ parentEndIndexInReverseChildOrder;
+        if (currentParent) {
+            var /** @type {?} */ lastChildIndex = i + childCount;
+            lastChildOffsetRelativeToParentInDfsOrder = lastChildIndex - currentParent.index - 1;
+            parentEndIndexInReverseChildOrder = currentParent.reverseChildIndex + currentParent.childCount;
+        }
+        else {
+            lastChildOffsetRelativeToParentInDfsOrder = i + childCount;
+            parentEndIndexInReverseChildOrder = nodeCount - 1;
+        }
+        return parentEndIndexInReverseChildOrder - lastChildOffsetRelativeToParentInDfsOrder;
+    }
+    /**
+     * @param {?} parent
+     * @param {?} node
+     * @param {?} nodeCount
+     * @return {?}
+     */
+    function validateNode(parent, node, nodeCount) {
+        var /** @type {?} */ template = node.element && node.element.template;
+        if (template) {
+            if (template.lastRootNode && template.lastRootNode.flags & NodeFlags.HasEmbeddedViews) {
+                throw new Error("Illegal State: Last root node of a template can't have embedded views, at index " + node.index + "!");
+            }
+        }
+        if (node.provider) {
+            var /** @type {?} */ parentType = parent ? parent.type : null;
+            if (parentType !== NodeType.Element) {
+                throw new Error("Illegal State: Provider nodes need to be children of elements or anchors, at index " + node.index + "!");
+            }
+        }
+        if (node.query) {
+            var /** @type {?} */ parentType = parent ? parent.type : null;
+            if (parentType !== NodeType.Provider) {
+                throw new Error("Illegal State: Query nodes need to be children of providers, at index " + node.index + "!");
+            }
+        }
+        if (node.childCount) {
+            var /** @type {?} */ parentEnd = parent ? parent.index + parent.childCount : nodeCount - 1;
+            if (node.index <= parentEnd && node.index + node.childCount > parentEnd) {
+                throw new Error("Illegal State: childCount of node leads outside of parent, at index " + node.index + "!");
+            }
+        }
+    }
+    /**
+     * @param {?} nodeDef
+     * @param {?} values
+     * @return {?}
+     */
+    function cloneAndModifyNode(nodeDef, values) {
+        // Attention: don't use copyInto here to prevent v8 from treating this object
+        // as a dictionary!
+        return {
+            type: nodeDef.type,
+            index: values.index,
+            reverseChildIndex: values.reverseChildIndex,
+            parent: values.parent,
+            childFlags: 0,
+            childMatchedQueries: {},
+            bindingIndex: values.bindingIndex,
+            disposableIndex: values.disposableIndex,
+            flags: nodeDef.flags,
+            matchedQueries: nodeDef.matchedQueries,
+            ngContentIndex: nodeDef.ngContentIndex,
+            childCount: nodeDef.childCount,
+            bindings: nodeDef.bindings,
+            disposableCount: nodeDef.disposableCount,
+            element: nodeDef.element,
+            provider: nodeDef.provider,
+            text: nodeDef.text,
+            pureExpression: nodeDef.pureExpression,
+            query: nodeDef.query,
+            ngContent: nodeDef.ngContent
+        };
+    }
+    /**
+     * @param {?} elementDef
+     * @param {?} values
+     * @return {?}
+     */
+    function cloneAndModifyElement(elementDef, values) {
+        // Attention: don't use copyInto here to prevent v8 from treating this object
+        // as a dictionary!
+        return {
+            name: elementDef.name,
+            attrs: elementDef.attrs,
+            outputs: elementDef.outputs,
+            template: elementDef.template,
+            providerIndices: values.providerIndices,
+            source: elementDef.source
+        };
+    }
+    /**
+     * @param {?} parent
+     * @param {?} anchorDef
+     * @param {?=} context
+     * @return {?}
+     */
+    function createEmbeddedView(parent, anchorDef, context) {
+        // embedded views are seen as siblings to the anchor, so we need
+        // to get the parent of the anchor and use it as parentIndex.
+        var /** @type {?} */ view = createView(parent.root, parent, anchorDef.index, anchorDef.element.template);
+        initView(view, parent.component, context);
+        createViewNodes(view);
+        return view;
+    }
+    /**
+     * @param {?} root
+     * @param {?} def
+     * @param {?=} context
+     * @return {?}
+     */
+    function createRootView(root, def, context) {
+        var /** @type {?} */ view = createView(root, null, null, def);
+        initView(view, context, context);
+        createViewNodes(view);
+        return view;
+    }
+    /**
+     * @param {?} root
+     * @param {?} parent
+     * @param {?} parentIndex
+     * @param {?} def
+     * @return {?}
+     */
+    function createView(root, parent, parentIndex, def) {
+        var /** @type {?} */ nodes = new Array(def.nodes.length);
+        var /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
+        var /** @type {?} */ view = {
+            def: def,
+            parent: parent,
+            parentIndex: parentIndex,
+            context: undefined,
+            component: undefined, nodes: nodes,
+            state: ViewState.FirstCheck | ViewState.ChecksEnabled, root: root,
+            oldValues: new Array(def.bindingCount), disposables: disposables
+        };
+        return view;
+    }
+    /**
+     * @param {?} view
+     * @param {?} component
+     * @param {?} context
+     * @return {?}
+     */
+    function initView(view, component, context) {
+        view.component = component;
+        view.context = context;
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function createViewNodes(view) {
+        var /** @type {?} */ renderHost;
+        if (isComponentView(view)) {
+            renderHost = asElementData(view.parent, view.parentIndex).renderElement;
+        }
+        var /** @type {?} */ def = view.def;
+        var /** @type {?} */ nodes = view.nodes;
+        for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = def.nodes[i];
+            Services.setCurrentNode(view, i);
+            switch (nodeDef.type) {
+                case NodeType.Element:
+                    nodes[i] = (createElement(view, renderHost, nodeDef));
+                    break;
+                case NodeType.Text:
+                    nodes[i] = (createText(view, renderHost, nodeDef));
+                    break;
+                case NodeType.Provider:
+                    if (nodeDef.provider.component) {
+                        // Components can inject a ChangeDetectorRef that needs a references to
+                        // the component view. Therefore, we create the component view first
+                        // and set the ProviderData in ViewData, and then instantiate the provider.
+                        var /** @type {?} */ componentView = createView(view.root, view, nodeDef.parent, resolveViewDefinition(nodeDef.provider.component));
+                        var /** @type {?} */ providerData = ({ componentView: componentView, instance: undefined });
+                        nodes[i] = (providerData);
+                        var /** @type {?} */ instance = providerData.instance = createProviderInstance(view, nodeDef);
+                        initView(componentView, instance, instance);
+                    }
+                    else {
+                        var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                        var /** @type {?} */ providerData = ({ componentView: undefined, instance: instance });
+                        nodes[i] = (providerData);
+                    }
+                    break;
+                case NodeType.PureExpression:
+                    nodes[i] = (createPureExpression(view, nodeDef));
+                    break;
+                case NodeType.Query:
+                    nodes[i] = (createQuery());
+                    break;
+                case NodeType.NgContent:
+                    appendNgContent(view, renderHost, nodeDef);
+                    // no runtime data needed for NgContent...
+                    nodes[i] = undefined;
+                    break;
+            }
+        }
+        // Create the ViewData.nodes of component views after we created everything else,
+        // so that e.g. ng-content works
+        execComponentViewsAction(view, ViewAction.CreateViewNodes);
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function checkNoChangesView(view) {
+        Services.updateView(checkNoChangesNode, view);
+        execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
+        execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckNoChanges);
+        execComponentViewsAction(view, ViewAction.CheckNoChanges);
+        execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckNoChanges);
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function checkAndUpdateView(view) {
+        Services.updateView(checkAndUpdateNode, view);
+        execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
+        execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckAndUpdate);
+        callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
+            (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
+        execComponentViewsAction(view, ViewAction.CheckAndUpdate);
+        execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckAndUpdate);
+        callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
+            (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
+        if (view.def.flags & ViewFlags.OnPush) {
+            view.state &= ~ViewState.ChecksEnabled;
+        }
+        view.state &= ~ViewState.FirstCheck;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} argStyle
+     * @param {?=} v0
+     * @param {?=} v1
+     * @param {?=} v2
+     * @param {?=} v3
+     * @param {?=} v4
+     * @param {?=} v5
+     * @param {?=} v6
+     * @param {?=} v7
+     * @param {?=} v8
+     * @param {?=} v9
+     * @return {?}
+     */
+    function checkAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        if (argStyle === ArgumentType.Inline) {
+            return checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        }
+        else {
+            return checkAndUpdateNodeDynamic(view, nodeIndex, v0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?=} v0
+     * @param {?=} v1
+     * @param {?=} v2
+     * @param {?=} v3
+     * @param {?=} v4
+     * @param {?=} v5
+     * @param {?=} v6
+     * @param {?=} v7
+     * @param {?=} v8
+     * @param {?=} v9
+     * @return {?}
+     */
+    function checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        switch (nodeDef.type) {
+            case NodeType.Element:
+                return checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            case NodeType.Text:
+                return checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            case NodeType.Provider:
+                return checkAndUpdateProviderInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            case NodeType.PureExpression:
+                return checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} values
+     * @return {?}
+     */
+    function checkAndUpdateNodeDynamic(view, nodeIndex, values) {
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        switch (nodeDef.type) {
+            case NodeType.Element:
+                return checkAndUpdateElementDynamic(view, nodeDef, values);
+            case NodeType.Text:
+                return checkAndUpdateTextDynamic(view, nodeDef, values);
+            case NodeType.Provider:
+                return checkAndUpdateProviderDynamic(view, nodeDef, values);
+            case NodeType.PureExpression:
+                return checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} argStyle
+     * @param {?=} v0
+     * @param {?=} v1
+     * @param {?=} v2
+     * @param {?=} v3
+     * @param {?=} v4
+     * @param {?=} v5
+     * @param {?=} v6
+     * @param {?=} v7
+     * @param {?=} v8
+     * @param {?=} v9
+     * @return {?}
+     */
+    function checkNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        if (argStyle === ArgumentType.Inline) {
+            return checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        }
+        else {
+            return checkNoChangesNodeDynamic(view, nodeIndex, v0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} v0
+     * @param {?} v1
+     * @param {?} v2
+     * @param {?} v3
+     * @param {?} v4
+     * @param {?} v5
+     * @param {?} v6
+     * @param {?} v7
+     * @param {?} v8
+     * @param {?} v9
+     * @return {?}
+     */
+    function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        // Note: fallthrough is intended!
+        switch (nodeDef.bindings.length) {
+            case 10:
+                checkBindingNoChanges(view, nodeDef, 9, v9);
+            case 9:
+                checkBindingNoChanges(view, nodeDef, 8, v8);
+            case 8:
+                checkBindingNoChanges(view, nodeDef, 7, v7);
+            case 7:
+                checkBindingNoChanges(view, nodeDef, 6, v6);
+            case 6:
+                checkBindingNoChanges(view, nodeDef, 5, v5);
+            case 5:
+                checkBindingNoChanges(view, nodeDef, 4, v4);
+            case 4:
+                checkBindingNoChanges(view, nodeDef, 3, v3);
+            case 3:
+                checkBindingNoChanges(view, nodeDef, 2, v2);
+            case 2:
+                checkBindingNoChanges(view, nodeDef, 1, v1);
+            case 1:
+                checkBindingNoChanges(view, nodeDef, 0, v0);
+        }
+        return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
+            undefined;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} values
+     * @return {?}
+     */
+    function checkNoChangesNodeDynamic(view, nodeIndex, values) {
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        for (var /** @type {?} */ i = 0; i < values.length; i++) {
+            checkBindingNoChanges(view, nodeDef, i, values[i]);
+        }
+        return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
+            undefined;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @return {?}
+     */
+    function checkNoChangesQuery(view, nodeDef) {
+        var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
+        if (queryList.dirty) {
+            throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, nodeDef.index), "Query " + nodeDef.query.id + " not dirty", "Query " + nodeDef.query.id + " dirty", (view.state & ViewState.FirstCheck) !== 0);
+        }
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function destroyView(view) {
+        callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
+        if (view.disposables) {
+            for (var /** @type {?} */ i = 0; i < view.disposables.length; i++) {
+                view.disposables[i]();
+            }
+        }
+        execComponentViewsAction(view, ViewAction.Destroy);
+        execEmbeddedViewsAction(view, ViewAction.Destroy);
+        view.state |= ViewState.Destroyed;
+    }
+    var ViewAction = {};
+    ViewAction.CreateViewNodes = 0;
+    ViewAction.CheckNoChanges = 1;
+    ViewAction.CheckAndUpdate = 2;
+    ViewAction.Destroy = 3;
+    ViewAction[ViewAction.CreateViewNodes] = "CreateViewNodes";
+    ViewAction[ViewAction.CheckNoChanges] = "CheckNoChanges";
+    ViewAction[ViewAction.CheckAndUpdate] = "CheckAndUpdate";
+    ViewAction[ViewAction.Destroy] = "Destroy";
+    /**
+     * @param {?} view
+     * @param {?} action
+     * @return {?}
+     */
+    function execComponentViewsAction(view, action) {
+        var /** @type {?} */ def = view.def;
+        if (!(def.nodeFlags & NodeFlags.HasComponent)) {
+            return;
+        }
+        for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = def.nodes[i];
+            if (nodeDef.flags & NodeFlags.HasComponent) {
+                // a leaf
+                var /** @type {?} */ providerData = asProviderData(view, i);
+                callViewAction(providerData.componentView, action);
+            }
+            else if ((nodeDef.childFlags & NodeFlags.HasComponent) === 0) {
+                // a parent with leafs
+                // no child is a component,
+                // then skip the children
+                i += nodeDef.childCount;
+            }
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} action
+     * @return {?}
+     */
+    function execEmbeddedViewsAction(view, action) {
+        var /** @type {?} */ def = view.def;
+        if (!(def.nodeFlags & NodeFlags.HasEmbeddedViews)) {
+            return;
+        }
+        for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = def.nodes[i];
+            if (nodeDef.flags & NodeFlags.HasEmbeddedViews) {
+                // a leaf
+                var /** @type {?} */ embeddedViews = asElementData(view, i).embeddedViews;
+                if (embeddedViews) {
+                    for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                        callViewAction(embeddedViews[k], action);
+                    }
+                }
+            }
+            else if ((nodeDef.childFlags & NodeFlags.HasEmbeddedViews) === 0) {
+                // a parent with leafs
+                // no child is a component,
+                // then skip the children
+                i += nodeDef.childCount;
+            }
+        }
+    }
+    /**
+     * @param {?} view
+     * @param {?} action
+     * @return {?}
+     */
+    function callViewAction(view, action) {
+        var /** @type {?} */ viewState = view.state;
+        switch (action) {
+            case ViewAction.CheckNoChanges:
+                if ((viewState & ViewState.ChecksEnabled) &&
+                    (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
+                    checkNoChangesView(view);
+                }
+                break;
+            case ViewAction.CheckAndUpdate:
+                if ((viewState & ViewState.ChecksEnabled) &&
+                    (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
+                    checkAndUpdateView(view);
+                }
+                break;
+            case ViewAction.Destroy:
+                destroyView(view);
+                break;
+            case ViewAction.CreateViewNodes:
+                createViewNodes(view);
+                break;
+        }
+    }
+    var QueryAction = {};
+    QueryAction.CheckAndUpdate = 0;
+    QueryAction.CheckNoChanges = 1;
+    QueryAction[QueryAction.CheckAndUpdate] = "CheckAndUpdate";
+    QueryAction[QueryAction.CheckNoChanges] = "CheckNoChanges";
+    /**
+     * @param {?} view
+     * @param {?} queryFlags
+     * @param {?} action
+     * @return {?}
+     */
+    function execQueriesAction(view, queryFlags, action) {
+        if (!(view.def.nodeFlags & queryFlags)) {
+            return;
+        }
+        var /** @type {?} */ nodeCount = view.def.nodes.length;
+        for (var /** @type {?} */ i = 0; i < nodeCount; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            if (nodeDef.flags & queryFlags) {
+                Services.setCurrentNode(view, nodeDef.index);
+                switch (action) {
+                    case QueryAction.CheckAndUpdate:
+                        checkAndUpdateQuery(view, nodeDef);
+                        break;
+                    case QueryAction.CheckNoChanges:
+                        checkNoChangesQuery(view, nodeDef);
+                        break;
+                }
+            }
+            else if ((nodeDef.childFlags & queryFlags) === 0) {
+                // no child has a content query
+                // then skip the children
+                i += nodeDef.childCount;
+            }
+        }
+    }
+
+    /**
+     * @param {?} elementData
+     * @param {?} viewIndex
+     * @param {?} view
+     * @return {?}
+     */
+    function attachEmbeddedView(elementData, viewIndex, view) {
+        var /** @type {?} */ embeddedViews = elementData.embeddedViews;
+        if (viewIndex == null) {
+            viewIndex = embeddedViews.length;
+        }
+        addToArray$1(embeddedViews, viewIndex, view);
+        var /** @type {?} */ dvcElementData = declaredViewContainer(view);
+        if (dvcElementData && dvcElementData !== elementData) {
+            var /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+            if (!projectedViews) {
+                projectedViews = dvcElementData.projectedViews = [];
+            }
+            projectedViews.push(view);
+        }
+        for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
+            dirtyParentQuery(queryId, view);
+        }
+        var /** @type {?} */ prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
+        renderAttachEmbeddedView(elementData, prevView, view);
+    }
+    /**
+     * @param {?} elementData
+     * @param {?} viewIndex
+     * @return {?}
+     */
+    function detachEmbeddedView(elementData, viewIndex) {
+        var /** @type {?} */ embeddedViews = elementData.embeddedViews;
+        if (viewIndex == null) {
+            viewIndex = embeddedViews.length;
+        }
+        var /** @type {?} */ view = embeddedViews[viewIndex];
+        removeFromArray(embeddedViews, viewIndex);
+        var /** @type {?} */ dvcElementData = declaredViewContainer(view);
+        if (dvcElementData && dvcElementData !== elementData) {
+            var /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+            removeFromArray(projectedViews, projectedViews.indexOf(view));
+        }
+        for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
+            dirtyParentQuery(queryId, view);
+        }
+        renderDetachEmbeddedView(elementData, view);
+        return view;
+    }
+    /**
+     * @param {?} elementData
+     * @param {?} oldViewIndex
+     * @param {?} newViewIndex
+     * @return {?}
+     */
+    function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
+        var /** @type {?} */ embeddedViews = elementData.embeddedViews;
+        var /** @type {?} */ view = embeddedViews[oldViewIndex];
+        removeFromArray(embeddedViews, oldViewIndex);
+        if (newViewIndex == null) {
+            newViewIndex = embeddedViews.length;
+        }
+        addToArray$1(embeddedViews, newViewIndex, view);
+        // Note: Don't need to change projectedViews as the order in there
+        // as always invalid...
+        for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
+            dirtyParentQuery(queryId, view);
+        }
+        renderDetachEmbeddedView(elementData, view);
+        var /** @type {?} */ prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
+        renderAttachEmbeddedView(elementData, prevView, view);
+        return view;
+    }
+    /**
+     * @param {?} elementData
+     * @param {?} prevView
+     * @param {?} view
+     * @return {?}
+     */
+    function renderAttachEmbeddedView(elementData, prevView, view) {
+        var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
+        var /** @type {?} */ parentNode = view.root.renderer.parentNode(prevRenderNode);
+        var /** @type {?} */ nextSibling = view.root.renderer.nextSibling(prevRenderNode);
+        // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+        // However, browsers automatically do `appendChild` when there is no `nextSibling`.
+        visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
+    }
+    /**
+     * @param {?} elementData
+     * @param {?} view
+     * @return {?}
+     */
+    function renderDetachEmbeddedView(elementData, view) {
+        var /** @type {?} */ parentNode = view.root.renderer.parentNode(elementData.renderElement);
+        visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
+    }
+    /**
+     * @param {?} arr
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */
+    function addToArray$1(arr, index, value) {
+        // perf: array.push is faster than array.splice!
+        if (index >= arr.length) {
+            arr.push(value);
+        }
+        else {
+            arr.splice(index, 0, value);
+        }
+    }
+    /**
+     * @param {?} arr
+     * @param {?} index
+     * @return {?}
+     */
+    function removeFromArray(arr, index) {
+        // perf: array.pop is faster than array.splice!
+        if (index >= arr.length - 1) {
+            arr.pop();
+        }
+        else {
+            arr.splice(index, 1);
+        }
+    }
+
+    var /** @type {?} */ initialized = false;
+    /**
+     * @return {?}
+     */
+    function initServicesIfNeeded() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        var /** @type {?} */ services = isDevMode() ? createDebugServices() : createProdServices();
+        Services.setCurrentNode = services.setCurrentNode;
+        Services.createRootView = services.createRootView;
+        Services.createEmbeddedView = services.createEmbeddedView;
+        Services.checkAndUpdateView = services.checkAndUpdateView;
+        Services.checkNoChangesView = services.checkNoChangesView;
+        Services.destroyView = services.destroyView;
+        Services.attachEmbeddedView = services.attachEmbeddedView,
+            Services.detachEmbeddedView = services.detachEmbeddedView,
+            Services.moveEmbeddedView = services.moveEmbeddedView;
+        Services.resolveDep = services.resolveDep;
+        Services.createDebugContext = services.createDebugContext;
+        Services.handleEvent = services.handleEvent;
+        Services.updateView = services.updateView;
+    }
+    /**
+     * @return {?}
+     */
+    function createProdServices() {
+        return {
+            setCurrentNode: function () { },
+            createRootView: createProdRootView,
+            createEmbeddedView: createEmbeddedView,
+            checkAndUpdateView: checkAndUpdateView,
+            checkNoChangesView: checkNoChangesView,
+            destroyView: destroyView,
+            attachEmbeddedView: attachEmbeddedView,
+            detachEmbeddedView: detachEmbeddedView,
+            moveEmbeddedView: moveEmbeddedView,
+            resolveDep: resolveDep,
+            createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
+            handleEvent: function (view, nodeIndex, eventName, event) {
+                return view.def.handleEvent(view, nodeIndex, eventName, event);
+            },
+            updateView: function (check, view) { return view.def.update(check, view); }
+        };
+    }
+    /**
+     * @return {?}
+     */
+    function createDebugServices() {
+        return {
+            setCurrentNode: debugSetCurrentNode,
+            createRootView: debugCreateRootView,
+            createEmbeddedView: debugCreateEmbeddedView,
+            checkAndUpdateView: debugCheckAndUpdateView,
+            checkNoChangesView: debugCheckNoChangesView,
+            destroyView: debugDestroyView,
+            attachEmbeddedView: attachEmbeddedView,
+            detachEmbeddedView: detachEmbeddedView,
+            moveEmbeddedView: moveEmbeddedView,
+            resolveDep: resolveDep,
+            createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
+            handleEvent: debugHandleEvent,
+            updateView: debugUpdateView
+        };
+    }
+    /**
+     * @param {?} injector
+     * @param {?} projectableNodes
+     * @param {?} rootSelectorOrNode
+     * @param {?} def
+     * @param {?=} context
+     * @return {?}
+     */
+    function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
+        return createRootView(createRootData(injector, projectableNodes, rootSelectorOrNode), def, context);
+    }
+    /**
+     * @param {?} injector
+     * @param {?} projectableNodes
+     * @param {?} rootSelectorOrNode
+     * @param {?} def
+     * @param {?=} context
+     * @return {?}
+     */
+    function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
+        var /** @type {?} */ root = createRootData(injector, projectableNodes, rootSelectorOrNode);
+        var /** @type {?} */ debugRoot = {
+            injector: root.injector,
+            projectableNodes: root.projectableNodes,
+            selectorOrNode: root.selectorOrNode,
+            renderer: new DebugRenderer(root.renderer),
+            sanitizer: root.sanitizer
+        };
+        return callWithDebugContext('create', createRootView, null, [debugRoot, def, context]);
+    }
+    /**
+     * @param {?} injector
+     * @param {?} projectableNodes
+     * @param {?} rootSelectorOrNode
+     * @return {?}
+     */
+    function createRootData(injector, projectableNodes, rootSelectorOrNode) {
+        var /** @type {?} */ sanitizer = injector.get(Sanitizer);
+        // TODO(tbosch): once the new renderer interface is implemented via platform-browser,
+        // just get it via the injector and drop LegacyRendererAdapter and DirectDomRenderer.
+        var /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(RootRenderer)) :
+            new DirectDomRenderer();
+        var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
+        return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
+    }
+    /**
+     * @param {?} parent
+     * @param {?} anchorDef
+     * @param {?=} context
+     * @return {?}
+     */
+    function debugCreateEmbeddedView(parent, anchorDef, context) {
+        return callWithDebugContext('create', createEmbeddedView, null, [parent, anchorDef, context]);
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function debugCheckAndUpdateView(view) {
+        return callWithDebugContext('detectChanges', checkAndUpdateView, null, [view]);
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function debugCheckNoChangesView(view) {
+        return callWithDebugContext('checkNoChanges', checkNoChangesView, null, [view]);
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function debugDestroyView(view) {
+        return callWithDebugContext('destroyView', destroyView, null, [view]);
+    }
+    var /** @type {?} */ _currentAction;
+    var /** @type {?} */ _currentView;
+    var /** @type {?} */ _currentNodeIndex;
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @return {?}
+     */
+    function debugSetCurrentNode(view, nodeIndex) {
+        _currentView = view;
+        _currentNodeIndex = nodeIndex;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} eventName
+     * @param {?} event
+     * @return {?}
+     */
+    function debugHandleEvent(view, nodeIndex, eventName, event) {
+        if (view.state & ViewState.Destroyed) {
+            throw viewDestroyedError$1(_currentAction);
+        }
+        debugSetCurrentNode(view, nodeIndex);
+        return callWithDebugContext('handleEvent', view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
+    }
+    /**
+     * @param {?} check
+     * @param {?} view
+     * @return {?}
+     */
+    function debugUpdateView(check, view) {
+        if (view.state & ViewState.Destroyed) {
+            throw viewDestroyedError$1(_currentAction);
+        }
+        debugSetCurrentNode(view, nextNodeIndexWithBinding(view, 0));
+        return view.def.update(debugCheckFn, view);
+        /**
+         * @param {?} view
+         * @param {?} nodeIndex
+         * @param {?} argStyle
+         * @param {?=} v0
+         * @param {?=} v1
+         * @param {?=} v2
+         * @param {?=} v3
+         * @param {?=} v4
+         * @param {?=} v5
+         * @param {?=} v6
+         * @param {?=} v7
+         * @param {?=} v8
+         * @param {?=} v9
+         * @return {?}
+         */
+        function debugCheckFn(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+            var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? v0 : [].slice.call(arguments, 3);
+            var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+            for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
+                var /** @type {?} */ binding = nodeDef.bindings[i];
+                var /** @type {?} */ value = values[i];
+                if ((binding.type === BindingType.ElementProperty ||
+                    binding.type === BindingType.ProviderProperty) &&
+                    checkBinding$1(view, nodeDef, i, value)) {
+                    var /** @type {?} */ elIndex = nodeDef.type === NodeType.Provider ? nodeDef.parent : nodeDef.index;
+                    setBindingDebugInfo$1(view.root.renderer, asElementData(view, elIndex).renderElement, binding.nonMinifiedName, value);
+                }
+            }
+            var /** @type {?} */ result = check(view, nodeIndex, /** @type {?} */ (argStyle), v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            debugSetCurrentNode(view, nextNodeIndexWithBinding(view, nodeIndex));
+            return result;
+        }
+        ;
+    }
+    /**
+     * @param {?} renderer
+     * @param {?} renderNode
+     * @param {?} propName
+     * @param {?} value
+     * @return {?}
+     */
+    function setBindingDebugInfo$1(renderer, renderNode, propName, value) {
+        var /** @type {?} */ renderName = "ng-reflect-" + camelCaseToDashCase$1(propName);
+        if (value) {
+            try {
+                renderer.setBindingDebugInfo(renderNode, renderName, value.toString());
+            }
+            catch (e) {
+                renderer.setBindingDebugInfo(renderNode, renderName, '[ERROR] Exception while trying to serialize the value');
+            }
+        }
+        else {
+            renderer.removeBindingDebugInfo(renderNode, renderName);
+        }
+    }
+    var /** @type {?} */ CAMEL_CASE_REGEXP$1 = /([A-Z])/g;
+    /**
+     * @param {?} input
+     * @return {?}
+     */
+    function camelCaseToDashCase$1(input) {
+        return input.replace(CAMEL_CASE_REGEXP$1, function () {
+            var m = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                m[_i] = arguments[_i];
+            }
+            return '-' + m[1].toLowerCase();
+        });
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @return {?}
+     */
+    function nextNodeIndexWithBinding(view, nodeIndex) {
+        for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            if (nodeDef.bindings && nodeDef.bindings.length) {
+                return i;
+            }
+        }
+        return undefined;
+    }
+    var DebugRenderer = (function () {
+        /**
+         * @param {?} _delegate
+         */
+        function DebugRenderer(_delegate) {
+            this._delegate = _delegate;
+        }
+        /**
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRenderer.prototype.createElement = function (name) {
+            return this._delegate.createElement(name, getCurrentDebugContext());
+        };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.createComment = function (value) {
+            return this._delegate.createComment(value, getCurrentDebugContext());
+        };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.createText = function (value) {
+            return this._delegate.createText(value, getCurrentDebugContext());
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        DebugRenderer.prototype.appendChild = function (parent, newChild) {
+            return this._delegate.appendChild(parent, newChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        DebugRenderer.prototype.insertBefore = function (parent, newChild, refChild) {
+            return this._delegate.insertBefore(parent, newChild, refChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        DebugRenderer.prototype.removeChild = function (parent, oldChild) {
+            return this._delegate.removeChild(parent, oldChild);
+        };
+        /**
+         * @param {?} selectorOrNode
+         * @return {?}
+         */
+        DebugRenderer.prototype.selectRootElement = function (selectorOrNode) {
+            return this._delegate.selectRootElement(selectorOrNode, getCurrentDebugContext());
+        };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugRenderer.prototype.parentNode = function (node) { return this._delegate.parentNode(node); };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugRenderer.prototype.nextSibling = function (node) { return this._delegate.nextSibling(node); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.setAttribute = function (el, name, value) {
+            return this._delegate.setAttribute(el, name, value);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRenderer.prototype.removeAttribute = function (el, name) { return this._delegate.removeAttribute(el, name); };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @param {?} propertyValue
+         * @return {?}
+         */
+        DebugRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
+            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+        };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @return {?}
+         */
+        DebugRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) {
+            this._delegate.removeBindingDebugInfo(el, propertyName);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRenderer.prototype.addClass = function (el, name) { return this._delegate.addClass(el, name); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRenderer.prototype.removeClass = function (el, name) { return this._delegate.removeClass(el, name); };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.setStyle = function (el, style, value) {
+            return this._delegate.setStyle(el, style, value);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @return {?}
+         */
+        DebugRenderer.prototype.removeStyle = function (el, style) { return this._delegate.removeStyle(el, style); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.setProperty = function (el, name, value) {
+            return this._delegate.setProperty(el, name, value);
+        };
+        /**
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRenderer.prototype.setText = function (node, value) { return this._delegate.setText(node, value); };
+        /**
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        DebugRenderer.prototype.listen = function (target, eventName, callback) {
+            return this._delegate.listen(target, eventName, callback);
+        };
+        return DebugRenderer;
+    }());
+    var DebugContext_ = (function () {
+        /**
+         * @param {?} view
+         * @param {?} nodeIndex
+         */
+        function DebugContext_(view, nodeIndex) {
+            this.view = view;
+            this.nodeIndex = nodeIndex;
+            if (nodeIndex == null) {
+                this.nodeIndex = 0;
+            }
+            this.nodeDef = view.def.nodes[nodeIndex];
+            var elIndex = nodeIndex;
+            var elView = view;
+            while (elIndex != null && view.def.nodes[elIndex].type !== NodeType.Element) {
+                elIndex = view.def.nodes[elIndex].parent;
+            }
+            if (elIndex == null) {
+                while (elIndex == null && elView) {
+                    elIndex = viewParentDiIndex(elView);
+                    elView = elView.parent;
+                }
+            }
+            this.elView = elView;
+            if (elView) {
+                this.elDef = elView.def.nodes[elIndex];
+                for (var i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
+                    var childDef = this.elView.def.nodes[i];
+                    if (childDef.flags & NodeFlags.HasComponent) {
+                        this.compProviderIndex = i;
+                        break;
+                    }
+                    i += childDef.childCount;
+                }
+            }
+            else {
+                this.elDef = null;
+            }
+        }
+        Object.defineProperty(DebugContext_.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return createInjector(this.elView, this.elDef.index); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "component", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                if (this.compProviderIndex != null) {
+                    return asProviderData(this.elView, this.compProviderIndex).instance;
+                }
+                return this.view.component;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "context", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                if (this.compProviderIndex != null) {
+                    return asProviderData(this.elView, this.compProviderIndex).instance;
+                }
+                return this.view.context;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "providerTokens", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                var /** @type {?} */ tokens = [];
+                if (this.elDef) {
+                    for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
+                        var /** @type {?} */ childDef = this.elView.def.nodes[i];
+                        if (childDef.type === NodeType.Provider) {
+                            tokens.push(childDef.provider.token);
+                        }
+                        i += childDef.childCount;
+                    }
+                }
+                return tokens;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "references", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                var /** @type {?} */ references = {};
+                if (this.elDef) {
+                    collectReferences(this.elView, this.elDef, references);
+                    for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
+                        var /** @type {?} */ childDef = this.elView.def.nodes[i];
+                        if (childDef.type === NodeType.Provider) {
+                            collectReferences(this.elView, childDef, references);
+                        }
+                        i += childDef.childCount;
+                    }
+                }
+                return references;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "source", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                if (this.nodeDef.type === NodeType.Text) {
+                    return this.nodeDef.text.source;
+                }
+                else {
+                    return this.elDef.element.source;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "componentRenderElement", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                var /** @type {?} */ view = this.compProviderIndex != null ?
+                    asProviderData(this.elView, this.compProviderIndex).componentView :
+                    this.view;
+                var /** @type {?} */ elData = findHostElement(view);
+                return elData ? elData.renderElement : undefined;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DebugContext_.prototype, "renderNode", {
+            /**
+             * @return {?}
+             */
+            get: function () {
+                return this.nodeDef.type === NodeType.Text ? renderNode(this.view, this.nodeDef) :
+                    renderNode(this.elView, this.elDef);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DebugContext_;
+    }());
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function findHostElement(view) {
+        while (view && !isComponentView(view)) {
+            view = view.parent;
+        }
+        if (view.parent) {
+            var /** @type {?} */ hostData = asElementData(view.parent, view.parentIndex);
+            return hostData;
+        }
+        return undefined;
+    }
+    /**
+     * @param {?} view
+     * @param {?} nodeDef
+     * @param {?} references
+     * @return {?}
+     */
+    function collectReferences(view, nodeDef, references) {
+        for (var /** @type {?} */ queryId in nodeDef.matchedQueries) {
+            if (queryIdIsReference(queryId)) {
+                references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
+            }
+        }
+    }
+    /**
+     * @param {?} action
+     * @param {?} fn
+     * @param {?} self
+     * @param {?} args
+     * @return {?}
+     */
+    function callWithDebugContext(action, fn, self, args) {
+        var /** @type {?} */ oldAction = _currentAction;
+        var /** @type {?} */ oldView = _currentView;
+        var /** @type {?} */ oldNodeIndex = _currentNodeIndex;
+        try {
+            _currentAction = action;
+            var /** @type {?} */ result = fn.apply(self, args);
+            _currentView = oldView;
+            _currentNodeIndex = oldNodeIndex;
+            _currentAction = oldAction;
+            return result;
+        }
+        catch (e) {
+            if (isViewDebugError(e) || !_currentView) {
+                throw e;
+            }
+            throw viewWrappedDebugError(e, getCurrentDebugContext());
+        }
+    }
+    /**
+     * @return {?}
+     */
+    function getCurrentDebugContext() {
+        return new DebugContext_(_currentView, _currentNodeIndex);
+    }
+
+
+
+    var viewEngine = Object.freeze({
+    	anchorDef: anchorDef,
+    	elementDef: elementDef,
+    	ngContentDef: ngContentDef,
+    	directiveDef: directiveDef,
+    	providerDef: providerDef,
+    	pureArrayDef: pureArrayDef,
+    	pureObjectDef: pureObjectDef,
+    	purePipeDef: purePipeDef,
+    	queryDef: queryDef,
+    	createComponentFactory: createComponentFactory,
+    	initServicesIfNeeded: initServicesIfNeeded,
+    	textDef: textDef,
+    	elementEventFullName: elementEventFullName,
+    	nodeValue: nodeValue,
+    	rootRenderNodes: rootRenderNodes,
+    	viewDef: viewDef,
+    	attachEmbeddedView: attachEmbeddedView,
+    	detachEmbeddedView: detachEmbeddedView,
+    	moveEmbeddedView: moveEmbeddedView,
+    	ArgumentType: ArgumentType,
+    	ViewFlags: ViewFlags,
+    	NodeType: NodeType,
+    	NodeFlags: NodeFlags,
+    	BindingType: BindingType,
+    	QueryValueType: QueryValueType,
+    	ProviderType: ProviderType,
+    	DepFlags: DepFlags,
+    	PureExpressionType: PureExpressionType,
+    	QueryBindingType: QueryBindingType,
+    	ViewState: ViewState,
+    	NodeData: NodeData,
+    	asTextData: asTextData,
+    	asElementData: asElementData,
+    	asProviderData: asProviderData,
+    	asPureExpressionData: asPureExpressionData,
+    	asQueryList: asQueryList,
+    	RenderDebugContext: RenderDebugContext,
+    	DebugContext: DebugContext,
+    	Services: Services
+    });
+
+    /**
+     * @return {?}
+     */
+    function _iterableDiffersFactory() {
+        return defaultIterableDiffers;
+    }
+    /**
+     * @return {?}
+     */
+    function _keyValueDiffersFactory() {
+        return defaultKeyValueDiffers;
+    }
+    /**
+     * @param {?=} locale
+     * @return {?}
+     */
+    function _localeFactory(locale) {
+        return locale || 'en-US';
+    }
+    /**
+     * @return {?}
+     */
+    function _initViewEngine() {
+        initServicesIfNeeded();
+    }
+    /**
+     * This module includes the providers of \@angular/core that are needed
+     * to bootstrap components via `ApplicationRef`.
+     *
+     * \@experimental
+     */
+    var ApplicationModule = (function () {
+        function ApplicationModule() {
+        }
+        return ApplicationModule;
+    }());
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{
+                    providers: [
+                        ApplicationRef_,
+                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                        ApplicationInitStatus,
+                        Compiler,
+                        APP_ID_RANDOM_PROVIDER,
+                        ViewUtils,
+                        AnimationQueue,
+                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                        {
+                            provide: LOCALE_ID,
+                            useFactory: _localeFactory,
+                            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                        },
+                        { provide: APP_INITIALIZER, useValue: _initViewEngine, multi: true },
+                    ]
+                },] },
+    ];
+    /** @nocollapse */
+    ApplicationModule.ctorParameters = function () { return []; };
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */ var /** @type {?} */ FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
+    // TODO (matsko): change to boolean
+    var /** @type {?} */ ANY_STATE = '*';
+    var /** @type {?} */ DEFAULT_STATE = '*';
+    var /** @type {?} */ EMPTY_STATE = 'void';
+
+    var AnimationGroupPlayer = (function () {
+        /**
+         * @param {?} _players
+         */
+        function AnimationGroupPlayer(_players) {
+            var _this = this;
+            this._players = _players;
+            this._onDoneFns = [];
+            this._onStartFns = [];
+            this._finished = false;
+            this._started = false;
+            this._destroyed = false;
+            this._onDestroyFns = [];
+            this.parentPlayer = null;
+            var count = 0;
+            var total = this._players.length;
+            if (total == 0) {
+                scheduleMicroTask(function () { return _this._onFinish(); });
+            }
+            else {
+                this._players.forEach(function (player) {
+                    player.parentPlayer = _this;
+                    player.onDone(function () {
+                        if (++count >= total) {
+                            _this._onFinish();
+                        }
+                    });
+                });
+            }
+        }
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype._onFinish = function () {
+            if (!this._finished) {
+                this._finished = true;
+                this._onDoneFns.forEach(function (fn) { return fn(); });
+                this._onDoneFns = [];
+            }
+        };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.init = function () { this._players.forEach(function (player) { return player.init(); }); };
+        /**
+         * @param {?} fn
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
+        /**
+         * @param {?} fn
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
+        /**
+         * @param {?} fn
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.play = function () {
+            if (!isPresent(this.parentPlayer)) {
+                this.init();
+            }
+            if (!this.hasStarted()) {
+                this._onStartFns.forEach(function (fn) { return fn(); });
+                this._onStartFns = [];
+                this._started = true;
+            }
+            this._players.forEach(function (player) { return player.play(); });
+        };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.pause = function () { this._players.forEach(function (player) { return player.pause(); }); };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.restart = function () { this._players.forEach(function (player) { return player.restart(); }); };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.finish = function () {
+            this._onFinish();
+            this._players.forEach(function (player) { return player.finish(); });
+        };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.destroy = function () {
+            if (!this._destroyed) {
+                this._onFinish();
+                this._players.forEach(function (player) { return player.destroy(); });
+                this._destroyed = true;
+                this._onDestroyFns.forEach(function (fn) { return fn(); });
+                this._onDestroyFns = [];
+            }
+        };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.reset = function () {
+            this._players.forEach(function (player) { return player.reset(); });
+            this._destroyed = false;
+            this._finished = false;
+            this._started = false;
+        };
+        /**
+         * @param {?} p
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.setPosition = function (p) {
+            this._players.forEach(function (player) { player.setPosition(p); });
+        };
+        /**
+         * @return {?}
+         */
+        AnimationGroupPlayer.prototype.getPosition = function () {
+            var /** @type {?} */ min = 0;
+            this._players.forEach(function (player) {
+                var /** @type {?} */ p = player.getPosition();
+                min = Math.min(p, min);
+            });
+            return min;
+        };
+        Object.defineProperty(AnimationGroupPlayer.prototype, "players", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._players; },
+            enumerable: true,
+            configurable: true
+        });
+        return AnimationGroupPlayer;
+    }());
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * `AnimationKeyframe` consists of a series of styles (contained within {\@link AnimationStyles
+     * `AnimationStyles`})
+     * and an offset value indicating when those styles are applied within the `duration/delay/easing`
+     * timings.
+     * `AnimationKeyframe` is mostly an internal class which is designed to be used alongside {\@link
+     * Renderer#animate-anchor `Renderer.animate`}.
+     *
+     * \@experimental Animation support is experimental
+     */
+    var AnimationKeyframe = (function () {
+        /**
+         * @param {?} offset
+         * @param {?} styles
+         */
+        function AnimationKeyframe(offset, styles) {
+            this.offset = offset;
+            this.styles = styles;
+        }
+        return AnimationKeyframe;
+    }());
+
     var AnimationSequencePlayer = (function () {
         /**
          * @param {?} _players
@@ -10155,6 +14645,7 @@
             this._currentIndex = 0;
             this._onDoneFns = [];
             this._onStartFns = [];
+            this._onDestroyFns = [];
             this._finished = false;
             this._started = false;
             this._destroyed = false;
@@ -10212,6 +14703,11 @@
          */
         AnimationSequencePlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
         /**
+         * @param {?} fn
+         * @return {?}
+         */
+        AnimationSequencePlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
+        /**
          * @return {?}
          */
         AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
@@ -10267,6 +14763,8 @@
                 this._players.forEach(function (player) { return player.destroy(); });
                 this._destroyed = true;
                 this._activePlayer = new NoOpAnimationPlayer();
+                this._onDestroyFns.forEach(function (fn) { return fn(); });
+                this._onDestroyFns = [];
             }
         };
         /**
@@ -10296,7 +14794,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$9 = (this && this.__extends) || function (d, b) {
+    var __extends$11 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -10340,7 +14838,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
-        __extends$9(AnimationStateDeclarationMetadata, _super);
+        __extends$11(AnimationStateDeclarationMetadata, _super);
         /**
          * @param {?} stateNameExpr
          * @param {?} styles
@@ -10361,7 +14859,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateTransitionMetadata = (function (_super) {
-        __extends$9(AnimationStateTransitionMetadata, _super);
+        __extends$11(AnimationStateTransitionMetadata, _super);
         /**
          * @param {?} stateChangeExpr
          * @param {?} steps
@@ -10391,7 +14889,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
-        __extends$9(AnimationKeyframesSequenceMetadata, _super);
+        __extends$11(AnimationKeyframesSequenceMetadata, _super);
         /**
          * @param {?} steps
          */
@@ -10410,7 +14908,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStyleMetadata = (function (_super) {
-        __extends$9(AnimationStyleMetadata, _super);
+        __extends$11(AnimationStyleMetadata, _super);
         /**
          * @param {?} styles
          * @param {?=} offset
@@ -10432,7 +14930,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationAnimateMetadata = (function (_super) {
-        __extends$9(AnimationAnimateMetadata, _super);
+        __extends$11(AnimationAnimateMetadata, _super);
         /**
          * @param {?} timings
          * @param {?} styles
@@ -10450,7 +14948,7 @@
      * @abstract
      */
     var AnimationWithStepsMetadata = (function (_super) {
-        __extends$9(AnimationWithStepsMetadata, _super);
+        __extends$11(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
             return _super.call(this) || this;
         }
@@ -10472,7 +14970,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationSequenceMetadata = (function (_super) {
-        __extends$9(AnimationSequenceMetadata, _super);
+        __extends$11(AnimationSequenceMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -10499,7 +14997,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationGroupMetadata = (function (_super) {
-        __extends$9(AnimationGroupMetadata, _super);
+        __extends$11(AnimationGroupMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -11551,7 +16049,7 @@
         }
         return StaticNodeDebugInfo;
     }());
-    var DebugContext = (function () {
+    var DebugContext$1 = (function () {
         /**
          * @param {?} _view
          * @param {?} _nodeIndex
@@ -11832,13 +16330,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$11 = (this && this.__extends) || function (d, b) {
+    var __extends$13 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var ElementInjector = (function (_super) {
-        __extends$11(ElementInjector, _super);
+        __extends$13(ElementInjector, _super);
         /**
          * @param {?} _view
          * @param {?} _nodeIndex
@@ -11868,7 +16366,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$10 = (this && this.__extends) || function (d, b) {
+    var __extends$12 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -11877,7 +16375,7 @@
     /**
      * @experimental
      */
-    var /** @type {?} */ EMPTY_CONTEXT = new Object();
+    var /** @type {?} */ EMPTY_CONTEXT$1 = new Object();
     var /** @type {?} */ UNDEFINED$1 = new Object();
     /**
      * Cost of making objects: http://jsperf.com/instantiate-size-of-object
@@ -11954,7 +16452,7 @@
          * @return {?}
          */
         AppView.prototype.createHostView = function (rootSelectorOrNode, hostInjector, projectableNodes) {
-            this.context = (EMPTY_CONTEXT);
+            this.context = (EMPTY_CONTEXT$1);
             this._hasExternalHostElement = isPresent(rootSelectorOrNode);
             this._hostInjector = hostInjector;
             this._hostProjectableNodes = projectableNodes;
@@ -12323,7 +16821,7 @@
         return AppView;
     }());
     var DebugAppView = (function (_super) {
-        __extends$10(DebugAppView, _super);
+        __extends$12(DebugAppView, _super);
         /**
          * @param {?} clazz
          * @param {?} componentType
@@ -12441,7 +16939,7 @@
          * @return {?}
          */
         DebugAppView.prototype.debug = function (nodeIndex, rowNum, colNum) {
-            return this._currentDebugContext = new DebugContext(this, nodeIndex, rowNum, colNum);
+            return this._currentDebugContext = new DebugContext$1(this, nodeIndex, rowNum, colNum);
         };
         /**
          * @param {?} e
@@ -12651,7 +17149,7 @@
         return ViewContainer;
     }());
 
-    var /** @type {?} */ __core_private__ = {
+    var /** @type {?} */ __core_private__ = ({
         isDefaultChangeDetectionStrategy: isDefaultChangeDetectionStrategy,
         ChangeDetectorStatus: ChangeDetectorStatus,
         constructDependencies: constructDependencies,
@@ -12667,8 +17165,9 @@
         registerModuleFactory: registerModuleFactory,
         ViewType: ViewType,
         view_utils: view_utils,
+        viewEngine: viewEngine,
         ViewMetadata: ViewMetadata,
-        DebugContext: DebugContext,
+        DebugContext: DebugContext$1,
         StaticNodeDebugInfo: StaticNodeDebugInfo,
         devModeEqual: devModeEqual,
         ValueUnwrapper: ValueUnwrapper,
@@ -12681,7 +17180,7 @@
         reflector: reflector,
         Reflector: Reflector,
         NoOpAnimationPlayer: NoOpAnimationPlayer,
-        AnimationPlayer: AnimationPlayer,
+        AnimationPlayer: AnimationPlayer_,
         AnimationSequencePlayer: AnimationSequencePlayer,
         AnimationGroupPlayer: AnimationGroupPlayer,
         AnimationKeyframe: AnimationKeyframe,
@@ -12700,8 +17199,9 @@
         isPromise: isPromise,
         isObservable: isObservable,
         AnimationTransition: AnimationTransition,
-        ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE
-    };
+        ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE,
+        TransitionEngine: TransitionEngine
+    }) /* TODO(misko): export these using omega names instead */;
 
     exports.createPlatform = createPlatform;
     exports.assertPlatform = assertPlatform;
@@ -12739,7 +17239,7 @@
     exports.EventEmitter = EventEmitter;
     exports.ErrorHandler = ErrorHandler;
     exports.AnimationTransitionEvent = AnimationTransitionEvent;
-    exports.AnimationPlayer = AnimationPlayer;
+    exports.AnimationPlayer = AnimationPlayer_;
     exports.AnimationStyles = AnimationStyles;
     exports.AnimationKeyframe = AnimationKeyframe;
     exports.Sanitizer = Sanitizer;

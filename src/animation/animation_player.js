@@ -25,6 +25,12 @@ export class AnimationPlayer {
     onStart(fn) { }
     /**
      * @abstract
+     * @param {?} fn
+     * @return {?}
+     */
+    onDestroy(fn) { }
+    /**
+     * @abstract
      * @return {?}
      */
     init() { }
@@ -88,17 +94,22 @@ export class NoOpAnimationPlayer {
     constructor() {
         this._onDoneFns = [];
         this._onStartFns = [];
+        this._onDestroyFns = [];
         this._started = false;
+        this._destroyed = false;
+        this._finished = false;
         this.parentPlayer = null;
         scheduleMicroTask(() => this._onFinish());
     }
     /**
-     * \@internal
      * @return {?}
      */
     _onFinish() {
-        this._onDoneFns.forEach(fn => fn());
-        this._onDoneFns = [];
+        if (!this._finished) {
+            this._finished = true;
+            this._onDoneFns.forEach(fn => fn());
+            this._onDoneFns = [];
+        }
     }
     /**
      * @param {?} fn
@@ -110,6 +121,11 @@ export class NoOpAnimationPlayer {
      * @return {?}
      */
     onDone(fn) { this._onDoneFns.push(fn); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDestroy(fn) { this._onDestroyFns.push(fn); }
     /**
      * @return {?}
      */
@@ -143,7 +159,14 @@ export class NoOpAnimationPlayer {
     /**
      * @return {?}
      */
-    destroy() { }
+    destroy() {
+        if (!this._destroyed) {
+            this._destroyed = true;
+            this.finish();
+            this._onDestroyFns.forEach(fn => fn());
+            this._onDestroyFns = [];
+        }
+    }
     /**
      * @return {?}
      */
@@ -164,7 +187,13 @@ function NoOpAnimationPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     NoOpAnimationPlayer.prototype._onStartFns;
     /** @type {?} */
+    NoOpAnimationPlayer.prototype._onDestroyFns;
+    /** @type {?} */
     NoOpAnimationPlayer.prototype._started;
+    /** @type {?} */
+    NoOpAnimationPlayer.prototype._destroyed;
+    /** @type {?} */
+    NoOpAnimationPlayer.prototype._finished;
     /** @type {?} */
     NoOpAnimationPlayer.prototype.parentPlayer;
 }

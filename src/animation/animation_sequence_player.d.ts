@@ -5,6 +5,7 @@ export declare class AnimationSequencePlayer implements AnimationPlayer {
     private _activePlayer;
     private _onDoneFns;
     private _onStartFns;
+    private _onDestroyFns;
     private _finished;
     private _started;
     private _destroyed;
@@ -15,6 +16,7 @@ export declare class AnimationSequencePlayer implements AnimationPlayer {
     init(): void;
     onStart(fn: () => void): void;
     onDone(fn: () => void): void;
+    onDestroy(fn: () => void): void;
     hasStarted(): boolean;
     play(): void;
     pause(): void;

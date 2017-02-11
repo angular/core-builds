@@ -12,6 +12,8 @@ export declare class DirectDomRenderer implements RendererV2 {
     nextSibling(node: any): any;
     setAttribute(el: any, name: string, value: string): void;
     removeAttribute(el: any, name: string): void;
+    setBindingDebugInfo(el: any, propertyName: string, propertyValue: string): void;
+    removeBindingDebugInfo(el: any, propertyName: string): void;
     addClass(el: any, name: string): void;
     removeClass(el: any, name: string): void;
     setStyle(el: any, style: string, value: any): void;
@@ -40,6 +42,8 @@ export declare class LegacyRendererAdapter implements RendererV2 {
     nextSibling(node: any): any;
     setAttribute(el: any, name: string, value: string): void;
     removeAttribute(el: any, name: string): void;
+    setBindingDebugInfo(el: any, propertyName: string, propertyValue: string): void;
+    removeBindingDebugInfo(el: any, propertyName: string): void;
     addClass(el: any, name: string): void;
     removeClass(el: any, name: string): void;
     setStyle(el: any, style: string, value: any): void;

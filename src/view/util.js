@@ -113,29 +113,12 @@ export function declaredViewContainer(view) {
  * @param {?} view
  * @return {?}
  */
-export function parentDiIndex(view) {
-    if (view.parent) {
-        const /** @type {?} */ parentNodeDef = view.def.nodes[view.parentIndex];
-        return parentNodeDef.element && parentNodeDef.element.template ? parentNodeDef.parent :
-            parentNodeDef.index;
+export function viewParentDiIndex(view) {
+    if (view.parent && view.context !== view.component) {
+        const /** @type {?} */ parentNodeDef = view.parent.def.nodes[view.parentIndex];
+        return parentNodeDef.parent;
     }
     return view.parentIndex;
-}
-/**
- * @param {?} view
- * @param {?} nodeIndex
- * @return {?}
- */
-export function findElementDef(view, nodeIndex) {
-    const /** @type {?} */ viewDef = view.def;
-    let /** @type {?} */ nodeDef = viewDef.nodes[nodeIndex];
-    while (nodeDef) {
-        if (nodeDef.type === NodeType.Element) {
-            return nodeDef;
-        }
-        nodeDef = nodeDef.parent != null ? viewDef.nodes[nodeDef.parent] : undefined;
-    }
-    return undefined;
 }
 /**
  * @param {?} view
@@ -149,6 +132,38 @@ export function renderNode(view, def) {
         case NodeType.Text:
             return asTextData(view, def.index).renderText;
     }
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+export function nodeValue(view, index) {
+    const /** @type {?} */ def = view.def.nodes[index];
+    switch (def.type) {
+        case NodeType.Element:
+            return asElementData(view, def.index).renderElement;
+        case NodeType.Text:
+            return asTextData(view, def.index).renderText;
+        case NodeType.Provider:
+            return asProviderData(view, def.index).instance;
+    }
+    return undefined;
+}
+/**
+ * @param {?} queryId
+ * @return {?}
+ */
+export function queryIdIsReference(queryId) {
+    return queryId.startsWith('#');
+}
+/**
+ * @param {?} target
+ * @param {?} name
+ * @return {?}
+ */
+export function elementEventFullName(target, name) {
+    return target ? `${target}:${name}` : name;
 }
 /**
  * @param {?} view

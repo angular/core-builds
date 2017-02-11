@@ -12,6 +12,7 @@ export class MockAnimationPlayer {
         this.keyframes = keyframes;
         this._onDoneFns = [];
         this._onStartFns = [];
+        this._onDestroyFns = [];
         this._finished = false;
         this._destroyed = false;
         this._started = false;
@@ -36,6 +37,7 @@ export class MockAnimationPlayer {
     init() { this.log.push('init'); }
     onDone(fn) { this._onDoneFns.push(fn); }
     onStart(fn) { this._onStartFns.push(fn); }
+    onDestroy(fn) { this._onDestroyFns.push(fn); }
     hasStarted() { return this._started; }
     play() {
         if (!this.hasStarted()) {
@@ -59,6 +61,8 @@ export class MockAnimationPlayer {
             this._destroyed = true;
             this.finish();
             this.log.push('destroy');
+            this._onDestroyFns.forEach(fn => fn());
+            this._onDestroyFns = [];
         }
     }
     setPosition(p) { }

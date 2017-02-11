@@ -17,6 +17,7 @@ export class AnimationGroupPlayer {
         this._finished = false;
         this._started = false;
         this._destroyed = false;
+        this._onDestroyFns = [];
         this.parentPlayer = null;
         let count = 0;
         const total = this._players.length;
@@ -59,6 +60,11 @@ export class AnimationGroupPlayer {
      */
     onDone(fn) { this._onDoneFns.push(fn); }
     /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDestroy(fn) { this._onDestroyFns.push(fn); }
+    /**
      * @return {?}
      */
     hasStarted() { return this._started; }
@@ -99,6 +105,8 @@ export class AnimationGroupPlayer {
             this._onFinish();
             this._players.forEach(player => player.destroy());
             this._destroyed = true;
+            this._onDestroyFns.forEach(fn => fn());
+            this._onDestroyFns = [];
         }
     }
     /**
@@ -144,6 +152,8 @@ function AnimationGroupPlayer_tsickle_Closure_declarations() {
     AnimationGroupPlayer.prototype._started;
     /** @type {?} */
     AnimationGroupPlayer.prototype._destroyed;
+    /** @type {?} */
+    AnimationGroupPlayer.prototype._onDestroyFns;
     /** @type {?} */
     AnimationGroupPlayer.prototype.parentPlayer;
     /** @type {?} */

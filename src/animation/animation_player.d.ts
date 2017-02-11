@@ -4,6 +4,7 @@
 export declare abstract class AnimationPlayer {
     abstract onDone(fn: () => void): void;
     abstract onStart(fn: () => void): void;
+    abstract onDestroy(fn: () => void): void;
     abstract init(): void;
     abstract hasStarted(): boolean;
     abstract play(): void;
@@ -19,11 +20,16 @@ export declare abstract class AnimationPlayer {
 export declare class NoOpAnimationPlayer implements AnimationPlayer {
     private _onDoneFns;
     private _onStartFns;
+    private _onDestroyFns;
     private _started;
+    private _destroyed;
+    private _finished;
     parentPlayer: AnimationPlayer;
     constructor();
+    private _onFinish();
     onStart(fn: () => void): void;
     onDone(fn: () => void): void;
+    onDestroy(fn: () => void): void;
     hasStarted(): boolean;
     init(): void;
     play(): void;

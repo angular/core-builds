@@ -13,8 +13,8 @@ import { resolveDep } from './provider';
 import { getQueryValue } from './query';
 import { createInjector } from './refs';
 import { DirectDomRenderer, LegacyRendererAdapter } from './renderer';
-import { ArgumentType, BindingType, NodeType, Services, ViewState, asElementData } from './types';
-import { checkBinding, findElementDef, isComponentView, renderNode } from './util';
+import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
+import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentDiIndex } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
 import { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
 let /** @type {?} */ initialized = false;
@@ -105,7 +105,7 @@ function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def
     const /** @type {?} */ debugRoot = {
         injector: root.injector,
         projectableNodes: root.projectableNodes,
-        element: root.element,
+        selectorOrNode: root.selectorOrNode,
         renderer: new DebugRenderer(root.renderer),
         sanitizer: root.sanitizer
     };
@@ -124,7 +124,7 @@ function createRootData(injector, projectableNodes, rootSelectorOrNode) {
     const /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(v1renderer.RootRenderer)) :
         new DirectDomRenderer();
     const /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
-    return { injector, projectableNodes, element: rootElement, sanitizer, renderer };
+    return { injector, projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer, renderer };
 }
 /**
  * @param {?} parent
@@ -236,11 +236,17 @@ function debugUpdateView(check, view) {
  * @return {?}
  */
 function setBindingDebugInfo(renderer, renderNode, propName, value) {
-    try {
-        renderer.setAttribute(renderNode, `ng-reflect-${camelCaseToDashCase(propName)}`, value ? value.toString() : null);
+    const /** @type {?} */ renderName = `ng-reflect-${camelCaseToDashCase(propName)}`;
+    if (value) {
+        try {
+            renderer.setBindingDebugInfo(renderNode, renderName, value.toString());
+        }
+        catch (e) {
+            renderer.setBindingDebugInfo(renderNode, renderName, '[ERROR] Exception while trying to serialize the value');
+        }
     }
-    catch (e) {
-        renderer.setAttribute(renderNode, `ng-reflect-${camelCaseToDashCase(propName)}`, '[ERROR] Exception while trying to serialize the value');
+    else {
+        renderer.removeBindingDebugInfo(renderNode, renderName);
     }
 }
 const /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
@@ -352,6 +358,23 @@ class DebugRenderer {
     removeAttribute(el, name) { return this._delegate.removeAttribute(el, name); }
     /**
      * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(el, propertyName, propertyValue) {
+        this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+    }
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    removeBindingDebugInfo(el, propertyName) {
+        this._delegate.removeBindingDebugInfo(el, propertyName);
+    }
+    /**
+     * @param {?} el
      * @param {?} name
      * @return {?}
      */
@@ -415,20 +438,58 @@ class DebugContext_ {
         this.view = view;
         this.nodeIndex = nodeIndex;
         if (nodeIndex == null) {
-            this.nodeIndex = nodeIndex = view.parentIndex;
-            this.view = view = view.parent;
+            this.nodeIndex = 0;
         }
         this.nodeDef = view.def.nodes[nodeIndex];
-        this.elDef = findElementDef(view, nodeIndex);
+        let elIndex = nodeIndex;
+        let elView = view;
+        while (elIndex != null && view.def.nodes[elIndex].type !== NodeType.Element) {
+            elIndex = view.def.nodes[elIndex].parent;
+        }
+        if (elIndex == null) {
+            while (elIndex == null && elView) {
+                elIndex = viewParentDiIndex(elView);
+                elView = elView.parent;
+            }
+        }
+        this.elView = elView;
+        if (elView) {
+            this.elDef = elView.def.nodes[elIndex];
+            for (let i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
+                const childDef = this.elView.def.nodes[i];
+                if (childDef.flags & NodeFlags.HasComponent) {
+                    this.compProviderIndex = i;
+                    break;
+                }
+                i += childDef.childCount;
+            }
+        }
+        else {
+            this.elDef = null;
+        }
     }
     /**
      * @return {?}
      */
-    get injector() { return createInjector(this.view, this.elDef.index); }
+    get injector() { return createInjector(this.elView, this.elDef.index); }
     /**
      * @return {?}
      */
-    get component() { return this.view.component; }
+    get component() {
+        if (this.compProviderIndex != null) {
+            return asProviderData(this.elView, this.compProviderIndex).instance;
+        }
+        return this.view.component;
+    }
+    /**
+     * @return {?}
+     */
+    get context() {
+        if (this.compProviderIndex != null) {
+            return asProviderData(this.elView, this.compProviderIndex).instance;
+        }
+        return this.view.context;
+    }
     /**
      * @return {?}
      */
@@ -436,13 +497,11 @@ class DebugContext_ {
         const /** @type {?} */ tokens = [];
         if (this.elDef) {
             for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                const /** @type {?} */ childDef = this.view.def.nodes[i];
+                const /** @type {?} */ childDef = this.elView.def.nodes[i];
                 if (childDef.type === NodeType.Provider) {
                     tokens.push(childDef.provider.token);
                 }
-                else {
-                    i += childDef.childCount;
-                }
+                i += childDef.childCount;
             }
         }
         return tokens;
@@ -453,23 +512,17 @@ class DebugContext_ {
     get references() {
         const /** @type {?} */ references = {};
         if (this.elDef) {
-            collectReferences(this.view, this.elDef, references);
+            collectReferences(this.elView, this.elDef, references);
             for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                const /** @type {?} */ childDef = this.view.def.nodes[i];
+                const /** @type {?} */ childDef = this.elView.def.nodes[i];
                 if (childDef.type === NodeType.Provider) {
-                    collectReferences(this.view, childDef, references);
+                    collectReferences(this.elView, childDef, references);
                 }
-                else {
-                    i += childDef.childCount;
-                }
+                i += childDef.childCount;
             }
         }
         return references;
     }
-    /**
-     * @return {?}
-     */
-    get context() { return this.view.context; }
     /**
      * @return {?}
      */
@@ -485,22 +538,29 @@ class DebugContext_ {
      * @return {?}
      */
     get componentRenderElement() {
-        const /** @type {?} */ elData = findHostElement(this.view);
+        const /** @type {?} */ view = this.compProviderIndex != null ?
+            asProviderData(this.elView, this.compProviderIndex).componentView :
+            this.view;
+        const /** @type {?} */ elData = findHostElement(view);
         return elData ? elData.renderElement : undefined;
     }
     /**
      * @return {?}
      */
     get renderNode() {
-        let /** @type {?} */ nodeDef = this.nodeDef.type === NodeType.Text ? this.nodeDef : this.elDef;
-        return renderNode(this.view, nodeDef);
+        return this.nodeDef.type === NodeType.Text ? renderNode(this.view, this.nodeDef) :
+            renderNode(this.elView, this.elDef);
     }
 }
 function DebugContext__tsickle_Closure_declarations() {
     /** @type {?} */
     DebugContext_.prototype.nodeDef;
     /** @type {?} */
+    DebugContext_.prototype.elView;
+    /** @type {?} */
     DebugContext_.prototype.elDef;
+    /** @type {?} */
+    DebugContext_.prototype.compProviderIndex;
     /** @type {?} */
     DebugContext_.prototype.view;
     /** @type {?} */
@@ -528,7 +588,7 @@ function findHostElement(view) {
  */
 function collectReferences(view, nodeDef, references) {
     for (let /** @type {?} */ queryId in nodeDef.matchedQueries) {
-        if (queryId.startsWith('#')) {
+        if (queryIdIsReference(queryId)) {
             references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
         }
     }

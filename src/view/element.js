@@ -8,22 +8,23 @@
 import { isDevMode } from '../application_ref';
 import { SecurityContext } from '../security';
 import { BindingType, NodeFlags, NodeType, asElementData } from './types';
-import { checkAndUpdateBinding, dispatchEvent, sliceErrorStack, unwrapValue } from './util';
+import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, resolveViewDefinition, sliceErrorStack, unwrapValue } from './util';
 /**
  * @param {?} flags
  * @param {?} matchedQueries
  * @param {?} ngContentIndex
  * @param {?} childCount
- * @param {?=} template
+ * @param {?=} templateFactory
  * @return {?}
  */
-export function anchorDef(flags, matchedQueries, ngContentIndex, childCount, template) {
+export function anchorDef(flags, matchedQueries, ngContentIndex, childCount, templateFactory) {
     const /** @type {?} */ matchedQueryDefs = {};
     if (matchedQueries) {
         matchedQueries.forEach(([queryId, valueType]) => { matchedQueryDefs[queryId] = valueType; });
     }
     // skip the call to sliceErrorStack itself + the call to this function.
     const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
+    const /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
     return {
         type: NodeType.Element,
         // will bet set by the view definition
@@ -143,10 +144,10 @@ export function elementDef(flags, matchedQueries, ngContentIndex, childCount, na
  */
 export function createElement(view, renderHost, def) {
     const /** @type {?} */ elDef = def.element;
-    const /** @type {?} */ rootElement = view.root.element;
+    const /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
     const /** @type {?} */ renderer = view.root.renderer;
     let /** @type {?} */ el;
-    if (view.parent || !rootElement) {
+    if (view.parent || !rootSelectorOrNode) {
         const /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
         el = elDef.name ? renderer.createElement(elDef.name) : renderer.createComment('');
         if (parentNode) {
@@ -154,7 +155,7 @@ export function createElement(view, renderHost, def) {
         }
     }
     else {
-        el = rootElement;
+        el = renderer.selectRootElement(rootSelectorOrNode);
     }
     if (elDef.attrs) {
         for (let /** @type {?} */ attrName in elDef.attrs) {
@@ -164,7 +165,7 @@ export function createElement(view, renderHost, def) {
     if (elDef.outputs.length) {
         for (let /** @type {?} */ i = 0; i < elDef.outputs.length; i++) {
             const /** @type {?} */ output = elDef.outputs[i];
-            const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, output.eventName);
+            const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, elementEventFullName(output.target, output.eventName));
             const /** @type {?} */ disposable = (renderer.listen(output.target || el, output.eventName, handleEventClosure));
             view.disposables[def.disposableIndex + i] = disposable;
         }

@@ -11,5 +11,5 @@ export const __core_private_testing__ = {
     TestingCompiler: test_compiler.TestingCompiler,
     TestingCompilerFactory: test_compiler.TestingCompilerFactory,
     MockAnimationPlayer: mock_animation_player.MockAnimationPlayer
-};
+} /* TODO(misko): export these using omega names instead */;
 //# sourceMappingURL=private_export_testing.js.map

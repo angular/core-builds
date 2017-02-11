@@ -91,6 +91,19 @@ export class DirectDomRenderer {
     removeAttribute(el, name) { el.removeAttribute(name); }
     /**
      * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(el, propertyName, propertyValue) { }
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    removeBindingDebugInfo(el, propertyName) { }
+    /**
+     * @param {?} el
      * @param {?} name
      * @return {?}
      */
@@ -209,8 +222,12 @@ export class LegacyRendererAdapter {
      * @return {?}
      */
     insertBefore(parent, newChild, refChild) {
-        const /** @type {?} */ beforeSibling = refChild.nextSiblingOf ? refChild.nextSiblingOf : refChild;
-        this._delegate.attachViewAfter(beforeSibling, [newChild]);
+        if (refChild) {
+            this._delegate.attachViewAfter(refChild.previousSibling, [newChild]);
+        }
+        else {
+            this.appendChild(parent, newChild);
+        }
     }
     /**
      * @param {?} parent
@@ -234,12 +251,12 @@ export class LegacyRendererAdapter {
      * @param {?} node
      * @return {?}
      */
-    parentNode(node) { return { parentOf: node }; }
+    parentNode(node) { return node.parentNode; }
     /**
      * @param {?} node
      * @return {?}
      */
-    nextSibling(node) { return { nextSiblingOf: node }; }
+    nextSibling(node) { return node.nextSibling; }
     /**
      * @param {?} el
      * @param {?} name
@@ -256,6 +273,23 @@ export class LegacyRendererAdapter {
      */
     removeAttribute(el, name) {
         this._delegate.setElementAttribute(el, name, null);
+    }
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(el, propertyName, propertyValue) {
+        this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+    }
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    removeBindingDebugInfo(el, propertyName) {
+        this._delegate.setBindingDebugInfo(el, propertyName, null);
     }
     /**
      * @param {?} el

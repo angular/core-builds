@@ -1,6 +1,6 @@
 import { SecurityContext } from '../security';
-import { BindingType, ElementData, NodeDef, NodeFlags, QueryValueType, ViewData, ViewDefinition } from './types';
-export declare function anchorDef(flags: NodeFlags, matchedQueries: [string, QueryValueType][], ngContentIndex: number, childCount: number, template?: ViewDefinition): NodeDef;
+import { BindingType, ElementData, NodeDef, NodeFlags, QueryValueType, ViewData, ViewDefinitionFactory } from './types';
+export declare function anchorDef(flags: NodeFlags, matchedQueries: [string, QueryValueType][], ngContentIndex: number, childCount: number, templateFactory?: ViewDefinitionFactory): NodeDef;
 export declare function elementDef(flags: NodeFlags, matchedQueries: [string, QueryValueType][], ngContentIndex: number, childCount: number, name: string, fixedAttrs?: {
     [name: string]: string;
 }, bindings?: ([BindingType.ElementClass, string] | [BindingType.ElementStyle, string, string] | [BindingType.ElementAttribute | BindingType.ElementProperty, string, SecurityContext])[], outputs?: (string | [string, string])[]): NodeDef;
