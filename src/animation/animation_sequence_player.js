@@ -17,6 +17,7 @@ var AnimationSequencePlayer = (function () {
         this._currentIndex = 0;
         this._onDoneFns = [];
         this._onStartFns = [];
+        this._onDestroyFns = [];
         this._finished = false;
         this._started = false;
         this._destroyed = false;
@@ -74,6 +75,11 @@ var AnimationSequencePlayer = (function () {
      */
     AnimationSequencePlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     /**
+     * @param {?} fn
+     * @return {?}
+     */
+    AnimationSequencePlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
+    /**
      * @return {?}
      */
     AnimationSequencePlayer.prototype.hasStarted = function () { return this._started; };
@@ -129,6 +135,8 @@ var AnimationSequencePlayer = (function () {
             this._players.forEach(function (player) { return player.destroy(); });
             this._destroyed = true;
             this._activePlayer = new NoOpAnimationPlayer();
+            this._onDestroyFns.forEach(function (fn) { return fn(); });
+            this._onDestroyFns = [];
         }
     };
     /**
@@ -160,6 +168,8 @@ function AnimationSequencePlayer_tsickle_Closure_declarations() {
     AnimationSequencePlayer.prototype._onDoneFns;
     /** @type {?} */
     AnimationSequencePlayer.prototype._onStartFns;
+    /** @type {?} */
+    AnimationSequencePlayer.prototype._onDestroyFns;
     /** @type {?} */
     AnimationSequencePlayer.prototype._finished;
     /** @type {?} */

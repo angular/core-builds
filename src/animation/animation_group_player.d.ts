@@ -6,12 +6,14 @@ export declare class AnimationGroupPlayer implements AnimationPlayer {
     private _finished;
     private _started;
     private _destroyed;
+    private _onDestroyFns;
     parentPlayer: AnimationPlayer;
     constructor(_players: AnimationPlayer[]);
     private _onFinish();
     init(): void;
     onStart(fn: () => void): void;
     onDone(fn: () => void): void;
+    onDestroy(fn: () => void): void;
     hasStarted(): boolean;
     play(): void;
     pause(): void;

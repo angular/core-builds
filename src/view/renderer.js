@@ -93,6 +93,19 @@ var DirectDomRenderer = (function () {
     DirectDomRenderer.prototype.removeAttribute = function (el, name) { el.removeAttribute(name); };
     /**
      * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    DirectDomRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    DirectDomRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) { };
+    /**
+     * @param {?} el
      * @param {?} name
      * @return {?}
      */
@@ -213,8 +226,12 @@ var LegacyRendererAdapter = (function () {
      * @return {?}
      */
     LegacyRendererAdapter.prototype.insertBefore = function (parent, newChild, refChild) {
-        var /** @type {?} */ beforeSibling = refChild.nextSiblingOf ? refChild.nextSiblingOf : refChild;
-        this._delegate.attachViewAfter(beforeSibling, [newChild]);
+        if (refChild) {
+            this._delegate.attachViewAfter(refChild.previousSibling, [newChild]);
+        }
+        else {
+            this.appendChild(parent, newChild);
+        }
     };
     /**
      * @param {?} parent
@@ -238,12 +255,12 @@ var LegacyRendererAdapter = (function () {
      * @param {?} node
      * @return {?}
      */
-    LegacyRendererAdapter.prototype.parentNode = function (node) { return { parentOf: node }; };
+    LegacyRendererAdapter.prototype.parentNode = function (node) { return node.parentNode; };
     /**
      * @param {?} node
      * @return {?}
      */
-    LegacyRendererAdapter.prototype.nextSibling = function (node) { return { nextSiblingOf: node }; };
+    LegacyRendererAdapter.prototype.nextSibling = function (node) { return node.nextSibling; };
     /**
      * @param {?} el
      * @param {?} name
@@ -260,6 +277,23 @@ var LegacyRendererAdapter = (function () {
      */
     LegacyRendererAdapter.prototype.removeAttribute = function (el, name) {
         this._delegate.setElementAttribute(el, name, null);
+    };
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    LegacyRendererAdapter.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
+        this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+    };
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    LegacyRendererAdapter.prototype.removeBindingDebugInfo = function (el, propertyName) {
+        this._delegate.setBindingDebugInfo(el, propertyName, null);
     };
     /**
      * @param {?} el

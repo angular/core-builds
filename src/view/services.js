@@ -13,8 +13,8 @@ import { resolveDep } from './provider';
 import { getQueryValue } from './query';
 import { createInjector } from './refs';
 import { DirectDomRenderer, LegacyRendererAdapter } from './renderer';
-import { ArgumentType, BindingType, NodeType, Services, ViewState, asElementData } from './types';
-import { checkBinding, findElementDef, isComponentView, renderNode } from './util';
+import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
+import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentDiIndex } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
 import { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
 var /** @type {?} */ initialized = false;
@@ -107,7 +107,7 @@ function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def
     var /** @type {?} */ debugRoot = {
         injector: root.injector,
         projectableNodes: root.projectableNodes,
-        element: root.element,
+        selectorOrNode: root.selectorOrNode,
         renderer: new DebugRenderer(root.renderer),
         sanitizer: root.sanitizer
     };
@@ -126,7 +126,7 @@ function createRootData(injector, projectableNodes, rootSelectorOrNode) {
     var /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(v1renderer.RootRenderer)) :
         new DirectDomRenderer();
     var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
-    return { injector: injector, projectableNodes: projectableNodes, element: rootElement, sanitizer: sanitizer, renderer: renderer };
+    return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
 }
 /**
  * @param {?} parent
@@ -238,11 +238,17 @@ function debugUpdateView(check, view) {
  * @return {?}
  */
 function setBindingDebugInfo(renderer, renderNode, propName, value) {
-    try {
-        renderer.setAttribute(renderNode, "ng-reflect-" + camelCaseToDashCase(propName), value ? value.toString() : null);
+    var /** @type {?} */ renderName = "ng-reflect-" + camelCaseToDashCase(propName);
+    if (value) {
+        try {
+            renderer.setBindingDebugInfo(renderNode, renderName, value.toString());
+        }
+        catch (e) {
+            renderer.setBindingDebugInfo(renderNode, renderName, '[ERROR] Exception while trying to serialize the value');
+        }
     }
-    catch (e) {
-        renderer.setAttribute(renderNode, "ng-reflect-" + camelCaseToDashCase(propName), '[ERROR] Exception while trying to serialize the value');
+    else {
+        renderer.removeBindingDebugInfo(renderNode, renderName);
     }
 }
 var /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
@@ -360,6 +366,23 @@ var DebugRenderer = (function () {
     DebugRenderer.prototype.removeAttribute = function (el, name) { return this._delegate.removeAttribute(el, name); };
     /**
      * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    DebugRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
+        this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+    };
+    /**
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    DebugRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) {
+        this._delegate.removeBindingDebugInfo(el, propertyName);
+    };
+    /**
+     * @param {?} el
      * @param {?} name
      * @return {?}
      */
@@ -424,17 +447,41 @@ var DebugContext_ = (function () {
         this.view = view;
         this.nodeIndex = nodeIndex;
         if (nodeIndex == null) {
-            this.nodeIndex = nodeIndex = view.parentIndex;
-            this.view = view = view.parent;
+            this.nodeIndex = 0;
         }
         this.nodeDef = view.def.nodes[nodeIndex];
-        this.elDef = findElementDef(view, nodeIndex);
+        var elIndex = nodeIndex;
+        var elView = view;
+        while (elIndex != null && view.def.nodes[elIndex].type !== NodeType.Element) {
+            elIndex = view.def.nodes[elIndex].parent;
+        }
+        if (elIndex == null) {
+            while (elIndex == null && elView) {
+                elIndex = viewParentDiIndex(elView);
+                elView = elView.parent;
+            }
+        }
+        this.elView = elView;
+        if (elView) {
+            this.elDef = elView.def.nodes[elIndex];
+            for (var i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
+                var childDef = this.elView.def.nodes[i];
+                if (childDef.flags & NodeFlags.HasComponent) {
+                    this.compProviderIndex = i;
+                    break;
+                }
+                i += childDef.childCount;
+            }
+        }
+        else {
+            this.elDef = null;
+        }
     }
     Object.defineProperty(DebugContext_.prototype, "injector", {
         /**
          * @return {?}
          */
-        get: function () { return createInjector(this.view, this.elDef.index); },
+        get: function () { return createInjector(this.elView, this.elDef.index); },
         enumerable: true,
         configurable: true
     });
@@ -442,7 +489,25 @@ var DebugContext_ = (function () {
         /**
          * @return {?}
          */
-        get: function () { return this.view.component; },
+        get: function () {
+            if (this.compProviderIndex != null) {
+                return asProviderData(this.elView, this.compProviderIndex).instance;
+            }
+            return this.view.component;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DebugContext_.prototype, "context", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            if (this.compProviderIndex != null) {
+                return asProviderData(this.elView, this.compProviderIndex).instance;
+            }
+            return this.view.context;
+        },
         enumerable: true,
         configurable: true
     });
@@ -454,13 +519,11 @@ var DebugContext_ = (function () {
             var /** @type {?} */ tokens = [];
             if (this.elDef) {
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                    var /** @type {?} */ childDef = this.view.def.nodes[i];
+                    var /** @type {?} */ childDef = this.elView.def.nodes[i];
                     if (childDef.type === NodeType.Provider) {
                         tokens.push(childDef.provider.token);
                     }
-                    else {
-                        i += childDef.childCount;
-                    }
+                    i += childDef.childCount;
                 }
             }
             return tokens;
@@ -475,27 +538,17 @@ var DebugContext_ = (function () {
         get: function () {
             var /** @type {?} */ references = {};
             if (this.elDef) {
-                collectReferences(this.view, this.elDef, references);
+                collectReferences(this.elView, this.elDef, references);
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                    var /** @type {?} */ childDef = this.view.def.nodes[i];
+                    var /** @type {?} */ childDef = this.elView.def.nodes[i];
                     if (childDef.type === NodeType.Provider) {
-                        collectReferences(this.view, childDef, references);
+                        collectReferences(this.elView, childDef, references);
                     }
-                    else {
-                        i += childDef.childCount;
-                    }
+                    i += childDef.childCount;
                 }
             }
             return references;
         },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(DebugContext_.prototype, "context", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this.view.context; },
         enumerable: true,
         configurable: true
     });
@@ -519,7 +572,10 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            var /** @type {?} */ elData = findHostElement(this.view);
+            var /** @type {?} */ view = this.compProviderIndex != null ?
+                asProviderData(this.elView, this.compProviderIndex).componentView :
+                this.view;
+            var /** @type {?} */ elData = findHostElement(view);
             return elData ? elData.renderElement : undefined;
         },
         enumerable: true,
@@ -530,8 +586,8 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            var /** @type {?} */ nodeDef = this.nodeDef.type === NodeType.Text ? this.nodeDef : this.elDef;
-            return renderNode(this.view, nodeDef);
+            return this.nodeDef.type === NodeType.Text ? renderNode(this.view, this.nodeDef) :
+                renderNode(this.elView, this.elDef);
         },
         enumerable: true,
         configurable: true
@@ -542,7 +598,11 @@ function DebugContext__tsickle_Closure_declarations() {
     /** @type {?} */
     DebugContext_.prototype.nodeDef;
     /** @type {?} */
+    DebugContext_.prototype.elView;
+    /** @type {?} */
     DebugContext_.prototype.elDef;
+    /** @type {?} */
+    DebugContext_.prototype.compProviderIndex;
     /** @type {?} */
     DebugContext_.prototype.view;
     /** @type {?} */
@@ -570,7 +630,7 @@ function findHostElement(view) {
  */
 function collectReferences(view, nodeDef, references) {
     for (var /** @type {?} */ queryId in nodeDef.matchedQueries) {
-        if (queryId.startsWith('#')) {
+        if (queryIdIsReference(queryId)) {
             references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
         }
     }

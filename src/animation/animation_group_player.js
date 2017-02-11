@@ -18,6 +18,7 @@ var AnimationGroupPlayer = (function () {
         this._finished = false;
         this._started = false;
         this._destroyed = false;
+        this._onDestroyFns = [];
         this.parentPlayer = null;
         var count = 0;
         var total = this._players.length;
@@ -60,6 +61,11 @@ var AnimationGroupPlayer = (function () {
      */
     AnimationGroupPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     /**
+     * @param {?} fn
+     * @return {?}
+     */
+    AnimationGroupPlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
+    /**
      * @return {?}
      */
     AnimationGroupPlayer.prototype.hasStarted = function () { return this._started; };
@@ -100,6 +106,8 @@ var AnimationGroupPlayer = (function () {
             this._onFinish();
             this._players.forEach(function (player) { return player.destroy(); });
             this._destroyed = true;
+            this._onDestroyFns.forEach(function (fn) { return fn(); });
+            this._onDestroyFns = [];
         }
     };
     /**
@@ -151,6 +159,8 @@ function AnimationGroupPlayer_tsickle_Closure_declarations() {
     AnimationGroupPlayer.prototype._started;
     /** @type {?} */
     AnimationGroupPlayer.prototype._destroyed;
+    /** @type {?} */
+    AnimationGroupPlayer.prototype._onDestroyFns;
     /** @type {?} */
     AnimationGroupPlayer.prototype.parentPlayer;
     /** @type {?} */

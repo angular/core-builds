@@ -11,9 +11,11 @@ export declare function declaredViewContainer(view: ViewData): ElementData;
  * for embedded views, this is the index of the parent node
  * that contains the view container.
  */
-export declare function parentDiIndex(view: ViewData): number;
-export declare function findElementDef(view: ViewData, nodeIndex: number): NodeDef;
+export declare function viewParentDiIndex(view: ViewData): number;
 export declare function renderNode(view: ViewData, def: NodeDef): any;
+export declare function nodeValue(view: ViewData, index: number): any;
+export declare function queryIdIsReference(queryId: string): boolean;
+export declare function elementEventFullName(target: string, name: string): string;
 export declare function isComponentView(view: ViewData): boolean;
 export declare function resolveViewDefinition(factory: ViewDefinitionFactory): ViewDefinition;
 export declare function sliceErrorStack(start: number, end: number): string;

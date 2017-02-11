@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AnimationQueue } from './animation/animation_queue';
-import { ApplicationInitStatus } from './application_init';
+import { APP_INITIALIZER, ApplicationInitStatus } from './application_init';
 import { ApplicationRef, ApplicationRef_ } from './application_ref';
 import { APP_ID_RANDOM_PROVIDER } from './application_tokens';
 import { IterableDiffers, KeyValueDiffers, defaultIterableDiffers, defaultKeyValueDiffers } from './change_detection/change_detection';
@@ -15,6 +15,7 @@ import { LOCALE_ID } from './i18n/tokens';
 import { Compiler } from './linker/compiler';
 import { ViewUtils } from './linker/view_utils';
 import { NgModule } from './metadata';
+import { initServicesIfNeeded } from './view/index';
 /**
  * @return {?}
  */
@@ -33,6 +34,12 @@ export function _keyValueDiffersFactory() {
  */
 export function _localeFactory(locale) {
     return locale || 'en-US';
+}
+/**
+ * @return {?}
+ */
+export function _initViewEngine() {
+    initServicesIfNeeded();
 }
 /**
  * This module includes the providers of \@angular/core that are needed
@@ -63,6 +70,7 @@ ApplicationModule.decorators = [
                         useFactory: _localeFactory,
                         deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
                     },
+                    { provide: APP_INITIALIZER, useValue: _initViewEngine, multi: true },
                 ]
             },] },
 ];

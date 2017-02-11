@@ -27,6 +27,12 @@ var AnimationPlayer = (function () {
     AnimationPlayer.prototype.onStart = function (fn) { };
     /**
      * @abstract
+     * @param {?} fn
+     * @return {?}
+     */
+    AnimationPlayer.prototype.onDestroy = function (fn) { };
+    /**
+     * @abstract
      * @return {?}
      */
     AnimationPlayer.prototype.init = function () { };
@@ -97,17 +103,22 @@ var NoOpAnimationPlayer = (function () {
         var _this = this;
         this._onDoneFns = [];
         this._onStartFns = [];
+        this._onDestroyFns = [];
         this._started = false;
+        this._destroyed = false;
+        this._finished = false;
         this.parentPlayer = null;
         scheduleMicroTask(function () { return _this._onFinish(); });
     }
     /**
-     * \@internal
      * @return {?}
      */
     NoOpAnimationPlayer.prototype._onFinish = function () {
-        this._onDoneFns.forEach(function (fn) { return fn(); });
-        this._onDoneFns = [];
+        if (!this._finished) {
+            this._finished = true;
+            this._onDoneFns.forEach(function (fn) { return fn(); });
+            this._onDoneFns = [];
+        }
     };
     /**
      * @param {?} fn
@@ -119,6 +130,11 @@ var NoOpAnimationPlayer = (function () {
      * @return {?}
      */
     NoOpAnimationPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    NoOpAnimationPlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
     /**
      * @return {?}
      */
@@ -152,7 +168,14 @@ var NoOpAnimationPlayer = (function () {
     /**
      * @return {?}
      */
-    NoOpAnimationPlayer.prototype.destroy = function () { };
+    NoOpAnimationPlayer.prototype.destroy = function () {
+        if (!this._destroyed) {
+            this._destroyed = true;
+            this.finish();
+            this._onDestroyFns.forEach(function (fn) { return fn(); });
+            this._onDestroyFns = [];
+        }
+    };
     /**
      * @return {?}
      */
@@ -175,7 +198,13 @@ function NoOpAnimationPlayer_tsickle_Closure_declarations() {
     /** @type {?} */
     NoOpAnimationPlayer.prototype._onStartFns;
     /** @type {?} */
+    NoOpAnimationPlayer.prototype._onDestroyFns;
+    /** @type {?} */
     NoOpAnimationPlayer.prototype._started;
+    /** @type {?} */
+    NoOpAnimationPlayer.prototype._destroyed;
+    /** @type {?} */
+    NoOpAnimationPlayer.prototype._finished;
     /** @type {?} */
     NoOpAnimationPlayer.prototype.parentPlayer;
 }

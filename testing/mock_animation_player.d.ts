@@ -15,6 +15,7 @@ export declare class MockAnimationPlayer implements AnimationPlayer {
     }]>;
     private _onDoneFns;
     private _onStartFns;
+    private _onDestroyFns;
     private _finished;
     private _destroyed;
     private _started;
@@ -32,6 +33,7 @@ export declare class MockAnimationPlayer implements AnimationPlayer {
     init(): void;
     onDone(fn: () => void): void;
     onStart(fn: () => void): void;
+    onDestroy(fn: () => void): void;
     hasStarted(): boolean;
     play(): void;
     pause(): void;

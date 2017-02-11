@@ -36,9 +36,11 @@ import * as reflection from './reflection/reflection';
 import * as reflection_capabilities from './reflection/reflection_capabilities';
 import * as reflector_reader from './reflection/reflector_reader';
 import * as api from './render/api';
+import { TransitionEngine } from './transition/transition_engine';
 import * as decorators from './util/decorators';
 import { isObservable, isPromise } from './util/lang';
-export var /** @type {?} */ __core_private__ = {
+import * as viewEngine from './view/index';
+export var /** @type {?} */ __core_private__ = ({
     isDefaultChangeDetectionStrategy: constants.isDefaultChangeDetectionStrategy,
     ChangeDetectorStatus: constants.ChangeDetectorStatus,
     constructDependencies: reflective_provider.constructDependencies,
@@ -54,6 +56,7 @@ export var /** @type {?} */ __core_private__ = {
     registerModuleFactory: ng_module_factory_loader.registerModuleFactory,
     ViewType: view_type.ViewType,
     view_utils: view_utils,
+    viewEngine: viewEngine,
     ViewMetadata: metadata_view.ViewMetadata,
     DebugContext: debug_context.DebugContext,
     StaticNodeDebugInfo: debug_context.StaticNodeDebugInfo,
@@ -87,6 +90,7 @@ export var /** @type {?} */ __core_private__ = {
     isPromise: isPromise,
     isObservable: isObservable,
     AnimationTransition: AnimationTransition,
-    ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE
-};
+    ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE,
+    TransitionEngine: TransitionEngine
+}) /* TODO(misko): export these using omega names instead */;
 //# sourceMappingURL=core_private_export.js.map

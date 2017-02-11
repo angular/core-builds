@@ -8,7 +8,7 @@
 import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
 import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { parentDiIndex, resolveViewDefinition, rootRenderNodes, tokenKey } from './util';
+import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentDiIndex } from './util';
 var /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -194,7 +194,7 @@ var ViewContainerRef_ = (function () {
             var /** @type {?} */ view = this._view;
             var /** @type {?} */ elIndex = view.def.nodes[this._elIndex].parent;
             while (elIndex == null && view) {
-                elIndex = parentDiIndex(view);
+                elIndex = viewParentDiIndex(view);
                 view = view.parent;
             }
             return view ? new Injector_(view, elIndex) : this._view.root.injector;
@@ -233,7 +233,7 @@ var ViewContainerRef_ = (function () {
      * @return {?}
      */
     ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
-        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context);
+        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context || ({}));
         this.insert(viewRef, index);
         return viewRef;
     };

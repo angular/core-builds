@@ -10,6 +10,7 @@ import { Console } from './console';
 import { Reflector, reflector } from './reflection/reflection';
 import { ReflectorReader } from './reflection/reflector_reader';
 import { TestabilityRegistry } from './testability/testability';
+import { NoOpTransitionEngine, TransitionEngine } from './transition/transition_engine';
 /**
  * @return {?}
  */
@@ -21,6 +22,7 @@ var /** @type {?} */ _CORE_PLATFORM_PROVIDERS = [
     { provide: PlatformRef, useExisting: PlatformRef_ },
     { provide: Reflector, useFactory: _reflector, deps: [] },
     { provide: ReflectorReader, useExisting: Reflector },
+    { provide: TransitionEngine, useClass: NoOpTransitionEngine },
     TestabilityRegistry,
     Console,
 ];

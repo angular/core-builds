@@ -54,8 +54,7 @@ export declare enum ArgumentType {
  */
 export declare enum ViewFlags {
     None = 0,
-    DirectDom = 2,
-    OnPush = 4,
+    OnPush = 2,
 }
 export interface ComponentDefinition {
     id: string;
@@ -201,6 +200,7 @@ export declare enum DepFlags {
     None = 0,
     SkipSelf = 1,
     Optional = 2,
+    Value = 8,
 }
 export interface ProviderOutputDef {
     propName: string;
@@ -341,7 +341,7 @@ export declare function asQueryList(view: ViewData, index: number): QueryList<an
 export interface RootData {
     injector: Injector;
     projectableNodes: any[][];
-    element: any;
+    selectorOrNode: any;
     renderer: RendererV2;
     sanitizer: Sanitizer;
 }
@@ -369,6 +369,14 @@ export interface RendererV2 {
      * the caller can't rely on checking whether this is null or not.
      */
     nextSibling(node: any): any;
+    /**
+     * Used only in debug mode to serialize property changes to dom nodes as attributes.
+     */
+    setBindingDebugInfo(el: any, propertyName: string, propertyValue: string): void;
+    /**
+     * Used only in debug mode to serialize property changes to dom nodes as attributes.
+     */
+    removeBindingDebugInfo(el: any, propertyName: string): void;
     setAttribute(el: any, name: string, value: string): void;
     removeAttribute(el: any, name: string): void;
     addClass(el: any, name: string): void;

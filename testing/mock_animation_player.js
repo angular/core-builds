@@ -16,6 +16,7 @@ var MockAnimationPlayer = (function () {
         this.keyframes = keyframes;
         this._onDoneFns = [];
         this._onStartFns = [];
+        this._onDestroyFns = [];
         this._finished = false;
         this._destroyed = false;
         this._started = false;
@@ -40,6 +41,7 @@ var MockAnimationPlayer = (function () {
     MockAnimationPlayer.prototype.init = function () { this.log.push('init'); };
     MockAnimationPlayer.prototype.onDone = function (fn) { this._onDoneFns.push(fn); };
     MockAnimationPlayer.prototype.onStart = function (fn) { this._onStartFns.push(fn); };
+    MockAnimationPlayer.prototype.onDestroy = function (fn) { this._onDestroyFns.push(fn); };
     MockAnimationPlayer.prototype.hasStarted = function () { return this._started; };
     MockAnimationPlayer.prototype.play = function () {
         if (!this.hasStarted()) {
@@ -63,6 +65,8 @@ var MockAnimationPlayer = (function () {
             this._destroyed = true;
             this.finish();
             this.log.push('destroy');
+            this._onDestroyFns.forEach(function (fn) { return fn(); });
+            this._onDestroyFns = [];
         }
     };
     MockAnimationPlayer.prototype.setPosition = function (p) { };
