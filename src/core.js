@@ -37,4 +37,5 @@ export { AnimationPlayer } from './animation/animation_player';
 export { AnimationStyles } from './animation/animation_styles';
 export { AnimationKeyframe } from './animation/animation_keyframe';
 export { Sanitizer, SecurityContext } from './security';
+export { ɵAnimationGroupPlayer, ɵAnimationKeyframe, ɵNoOpAnimationPlayer, ɵAnimationSequencePlayer, ɵbalanceAnimationKeyframes, ɵclearStyles, ɵcollectAndResolveStyles, ɵprepareFinalAnimationStyles, ɵrenderStyles, ɵAnimationStyles, ɵAnimationTransition, ɵValueUnwrapper, ɵdevModeEqual, ɵChangeDetectorStatus, ɵComponentRef_, ɵCodegenComponentFactoryResolver, ɵDebugContext, ɵStaticNodeDebugInfo, ɵNgModuleInjector, ɵregisterModuleFactory, ɵTemplateRef_, ɵAppView, ɵDebugAppView, ɵViewContainer, ɵViewType, ɵreflector, ɵview_utils, ɵviewEngine } from './codegen_private_exports';
 //# sourceMappingURL=core.js.map

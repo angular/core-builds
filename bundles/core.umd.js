@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.7-e4e9dbe
+ * @license Angular v4.0.0-beta.7-269cf42
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1131,7 +1131,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-e4e9dbe');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-269cf42');
 
     /**
      * Inject decorator and metadata.
@@ -2068,10 +2068,13 @@
         /**
          * @param {?} name
          * @param {?} moduleUrl
+         * @param {?} members
          * @param {?} runtime
          * @return {?}
          */
-        ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { return runtime; };
+        ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+            return runtime;
+        };
         /**
          * @param {?} enumIdentifier
          * @param {?} name
@@ -2143,10 +2146,11 @@
          * @abstract
          * @param {?} name
          * @param {?} moduleUrl
+         * @param {?} members
          * @param {?} runtime
          * @return {?}
          */
-        ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { };
+        ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) { };
         /**
          * @abstract
          * @param {?} identifier
@@ -2245,11 +2249,12 @@
         /**
          * @param {?} name
          * @param {?} moduleUrl
+         * @param {?} members
          * @param {?} runtime
          * @return {?}
          */
-        Reflector.prototype.resolveIdentifier = function (name, moduleUrl, runtime) {
-            return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+        Reflector.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+            return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
         };
         /**
          * @param {?} identifier
@@ -17450,5 +17455,33 @@
     exports.keyframes = keyframes;
     exports.transition = transition;
     exports.trigger = trigger;
+    exports.ɵAnimationGroupPlayer = AnimationGroupPlayer;
+    exports.ɵAnimationKeyframe = AnimationKeyframe;
+    exports.ɵNoOpAnimationPlayer = NoOpAnimationPlayer;
+    exports.ɵAnimationSequencePlayer = AnimationSequencePlayer;
+    exports.ɵbalanceAnimationKeyframes = balanceAnimationKeyframes;
+    exports.ɵclearStyles = clearStyles;
+    exports.ɵcollectAndResolveStyles = collectAndResolveStyles;
+    exports.ɵprepareFinalAnimationStyles = prepareFinalAnimationStyles;
+    exports.ɵrenderStyles = renderStyles;
+    exports.ɵAnimationStyles = AnimationStyles;
+    exports.ɵAnimationTransition = AnimationTransition;
+    exports.ɵValueUnwrapper = ValueUnwrapper;
+    exports.ɵdevModeEqual = devModeEqual;
+    exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
+    exports.ɵComponentRef_ = ComponentRef_;
+    exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
+    exports.ɵDebugContext = DebugContext$1;
+    exports.ɵStaticNodeDebugInfo = StaticNodeDebugInfo;
+    exports.ɵNgModuleInjector = NgModuleInjector;
+    exports.ɵregisterModuleFactory = registerModuleFactory;
+    exports.ɵTemplateRef_ = TemplateRef_;
+    exports.ɵAppView = AppView;
+    exports.ɵDebugAppView = DebugAppView;
+    exports.ɵViewContainer = ViewContainer;
+    exports.ɵViewType = ViewType;
+    exports.ɵreflector = reflector;
+    exports.ɵview_utils = view_utils;
+    exports.ɵviewEngine = viewEngine;
 
 }));

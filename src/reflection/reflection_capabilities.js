@@ -267,10 +267,13 @@ var ReflectionCapabilities = (function () {
     /**
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { return runtime; };
+    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+        return runtime;
+    };
     /**
      * @param {?} enumIdentifier
      * @param {?} name

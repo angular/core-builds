@@ -87,11 +87,12 @@ var Reflector = (function (_super) {
     /**
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    Reflector.prototype.resolveIdentifier = function (name, moduleUrl, runtime) {
-        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+    Reflector.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
     };
     /**
      * @param {?} identifier

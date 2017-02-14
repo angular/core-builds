@@ -34,10 +34,11 @@ var ReflectorReader = (function () {
      * @abstract
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, runtime) { };
+    ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) { };
     /**
      * @abstract
      * @param {?} identifier
