@@ -7,8 +7,8 @@
  */
 import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
-import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentDiIndex } from './util';
+import { DepFlags, NodeFlags, Services, ViewState, asElementData, asProviderData } from './types';
+import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentElIndex } from './util';
 var /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -45,7 +45,7 @@ var ComponentFactory_ = (function () {
         var /** @type {?} */ len = viewDef.nodes.length;
         for (var /** @type {?} */ i = 0; i < len; i++) {
             var /** @type {?} */ nodeDef = viewDef.nodes[i];
-            if (nodeDef.provider && nodeDef.provider.component) {
+            if (nodeDef.flags & NodeFlags.HasComponent) {
                 componentNodeIndex = i;
                 break;
             }
@@ -194,7 +194,7 @@ var ViewContainerRef_ = (function () {
             var /** @type {?} */ view = this._view;
             var /** @type {?} */ elIndex = view.def.nodes[this._elIndex].parent;
             while (elIndex == null && view) {
-                elIndex = viewParentDiIndex(view);
+                elIndex = viewParentElIndex(view);
                 view = view.parent;
             }
             return view ? new Injector_(view, elIndex) : this._view.root.injector;

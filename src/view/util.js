@@ -22,6 +22,18 @@ export function tokenKey(token) {
     }
     return key;
 }
+var /** @type {?} */ unwrapCounter = 0;
+/**
+ * @param {?} value
+ * @return {?}
+ */
+export function unwrapValue(value) {
+    if (value instanceof WrappedValue) {
+        value = value.wrapped;
+        unwrapCounter++;
+    }
+    return value;
+}
 /**
  * @param {?} view
  * @param {?} def
@@ -31,7 +43,8 @@ export function tokenKey(token) {
  */
 export function checkBinding(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    return !!(view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value);
+    return unwrapCounter > 0 || !!(view.state & ViewState.FirstCheck) ||
+        !devModeEqual(oldValue, value);
 }
 /**
  * @param {?} view
@@ -42,7 +55,8 @@ export function checkBinding(view, def, bindingIdx, value) {
  */
 export function checkBindingNoChanges(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value)) {
+    if (unwrapCounter || (view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value)) {
+        unwrapCounter = 0;
         throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
     }
 }
@@ -55,15 +69,10 @@ export function checkBindingNoChanges(view, def, bindingIdx, value) {
  */
 export function checkAndUpdateBinding(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValues = view.oldValues;
-    if ((view.state & ViewState.FirstCheck) ||
+    if (unwrapCounter || (view.state & ViewState.FirstCheck) ||
         !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+        unwrapCounter = 0;
         oldValues[def.bindingIndex + bindingIdx] = value;
-        if (def.flags & NodeFlags.HasComponent) {
-            var /** @type {?} */ compView = asProviderData(view, def.index).componentView;
-            if (compView.def.flags & ViewFlags.OnPush) {
-                compView.state |= ViewState.ChecksEnabled;
-            }
-        }
         return true;
     }
     return false;
@@ -86,16 +95,6 @@ export function dispatchEvent(view, nodeIndex, eventName, event) {
     return Services.handleEvent(view, nodeIndex, eventName, event);
 }
 /**
- * @param {?} value
- * @return {?}
- */
-export function unwrapValue(value) {
-    if (value instanceof WrappedValue) {
-        value = value.wrapped;
-    }
-    return value;
-}
-/**
  * @param {?} view
  * @return {?}
  */
@@ -107,18 +106,20 @@ export function declaredViewContainer(view) {
     return undefined;
 }
 /**
- * for component views, this is the same as parentIndex.
+ * for component views, this is the host element.
  * for embedded views, this is the index of the parent node
  * that contains the view container.
  * @param {?} view
  * @return {?}
  */
-export function viewParentDiIndex(view) {
-    if (view.parent && view.context !== view.component) {
-        var /** @type {?} */ parentNodeDef = view.parent.def.nodes[view.parentIndex];
-        return parentNodeDef.parent;
+export function viewParentElIndex(view) {
+    var /** @type {?} */ parentView = view.parent;
+    if (parentView) {
+        return parentView.def.nodes[view.parentIndex].parent;
     }
-    return view.parentIndex;
+    else {
+        return null;
+    }
 }
 /**
  * @param {?} view
@@ -145,6 +146,8 @@ export function nodeValue(view, index) {
             return asElementData(view, def.index).renderElement;
         case NodeType.Text:
             return asTextData(view, def.index).renderText;
+        case NodeType.Directive:
+        case NodeType.Pipe:
         case NodeType.Provider:
             return asProviderData(view, def.index).instance;
     }
@@ -237,7 +240,10 @@ export function visitRootRenderNodes(view, action, parentNode, nextSibling, targ
     var /** @type {?} */ len = view.def.nodes.length;
     for (var /** @type {?} */ i = 0; i < len; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+        if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text ||
+            nodeDef.type === NodeType.NgContent) {
+            visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
+        }
         // jump to next sibling
         i += nodeDef.childCount;
     }
@@ -257,7 +263,7 @@ export function visitProjectedRenderNodes(view, ngContentIndex, action, parentNo
         compView = compView.parent;
     }
     var /** @type {?} */ hostView = compView.parent;
-    var /** @type {?} */ hostElDef = hostView.def.nodes[compView.parentIndex];
+    var /** @type {?} */ hostElDef = hostView.def.nodes[viewParentElIndex(compView)];
     var /** @type {?} */ startIndex = hostElDef.index + 1;
     var /** @type {?} */ endIndex = hostElDef.index + hostElDef.childCount;
     for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {

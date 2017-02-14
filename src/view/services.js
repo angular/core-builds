@@ -14,7 +14,7 @@ import { getQueryValue } from './query';
 import { createInjector } from './refs';
 import { DirectDomRenderer, LegacyRendererAdapter } from './renderer';
 import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
-import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentDiIndex } from './util';
+import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentElIndex } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
 import { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
 var /** @type {?} */ initialized = false;
@@ -39,7 +39,8 @@ export function initServicesIfNeeded() {
     Services.resolveDep = services.resolveDep;
     Services.createDebugContext = services.createDebugContext;
     Services.handleEvent = services.handleEvent;
-    Services.updateView = services.updateView;
+    Services.updateDirectives = services.updateDirectives;
+    Services.updateRenderer = services.updateRenderer;
 }
 /**
  * @return {?}
@@ -60,7 +61,10 @@ function createProdServices() {
         handleEvent: function (view, nodeIndex, eventName, event) {
             return view.def.handleEvent(view, nodeIndex, eventName, event);
         },
-        updateView: function (check, view) { return view.def.update(check, view); }
+        updateDirectives: function (check, view) {
+            return view.def.updateDirectives(check, view);
+        },
+        updateRenderer: function (check, view) { return view.def.updateRenderer(check, view); },
     };
 }
 /**
@@ -80,7 +84,8 @@ function createDebugServices() {
         resolveDep: resolveDep,
         createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
         handleEvent: debugHandleEvent,
-        updateView: debugUpdateView
+        updateDirectives: debugUpdateDirectives,
+        updateRenderer: debugUpdateRenderer
     };
 }
 /**
@@ -189,47 +194,83 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  * @param {?} view
  * @return {?}
  */
-function debugUpdateView(check, view) {
+function debugUpdateDirectives(check, view) {
     if (view.state & ViewState.Destroyed) {
         throw viewDestroyedError(_currentAction);
     }
-    debugSetCurrentNode(view, nextNodeIndexWithBinding(view, 0));
-    return view.def.update(debugCheckFn, view);
+    debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
+    return view.def.updateDirectives(debugCheckDirectivesFn, view);
     /**
      * @param {?} view
      * @param {?} nodeIndex
      * @param {?} argStyle
-     * @param {?=} v0
-     * @param {?=} v1
-     * @param {?=} v2
-     * @param {?=} v3
-     * @param {?=} v4
-     * @param {?=} v5
-     * @param {?=} v6
-     * @param {?=} v7
-     * @param {?=} v8
-     * @param {?=} v9
+     * @param {...?} values
      * @return {?}
      */
-    function debugCheckFn(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-        var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? v0 : [].slice.call(arguments, 3);
-        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
-            var /** @type {?} */ binding = nodeDef.bindings[i];
-            var /** @type {?} */ value = values[i];
-            if ((binding.type === BindingType.ElementProperty ||
-                binding.type === BindingType.ProviderProperty) &&
-                checkBinding(view, nodeDef, i, value)) {
-                var /** @type {?} */ elIndex = nodeDef.type === NodeType.Provider ? nodeDef.parent : nodeDef.index;
-                setBindingDebugInfo(view.root.renderer, asElementData(view, elIndex).renderElement, binding.nonMinifiedName, value);
-            }
+    function debugCheckDirectivesFn(view, nodeIndex, argStyle) {
+        var values = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            values[_i - 3] = arguments[_i];
         }
-        var /** @type {?} */ result = check(view, nodeIndex, /** @type {?} */ (argStyle), v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-        debugSetCurrentNode(view, nextNodeIndexWithBinding(view, nodeIndex));
+        var /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
+        debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
         return result;
     }
     ;
 }
+/**
+ * @param {?} check
+ * @param {?} view
+ * @return {?}
+ */
+function debugUpdateRenderer(check, view) {
+    if (view.state & ViewState.Destroyed) {
+        throw viewDestroyedError(_currentAction);
+    }
+    debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
+    return view.def.updateRenderer(debugCheckRenderNodeFn, view);
+    /**
+     * @param {?} view
+     * @param {?} nodeIndex
+     * @param {?} argStyle
+     * @param {...?} values
+     * @return {?}
+     */
+    function debugCheckRenderNodeFn(view, nodeIndex, argStyle) {
+        var values = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            values[_i - 3] = arguments[_i];
+        }
+        var /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
+        debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
+        return result;
+    }
+    ;
+}
+/**
+ * @param {?} delegate
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?} givenValues
+ * @return {?}
+ */
+function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
+    var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
+    var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
+        var /** @type {?} */ binding = nodeDef.bindings[i];
+        var /** @type {?} */ value = values[i];
+        if ((binding.type === BindingType.ElementProperty ||
+            binding.type === BindingType.DirectiveProperty) &&
+            checkBinding(view, nodeDef, i, value)) {
+            var /** @type {?} */ elIndex = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef.index;
+            setBindingDebugInfo(view.root.renderer, asElementData(view, elIndex).renderElement, binding.nonMinifiedName, value);
+        }
+    }
+    return ((delegate)).apply(void 0, [view, nodeIndex, argStyle].concat(givenValues));
+}
+;
 /**
  * @param {?} renderer
  * @param {?} renderNode
@@ -270,10 +311,25 @@ function camelCaseToDashCase(input) {
  * @param {?} nodeIndex
  * @return {?}
  */
-function nextNodeIndexWithBinding(view, nodeIndex) {
+function nextDirectiveWithBinding(view, nodeIndex) {
     for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.bindings && nodeDef.bindings.length) {
+        if (nodeDef.type === NodeType.Directive && nodeDef.bindings && nodeDef.bindings.length) {
+            return i;
+        }
+    }
+    return undefined;
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @return {?}
+ */
+function nextRenderNodeWithBinding(view, nodeIndex) {
+    for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
+        var /** @type {?} */ nodeDef = view.def.nodes[i];
+        if ((nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text) && nodeDef.bindings &&
+            nodeDef.bindings.length) {
             return i;
         }
     }
@@ -457,7 +513,7 @@ var DebugContext_ = (function () {
         }
         if (elIndex == null) {
             while (elIndex == null && elView) {
-                elIndex = viewParentDiIndex(elView);
+                elIndex = viewParentElIndex(elView);
                 elView = elView.parent;
             }
         }
@@ -520,7 +576,7 @@ var DebugContext_ = (function () {
             if (this.elDef) {
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.type === NodeType.Provider) {
+                    if (childDef.type === NodeType.Provider || childDef.type === NodeType.Directive) {
                         tokens.push(childDef.provider.token);
                     }
                     i += childDef.childCount;
@@ -541,7 +597,7 @@ var DebugContext_ = (function () {
                 collectReferences(this.elView, this.elDef, references);
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.type === NodeType.Provider) {
+                    if (childDef.type === NodeType.Provider || childDef.type === NodeType.Directive) {
                         collectReferences(this.elView, childDef, references);
                     }
                     i += childDef.childCount;
@@ -617,7 +673,7 @@ function findHostElement(view) {
         view = view.parent;
     }
     if (view.parent) {
-        var /** @type {?} */ hostData = asElementData(view.parent, view.parentIndex);
+        var /** @type {?} */ hostData = asElementData(view.parent, viewParentElIndex(view));
         return hostData;
     }
     return undefined;
@@ -658,6 +714,7 @@ function callWithDebugContext(action, fn, self, args) {
         if (isViewDebugError(e) || !_currentView) {
             throw e;
         }
+        _currentView.state |= ViewState.Errored;
         throw viewWrappedDebugError(e, getCurrentDebugContext());
     }
 }

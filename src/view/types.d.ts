@@ -1,11 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { PipeTransform } from '../change_detection/change_detection';
 import { Injector } from '../di';
 import { QueryList } from '../linker/query_list';
 import { ViewEncapsulation } from '../metadata/view';
@@ -13,7 +5,8 @@ import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
     flags: ViewFlags;
     component: ComponentDefinition;
-    update: ViewUpdateFn;
+    updateDirectives: ViewUpdateFn;
+    updateRenderer: ViewUpdateFn;
     handleEvent: ViewHandleEventFn;
     /**
      * Order: Depth first.
@@ -106,10 +99,12 @@ export interface NodeDef {
 export declare enum NodeType {
     Element = 0,
     Text = 1,
-    Provider = 2,
-    PureExpression = 3,
-    Query = 4,
-    NgContent = 5,
+    Directive = 2,
+    Provider = 3,
+    Pipe = 4,
+    PureExpression = 5,
+    Query = 6,
+    NgContent = 7,
 }
 /**
  * Bitmask for NodeDef.flags.
@@ -142,8 +137,8 @@ export declare enum BindingType {
     ElementClass = 1,
     ElementStyle = 2,
     ElementProperty = 3,
-    ProviderProperty = 4,
-    Interpolation = 5,
+    DirectiveProperty = 4,
+    TextInterpolation = 5,
     PureExpressionProperty = 6,
 }
 export declare enum QueryValueType {
@@ -179,7 +174,7 @@ export interface ProviderDef {
     tokenKey: string;
     value: any;
     deps: DepDef[];
-    outputs: ProviderOutputDef[];
+    outputs: DirectiveOutputDef[];
     component: ViewDefinitionFactory;
 }
 export declare enum ProviderType {
@@ -202,7 +197,7 @@ export declare enum DepFlags {
     Optional = 2,
     Value = 8,
 }
-export interface ProviderOutputDef {
+export interface DirectiveOutputDef {
     propName: string;
     eventName: string;
 }
@@ -212,7 +207,6 @@ export interface TextDef {
 }
 export interface PureExpressionDef {
     type: PureExpressionType;
-    pipeDep: DepDef;
 }
 export declare enum PureExpressionType {
     Array = 0,
@@ -328,7 +322,6 @@ export declare function asProviderData(view: ViewData, index: number): ProviderD
  */
 export interface PureExpressionData {
     value: any;
-    pipe: PipeTransform;
 }
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -416,7 +409,8 @@ export interface Services {
     resolveDep(view: ViewData, requestNodeIndex: number, elIndex: number, depDef: DepDef, notFoundValue?: any): any;
     createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
     handleEvent: ViewHandleEventFn;
-    updateView: ViewUpdateFn;
+    updateDirectives: ViewUpdateFn;
+    updateRenderer: ViewUpdateFn;
 }
 /**
  * This object is used to prevent cycles in the source files and to have a place where

@@ -1,17 +1,17 @@
 import { ElementData, NodeDef, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
 export declare function tokenKey(token: any): string;
+export declare function unwrapValue(value: any): any;
 export declare function checkBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
 export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function dispatchEvent(view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
-export declare function unwrapValue(value: any): any;
 export declare function declaredViewContainer(view: ViewData): ElementData;
 /**
- * for component views, this is the same as parentIndex.
+ * for component views, this is the host element.
  * for embedded views, this is the index of the parent node
  * that contains the view container.
  */
-export declare function viewParentDiIndex(view: ViewData): number;
+export declare function viewParentElIndex(view: ViewData): number;
 export declare function renderNode(view: ViewData, def: NodeDef): any;
 export declare function nodeValue(view: ViewData, index: number): any;
 export declare function queryIdIsReference(queryId: string): boolean;

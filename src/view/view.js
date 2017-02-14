@@ -8,24 +8,25 @@
 import { checkAndUpdateElementDynamic, checkAndUpdateElementInline, createElement } from './element';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
 import { appendNgContent } from './ng_content';
-import { callLifecycleHooksChildrenFirst, checkAndUpdateProviderDynamic, checkAndUpdateProviderInline, createProviderInstance } from './provider';
+import { callLifecycleHooksChildrenFirst, checkAndUpdateDirectiveDynamic, checkAndUpdateDirectiveInline, createDirectiveInstance, createPipeInstance, createProviderInstance } from './provider';
 import { checkAndUpdatePureExpressionDynamic, checkAndUpdatePureExpressionInline, createPureExpression } from './pure_expression';
 import { checkAndUpdateQuery, createQuery } from './query';
 import { checkAndUpdateTextDynamic, checkAndUpdateTextInline, createText } from './text';
 import { ArgumentType, NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList } from './types';
-import { checkBindingNoChanges, isComponentView, queryIdIsReference, resolveViewDefinition } from './util';
+import { checkBindingNoChanges, isComponentView, queryIdIsReference, resolveViewDefinition, viewParentElIndex } from './util';
 var /** @type {?} */ NOOP = function () { return undefined; };
 /**
  * @param {?} flags
  * @param {?} nodesWithoutIndices
- * @param {?=} update
+ * @param {?=} updateDirectives
+ * @param {?=} updateRenderer
  * @param {?=} handleEvent
  * @param {?=} compId
  * @param {?=} encapsulation
  * @param {?=} styles
  * @return {?}
  */
-export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compId, encapsulation, styles) {
+export function viewDef(flags, nodesWithoutIndices, updateDirectives, updateRenderer, handleEvent, compId, encapsulation, styles) {
     // clone nodes and set auto calculated values
     if (nodesWithoutIndices.length === 0) {
         throw new Error("Illegal State: Views without nodes are not allowed!");
@@ -78,7 +79,7 @@ export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compId,
         if (!currentParent) {
             lastRootNode = node;
         }
-        if (node.provider) {
+        if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
             currentParent.element.providerIndices[node.provider.tokenKey] = i;
         }
         if (node.query) {
@@ -102,7 +103,8 @@ export function viewDef(flags, nodesWithoutIndices, update, handleEvent, compId,
         nodeFlags: viewNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags: flags,
         nodes: nodes, reverseChildNodes: reverseChildNodes,
-        update: update || NOOP,
+        updateDirectives: updateDirectives || NOOP,
+        updateRenderer: updateRenderer || NOOP,
         handleEvent: handleEvent || NOOP,
         component: componentDef,
         bindingCount: viewBindingCount,
@@ -177,16 +179,16 @@ function validateNode(parent, node, nodeCount) {
             throw new Error("Illegal State: Last root node of a template can't have embedded views, at index " + node.index + "!");
         }
     }
-    if (node.provider) {
+    if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
         var /** @type {?} */ parentType = parent ? parent.type : null;
         if (parentType !== NodeType.Element) {
-            throw new Error("Illegal State: Provider nodes need to be children of elements or anchors, at index " + node.index + "!");
+            throw new Error("Illegal State: Provider/Directive nodes need to be children of elements or anchors, at index " + node.index + "!");
         }
     }
     if (node.query) {
         var /** @type {?} */ parentType = parent ? parent.type : null;
-        if (parentType !== NodeType.Provider) {
-            throw new Error("Illegal State: Query nodes need to be children of providers, at index " + node.index + "!");
+        if (parentType !== NodeType.Directive) {
+            throw new Error("Illegal State: Query nodes need to be children of directives, at index " + node.index + "!");
         }
     }
     if (node.childCount) {
@@ -308,7 +310,7 @@ function initView(view, component, context) {
 function createViewNodes(view) {
     var /** @type {?} */ renderHost;
     if (isComponentView(view)) {
-        renderHost = asElementData(view.parent, view.parentIndex).renderElement;
+        renderHost = asElementData(view.parent, viewParentElIndex(view)).renderElement;
     }
     var /** @type {?} */ def = view.def;
     var /** @type {?} */ nodes = view.nodes;
@@ -322,23 +324,36 @@ function createViewNodes(view) {
             case NodeType.Text:
                 nodes[i] = (createText(view, renderHost, nodeDef));
                 break;
-            case NodeType.Provider:
-                if (nodeDef.provider.component) {
+            case NodeType.Provider: {
+                var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                var /** @type {?} */ providerData = ({ componentView: undefined, instance: instance });
+                nodes[i] = (providerData);
+                break;
+            }
+            case NodeType.Pipe: {
+                var /** @type {?} */ instance = createPipeInstance(view, nodeDef);
+                var /** @type {?} */ providerData = ({ componentView: undefined, instance: instance });
+                nodes[i] = (providerData);
+                break;
+            }
+            case NodeType.Directive: {
+                if (nodeDef.flags & NodeFlags.HasComponent) {
                     // Components can inject a ChangeDetectorRef that needs a references to
                     // the component view. Therefore, we create the component view first
                     // and set the ProviderData in ViewData, and then instantiate the provider.
-                    var /** @type {?} */ componentView = createView(view.root, view, nodeDef.parent, resolveViewDefinition(nodeDef.provider.component));
+                    var /** @type {?} */ componentView = createView(view.root, view, nodeDef.index, resolveViewDefinition(nodeDef.provider.component));
                     var /** @type {?} */ providerData = ({ componentView: componentView, instance: undefined });
                     nodes[i] = (providerData);
-                    var /** @type {?} */ instance = providerData.instance = createProviderInstance(view, nodeDef);
+                    var /** @type {?} */ instance = providerData.instance = createDirectiveInstance(view, nodeDef);
                     initView(componentView, instance, instance);
                 }
                 else {
-                    var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                    var /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
                     var /** @type {?} */ providerData = ({ componentView: undefined, instance: instance });
                     nodes[i] = (providerData);
                 }
                 break;
+            }
             case NodeType.PureExpression:
                 nodes[i] = (createPureExpression(view, nodeDef));
                 break;
@@ -361,9 +376,10 @@ function createViewNodes(view) {
  * @return {?}
  */
 export function checkNoChangesView(view) {
-    Services.updateView(checkNoChangesNode, view);
+    Services.updateDirectives(checkNoChangesNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
     execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckNoChanges);
+    Services.updateRenderer(checkNoChangesNode, view);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
     execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckNoChanges);
 }
@@ -372,11 +388,12 @@ export function checkNoChangesView(view) {
  * @return {?}
  */
 export function checkAndUpdateView(view) {
-    Services.updateView(checkAndUpdateNode, view);
+    Services.updateDirectives(checkAndUpdateNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
         (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
+    Services.updateRenderer(checkAndUpdateNode, view);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
@@ -432,8 +449,8 @@ function checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v
             return checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
         case NodeType.Text:
             return checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-        case NodeType.Provider:
-            return checkAndUpdateProviderInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        case NodeType.Directive:
+            return checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
         case NodeType.PureExpression:
             return checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
@@ -451,8 +468,8 @@ function checkAndUpdateNodeDynamic(view, nodeIndex, values) {
             return checkAndUpdateElementDynamic(view, nodeDef, values);
         case NodeType.Text:
             return checkAndUpdateTextDynamic(view, nodeDef, values);
-        case NodeType.Provider:
-            return checkAndUpdateProviderDynamic(view, nodeDef, values);
+        case NodeType.Directive:
+            return checkAndUpdateDirectiveDynamic(view, nodeDef, values);
         case NodeType.PureExpression:
             return checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
     }
@@ -554,14 +571,14 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 export function destroyView(view) {
+    execEmbeddedViewsAction(view, ViewAction.Destroy);
+    execComponentViewsAction(view, ViewAction.Destroy);
     callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
     if (view.disposables) {
         for (var /** @type {?} */ i = 0; i < view.disposables.length; i++) {
             view.disposables[i]();
         }
     }
-    execComponentViewsAction(view, ViewAction.Destroy);
-    execEmbeddedViewsAction(view, ViewAction.Destroy);
     view.state |= ViewState.Destroyed;
 }
 var ViewAction = {};
