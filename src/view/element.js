@@ -8,7 +8,7 @@
 import { isDevMode } from '../application_ref';
 import { SecurityContext } from '../security';
 import { BindingType, NodeFlags, NodeType, asElementData } from './types';
-import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, resolveViewDefinition, sliceErrorStack, unwrapValue } from './util';
+import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, resolveViewDefinition, sliceErrorStack } from './util';
 /**
  * @param {?} flags
  * @param {?} matchedQueries
@@ -247,7 +247,6 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     if (!checkAndUpdateBinding(view, def, bindingIdx, value)) {
         return;
     }
-    value = unwrapValue(value);
     const /** @type {?} */ binding = def.bindings[bindingIdx];
     const /** @type {?} */ name = binding.name;
     const /** @type {?} */ renderNode = asElementData(view, def.index).renderElement;

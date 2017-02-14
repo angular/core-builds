@@ -5,37 +5,36 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { BindingType, DepFlags, NodeType, PureExpressionType, Services, asPureExpressionData } from './types';
-import { checkAndUpdateBinding, tokenKey, unwrapValue } from './util';
+import { BindingType, NodeType, PureExpressionType, asPureExpressionData } from './types';
+import { checkAndUpdateBinding } from './util';
 /**
- * @param {?} pipeToken
  * @param {?} argCount
  * @return {?}
  */
-export function purePipeDef(pipeToken, argCount) {
-    return _pureExpressionDef(PureExpressionType.Pipe, new Array(argCount), { token: pipeToken, tokenKey: tokenKey(pipeToken), flags: DepFlags.None });
+export function purePipeDef(argCount) {
+    // argCount + 1 to include the pipe as first arg
+    return _pureExpressionDef(PureExpressionType.Pipe, new Array(argCount + 1));
 }
 /**
  * @param {?} argCount
  * @return {?}
  */
 export function pureArrayDef(argCount) {
-    return _pureExpressionDef(PureExpressionType.Array, new Array(argCount), undefined);
+    return _pureExpressionDef(PureExpressionType.Array, new Array(argCount));
 }
 /**
  * @param {?} propertyNames
  * @return {?}
  */
 export function pureObjectDef(propertyNames) {
-    return _pureExpressionDef(PureExpressionType.Object, propertyNames, undefined);
+    return _pureExpressionDef(PureExpressionType.Object, propertyNames);
 }
 /**
  * @param {?} type
  * @param {?} propertyNames
- * @param {?} pipeDep
  * @return {?}
  */
-function _pureExpressionDef(type, propertyNames, pipeDep) {
+function _pureExpressionDef(type, propertyNames) {
     const /** @type {?} */ bindings = new Array(propertyNames.length);
     for (let /** @type {?} */ i = 0; i < propertyNames.length; i++) {
         const /** @type {?} */ prop = propertyNames[i];
@@ -66,7 +65,7 @@ function _pureExpressionDef(type, propertyNames, pipeDep) {
         element: undefined,
         provider: undefined,
         text: undefined,
-        pureExpression: { type, pipeDep },
+        pureExpression: { type },
         query: undefined,
         ngContent: undefined
     };
@@ -77,10 +76,7 @@ function _pureExpressionDef(type, propertyNames, pipeDep) {
  * @return {?}
  */
 export function createPureExpression(view, def) {
-    const /** @type {?} */ pipe = def.pureExpression.pipeDep ?
-        Services.resolveDep(view, def.index, def.parent, def.pureExpression.pipeDep) :
-        undefined;
-    return { value: undefined, pipe };
+    return { value: undefined };
 }
 /**
  * @param {?} view
@@ -135,16 +131,6 @@ export function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4
     }
     const /** @type {?} */ data = asPureExpressionData(view, def.index);
     if (changed) {
-        v0 = unwrapValue(v0);
-        v1 = unwrapValue(v1);
-        v2 = unwrapValue(v2);
-        v3 = unwrapValue(v3);
-        v4 = unwrapValue(v4);
-        v5 = unwrapValue(v5);
-        v6 = unwrapValue(v6);
-        v7 = unwrapValue(v7);
-        v8 = unwrapValue(v8);
-        v9 = unwrapValue(v9);
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
@@ -200,36 +186,37 @@ export function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4
                 }
                 break;
             case PureExpressionType.Pipe:
+                const /** @type {?} */ pipe = v0;
                 switch (bindings.length) {
                     case 10:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+                        value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8, v9);
                         break;
                     case 9:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7, v8);
+                        value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8);
                         break;
                     case 8:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6, v7);
+                        value = pipe.transform(v1, v2, v3, v4, v5, v6, v7);
                         break;
                     case 7:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4, v5, v6);
+                        value = pipe.transform(v1, v2, v3, v4, v5, v6);
                         break;
                     case 6:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4, v5);
+                        value = pipe.transform(v1, v2, v3, v4, v5);
                         break;
                     case 5:
-                        value = data.pipe.transform(v0, v1, v2, v3, v4);
+                        value = pipe.transform(v1, v2, v3, v4);
                         break;
                     case 4:
-                        value = data.pipe.transform(v0, v1, v2, v3);
+                        value = pipe.transform(v1, v2, v3);
                         break;
                     case 3:
-                        value = data.pipe.transform(v0, v1, v2);
+                        value = pipe.transform(v1, v2);
                         break;
                     case 2:
-                        value = data.pipe.transform(v0, v1);
+                        value = pipe.transform(v1);
                         break;
                     case 1:
-                        value = data.pipe.transform(v0);
+                        value = pipe.transform(v0);
                         break;
                 }
                 break;
@@ -259,23 +246,18 @@ export function checkAndUpdatePureExpressionDynamic(view, def, values) {
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
-                value = new Array(values.length);
-                for (let /** @type {?} */ i = 0; i < values.length; i++) {
-                    value[i] = unwrapValue(values[i]);
-                }
+                value = values;
                 break;
             case PureExpressionType.Object:
                 value = {};
                 for (let /** @type {?} */ i = 0; i < values.length; i++) {
-                    value[bindings[i].name] = unwrapValue(values[i]);
+                    value[bindings[i].name] = values[i];
                 }
                 break;
             case PureExpressionType.Pipe:
-                const /** @type {?} */ params = new Array(values.length);
-                for (let /** @type {?} */ i = 0; i < values.length; i++) {
-                    params[i] = unwrapValue(values[i]);
-                }
-                value = ((data.pipe.transform))(...params);
+                const /** @type {?} */ pipe = values[0];
+                const /** @type {?} */ params = values.slice(1);
+                value = ((pipe.transform))(...params);
                 break;
         }
         data.value = value;

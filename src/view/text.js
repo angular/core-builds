@@ -7,7 +7,7 @@
  */
 import { isDevMode } from '../application_ref';
 import { BindingType, NodeType, asElementData, asTextData } from './types';
-import { checkAndUpdateBinding, sliceErrorStack, unwrapValue } from './util';
+import { checkAndUpdateBinding, sliceErrorStack } from './util';
 /**
  * @param {?} ngContentIndex
  * @param {?} constants
@@ -19,7 +19,7 @@ export function textDef(ngContentIndex, constants) {
     const /** @type {?} */ bindings = new Array(constants.length - 1);
     for (let /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
-            type: BindingType.Interpolation,
+            type: BindingType.TextInterpolation,
             name: undefined,
             nonMinifiedName: undefined,
             securityContext: undefined,
@@ -178,7 +178,6 @@ export function checkAndUpdateTextDynamic(view, def, values) {
  * @return {?}
  */
 function _addInterpolationPart(value, binding) {
-    value = unwrapValue(value);
     const /** @type {?} */ valueStr = value != null ? value.toString() : '';
     return valueStr + binding.suffix;
 }

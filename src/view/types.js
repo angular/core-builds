@@ -18,13 +18,17 @@ ViewFlags[ViewFlags.OnPush] = "OnPush";
 export let NodeType = {};
 NodeType.Element = 0;
 NodeType.Text = 1;
-NodeType.Provider = 2;
-NodeType.PureExpression = 3;
-NodeType.Query = 4;
-NodeType.NgContent = 5;
+NodeType.Directive = 2;
+NodeType.Provider = 3;
+NodeType.Pipe = 4;
+NodeType.PureExpression = 5;
+NodeType.Query = 6;
+NodeType.NgContent = 7;
 NodeType[NodeType.Element] = "Element";
 NodeType[NodeType.Text] = "Text";
+NodeType[NodeType.Directive] = "Directive";
 NodeType[NodeType.Provider] = "Provider";
+NodeType[NodeType.Pipe] = "Pipe";
 NodeType[NodeType.PureExpression] = "PureExpression";
 NodeType[NodeType.Query] = "Query";
 NodeType[NodeType.NgContent] = "NgContent";
@@ -62,15 +66,15 @@ BindingType.ElementAttribute = 0;
 BindingType.ElementClass = 1;
 BindingType.ElementStyle = 2;
 BindingType.ElementProperty = 3;
-BindingType.ProviderProperty = 4;
-BindingType.Interpolation = 5;
+BindingType.DirectiveProperty = 4;
+BindingType.TextInterpolation = 5;
 BindingType.PureExpressionProperty = 6;
 BindingType[BindingType.ElementAttribute] = "ElementAttribute";
 BindingType[BindingType.ElementClass] = "ElementClass";
 BindingType[BindingType.ElementStyle] = "ElementStyle";
 BindingType[BindingType.ElementProperty] = "ElementProperty";
-BindingType[BindingType.ProviderProperty] = "ProviderProperty";
-BindingType[BindingType.Interpolation] = "Interpolation";
+BindingType[BindingType.DirectiveProperty] = "DirectiveProperty";
+BindingType[BindingType.TextInterpolation] = "TextInterpolation";
 BindingType[BindingType.PureExpressionProperty] = "PureExpressionProperty";
 export let QueryValueType = {};
 QueryValueType.ElementRef = 0;
@@ -261,6 +265,7 @@ export const /** @type {?} */ Services = {
     resolveDep: undefined,
     createDebugContext: undefined,
     handleEvent: undefined,
-    updateView: undefined,
+    updateDirectives: undefined,
+    updateRenderer: undefined,
 };
 //# sourceMappingURL=types.js.map

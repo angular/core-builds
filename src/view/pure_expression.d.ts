@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { NodeDef, PureExpressionData, ViewData } from './types';
-export declare function purePipeDef(pipeToken: any, argCount: number): NodeDef;
+export declare function purePipeDef(argCount: number): NodeDef;
 export declare function pureArrayDef(argCount: number): NodeDef;
 export declare function pureObjectDef(propertyNames: string[]): NodeDef;
 export declare function createPureExpression(view: ViewData, def: NodeDef): PureExpressionData;

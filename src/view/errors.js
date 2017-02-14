@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ERROR_DEBUG_CONTEXT, ERROR_ORIGINAL_ERROR, getDebugContext } from '../errors';
-import { ViewState } from './types';
 /**
  * @param {?} context
  * @param {?} oldValue
@@ -42,7 +41,6 @@ export function viewDebugError(msg, context) {
     const /** @type {?} */ err = new Error(msg);
     ((err))[ERROR_DEBUG_CONTEXT] = context;
     err.stack = context.source;
-    context.view.state |= ViewState.Errored;
     return err;
 }
 /**

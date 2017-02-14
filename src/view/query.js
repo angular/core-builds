@@ -9,7 +9,7 @@ import { ElementRef } from '../linker/element_ref';
 import { QueryList } from '../linker/query_list';
 import { createTemplateRef, createViewContainerRef } from './refs';
 import { NodeFlags, NodeType, QueryBindingType, QueryValueType, asElementData, asProviderData, asQueryList } from './types';
-import { declaredViewContainer } from './util';
+import { declaredViewContainer, viewParentElIndex } from './util';
 /**
  * @param {?} flags
  * @param {?} id
@@ -59,16 +59,18 @@ export function createQuery() {
  * @return {?}
  */
 export function dirtyParentQuery(queryId, view) {
-    let /** @type {?} */ nodeIndex = view.parentIndex;
+    let /** @type {?} */ elIndex = viewParentElIndex(view);
     view = view.parent;
     let /** @type {?} */ queryIdx;
     while (view) {
-        const /** @type {?} */ elementDef = view.def.nodes[nodeIndex];
-        queryIdx = elementDef.element.providerIndices[queryId];
-        if (queryIdx != null) {
-            break;
+        if (elIndex != null) {
+            const /** @type {?} */ elementDef = view.def.nodes[elIndex];
+            queryIdx = elementDef.element.providerIndices[queryId];
+            if (queryIdx != null) {
+                break;
+            }
         }
-        nodeIndex = view.parentIndex;
+        elIndex = viewParentElIndex(view);
         view = view.parent;
     }
     if (!view) {
