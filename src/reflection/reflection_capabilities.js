@@ -258,10 +258,13 @@ export class ReflectionCapabilities {
     /**
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    resolveIdentifier(name, moduleUrl, runtime) { return runtime; }
+    resolveIdentifier(name, moduleUrl, members, runtime) {
+        return runtime;
+    }
     /**
      * @param {?} enumIdentifier
      * @param {?} name

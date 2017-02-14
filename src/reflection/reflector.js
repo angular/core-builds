@@ -80,11 +80,12 @@ export class Reflector extends ReflectorReader {
     /**
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    resolveIdentifier(name, moduleUrl, runtime) {
-        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, runtime);
+    resolveIdentifier(name, moduleUrl, members, runtime) {
+        return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
     }
     /**
      * @param {?} identifier

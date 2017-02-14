@@ -32,10 +32,11 @@ export class ReflectorReader {
      * @abstract
      * @param {?} name
      * @param {?} moduleUrl
+     * @param {?} members
      * @param {?} runtime
      * @return {?}
      */
-    resolveIdentifier(name, moduleUrl, runtime) { }
+    resolveIdentifier(name, moduleUrl, members, runtime) { }
     /**
      * @abstract
      * @param {?} identifier
