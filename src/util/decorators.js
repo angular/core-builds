@@ -144,6 +144,7 @@ function applyParams(fnOrArray, key) {
  *   }
  * });
  * ```
+ * @suppress {globalThis}
  * \@stable
  * @param {?} clsDef
  * @return {?}
@@ -175,6 +176,7 @@ export function Class(clsDef) {
     return (constructor);
 }
 /**
+ * @suppress {globalThis}
  * @param {?} name
  * @param {?} props
  * @param {?=} parentClass

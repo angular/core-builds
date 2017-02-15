@@ -144,9 +144,13 @@ export interface TypeDecorator {
  *   }
  * });
  * ```
+ * @suppress {globalThis}
  * @stable
  */
 export declare function Class(clsDef: ClassDefinition): Type<any>;
+/**
+ * @suppress {globalThis}
+ */
 export declare function makeDecorator(name: string, props: {
     [name: string]: any;
 }, parentClass?: any, chainFn?: (fn: Function) => void): (...args: any[]) => (cls: any) => any;
