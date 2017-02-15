@@ -5,6 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { InjectionToken } from '../di';
+/**
+ * Provide a concrete implementation of {@link RendererV2}
+ *
+ * @experimental
+ */
+export var /** @type {?} */ RENDERER_V2_DIRECT = new InjectionToken('Renderer V2');
 var RenderComponentType = (function () {
     /**
      * @param {?} id
@@ -235,6 +242,221 @@ var Renderer = (function () {
     return Renderer;
 }());
 export { Renderer };
+/**
+ * \@experimental
+ * @abstract
+ */
+var RendererV2 = (function () {
+    function RendererV2() {
+    }
+    /**
+     * @abstract
+     * @param {?} name
+     * @param {?=} namespace
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    RendererV2.prototype.createElement = function (name, namespace, debugInfo) { };
+    /**
+     * @abstract
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    RendererV2.prototype.createComment = function (value, debugInfo) { };
+    /**
+     * @abstract
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    RendererV2.prototype.createText = function (value, debugInfo) { };
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */
+    RendererV2.prototype.appendChild = function (parent, newChild) { };
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */
+    RendererV2.prototype.insertBefore = function (parent, newChild, refChild) { };
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */
+    RendererV2.prototype.removeChild = function (parent, oldChild) { };
+    /**
+     * @abstract
+     * @param {?} selectorOrNode
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    RendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */
+    RendererV2.prototype.parentNode = function (node) { };
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */
+    RendererV2.prototype.nextSibling = function (node) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */
+    RendererV2.prototype.setAttribute = function (el, name, value, namespace) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    RendererV2.prototype.removeAttribute = function (el, name, namespace) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    RendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    RendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    RendererV2.prototype.addClass = function (el, name) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    RendererV2.prototype.removeClass = function (el, name) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
+     * @return {?}
+     */
+    RendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} hasVendorPrefix
+     * @return {?}
+     */
+    RendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) { };
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    RendererV2.prototype.setProperty = function (el, name, value) { };
+    /**
+     * @abstract
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */
+    RendererV2.prototype.setText = function (node, value) { };
+    /**
+     * @abstract
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */
+    RendererV2.prototype.listen = function (target, eventName, callback) { };
+    return RendererV2;
+}());
+export { RendererV2 };
+/**
+ * @abstract
+ */
+var RenderDebugContext = (function () {
+    function RenderDebugContext() {
+    }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.injector = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.component = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.providerTokens = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.references = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.context = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.source = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.componentRenderElement = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RenderDebugContext.prototype.renderNode = function () { };
+    return RenderDebugContext;
+}());
+export { RenderDebugContext };
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *

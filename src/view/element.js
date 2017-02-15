@@ -156,7 +156,14 @@ export function createElement(view, renderHost, def) {
     var /** @type {?} */ el;
     if (view.parent || !rootSelectorOrNode) {
         var /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
-        el = elDef.name ? renderer.createElement(elDef.name) : renderer.createComment('');
+        if (elDef.name) {
+            // TODO(vicb): move the namespace to the node definition
+            var /** @type {?} */ nsAndName = splitNamespace(elDef.name);
+            el = renderer.createElement(nsAndName[1], nsAndName[0]);
+        }
+        else {
+            el = renderer.createComment('');
+        }
         if (parentNode) {
             renderer.appendChild(parentNode, el);
         }
@@ -166,7 +173,9 @@ export function createElement(view, renderHost, def) {
     }
     if (elDef.attrs) {
         for (var /** @type {?} */ attrName in elDef.attrs) {
-            renderer.setAttribute(el, attrName, elDef.attrs[attrName]);
+            // TODO(vicb): move the namespace to the node definition
+            var /** @type {?} */ nsAndName = splitNamespace(attrName);
+            renderer.setAttribute(el, nsAndName[1], elDef.attrs[attrName], nsAndName[0]);
         }
     }
     if (elDef.outputs.length) {
@@ -285,11 +294,13 @@ function setElementAttribute(view, binding, renderNode, name, value) {
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     renderValue = renderValue != null ? renderValue.toString() : null;
     var /** @type {?} */ renderer = view.root.renderer;
+    // TODO(vicb): move the namespace to the node definition
+    var /** @type {?} */ nsAndName = splitNamespace(name);
     if (value != null) {
-        renderer.setAttribute(renderNode, name, renderValue);
+        renderer.setAttribute(renderNode, nsAndName[1], renderValue, nsAndName[0]);
     }
     else {
-        renderer.removeAttribute(renderNode, name);
+        renderer.removeAttribute(renderNode, nsAndName[1], nsAndName[0]);
     }
 }
 /**
@@ -330,10 +341,10 @@ function setElementStyle(view, binding, renderNode, name, value) {
     }
     var /** @type {?} */ renderer = view.root.renderer;
     if (renderValue != null) {
-        renderer.setStyle(renderNode, name, renderValue);
+        renderer.setStyle(renderNode, name, renderValue, false, false);
     }
     else {
-        renderer.removeStyle(renderNode, name);
+        renderer.removeStyle(renderNode, name, false);
     }
 }
 /**
@@ -348,5 +359,17 @@ function setElementProperty(view, binding, renderNode, name, value) {
     var /** @type {?} */ securityContext = binding.securityContext;
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     view.root.renderer.setProperty(renderNode, name, renderValue);
+}
+var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+/**
+ * @param {?} name
+ * @return {?}
+ */
+function splitNamespace(name) {
+    if (name[0] === ':') {
+        var /** @type {?} */ match = name.match(NS_PREFIX_RE);
+        return [match[1], match[2]];
+    }
+    return ['', name];
 }
 //# sourceMappingURL=element.js.map

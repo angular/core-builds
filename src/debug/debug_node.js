@@ -159,18 +159,35 @@ var DebugElement = (function (_super) {
      * @return {?}
      */
     DebugElement.prototype.insertChildrenAfter = function (child, newChildren) {
+        var _this = this;
         var /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
-            var /** @type {?} */ previousChildren = this.childNodes.slice(0, siblingIndex + 1);
-            var /** @type {?} */ nextChildren = this.childNodes.slice(siblingIndex + 1);
-            this.childNodes = previousChildren.concat(newChildren, nextChildren);
-            for (var /** @type {?} */ i = 0; i < newChildren.length; ++i) {
-                var /** @type {?} */ newChild = newChildren[i];
-                if (newChild.parent) {
-                    newChild.parent.removeChild(newChild);
+            (_a = this.childNodes).splice.apply(_a, [siblingIndex + 1, 0].concat(newChildren));
+            newChildren.forEach(function (c) {
+                if (c.parent) {
+                    c.parent.removeChild(c);
                 }
-                newChild.parent = this;
+                c.parent = _this;
+            });
+        }
+        var _a;
+    };
+    /**
+     * @param {?} refChild
+     * @param {?} newChild
+     * @return {?}
+     */
+    DebugElement.prototype.insertBefore = function (refChild, newChild) {
+        var /** @type {?} */ refIndex = this.childNodes.indexOf(refChild);
+        if (refIndex === -1) {
+            this.addChild(newChild);
+        }
+        else {
+            if (newChild.parent) {
+                newChild.parent.removeChild(newChild);
             }
+            newChild.parent = this;
+            this.childNodes.splice(refIndex, 0, newChild);
         }
     };
     /**

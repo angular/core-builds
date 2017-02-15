@@ -10,6 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+import { RenderDebugContext } from '../render/api';
 export var ArgumentType = {};
 ArgumentType.Inline = 0;
 ArgumentType.Dynamic = 1;
@@ -197,55 +198,6 @@ export function asPureExpressionData(view, index) {
 export function asQueryList(view, index) {
     return (view.nodes[index]);
 }
-/**
- * @abstract
- */
-var RenderDebugContext = (function () {
-    function RenderDebugContext() {
-    }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.injector = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.component = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.providerTokens = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.references = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.context = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.source = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.componentRenderElement = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.renderNode = function () { };
-    return RenderDebugContext;
-}());
-export { RenderDebugContext };
 /**
  * @abstract
  */

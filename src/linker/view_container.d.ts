@@ -29,7 +29,7 @@ export declare class ViewContainer {
     destroyNestedViews(): void;
     visitNestedViewRootNodes<C>(cb: (node: any, ctx: C) => void, c: C): void;
     mapNestedViews(nestedViewClass: any, callback: Function): any[];
-    moveView(view: AppView<any>, currentIndex: number): void;
+    moveView(view: AppView<any>, toIndex: number): void;
     attachView(view: AppView<any>, viewIndex: number): void;
     detachView(viewIndex: number): AppView<any>;
 }

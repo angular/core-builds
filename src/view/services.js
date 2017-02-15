@@ -6,13 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isDevMode } from '../application_ref';
-import * as v1renderer from '../render/api';
+import { RendererV2 } from '../render/api';
 import { Sanitizer } from '../security';
 import { isViewDebugError, viewDestroyedError, viewWrappedDebugError } from './errors';
 import { resolveDep } from './provider';
 import { getQueryValue } from './query';
 import { createInjector } from './refs';
-import { DirectDomRenderer, LegacyRendererAdapter } from './renderer';
 import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
 import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentElIndex } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
@@ -126,10 +125,7 @@ function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def
  */
 function createRootData(injector, projectableNodes, rootSelectorOrNode) {
     var /** @type {?} */ sanitizer = injector.get(Sanitizer);
-    // TODO(tbosch): once the new renderer interface is implemented via platform-browser,
-    // just get it via the injector and drop LegacyRendererAdapter and DirectDomRenderer.
-    var /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(v1renderer.RootRenderer)) :
-        new DirectDomRenderer();
+    var /** @type {?} */ renderer = injector.get(RendererV2);
     var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
     return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
 }
@@ -245,7 +241,6 @@ function debugUpdateRenderer(check, view) {
         debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         return result;
     }
-    ;
 }
 /**
  * @param {?} delegate
@@ -344,10 +339,11 @@ var DebugRenderer = (function () {
     }
     /**
      * @param {?} name
+     * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer.prototype.createElement = function (name) {
-        return this._delegate.createElement(name, getCurrentDebugContext());
+    DebugRenderer.prototype.createElement = function (name, namespace) {
+        return this._delegate.createElement(name, namespace, getCurrentDebugContext());
     };
     /**
      * @param {?} value
@@ -409,17 +405,21 @@ var DebugRenderer = (function () {
      * @param {?} el
      * @param {?} name
      * @param {?} value
+     * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer.prototype.setAttribute = function (el, name, value) {
-        return this._delegate.setAttribute(el, name, value);
+    DebugRenderer.prototype.setAttribute = function (el, name, value, namespace) {
+        return this._delegate.setAttribute(el, name, value, namespace);
     };
     /**
      * @param {?} el
      * @param {?} name
+     * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer.prototype.removeAttribute = function (el, name) { return this._delegate.removeAttribute(el, name); };
+    DebugRenderer.prototype.removeAttribute = function (el, name, namespace) {
+        return this._delegate.removeAttribute(el, name, namespace);
+    };
     /**
      * @param {?} el
      * @param {?} propertyName
@@ -453,17 +453,22 @@ var DebugRenderer = (function () {
      * @param {?} el
      * @param {?} style
      * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
      * @return {?}
      */
-    DebugRenderer.prototype.setStyle = function (el, style, value) {
-        return this._delegate.setStyle(el, style, value);
+    DebugRenderer.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+        return this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
     };
     /**
      * @param {?} el
      * @param {?} style
+     * @param {?} hasVendorPrefix
      * @return {?}
      */
-    DebugRenderer.prototype.removeStyle = function (el, style) { return this._delegate.removeStyle(el, style); };
+    DebugRenderer.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+        return this._delegate.removeStyle(el, style, hasVendorPrefix);
+    };
     /**
      * @param {?} el
      * @param {?} name

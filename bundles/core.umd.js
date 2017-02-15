@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.7-b4d444a
+ * @license Angular v4.0.0-beta.7-bb9c7ae
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1133,7 +1133,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-b4d444a');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-bb9c7ae');
 
     /**
      * Inject decorator and metadata.
@@ -5712,12 +5712,11 @@
     var /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
     /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
+     * Provide a concrete implementation of {@link RendererV2}
      *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
+     * @experimental
      */
+    var /** @type {?} */ RENDERER_V2_DIRECT = new InjectionToken('Renderer V2');
     var RenderComponentType = (function () {
         /**
          * @param {?} id
@@ -5930,6 +5929,219 @@
          */
         Renderer.prototype.animate = function (element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { };
         return Renderer;
+    }());
+    /**
+     * \@experimental
+     * @abstract
+     */
+    var RendererV2 = (function () {
+        function RendererV2() {
+        }
+        /**
+         * @abstract
+         * @param {?} name
+         * @param {?=} namespace
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        RendererV2.prototype.createElement = function (name, namespace, debugInfo) { };
+        /**
+         * @abstract
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        RendererV2.prototype.createComment = function (value, debugInfo) { };
+        /**
+         * @abstract
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        RendererV2.prototype.createText = function (value, debugInfo) { };
+        /**
+         * @abstract
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        RendererV2.prototype.appendChild = function (parent, newChild) { };
+        /**
+         * @abstract
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        RendererV2.prototype.insertBefore = function (parent, newChild, refChild) { };
+        /**
+         * @abstract
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        RendererV2.prototype.removeChild = function (parent, oldChild) { };
+        /**
+         * @abstract
+         * @param {?} selectorOrNode
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        RendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
+        /**
+         * Attention: On WebWorkers, this will always return a value,
+         * as we are asking for a result synchronously. I.e.
+         * the caller can't rely on checking whether this is null or not.
+         * @abstract
+         * @param {?} node
+         * @return {?}
+         */
+        RendererV2.prototype.parentNode = function (node) { };
+        /**
+         * Attention: On WebWorkers, this will always return a value,
+         * as we are asking for a result synchronously. I.e.
+         * the caller can't rely on checking whether this is null or not.
+         * @abstract
+         * @param {?} node
+         * @return {?}
+         */
+        RendererV2.prototype.nextSibling = function (node) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @param {?=} namespace
+         * @return {?}
+         */
+        RendererV2.prototype.setAttribute = function (el, name, value, namespace) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} name
+         * @param {?=} namespace
+         * @return {?}
+         */
+        RendererV2.prototype.removeAttribute = function (el, name, namespace) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} propertyName
+         * @param {?} propertyValue
+         * @return {?}
+         */
+        RendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} propertyName
+         * @return {?}
+         */
+        RendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        RendererV2.prototype.addClass = function (el, name) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        RendererV2.prototype.removeClass = function (el, name) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @param {?} hasVendorPrefix
+         * @param {?} hasImportant
+         * @return {?}
+         */
+        RendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} style
+         * @param {?} hasVendorPrefix
+         * @return {?}
+         */
+        RendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) { };
+        /**
+         * @abstract
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        RendererV2.prototype.setProperty = function (el, name, value) { };
+        /**
+         * @abstract
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        RendererV2.prototype.setText = function (node, value) { };
+        /**
+         * @abstract
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        RendererV2.prototype.listen = function (target, eventName, callback) { };
+        return RendererV2;
+    }());
+    /**
+     * @abstract
+     */
+    var RenderDebugContext = (function () {
+        function RenderDebugContext() {
+        }
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.injector = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.component = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.providerTokens = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.references = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.context = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.source = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.componentRenderElement = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        RenderDebugContext.prototype.renderNode = function () { };
+        return RenderDebugContext;
     }());
     /**
      * Injectable service that provides a low-level interface for modifying the UI.
@@ -9111,7 +9323,7 @@
              */
             get: function () {
                 var /** @type {?} */ views = this._element.nestedViews;
-                return isPresent(views) ? views.length : 0;
+                return views ? views.length : 0;
             },
             enumerable: true,
             configurable: true
@@ -9583,18 +9795,35 @@
          * @return {?}
          */
         DebugElement.prototype.insertChildrenAfter = function (child, newChildren) {
+            var _this = this;
             var /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
             if (siblingIndex !== -1) {
-                var /** @type {?} */ previousChildren = this.childNodes.slice(0, siblingIndex + 1);
-                var /** @type {?} */ nextChildren = this.childNodes.slice(siblingIndex + 1);
-                this.childNodes = previousChildren.concat(newChildren, nextChildren);
-                for (var /** @type {?} */ i = 0; i < newChildren.length; ++i) {
-                    var /** @type {?} */ newChild = newChildren[i];
-                    if (newChild.parent) {
-                        newChild.parent.removeChild(newChild);
+                (_a = this.childNodes).splice.apply(_a, [siblingIndex + 1, 0].concat(newChildren));
+                newChildren.forEach(function (c) {
+                    if (c.parent) {
+                        c.parent.removeChild(c);
                     }
-                    newChild.parent = this;
+                    c.parent = _this;
+                });
+            }
+            var _a;
+        };
+        /**
+         * @param {?} refChild
+         * @param {?} newChild
+         * @return {?}
+         */
+        DebugElement.prototype.insertBefore = function (refChild, newChild) {
+            var /** @type {?} */ refIndex = this.childNodes.indexOf(refChild);
+            if (refIndex === -1) {
+                this.addChild(newChild);
+            }
+            else {
+                if (newChild.parent) {
+                    newChild.parent.removeChild(newChild);
                 }
+                newChild.parent = this;
+                this.childNodes.splice(refIndex, 0, newChild);
             }
         };
         /**
@@ -10218,54 +10447,6 @@
     /**
      * @abstract
      */
-    var RenderDebugContext = (function () {
-        function RenderDebugContext() {
-        }
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.injector = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.component = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.providerTokens = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.references = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.context = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.source = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.componentRenderElement = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.renderNode = function () { };
-        return RenderDebugContext;
-    }());
-    /**
-     * @abstract
-     */
     var DebugContext = (function (_super) {
         __extends$10(DebugContext, _super);
         function DebugContext() {
@@ -10584,6 +10765,10 @@
      * @return {?}
      */
     function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+        // We need to re-compute the parent node in case the nodes have been moved around manually
+        if (action === RenderNodeAction.RemoveChild) {
+            parentNode = view.root.renderer.parentNode(renderNode(view, view.def.lastRootNode));
+        }
         var /** @type {?} */ len = view.def.nodes.length;
         for (var /** @type {?} */ i = 0; i < len; i++) {
             var /** @type {?} */ nodeDef = view.def.nodes[i];
@@ -10831,7 +11016,14 @@
         var /** @type {?} */ el;
         if (view.parent || !rootSelectorOrNode) {
             var /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
-            el = elDef.name ? renderer.createElement(elDef.name) : renderer.createComment('');
+            if (elDef.name) {
+                // TODO(vicb): move the namespace to the node definition
+                var /** @type {?} */ nsAndName = splitNamespace(elDef.name);
+                el = renderer.createElement(nsAndName[1], nsAndName[0]);
+            }
+            else {
+                el = renderer.createComment('');
+            }
             if (parentNode) {
                 renderer.appendChild(parentNode, el);
             }
@@ -10841,7 +11033,9 @@
         }
         if (elDef.attrs) {
             for (var /** @type {?} */ attrName in elDef.attrs) {
-                renderer.setAttribute(el, attrName, elDef.attrs[attrName]);
+                // TODO(vicb): move the namespace to the node definition
+                var /** @type {?} */ nsAndName = splitNamespace(attrName);
+                renderer.setAttribute(el, nsAndName[1], elDef.attrs[attrName], nsAndName[0]);
             }
         }
         if (elDef.outputs.length) {
@@ -10960,11 +11154,13 @@
         var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
         renderValue = renderValue != null ? renderValue.toString() : null;
         var /** @type {?} */ renderer = view.root.renderer;
+        // TODO(vicb): move the namespace to the node definition
+        var /** @type {?} */ nsAndName = splitNamespace(name);
         if (value != null) {
-            renderer.setAttribute(renderNode, name, renderValue);
+            renderer.setAttribute(renderNode, nsAndName[1], renderValue, nsAndName[0]);
         }
         else {
-            renderer.removeAttribute(renderNode, name);
+            renderer.removeAttribute(renderNode, nsAndName[1], nsAndName[0]);
         }
     }
     /**
@@ -11005,10 +11201,10 @@
         }
         var /** @type {?} */ renderer = view.root.renderer;
         if (renderValue != null) {
-            renderer.setStyle(renderNode, name, renderValue);
+            renderer.setStyle(renderNode, name, renderValue, false, false);
         }
         else {
-            renderer.removeStyle(renderNode, name);
+            renderer.removeStyle(renderNode, name, false);
         }
     }
     /**
@@ -11023,6 +11219,18 @@
         var /** @type {?} */ securityContext = binding.securityContext;
         var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
         view.root.renderer.setProperty(renderNode, name, renderValue);
+    }
+    var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+    /**
+     * @param {?} name
+     * @return {?}
+     */
+    function splitNamespace(name) {
+        if (name[0] === ':') {
+            var /** @type {?} */ match = name.match(NS_PREFIX_RE);
+            return [match[1], match[2]];
+        }
+        return ['', name];
     }
 
     /**
@@ -12426,352 +12634,6 @@
         }
     }
 
-    var DirectDomRenderer = (function () {
-        function DirectDomRenderer() {
-        }
-        /**
-         * @param {?} name
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.createElement = function (name) { return document.createElement(name); };
-        /**
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.createComment = function (value) { return document.createComment(value); };
-        /**
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.createText = function (value) { return document.createTextNode(value); };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.appendChild = function (parent, newChild) { parent.appendChild(newChild); };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @param {?} refChild
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.insertBefore = function (parent, newChild, refChild) {
-            if (parent) {
-                parent.insertBefore(newChild, refChild);
-            }
-        };
-        /**
-         * @param {?} parent
-         * @param {?} oldChild
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.removeChild = function (parent, oldChild) {
-            if (parent) {
-                parent.removeChild(oldChild);
-            }
-        };
-        /**
-         * @param {?} selectorOrNode
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
-            var /** @type {?} */ el;
-            if (typeof selectorOrNode === 'string') {
-                el = document.querySelector(selectorOrNode);
-            }
-            else {
-                el = selectorOrNode;
-            }
-            el.textContent = '';
-            return el;
-        };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.parentNode = function (node) { return node.parentNode; };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.nextSibling = function (node) { return node.nextSiblibng; };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.setAttribute = function (el, name, value) { return el.setAttribute(name, value); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.removeAttribute = function (el, name) { el.removeAttribute(name); };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @param {?} propertyValue
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) { };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.addClass = function (el, name) { el.classList.add(name); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.removeClass = function (el, name) { el.classList.remove(name); };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.setStyle = function (el, style, value) { el.style[style] = value; };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.removeStyle = function (el, style) {
-            // IE requires '' instead of null
-            // see https://github.com/angular/angular/issues/7916
-            ((el.style))[style] = '';
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.setProperty = function (el, name, value) { el[name] = value; };
-        /**
-         * @param {?} node
-         * @param {?} value
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.setText = function (node, value) { node.nodeValue = value; };
-        /**
-         * @param {?} target
-         * @param {?} eventName
-         * @param {?} callback
-         * @return {?}
-         */
-        DirectDomRenderer.prototype.listen = function (target, eventName, callback) {
-            var /** @type {?} */ renderTarget;
-            switch (target) {
-                case 'window':
-                    renderTarget = window;
-                    break;
-                case 'document':
-                    renderTarget = document;
-                    break;
-                default:
-                    renderTarget = target;
-            }
-            var /** @type {?} */ closure = function (event) {
-                if (callback(event) === false) {
-                    event.preventDefault();
-                }
-            };
-            renderTarget.addEventListener(eventName, closure);
-            return function () { return renderTarget.removeEventListener(eventName, closure); };
-        };
-        return DirectDomRenderer;
-    }());
-    var /** @type {?} */ EMPTY_V1_RENDER_COMPONENT_TYPE = new RenderComponentType('EMPTY', '', 0, ViewEncapsulation.None, [], {});
-    /**
-     * A temporal implementation of `Renderer` until we migrated our current renderer
-     * in all packages to the new API.
-     *
-     * Note that this is not complete, e.g. does not support shadow dom, view encapsulation, ...!
-     */
-    var LegacyRendererAdapter = (function () {
-        /**
-         * @param {?} rootDelegate
-         */
-        function LegacyRendererAdapter(rootDelegate) {
-            this._delegate = rootDelegate.renderComponent(EMPTY_V1_RENDER_COMPONENT_TYPE);
-        }
-        /**
-         * @param {?} name
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.createElement = function (name, debugInfo) {
-            return this._delegate.createElement(null, name, debugInfo);
-        };
-        /**
-         * @param {?} value
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.createComment = function (value, debugInfo) {
-            return this._delegate.createTemplateAnchor(null, debugInfo);
-        };
-        /**
-         * @param {?} value
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.createText = function (value, debugInfo) {
-            return this._delegate.createText(null, value, debugInfo);
-        };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.appendChild = function (parent, newChild) { this._delegate.projectNodes(parent, [newChild]); };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @param {?} refChild
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.insertBefore = function (parent, newChild, refChild) {
-            if (refChild) {
-                this._delegate.attachViewAfter(refChild.previousSibling, [newChild]);
-            }
-            else {
-                this.appendChild(parent, newChild);
-            }
-        };
-        /**
-         * @param {?} parent
-         * @param {?} oldChild
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.removeChild = function (parent, oldChild) {
-            if (parent) {
-                this._delegate.detachView([oldChild]);
-            }
-        };
-        /**
-         * @param {?} selectorOrNode
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
-            return this._delegate.selectRootElement(selectorOrNode, debugInfo);
-        };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.parentNode = function (node) { return node.parentNode; };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.nextSibling = function (node) { return node.nextSibling; };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.setAttribute = function (el, name, value) {
-            this._delegate.setElementAttribute(el, name, value);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.removeAttribute = function (el, name) {
-            this._delegate.setElementAttribute(el, name, null);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @param {?} propertyValue
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
-            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.removeBindingDebugInfo = function (el, propertyName) {
-            this._delegate.setBindingDebugInfo(el, propertyName, null);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.addClass = function (el, name) { this._delegate.setElementClass(el, name, true); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.removeClass = function (el, name) { this._delegate.setElementClass(el, name, false); };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} value
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.setStyle = function (el, style, value) {
-            this._delegate.setElementStyle(el, style, value);
-        };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.removeStyle = function (el, style) { this._delegate.setElementStyle(el, style, null); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.setProperty = function (el, name, value) {
-            this._delegate.setElementProperty(el, name, value);
-        };
-        /**
-         * @param {?} node
-         * @param {?} value
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.setText = function (node, value) { this._delegate.setText(node, value); };
-        /**
-         * @param {?} target
-         * @param {?} eventName
-         * @param {?} callback
-         * @return {?}
-         */
-        LegacyRendererAdapter.prototype.listen = function (target, eventName, callback) {
-            if (typeof target === 'string') {
-                return (this._delegate.listenGlobal(target, eventName, callback));
-            }
-            else {
-                return (this._delegate.listen(target, eventName, callback));
-            }
-        };
-        return LegacyRendererAdapter;
-    }());
-
     /**
      * @param {?} ngContentIndex
      * @param {?} constants
@@ -13876,10 +13738,7 @@
      */
     function createRootData(injector, projectableNodes, rootSelectorOrNode) {
         var /** @type {?} */ sanitizer = injector.get(Sanitizer);
-        // TODO(tbosch): once the new renderer interface is implemented via platform-browser,
-        // just get it via the injector and drop LegacyRendererAdapter and DirectDomRenderer.
-        var /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(RootRenderer)) :
-            new DirectDomRenderer();
+        var /** @type {?} */ renderer = injector.get(RendererV2);
         var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
         return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
     }
@@ -13995,7 +13854,6 @@
             debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
             return result;
         }
-        ;
     }
     /**
      * @param {?} delegate
@@ -14094,10 +13952,11 @@
         }
         /**
          * @param {?} name
+         * @param {?=} namespace
          * @return {?}
          */
-        DebugRenderer.prototype.createElement = function (name) {
-            return this._delegate.createElement(name, getCurrentDebugContext());
+        DebugRenderer.prototype.createElement = function (name, namespace) {
+            return this._delegate.createElement(name, namespace, getCurrentDebugContext());
         };
         /**
          * @param {?} value
@@ -14159,17 +14018,21 @@
          * @param {?} el
          * @param {?} name
          * @param {?} value
+         * @param {?=} namespace
          * @return {?}
          */
-        DebugRenderer.prototype.setAttribute = function (el, name, value) {
-            return this._delegate.setAttribute(el, name, value);
+        DebugRenderer.prototype.setAttribute = function (el, name, value, namespace) {
+            return this._delegate.setAttribute(el, name, value, namespace);
         };
         /**
          * @param {?} el
          * @param {?} name
+         * @param {?=} namespace
          * @return {?}
          */
-        DebugRenderer.prototype.removeAttribute = function (el, name) { return this._delegate.removeAttribute(el, name); };
+        DebugRenderer.prototype.removeAttribute = function (el, name, namespace) {
+            return this._delegate.removeAttribute(el, name, namespace);
+        };
         /**
          * @param {?} el
          * @param {?} propertyName
@@ -14203,17 +14066,22 @@
          * @param {?} el
          * @param {?} style
          * @param {?} value
+         * @param {?} hasVendorPrefix
+         * @param {?} hasImportant
          * @return {?}
          */
-        DebugRenderer.prototype.setStyle = function (el, style, value) {
-            return this._delegate.setStyle(el, style, value);
+        DebugRenderer.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+            return this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
         };
         /**
          * @param {?} el
          * @param {?} style
+         * @param {?} hasVendorPrefix
          * @return {?}
          */
-        DebugRenderer.prototype.removeStyle = function (el, style) { return this._delegate.removeStyle(el, style); };
+        DebugRenderer.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+            return this._delegate.removeStyle(el, style, hasVendorPrefix);
+        };
         /**
          * @param {?} el
          * @param {?} name
@@ -14498,7 +14366,6 @@
     	asProviderData: asProviderData,
     	asPureExpressionData: asPureExpressionData,
     	asQueryList: asQueryList,
-    	RenderDebugContext: RenderDebugContext,
     	DebugContext: DebugContext,
     	Services: Services
     });
@@ -16015,7 +15882,7 @@
         DebugDomRenderer.prototype.detachView = function (viewRootNodes) {
             viewRootNodes.forEach(function (node) {
                 var /** @type {?} */ debugNode = getDebugNode(node);
-                if (isPresent(debugNode) && isPresent(debugNode.parent)) {
+                if (debugNode && debugNode.parent) {
                     debugNode.parent.removeChild(debugNode);
                 }
             });
@@ -16144,6 +16011,244 @@
             return this._delegate.animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers);
         };
         return DebugDomRenderer;
+    }());
+    var DebugDomRendererV2 = (function () {
+        /**
+         * @param {?} _delegate
+         */
+        function DebugDomRendererV2(_delegate) {
+            this._delegate = _delegate;
+        }
+        /**
+         * @param {?} name
+         * @param {?=} namespace
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.createElement = function (name, namespace, debugInfo) {
+            var /** @type {?} */ el = this._delegate.createElement(name, namespace, debugInfo);
+            var /** @type {?} */ debugEl = new DebugElement(el, null, debugInfo);
+            debugEl.name = name;
+            indexDebugNode(debugEl);
+            return el;
+        };
+        /**
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.createComment = function (value, debugInfo) {
+            var /** @type {?} */ comment = this._delegate.createComment(value, debugInfo);
+            var /** @type {?} */ debugEl = new DebugNode(comment, null, debugInfo);
+            indexDebugNode(debugEl);
+            return comment;
+        };
+        /**
+         * @param {?} value
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.createText = function (value, debugInfo) {
+            var /** @type {?} */ text = this._delegate.createText(value, debugInfo);
+            var /** @type {?} */ debugEl = new DebugNode(text, null, debugInfo);
+            indexDebugNode(debugEl);
+            return text;
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.appendChild = function (parent, newChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.addChild(debugChildEl);
+            }
+            this._delegate.appendChild(parent, newChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.insertBefore = function (parent, newChild, refChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+            var /** @type {?} */ debugRefEl = getDebugNode(refChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.insertBefore(debugRefEl, debugChildEl);
+            }
+            this._delegate.insertBefore(parent, newChild, refChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.removeChild = function (parent, oldChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(oldChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.removeChild(debugChildEl);
+            }
+            this._delegate.removeChild(parent, oldChild);
+        };
+        /**
+         * @param {?} selectorOrNode
+         * @param {?=} debugInfo
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
+            var /** @type {?} */ el = this._delegate.selectRootElement(selectorOrNode, debugInfo);
+            var /** @type {?} */ debugEl = new DebugElement(el, null, debugInfo);
+            indexDebugNode(debugEl);
+            return el;
+        };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.parentNode = function (node) { return this._delegate.parentNode(node); };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.nextSibling = function (node) { return this._delegate.nextSibling(node); };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @param {?=} namespace
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.setAttribute = function (el, name, value, namespace) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+                debugEl.attributes[fullName] = value;
+            }
+            this._delegate.setAttribute(el, name, value, namespace);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?=} namespace
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.removeAttribute = function (el, name, namespace) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+                debugEl.attributes[fullName] = null;
+            }
+            this._delegate.removeAttribute(el, name, namespace);
+        };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @param {?} propertyValue
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
+            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
+        };
+        /**
+         * @param {?} el
+         * @param {?} propertyName
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) {
+            this._delegate.removeBindingDebugInfo(el, propertyName);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.addClass = function (el, name) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.classes[name] = true;
+            }
+            this._delegate.addClass(el, name);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.removeClass = function (el, name) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.classes[name] = false;
+            }
+            this._delegate.removeClass(el, name);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @param {?} hasVendorPrefix
+         * @param {?} hasImportant
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.styles[style] = value;
+            }
+            this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} hasVendorPrefix
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.styles[style] = null;
+            }
+            this._delegate.removeStyle(el, style, hasVendorPrefix);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.setProperty = function (el, name, value) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.properties[name] = value;
+            }
+            this._delegate.setProperty(el, name, value);
+        };
+        /**
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.setText = function (node, value) { this._delegate.setText(node, value); };
+        /**
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        DebugDomRendererV2.prototype.listen = function (target, eventName, callback) {
+            if (typeof target !== 'string') {
+                var /** @type {?} */ debugEl = getDebugNode(target);
+                if (debugEl) {
+                    debugEl.listeners.push(new EventListener(eventName, callback));
+                }
+            }
+            return this._delegate.listen(target, eventName, callback);
+        };
+        return DebugDomRendererV2;
     }());
 
     var ViewType = {};
@@ -17203,11 +17308,11 @@
         };
         /**
          * @param {?} view
-         * @param {?} currentIndex
+         * @param {?} toIndex
          * @return {?}
          */
-        ViewContainer.prototype.moveView = function (view, currentIndex) {
-            var /** @type {?} */ previousIndex = this.nestedViews.indexOf(view);
+        ViewContainer.prototype.moveView = function (view, toIndex) {
+            var /** @type {?} */ fromIndex = this.nestedViews.indexOf(view);
             if (view.type === ViewType.COMPONENT) {
                 throw new Error("Component views can't be moved!");
             }
@@ -17216,9 +17321,9 @@
                 nestedViews = [];
                 this.nestedViews = nestedViews;
             }
-            nestedViews.splice(previousIndex, 1);
-            nestedViews.splice(currentIndex, 0, view);
-            var /** @type {?} */ prevView = currentIndex > 0 ? nestedViews[currentIndex - 1] : null;
+            nestedViews.splice(fromIndex, 1);
+            nestedViews.splice(toIndex, 0, view);
+            var /** @type {?} */ prevView = toIndex > 0 ? nestedViews[toIndex - 1] : null;
             view.moveAfter(this, prevView);
         };
         /**
@@ -17294,6 +17399,7 @@
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
+        DebugDomRendererV2: DebugDomRendererV2,
         Console: Console,
         reflector: reflector,
         Reflector: Reflector,
@@ -17406,8 +17512,10 @@
     exports.SkipSelf = SkipSelf;
     exports.Host = Host;
     exports.NgZone = NgZone;
+    exports.RENDERER_V2_DIRECT = RENDERER_V2_DIRECT;
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = Renderer;
+    exports.RendererV2 = RendererV2;
     exports.RootRenderer = RootRenderer;
     exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;

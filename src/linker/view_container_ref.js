@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { isPresent } from '../facade/lang';
 import { wtfCreateScope, wtfLeave } from '../profile/profile';
 /**
  * Represents a container where one or more Views can be attached.
@@ -176,7 +175,7 @@ var ViewContainerRef_ = (function () {
          */
         get: function () {
             var /** @type {?} */ views = this._element.nestedViews;
-            return isPresent(views) ? views.length : 0;
+            return views ? views.length : 0;
         },
         enumerable: true,
         configurable: true
