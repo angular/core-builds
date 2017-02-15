@@ -12,8 +12,8 @@ import { isViewDebugError, viewDestroyedError, viewWrappedDebugError } from './e
 import { resolveDep } from './provider';
 import { getQueryValue } from './query';
 import { createInjector } from './refs';
-import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
-import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentElIndex } from './util';
+import { ArgumentType, BindingType, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
+import { checkBinding, isComponentView, renderNode, viewParentEl } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
 import { attachEmbeddedView, detachEmbeddedView, moveEmbeddedView } from './view_attach';
 var /** @type {?} */ initialized = false;
@@ -259,8 +259,8 @@ function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
         if ((binding.type === BindingType.ElementProperty ||
             binding.type === BindingType.DirectiveProperty) &&
             checkBinding(view, nodeDef, i, value)) {
-            var /** @type {?} */ elIndex = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef.index;
-            setBindingDebugInfo(view.root.renderer, asElementData(view, elIndex).renderElement, binding.nonMinifiedName, value);
+            var /** @type {?} */ elDef = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef;
+            setBindingDebugInfo(view.root.renderer, asElementData(view, elDef.index).renderElement, binding.nonMinifiedName, value);
         }
     }
     return ((delegate)).apply(void 0, [view, nodeIndex, argStyle].concat(givenValues));
@@ -511,38 +511,26 @@ var DebugContext_ = (function () {
             this.nodeIndex = 0;
         }
         this.nodeDef = view.def.nodes[nodeIndex];
-        var elIndex = nodeIndex;
+        var elDef = this.nodeDef;
         var elView = view;
-        while (elIndex != null && view.def.nodes[elIndex].type !== NodeType.Element) {
-            elIndex = view.def.nodes[elIndex].parent;
+        while (elDef && elDef.type !== NodeType.Element) {
+            elDef = elDef.parent;
         }
-        if (elIndex == null) {
-            while (elIndex == null && elView) {
-                elIndex = viewParentElIndex(elView);
+        if (!elDef) {
+            while (!elDef && elView) {
+                elDef = viewParentEl(elView);
                 elView = elView.parent;
             }
         }
+        this.elDef = elDef;
         this.elView = elView;
-        if (elView) {
-            this.elDef = elView.def.nodes[elIndex];
-            for (var i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
-                var childDef = this.elView.def.nodes[i];
-                if (childDef.flags & NodeFlags.HasComponent) {
-                    this.compProviderIndex = i;
-                    break;
-                }
-                i += childDef.childCount;
-            }
-        }
-        else {
-            this.elDef = null;
-        }
+        this.compProviderDef = elView ? this.elDef.element.component : null;
     }
     Object.defineProperty(DebugContext_.prototype, "injector", {
         /**
          * @return {?}
          */
-        get: function () { return createInjector(this.elView, this.elDef.index); },
+        get: function () { return createInjector(this.elView, this.elDef); },
         enumerable: true,
         configurable: true
     });
@@ -551,8 +539,8 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            if (this.compProviderIndex != null) {
-                return asProviderData(this.elView, this.compProviderIndex).instance;
+            if (this.compProviderDef) {
+                return asProviderData(this.elView, this.compProviderDef.index).instance;
             }
             return this.view.component;
         },
@@ -564,8 +552,8 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            if (this.compProviderIndex != null) {
-                return asProviderData(this.elView, this.compProviderIndex).instance;
+            if (this.compProviderDef) {
+                return asProviderData(this.elView, this.compProviderDef.index).instance;
             }
             return this.view.context;
         },
@@ -633,8 +621,8 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            var /** @type {?} */ view = this.compProviderIndex != null ?
-                asProviderData(this.elView, this.compProviderIndex).componentView :
+            var /** @type {?} */ view = this.compProviderDef ?
+                asProviderData(this.elView, this.compProviderDef.index).componentView :
                 this.view;
             var /** @type {?} */ elData = findHostElement(view);
             return elData ? elData.renderElement : undefined;
@@ -663,7 +651,7 @@ function DebugContext__tsickle_Closure_declarations() {
     /** @type {?} */
     DebugContext_.prototype.elDef;
     /** @type {?} */
-    DebugContext_.prototype.compProviderIndex;
+    DebugContext_.prototype.compProviderDef;
     /** @type {?} */
     DebugContext_.prototype.view;
     /** @type {?} */
@@ -678,8 +666,7 @@ function findHostElement(view) {
         view = view.parent;
     }
     if (view.parent) {
-        var /** @type {?} */ hostData = asElementData(view.parent, viewParentElIndex(view));
-        return hostData;
+        return asElementData(view.parent, viewParentEl(view).index);
     }
     return undefined;
 }
@@ -690,10 +677,8 @@ function findHostElement(view) {
  * @return {?}
  */
 function collectReferences(view, nodeDef, references) {
-    for (var /** @type {?} */ queryId in nodeDef.matchedQueries) {
-        if (queryIdIsReference(queryId)) {
-            references[queryId.slice(1)] = getQueryValue(view, nodeDef, queryId);
-        }
+    for (var /** @type {?} */ refName in nodeDef.references) {
+        references[refName] = getQueryValue(view, nodeDef, nodeDef.references[refName]);
     }
 }
 /**

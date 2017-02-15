@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { NodeType, asElementData } from './types';
-import { RenderNodeAction, visitProjectedRenderNodes } from './util';
+import { NodeType } from './types';
+import { RenderNodeAction, getParentRenderElement, visitProjectedRenderNodes } from './util';
 /**
  * @param {?} ngContentIndex
  * @param {?} index
@@ -19,13 +19,16 @@ export function ngContentDef(ngContentIndex, index) {
         index: undefined,
         reverseChildIndex: undefined,
         parent: undefined,
-        childFlags: undefined,
-        childMatchedQueries: undefined,
+        renderParent: undefined,
         bindingIndex: undefined,
         disposableIndex: undefined,
         // regular values
         flags: 0,
-        matchedQueries: {}, ngContentIndex: ngContentIndex,
+        childFlags: 0,
+        childMatchedQueries: 0,
+        matchedQueries: {},
+        matchedQueryIds: 0,
+        references: {}, ngContentIndex: ngContentIndex,
         childCount: 0,
         bindings: [],
         disposableCount: 0,
@@ -44,11 +47,7 @@ export function ngContentDef(ngContentIndex, index) {
  * @return {?}
  */
 export function appendNgContent(view, renderHost, def) {
-    if (def.ngContentIndex != null) {
-        // Do nothing if we are reprojected!
-        return;
-    }
-    var /** @type {?} */ parentEl = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
+    var /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
     if (!parentEl) {
         // Nothing to do if there is no parent element.
         return;

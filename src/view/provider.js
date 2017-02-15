@@ -13,7 +13,7 @@ import { ViewContainerRef } from '../linker/view_container_ref';
 import * as v1renderer from '../render/api';
 import { createChangeDetectorRef, createInjector, createTemplateRef, createViewContainerRef } from './refs';
 import { BindingType, DepFlags, NodeFlags, NodeType, ProviderType, Services, ViewFlags, ViewState, asElementData, asProviderData } from './types';
-import { checkAndUpdateBinding, dispatchEvent, isComponentView, tokenKey, viewParentElIndex } from './util';
+import { checkAndUpdateBinding, dispatchEvent, isComponentView, splitMatchedQueriesDsl, tokenKey, viewParentEl } from './util';
 var /** @type {?} */ RendererV1TokenKey = tokenKey(v1renderer.Renderer);
 var /** @type {?} */ ElementRefTokenKey = tokenKey(ElementRef);
 var /** @type {?} */ ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
@@ -77,7 +77,7 @@ export function providerDef(flags, matchedQueries, type, token, value, deps) {
 /**
  * @param {?} type
  * @param {?} flags
- * @param {?} matchedQueries
+ * @param {?} matchedQueriesDsl
  * @param {?} childCount
  * @param {?} providerType
  * @param {?} token
@@ -88,14 +88,8 @@ export function providerDef(flags, matchedQueries, type, token, value, deps) {
  * @param {?=} component
  * @return {?}
  */
-export function _def(type, flags, matchedQueries, childCount, providerType, token, value, deps, bindings, outputs, component) {
-    var /** @type {?} */ matchedQueryDefs = {};
-    if (matchedQueries) {
-        matchedQueries.forEach(function (_a) {
-            var queryId = _a[0], valueType = _a[1];
-            matchedQueryDefs[queryId] = valueType;
-        });
-    }
+export function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component) {
+    var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
     if (!outputs) {
         outputs = [];
     }
@@ -123,13 +117,13 @@ export function _def(type, flags, matchedQueries, childCount, providerType, toke
         index: undefined,
         reverseChildIndex: undefined,
         parent: undefined,
-        childFlags: undefined,
-        childMatchedQueries: undefined,
+        renderParent: undefined,
         bindingIndex: undefined,
         disposableIndex: undefined,
         // regular values
         flags: flags,
-        matchedQueries: matchedQueryDefs,
+        childFlags: 0,
+        childMatchedQueries: 0, matchedQueries: matchedQueries, matchedQueryIds: matchedQueryIds, references: references,
         ngContentIndex: undefined, childCount: childCount, bindings: bindings,
         disposableCount: outputs.length,
         element: undefined,
@@ -164,8 +158,10 @@ export function createPipeInstance(view, def) {
     while (compView.parent && !isComponentView(compView)) {
         compView = compView.parent;
     }
+    // pipes can see the private services of the component
+    var /** @type {?} */ allowPrivateServices = true;
     // pipes are always eager and classes!
-    return createClass(compView.parent, compView.parentIndex, viewParentElIndex(compView), def.provider.value, def.provider.deps);
+    return createClass(compView.parent, viewParentEl(compView), allowPrivateServices, def.provider.value, def.provider.deps);
 }
 /**
  * @param {?} view
@@ -173,13 +169,15 @@ export function createPipeInstance(view, def) {
  * @return {?}
  */
 export function createDirectiveInstance(view, def) {
+    // components can see other private services, other directives can't.
+    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.HasComponent) > 0;
     var /** @type {?} */ providerDef = def.provider;
     // directives are always eager and classes!
-    var /** @type {?} */ instance = createClass(view, def.index, def.parent, def.provider.value, def.provider.deps);
+    var /** @type {?} */ instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
     if (providerDef.outputs.length) {
         for (var /** @type {?} */ i = 0; i < providerDef.outputs.length; i++) {
             var /** @type {?} */ output = providerDef.outputs[i];
-            var /** @type {?} */ subscription = instance[output.propName].subscribe(eventHandlerClosure(view, def.parent, output.eventName));
+            var /** @type {?} */ subscription = instance[output.propName].subscribe(eventHandlerClosure(view, def.parent.index, output.eventName));
             view.disposables[def.disposableIndex + i] = subscription.unsubscribe.bind(subscription);
         }
     }
@@ -275,17 +273,21 @@ export function checkAndUpdateDirectiveDynamic(view, def, values) {
  * @return {?}
  */
 function _createProviderInstance(view, def) {
+    // private services can see other private services
+    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.PrivateProvider) > 0;
     var /** @type {?} */ providerDef = def.provider;
     var /** @type {?} */ injectable;
     switch (providerDef.type) {
         case ProviderType.Class:
-            injectable = createClass(view, def.index, def.parent, providerDef.value, providerDef.deps);
+            injectable =
+                createClass(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
             break;
         case ProviderType.Factory:
-            injectable = callFactory(view, def.index, def.parent, providerDef.value, providerDef.deps);
+            injectable =
+                callFactory(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
             break;
         case ProviderType.UseExisting:
-            injectable = resolveDep(view, def.index, def.parent, providerDef.deps[0]);
+            injectable = resolveDep(view, def.parent, allowPrivateServices, providerDef.deps[0]);
             break;
         case ProviderType.Value:
             injectable = providerDef.value;
@@ -295,13 +297,13 @@ function _createProviderInstance(view, def) {
 }
 /**
  * @param {?} view
- * @param {?} requestorNodeIndex
- * @param {?} elIndex
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
  * @param {?} ctor
  * @param {?} deps
  * @return {?}
  */
-function createClass(view, requestorNodeIndex, elIndex, ctor, deps) {
+function createClass(view, elDef, allowPrivateServices, ctor, deps) {
     var /** @type {?} */ len = deps.length;
     var /** @type {?} */ injectable;
     switch (len) {
@@ -309,18 +311,18 @@ function createClass(view, requestorNodeIndex, elIndex, ctor, deps) {
             injectable = new ctor();
             break;
         case 1:
-            injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]));
+            injectable = new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]));
             break;
         case 2:
-            injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]));
+            injectable = new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
             break;
         case 3:
-            injectable = new ctor(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]), resolveDep(view, requestorNodeIndex, elIndex, deps[2]));
+            injectable = new ctor(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
             break;
         default:
             var /** @type {?} */ depValues = new Array(len);
             for (var /** @type {?} */ i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, requestorNodeIndex, elIndex, deps[i]);
+                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
             }
             injectable = new (ctor.bind.apply(ctor, [void 0].concat(depValues)))();
     }
@@ -328,13 +330,13 @@ function createClass(view, requestorNodeIndex, elIndex, ctor, deps) {
 }
 /**
  * @param {?} view
- * @param {?} requestorNodeIndex
- * @param {?} elIndex
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
  * @param {?} factory
  * @param {?} deps
  * @return {?}
  */
-function callFactory(view, requestorNodeIndex, elIndex, factory, deps) {
+function callFactory(view, elDef, allowPrivateServices, factory, deps) {
     var /** @type {?} */ len = deps.length;
     var /** @type {?} */ injectable;
     switch (len) {
@@ -342,18 +344,18 @@ function callFactory(view, requestorNodeIndex, elIndex, factory, deps) {
             injectable = factory();
             break;
         case 1:
-            injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]));
+            injectable = factory(resolveDep(view, elDef, allowPrivateServices, deps[0]));
             break;
         case 2:
-            injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]));
+            injectable = factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]));
             break;
         case 3:
-            injectable = factory(resolveDep(view, requestorNodeIndex, elIndex, deps[0]), resolveDep(view, requestorNodeIndex, elIndex, deps[1]), resolveDep(view, requestorNodeIndex, elIndex, deps[2]));
+            injectable = factory(resolveDep(view, elDef, allowPrivateServices, deps[0]), resolveDep(view, elDef, allowPrivateServices, deps[1]), resolveDep(view, elDef, allowPrivateServices, deps[2]));
             break;
         default:
             var /** @type {?} */ depValues = Array(len);
             for (var /** @type {?} */ i = 0; i < len; i++) {
-                depValues[i] = resolveDep(view, requestorNodeIndex, elIndex, deps[i]);
+                depValues[i] = resolveDep(view, elDef, allowPrivateServices, deps[i]);
             }
             injectable = factory.apply(void 0, depValues);
     }
@@ -361,13 +363,13 @@ function callFactory(view, requestorNodeIndex, elIndex, factory, deps) {
 }
 /**
  * @param {?} view
- * @param {?} requestNodeIndex
- * @param {?} elIndex
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
  * @param {?} depDef
  * @param {?=} notFoundValue
  * @return {?}
  */
-export function resolveDep(view, requestNodeIndex, elIndex, depDef, notFoundValue) {
+export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
     if (depDef.flags & DepFlags.Value) {
         return depDef.token;
@@ -378,55 +380,60 @@ export function resolveDep(view, requestNodeIndex, elIndex, depDef, notFoundValu
     }
     var /** @type {?} */ tokenKey = depDef.tokenKey;
     if (depDef.flags & DepFlags.SkipSelf) {
-        requestNodeIndex = null;
-        elIndex = view.def.nodes[elIndex].parent;
-        while (elIndex == null && view) {
-            elIndex = viewParentElIndex(view);
-            view = view.parent;
-        }
+        allowPrivateServices = false;
+        elDef = elDef.parent;
     }
     while (view) {
-        var /** @type {?} */ elDef = view.def.nodes[elIndex];
-        switch (tokenKey) {
-            case RendererV1TokenKey: {
-                var /** @type {?} */ compView = view;
-                while (compView && !isComponentView(compView)) {
-                    compView = compView.parent;
+        if (elDef) {
+            switch (tokenKey) {
+                case RendererV1TokenKey: {
+                    var /** @type {?} */ compView = view;
+                    while (compView && !isComponentView(compView)) {
+                        compView = compView.parent;
+                    }
+                    var /** @type {?} */ rootRenderer = view.root.injector.get(v1renderer.RootRenderer);
+                    // Note: Don't fill in the styles as they have been installed already!
+                    return rootRenderer.renderComponent(new v1renderer.RenderComponentType(view.def.component.id, '', 0, view.def.component.encapsulation, [], {}));
                 }
-                var /** @type {?} */ rootRenderer = view.root.injector.get(v1renderer.RootRenderer);
-                // Note: Don't fill in the styles as they have been installed already!
-                return rootRenderer.renderComponent(new v1renderer.RenderComponentType(view.def.component.id, '', 0, view.def.component.encapsulation, [], {}));
+                case ElementRefTokenKey:
+                    return new ElementRef(asElementData(view, elDef.index).renderElement);
+                case ViewContainerRefTokenKey:
+                    return createViewContainerRef(view, elDef);
+                case TemplateRefTokenKey: {
+                    if (elDef.element.template) {
+                        return createTemplateRef(view, elDef);
+                    }
+                    break;
+                }
+                case ChangeDetectorRefTokenKey: {
+                    var /** @type {?} */ cdView = void 0;
+                    if (allowPrivateServices) {
+                        cdView = asProviderData(view, elDef.element.component.index).componentView;
+                    }
+                    else {
+                        cdView = view;
+                        while (cdView.parent && !isComponentView(cdView)) {
+                            cdView = cdView.parent;
+                        }
+                    }
+                    return createChangeDetectorRef(cdView);
+                }
+                case InjectorRefTokenKey:
+                    return createInjector(view, elDef);
+                default:
+                    var /** @type {?} */ providerDef_1 = (allowPrivateServices ? elDef.element.allProviders :
+                        elDef.element.publicProviders)[tokenKey];
+                    if (providerDef_1) {
+                        var /** @type {?} */ providerData = asProviderData(view, providerDef_1.index);
+                        if (providerData.instance === NOT_CREATED) {
+                            providerData.instance = _createProviderInstance(view, providerDef_1);
+                        }
+                        return providerData.instance;
+                    }
             }
-            case ElementRefTokenKey:
-                return new ElementRef(asElementData(view, elIndex).renderElement);
-            case ViewContainerRefTokenKey:
-                return createViewContainerRef(view, elIndex);
-            case TemplateRefTokenKey:
-                return createTemplateRef(view, elDef);
-            case ChangeDetectorRefTokenKey:
-                var /** @type {?} */ cdView = view;
-                // If we are still checking dependencies on the initial element...
-                if (requestNodeIndex != null) {
-                    var /** @type {?} */ requestorNodeDef = view.def.nodes[requestNodeIndex];
-                    if (requestorNodeDef.flags & NodeFlags.HasComponent) {
-                        cdView = asProviderData(view, requestNodeIndex).componentView;
-                    }
-                }
-                return createChangeDetectorRef(cdView);
-            case InjectorRefTokenKey:
-                return createInjector(view, elIndex);
-            default:
-                var /** @type {?} */ providerIndex = elDef.element.providerIndices[tokenKey];
-                if (providerIndex != null) {
-                    var /** @type {?} */ providerData = asProviderData(view, providerIndex);
-                    if (providerData.instance === NOT_CREATED) {
-                        providerData.instance = _createProviderInstance(view, view.def.nodes[providerIndex]);
-                    }
-                    return providerData.instance;
-                }
         }
-        requestNodeIndex = null;
-        elIndex = viewParentElIndex(view);
+        allowPrivateServices = isComponentView(view);
+        elDef = viewParentEl(view);
         view = view.parent;
     }
     return startView.root.injector.get(depDef.token, notFoundValue);

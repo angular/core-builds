@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { dirtyParentQuery } from './query';
+import { dirtyParentQueries } from './query';
 import { RenderNodeAction, declaredViewContainer, renderNode, visitRootRenderNodes } from './util';
 /**
  * @param {?} elementData
@@ -27,9 +27,7 @@ export function attachEmbeddedView(elementData, viewIndex, view) {
         }
         projectedViews.push(view);
     }
-    for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
-        dirtyParentQuery(queryId, view);
-    }
+    dirtyParentQueries(view);
     var /** @type {?} */ prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
     renderAttachEmbeddedView(elementData, prevView, view);
 }
@@ -50,9 +48,7 @@ export function detachEmbeddedView(elementData, viewIndex) {
         var /** @type {?} */ projectedViews = dvcElementData.projectedViews;
         removeFromArray(projectedViews, projectedViews.indexOf(view));
     }
-    for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
-        dirtyParentQuery(queryId, view);
-    }
+    dirtyParentQueries(view);
     renderDetachEmbeddedView(elementData, view);
     return view;
 }
@@ -72,9 +68,7 @@ export function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
     addToArray(embeddedViews, newViewIndex, view);
     // Note: Don't need to change projectedViews as the order in there
     // as always invalid...
-    for (var /** @type {?} */ queryId in view.def.nodeMatchedQueries) {
-        dirtyParentQuery(queryId, view);
-    }
+    dirtyParentQueries(view);
     renderDetachEmbeddedView(elementData, view);
     var /** @type {?} */ prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
     renderAttachEmbeddedView(elementData, prevView, view);

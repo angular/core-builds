@@ -7,8 +7,8 @@
  */
 import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
-import { DepFlags, NodeFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentElIndex } from './util';
+import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
+import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentEl } from './util';
 var /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -41,18 +41,7 @@ var ComponentFactory_ = (function () {
         if (projectableNodes === void 0) { projectableNodes = null; }
         if (rootSelectorOrNode === void 0) { rootSelectorOrNode = null; }
         var /** @type {?} */ viewDef = resolveViewDefinition(this._viewClass);
-        var /** @type {?} */ componentNodeIndex;
-        var /** @type {?} */ len = viewDef.nodes.length;
-        for (var /** @type {?} */ i = 0; i < len; i++) {
-            var /** @type {?} */ nodeDef = viewDef.nodes[i];
-            if (nodeDef.flags & NodeFlags.HasComponent) {
-                componentNodeIndex = i;
-                break;
-            }
-        }
-        if (componentNodeIndex == null) {
-            throw new Error("Illegal State: Could not find a component in the view definition!");
-        }
+        var /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.component.index;
         var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
         var /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
         return new ComponentRef_(view, new ViewRef_(view), component);
@@ -81,12 +70,15 @@ var ComponentRef_ = (function () {
         this._view = _view;
         this._viewRef = _viewRef;
         this._component = _component;
+        this._elDef = this._view.def.nodes[0];
     }
     Object.defineProperty(ComponentRef_.prototype, "location", {
         /**
          * @return {?}
          */
-        get: function () { return new ElementRef(asElementData(this._view, 0).renderElement); },
+        get: function () {
+            return new ElementRef(asElementData(this._view, this._elDef.index).renderElement);
+        },
         enumerable: true,
         configurable: true
     });
@@ -94,7 +86,7 @@ var ComponentRef_ = (function () {
         /**
          * @return {?}
          */
-        get: function () { return new Injector_(this._view, 0); },
+        get: function () { return new Injector_(this._view, this._elDef); },
         enumerable: true,
         configurable: true
     });
@@ -146,6 +138,8 @@ var ComponentRef_ = (function () {
 }());
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
+    ComponentRef_.prototype._elDef;
+    /** @type {?} */
     ComponentRef_.prototype._view;
     /** @type {?} */
     ComponentRef_.prototype._viewRef;
@@ -154,21 +148,21 @@ function ComponentRef__tsickle_Closure_declarations() {
 }
 /**
  * @param {?} view
- * @param {?} elIndex
+ * @param {?} elDef
  * @return {?}
  */
-export function createViewContainerRef(view, elIndex) {
-    return new ViewContainerRef_(view, elIndex);
+export function createViewContainerRef(view, elDef) {
+    return new ViewContainerRef_(view, elDef);
 }
 var ViewContainerRef_ = (function () {
     /**
      * @param {?} _view
-     * @param {?} _elIndex
+     * @param {?} _elDef
      */
-    function ViewContainerRef_(_view, _elIndex) {
+    function ViewContainerRef_(_view, _elDef) {
         this._view = _view;
-        this._elIndex = _elIndex;
-        this._data = asElementData(_view, _elIndex);
+        this._elDef = _elDef;
+        this._data = asElementData(_view, _elDef.index);
     }
     Object.defineProperty(ViewContainerRef_.prototype, "element", {
         /**
@@ -182,7 +176,7 @@ var ViewContainerRef_ = (function () {
         /**
          * @return {?}
          */
-        get: function () { return new Injector_(this._view, this._elIndex); },
+        get: function () { return new Injector_(this._view, this._elDef); },
         enumerable: true,
         configurable: true
     });
@@ -192,12 +186,12 @@ var ViewContainerRef_ = (function () {
          */
         get: function () {
             var /** @type {?} */ view = this._view;
-            var /** @type {?} */ elIndex = view.def.nodes[this._elIndex].parent;
-            while (elIndex == null && view) {
-                elIndex = viewParentElIndex(view);
+            var /** @type {?} */ elDef = this._elDef.parent;
+            while (!elDef && view) {
+                elDef = viewParentEl(view);
                 view = view.parent;
             }
-            return view ? new Injector_(view, elIndex) : this._view.root.injector;
+            return view ? new Injector_(view, elDef) : this._view.root.injector;
         },
         enumerable: true,
         configurable: true
@@ -302,7 +296,7 @@ function ViewContainerRef__tsickle_Closure_declarations() {
     /** @type {?} */
     ViewContainerRef_.prototype._view;
     /** @type {?} */
-    ViewContainerRef_.prototype._elIndex;
+    ViewContainerRef_.prototype._elDef;
 }
 /**
  * @param {?} view
@@ -424,20 +418,20 @@ function TemplateRef__tsickle_Closure_declarations() {
 }
 /**
  * @param {?} view
- * @param {?} elIndex
+ * @param {?} elDef
  * @return {?}
  */
-export function createInjector(view, elIndex) {
-    return new Injector_(view, elIndex);
+export function createInjector(view, elDef) {
+    return new Injector_(view, elDef);
 }
 var Injector_ = (function () {
     /**
      * @param {?} view
-     * @param {?} elIndex
+     * @param {?} elDef
      */
-    function Injector_(view, elIndex) {
+    function Injector_(view, elDef) {
         this.view = view;
-        this.elIndex = elIndex;
+        this.elDef = elDef;
     }
     /**
      * @param {?} token
@@ -446,7 +440,7 @@ var Injector_ = (function () {
      */
     Injector_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        return Services.resolveDep(this.view, undefined, this.elIndex, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        return Services.resolveDep(this.view, this.elDef, true, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
     };
     return Injector_;
 }());
@@ -454,6 +448,6 @@ function Injector__tsickle_Closure_declarations() {
     /** @type {?} */
     Injector_.prototype.view;
     /** @type {?} */
-    Injector_.prototype.elIndex;
+    Injector_.prototype.elDef;
 }
 //# sourceMappingURL=refs.js.map
