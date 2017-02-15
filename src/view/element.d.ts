@@ -1,7 +1,7 @@
 import { SecurityContext } from '../security';
 import { BindingType, ElementData, NodeDef, NodeFlags, QueryValueType, ViewData, ViewDefinitionFactory } from './types';
-export declare function anchorDef(flags: NodeFlags, matchedQueries: [string, QueryValueType][], ngContentIndex: number, childCount: number, templateFactory?: ViewDefinitionFactory): NodeDef;
-export declare function elementDef(flags: NodeFlags, matchedQueries: [string, QueryValueType][], ngContentIndex: number, childCount: number, name: string, fixedAttrs?: {
+export declare function anchorDef(flags: NodeFlags, matchedQueriesDsl: [string | number, QueryValueType][], ngContentIndex: number, childCount: number, templateFactory?: ViewDefinitionFactory): NodeDef;
+export declare function elementDef(flags: NodeFlags, matchedQueriesDsl: [string | number, QueryValueType][], ngContentIndex: number, childCount: number, name: string, fixedAttrs?: {
     [name: string]: string;
 }, bindings?: ([BindingType.ElementClass, string] | [BindingType.ElementStyle, string, string] | [BindingType.ElementAttribute | BindingType.ElementProperty, string, SecurityContext])[], outputs?: (string | [string, string])[]): NodeDef;
 export declare function createElement(view: ViewData, renderHost: any, def: NodeDef): ElementData;

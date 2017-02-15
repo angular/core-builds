@@ -7,8 +7,8 @@
  */
 import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
-import { DepFlags, NodeFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentElIndex } from './util';
+import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
+import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentEl } from './util';
 const /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -39,18 +39,7 @@ class ComponentFactory_ {
      */
     create(injector, projectableNodes = null, rootSelectorOrNode = null) {
         const /** @type {?} */ viewDef = resolveViewDefinition(this._viewClass);
-        let /** @type {?} */ componentNodeIndex;
-        const /** @type {?} */ len = viewDef.nodes.length;
-        for (let /** @type {?} */ i = 0; i < len; i++) {
-            const /** @type {?} */ nodeDef = viewDef.nodes[i];
-            if (nodeDef.flags & NodeFlags.HasComponent) {
-                componentNodeIndex = i;
-                break;
-            }
-        }
-        if (componentNodeIndex == null) {
-            throw new Error(`Illegal State: Could not find a component in the view definition!`);
-        }
+        const /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.component.index;
         const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
         const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
         return new ComponentRef_(view, new ViewRef_(view), component);
@@ -78,15 +67,18 @@ class ComponentRef_ {
         this._view = _view;
         this._viewRef = _viewRef;
         this._component = _component;
+        this._elDef = this._view.def.nodes[0];
     }
     /**
      * @return {?}
      */
-    get location() { return new ElementRef(asElementData(this._view, 0).renderElement); }
+    get location() {
+        return new ElementRef(asElementData(this._view, this._elDef.index).renderElement);
+    }
     /**
      * @return {?}
      */
-    get injector() { return new Injector_(this._view, 0); }
+    get injector() { return new Injector_(this._view, this._elDef); }
     /**
      * @return {?}
      */
@@ -118,6 +110,8 @@ class ComponentRef_ {
 }
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
+    ComponentRef_.prototype._elDef;
+    /** @type {?} */
     ComponentRef_.prototype._view;
     /** @type {?} */
     ComponentRef_.prototype._viewRef;
@@ -126,21 +120,21 @@ function ComponentRef__tsickle_Closure_declarations() {
 }
 /**
  * @param {?} view
- * @param {?} elIndex
+ * @param {?} elDef
  * @return {?}
  */
-export function createViewContainerRef(view, elIndex) {
-    return new ViewContainerRef_(view, elIndex);
+export function createViewContainerRef(view, elDef) {
+    return new ViewContainerRef_(view, elDef);
 }
 class ViewContainerRef_ {
     /**
      * @param {?} _view
-     * @param {?} _elIndex
+     * @param {?} _elDef
      */
-    constructor(_view, _elIndex) {
+    constructor(_view, _elDef) {
         this._view = _view;
-        this._elIndex = _elIndex;
-        this._data = asElementData(_view, _elIndex);
+        this._elDef = _elDef;
+        this._data = asElementData(_view, _elDef.index);
     }
     /**
      * @return {?}
@@ -149,18 +143,18 @@ class ViewContainerRef_ {
     /**
      * @return {?}
      */
-    get injector() { return new Injector_(this._view, this._elIndex); }
+    get injector() { return new Injector_(this._view, this._elDef); }
     /**
      * @return {?}
      */
     get parentInjector() {
         let /** @type {?} */ view = this._view;
-        let /** @type {?} */ elIndex = view.def.nodes[this._elIndex].parent;
-        while (elIndex == null && view) {
-            elIndex = viewParentElIndex(view);
+        let /** @type {?} */ elDef = this._elDef.parent;
+        while (!elDef && view) {
+            elDef = viewParentEl(view);
             view = view.parent;
         }
-        return view ? new Injector_(view, elIndex) : this._view.root.injector;
+        return view ? new Injector_(view, elDef) : this._view.root.injector;
     }
     /**
      * @return {?}
@@ -257,7 +251,7 @@ function ViewContainerRef__tsickle_Closure_declarations() {
     /** @type {?} */
     ViewContainerRef_.prototype._view;
     /** @type {?} */
-    ViewContainerRef_.prototype._elIndex;
+    ViewContainerRef_.prototype._elDef;
 }
 /**
  * @param {?} view
@@ -359,20 +353,20 @@ function TemplateRef__tsickle_Closure_declarations() {
 }
 /**
  * @param {?} view
- * @param {?} elIndex
+ * @param {?} elDef
  * @return {?}
  */
-export function createInjector(view, elIndex) {
-    return new Injector_(view, elIndex);
+export function createInjector(view, elDef) {
+    return new Injector_(view, elDef);
 }
 class Injector_ {
     /**
      * @param {?} view
-     * @param {?} elIndex
+     * @param {?} elDef
      */
-    constructor(view, elIndex) {
+    constructor(view, elDef) {
         this.view = view;
-        this.elIndex = elIndex;
+        this.elDef = elDef;
     }
     /**
      * @param {?} token
@@ -380,13 +374,13 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        return Services.resolveDep(this.view, undefined, this.elIndex, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
+        return Services.resolveDep(this.view, this.elDef, true, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
 function Injector__tsickle_Closure_declarations() {
     /** @type {?} */
     Injector_.prototype.view;
     /** @type {?} */
-    Injector_.prototype.elIndex;
+    Injector_.prototype.elDef;
 }
 //# sourceMappingURL=refs.js.map

@@ -25,12 +25,11 @@ export interface ViewDefinition {
     bindingCount: number;
     disposableCount: number;
     /**
-     * ids of all queries that are matched by one of the nodes.
+     * Binary or of all query ids that are matched by one of the nodes.
      * This includes query ids from templates as well.
+     * Used as a bloom filter.
      */
-    nodeMatchedQueries: {
-        [queryId: string]: boolean;
-    };
+    nodeMatchedQueries: number;
 }
 export declare type ViewDefinitionFactory = () => ViewDefinition;
 export declare type ViewUpdateFn = (check: NodeCheckFn, view: ViewData) => void;
@@ -66,30 +65,38 @@ export interface NodeDef {
     index: number;
     reverseChildIndex: number;
     flags: NodeFlags;
-    parent: number;
+    parent: NodeDef;
+    renderParent: NodeDef;
     /** this is checked against NgContentDef.index to find matched nodes */
     ngContentIndex: number;
     /** number of transitive children */
     childCount: number;
-    /** aggregated NodeFlags for all children **/
+    /** aggregated NodeFlags for all children (does not include self) **/
     childFlags: NodeFlags;
     bindingIndex: number;
     bindings: BindingDef[];
     disposableIndex: number;
     disposableCount: number;
     /**
+     * references that the user placed on the element
+     */
+    references: {
+        [refId: string]: QueryValueType;
+    };
+    /**
      * ids and value types of all queries that are matched by this node.
      */
     matchedQueries: {
-        [queryId: string]: QueryValueType;
+        [queryId: number]: QueryValueType;
     };
+    /** Binary or of all matched query ids of this node. */
+    matchedQueryIds: number;
     /**
-     * ids of all queries that are matched by one of the child nodes.
+     * Binary or of all query ids that are matched by one of the children.
      * This includes query ids from templates as well.
+     * Used as a bloom filter.
      */
-    childMatchedQueries: {
-        [queryId: string]: boolean;
-    };
+    childMatchedQueries: number;
     element: ElementDef;
     provider: ProviderDef;
     text: TextDef;
@@ -123,8 +130,11 @@ export declare enum NodeFlags {
     HasEmbeddedViews = 256,
     HasComponent = 512,
     HasContentQuery = 1024,
-    HasViewQuery = 2048,
-    LazyProvider = 4096,
+    HasStaticQuery = 2048,
+    HasDynamicQuery = 4096,
+    HasViewQuery = 8192,
+    LazyProvider = 16384,
+    PrivateProvider = 32768,
 }
 export interface BindingDef {
     type: BindingType;
@@ -156,12 +166,20 @@ export interface ElementDef {
     };
     outputs: ElementOutputDef[];
     template: ViewDefinition;
+    component: NodeDef;
     /**
-     * visible providers for DI in the view,
-     * as see from this element.
+     * visible public providers for DI in the view,
+     * as see from this element. This does not include private providers.
      */
-    providerIndices: {
-        [tokenKey: string]: number;
+    publicProviders: {
+        [tokenKey: string]: NodeDef;
+    };
+    /**
+     * same as visiblePublicProviders, but also includes private providers
+     * that are located on this element.
+     */
+    allProviders: {
+        [tokenKey: string]: NodeDef;
     };
     source: string;
 }
@@ -215,7 +233,8 @@ export declare enum PureExpressionType {
     Pipe = 2,
 }
 export interface QueryDef {
-    id: string;
+    id: number;
+    filterId: number;
     bindings: QueryBindingDef[];
 }
 export interface QueryBindingDef {
@@ -242,7 +261,7 @@ export interface NgContentDef {
 export interface ViewData {
     def: ViewDefinition;
     root: RootData;
-    parentIndex: number;
+    parentNodeDef: NodeDef;
     parent: ViewData;
     component: any;
     context: any;
@@ -353,7 +372,7 @@ export interface Services {
     detachEmbeddedView(elementData: ElementData, viewIndex: number): ViewData;
     moveEmbeddedView(elementData: ElementData, oldViewIndex: number, newViewIndex: number): ViewData;
     destroyView(view: ViewData): void;
-    resolveDep(view: ViewData, requestNodeIndex: number, elIndex: number, depDef: DepDef, notFoundValue?: any): any;
+    resolveDep(view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, depDef: DepDef, notFoundValue?: any): any;
     createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
     handleEvent: ViewHandleEventFn;
     updateDirectives: ViewUpdateFn;

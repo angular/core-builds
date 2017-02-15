@@ -101,7 +101,7 @@ export function dispatchEvent(view, nodeIndex, eventName, event) {
 export function declaredViewContainer(view) {
     if (view.parent) {
         const /** @type {?} */ parentView = view.parent;
-        return asElementData(parentView, view.parentIndex);
+        return asElementData(parentView, view.parentNodeDef.index);
     }
     return undefined;
 }
@@ -112,10 +112,10 @@ export function declaredViewContainer(view) {
  * @param {?} view
  * @return {?}
  */
-export function viewParentElIndex(view) {
+export function viewParentEl(view) {
     const /** @type {?} */ parentView = view.parent;
     if (parentView) {
-        return parentView.def.nodes[view.parentIndex].parent;
+        return view.parentNodeDef.parent;
     }
     else {
         return null;
@@ -154,13 +154,6 @@ export function nodeValue(view, index) {
     return undefined;
 }
 /**
- * @param {?} queryId
- * @return {?}
- */
-export function queryIdIsReference(queryId) {
-    return queryId.startsWith('#');
-}
-/**
  * @param {?} target
  * @param {?} name
  * @return {?}
@@ -174,6 +167,57 @@ export function elementEventFullName(target, name) {
  */
 export function isComponentView(view) {
     return view.component === view.context && !!view.parent;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+export function isEmbeddedView(view) {
+    return view.component !== view.context && !!view.parent;
+}
+/**
+ * @param {?} queryId
+ * @return {?}
+ */
+export function filterQueryId(queryId) {
+    return 1 << (queryId % 32);
+}
+/**
+ * @param {?} matchedQueriesDsl
+ * @return {?}
+ */
+export function splitMatchedQueriesDsl(matchedQueriesDsl) {
+    const /** @type {?} */ matchedQueries = {};
+    let /** @type {?} */ matchedQueryIds = 0;
+    const /** @type {?} */ references = {};
+    if (matchedQueriesDsl) {
+        matchedQueriesDsl.forEach(([queryId, valueType]) => {
+            if (typeof queryId === 'number') {
+                matchedQueries[queryId] = valueType;
+                matchedQueryIds |= filterQueryId(queryId);
+            }
+            else {
+                references[queryId] = valueType;
+            }
+        });
+    }
+    return { matchedQueries, references, matchedQueryIds };
+}
+/**
+ * @param {?} view
+ * @param {?} renderHost
+ * @param {?} def
+ * @return {?}
+ */
+export function getParentRenderElement(view, renderHost, def) {
+    let /** @type {?} */ parentEl;
+    if (!def.parent) {
+        parentEl = renderHost;
+    }
+    else if (def.renderParent) {
+        parentEl = asElementData(view, def.renderParent.index).renderElement;
+    }
+    return parentEl;
 }
 const /** @type {?} */ VIEW_DEFINITION_CACHE = new WeakMap();
 /**
@@ -241,8 +285,20 @@ export function visitRootRenderNodes(view, action, parentNode, nextSibling, targ
     if (action === RenderNodeAction.RemoveChild) {
         parentNode = view.root.renderer.parentNode(renderNode(view, view.def.lastRootNode));
     }
-    const /** @type {?} */ len = view.def.nodes.length;
-    for (let /** @type {?} */ i = 0; i < len; i++) {
+    visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
+}
+/**
+ * @param {?} view
+ * @param {?} action
+ * @param {?} startIndex
+ * @param {?} endIndex
+ * @param {?} parentNode
+ * @param {?} nextSibling
+ * @param {?} target
+ * @return {?}
+ */
+export function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
+    for (let /** @type {?} */ i = startIndex; i <= endIndex; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
         if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text ||
             nodeDef.type === NodeType.NgContent) {
@@ -267,7 +323,7 @@ export function visitProjectedRenderNodes(view, ngContentIndex, action, parentNo
         compView = compView.parent;
     }
     const /** @type {?} */ hostView = compView.parent;
-    const /** @type {?} */ hostElDef = hostView.def.nodes[viewParentElIndex(compView)];
+    const /** @type {?} */ hostElDef = viewParentEl(compView);
     const /** @type {?} */ startIndex = hostElDef.index + 1;
     const /** @type {?} */ endIndex = hostElDef.index + hostElDef.childCount;
     for (let /** @type {?} */ i = startIndex; i <= endIndex; i++) {
@@ -311,6 +367,9 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
                     visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
                 }
             }
+        }
+        if (nodeDef.type === NodeType.Element && !nodeDef.element.name) {
+            visitSiblingRenderNodes(view, action, nodeDef.index + 1, nodeDef.index + nodeDef.childCount, parentNode, nextSibling, target);
         }
     }
 }

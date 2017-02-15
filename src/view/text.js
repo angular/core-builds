@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isDevMode } from '../application_ref';
-import { BindingType, NodeType, asElementData, asTextData } from './types';
-import { checkAndUpdateBinding, sliceErrorStack } from './util';
+import { BindingType, NodeType, asTextData } from './types';
+import { checkAndUpdateBinding, getParentRenderElement, sliceErrorStack } from './util';
 /**
  * @param {?} ngContentIndex
  * @param {?} constants
@@ -32,13 +32,16 @@ export function textDef(ngContentIndex, constants) {
         index: undefined,
         reverseChildIndex: undefined,
         parent: undefined,
-        childFlags: undefined,
-        childMatchedQueries: undefined,
+        renderParent: undefined,
         bindingIndex: undefined,
         disposableIndex: undefined,
         // regular values
         flags: 0,
-        matchedQueries: {}, ngContentIndex,
+        childFlags: 0,
+        childMatchedQueries: 0,
+        matchedQueries: {},
+        matchedQueryIds: 0,
+        references: {}, ngContentIndex,
         childCount: 0, bindings,
         disposableCount: 0,
         element: undefined,
@@ -56,12 +59,12 @@ export function textDef(ngContentIndex, constants) {
  * @return {?}
  */
 export function createText(view, renderHost, def) {
-    const /** @type {?} */ parentNode = def.parent != null ? asElementData(view, def.parent).renderElement : renderHost;
     let /** @type {?} */ renderNode;
     const /** @type {?} */ renderer = view.root.renderer;
     renderNode = renderer.createText(def.text.prefix);
-    if (parentNode) {
-        renderer.appendChild(parentNode, renderNode);
+    const /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
+    if (parentEl) {
+        renderer.appendChild(parentEl, renderNode);
     }
     return { renderText: renderNode };
 }

@@ -13,11 +13,11 @@ import { checkAndUpdatePureExpressionDynamic, checkAndUpdatePureExpressionInline
 import { checkAndUpdateQuery, createQuery } from './query';
 import { checkAndUpdateTextDynamic, checkAndUpdateTextInline, createText } from './text';
 import { ArgumentType, NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList } from './types';
-import { checkBindingNoChanges, isComponentView, queryIdIsReference, resolveViewDefinition, viewParentElIndex } from './util';
+import { checkBindingNoChanges, isComponentView, resolveViewDefinition, viewParentEl } from './util';
 const /** @type {?} */ NOOP = () => undefined;
 /**
  * @param {?} flags
- * @param {?} nodesWithoutIndices
+ * @param {?} nodes
  * @param {?=} updateDirectives
  * @param {?=} updateRenderer
  * @param {?=} handleEvent
@@ -26,75 +26,110 @@ const /** @type {?} */ NOOP = () => undefined;
  * @param {?=} styles
  * @return {?}
  */
-export function viewDef(flags, nodesWithoutIndices, updateDirectives, updateRenderer, handleEvent, compId, encapsulation, styles) {
+export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent, compId, encapsulation, styles) {
     // clone nodes and set auto calculated values
-    if (nodesWithoutIndices.length === 0) {
+    if (nodes.length === 0) {
         throw new Error(`Illegal State: Views without nodes are not allowed!`);
     }
-    const /** @type {?} */ nodes = new Array(nodesWithoutIndices.length);
-    const /** @type {?} */ reverseChildNodes = new Array(nodesWithoutIndices.length);
+    const /** @type {?} */ reverseChildNodes = new Array(nodes.length);
     let /** @type {?} */ viewBindingCount = 0;
     let /** @type {?} */ viewDisposableCount = 0;
     let /** @type {?} */ viewNodeFlags = 0;
-    let /** @type {?} */ viewMatchedQueries = {};
+    let /** @type {?} */ viewMatchedQueries = 0;
     let /** @type {?} */ currentParent = null;
+    let /** @type {?} */ currentElementHasPublicProviders = false;
+    let /** @type {?} */ currentElementHasPrivateProviders = false;
     let /** @type {?} */ lastRootNode = null;
-    for (let /** @type {?} */ i = 0; i < nodesWithoutIndices.length; i++) {
+    for (let /** @type {?} */ i = 0; i < nodes.length; i++) {
         while (currentParent && i > currentParent.index + currentParent.childCount) {
-            const /** @type {?} */ newParent = nodes[currentParent.parent];
+            const /** @type {?} */ newParent = currentParent.parent;
             if (newParent) {
                 newParent.childFlags |= currentParent.childFlags;
-                copyQueryMatchesInto(currentParent.childMatchedQueries, newParent.childMatchedQueries);
+                newParent.childMatchedQueries |= currentParent.childMatchedQueries;
             }
             currentParent = newParent;
         }
-        const /** @type {?} */ nodeWithoutIndices = nodesWithoutIndices[i];
-        const /** @type {?} */ reverseChildIndex = calculateReverseChildIndex(currentParent, i, nodeWithoutIndices.childCount, nodesWithoutIndices.length);
-        const /** @type {?} */ node = cloneAndModifyNode(nodeWithoutIndices, {
-            index: i,
-            parent: currentParent ? currentParent.index : undefined,
-            bindingIndex: viewBindingCount,
-            disposableIndex: viewDisposableCount, reverseChildIndex,
-        });
-        if (node.element) {
-            node.element = cloneAndModifyElement(node.element, {
-                // Use protoypical inheritance to not get O(n^2) complexity...
-                providerIndices: Object.create(currentParent ? currentParent.element.providerIndices : null),
-            });
-        }
-        nodes[i] = node;
-        reverseChildNodes[reverseChildIndex] = node;
-        validateNode(currentParent, node, nodesWithoutIndices.length);
-        viewNodeFlags |= node.flags;
-        copyQueryMatchesInto(node.matchedQueries, viewMatchedQueries);
-        viewBindingCount += node.bindings.length;
-        viewDisposableCount += node.disposableCount;
-        if (currentParent) {
-            currentParent.childFlags |= node.flags;
-            copyQueryMatchesInto(node.matchedQueries, currentParent.childMatchedQueries);
-            if (node.element && node.element.template) {
-                copyQueryMatchesInto(node.element.template.nodeMatchedQueries, currentParent.childMatchedQueries);
+        const /** @type {?} */ node = nodes[i];
+        node.index = i;
+        node.parent = currentParent;
+        node.bindingIndex = viewBindingCount;
+        node.disposableIndex = viewDisposableCount;
+        node.reverseChildIndex =
+            calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
+        let /** @type {?} */ currentRenderParent;
+        if (currentParent &&
+            !(currentParent.type === NodeType.Element && currentParent.element.component)) {
+            // children of components should never be attached!
+            if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
+                currentRenderParent = currentParent.renderParent;
+            }
+            else {
+                currentRenderParent = currentParent;
             }
         }
+        node.renderParent = currentRenderParent;
+        if (node.element) {
+            const /** @type {?} */ elDef = node.element;
+            elDef.publicProviders =
+                currentParent ? currentParent.element.publicProviders : Object.create(null);
+            elDef.allProviders = elDef.publicProviders;
+            // Note: We assume that all providers of an element are before any child element!
+            currentElementHasPublicProviders = false;
+            currentElementHasPrivateProviders = false;
+        }
+        reverseChildNodes[node.reverseChildIndex] = node;
+        validateNode(currentParent, node, nodes.length);
+        viewNodeFlags |= node.flags;
+        viewMatchedQueries |= node.matchedQueryIds;
+        if (node.element && node.element.template) {
+            viewMatchedQueries |= node.element.template.nodeMatchedQueries;
+        }
+        if (currentParent) {
+            currentParent.childFlags |= node.flags;
+            currentParent.childMatchedQueries |= node.matchedQueryIds;
+            if (node.element && node.element.template) {
+                currentParent.childMatchedQueries |= node.element.template.nodeMatchedQueries;
+            }
+        }
+        viewBindingCount += node.bindings.length;
+        viewDisposableCount += node.disposableCount;
         if (!currentParent) {
             lastRootNode = node;
         }
         if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
-            currentParent.element.providerIndices[node.provider.tokenKey] = i;
-        }
-        if (node.query) {
-            const /** @type {?} */ elementDef = nodes[currentParent.parent];
-            elementDef.element.providerIndices[node.query.id] = i;
+            if (!currentElementHasPublicProviders) {
+                currentElementHasPublicProviders = true;
+                // Use protoypical inheritance to not get O(n^2) complexity...
+                currentParent.element.publicProviders =
+                    Object.create(currentParent.element.publicProviders);
+                currentParent.element.allProviders = currentParent.element.publicProviders;
+            }
+            const /** @type {?} */ isPrivateService = (node.flags & NodeFlags.PrivateProvider) !== 0;
+            const /** @type {?} */ isComponent = (node.flags & NodeFlags.HasComponent) !== 0;
+            if (!isPrivateService || isComponent) {
+                currentParent.element.publicProviders[node.provider.tokenKey] = node;
+            }
+            else {
+                if (!currentElementHasPrivateProviders) {
+                    currentElementHasPrivateProviders = true;
+                    // Use protoypical inheritance to not get O(n^2) complexity...
+                    currentParent.element.allProviders = Object.create(currentParent.element.publicProviders);
+                }
+                currentParent.element.allProviders[node.provider.tokenKey] = node;
+            }
+            if (isComponent) {
+                currentParent.element.component = node;
+            }
         }
         if (node.childCount) {
             currentParent = node;
         }
     }
     while (currentParent) {
-        const /** @type {?} */ newParent = nodes[currentParent.parent];
+        const /** @type {?} */ newParent = currentParent.parent;
         if (newParent) {
             newParent.childFlags |= currentParent.childFlags;
-            copyQueryMatchesInto(currentParent.childMatchedQueries, newParent.childMatchedQueries);
+            newParent.childMatchedQueries |= currentParent.childMatchedQueries;
         }
         currentParent = newParent;
     }
@@ -110,18 +145,6 @@ export function viewDef(flags, nodesWithoutIndices, updateDirectives, updateRend
         bindingCount: viewBindingCount,
         disposableCount: viewDisposableCount, lastRootNode
     };
-}
-/**
- * @param {?} source
- * @param {?} target
- * @return {?}
- */
-function copyQueryMatchesInto(source, target) {
-    for (let /** @type {?} */ prop in source) {
-        if (!queryIdIsReference(prop)) {
-            target[prop] = true;
-        }
-    }
 }
 /**
  * @param {?} currentParent
@@ -199,54 +222,6 @@ function validateNode(parent, node, nodeCount) {
     }
 }
 /**
- * @param {?} nodeDef
- * @param {?} values
- * @return {?}
- */
-function cloneAndModifyNode(nodeDef, values) {
-    // Attention: don't use copyInto here to prevent v8 from treating this object
-    // as a dictionary!
-    return {
-        type: nodeDef.type,
-        index: values.index,
-        reverseChildIndex: values.reverseChildIndex,
-        parent: values.parent,
-        childFlags: 0,
-        childMatchedQueries: {},
-        bindingIndex: values.bindingIndex,
-        disposableIndex: values.disposableIndex,
-        flags: nodeDef.flags,
-        matchedQueries: nodeDef.matchedQueries,
-        ngContentIndex: nodeDef.ngContentIndex,
-        childCount: nodeDef.childCount,
-        bindings: nodeDef.bindings,
-        disposableCount: nodeDef.disposableCount,
-        element: nodeDef.element,
-        provider: nodeDef.provider,
-        text: nodeDef.text,
-        pureExpression: nodeDef.pureExpression,
-        query: nodeDef.query,
-        ngContent: nodeDef.ngContent
-    };
-}
-/**
- * @param {?} elementDef
- * @param {?} values
- * @return {?}
- */
-function cloneAndModifyElement(elementDef, values) {
-    // Attention: don't use copyInto here to prevent v8 from treating this object
-    // as a dictionary!
-    return {
-        name: elementDef.name,
-        attrs: elementDef.attrs,
-        outputs: elementDef.outputs,
-        template: elementDef.template,
-        providerIndices: values.providerIndices,
-        source: elementDef.source
-    };
-}
-/**
  * @param {?} parent
  * @param {?} anchorDef
  * @param {?=} context
@@ -255,7 +230,7 @@ function cloneAndModifyElement(elementDef, values) {
 export function createEmbeddedView(parent, anchorDef, context) {
     // embedded views are seen as siblings to the anchor, so we need
     // to get the parent of the anchor and use it as parentIndex.
-    const /** @type {?} */ view = createView(parent.root, parent, anchorDef.index, anchorDef.element.template);
+    const /** @type {?} */ view = createView(parent.root, parent, anchorDef, anchorDef.element.template);
     initView(view, parent.component, context);
     createViewNodes(view);
     return view;
@@ -275,17 +250,17 @@ export function createRootView(root, def, context) {
 /**
  * @param {?} root
  * @param {?} parent
- * @param {?} parentIndex
+ * @param {?} parentNodeDef
  * @param {?} def
  * @return {?}
  */
-function createView(root, parent, parentIndex, def) {
+function createView(root, parent, parentNodeDef, def) {
     const /** @type {?} */ nodes = new Array(def.nodes.length);
     const /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
     const /** @type {?} */ view = {
         def,
         parent,
-        parentIndex,
+        parentNodeDef,
         context: undefined,
         component: undefined, nodes,
         state: ViewState.FirstCheck | ViewState.ChecksEnabled, root,
@@ -310,7 +285,7 @@ function initView(view, component, context) {
 function createViewNodes(view) {
     let /** @type {?} */ renderHost;
     if (isComponentView(view)) {
-        renderHost = asElementData(view.parent, viewParentElIndex(view)).renderElement;
+        renderHost = asElementData(view.parent, viewParentEl(view).index).renderElement;
     }
     const /** @type {?} */ def = view.def;
     const /** @type {?} */ nodes = view.nodes;
@@ -341,7 +316,7 @@ function createViewNodes(view) {
                     // Components can inject a ChangeDetectorRef that needs a references to
                     // the component view. Therefore, we create the component view first
                     // and set the ProviderData in ViewData, and then instantiate the provider.
-                    const /** @type {?} */ componentView = createView(view.root, view, nodeDef.index, resolveViewDefinition(nodeDef.provider.component));
+                    const /** @type {?} */ componentView = createView(view.root, view, nodeDef, resolveViewDefinition(nodeDef.provider.component));
                     const /** @type {?} */ providerData = ({ componentView, instance: undefined });
                     nodes[i] = (providerData);
                     const /** @type {?} */ instance = providerData.instance = createDirectiveInstance(view, nodeDef);
@@ -370,6 +345,8 @@ function createViewNodes(view) {
     // Create the ViewData.nodes of component views after we created everything else,
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
+    // fill static content and view queries
+    execQueriesAction(view, NodeFlags.HasContentQuery | NodeFlags.HasViewQuery, NodeFlags.HasStaticQuery, QueryAction.CheckAndUpdate);
 }
 /**
  * @param {?} view
@@ -378,10 +355,10 @@ function createViewNodes(view) {
 export function checkNoChangesView(view) {
     Services.updateDirectives(checkNoChangesNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckNoChanges);
+    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckNoChanges);
     Services.updateRenderer(checkNoChangesNode, view);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckNoChanges);
+    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckNoChanges);
 }
 /**
  * @param {?} view
@@ -390,12 +367,12 @@ export function checkNoChangesView(view) {
 export function checkAndUpdateView(view) {
     Services.updateDirectives(checkAndUpdateNode, view);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasContentQuery, QueryAction.CheckAndUpdate);
+    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
         (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
     Services.updateRenderer(checkAndUpdateNode, view);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasViewQuery, QueryAction.CheckAndUpdate);
+    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
         (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
     if (view.def.flags & ViewFlags.OnPush) {
@@ -680,17 +657,19 @@ QueryAction[QueryAction.CheckNoChanges] = "CheckNoChanges";
 /**
  * @param {?} view
  * @param {?} queryFlags
+ * @param {?} staticDynamicQueryFlag
  * @param {?} action
  * @return {?}
  */
-function execQueriesAction(view, queryFlags, action) {
-    if (!(view.def.nodeFlags & queryFlags)) {
+function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, action) {
+    if (!(view.def.nodeFlags & queryFlags) || !(view.def.nodeFlags & staticDynamicQueryFlag)) {
         return;
     }
     const /** @type {?} */ nodeCount = view.def.nodes.length;
     for (let /** @type {?} */ i = 0; i < nodeCount; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & queryFlags) {
+        if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
+            const /** @type {?} */ elDef = nodeDef.parent.parent;
             Services.setCurrentNode(view, nodeDef.index);
             switch (action) {
                 case QueryAction.CheckAndUpdate:
@@ -701,8 +680,8 @@ function execQueriesAction(view, queryFlags, action) {
                     break;
             }
         }
-        else if ((nodeDef.childFlags & queryFlags) === 0) {
-            // no child has a content query
+        if (!(nodeDef.childFlags & queryFlags) || !(nodeDef.childFlags & staticDynamicQueryFlag)) {
+            // no child has a matching query
             // then skip the children
             i += nodeDef.childCount;
         }
