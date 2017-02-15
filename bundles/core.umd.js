@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.7-269cf42
+ * @license Angular v4.0.0-beta.7-b4d444a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -364,6 +364,7 @@
      *   }
      * });
      * ```
+     * @suppress {globalThis}
      * \@stable
      * @param {?} clsDef
      * @return {?}
@@ -395,6 +396,7 @@
         return (constructor);
     }
     /**
+     * @suppress {globalThis}
      * @param {?} name
      * @param {?} props
      * @param {?=} parentClass
@@ -1131,7 +1133,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-269cf42');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-b4d444a');
 
     /**
      * Inject decorator and metadata.
@@ -2482,7 +2484,7 @@
         var /** @type {?} */ optional = false;
         if (!Array.isArray(metadata)) {
             if (metadata instanceof Inject) {
-                return _createDependency(metadata.token, optional, null);
+                return _createDependency(metadata['token'], optional, null);
             }
             else {
                 return _createDependency(metadata, optional, null);
@@ -2495,7 +2497,7 @@
                 token = paramMetadata;
             }
             else if (paramMetadata instanceof Inject) {
-                token = paramMetadata.token;
+                token = paramMetadata['token'];
             }
             else if (paramMetadata instanceof Optional) {
                 optional = true;
