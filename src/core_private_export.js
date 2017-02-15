@@ -67,6 +67,7 @@ export const /** @type {?} */ __core_private__ = ({
     ReflectionCapabilities: reflection_capabilities.ReflectionCapabilities,
     makeDecorator: decorators.makeDecorator,
     DebugDomRootRenderer: debug.DebugDomRootRenderer,
+    DebugDomRendererV2: debug.DebugDomRendererV2,
     Console: console.Console,
     reflector: reflection.reflector,
     Reflector: reflection.Reflector,

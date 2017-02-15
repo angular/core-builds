@@ -126,16 +126,31 @@ export class DebugElement extends DebugNode {
     insertChildrenAfter(child, newChildren) {
         const /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
-            const /** @type {?} */ previousChildren = this.childNodes.slice(0, siblingIndex + 1);
-            const /** @type {?} */ nextChildren = this.childNodes.slice(siblingIndex + 1);
-            this.childNodes = previousChildren.concat(newChildren, nextChildren);
-            for (let /** @type {?} */ i = 0; i < newChildren.length; ++i) {
-                const /** @type {?} */ newChild = newChildren[i];
-                if (newChild.parent) {
-                    newChild.parent.removeChild(newChild);
+            this.childNodes.splice(siblingIndex + 1, 0, ...newChildren);
+            newChildren.forEach(c => {
+                if (c.parent) {
+                    c.parent.removeChild(c);
                 }
-                newChild.parent = this;
+                c.parent = this;
+            });
+        }
+    }
+    /**
+     * @param {?} refChild
+     * @param {?} newChild
+     * @return {?}
+     */
+    insertBefore(refChild, newChild) {
+        const /** @type {?} */ refIndex = this.childNodes.indexOf(refChild);
+        if (refIndex === -1) {
+            this.addChild(newChild);
+        }
+        else {
+            if (newChild.parent) {
+                newChild.parent.removeChild(newChild);
             }
+            newChild.parent = this;
+            this.childNodes.splice(refIndex, 0, newChild);
         }
     }
     /**

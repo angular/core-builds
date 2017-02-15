@@ -6,5 +6,5 @@
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for render
-export { RenderComponentType, Renderer, RootRenderer } from './render/api';
+export { RENDERER_V2_DIRECT, RenderComponentType, Renderer, RendererV2, RootRenderer } from './render/api';
 //# sourceMappingURL=render.js.map

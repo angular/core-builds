@@ -8,8 +8,14 @@
 import { AnimationKeyframe } from '../../src/animation/animation_keyframe';
 import { AnimationPlayer } from '../../src/animation/animation_player';
 import { AnimationStyles } from '../../src/animation/animation_styles';
-import { Injector } from '../di/injector';
+import { InjectionToken, Injector } from '../di';
 import { ViewEncapsulation } from '../metadata/view';
+/**
+ * Provide a concrete implementation of {@link RendererV2}
+ *
+ * @experimental
+ */
+export declare const RENDERER_V2_DIRECT: InjectionToken<RendererV2>;
 /**
  * @experimental
  */
@@ -69,6 +75,53 @@ export declare abstract class Renderer {
     abstract invokeElementMethod(renderElement: any, methodName: string, args?: any[]): void;
     abstract setText(renderNode: any, text: string): void;
     abstract animate(element: any, startingStyles: AnimationStyles, keyframes: AnimationKeyframe[], duration: number, delay: number, easing: string, previousPlayers?: AnimationPlayer[]): AnimationPlayer;
+}
+/**
+ * @experimental
+ */
+export declare abstract class RendererV2 {
+    abstract createElement(name: string, namespace?: string, debugInfo?: RenderDebugContext): any;
+    abstract createComment(value: string, debugInfo?: RenderDebugContext): any;
+    abstract createText(value: string, debugInfo?: RenderDebugContext): any;
+    abstract appendChild(parent: any, newChild: any): void;
+    abstract insertBefore(parent: any, newChild: any, refChild: any): void;
+    abstract removeChild(parent: any, oldChild: any): void;
+    abstract selectRootElement(selectorOrNode: string | any, debugInfo?: RenderDebugContext): any;
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     */
+    abstract parentNode(node: any): any;
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     */
+    abstract nextSibling(node: any): any;
+    abstract setAttribute(el: any, name: string, value: string, namespace?: string): void;
+    abstract removeAttribute(el: any, name: string, namespace?: string): void;
+    abstract setBindingDebugInfo(el: any, propertyName: string, propertyValue: string): void;
+    abstract removeBindingDebugInfo(el: any, propertyName: string): void;
+    abstract addClass(el: any, name: string): void;
+    abstract removeClass(el: any, name: string): void;
+    abstract setStyle(el: any, style: string, value: any, hasVendorPrefix: boolean, hasImportant: boolean): void;
+    abstract removeStyle(el: any, style: string, hasVendorPrefix: boolean): void;
+    abstract setProperty(el: any, name: string, value: any): void;
+    abstract setText(node: any, value: string): void;
+    abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean): () => void;
+}
+export declare abstract class RenderDebugContext {
+    readonly abstract injector: Injector;
+    readonly abstract component: any;
+    readonly abstract providerTokens: any[];
+    readonly abstract references: {
+        [key: string]: any;
+    };
+    readonly abstract context: any;
+    readonly abstract source: string;
+    readonly abstract componentRenderElement: any;
+    readonly abstract renderNode: any;
 }
 /**
  * Injectable service that provides a low-level interface for modifying the UI.

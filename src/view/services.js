@@ -6,13 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isDevMode } from '../application_ref';
-import * as v1renderer from '../render/api';
+import { RendererV2 } from '../render/api';
 import { Sanitizer } from '../security';
 import { isViewDebugError, viewDestroyedError, viewWrappedDebugError } from './errors';
 import { resolveDep } from './provider';
 import { getQueryValue } from './query';
 import { createInjector } from './refs';
-import { DirectDomRenderer, LegacyRendererAdapter } from './renderer';
 import { ArgumentType, BindingType, NodeFlags, NodeType, Services, ViewState, asElementData, asProviderData } from './types';
 import { checkBinding, isComponentView, queryIdIsReference, renderNode, viewParentElIndex } from './util';
 import { checkAndUpdateView, checkNoChangesView, createEmbeddedView, createRootView, destroyView } from './view';
@@ -122,10 +121,7 @@ function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def
  */
 function createRootData(injector, projectableNodes, rootSelectorOrNode) {
     const /** @type {?} */ sanitizer = injector.get(Sanitizer);
-    // TODO(tbosch): once the new renderer interface is implemented via platform-browser,
-    // just get it via the injector and drop LegacyRendererAdapter and DirectDomRenderer.
-    const /** @type {?} */ renderer = isDevMode() ? new LegacyRendererAdapter(injector.get(v1renderer.RootRenderer)) :
-        new DirectDomRenderer();
+    const /** @type {?} */ renderer = injector.get(RendererV2);
     const /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
     return { injector, projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer, renderer };
 }
@@ -233,7 +229,6 @@ function debugUpdateRenderer(check, view) {
         debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         return result;
     }
-    ;
 }
 /**
  * @param {?} delegate
@@ -326,10 +321,11 @@ class DebugRenderer {
     }
     /**
      * @param {?} name
+     * @param {?=} namespace
      * @return {?}
      */
-    createElement(name) {
-        return this._delegate.createElement(name, getCurrentDebugContext());
+    createElement(name, namespace) {
+        return this._delegate.createElement(name, namespace, getCurrentDebugContext());
     }
     /**
      * @param {?} value
@@ -391,17 +387,21 @@ class DebugRenderer {
      * @param {?} el
      * @param {?} name
      * @param {?} value
+     * @param {?=} namespace
      * @return {?}
      */
-    setAttribute(el, name, value) {
-        return this._delegate.setAttribute(el, name, value);
+    setAttribute(el, name, value, namespace) {
+        return this._delegate.setAttribute(el, name, value, namespace);
     }
     /**
      * @param {?} el
      * @param {?} name
+     * @param {?=} namespace
      * @return {?}
      */
-    removeAttribute(el, name) { return this._delegate.removeAttribute(el, name); }
+    removeAttribute(el, name, namespace) {
+        return this._delegate.removeAttribute(el, name, namespace);
+    }
     /**
      * @param {?} el
      * @param {?} propertyName
@@ -435,17 +435,22 @@ class DebugRenderer {
      * @param {?} el
      * @param {?} style
      * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
      * @return {?}
      */
-    setStyle(el, style, value) {
-        return this._delegate.setStyle(el, style, value);
+    setStyle(el, style, value, hasVendorPrefix, hasImportant) {
+        return this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
     }
     /**
      * @param {?} el
      * @param {?} style
+     * @param {?} hasVendorPrefix
      * @return {?}
      */
-    removeStyle(el, style) { return this._delegate.removeStyle(el, style); }
+    removeStyle(el, style, hasVendorPrefix) {
+        return this._delegate.removeStyle(el, style, hasVendorPrefix);
+    }
     /**
      * @param {?} el
      * @param {?} name

@@ -237,6 +237,10 @@ RenderNodeAction[RenderNodeAction.RemoveChild] = "RemoveChild";
  * @return {?}
  */
 export function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
+    // We need to re-compute the parent node in case the nodes have been moved around manually
+    if (action === RenderNodeAction.RemoveChild) {
+        parentNode = view.root.renderer.parentNode(renderNode(view, view.def.lastRootNode));
+    }
     const /** @type {?} */ len = view.def.nodes.length;
     for (let /** @type {?} */ i = 0; i < len; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];

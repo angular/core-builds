@@ -54,6 +54,7 @@ export declare class DebugElement extends DebugNode {
     addChild(child: DebugNode): void;
     removeChild(child: DebugNode): void;
     insertChildrenAfter(child: DebugNode, newChildren: DebugNode[]): void;
+    insertBefore(refChild: DebugNode, newChild: DebugNode): void;
     query(predicate: Predicate<DebugElement>): DebugElement;
     queryAll(predicate: Predicate<DebugElement>): DebugElement[];
     queryAllNodes(predicate: Predicate<DebugNode>): DebugNode[];

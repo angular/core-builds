@@ -5,6 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { InjectionToken } from '../di';
+/**
+ * Provide a concrete implementation of {@link RendererV2}
+ *
+ * @experimental
+ */
+export const /** @type {?} */ RENDERER_V2_DIRECT = new InjectionToken('Renderer V2');
 export class RenderComponentType {
     /**
      * @param {?} id
@@ -224,6 +231,213 @@ export class Renderer {
      * @return {?}
      */
     animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { }
+}
+/**
+ * \@experimental
+ * @abstract
+ */
+export class RendererV2 {
+    /**
+     * @abstract
+     * @param {?} name
+     * @param {?=} namespace
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    createElement(name, namespace, debugInfo) { }
+    /**
+     * @abstract
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    createComment(value, debugInfo) { }
+    /**
+     * @abstract
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    createText(value, debugInfo) { }
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */
+    appendChild(parent, newChild) { }
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */
+    insertBefore(parent, newChild, refChild) { }
+    /**
+     * @abstract
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */
+    removeChild(parent, oldChild) { }
+    /**
+     * @abstract
+     * @param {?} selectorOrNode
+     * @param {?=} debugInfo
+     * @return {?}
+     */
+    selectRootElement(selectorOrNode, debugInfo) { }
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */
+    parentNode(node) { }
+    /**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */
+    nextSibling(node) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */
+    setAttribute(el, name, value, namespace) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    removeAttribute(el, name, namespace) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(el, propertyName, propertyValue) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} propertyName
+     * @return {?}
+     */
+    removeBindingDebugInfo(el, propertyName) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    addClass(el, name) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    removeClass(el, name) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
+     * @return {?}
+     */
+    setStyle(el, style, value, hasVendorPrefix, hasImportant) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} hasVendorPrefix
+     * @return {?}
+     */
+    removeStyle(el, style, hasVendorPrefix) { }
+    /**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    setProperty(el, name, value) { }
+    /**
+     * @abstract
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */
+    setText(node, value) { }
+    /**
+     * @abstract
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */
+    listen(target, eventName, callback) { }
+}
+/**
+ * @abstract
+ */
+export class RenderDebugContext {
+    /**
+     * @abstract
+     * @return {?}
+     */
+    injector() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    component() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    providerTokens() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    references() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    context() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    source() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    componentRenderElement() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    renderNode() { }
 }
 /**
  * Injectable service that provides a low-level interface for modifying the UI.

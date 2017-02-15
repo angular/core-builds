@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { RenderDebugContext } from '../render/api';
 export let ArgumentType = {};
 ArgumentType.Inline = 0;
 ArgumentType.Dynamic = 1;
@@ -187,51 +188,6 @@ export function asPureExpressionData(view, index) {
  */
 export function asQueryList(view, index) {
     return (view.nodes[index]);
-}
-/**
- * @abstract
- */
-export class RenderDebugContext {
-    /**
-     * @abstract
-     * @return {?}
-     */
-    injector() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    component() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    providerTokens() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    references() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    context() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    source() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    componentRenderElement() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    renderNode() { }
 }
 /**
  * @abstract
