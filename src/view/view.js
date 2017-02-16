@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ViewEncapsulation } from '../metadata/view';
 import { checkAndUpdateElementDynamic, checkAndUpdateElementInline, createElement } from './element';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
 import { appendNgContent } from './ng_content';
@@ -12,8 +13,8 @@ import { callLifecycleHooksChildrenFirst, checkAndUpdateDirectiveDynamic, checkA
 import { checkAndUpdatePureExpressionDynamic, checkAndUpdatePureExpressionInline, createPureExpression } from './pure_expression';
 import { checkAndUpdateQuery, createQuery } from './query';
 import { checkAndUpdateTextDynamic, checkAndUpdateTextInline, createText } from './text';
-import { ArgumentType, NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList } from './types';
-import { checkBindingNoChanges, isComponentView, resolveViewDefinition, viewParentEl } from './util';
+import { ArgumentType, NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asPureExpressionData, asQueryList, asTextData } from './types';
+import { checkBindingNoChanges, isComponentView, resolveViewDefinition } from './util';
 var /** @type {?} */ NOOP = function () { return undefined; };
 /**
  * @param {?} flags
@@ -21,12 +22,9 @@ var /** @type {?} */ NOOP = function () { return undefined; };
  * @param {?=} updateDirectives
  * @param {?=} updateRenderer
  * @param {?=} handleEvent
- * @param {?=} compId
- * @param {?=} encapsulation
- * @param {?=} styles
  * @return {?}
  */
-export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent, compId, encapsulation, styles) {
+export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent) {
     // clone nodes and set auto calculated values
     if (nodes.length === 0) {
         throw new Error("Illegal State: Views without nodes are not allowed!");
@@ -58,8 +56,11 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
             calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
         var /** @type {?} */ currentRenderParent = void 0;
         if (currentParent &&
-            !(currentParent.type === NodeType.Element && currentParent.element.component)) {
-            // children of components should never be attached!
+            (currentParent.type !== NodeType.Element || !currentParent.element.component ||
+                (currentParent.element.component.provider.componentRenderType &&
+                    currentParent.element.component.provider.componentRenderType.encapsulation ===
+                        ViewEncapsulation.Native))) {
+            // children of components that don't use native encapsulation should never be attached!
             if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
                 currentRenderParent = currentParent.renderParent;
             }
@@ -133,7 +134,6 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         }
         currentParent = newParent;
     }
-    var /** @type {?} */ componentDef = compId ? ({ id: compId, encapsulation: encapsulation, styles: styles }) : undefined;
     return {
         nodeFlags: viewNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags: flags,
@@ -141,7 +141,6 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         updateDirectives: updateDirectives || NOOP,
         updateRenderer: updateRenderer || NOOP,
         handleEvent: handleEvent || NOOP,
-        component: componentDef,
         bindingCount: viewBindingCount,
         disposableCount: viewDisposableCount, lastRootNode: lastRootNode
     };
@@ -230,7 +229,7 @@ function validateNode(parent, node, nodeCount) {
 export function createEmbeddedView(parent, anchorDef, context) {
     // embedded views are seen as siblings to the anchor, so we need
     // to get the parent of the anchor and use it as parentIndex.
-    var /** @type {?} */ view = createView(parent.root, parent, anchorDef, anchorDef.element.template);
+    var /** @type {?} */ view = createView(parent.root, parent.renderer, parent, anchorDef, anchorDef.element.template);
     initView(view, parent.component, context);
     createViewNodes(view);
     return view;
@@ -242,19 +241,20 @@ export function createEmbeddedView(parent, anchorDef, context) {
  * @return {?}
  */
 export function createRootView(root, def, context) {
-    var /** @type {?} */ view = createView(root, null, null, def);
+    var /** @type {?} */ view = createView(root, root.renderer, null, null, def);
     initView(view, context, context);
     createViewNodes(view);
     return view;
 }
 /**
  * @param {?} root
+ * @param {?} renderer
  * @param {?} parent
  * @param {?} parentNodeDef
  * @param {?} def
  * @return {?}
  */
-function createView(root, parent, parentNodeDef, def) {
+function createView(root, renderer, parent, parentNodeDef, def) {
     var /** @type {?} */ nodes = new Array(def.nodes.length);
     var /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
     var /** @type {?} */ view = {
@@ -263,7 +263,7 @@ function createView(root, parent, parentNodeDef, def) {
         parentNodeDef: parentNodeDef,
         context: undefined,
         component: undefined, nodes: nodes,
-        state: ViewState.FirstCheck | ViewState.ChecksEnabled, root: root,
+        state: ViewState.FirstCheck | ViewState.ChecksEnabled, root: root, renderer: renderer,
         oldValues: new Array(def.bindingCount), disposables: disposables
     };
     return view;
@@ -285,7 +285,8 @@ function initView(view, component, context) {
 function createViewNodes(view) {
     var /** @type {?} */ renderHost;
     if (isComponentView(view)) {
-        renderHost = asElementData(view.parent, viewParentEl(view).index).renderElement;
+        var /** @type {?} */ hostDef = view.parentNodeDef;
+        renderHost = asElementData(view.parent, hostDef.parent.index).renderElement;
     }
     var /** @type {?} */ def = view.def;
     var /** @type {?} */ nodes = view.nodes;
@@ -316,7 +317,17 @@ function createViewNodes(view) {
                     // Components can inject a ChangeDetectorRef that needs a references to
                     // the component view. Therefore, we create the component view first
                     // and set the ProviderData in ViewData, and then instantiate the provider.
-                    var /** @type {?} */ componentView = createView(view.root, view, nodeDef, resolveViewDefinition(nodeDef.provider.component));
+                    var /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.provider.component);
+                    var /** @type {?} */ compRenderType = nodeDef.provider.componentRenderType;
+                    var /** @type {?} */ compRenderer = void 0;
+                    if (!compRenderType) {
+                        compRenderer = view.root.renderer;
+                    }
+                    else {
+                        var /** @type {?} */ hostEl = asElementData(view, nodeDef.parent.index).renderElement;
+                        compRenderer = view.root.rendererFactory.createRenderer(hostEl, compRenderType);
+                    }
+                    var /** @type {?} */ componentView = createView(view.root, compRenderer, view, nodeDef, compViewDef);
                     var /** @type {?} */ providerData = ({ componentView: componentView, instance: undefined });
                     nodes[i] = (providerData);
                     var /** @type {?} */ instance = providerData.instance = createDirectiveInstance(view, nodeDef);
@@ -556,7 +567,29 @@ export function destroyView(view) {
             view.disposables[i]();
         }
     }
+    if (view.renderer.destroyNode) {
+        destroyViewNodes(view);
+    }
+    if (view.parentNodeDef && view.parentNodeDef.flags & NodeFlags.HasComponent) {
+        view.renderer.destroy();
+    }
     view.state |= ViewState.Destroyed;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function destroyViewNodes(view) {
+    var /** @type {?} */ len = view.def.nodes.length;
+    for (var /** @type {?} */ i = 0; i < len; i++) {
+        var /** @type {?} */ def = view.def.nodes[i];
+        if (def.type === NodeType.Element) {
+            view.renderer.destroyNode(asElementData(view, i).renderElement);
+        }
+        else if (def.type === NodeType.Text) {
+            view.renderer.destroyNode(asTextData(view, i).renderText);
+        }
+    }
 }
 var ViewAction = {};
 ViewAction.CreateViewNodes = 0;

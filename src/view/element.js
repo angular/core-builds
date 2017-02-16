@@ -144,7 +144,7 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
 export function createElement(view, renderHost, def) {
     var /** @type {?} */ elDef = def.element;
     var /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     var /** @type {?} */ el;
     if (view.parent || !rootSelectorOrNode) {
         if (elDef.name) {
@@ -285,7 +285,7 @@ function setElementAttribute(view, binding, renderNode, name, value) {
     var /** @type {?} */ securityContext = binding.securityContext;
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     renderValue = renderValue != null ? renderValue.toString() : null;
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     // TODO(vicb): move the namespace to the node definition
     var /** @type {?} */ nsAndName = splitNamespace(name);
     if (value != null) {
@@ -303,7 +303,7 @@ function setElementAttribute(view, binding, renderNode, name, value) {
  * @return {?}
  */
 function setElementClass(view, renderNode, name, value) {
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     if (value) {
         renderer.addClass(renderNode, name);
     }
@@ -331,7 +331,7 @@ function setElementStyle(view, binding, renderNode, name, value) {
     else {
         renderValue = null;
     }
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     if (renderValue != null) {
         renderer.setStyle(renderNode, name, renderValue, false, false);
     }
@@ -350,7 +350,7 @@ function setElementStyle(view, binding, renderNode, name, value) {
 function setElementProperty(view, binding, renderNode, name, value) {
     var /** @type {?} */ securityContext = binding.securityContext;
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
-    view.root.renderer.setProperty(renderNode, name, renderValue);
+    view.renderer.setProperty(renderNode, name, renderValue);
 }
 var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
 /**

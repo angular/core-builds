@@ -60,7 +60,7 @@ export function textDef(ngContentIndex, constants) {
  */
 export function createText(view, renderHost, def) {
     var /** @type {?} */ renderNode;
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     renderNode = renderer.createText(def.text.prefix);
     var /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
     if (parentEl) {
@@ -146,7 +146,7 @@ export function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, 
         }
         value = def.text.prefix + value;
         var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-        view.root.renderer.setText(renderNode, value);
+        view.renderer.setValue(renderNode, value);
     }
 }
 /**
@@ -172,7 +172,7 @@ export function checkAndUpdateTextDynamic(view, def, values) {
         }
         value = def.text.prefix + value;
         var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-        view.root.renderer.setText(renderNode, value);
+        view.renderer.setValue(renderNode, value);
     }
 }
 /**

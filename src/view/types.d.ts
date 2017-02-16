@@ -1,11 +1,9 @@
 import { Injector } from '../di';
 import { QueryList } from '../linker/query_list';
-import { ViewEncapsulation } from '../metadata/view';
-import { RenderDebugContext, RendererV2 } from '../render/api';
+import { ComponentRenderTypeV2, RendererFactoryV2, RendererV2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
     flags: ViewFlags;
-    component: ComponentDefinition;
     updateDirectives: ViewUpdateFn;
     updateRenderer: ViewUpdateFn;
     handleEvent: ViewHandleEventFn;
@@ -48,11 +46,6 @@ export declare enum ArgumentType {
 export declare enum ViewFlags {
     None = 0,
     OnPush = 2,
-}
-export interface ComponentDefinition {
-    id: string;
-    encapsulation: ViewEncapsulation;
-    styles: string[];
 }
 /**
  * A node definition in the view.
@@ -194,6 +187,7 @@ export interface ProviderDef {
     value: any;
     deps: DepDef[];
     outputs: DirectiveOutputDef[];
+    componentRenderType: ComponentRenderTypeV2;
     component: ViewDefinitionFactory;
 }
 export declare enum ProviderType {
@@ -261,6 +255,7 @@ export interface NgContentDef {
 export interface ViewData {
     def: ViewDefinition;
     root: RootData;
+    renderer: RendererV2;
     parentNodeDef: NodeDef;
     parent: ViewData;
     component: any;
@@ -356,11 +351,22 @@ export interface RootData {
     projectableNodes: any[][];
     selectorOrNode: any;
     renderer: RendererV2;
+    rendererFactory: RendererFactoryV2;
     sanitizer: Sanitizer;
 }
-export declare abstract class DebugContext extends RenderDebugContext {
+export declare abstract class DebugContext {
     readonly abstract view: ViewData;
     readonly abstract nodeIndex: number;
+    readonly abstract injector: Injector;
+    readonly abstract component: any;
+    readonly abstract providerTokens: any[];
+    readonly abstract references: {
+        [key: string]: any;
+    };
+    readonly abstract context: any;
+    readonly abstract source: string;
+    readonly abstract componentRenderElement: any;
+    readonly abstract renderNode: any;
 }
 export interface Services {
     setCurrentNode(view: ViewData, nodeIndex: number): void;

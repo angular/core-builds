@@ -18,7 +18,7 @@ export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformR
 export { APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, APP_BOOTSTRAP_LISTENER } from './application_tokens';
 export { APP_INITIALIZER, ApplicationInitStatus } from './application_init';
 export { NgZone } from './zone';
-export { RENDERER_V2_DIRECT, RenderComponentType, Renderer, RendererV2, RootRenderer } from './render';
+export { RenderComponentType, Renderer, RendererFactoryV2, RendererV2, RootRenderer } from './render';
 export { COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef } from './linker';
 export { DebugElement, DebugNode, asNativeElements, getDebugNode } from './debug/debug_node';
 export { Testability, TestabilityRegistry, setTestabilityGetter } from './testability/testability';

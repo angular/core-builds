@@ -6,7 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { isDevMode } from '../application_ref';
-import { RendererV2 } from '../render/api';
+import { DebugElement, DebugNode, EventListener, getDebugNode, indexDebugNode, removeDebugNodeFromIndex } from '../debug/debug_node';
+import { RendererFactoryV2 } from '../render/api';
 import { Sanitizer } from '../security';
 import { isViewDebugError, viewDestroyedError, viewWrappedDebugError } from './errors';
 import { resolveDep } from './provider';
@@ -96,7 +97,8 @@ function createDebugServices() {
  * @return {?}
  */
 function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    return createRootView(createRootData(injector, projectableNodes, rootSelectorOrNode), def, context);
+    var /** @type {?} */ rendererFactory = injector.get(RendererFactoryV2);
+    return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
 }
 /**
  * @param {?} injector
@@ -107,27 +109,25 @@ function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def,
  * @return {?}
  */
 function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    var /** @type {?} */ root = createRootData(injector, projectableNodes, rootSelectorOrNode);
-    var /** @type {?} */ debugRoot = {
-        injector: root.injector,
-        projectableNodes: root.projectableNodes,
-        selectorOrNode: root.selectorOrNode,
-        renderer: new DebugRenderer(root.renderer),
-        sanitizer: root.sanitizer
-    };
-    return callWithDebugContext('create', createRootView, null, [debugRoot, def, context]);
+    var /** @type {?} */ rendererFactory = injector.get(RendererFactoryV2);
+    var /** @type {?} */ root = createRootData(injector, new DebugRendererFactoryV2(rendererFactory), projectableNodes, rootSelectorOrNode);
+    return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
 }
 /**
  * @param {?} injector
+ * @param {?} rendererFactory
  * @param {?} projectableNodes
  * @param {?} rootSelectorOrNode
  * @return {?}
  */
-function createRootData(injector, projectableNodes, rootSelectorOrNode) {
+function createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode) {
     var /** @type {?} */ sanitizer = injector.get(Sanitizer);
-    var /** @type {?} */ renderer = injector.get(RendererV2);
-    var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
-    return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
+    var /** @type {?} */ renderer = rendererFactory.createRenderer(null, null);
+    return {
+        injector: injector,
+        projectableNodes: projectableNodes,
+        selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, rendererFactory: rendererFactory, renderer: renderer
+    };
 }
 /**
  * @param {?} parent
@@ -136,29 +136,40 @@ function createRootData(injector, projectableNodes, rootSelectorOrNode) {
  * @return {?}
  */
 function debugCreateEmbeddedView(parent, anchorDef, context) {
-    return callWithDebugContext('create', createEmbeddedView, null, [parent, anchorDef, context]);
+    return callWithDebugContext(DebugAction.create, createEmbeddedView, null, [parent, anchorDef, context]);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function debugCheckAndUpdateView(view) {
-    return callWithDebugContext('detectChanges', checkAndUpdateView, null, [view]);
+    return callWithDebugContext(DebugAction.detectChanges, checkAndUpdateView, null, [view]);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function debugCheckNoChangesView(view) {
-    return callWithDebugContext('checkNoChanges', checkNoChangesView, null, [view]);
+    return callWithDebugContext(DebugAction.checkNoChanges, checkNoChangesView, null, [view]);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function debugDestroyView(view) {
-    return callWithDebugContext('destroyView', destroyView, null, [view]);
+    return callWithDebugContext(DebugAction.destroy, destroyView, null, [view]);
 }
+var DebugAction = {};
+DebugAction.create = 0;
+DebugAction.detectChanges = 1;
+DebugAction.checkNoChanges = 2;
+DebugAction.destroy = 3;
+DebugAction.handleEvent = 4;
+DebugAction[DebugAction.create] = "create";
+DebugAction[DebugAction.detectChanges] = "detectChanges";
+DebugAction[DebugAction.checkNoChanges] = "checkNoChanges";
+DebugAction[DebugAction.destroy] = "destroy";
+DebugAction[DebugAction.handleEvent] = "handleEvent";
 var /** @type {?} */ _currentAction;
 var /** @type {?} */ _currentView;
 var /** @type {?} */ _currentNodeIndex;
@@ -180,10 +191,10 @@ function debugSetCurrentNode(view, nodeIndex) {
  */
 function debugHandleEvent(view, nodeIndex, eventName, event) {
     if (view.state & ViewState.Destroyed) {
-        throw viewDestroyedError(_currentAction);
+        throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nodeIndex);
-    return callWithDebugContext('handleEvent', view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
+    return callWithDebugContext(DebugAction.handleEvent, view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
 }
 /**
  * @param {?} check
@@ -192,7 +203,7 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  */
 function debugUpdateDirectives(check, view) {
     if (view.state & ViewState.Destroyed) {
-        throw viewDestroyedError(_currentAction);
+        throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
     return view.def.updateDirectives(debugCheckDirectivesFn, view);
@@ -221,7 +232,7 @@ function debugUpdateDirectives(check, view) {
  */
 function debugUpdateRenderer(check, view) {
     if (view.state & ViewState.Destroyed) {
-        throw viewDestroyedError(_currentAction);
+        throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
     return view.def.updateRenderer(debugCheckRenderNodeFn, view);
@@ -251,41 +262,46 @@ function debugUpdateRenderer(check, view) {
  * @return {?}
  */
 function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
-    var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
-    var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-    for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
-        var /** @type {?} */ binding = nodeDef.bindings[i];
-        var /** @type {?} */ value = values[i];
-        if ((binding.type === BindingType.ElementProperty ||
-            binding.type === BindingType.DirectiveProperty) &&
-            checkBinding(view, nodeDef, i, value)) {
+    if (_currentAction === DebugAction.detectChanges) {
+        var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        if (nodeDef.type === NodeType.Directive || nodeDef.type === NodeType.Element) {
+            var /** @type {?} */ bindingValues = {};
+            for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
+                var /** @type {?} */ binding = nodeDef.bindings[i];
+                var /** @type {?} */ value = values[i];
+                if ((binding.type === BindingType.ElementProperty ||
+                    binding.type === BindingType.DirectiveProperty) &&
+                    checkBinding(view, nodeDef, i, value)) {
+                    bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)] =
+                        normalizeDebugBindingValue(value);
+                }
+            }
             var /** @type {?} */ elDef = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef;
-            setBindingDebugInfo(view.root.renderer, asElementData(view, elDef.index).renderElement, binding.nonMinifiedName, value);
+            var /** @type {?} */ el = asElementData(view, elDef.index).renderElement;
+            if (!elDef.element.name) {
+                // a comment.
+                view.renderer.setValue(el, "bindings=" + JSON.stringify(bindingValues, null, 2));
+            }
+            else {
+                // a regular element.
+                for (var /** @type {?} */ attr in bindingValues) {
+                    view.renderer.setAttribute(el, attr, bindingValues[attr]);
+                }
+            }
         }
     }
     return ((delegate)).apply(void 0, [view, nodeIndex, argStyle].concat(givenValues));
 }
 ;
 /**
- * @param {?} renderer
- * @param {?} renderNode
- * @param {?} propName
- * @param {?} value
+ * @param {?} name
  * @return {?}
  */
-function setBindingDebugInfo(renderer, renderNode, propName, value) {
-    var /** @type {?} */ renderName = "ng-reflect-" + camelCaseToDashCase(propName);
-    if (value) {
-        try {
-            renderer.setBindingDebugInfo(renderNode, renderName, value.toString());
-        }
-        catch (e) {
-            renderer.setBindingDebugInfo(renderNode, renderName, '[ERROR] Exception while trying to serialize the value');
-        }
-    }
-    else {
-        renderer.removeBindingDebugInfo(renderNode, renderName);
-    }
+function normalizeDebugBindingName(name) {
+    // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+    name = camelCaseToDashCase(name.replace(/\$/g, '_'));
+    return "ng-reflect-" + name;
 }
 var /** @type {?} */ CAMEL_CASE_REGEXP = /([A-Z])/g;
 /**
@@ -300,6 +316,19 @@ function camelCaseToDashCase(input) {
         }
         return '-' + m[1].toLowerCase();
     });
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function normalizeDebugBindingValue(value) {
+    try {
+        // Limit the size of the value as otherwise the DOM just gets polluted.
+        return value ? value.toString().slice(0, 20) : value;
+    }
+    catch (e) {
+        return '[ERROR] Exception while trying to serialize the value';
+    }
 }
 /**
  * @param {?} view
@@ -329,175 +358,6 @@ function nextRenderNodeWithBinding(view, nodeIndex) {
         }
     }
     return undefined;
-}
-var DebugRenderer = (function () {
-    /**
-     * @param {?} _delegate
-     */
-    function DebugRenderer(_delegate) {
-        this._delegate = _delegate;
-    }
-    /**
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    DebugRenderer.prototype.createElement = function (name, namespace) {
-        return this._delegate.createElement(name, namespace, getCurrentDebugContext());
-    };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    DebugRenderer.prototype.createComment = function (value) {
-        return this._delegate.createComment(value, getCurrentDebugContext());
-    };
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    DebugRenderer.prototype.createText = function (value) {
-        return this._delegate.createText(value, getCurrentDebugContext());
-    };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @return {?}
-     */
-    DebugRenderer.prototype.appendChild = function (parent, newChild) {
-        return this._delegate.appendChild(parent, newChild);
-    };
-    /**
-     * @param {?} parent
-     * @param {?} newChild
-     * @param {?} refChild
-     * @return {?}
-     */
-    DebugRenderer.prototype.insertBefore = function (parent, newChild, refChild) {
-        return this._delegate.insertBefore(parent, newChild, refChild);
-    };
-    /**
-     * @param {?} parent
-     * @param {?} oldChild
-     * @return {?}
-     */
-    DebugRenderer.prototype.removeChild = function (parent, oldChild) {
-        return this._delegate.removeChild(parent, oldChild);
-    };
-    /**
-     * @param {?} selectorOrNode
-     * @return {?}
-     */
-    DebugRenderer.prototype.selectRootElement = function (selectorOrNode) {
-        return this._delegate.selectRootElement(selectorOrNode, getCurrentDebugContext());
-    };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    DebugRenderer.prototype.parentNode = function (node) { return this._delegate.parentNode(node); };
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    DebugRenderer.prototype.nextSibling = function (node) { return this._delegate.nextSibling(node); };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @param {?=} namespace
-     * @return {?}
-     */
-    DebugRenderer.prototype.setAttribute = function (el, name, value, namespace) {
-        return this._delegate.setAttribute(el, name, value, namespace);
-    };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?=} namespace
-     * @return {?}
-     */
-    DebugRenderer.prototype.removeAttribute = function (el, name, namespace) {
-        return this._delegate.removeAttribute(el, name, namespace);
-    };
-    /**
-     * @param {?} el
-     * @param {?} propertyName
-     * @param {?} propertyValue
-     * @return {?}
-     */
-    DebugRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
-        this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
-    };
-    /**
-     * @param {?} el
-     * @param {?} propertyName
-     * @return {?}
-     */
-    DebugRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) {
-        this._delegate.removeBindingDebugInfo(el, propertyName);
-    };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    DebugRenderer.prototype.addClass = function (el, name) { return this._delegate.addClass(el, name); };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @return {?}
-     */
-    DebugRenderer.prototype.removeClass = function (el, name) { return this._delegate.removeClass(el, name); };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?} value
-     * @param {?} hasVendorPrefix
-     * @param {?} hasImportant
-     * @return {?}
-     */
-    DebugRenderer.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
-        return this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
-    };
-    /**
-     * @param {?} el
-     * @param {?} style
-     * @param {?} hasVendorPrefix
-     * @return {?}
-     */
-    DebugRenderer.prototype.removeStyle = function (el, style, hasVendorPrefix) {
-        return this._delegate.removeStyle(el, style, hasVendorPrefix);
-    };
-    /**
-     * @param {?} el
-     * @param {?} name
-     * @param {?} value
-     * @return {?}
-     */
-    DebugRenderer.prototype.setProperty = function (el, name, value) {
-        return this._delegate.setProperty(el, name, value);
-    };
-    /**
-     * @param {?} node
-     * @param {?} value
-     * @return {?}
-     */
-    DebugRenderer.prototype.setText = function (node, value) { return this._delegate.setText(node, value); };
-    /**
-     * @param {?} target
-     * @param {?} eventName
-     * @param {?} callback
-     * @return {?}
-     */
-    DebugRenderer.prototype.listen = function (target, eventName, callback) {
-        return this._delegate.listen(target, eventName, callback);
-    };
-    return DebugRenderer;
-}());
-function DebugRenderer_tsickle_Closure_declarations() {
-    /** @type {?} */
-    DebugRenderer.prototype._delegate;
 }
 var DebugContext_ = (function () {
     /**
@@ -711,7 +571,263 @@ function callWithDebugContext(action, fn, self, args) {
 /**
  * @return {?}
  */
-function getCurrentDebugContext() {
+export function getCurrentDebugContext() {
     return new DebugContext_(_currentView, _currentNodeIndex);
+}
+var DebugRendererFactoryV2 = (function () {
+    /**
+     * @param {?} delegate
+     */
+    function DebugRendererFactoryV2(delegate) {
+        this.delegate = delegate;
+    }
+    /**
+     * @param {?} element
+     * @param {?} renderData
+     * @return {?}
+     */
+    DebugRendererFactoryV2.prototype.createRenderer = function (element, renderData) {
+        return new DebugRendererV2(this.delegate.createRenderer(element, renderData));
+    };
+    return DebugRendererFactoryV2;
+}());
+function DebugRendererFactoryV2_tsickle_Closure_declarations() {
+    /** @type {?} */
+    DebugRendererFactoryV2.prototype.delegate;
+}
+var DebugRendererV2 = (function () {
+    /**
+     * @param {?} delegate
+     */
+    function DebugRendererV2(delegate) {
+        this.delegate = delegate;
+    }
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    DebugRendererV2.prototype.destroyNode = function (node) {
+        removeDebugNodeFromIndex(getDebugNode(node));
+        if (this.delegate.destroyNode) {
+            this.delegate.destroyNode(node);
+        }
+    };
+    /**
+     * @return {?}
+     */
+    DebugRendererV2.prototype.destroy = function () { this.delegate.destroy(); };
+    /**
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    DebugRendererV2.prototype.createElement = function (name, namespace) {
+        var /** @type {?} */ el = this.delegate.createElement(name, namespace);
+        var /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
+        debugEl.name = name;
+        indexDebugNode(debugEl);
+        return el;
+    };
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    DebugRendererV2.prototype.createComment = function (value) {
+        var /** @type {?} */ comment = this.delegate.createComment(value);
+        var /** @type {?} */ debugEl = new DebugNode(comment, null, getCurrentDebugContext());
+        indexDebugNode(debugEl);
+        return comment;
+    };
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    DebugRendererV2.prototype.createText = function (value) {
+        var /** @type {?} */ text = this.delegate.createText(value);
+        var /** @type {?} */ debugEl = new DebugNode(text, null, getCurrentDebugContext());
+        indexDebugNode(debugEl);
+        return text;
+    };
+    /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */
+    DebugRendererV2.prototype.appendChild = function (parent, newChild) {
+        var /** @type {?} */ debugEl = getDebugNode(parent);
+        var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+        if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+            debugEl.addChild(debugChildEl);
+        }
+        this.delegate.appendChild(parent, newChild);
+    };
+    /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */
+    DebugRendererV2.prototype.insertBefore = function (parent, newChild, refChild) {
+        var /** @type {?} */ debugEl = getDebugNode(parent);
+        var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+        var /** @type {?} */ debugRefEl = getDebugNode(refChild);
+        if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+            debugEl.insertBefore(debugRefEl, debugChildEl);
+        }
+        this.delegate.insertBefore(parent, newChild, refChild);
+    };
+    /**
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */
+    DebugRendererV2.prototype.removeChild = function (parent, oldChild) {
+        var /** @type {?} */ debugEl = getDebugNode(parent);
+        var /** @type {?} */ debugChildEl = getDebugNode(oldChild);
+        if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+            debugEl.removeChild(debugChildEl);
+        }
+        this.delegate.removeChild(parent, oldChild);
+    };
+    /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    DebugRendererV2.prototype.selectRootElement = function (selectorOrNode) {
+        var /** @type {?} */ el = this.delegate.selectRootElement(selectorOrNode);
+        var /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
+        indexDebugNode(debugEl);
+        return el;
+    };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */
+    DebugRendererV2.prototype.setAttribute = function (el, name, value, namespace) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+            debugEl.attributes[fullName] = value;
+        }
+        this.delegate.setAttribute(el, name, value, namespace);
+    };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    DebugRendererV2.prototype.removeAttribute = function (el, name, namespace) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+            debugEl.attributes[fullName] = null;
+        }
+        this.delegate.removeAttribute(el, name, namespace);
+    };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    DebugRendererV2.prototype.addClass = function (el, name) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            debugEl.classes[name] = true;
+        }
+        this.delegate.addClass(el, name);
+    };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    DebugRendererV2.prototype.removeClass = function (el, name) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            debugEl.classes[name] = false;
+        }
+        this.delegate.removeClass(el, name);
+    };
+    /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
+     * @return {?}
+     */
+    DebugRendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            debugEl.styles[style] = value;
+        }
+        this.delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
+    };
+    /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} hasVendorPrefix
+     * @return {?}
+     */
+    DebugRendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            debugEl.styles[style] = null;
+        }
+        this.delegate.removeStyle(el, style, hasVendorPrefix);
+    };
+    /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    DebugRendererV2.prototype.setProperty = function (el, name, value) {
+        var /** @type {?} */ debugEl = getDebugNode(el);
+        if (debugEl && debugEl instanceof DebugElement) {
+            debugEl.properties[name] = value;
+        }
+        this.delegate.setProperty(el, name, value);
+    };
+    /**
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */
+    DebugRendererV2.prototype.listen = function (target, eventName, callback) {
+        if (typeof target !== 'string') {
+            var /** @type {?} */ debugEl = getDebugNode(target);
+            if (debugEl) {
+                debugEl.listeners.push(new EventListener(eventName, callback));
+            }
+        }
+        return this.delegate.listen(target, eventName, callback);
+    };
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    DebugRendererV2.prototype.parentNode = function (node) { return this.delegate.parentNode(node); };
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    DebugRendererV2.prototype.nextSibling = function (node) { return this.delegate.nextSibling(node); };
+    /**
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */
+    DebugRendererV2.prototype.setValue = function (node, value) { return this.delegate.setValue(node, value); };
+    return DebugRendererV2;
+}());
+function DebugRendererV2_tsickle_Closure_declarations() {
+    /** @type {?} */
+    DebugRendererV2.prototype.delegate;
 }
 //# sourceMappingURL=services.js.map

@@ -7,6 +7,7 @@
  */
 import { WrappedValue, devModeEqual } from '../change_detection/change_detection';
 import { looseIdentical, stringify } from '../facade/lang';
+import { ViewEncapsulation } from '../metadata/view';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
 import { NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asTextData } from './types';
 var /** @type {?} */ _tokenKeyCache = new Map();
@@ -33,6 +34,22 @@ export function unwrapValue(value) {
         unwrapCounter++;
     }
     return value;
+}
+var /** @type {?} */ _renderCompCount = 0;
+/**
+ * @param {?} values
+ * @return {?}
+ */
+export function createComponentRenderTypeV2(values) {
+    var /** @type {?} */ isFilled = values && (values.encapsulation !== ViewEncapsulation.None ||
+        values.styles.length || Object.keys(values.data).length);
+    if (isFilled) {
+        var /** @type {?} */ id = "c" + _renderCompCount++;
+        return { id: id, styles: values.styles, encapsulation: values.encapsulation, data: values.data };
+    }
+    else {
+        return null;
+    }
 }
 /**
  * @param {?} view
@@ -284,7 +301,7 @@ RenderNodeAction[RenderNodeAction.RemoveChild] = "RemoveChild";
 export function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
     // We need to re-compute the parent node in case the nodes have been moved around manually
     if (action === RenderNodeAction.RemoveChild) {
-        parentNode = view.root.renderer.parentNode(renderNode(view, view.def.lastRootNode));
+        parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRootNode));
     }
     visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
 }
@@ -384,7 +401,7 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
  * @return {?}
  */
 function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
-    var /** @type {?} */ renderer = view.root.renderer;
+    var /** @type {?} */ renderer = view.renderer;
     switch (action) {
         case RenderNodeAction.AppendChild:
             renderer.appendChild(parentNode, renderNode);

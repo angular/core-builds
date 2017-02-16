@@ -440,7 +440,8 @@ var Injector_ = (function () {
      */
     Injector_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        return Services.resolveDep(this.view, this.elDef, true, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        var /** @type {?} */ allowPrivateServices = !!this.elDef.element.component;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
     };
     return Injector_;
 }());

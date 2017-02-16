@@ -5,13 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { InjectionToken } from '../di';
-/**
- * Provide a concrete implementation of {@link RendererV2}
- *
- * @experimental
- */
-export var /** @type {?} */ RENDERER_V2_DIRECT = new InjectionToken('Renderer V2');
 var RenderComponentType = (function () {
     /**
      * @param {?} id
@@ -243,6 +236,49 @@ var Renderer = (function () {
 }());
 export { Renderer };
 /**
+ * Injectable service that provides a low-level interface for modifying the UI.
+ *
+ * Use this service to bypass Angular's templating and make custom UI changes that can't be
+ * expressed declaratively. For example if you need to set a property or an attribute whose name is
+ * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
+ * respectively.
+ *
+ * If you are implementing a custom renderer, you must implement this interface.
+ *
+ * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+ * \@experimental
+ * @abstract
+ */
+var RootRenderer = (function () {
+    function RootRenderer() {
+    }
+    /**
+     * @abstract
+     * @param {?} componentType
+     * @return {?}
+     */
+    RootRenderer.prototype.renderComponent = function (componentType) { };
+    return RootRenderer;
+}());
+export { RootRenderer };
+/**
+ * \@experimental
+ * @abstract
+ */
+var RendererFactoryV2 = (function () {
+    function RendererFactoryV2() {
+    }
+    /**
+     * @abstract
+     * @param {?} hostElement
+     * @param {?} type
+     * @return {?}
+     */
+    RendererFactoryV2.prototype.createRenderer = function (hostElement, type) { };
+    return RendererFactoryV2;
+}());
+export { RendererFactoryV2 };
+/**
  * \@experimental
  * @abstract
  */
@@ -251,26 +287,28 @@ var RendererV2 = (function () {
     }
     /**
      * @abstract
+     * @return {?}
+     */
+    RendererV2.prototype.destroy = function () { };
+    /**
+     * @abstract
      * @param {?} name
      * @param {?=} namespace
-     * @param {?=} debugInfo
      * @return {?}
      */
-    RendererV2.prototype.createElement = function (name, namespace, debugInfo) { };
+    RendererV2.prototype.createElement = function (name, namespace) { };
     /**
      * @abstract
      * @param {?} value
-     * @param {?=} debugInfo
      * @return {?}
      */
-    RendererV2.prototype.createComment = function (value, debugInfo) { };
+    RendererV2.prototype.createComment = function (value) { };
     /**
      * @abstract
      * @param {?} value
-     * @param {?=} debugInfo
      * @return {?}
      */
-    RendererV2.prototype.createText = function (value, debugInfo) { };
+    RendererV2.prototype.createText = function (value) { };
     /**
      * @abstract
      * @param {?} parent
@@ -296,10 +334,9 @@ var RendererV2 = (function () {
     /**
      * @abstract
      * @param {?} selectorOrNode
-     * @param {?=} debugInfo
      * @return {?}
      */
-    RendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
+    RendererV2.prototype.selectRootElement = function (selectorOrNode) { };
     /**
      * Attention: On WebWorkers, this will always return a value,
      * as we are asking for a result synchronously. I.e.
@@ -335,21 +372,6 @@ var RendererV2 = (function () {
      * @return {?}
      */
     RendererV2.prototype.removeAttribute = function (el, name, namespace) { };
-    /**
-     * @abstract
-     * @param {?} el
-     * @param {?} propertyName
-     * @param {?} propertyValue
-     * @return {?}
-     */
-    RendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
-    /**
-     * @abstract
-     * @param {?} el
-     * @param {?} propertyName
-     * @return {?}
-     */
-    RendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) { };
     /**
      * @abstract
      * @param {?} el
@@ -396,7 +418,7 @@ var RendererV2 = (function () {
      * @param {?} value
      * @return {?}
      */
-    RendererV2.prototype.setText = function (node, value) { };
+    RendererV2.prototype.setValue = function (node, value) { };
     /**
      * @abstract
      * @param {?} target
@@ -408,79 +430,13 @@ var RendererV2 = (function () {
     return RendererV2;
 }());
 export { RendererV2 };
-/**
- * @abstract
- */
-var RenderDebugContext = (function () {
-    function RenderDebugContext() {
-    }
+function RendererV2_tsickle_Closure_declarations() {
     /**
-     * @abstract
-     * @return {?}
+     * This property is allowed to be null / undefined,
+     * in which case the view engine won't call it.
+     * This is used as a performance optimization for production mode.
+     * @type {?}
      */
-    RenderDebugContext.prototype.injector = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.component = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.providerTokens = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.references = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.context = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.source = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.componentRenderElement = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    RenderDebugContext.prototype.renderNode = function () { };
-    return RenderDebugContext;
-}());
-export { RenderDebugContext };
-/**
- * Injectable service that provides a low-level interface for modifying the UI.
- *
- * Use this service to bypass Angular's templating and make custom UI changes that can't be
- * expressed declaratively. For example if you need to set a property or an attribute whose name is
- * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
- * respectively.
- *
- * If you are implementing a custom renderer, you must implement this interface.
- *
- * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
- * \@experimental
- * @abstract
- */
-var RootRenderer = (function () {
-    function RootRenderer() {
-    }
-    /**
-     * @abstract
-     * @param {?} componentType
-     * @return {?}
-     */
-    RootRenderer.prototype.renderComponent = function (componentType) { };
-    return RootRenderer;
-}());
-export { RootRenderer };
+    RendererV2.prototype.destroyNode;
+}
 //# sourceMappingURL=api.js.map

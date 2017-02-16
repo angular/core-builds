@@ -5,12 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-import { RenderDebugContext } from '../render/api';
 export var ArgumentType = {};
 ArgumentType.Inline = 0;
 ArgumentType.Dynamic = 1;
@@ -207,10 +201,8 @@ export function asQueryList(view, index) {
 /**
  * @abstract
  */
-var DebugContext = (function (_super) {
-    __extends(DebugContext, _super);
+var DebugContext = (function () {
     function DebugContext() {
-        return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
      * @abstract
@@ -222,8 +214,48 @@ var DebugContext = (function (_super) {
      * @return {?}
      */
     DebugContext.prototype.nodeIndex = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.injector = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.component = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.providerTokens = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.references = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.context = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.source = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.componentRenderElement = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    DebugContext.prototype.renderNode = function () { };
     return DebugContext;
-}(RenderDebugContext));
+}());
 export { DebugContext };
 /**
  * This object is used to prevent cycles in the source files and to have a place where

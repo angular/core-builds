@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.7-ba17dcb
+ * @license Angular v4.0.0-beta.7-0fa3895
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1133,7 +1133,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-ba17dcb');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.7-0fa3895');
 
     /**
      * Inject decorator and metadata.
@@ -5712,12 +5712,13 @@
     var /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
     /**
-     * Provide a concrete implementation of {@link RendererV2}
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
      *
-     * @experimental
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
      */
-    var /** @type {?} */ RENDERER_V2_DIRECT = new InjectionToken('Renderer V2');
-    var RenderComponentType = (function () {
+    var RenderComponentTypeV1 = (function () {
         /**
          * @param {?} id
          * @param {?} templateUrl
@@ -5778,7 +5779,7 @@
      * \@experimental
      * @abstract
      */
-    var Renderer = (function () {
+    var RendererV1 = (function () {
         function Renderer() {
         }
         /**
@@ -5931,6 +5932,47 @@
         return Renderer;
     }());
     /**
+     * Injectable service that provides a low-level interface for modifying the UI.
+     *
+     * Use this service to bypass Angular's templating and make custom UI changes that can't be
+     * expressed declaratively. For example if you need to set a property or an attribute whose name is
+     * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
+     * respectively.
+     *
+     * If you are implementing a custom renderer, you must implement this interface.
+     *
+     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+     * \@experimental
+     * @abstract
+     */
+    var RootRendererV1 = (function () {
+        function RootRenderer() {
+        }
+        /**
+         * @abstract
+         * @param {?} componentType
+         * @return {?}
+         */
+        RootRenderer.prototype.renderComponent = function (componentType) { };
+        return RootRenderer;
+    }());
+    /**
+     * \@experimental
+     * @abstract
+     */
+    var RendererFactoryV2 = (function () {
+        function RendererFactoryV2() {
+        }
+        /**
+         * @abstract
+         * @param {?} hostElement
+         * @param {?} type
+         * @return {?}
+         */
+        RendererFactoryV2.prototype.createRenderer = function (hostElement, type) { };
+        return RendererFactoryV2;
+    }());
+    /**
      * \@experimental
      * @abstract
      */
@@ -5939,26 +5981,28 @@
         }
         /**
          * @abstract
+         * @return {?}
+         */
+        RendererV2.prototype.destroy = function () { };
+        /**
+         * @abstract
          * @param {?} name
          * @param {?=} namespace
-         * @param {?=} debugInfo
          * @return {?}
          */
-        RendererV2.prototype.createElement = function (name, namespace, debugInfo) { };
+        RendererV2.prototype.createElement = function (name, namespace) { };
         /**
          * @abstract
          * @param {?} value
-         * @param {?=} debugInfo
          * @return {?}
          */
-        RendererV2.prototype.createComment = function (value, debugInfo) { };
+        RendererV2.prototype.createComment = function (value) { };
         /**
          * @abstract
          * @param {?} value
-         * @param {?=} debugInfo
          * @return {?}
          */
-        RendererV2.prototype.createText = function (value, debugInfo) { };
+        RendererV2.prototype.createText = function (value) { };
         /**
          * @abstract
          * @param {?} parent
@@ -5984,10 +6028,9 @@
         /**
          * @abstract
          * @param {?} selectorOrNode
-         * @param {?=} debugInfo
          * @return {?}
          */
-        RendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) { };
+        RendererV2.prototype.selectRootElement = function (selectorOrNode) { };
         /**
          * Attention: On WebWorkers, this will always return a value,
          * as we are asking for a result synchronously. I.e.
@@ -6023,21 +6066,6 @@
          * @return {?}
          */
         RendererV2.prototype.removeAttribute = function (el, name, namespace) { };
-        /**
-         * @abstract
-         * @param {?} el
-         * @param {?} propertyName
-         * @param {?} propertyValue
-         * @return {?}
-         */
-        RendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) { };
-        /**
-         * @abstract
-         * @param {?} el
-         * @param {?} propertyName
-         * @return {?}
-         */
-        RendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) { };
         /**
          * @abstract
          * @param {?} el
@@ -6084,7 +6112,7 @@
          * @param {?} value
          * @return {?}
          */
-        RendererV2.prototype.setText = function (node, value) { };
+        RendererV2.prototype.setValue = function (node, value) { };
         /**
          * @abstract
          * @param {?} target
@@ -6094,79 +6122,6 @@
          */
         RendererV2.prototype.listen = function (target, eventName, callback) { };
         return RendererV2;
-    }());
-    /**
-     * @abstract
-     */
-    var RenderDebugContext = (function () {
-        function RenderDebugContext() {
-        }
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.injector = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.component = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.providerTokens = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.references = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.context = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.source = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.componentRenderElement = function () { };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        RenderDebugContext.prototype.renderNode = function () { };
-        return RenderDebugContext;
-    }());
-    /**
-     * Injectable service that provides a low-level interface for modifying the UI.
-     *
-     * Use this service to bypass Angular's templating and make custom UI changes that can't be
-     * expressed declaratively. For example if you need to set a property or an attribute whose name is
-     * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
-     * respectively.
-     *
-     * If you are implementing a custom renderer, you must implement this interface.
-     *
-     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
-     * \@experimental
-     * @abstract
-     */
-    var RootRenderer = (function () {
-        function RootRenderer() {
-        }
-        /**
-         * @abstract
-         * @param {?} componentType
-         * @return {?}
-         */
-        RootRenderer.prototype.renderComponent = function (componentType) { };
-        return RootRenderer;
     }());
 
     var SecurityContext = {};
@@ -6300,7 +6255,7 @@
     ];
     /** @nocollapse */
     ViewUtils.ctorParameters = function () { return [
-        { type: RootRenderer, },
+        { type: RootRendererV1, },
         { type: Sanitizer, },
         { type: AnimationQueue, },
     ]; };
@@ -6314,7 +6269,7 @@
      * @return {?}
      */
     function createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
-        return new RenderComponentType("" + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
+        return new RenderComponentTypeV1("" + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
     }
     /**
      * @param {?} e
@@ -10259,11 +10214,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$10 = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
     var ArgumentType = {};
     ArgumentType.Inline = 0;
     ArgumentType.Dynamic = 1;
@@ -10455,10 +10405,8 @@
     /**
      * @abstract
      */
-    var DebugContext = (function (_super) {
-        __extends$10(DebugContext, _super);
+    var DebugContext = (function () {
         function DebugContext() {
-            return _super !== null && _super.apply(this, arguments) || this;
         }
         /**
          * @abstract
@@ -10470,8 +10418,48 @@
          * @return {?}
          */
         DebugContext.prototype.nodeIndex = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.injector = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.component = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.providerTokens = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.references = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.context = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.source = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.componentRenderElement = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.renderNode = function () { };
         return DebugContext;
-    }(RenderDebugContext));
+    }());
     /**
      * This object is used to prevent cycles in the source files and to have a place where
      * debug mode can hook it. It is lazily filled when `isDevMode` is known.
@@ -10569,6 +10557,22 @@
             unwrapCounter++;
         }
         return value;
+    }
+    var /** @type {?} */ _renderCompCount = 0;
+    /**
+     * @param {?} values
+     * @return {?}
+     */
+    function createComponentRenderTypeV2(values) {
+        var /** @type {?} */ isFilled = values && (values.encapsulation !== ViewEncapsulation.None ||
+            values.styles.length || Object.keys(values.data).length);
+        if (isFilled) {
+            var /** @type {?} */ id = "c" + _renderCompCount++;
+            return { id: id, styles: values.styles, encapsulation: values.encapsulation, data: values.data };
+        }
+        else {
+            return null;
+        }
     }
     /**
      * @param {?} view
@@ -10820,7 +10824,7 @@
     function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
         // We need to re-compute the parent node in case the nodes have been moved around manually
         if (action === RenderNodeAction.RemoveChild) {
-            parentNode = view.root.renderer.parentNode(renderNode(view, view.def.lastRootNode));
+            parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRootNode));
         }
         visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
     }
@@ -10920,7 +10924,7 @@
      * @return {?}
      */
     function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         switch (action) {
             case RenderNodeAction.AppendChild:
                 renderer.appendChild(parentNode, renderNode);
@@ -11072,7 +11076,7 @@
     function createElement(view, renderHost, def) {
         var /** @type {?} */ elDef = def.element;
         var /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         var /** @type {?} */ el;
         if (view.parent || !rootSelectorOrNode) {
             if (elDef.name) {
@@ -11213,7 +11217,7 @@
         var /** @type {?} */ securityContext = binding.securityContext;
         var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
         renderValue = renderValue != null ? renderValue.toString() : null;
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         // TODO(vicb): move the namespace to the node definition
         var /** @type {?} */ nsAndName = splitNamespace(name);
         if (value != null) {
@@ -11231,7 +11235,7 @@
      * @return {?}
      */
     function setElementClass(view, renderNode, name, value) {
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         if (value) {
             renderer.addClass(renderNode, name);
         }
@@ -11259,7 +11263,7 @@
         else {
             renderValue = null;
         }
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         if (renderValue != null) {
             renderer.setStyle(renderNode, name, renderValue, false, false);
         }
@@ -11278,7 +11282,7 @@
     function setElementProperty(view, binding, renderNode, name, value) {
         var /** @type {?} */ securityContext = binding.securityContext;
         var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
-        view.root.renderer.setProperty(renderNode, name, renderValue);
+        view.renderer.setProperty(renderNode, name, renderValue);
     }
     var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
     /**
@@ -11730,12 +11734,14 @@
          */
         Injector_.prototype.get = function (token, notFoundValue) {
             if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-            return Services.resolveDep(this.view, this.elDef, true, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+            var /** @type {?} */ allowPrivateServices = !!this.elDef.element.component;
+            return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
         };
         return Injector_;
     }());
 
-    var /** @type {?} */ RendererV1TokenKey = tokenKey(Renderer);
+    var /** @type {?} */ RendererV1TokenKey = tokenKey(RendererV1);
+    var /** @type {?} */ RendererV2TokenKey = tokenKey(RendererV2);
     var /** @type {?} */ ElementRefTokenKey = tokenKey(ElementRef);
     var /** @type {?} */ ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
     var /** @type {?} */ TemplateRefTokenKey = tokenKey(TemplateRef);
@@ -11751,9 +11757,10 @@
      * @param {?=} props
      * @param {?=} outputs
      * @param {?=} component
+     * @param {?=} componentRenderType
      * @return {?}
      */
-    function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component) {
+    function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component, componentRenderType) {
         var /** @type {?} */ bindings = [];
         if (props) {
             for (var /** @type {?} */ prop in props) {
@@ -11772,7 +11779,7 @@
                 outputDefs.push({ propName: propName, eventName: outputs[propName] });
             }
         }
-        return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component);
+        return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component, componentRenderType);
     }
     /**
      * @param {?} flags
@@ -11807,10 +11814,16 @@
      * @param {?=} bindings
      * @param {?=} outputs
      * @param {?=} component
+     * @param {?=} componentRenderType
      * @return {?}
      */
-    function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component) {
+    function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component, componentRenderType) {
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
+        // This is needed as the jit compiler always uses an empty hash as default ComponentRenderTypeV2,
+        // which is not filled for host views.
+        if (componentRenderType && componentRenderType.encapsulation == null) {
+            componentRenderType = null;
+        }
         if (!outputs) {
             outputs = [];
         }
@@ -11852,7 +11865,7 @@
                 type: providerType,
                 token: token,
                 tokenKey: tokenKey(token), value: value,
-                deps: depDefs, outputs: outputs, component: component
+                deps: depDefs, outputs: outputs, component: component, componentRenderType: componentRenderType
             },
             text: undefined,
             pureExpression: undefined,
@@ -12108,13 +12121,16 @@
             if (elDef) {
                 switch (tokenKey) {
                     case RendererV1TokenKey: {
-                        var /** @type {?} */ compView = view;
-                        while (compView && !isComponentView(compView)) {
-                            compView = compView.parent;
-                        }
-                        var /** @type {?} */ rootRenderer = view.root.injector.get(RootRenderer);
-                        // Note: Don't fill in the styles as they have been installed already!
-                        return rootRenderer.renderComponent(new RenderComponentType(view.def.component.id, '', 0, view.def.component.encapsulation, [], {}));
+                        var /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);
+                        var /** @type {?} */ compDef = compView.parentNodeDef;
+                        var /** @type {?} */ rootRendererV1 = view.root.injector.get(RootRendererV1);
+                        // Note: Don't fill in the styles as they have been installed already via the RendererV2!
+                        var /** @type {?} */ compRenderType = compDef.provider.componentRenderType;
+                        return rootRendererV1.renderComponent(new RenderComponentTypeV1(compRenderType ? compRenderType.id : '0', '', 0, compRenderType ? compRenderType.encapsulation : ViewEncapsulation.None, [], {}));
+                    }
+                    case RendererV2TokenKey: {
+                        var /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);
+                        return compView.renderer;
                     }
                     case ElementRefTokenKey:
                         return new ElementRef(asElementData(view, elDef.index).renderElement);
@@ -12127,16 +12143,7 @@
                         break;
                     }
                     case ChangeDetectorRefTokenKey: {
-                        var /** @type {?} */ cdView = void 0;
-                        if (allowPrivateServices) {
-                            cdView = asProviderData(view, elDef.element.component.index).componentView;
-                        }
-                        else {
-                            cdView = view;
-                            while (cdView.parent && !isComponentView(cdView)) {
-                                cdView = cdView.parent;
-                            }
-                        }
+                        var /** @type {?} */ cdView = findCompView(view, elDef, allowPrivateServices);
                         return createChangeDetectorRef(cdView);
                     }
                     case InjectorRefTokenKey:
@@ -12158,6 +12165,25 @@
             view = view.parent;
         }
         return startView.root.injector.get(depDef.token, notFoundValue);
+    }
+    /**
+     * @param {?} view
+     * @param {?} elDef
+     * @param {?} allowPrivateServices
+     * @return {?}
+     */
+    function findCompView(view, elDef, allowPrivateServices) {
+        var /** @type {?} */ compView;
+        if (allowPrivateServices) {
+            compView = asProviderData(view, elDef.element.component.index).componentView;
+        }
+        else {
+            compView = view;
+            while (compView.parent && !isComponentView(compView)) {
+                compView = compView.parent;
+            }
+        }
+        return compView;
     }
     /**
      * @param {?} view
@@ -12765,7 +12791,7 @@
      */
     function createText(view, renderHost, def) {
         var /** @type {?} */ renderNode;
-        var /** @type {?} */ renderer = view.root.renderer;
+        var /** @type {?} */ renderer = view.renderer;
         renderNode = renderer.createText(def.text.prefix);
         var /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
         if (parentEl) {
@@ -12851,7 +12877,7 @@
             }
             value = def.text.prefix + value;
             var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-            view.root.renderer.setText(renderNode, value);
+            view.renderer.setValue(renderNode, value);
         }
     }
     /**
@@ -12877,7 +12903,7 @@
             }
             value = def.text.prefix + value;
             var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
-            view.root.renderer.setText(renderNode, value);
+            view.renderer.setValue(renderNode, value);
         }
     }
     /**
@@ -12897,12 +12923,9 @@
      * @param {?=} updateDirectives
      * @param {?=} updateRenderer
      * @param {?=} handleEvent
-     * @param {?=} compId
-     * @param {?=} encapsulation
-     * @param {?=} styles
      * @return {?}
      */
-    function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent, compId, encapsulation, styles) {
+    function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent) {
         // clone nodes and set auto calculated values
         if (nodes.length === 0) {
             throw new Error("Illegal State: Views without nodes are not allowed!");
@@ -12934,8 +12957,11 @@
                 calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
             var /** @type {?} */ currentRenderParent = void 0;
             if (currentParent &&
-                !(currentParent.type === NodeType.Element && currentParent.element.component)) {
-                // children of components should never be attached!
+                (currentParent.type !== NodeType.Element || !currentParent.element.component ||
+                    (currentParent.element.component.provider.componentRenderType &&
+                        currentParent.element.component.provider.componentRenderType.encapsulation ===
+                            ViewEncapsulation.Native))) {
+                // children of components that don't use native encapsulation should never be attached!
                 if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
                     currentRenderParent = currentParent.renderParent;
                 }
@@ -13009,7 +13035,6 @@
             }
             currentParent = newParent;
         }
-        var /** @type {?} */ componentDef = compId ? ({ id: compId, encapsulation: encapsulation, styles: styles }) : undefined;
         return {
             nodeFlags: viewNodeFlags,
             nodeMatchedQueries: viewMatchedQueries, flags: flags,
@@ -13017,7 +13042,6 @@
             updateDirectives: updateDirectives || NOOP,
             updateRenderer: updateRenderer || NOOP,
             handleEvent: handleEvent || NOOP,
-            component: componentDef,
             bindingCount: viewBindingCount,
             disposableCount: viewDisposableCount, lastRootNode: lastRootNode
         };
@@ -13106,7 +13130,7 @@
     function createEmbeddedView(parent, anchorDef, context) {
         // embedded views are seen as siblings to the anchor, so we need
         // to get the parent of the anchor and use it as parentIndex.
-        var /** @type {?} */ view = createView(parent.root, parent, anchorDef, anchorDef.element.template);
+        var /** @type {?} */ view = createView(parent.root, parent.renderer, parent, anchorDef, anchorDef.element.template);
         initView(view, parent.component, context);
         createViewNodes(view);
         return view;
@@ -13118,19 +13142,20 @@
      * @return {?}
      */
     function createRootView(root, def, context) {
-        var /** @type {?} */ view = createView(root, null, null, def);
+        var /** @type {?} */ view = createView(root, root.renderer, null, null, def);
         initView(view, context, context);
         createViewNodes(view);
         return view;
     }
     /**
      * @param {?} root
+     * @param {?} renderer
      * @param {?} parent
      * @param {?} parentNodeDef
      * @param {?} def
      * @return {?}
      */
-    function createView(root, parent, parentNodeDef, def) {
+    function createView(root, renderer, parent, parentNodeDef, def) {
         var /** @type {?} */ nodes = new Array(def.nodes.length);
         var /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
         var /** @type {?} */ view = {
@@ -13139,7 +13164,7 @@
             parentNodeDef: parentNodeDef,
             context: undefined,
             component: undefined, nodes: nodes,
-            state: ViewState.FirstCheck | ViewState.ChecksEnabled, root: root,
+            state: ViewState.FirstCheck | ViewState.ChecksEnabled, root: root, renderer: renderer,
             oldValues: new Array(def.bindingCount), disposables: disposables
         };
         return view;
@@ -13161,7 +13186,8 @@
     function createViewNodes(view) {
         var /** @type {?} */ renderHost;
         if (isComponentView(view)) {
-            renderHost = asElementData(view.parent, viewParentEl(view).index).renderElement;
+            var /** @type {?} */ hostDef = view.parentNodeDef;
+            renderHost = asElementData(view.parent, hostDef.parent.index).renderElement;
         }
         var /** @type {?} */ def = view.def;
         var /** @type {?} */ nodes = view.nodes;
@@ -13192,7 +13218,17 @@
                         // Components can inject a ChangeDetectorRef that needs a references to
                         // the component view. Therefore, we create the component view first
                         // and set the ProviderData in ViewData, and then instantiate the provider.
-                        var /** @type {?} */ componentView = createView(view.root, view, nodeDef, resolveViewDefinition(nodeDef.provider.component));
+                        var /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.provider.component);
+                        var /** @type {?} */ compRenderType = nodeDef.provider.componentRenderType;
+                        var /** @type {?} */ compRenderer = void 0;
+                        if (!compRenderType) {
+                            compRenderer = view.root.renderer;
+                        }
+                        else {
+                            var /** @type {?} */ hostEl = asElementData(view, nodeDef.parent.index).renderElement;
+                            compRenderer = view.root.rendererFactory.createRenderer(hostEl, compRenderType);
+                        }
+                        var /** @type {?} */ componentView = createView(view.root, compRenderer, view, nodeDef, compViewDef);
                         var /** @type {?} */ providerData = ({ componentView: componentView, instance: undefined });
                         nodes[i] = (providerData);
                         var /** @type {?} */ instance = providerData.instance = createDirectiveInstance(view, nodeDef);
@@ -13432,7 +13468,29 @@
                 view.disposables[i]();
             }
         }
+        if (view.renderer.destroyNode) {
+            destroyViewNodes(view);
+        }
+        if (view.parentNodeDef && view.parentNodeDef.flags & NodeFlags.HasComponent) {
+            view.renderer.destroy();
+        }
         view.state |= ViewState.Destroyed;
+    }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    function destroyViewNodes(view) {
+        var /** @type {?} */ len = view.def.nodes.length;
+        for (var /** @type {?} */ i = 0; i < len; i++) {
+            var /** @type {?} */ def = view.def.nodes[i];
+            if (def.type === NodeType.Element) {
+                view.renderer.destroyNode(asElementData(view, i).renderElement);
+            }
+            else if (def.type === NodeType.Text) {
+                view.renderer.destroyNode(asTextData(view, i).renderText);
+            }
+        }
     }
     var ViewAction = {};
     ViewAction.CreateViewNodes = 0;
@@ -13639,8 +13697,8 @@
      */
     function renderAttachEmbeddedView(elementData, prevView, view) {
         var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
-        var /** @type {?} */ parentNode = view.root.renderer.parentNode(prevRenderNode);
-        var /** @type {?} */ nextSibling = view.root.renderer.nextSibling(prevRenderNode);
+        var /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
+        var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
         // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
         // However, browsers automatically do `appendChild` when there is no `nextSibling`.
         visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
@@ -13651,7 +13709,7 @@
      * @return {?}
      */
     function renderDetachEmbeddedView(elementData, view) {
-        var /** @type {?} */ parentNode = view.root.renderer.parentNode(elementData.renderElement);
+        var /** @type {?} */ parentNode = view.renderer.parentNode(elementData.renderElement);
         visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
     }
     /**
@@ -13764,7 +13822,8 @@
      * @return {?}
      */
     function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        return createRootView(createRootData(injector, projectableNodes, rootSelectorOrNode), def, context);
+        var /** @type {?} */ rendererFactory = injector.get(RendererFactoryV2);
+        return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
     }
     /**
      * @param {?} injector
@@ -13775,27 +13834,25 @@
      * @return {?}
      */
     function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        var /** @type {?} */ root = createRootData(injector, projectableNodes, rootSelectorOrNode);
-        var /** @type {?} */ debugRoot = {
-            injector: root.injector,
-            projectableNodes: root.projectableNodes,
-            selectorOrNode: root.selectorOrNode,
-            renderer: new DebugRenderer(root.renderer),
-            sanitizer: root.sanitizer
-        };
-        return callWithDebugContext('create', createRootView, null, [debugRoot, def, context]);
+        var /** @type {?} */ rendererFactory = injector.get(RendererFactoryV2);
+        var /** @type {?} */ root = createRootData(injector, new DebugRendererFactoryV2(rendererFactory), projectableNodes, rootSelectorOrNode);
+        return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
     }
     /**
      * @param {?} injector
+     * @param {?} rendererFactory
      * @param {?} projectableNodes
      * @param {?} rootSelectorOrNode
      * @return {?}
      */
-    function createRootData(injector, projectableNodes, rootSelectorOrNode) {
+    function createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode) {
         var /** @type {?} */ sanitizer = injector.get(Sanitizer);
-        var /** @type {?} */ renderer = injector.get(RendererV2);
-        var /** @type {?} */ rootElement = rootSelectorOrNode ? renderer.selectRootElement(rootSelectorOrNode) : undefined;
-        return { injector: injector, projectableNodes: projectableNodes, selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, renderer: renderer };
+        var /** @type {?} */ renderer = rendererFactory.createRenderer(null, null);
+        return {
+            injector: injector,
+            projectableNodes: projectableNodes,
+            selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, rendererFactory: rendererFactory, renderer: renderer
+        };
     }
     /**
      * @param {?} parent
@@ -13804,29 +13861,40 @@
      * @return {?}
      */
     function debugCreateEmbeddedView(parent, anchorDef, context) {
-        return callWithDebugContext('create', createEmbeddedView, null, [parent, anchorDef, context]);
+        return callWithDebugContext(DebugAction.create, createEmbeddedView, null, [parent, anchorDef, context]);
     }
     /**
      * @param {?} view
      * @return {?}
      */
     function debugCheckAndUpdateView(view) {
-        return callWithDebugContext('detectChanges', checkAndUpdateView, null, [view]);
+        return callWithDebugContext(DebugAction.detectChanges, checkAndUpdateView, null, [view]);
     }
     /**
      * @param {?} view
      * @return {?}
      */
     function debugCheckNoChangesView(view) {
-        return callWithDebugContext('checkNoChanges', checkNoChangesView, null, [view]);
+        return callWithDebugContext(DebugAction.checkNoChanges, checkNoChangesView, null, [view]);
     }
     /**
      * @param {?} view
      * @return {?}
      */
     function debugDestroyView(view) {
-        return callWithDebugContext('destroyView', destroyView, null, [view]);
+        return callWithDebugContext(DebugAction.destroy, destroyView, null, [view]);
     }
+    var DebugAction = {};
+    DebugAction.create = 0;
+    DebugAction.detectChanges = 1;
+    DebugAction.checkNoChanges = 2;
+    DebugAction.destroy = 3;
+    DebugAction.handleEvent = 4;
+    DebugAction[DebugAction.create] = "create";
+    DebugAction[DebugAction.detectChanges] = "detectChanges";
+    DebugAction[DebugAction.checkNoChanges] = "checkNoChanges";
+    DebugAction[DebugAction.destroy] = "destroy";
+    DebugAction[DebugAction.handleEvent] = "handleEvent";
     var /** @type {?} */ _currentAction;
     var /** @type {?} */ _currentView;
     var /** @type {?} */ _currentNodeIndex;
@@ -13848,10 +13916,10 @@
      */
     function debugHandleEvent(view, nodeIndex, eventName, event) {
         if (view.state & ViewState.Destroyed) {
-            throw viewDestroyedError$1(_currentAction);
+            throw viewDestroyedError$1(DebugAction[_currentAction]);
         }
         debugSetCurrentNode(view, nodeIndex);
-        return callWithDebugContext('handleEvent', view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
+        return callWithDebugContext(DebugAction.handleEvent, view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
     }
     /**
      * @param {?} check
@@ -13860,7 +13928,7 @@
      */
     function debugUpdateDirectives(check, view) {
         if (view.state & ViewState.Destroyed) {
-            throw viewDestroyedError$1(_currentAction);
+            throw viewDestroyedError$1(DebugAction[_currentAction]);
         }
         debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
         return view.def.updateDirectives(debugCheckDirectivesFn, view);
@@ -13889,7 +13957,7 @@
      */
     function debugUpdateRenderer(check, view) {
         if (view.state & ViewState.Destroyed) {
-            throw viewDestroyedError$1(_currentAction);
+            throw viewDestroyedError$1(DebugAction[_currentAction]);
         }
         debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
         return view.def.updateRenderer(debugCheckRenderNodeFn, view);
@@ -13919,41 +13987,46 @@
      * @return {?}
      */
     function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
-        var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
-        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
-            var /** @type {?} */ binding = nodeDef.bindings[i];
-            var /** @type {?} */ value = values[i];
-            if ((binding.type === BindingType.ElementProperty ||
-                binding.type === BindingType.DirectiveProperty) &&
-                checkBinding$1(view, nodeDef, i, value)) {
+        if (_currentAction === DebugAction.detectChanges) {
+            var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
+            var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+            if (nodeDef.type === NodeType.Directive || nodeDef.type === NodeType.Element) {
+                var /** @type {?} */ bindingValues = {};
+                for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
+                    var /** @type {?} */ binding = nodeDef.bindings[i];
+                    var /** @type {?} */ value = values[i];
+                    if ((binding.type === BindingType.ElementProperty ||
+                        binding.type === BindingType.DirectiveProperty) &&
+                        checkBinding$1(view, nodeDef, i, value)) {
+                        bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)] =
+                            normalizeDebugBindingValue(value);
+                    }
+                }
                 var /** @type {?} */ elDef = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef;
-                setBindingDebugInfo$1(view.root.renderer, asElementData(view, elDef.index).renderElement, binding.nonMinifiedName, value);
+                var /** @type {?} */ el = asElementData(view, elDef.index).renderElement;
+                if (!elDef.element.name) {
+                    // a comment.
+                    view.renderer.setValue(el, "bindings=" + JSON.stringify(bindingValues, null, 2));
+                }
+                else {
+                    // a regular element.
+                    for (var /** @type {?} */ attr in bindingValues) {
+                        view.renderer.setAttribute(el, attr, bindingValues[attr]);
+                    }
+                }
             }
         }
         return ((delegate)).apply(void 0, [view, nodeIndex, argStyle].concat(givenValues));
     }
     ;
     /**
-     * @param {?} renderer
-     * @param {?} renderNode
-     * @param {?} propName
-     * @param {?} value
+     * @param {?} name
      * @return {?}
      */
-    function setBindingDebugInfo$1(renderer, renderNode, propName, value) {
-        var /** @type {?} */ renderName = "ng-reflect-" + camelCaseToDashCase$1(propName);
-        if (value) {
-            try {
-                renderer.setBindingDebugInfo(renderNode, renderName, value.toString());
-            }
-            catch (e) {
-                renderer.setBindingDebugInfo(renderNode, renderName, '[ERROR] Exception while trying to serialize the value');
-            }
-        }
-        else {
-            renderer.removeBindingDebugInfo(renderNode, renderName);
-        }
+    function normalizeDebugBindingName(name) {
+        // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
+        name = camelCaseToDashCase$1(name.replace(/\$/g, '_'));
+        return "ng-reflect-" + name;
     }
     var /** @type {?} */ CAMEL_CASE_REGEXP$1 = /([A-Z])/g;
     /**
@@ -13968,6 +14041,19 @@
             }
             return '-' + m[1].toLowerCase();
         });
+    }
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    function normalizeDebugBindingValue(value) {
+        try {
+            // Limit the size of the value as otherwise the DOM just gets polluted.
+            return value ? value.toString().slice(0, 20) : value;
+        }
+        catch (e) {
+            return '[ERROR] Exception while trying to serialize the value';
+        }
     }
     /**
      * @param {?} view
@@ -13998,171 +14084,6 @@
         }
         return undefined;
     }
-    var DebugRenderer = (function () {
-        /**
-         * @param {?} _delegate
-         */
-        function DebugRenderer(_delegate) {
-            this._delegate = _delegate;
-        }
-        /**
-         * @param {?} name
-         * @param {?=} namespace
-         * @return {?}
-         */
-        DebugRenderer.prototype.createElement = function (name, namespace) {
-            return this._delegate.createElement(name, namespace, getCurrentDebugContext());
-        };
-        /**
-         * @param {?} value
-         * @return {?}
-         */
-        DebugRenderer.prototype.createComment = function (value) {
-            return this._delegate.createComment(value, getCurrentDebugContext());
-        };
-        /**
-         * @param {?} value
-         * @return {?}
-         */
-        DebugRenderer.prototype.createText = function (value) {
-            return this._delegate.createText(value, getCurrentDebugContext());
-        };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @return {?}
-         */
-        DebugRenderer.prototype.appendChild = function (parent, newChild) {
-            return this._delegate.appendChild(parent, newChild);
-        };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @param {?} refChild
-         * @return {?}
-         */
-        DebugRenderer.prototype.insertBefore = function (parent, newChild, refChild) {
-            return this._delegate.insertBefore(parent, newChild, refChild);
-        };
-        /**
-         * @param {?} parent
-         * @param {?} oldChild
-         * @return {?}
-         */
-        DebugRenderer.prototype.removeChild = function (parent, oldChild) {
-            return this._delegate.removeChild(parent, oldChild);
-        };
-        /**
-         * @param {?} selectorOrNode
-         * @return {?}
-         */
-        DebugRenderer.prototype.selectRootElement = function (selectorOrNode) {
-            return this._delegate.selectRootElement(selectorOrNode, getCurrentDebugContext());
-        };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DebugRenderer.prototype.parentNode = function (node) { return this._delegate.parentNode(node); };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DebugRenderer.prototype.nextSibling = function (node) { return this._delegate.nextSibling(node); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @param {?=} namespace
-         * @return {?}
-         */
-        DebugRenderer.prototype.setAttribute = function (el, name, value, namespace) {
-            return this._delegate.setAttribute(el, name, value, namespace);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?=} namespace
-         * @return {?}
-         */
-        DebugRenderer.prototype.removeAttribute = function (el, name, namespace) {
-            return this._delegate.removeAttribute(el, name, namespace);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @param {?} propertyValue
-         * @return {?}
-         */
-        DebugRenderer.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
-            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @return {?}
-         */
-        DebugRenderer.prototype.removeBindingDebugInfo = function (el, propertyName) {
-            this._delegate.removeBindingDebugInfo(el, propertyName);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DebugRenderer.prototype.addClass = function (el, name) { return this._delegate.addClass(el, name); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DebugRenderer.prototype.removeClass = function (el, name) { return this._delegate.removeClass(el, name); };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} value
-         * @param {?} hasVendorPrefix
-         * @param {?} hasImportant
-         * @return {?}
-         */
-        DebugRenderer.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
-            return this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
-        };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} hasVendorPrefix
-         * @return {?}
-         */
-        DebugRenderer.prototype.removeStyle = function (el, style, hasVendorPrefix) {
-            return this._delegate.removeStyle(el, style, hasVendorPrefix);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        DebugRenderer.prototype.setProperty = function (el, name, value) {
-            return this._delegate.setProperty(el, name, value);
-        };
-        /**
-         * @param {?} node
-         * @param {?} value
-         * @return {?}
-         */
-        DebugRenderer.prototype.setText = function (node, value) { return this._delegate.setText(node, value); };
-        /**
-         * @param {?} target
-         * @param {?} eventName
-         * @param {?} callback
-         * @return {?}
-         */
-        DebugRenderer.prototype.listen = function (target, eventName, callback) {
-            return this._delegate.listen(target, eventName, callback);
-        };
-        return DebugRenderer;
-    }());
     var DebugContext_ = (function () {
         /**
          * @param {?} view
@@ -14364,6 +14285,254 @@
     function getCurrentDebugContext() {
         return new DebugContext_(_currentView, _currentNodeIndex);
     }
+    var DebugRendererFactoryV2 = (function () {
+        /**
+         * @param {?} delegate
+         */
+        function DebugRendererFactoryV2(delegate) {
+            this.delegate = delegate;
+        }
+        /**
+         * @param {?} element
+         * @param {?} renderData
+         * @return {?}
+         */
+        DebugRendererFactoryV2.prototype.createRenderer = function (element, renderData) {
+            return new DebugRendererV2(this.delegate.createRenderer(element, renderData));
+        };
+        return DebugRendererFactoryV2;
+    }());
+    var DebugRendererV2 = (function () {
+        /**
+         * @param {?} delegate
+         */
+        function DebugRendererV2(delegate) {
+            this.delegate = delegate;
+        }
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugRendererV2.prototype.destroyNode = function (node) {
+            removeDebugNodeFromIndex(getDebugNode(node));
+            if (this.delegate.destroyNode) {
+                this.delegate.destroyNode(node);
+            }
+        };
+        /**
+         * @return {?}
+         */
+        DebugRendererV2.prototype.destroy = function () { this.delegate.destroy(); };
+        /**
+         * @param {?} name
+         * @param {?=} namespace
+         * @return {?}
+         */
+        DebugRendererV2.prototype.createElement = function (name, namespace) {
+            var /** @type {?} */ el = this.delegate.createElement(name, namespace);
+            var /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
+            debugEl.name = name;
+            indexDebugNode(debugEl);
+            return el;
+        };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRendererV2.prototype.createComment = function (value) {
+            var /** @type {?} */ comment = this.delegate.createComment(value);
+            var /** @type {?} */ debugEl = new DebugNode(comment, null, getCurrentDebugContext());
+            indexDebugNode(debugEl);
+            return comment;
+        };
+        /**
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRendererV2.prototype.createText = function (value) {
+            var /** @type {?} */ text = this.delegate.createText(value);
+            var /** @type {?} */ debugEl = new DebugNode(text, null, getCurrentDebugContext());
+            indexDebugNode(debugEl);
+            return text;
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @return {?}
+         */
+        DebugRendererV2.prototype.appendChild = function (parent, newChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.addChild(debugChildEl);
+            }
+            this.delegate.appendChild(parent, newChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} newChild
+         * @param {?} refChild
+         * @return {?}
+         */
+        DebugRendererV2.prototype.insertBefore = function (parent, newChild, refChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
+            var /** @type {?} */ debugRefEl = getDebugNode(refChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.insertBefore(debugRefEl, debugChildEl);
+            }
+            this.delegate.insertBefore(parent, newChild, refChild);
+        };
+        /**
+         * @param {?} parent
+         * @param {?} oldChild
+         * @return {?}
+         */
+        DebugRendererV2.prototype.removeChild = function (parent, oldChild) {
+            var /** @type {?} */ debugEl = getDebugNode(parent);
+            var /** @type {?} */ debugChildEl = getDebugNode(oldChild);
+            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
+                debugEl.removeChild(debugChildEl);
+            }
+            this.delegate.removeChild(parent, oldChild);
+        };
+        /**
+         * @param {?} selectorOrNode
+         * @return {?}
+         */
+        DebugRendererV2.prototype.selectRootElement = function (selectorOrNode) {
+            var /** @type {?} */ el = this.delegate.selectRootElement(selectorOrNode);
+            var /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
+            indexDebugNode(debugEl);
+            return el;
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @param {?=} namespace
+         * @return {?}
+         */
+        DebugRendererV2.prototype.setAttribute = function (el, name, value, namespace) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+                debugEl.attributes[fullName] = value;
+            }
+            this.delegate.setAttribute(el, name, value, namespace);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?=} namespace
+         * @return {?}
+         */
+        DebugRendererV2.prototype.removeAttribute = function (el, name, namespace) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
+                debugEl.attributes[fullName] = null;
+            }
+            this.delegate.removeAttribute(el, name, namespace);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRendererV2.prototype.addClass = function (el, name) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.classes[name] = true;
+            }
+            this.delegate.addClass(el, name);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @return {?}
+         */
+        DebugRendererV2.prototype.removeClass = function (el, name) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.classes[name] = false;
+            }
+            this.delegate.removeClass(el, name);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} value
+         * @param {?} hasVendorPrefix
+         * @param {?} hasImportant
+         * @return {?}
+         */
+        DebugRendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.styles[style] = value;
+            }
+            this.delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
+        };
+        /**
+         * @param {?} el
+         * @param {?} style
+         * @param {?} hasVendorPrefix
+         * @return {?}
+         */
+        DebugRendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.styles[style] = null;
+            }
+            this.delegate.removeStyle(el, style, hasVendorPrefix);
+        };
+        /**
+         * @param {?} el
+         * @param {?} name
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRendererV2.prototype.setProperty = function (el, name, value) {
+            var /** @type {?} */ debugEl = getDebugNode(el);
+            if (debugEl && debugEl instanceof DebugElement) {
+                debugEl.properties[name] = value;
+            }
+            this.delegate.setProperty(el, name, value);
+        };
+        /**
+         * @param {?} target
+         * @param {?} eventName
+         * @param {?} callback
+         * @return {?}
+         */
+        DebugRendererV2.prototype.listen = function (target, eventName, callback) {
+            if (typeof target !== 'string') {
+                var /** @type {?} */ debugEl = getDebugNode(target);
+                if (debugEl) {
+                    debugEl.listeners.push(new EventListener(eventName, callback));
+                }
+            }
+            return this.delegate.listen(target, eventName, callback);
+        };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugRendererV2.prototype.parentNode = function (node) { return this.delegate.parentNode(node); };
+        /**
+         * @param {?} node
+         * @return {?}
+         */
+        DebugRendererV2.prototype.nextSibling = function (node) { return this.delegate.nextSibling(node); };
+        /**
+         * @param {?} node
+         * @param {?} value
+         * @return {?}
+         */
+        DebugRendererV2.prototype.setValue = function (node, value) { return this.delegate.setValue(node, value); };
+        return DebugRendererV2;
+    }());
 
 
 
@@ -14381,6 +14550,7 @@
     	createComponentFactory: createComponentFactory,
     	initServicesIfNeeded: initServicesIfNeeded,
     	textDef: textDef,
+    	createComponentRenderTypeV2: createComponentRenderTypeV2,
     	elementEventFullName: elementEventFullName,
     	nodeValue: nodeValue,
     	rootRenderNodes: rootRenderNodes,
@@ -14819,7 +14989,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$11 = (this && this.__extends) || function (d, b) {
+    var __extends$10 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -14863,7 +15033,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateDeclarationMetadata = (function (_super) {
-        __extends$11(AnimationStateDeclarationMetadata, _super);
+        __extends$10(AnimationStateDeclarationMetadata, _super);
         /**
          * @param {?} stateNameExpr
          * @param {?} styles
@@ -14884,7 +15054,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStateTransitionMetadata = (function (_super) {
-        __extends$11(AnimationStateTransitionMetadata, _super);
+        __extends$10(AnimationStateTransitionMetadata, _super);
         /**
          * @param {?} stateChangeExpr
          * @param {?} steps
@@ -14914,7 +15084,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationKeyframesSequenceMetadata = (function (_super) {
-        __extends$11(AnimationKeyframesSequenceMetadata, _super);
+        __extends$10(AnimationKeyframesSequenceMetadata, _super);
         /**
          * @param {?} steps
          */
@@ -14933,7 +15103,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationStyleMetadata = (function (_super) {
-        __extends$11(AnimationStyleMetadata, _super);
+        __extends$10(AnimationStyleMetadata, _super);
         /**
          * @param {?} styles
          * @param {?=} offset
@@ -14955,7 +15125,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationAnimateMetadata = (function (_super) {
-        __extends$11(AnimationAnimateMetadata, _super);
+        __extends$10(AnimationAnimateMetadata, _super);
         /**
          * @param {?} timings
          * @param {?} styles
@@ -14973,7 +15143,7 @@
      * @abstract
      */
     var AnimationWithStepsMetadata = (function (_super) {
-        __extends$11(AnimationWithStepsMetadata, _super);
+        __extends$10(AnimationWithStepsMetadata, _super);
         function AnimationWithStepsMetadata() {
             return _super.call(this) || this;
         }
@@ -14995,7 +15165,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationSequenceMetadata = (function (_super) {
-        __extends$11(AnimationSequenceMetadata, _super);
+        __extends$10(AnimationSequenceMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -15022,7 +15192,7 @@
      * \@experimental Animation support is experimental.
      */
     var AnimationGroupMetadata = (function (_super) {
-        __extends$11(AnimationGroupMetadata, _super);
+        __extends$10(AnimationGroupMetadata, _super);
         /**
          * @param {?} _steps
          */
@@ -16052,244 +16222,6 @@
         };
         return DebugDomRenderer;
     }());
-    var DebugDomRendererV2 = (function () {
-        /**
-         * @param {?} _delegate
-         */
-        function DebugDomRendererV2(_delegate) {
-            this._delegate = _delegate;
-        }
-        /**
-         * @param {?} name
-         * @param {?=} namespace
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.createElement = function (name, namespace, debugInfo) {
-            var /** @type {?} */ el = this._delegate.createElement(name, namespace, debugInfo);
-            var /** @type {?} */ debugEl = new DebugElement(el, null, debugInfo);
-            debugEl.name = name;
-            indexDebugNode(debugEl);
-            return el;
-        };
-        /**
-         * @param {?} value
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.createComment = function (value, debugInfo) {
-            var /** @type {?} */ comment = this._delegate.createComment(value, debugInfo);
-            var /** @type {?} */ debugEl = new DebugNode(comment, null, debugInfo);
-            indexDebugNode(debugEl);
-            return comment;
-        };
-        /**
-         * @param {?} value
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.createText = function (value, debugInfo) {
-            var /** @type {?} */ text = this._delegate.createText(value, debugInfo);
-            var /** @type {?} */ debugEl = new DebugNode(text, null, debugInfo);
-            indexDebugNode(debugEl);
-            return text;
-        };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.appendChild = function (parent, newChild) {
-            var /** @type {?} */ debugEl = getDebugNode(parent);
-            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
-            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
-                debugEl.addChild(debugChildEl);
-            }
-            this._delegate.appendChild(parent, newChild);
-        };
-        /**
-         * @param {?} parent
-         * @param {?} newChild
-         * @param {?} refChild
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.insertBefore = function (parent, newChild, refChild) {
-            var /** @type {?} */ debugEl = getDebugNode(parent);
-            var /** @type {?} */ debugChildEl = getDebugNode(newChild);
-            var /** @type {?} */ debugRefEl = getDebugNode(refChild);
-            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
-                debugEl.insertBefore(debugRefEl, debugChildEl);
-            }
-            this._delegate.insertBefore(parent, newChild, refChild);
-        };
-        /**
-         * @param {?} parent
-         * @param {?} oldChild
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.removeChild = function (parent, oldChild) {
-            var /** @type {?} */ debugEl = getDebugNode(parent);
-            var /** @type {?} */ debugChildEl = getDebugNode(oldChild);
-            if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
-                debugEl.removeChild(debugChildEl);
-            }
-            this._delegate.removeChild(parent, oldChild);
-        };
-        /**
-         * @param {?} selectorOrNode
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.selectRootElement = function (selectorOrNode, debugInfo) {
-            var /** @type {?} */ el = this._delegate.selectRootElement(selectorOrNode, debugInfo);
-            var /** @type {?} */ debugEl = new DebugElement(el, null, debugInfo);
-            indexDebugNode(debugEl);
-            return el;
-        };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.parentNode = function (node) { return this._delegate.parentNode(node); };
-        /**
-         * @param {?} node
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.nextSibling = function (node) { return this._delegate.nextSibling(node); };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @param {?=} namespace
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.setAttribute = function (el, name, value, namespace) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
-                debugEl.attributes[fullName] = value;
-            }
-            this._delegate.setAttribute(el, name, value, namespace);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?=} namespace
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.removeAttribute = function (el, name, namespace) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
-                debugEl.attributes[fullName] = null;
-            }
-            this._delegate.removeAttribute(el, name, namespace);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @param {?} propertyValue
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.setBindingDebugInfo = function (el, propertyName, propertyValue) {
-            this._delegate.setBindingDebugInfo(el, propertyName, propertyValue);
-        };
-        /**
-         * @param {?} el
-         * @param {?} propertyName
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.removeBindingDebugInfo = function (el, propertyName) {
-            this._delegate.removeBindingDebugInfo(el, propertyName);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.addClass = function (el, name) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                debugEl.classes[name] = true;
-            }
-            this._delegate.addClass(el, name);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.removeClass = function (el, name) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                debugEl.classes[name] = false;
-            }
-            this._delegate.removeClass(el, name);
-        };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} value
-         * @param {?} hasVendorPrefix
-         * @param {?} hasImportant
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                debugEl.styles[style] = value;
-            }
-            this._delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
-        };
-        /**
-         * @param {?} el
-         * @param {?} style
-         * @param {?} hasVendorPrefix
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.removeStyle = function (el, style, hasVendorPrefix) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                debugEl.styles[style] = null;
-            }
-            this._delegate.removeStyle(el, style, hasVendorPrefix);
-        };
-        /**
-         * @param {?} el
-         * @param {?} name
-         * @param {?} value
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.setProperty = function (el, name, value) {
-            var /** @type {?} */ debugEl = getDebugNode(el);
-            if (debugEl && debugEl instanceof DebugElement) {
-                debugEl.properties[name] = value;
-            }
-            this._delegate.setProperty(el, name, value);
-        };
-        /**
-         * @param {?} node
-         * @param {?} value
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.setText = function (node, value) { this._delegate.setText(node, value); };
-        /**
-         * @param {?} target
-         * @param {?} eventName
-         * @param {?} callback
-         * @return {?}
-         */
-        DebugDomRendererV2.prototype.listen = function (target, eventName, callback) {
-            if (typeof target !== 'string') {
-                var /** @type {?} */ debugEl = getDebugNode(target);
-                if (debugEl) {
-                    debugEl.listeners.push(new EventListener(eventName, callback));
-                }
-            }
-            return this._delegate.listen(target, eventName, callback);
-        };
-        return DebugDomRendererV2;
-    }());
 
     var ViewType = {};
     ViewType.HOST = 0;
@@ -16593,13 +16525,13 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$13 = (this && this.__extends) || function (d, b) {
+    var __extends$12 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var ElementInjector = (function (_super) {
-        __extends$13(ElementInjector, _super);
+        __extends$12(ElementInjector, _super);
         /**
          * @param {?} _view
          * @param {?} _nodeIndex
@@ -16629,7 +16561,7 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    var __extends$12 = (this && this.__extends) || function (d, b) {
+    var __extends$11 = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -17084,7 +17016,7 @@
         return AppView;
     }());
     var DebugAppView = (function (_super) {
-        __extends$12(DebugAppView, _super);
+        __extends$11(DebugAppView, _super);
         /**
          * @param {?} clazz
          * @param {?} componentType
@@ -17439,7 +17371,6 @@
         ReflectionCapabilities: ReflectionCapabilities,
         makeDecorator: makeDecorator,
         DebugDomRootRenderer: DebugDomRootRenderer,
-        DebugDomRendererV2: DebugDomRendererV2,
         Console: Console,
         reflector: reflector,
         Reflector: Reflector,
@@ -17553,11 +17484,11 @@
     exports.SkipSelf = SkipSelf;
     exports.Host = Host;
     exports.NgZone = NgZone;
-    exports.RENDERER_V2_DIRECT = RENDERER_V2_DIRECT;
-    exports.RenderComponentType = RenderComponentType;
-    exports.Renderer = Renderer;
+    exports.RenderComponentType = RenderComponentTypeV1;
+    exports.Renderer = RendererV1;
+    exports.RendererFactoryV2 = RendererFactoryV2;
     exports.RendererV2 = RendererV2;
-    exports.RootRenderer = RootRenderer;
+    exports.RootRenderer = RootRendererV1;
     exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;
     exports.CompilerFactory = CompilerFactory;

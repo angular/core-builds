@@ -82,8 +82,8 @@ export function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
  */
 function renderAttachEmbeddedView(elementData, prevView, view) {
     var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
-    var /** @type {?} */ parentNode = view.root.renderer.parentNode(prevRenderNode);
-    var /** @type {?} */ nextSibling = view.root.renderer.nextSibling(prevRenderNode);
+    var /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
+    var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
     // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
     // However, browsers automatically do `appendChild` when there is no `nextSibling`.
     visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
@@ -94,7 +94,7 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
  * @return {?}
  */
 function renderDetachEmbeddedView(elementData, view) {
-    var /** @type {?} */ parentNode = view.root.renderer.parentNode(elementData.renderElement);
+    var /** @type {?} */ parentNode = view.renderer.parentNode(elementData.renderElement);
     visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
 }
 /**
