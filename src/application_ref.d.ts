@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { ErrorHandler } from '../src/error_handler';
 import { ApplicationInitStatus } from './application_init';
 import { Console } from './console';
-import { Injector, Provider } from './di';
+import { InjectionToken, Injector, Provider } from './di';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -18,6 +18,7 @@ import { ViewRef } from './linker/view_ref';
 import { Testability, TestabilityRegistry } from './testability/testability';
 import { Type } from './type';
 import { NgZone } from './zone/ng_zone';
+export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 /**
  * Disable Angular's development mode, which turns off assertions and other
  * checks within the framework.
@@ -62,8 +63,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  */
 export declare function createPlatformFactory(parentPlatformFactory: (extraProviders?: Provider[]) => PlatformRef, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
 /**
- * Checks that there currently is a platform
- * which contains the given token as a provider.
+ * Checks that there currently is a platform which contains the given token as a provider.
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */

@@ -13,6 +13,7 @@ import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './animation
 import * as animationUtils from './animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './animation/animation_styles';
 import { AnimationTransition } from './animation/animation_transition';
+import { ALLOW_MULTIPLE_PLATFORMS } from './application_ref';
 import * as application_tokens from './application_tokens';
 import * as change_detection_util from './change_detection/change_detection_util';
 import * as constants from './change_detection/constants';
@@ -91,6 +92,7 @@ export var /** @type {?} */ __core_private__ = ({
     isPromise: isPromise,
     isObservable: isObservable,
     AnimationTransition: AnimationTransition,
+    ALLOW_MULTIPLE_PLATFORMS: ALLOW_MULTIPLE_PLATFORMS,
     ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE,
     TransitionEngine: TransitionEngine
 }) /* TODO(misko): export these using omega names instead */;
