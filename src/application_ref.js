@@ -25,6 +25,7 @@ import { NgZone } from './zone/ng_zone';
 let /** @type {?} */ _devMode = true;
 let /** @type {?} */ _runModeLocked = false;
 let /** @type {?} */ _platform;
+export const /** @type {?} */ ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
 /**
  * Disable Angular's development mode, which turns off assertions and other
  * checks within the framework.
@@ -85,7 +86,8 @@ function NgProbeToken_tsickle_Closure_declarations() {
  * @return {?}
  */
 export function createPlatform(injector) {
-    if (_platform && !_platform.destroyed) {
+    if (_platform && !_platform.destroyed &&
+        !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
         throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
     }
     _platform = injector.get(PlatformRef);
@@ -106,7 +108,8 @@ export function createPlatform(injector) {
 export function createPlatformFactory(parentPlatformFactory, name, providers = []) {
     const /** @type {?} */ marker = new InjectionToken(`Platform: ${name}`);
     return (extraProviders = []) => {
-        if (!getPlatform()) {
+        let /** @type {?} */ platform = getPlatform();
+        if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
             if (parentPlatformFactory) {
                 parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
@@ -118,8 +121,7 @@ export function createPlatformFactory(parentPlatformFactory, name, providers = [
     };
 }
 /**
- * Checks that there currently is a platform
- * which contains the given token as a provider.
+ * Checks that there currently is a platform which contains the given token as a provider.
  *
  * \@experimental APIs related to application bootstrap are currently under review.
  * @param {?} requiredToken

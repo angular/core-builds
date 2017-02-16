@@ -7921,6 +7921,7 @@
     var /** @type {?} */ _devMode = true;
     var /** @type {?} */ _runModeLocked = false;
     var /** @type {?} */ _platform;
+    var /** @type {?} */ ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
     /**
      * Disable Angular's development mode, which turns off assertions and other
      * checks within the framework.
@@ -7976,7 +7977,8 @@
      * @return {?}
      */
     function createPlatform(injector) {
-        if (_platform && !_platform.destroyed) {
+        if (_platform && !_platform.destroyed &&
+            !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
             throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
         }
         _platform = injector.get(PlatformRef);
@@ -7999,7 +8001,8 @@
         var /** @type {?} */ marker = new InjectionToken("Platform: " + name);
         return function (extraProviders) {
             if (extraProviders === void 0) { extraProviders = []; }
-            if (!getPlatform()) {
+            var /** @type {?} */ platform = getPlatform();
+            if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
                 if (parentPlatformFactory) {
                     parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
                 }
@@ -8011,8 +8014,7 @@
         };
     }
     /**
-     * Checks that there currently is a platform
-     * which contains the given token as a provider.
+     * Checks that there currently is a platform which contains the given token as a provider.
      *
      * \@experimental APIs related to application bootstrap are currently under review.
      * @param {?} requiredToken
@@ -17461,6 +17463,7 @@
         isPromise: isPromise,
         isObservable: isObservable,
         AnimationTransition: AnimationTransition,
+        ALLOW_MULTIPLE_PLATFORMS: ALLOW_MULTIPLE_PLATFORMS,
         ERROR_COMPONENT_TYPE: ERROR_COMPONENT_TYPE,
         TransitionEngine: TransitionEngine
     }) /* TODO(misko): export these using omega names instead */;
@@ -17631,5 +17634,35 @@
     exports.ɵreflector = reflector;
     exports.ɵview_utils = view_utils;
     exports.ɵviewEngine = viewEngine;
+    exports.ɵbc = AnimationQueue;
+    exports.ɵr = _initViewEngine;
+    exports.ɵo = _iterableDiffersFactory;
+    exports.ɵp = _keyValueDiffersFactory;
+    exports.ɵq = _localeFactory;
+    exports.ɵg = ApplicationRef_;
+    exports.ɵi = APP_ID_RANDOM_PROVIDER;
+    exports.ɵh = _appIdRandomProviderFactory;
+    exports.ɵk = defaultIterableDiffers;
+    exports.ɵl = defaultKeyValueDiffers;
+    exports.ɵm = DefaultIterableDifferFactory;
+    exports.ɵn = DefaultKeyValueDifferFactory;
+    exports.ɵba = Console;
+    exports.ɵd = ReflectiveInjector_;
+    exports.ɵe = ReflectiveDependency;
+    exports.ɵf = resolveReflectiveProviders;
+    exports.ɵbb = ViewUtils;
+    exports.ɵs = wtfEnabled;
+    exports.ɵu = createScope;
+    exports.ɵt = detectWTF;
+    exports.ɵx = endTimeRange;
+    exports.ɵv = leave;
+    exports.ɵw = startTimeRange;
+    exports.ɵbe = ReflectionCapabilities;
+    exports.ɵy = Reflector;
+    exports.ɵbd = ReflectorReader;
+    exports.ɵj = RenderDebugInfo;
+    exports.ɵa = makeDecorator;
+    exports.ɵb = makeParamDecorator;
+    exports.ɵc = makePropDecorator;
 
 }));

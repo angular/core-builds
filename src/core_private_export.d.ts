@@ -13,6 +13,7 @@ import { AnimationSequencePlayer as AnimationSequencePlayer_ } from './animation
 import * as animationUtils from './animation/animation_style_util';
 import { AnimationStyles as AnimationStyles_ } from './animation/animation_styles';
 import { AnimationTransition } from './animation/animation_transition';
+import { ALLOW_MULTIPLE_PLATFORMS } from './application_ref';
 import * as application_tokens from './application_tokens';
 import * as change_detection_util from './change_detection/change_detection_util';
 import * as constants from './change_detection/constants';
@@ -120,6 +121,7 @@ export declare const __core_private__: {
     isPromise: typeof isPromise;
     isObservable: typeof isObservable;
     AnimationTransition: typeof AnimationTransition;
+    ALLOW_MULTIPLE_PLATFORMS: typeof ALLOW_MULTIPLE_PLATFORMS;
     view_utils: typeof view_utils;
     ERROR_COMPONENT_TYPE: typeof ERROR_COMPONENT_TYPE;
     viewEngine: typeof viewEngine;
