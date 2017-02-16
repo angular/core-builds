@@ -374,7 +374,8 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        return Services.resolveDep(this.view, this.elDef, true, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
+        const /** @type {?} */ allowPrivateServices = !!this.elDef.element.component;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
 function Injector__tsickle_Closure_declarations() {

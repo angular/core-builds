@@ -10,11 +10,13 @@ import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
-import * as v1renderer from '../render/api';
+import { ViewEncapsulation } from '../metadata/view';
+import { RenderComponentType as RenderComponentTypeV1, Renderer as RendererV1, RendererV2, RootRenderer as RootRendererV1 } from '../render/api';
 import { createChangeDetectorRef, createInjector, createTemplateRef, createViewContainerRef } from './refs';
 import { BindingType, DepFlags, NodeFlags, NodeType, ProviderType, Services, ViewFlags, ViewState, asElementData, asProviderData } from './types';
 import { checkAndUpdateBinding, dispatchEvent, isComponentView, splitMatchedQueriesDsl, tokenKey, viewParentEl } from './util';
-const /** @type {?} */ RendererV1TokenKey = tokenKey(v1renderer.Renderer);
+const /** @type {?} */ RendererV1TokenKey = tokenKey(RendererV1);
+const /** @type {?} */ RendererV2TokenKey = tokenKey(RendererV2);
 const /** @type {?} */ ElementRefTokenKey = tokenKey(ElementRef);
 const /** @type {?} */ ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 const /** @type {?} */ TemplateRefTokenKey = tokenKey(TemplateRef);
@@ -30,9 +32,10 @@ const /** @type {?} */ NOT_CREATED = new Object();
  * @param {?=} props
  * @param {?=} outputs
  * @param {?=} component
+ * @param {?=} componentRenderType
  * @return {?}
  */
-export function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component) {
+export function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component, componentRenderType) {
     const /** @type {?} */ bindings = [];
     if (props) {
         for (let /** @type {?} */ prop in props) {
@@ -51,7 +54,7 @@ export function directiveDef(flags, matchedQueries, childCount, ctor, deps, prop
             outputDefs.push({ propName, eventName: outputs[propName] });
         }
     }
-    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component);
+    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component, componentRenderType);
 }
 /**
  * @param {?} flags
@@ -86,10 +89,16 @@ export function providerDef(flags, matchedQueries, type, token, value, deps) {
  * @param {?=} bindings
  * @param {?=} outputs
  * @param {?=} component
+ * @param {?=} componentRenderType
  * @return {?}
  */
-export function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component) {
+export function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component, componentRenderType) {
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
+    // This is needed as the jit compiler always uses an empty hash as default ComponentRenderTypeV2,
+    // which is not filled for host views.
+    if (componentRenderType && componentRenderType.encapsulation == null) {
+        componentRenderType = null;
+    }
     if (!outputs) {
         outputs = [];
     }
@@ -131,7 +140,7 @@ export function _def(type, flags, matchedQueriesDsl, childCount, providerType, t
             type: providerType,
             token,
             tokenKey: tokenKey(token), value,
-            deps: depDefs, outputs, component
+            deps: depDefs, outputs, component, componentRenderType
         },
         text: undefined,
         pureExpression: undefined,
@@ -386,13 +395,16 @@ export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundVa
         if (elDef) {
             switch (tokenKey) {
                 case RendererV1TokenKey: {
-                    let /** @type {?} */ compView = view;
-                    while (compView && !isComponentView(compView)) {
-                        compView = compView.parent;
-                    }
-                    const /** @type {?} */ rootRenderer = view.root.injector.get(v1renderer.RootRenderer);
-                    // Note: Don't fill in the styles as they have been installed already!
-                    return rootRenderer.renderComponent(new v1renderer.RenderComponentType(view.def.component.id, '', 0, view.def.component.encapsulation, [], {}));
+                    const /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);
+                    const /** @type {?} */ compDef = compView.parentNodeDef;
+                    const /** @type {?} */ rootRendererV1 = view.root.injector.get(RootRendererV1);
+                    // Note: Don't fill in the styles as they have been installed already via the RendererV2!
+                    const /** @type {?} */ compRenderType = compDef.provider.componentRenderType;
+                    return rootRendererV1.renderComponent(new RenderComponentTypeV1(compRenderType ? compRenderType.id : '0', '', 0, compRenderType ? compRenderType.encapsulation : ViewEncapsulation.None, [], {}));
+                }
+                case RendererV2TokenKey: {
+                    const /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);
+                    return compView.renderer;
                 }
                 case ElementRefTokenKey:
                     return new ElementRef(asElementData(view, elDef.index).renderElement);
@@ -405,16 +417,7 @@ export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundVa
                     break;
                 }
                 case ChangeDetectorRefTokenKey: {
-                    let /** @type {?} */ cdView;
-                    if (allowPrivateServices) {
-                        cdView = asProviderData(view, elDef.element.component.index).componentView;
-                    }
-                    else {
-                        cdView = view;
-                        while (cdView.parent && !isComponentView(cdView)) {
-                            cdView = cdView.parent;
-                        }
-                    }
+                    let /** @type {?} */ cdView = findCompView(view, elDef, allowPrivateServices);
                     return createChangeDetectorRef(cdView);
                 }
                 case InjectorRefTokenKey:
@@ -436,6 +439,25 @@ export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundVa
         view = view.parent;
     }
     return startView.root.injector.get(depDef.token, notFoundValue);
+}
+/**
+ * @param {?} view
+ * @param {?} elDef
+ * @param {?} allowPrivateServices
+ * @return {?}
+ */
+function findCompView(view, elDef, allowPrivateServices) {
+    let /** @type {?} */ compView;
+    if (allowPrivateServices) {
+        compView = asProviderData(view, elDef.element.component.index).componentView;
+    }
+    else {
+        compView = view;
+        while (compView.parent && !isComponentView(compView)) {
+            compView = compView.parent;
+        }
+    }
+    return compView;
 }
 /**
  * @param {?} view

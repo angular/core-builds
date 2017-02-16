@@ -88,8 +88,6 @@ export declare const __core_private__: {
     makeDecorator: typeof decorators.makeDecorator;
     DebugDomRootRenderer: typeof debug.DebugDomRootRenderer;
     _DebugDomRootRenderer: debug.DebugDomRootRenderer;
-    DebugDomRendererV2: typeof debug.DebugDomRendererV2;
-    _DebugDomRendererV2: debug.DebugDomRendererV2;
     Console: typeof console.Console;
     _Console: console.Console;
     reflector: typeof reflection.reflector;

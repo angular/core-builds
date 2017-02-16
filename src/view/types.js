@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { RenderDebugContext } from '../render/api';
 export let ArgumentType = {};
 ArgumentType.Inline = 0;
 ArgumentType.Dynamic = 1;
@@ -198,7 +197,7 @@ export function asQueryList(view, index) {
 /**
  * @abstract
  */
-export class DebugContext extends RenderDebugContext {
+export class DebugContext {
     /**
      * @abstract
      * @return {?}
@@ -209,6 +208,46 @@ export class DebugContext extends RenderDebugContext {
      * @return {?}
      */
     nodeIndex() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    injector() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    component() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    providerTokens() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    references() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    context() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    source() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    componentRenderElement() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    renderNode() { }
 }
 /**
  * This object is used to prevent cycles in the source files and to have a place where
