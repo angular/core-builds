@@ -8,7 +8,7 @@
 import { isDevMode } from '../application_ref';
 import { SecurityContext } from '../security';
 import { BindingType, NodeFlags, NodeType, asElementData } from './types';
-import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, getParentRenderElement, resolveViewDefinition, sliceErrorStack, splitMatchedQueriesDsl } from './util';
+import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, getParentRenderElement, resolveViewDefinition, sliceErrorStack, splitMatchedQueriesDsl, splitNamespace } from './util';
 /**
  * @param {?} flags
  * @param {?} matchedQueriesDsl
@@ -38,6 +38,7 @@ export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, 
         bindings: [],
         disposableCount: 0,
         element: {
+            ns: undefined,
             name: undefined,
             attrs: undefined,
             outputs: [], template: template, source: source,
@@ -58,24 +59,29 @@ export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, 
  * @param {?} matchedQueriesDsl
  * @param {?} ngContentIndex
  * @param {?} childCount
- * @param {?} name
+ * @param {?} namespaceAndName
  * @param {?=} fixedAttrs
  * @param {?=} bindings
  * @param {?=} outputs
  * @return {?}
  */
-export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, name, fixedAttrs, bindings, outputs) {
-    if (fixedAttrs === void 0) { fixedAttrs = {}; }
+export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs, bindings, outputs) {
+    if (fixedAttrs === void 0) { fixedAttrs = []; }
     // skip the call to sliceErrorStack itself + the call to this function.
     var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
+    var /** @type {?} */ ns;
+    var /** @type {?} */ name;
+    if (namespaceAndName) {
+        _b = splitNamespace(namespaceAndName), ns = _b[0], name = _b[1];
+    }
     bindings = bindings || [];
     var /** @type {?} */ bindingDefs = new Array(bindings.length);
     for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
         var /** @type {?} */ entry = bindings[i];
         var /** @type {?} */ bindingDef = void 0;
         var /** @type {?} */ bindingType = entry[0];
-        var /** @type {?} */ name_1 = entry[1];
+        var _c = splitNamespace(entry[1]), ns_1 = _c[0], name_1 = _c[1];
         var /** @type {?} */ securityContext = void 0;
         var /** @type {?} */ suffix = void 0;
         switch (bindingType) {
@@ -87,7 +93,7 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
                 securityContext = (entry[2]);
                 break;
         }
-        bindingDefs[i] = { type: bindingType, name: name_1, nonMinifiedName: name_1, securityContext: securityContext, suffix: suffix };
+        bindingDefs[i] = { type: bindingType, ns: ns_1, name: name_1, nonMinifiedName: name_1, securityContext: securityContext, suffix: suffix };
     }
     outputs = outputs || [];
     var /** @type {?} */ outputDefs = new Array(outputs.length);
@@ -103,6 +109,12 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
         }
         outputDefs[i] = { eventName: eventName, target: target };
     }
+    fixedAttrs = fixedAttrs || [];
+    var /** @type {?} */ attrs = (fixedAttrs.map(function (_a) {
+        var namespaceAndName = _a[0], value = _a[1];
+        var _b = splitNamespace(namespaceAndName), ns = _b[0], name = _b[1];
+        return [ns, name, value];
+    }));
     return {
         type: NodeType.Element,
         // will bet set by the view definition
@@ -119,8 +131,9 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
         bindings: bindingDefs,
         disposableCount: outputDefs.length,
         element: {
+            ns: ns,
             name: name,
-            attrs: fixedAttrs,
+            attrs: attrs,
             outputs: outputDefs, source: source,
             template: undefined,
             // will bet set by the view definition
@@ -134,6 +147,7 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
         query: undefined,
         ngContent: undefined
     };
+    var _b;
 }
 /**
  * @param {?} view
@@ -148,9 +162,7 @@ export function createElement(view, renderHost, def) {
     var /** @type {?} */ el;
     if (view.parent || !rootSelectorOrNode) {
         if (elDef.name) {
-            // TODO(vicb): move the namespace to the node definition
-            var /** @type {?} */ nsAndName = splitNamespace(elDef.name);
-            el = renderer.createElement(nsAndName[1], nsAndName[0]);
+            el = renderer.createElement(elDef.name, elDef.ns);
         }
         else {
             el = renderer.createComment('');
@@ -164,10 +176,9 @@ export function createElement(view, renderHost, def) {
         el = renderer.selectRootElement(rootSelectorOrNode);
     }
     if (elDef.attrs) {
-        for (var /** @type {?} */ attrName in elDef.attrs) {
-            // TODO(vicb): move the namespace to the node definition
-            var /** @type {?} */ nsAndName = splitNamespace(attrName);
-            renderer.setAttribute(el, nsAndName[1], elDef.attrs[attrName], nsAndName[0]);
+        for (var /** @type {?} */ i = 0; i < elDef.attrs.length; i++) {
+            var _a = elDef.attrs[i], ns = _a[0], name_2 = _a[1], value = _a[2];
+            renderer.setAttribute(el, name_2, value, ns);
         }
     }
     if (elDef.outputs.length) {
@@ -256,11 +267,11 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
         return;
     }
     var /** @type {?} */ binding = def.bindings[bindingIdx];
-    var /** @type {?} */ name = binding.name;
     var /** @type {?} */ renderNode = asElementData(view, def.index).renderElement;
+    var /** @type {?} */ name = binding.name;
     switch (binding.type) {
         case BindingType.ElementAttribute:
-            setElementAttribute(view, binding, renderNode, name, value);
+            setElementAttribute(view, binding, renderNode, binding.ns, name, value);
             break;
         case BindingType.ElementClass:
             setElementClass(view, renderNode, name, value);
@@ -277,22 +288,21 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
  * @param {?} view
  * @param {?} binding
  * @param {?} renderNode
+ * @param {?} ns
  * @param {?} name
  * @param {?} value
  * @return {?}
  */
-function setElementAttribute(view, binding, renderNode, name, value) {
+function setElementAttribute(view, binding, renderNode, ns, name, value) {
     var /** @type {?} */ securityContext = binding.securityContext;
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     renderValue = renderValue != null ? renderValue.toString() : null;
     var /** @type {?} */ renderer = view.renderer;
-    // TODO(vicb): move the namespace to the node definition
-    var /** @type {?} */ nsAndName = splitNamespace(name);
     if (value != null) {
-        renderer.setAttribute(renderNode, nsAndName[1], renderValue, nsAndName[0]);
+        renderer.setAttribute(renderNode, name, renderValue, ns);
     }
     else {
-        renderer.removeAttribute(renderNode, nsAndName[1], nsAndName[0]);
+        renderer.removeAttribute(renderNode, name, ns);
     }
 }
 /**
@@ -351,17 +361,5 @@ function setElementProperty(view, binding, renderNode, name, value) {
     var /** @type {?} */ securityContext = binding.securityContext;
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     view.renderer.setProperty(renderNode, name, renderValue);
-}
-var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
-/**
- * @param {?} name
- * @return {?}
- */
-function splitNamespace(name) {
-    if (name[0] === ':') {
-        var /** @type {?} */ match = name.match(NS_PREFIX_RE);
-        return [match[1], match[2]];
-    }
-    return ['', name];
 }
 //# sourceMappingURL=element.js.map

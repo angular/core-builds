@@ -9,7 +9,7 @@ import { WrappedValue, devModeEqual } from '../change_detection/change_detection
 import { looseIdentical, stringify } from '../facade/lang';
 import { ViewEncapsulation } from '../metadata/view';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
-import { NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asProviderData, asTextData } from './types';
+import { NodeFlags, NodeType, Services, ViewFlags, ViewState, asElementData, asTextData } from './types';
 var /** @type {?} */ _tokenKeyCache = new Map();
 /**
  * @param {?} token
@@ -40,7 +40,7 @@ var /** @type {?} */ _renderCompCount = 0;
  * @param {?} values
  * @return {?}
  */
-export function createComponentRenderTypeV2(values) {
+export function createRendererTypeV2(values) {
     var /** @type {?} */ isFilled = values && (values.encapsulation !== ViewEncapsulation.None ||
         values.styles.length || Object.keys(values.data).length);
     if (isFilled) {
@@ -152,25 +152,6 @@ export function renderNode(view, def) {
     }
 }
 /**
- * @param {?} view
- * @param {?} index
- * @return {?}
- */
-export function nodeValue(view, index) {
-    var /** @type {?} */ def = view.def.nodes[index];
-    switch (def.type) {
-        case NodeType.Element:
-            return asElementData(view, def.index).renderElement;
-        case NodeType.Text:
-            return asTextData(view, def.index).renderText;
-        case NodeType.Directive:
-        case NodeType.Pipe:
-        case NodeType.Provider:
-            return asProviderData(view, def.index).instance;
-    }
-    return undefined;
-}
-/**
  * @param {?} target
  * @param {?} name
  * @return {?}
@@ -228,14 +209,21 @@ export function splitMatchedQueriesDsl(matchedQueriesDsl) {
  * @return {?}
  */
 export function getParentRenderElement(view, renderHost, def) {
-    var /** @type {?} */ parentEl;
-    if (!def.parent) {
-        parentEl = renderHost;
+    var /** @type {?} */ renderParent = def.renderParent;
+    if (renderParent) {
+        var /** @type {?} */ parent_1 = def.parent;
+        if (parent_1 && (parent_1.type !== NodeType.Element || !parent_1.element.component ||
+            (parent_1.element.component.provider.rendererType &&
+                parent_1.element.component.provider.rendererType.encapsulation ===
+                    ViewEncapsulation.Native))) {
+            // only children of non components, or children of components with native encapsulation should
+            // be attached.
+            return asElementData(view, def.renderParent.index).renderElement;
+        }
     }
-    else if (def.renderParent) {
-        parentEl = asElementData(view, def.renderParent.index).renderElement;
+    else {
+        return renderHost;
     }
-    return parentEl;
 }
 var /** @type {?} */ VIEW_DEFINITION_CACHE = new WeakMap();
 /**
@@ -416,5 +404,17 @@ function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling,
             target.push(renderNode);
             break;
     }
+}
+var /** @type {?} */ NS_PREFIX_RE = /^:([^:]+):(.+)$/;
+/**
+ * @param {?} name
+ * @return {?}
+ */
+export function splitNamespace(name) {
+    if (name[0] === ':') {
+        var /** @type {?} */ match = name.match(NS_PREFIX_RE);
+        return [match[1], match[2]];
+    }
+    return ['', name];
 }
 //# sourceMappingURL=util.js.map

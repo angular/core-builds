@@ -89,7 +89,7 @@ export declare abstract class RootRenderer {
 /**
  * @experimental
  */
-export interface ComponentRenderTypeV2 {
+export interface RendererTypeV2 {
     id: string;
     encapsulation: ViewEncapsulation;
     styles: (string | any[])[];
@@ -101,7 +101,7 @@ export interface ComponentRenderTypeV2 {
  * @experimental
  */
 export declare abstract class RendererFactoryV2 {
-    abstract createRenderer(hostElement: any, type: ComponentRenderTypeV2): RendererV2;
+    abstract createRenderer(hostElement: any, type: RendererTypeV2): RendererV2;
 }
 /**
  * @experimental

@@ -5,10 +5,18 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+import { NoOpAnimationPlayer } from '../animation/animation_player';
 import { Injector } from '../di';
+import { ComponentFactory, ComponentRef } from '../linker/component_factory';
 import { ElementRef } from '../linker/element_ref';
-import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentEl } from './util';
+import { VERSION } from '../version';
+import { DepFlags, NodeType, Services, ViewState, asElementData, asProviderData, asTextData } from './types';
+import { resolveViewDefinition, rootRenderNodes, splitNamespace, tokenKey, viewParentEl } from './util';
 var /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -19,16 +27,15 @@ var /** @type {?} */ EMPTY_CONTEXT = new Object();
 export function createComponentFactory(selector, componentType, viewDefFactory) {
     return new ComponentFactory_(selector, componentType, viewDefFactory);
 }
-var ComponentFactory_ = (function () {
+var ComponentFactory_ = (function (_super) {
+    __extends(ComponentFactory_, _super);
     /**
      * @param {?} selector
      * @param {?} componentType
-     * @param {?} _viewDefFactory
+     * @param {?} viewDefFactory
      */
-    function ComponentFactory_(selector, componentType, _viewDefFactory) {
-        this.selector = selector;
-        this.componentType = componentType;
-        this._viewClass = _viewDefFactory;
+    function ComponentFactory_(selector, componentType, viewDefFactory) {
+        return _super.call(this, selector, viewDefFactory, componentType) || this;
     }
     /**
      * Creates a new component.
@@ -44,33 +51,25 @@ var ComponentFactory_ = (function () {
         var /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.component.index;
         var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
         var /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
+        view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
         return new ComponentRef_(view, new ViewRef_(view), component);
     };
     return ComponentFactory_;
-}());
-function ComponentFactory__tsickle_Closure_declarations() {
-    /**
-     * We are not renaming this field as the old ComponentFactory is using it.
-     * \@internal
-     * @type {?}
-     */
-    ComponentFactory_.prototype._viewClass;
-    /** @type {?} */
-    ComponentFactory_.prototype.selector;
-    /** @type {?} */
-    ComponentFactory_.prototype.componentType;
-}
-var ComponentRef_ = (function () {
+}(ComponentFactory));
+var ComponentRef_ = (function (_super) {
+    __extends(ComponentRef_, _super);
     /**
      * @param {?} _view
      * @param {?} _viewRef
      * @param {?} _component
      */
     function ComponentRef_(_view, _viewRef, _component) {
-        this._view = _view;
-        this._viewRef = _viewRef;
-        this._component = _component;
-        this._elDef = this._view.def.nodes[0];
+        var _this = _super.call(this) || this;
+        _this._view = _view;
+        _this._viewRef = _viewRef;
+        _this._component = _component;
+        _this._elDef = _this._view.def.nodes[0];
+        return _this;
     }
     Object.defineProperty(ComponentRef_.prototype, "location", {
         /**
@@ -135,7 +134,7 @@ var ComponentRef_ = (function () {
      */
     ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
     return ComponentRef_;
-}());
+}(ComponentRef));
 function ComponentRef__tsickle_Closure_declarations() {
     /** @type {?} */
     ComponentRef_.prototype._elDef;
@@ -210,7 +209,11 @@ var ViewContainerRef_ = (function () {
      * @param {?} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.get = function (index) { return new ViewRef_(this._data.embeddedViews[index]); };
+    ViewContainerRef_.prototype.get = function (index) {
+        var /** @type {?} */ ref = new ViewRef_(this._data.embeddedViews[index]);
+        ref.attachToViewContainerRef(this);
+        return ref;
+    };
     Object.defineProperty(ViewContainerRef_.prototype, "length", {
         /**
          * @return {?}
@@ -250,8 +253,10 @@ var ViewContainerRef_ = (function () {
      * @return {?}
      */
     ViewContainerRef_.prototype.insert = function (viewRef, index) {
-        var /** @type {?} */ viewData = ((viewRef))._view;
+        var /** @type {?} */ viewRef_ = (viewRef);
+        var /** @type {?} */ viewData = viewRef_._view;
         Services.attachEmbeddedView(this._data, index, viewData);
+        viewRef_.attachToViewContainerRef(this);
         return viewRef;
     };
     /**
@@ -286,6 +291,7 @@ var ViewContainerRef_ = (function () {
     ViewContainerRef_.prototype.detach = function (index) {
         var /** @type {?} */ view = this.get(index);
         Services.detachEmbeddedView(this._data, index);
+        ((view)).detachFromContainer();
         return view;
     };
     return ViewContainerRef_;
@@ -311,6 +317,8 @@ var ViewRef_ = (function () {
      */
     function ViewRef_(_view) {
         this._view = _view;
+        this._viewContainerRef = null;
+        this._appRef = null;
     }
     Object.defineProperty(ViewRef_.prototype, "rootNodes", {
         /**
@@ -360,19 +368,64 @@ var ViewRef_ = (function () {
      * @param {?} callback
      * @return {?}
      */
-    ViewRef_.prototype.onDestroy = function (callback) { this._view.disposables.push(/** @type {?} */ (callback)); };
+    ViewRef_.prototype.onDestroy = function (callback) {
+        if (!this._view.disposables) {
+            this._view.disposables = [];
+        }
+        this._view.disposables.push(/** @type {?} */ (callback));
+    };
     /**
      * @return {?}
      */
-    ViewRef_.prototype.destroy = function () { Services.destroyView(this._view); };
+    ViewRef_.prototype.destroy = function () {
+        if (this._appRef) {
+            this._appRef.detachView(this);
+        }
+        else if (this._viewContainerRef) {
+            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+        }
+        Services.destroyView(this._view);
+    };
+    /**
+     * @return {?}
+     */
+    ViewRef_.prototype.detachFromContainer = function () {
+        this._appRef = null;
+        this._viewContainerRef = null;
+    };
+    /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    ViewRef_.prototype.attachToAppRef = function (appRef) {
+        if (this._viewContainerRef) {
+            throw new Error('This view is already attached to a ViewContainer!');
+        }
+        this._appRef = appRef;
+    };
+    /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    ViewRef_.prototype.attachToViewContainerRef = function (vcRef) {
+        if (this._appRef) {
+            throw new Error('This view is already attached directly to the ApplicationRef!');
+        }
+        this._viewContainerRef = vcRef;
+    };
     return ViewRef_;
 }());
+export { ViewRef_ };
 function ViewRef__tsickle_Closure_declarations() {
     /**
      * \@internal
      * @type {?}
      */
     ViewRef_.prototype._view;
+    /** @type {?} */
+    ViewRef_.prototype._viewContainerRef;
+    /** @type {?} */
+    ViewRef_.prototype._appRef;
 }
 /**
  * @param {?} view
@@ -450,5 +503,236 @@ function Injector__tsickle_Closure_declarations() {
     Injector_.prototype.view;
     /** @type {?} */
     Injector_.prototype.elDef;
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+export function nodeValue(view, index) {
+    var /** @type {?} */ def = view.def.nodes[index];
+    switch (def.type) {
+        case NodeType.Element:
+            if (def.element.template) {
+                return createTemplateRef(view, def);
+            }
+            else {
+                return asElementData(view, def.index).renderElement;
+            }
+        case NodeType.Text:
+            return asTextData(view, def.index).renderText;
+        case NodeType.Directive:
+        case NodeType.Pipe:
+        case NodeType.Provider:
+            return asProviderData(view, def.index).instance;
+    }
+    return undefined;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+export function createRendererV1(view) {
+    return new RendererAdapter(view.renderer);
+}
+var RendererAdapter = (function () {
+    /**
+     * @param {?} delegate
+     */
+    function RendererAdapter(delegate) {
+        this.delegate = delegate;
+    }
+    /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    RendererAdapter.prototype.selectRootElement = function (selectorOrNode) {
+        return this.delegate.selectRootElement(selectorOrNode);
+    };
+    /**
+     * @param {?} parent
+     * @param {?} namespaceAndName
+     * @return {?}
+     */
+    RendererAdapter.prototype.createElement = function (parent, namespaceAndName) {
+        var _a = splitNamespace(namespaceAndName), ns = _a[0], name = _a[1];
+        var /** @type {?} */ el = this.delegate.createElement(name, ns);
+        if (parent) {
+            this.delegate.appendChild(parent, el);
+        }
+        return el;
+    };
+    /**
+     * @param {?} hostElement
+     * @return {?}
+     */
+    RendererAdapter.prototype.createViewRoot = function (hostElement) { return hostElement; };
+    /**
+     * @param {?} parentElement
+     * @return {?}
+     */
+    RendererAdapter.prototype.createTemplateAnchor = function (parentElement) {
+        var /** @type {?} */ comment = this.delegate.createComment('');
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, comment);
+        }
+        return comment;
+    };
+    /**
+     * @param {?} parentElement
+     * @param {?} value
+     * @return {?}
+     */
+    RendererAdapter.prototype.createText = function (parentElement, value) {
+        var /** @type {?} */ node = this.delegate.createText(value);
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, node);
+        }
+        return node;
+    };
+    /**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */
+    RendererAdapter.prototype.projectNodes = function (parentElement, nodes) {
+        for (var /** @type {?} */ i = 0; i < nodes.length; i++) {
+            this.delegate.appendChild(parentElement, nodes[i]);
+        }
+    };
+    /**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    RendererAdapter.prototype.attachViewAfter = function (node, viewRootNodes) {
+        var /** @type {?} */ parentElement = this.delegate.parentNode(node);
+        var /** @type {?} */ nextSibling = this.delegate.nextSibling(node);
+        for (var /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
+            this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
+        }
+    };
+    /**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    RendererAdapter.prototype.detachView = function (viewRootNodes) {
+        for (var /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
+            var /** @type {?} */ node = viewRootNodes[i];
+            var /** @type {?} */ parentElement = this.delegate.parentNode(node);
+            this.delegate.removeChild(parentElement, node);
+        }
+    };
+    /**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */
+    RendererAdapter.prototype.destroyView = function (hostElement, viewAllNodes) {
+        for (var /** @type {?} */ i = 0; i < viewAllNodes.length; i++) {
+            this.delegate.destroyNode(viewAllNodes[i]);
+        }
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    RendererAdapter.prototype.listen = function (renderElement, name, callback) {
+        return this.delegate.listen(renderElement, name, /** @type {?} */ (callback));
+    };
+    /**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    RendererAdapter.prototype.listenGlobal = function (target, name, callback) {
+        return this.delegate.listen(target, name, /** @type {?} */ (callback));
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    RendererAdapter.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) {
+        this.delegate.setProperty(renderElement, propertyName, propertyValue);
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} namespaceAndName
+     * @param {?} attributeValue
+     * @return {?}
+     */
+    RendererAdapter.prototype.setElementAttribute = function (renderElement, namespaceAndName, attributeValue) {
+        var _a = splitNamespace(namespaceAndName), ns = _a[0], name = _a[1];
+        if (attributeValue != null) {
+            this.delegate.setAttribute(renderElement, name, attributeValue, ns);
+        }
+        else {
+            this.delegate.removeAttribute(renderElement, name, ns);
+        }
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    RendererAdapter.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
+    /**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */
+    RendererAdapter.prototype.setElementClass = function (renderElement, className, isAdd) {
+        if (isAdd) {
+            this.delegate.addClass(renderElement, className);
+        }
+        else {
+            this.delegate.removeClass(renderElement, className);
+        }
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */
+    RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
+        if (styleValue != null) {
+            this.delegate.setStyle(renderElement, styleName, styleValue, false, false);
+        }
+        else {
+            this.delegate.removeStyle(renderElement, styleName, false);
+        }
+    };
+    /**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?} args
+     * @return {?}
+     */
+    RendererAdapter.prototype.invokeElementMethod = function (renderElement, methodName, args) {
+        ((renderElement))[methodName].apply(renderElement, args);
+    };
+    /**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */
+    RendererAdapter.prototype.setText = function (renderNode, text) { this.delegate.setValue(renderNode, text); };
+    /**
+     * @return {?}
+     */
+    RendererAdapter.prototype.animate = function () { return new NoOpAnimationPlayer(); };
+    return RendererAdapter;
+}());
+function RendererAdapter_tsickle_Closure_declarations() {
+    /** @type {?} */
+    RendererAdapter.prototype.delegate;
 }
 //# sourceMappingURL=refs.js.map

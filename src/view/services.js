@@ -220,7 +220,9 @@ function debugUpdateDirectives(check, view) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
-        debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
+        if (view.def.nodes[nodeIndex].type === NodeType.Directive) {
+            debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
+        }
         return result;
     }
     ;
@@ -249,7 +251,10 @@ function debugUpdateRenderer(check, view) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
-        debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text) {
+            debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
+        }
         return result;
     }
 }
@@ -368,7 +373,7 @@ var DebugContext_ = (function () {
         this.view = view;
         this.nodeIndex = nodeIndex;
         if (nodeIndex == null) {
-            this.nodeIndex = 0;
+            this.nodeIndex = nodeIndex = 0;
         }
         this.nodeDef = view.def.nodes[nodeIndex];
         var elDef = this.nodeDef;

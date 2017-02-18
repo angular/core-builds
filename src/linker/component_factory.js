@@ -205,6 +205,8 @@ var ComponentFactory = (function () {
 export { ComponentFactory };
 function ComponentFactory_tsickle_Closure_declarations() {
     /**
+     * TODO(tbosch): type this properly to ViewDefinitionFactory again once the view engine
+     * is the default.
      * \@internal
      * @type {?}
      */
