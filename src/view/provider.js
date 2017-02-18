@@ -10,9 +10,8 @@ import { Injector } from '../di';
 import { ElementRef } from '../linker/element_ref';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
-import { ViewEncapsulation } from '../metadata/view';
-import { RenderComponentType as RenderComponentTypeV1, Renderer as RendererV1, RendererV2, RootRenderer as RootRendererV1 } from '../render/api';
-import { createChangeDetectorRef, createInjector, createTemplateRef, createViewContainerRef } from './refs';
+import { Renderer as RendererV1, RendererV2 } from '../render/api';
+import { createChangeDetectorRef, createInjector, createRendererV1, createTemplateRef, createViewContainerRef } from './refs';
 import { BindingType, DepFlags, NodeFlags, NodeType, ProviderType, Services, ViewFlags, ViewState, asElementData, asProviderData } from './types';
 import { checkAndUpdateBinding, dispatchEvent, isComponentView, splitMatchedQueriesDsl, tokenKey, viewParentEl } from './util';
 const /** @type {?} */ RendererV1TokenKey = tokenKey(RendererV1);
@@ -32,10 +31,10 @@ const /** @type {?} */ NOT_CREATED = new Object();
  * @param {?=} props
  * @param {?=} outputs
  * @param {?=} component
- * @param {?=} componentRenderType
+ * @param {?=} rendererType
  * @return {?}
  */
-export function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component, componentRenderType) {
+export function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component, rendererType) {
     const /** @type {?} */ bindings = [];
     if (props) {
         for (let /** @type {?} */ prop in props) {
@@ -43,6 +42,7 @@ export function directiveDef(flags, matchedQueries, childCount, ctor, deps, prop
             bindings[bindingIndex] = {
                 type: BindingType.DirectiveProperty,
                 name: prop, nonMinifiedName,
+                ns: undefined,
                 securityContext: undefined,
                 suffix: undefined
             };
@@ -54,7 +54,7 @@ export function directiveDef(flags, matchedQueries, childCount, ctor, deps, prop
             outputDefs.push({ propName, eventName: outputs[propName] });
         }
     }
-    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component, componentRenderType);
+    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component, rendererType);
 }
 /**
  * @param {?} flags
@@ -89,15 +89,15 @@ export function providerDef(flags, matchedQueries, type, token, value, deps) {
  * @param {?=} bindings
  * @param {?=} outputs
  * @param {?=} component
- * @param {?=} componentRenderType
+ * @param {?=} rendererType
  * @return {?}
  */
-export function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component, componentRenderType) {
+export function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component, rendererType) {
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    // This is needed as the jit compiler always uses an empty hash as default ComponentRenderTypeV2,
+    // This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
     // which is not filled for host views.
-    if (componentRenderType && componentRenderType.encapsulation == null) {
-        componentRenderType = null;
+    if (rendererType && rendererType.encapsulation == null) {
+        rendererType = null;
     }
     if (!outputs) {
         outputs = [];
@@ -140,7 +140,7 @@ export function _def(type, flags, matchedQueriesDsl, childCount, providerType, t
             type: providerType,
             token,
             tokenKey: tokenKey(token), value,
-            deps: depDefs, outputs, component, componentRenderType
+            deps: depDefs, outputs, component, rendererType
         },
         text: undefined,
         pureExpression: undefined,
@@ -396,11 +396,7 @@ export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundVa
             switch (tokenKey) {
                 case RendererV1TokenKey: {
                     const /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);
-                    const /** @type {?} */ compDef = compView.parentNodeDef;
-                    const /** @type {?} */ rootRendererV1 = view.root.injector.get(RootRendererV1);
-                    // Note: Don't fill in the styles as they have been installed already via the RendererV2!
-                    const /** @type {?} */ compRenderType = compDef.provider.componentRenderType;
-                    return rootRendererV1.renderComponent(new RenderComponentTypeV1(compRenderType ? compRenderType.id : '0', '', 0, compRenderType ? compRenderType.encapsulation : ViewEncapsulation.None, [], {}));
+                    return createRendererV1(compView);
                 }
                 case RendererV2TokenKey: {
                     const /** @type {?} */ compView = findCompView(view, elDef, allowPrivateServices);

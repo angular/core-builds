@@ -41,6 +41,7 @@ function _pureExpressionDef(type, propertyNames) {
         bindings[i] = {
             type: BindingType.PureExpressionProperty,
             name: prop,
+            ns: undefined,
             nonMinifiedName: prop,
             securityContext: undefined,
             suffix: undefined

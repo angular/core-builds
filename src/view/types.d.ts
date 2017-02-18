@@ -1,6 +1,6 @@
 import { Injector } from '../di';
 import { QueryList } from '../linker/query_list';
-import { ComponentRenderTypeV2, RendererFactoryV2, RendererV2 } from '../render/api';
+import { RendererFactoryV2, RendererTypeV2, RendererV2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
     flags: ViewFlags;
@@ -131,6 +131,7 @@ export declare enum NodeFlags {
 }
 export interface BindingDef {
     type: BindingType;
+    ns: string;
     name: string;
     nonMinifiedName: string;
     securityContext: SecurityContext;
@@ -154,9 +155,9 @@ export declare enum QueryValueType {
 }
 export interface ElementDef {
     name: string;
-    attrs: {
-        [name: string]: string;
-    };
+    ns: string;
+    /** ns, name, value */
+    attrs: [string, string, string][];
     outputs: ElementOutputDef[];
     template: ViewDefinition;
     component: NodeDef;
@@ -187,7 +188,7 @@ export interface ProviderDef {
     value: any;
     deps: DepDef[];
     outputs: DirectiveOutputDef[];
-    componentRenderType: ComponentRenderTypeV2;
+    rendererType: RendererTypeV2;
     component: ViewDefinitionFactory;
 }
 export declare enum ProviderType {

@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ViewEncapsulation } from '../metadata/view';
 import { checkAndUpdateElementDynamic, checkAndUpdateElementInline, createElement } from './element';
 import { expressionChangedAfterItHasBeenCheckedError } from './errors';
 import { appendNgContent } from './ng_content';
@@ -54,19 +53,13 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         node.disposableIndex = viewDisposableCount;
         node.reverseChildIndex =
             calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
+        // renderParent needs to account for ng-container!
         let /** @type {?} */ currentRenderParent;
-        if (currentParent &&
-            (currentParent.type !== NodeType.Element || !currentParent.element.component ||
-                (currentParent.element.component.provider.componentRenderType &&
-                    currentParent.element.component.provider.componentRenderType.encapsulation ===
-                        ViewEncapsulation.Native))) {
-            // children of components that don't use native encapsulation should never be attached!
-            if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
-                currentRenderParent = currentParent.renderParent;
-            }
-            else {
-                currentRenderParent = currentParent;
-            }
+        if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
+            currentRenderParent = currentParent.renderParent;
+        }
+        else {
+            currentRenderParent = currentParent;
         }
         node.renderParent = currentRenderParent;
         if (node.element) {
@@ -94,7 +87,7 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         }
         viewBindingCount += node.bindings.length;
         viewDisposableCount += node.disposableCount;
-        if (!currentParent) {
+        if (!currentRenderParent) {
             lastRootNode = node;
         }
         if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
@@ -208,9 +201,11 @@ function validateNode(parent, node, nodeCount) {
         }
     }
     if (node.query) {
-        const /** @type {?} */ parentType = parent ? parent.type : null;
-        if (parentType !== NodeType.Directive) {
-            throw new Error(`Illegal State: Query nodes need to be children of directives, at index ${node.index}!`);
+        if (node.flags & NodeFlags.HasContentQuery && (!parent || parent.type !== NodeType.Directive)) {
+            throw new Error(`Illegal State: Content Query nodes need to be children of directives, at index ${node.index}!`);
+        }
+        if (node.flags & NodeFlags.HasViewQuery && parent) {
+            throw new Error(`Illegal State: View Query nodes have to be top level nodes, at index ${node.index}!`);
         }
     }
     if (node.childCount) {
@@ -318,14 +313,14 @@ function createViewNodes(view) {
                     // the component view. Therefore, we create the component view first
                     // and set the ProviderData in ViewData, and then instantiate the provider.
                     const /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.provider.component);
-                    const /** @type {?} */ compRenderType = nodeDef.provider.componentRenderType;
+                    const /** @type {?} */ rendererType = nodeDef.provider.rendererType;
                     let /** @type {?} */ compRenderer;
-                    if (!compRenderType) {
+                    if (!rendererType) {
                         compRenderer = view.root.renderer;
                     }
                     else {
                         const /** @type {?} */ hostEl = asElementData(view, nodeDef.parent.index).renderElement;
-                        compRenderer = view.root.rendererFactory.createRenderer(hostEl, compRenderType);
+                        compRenderer = view.root.rendererFactory.createRenderer(hostEl, rendererType);
                     }
                     const /** @type {?} */ componentView = createView(view.root, compRenderer, view, nodeDef, compViewDef);
                     const /** @type {?} */ providerData = ({ componentView, instance: undefined });
@@ -702,7 +697,6 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, action) {
     for (let /** @type {?} */ i = 0; i < nodeCount; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
         if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
-            const /** @type {?} */ elDef = nodeDef.parent.parent;
             Services.setCurrentNode(view, nodeDef.index);
             switch (action) {
                 case QueryAction.CheckAndUpdate:

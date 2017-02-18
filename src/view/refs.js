@@ -5,10 +5,13 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { NoOpAnimationPlayer } from '../animation/animation_player';
 import { Injector } from '../di';
+import { ComponentFactory, ComponentRef } from '../linker/component_factory';
 import { ElementRef } from '../linker/element_ref';
-import { DepFlags, Services, ViewState, asElementData, asProviderData } from './types';
-import { resolveViewDefinition, rootRenderNodes, tokenKey, viewParentEl } from './util';
+import { VERSION } from '../version';
+import { DepFlags, NodeType, Services, ViewState, asElementData, asProviderData, asTextData } from './types';
+import { resolveViewDefinition, rootRenderNodes, splitNamespace, tokenKey, viewParentEl } from './util';
 const /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -19,16 +22,14 @@ const /** @type {?} */ EMPTY_CONTEXT = new Object();
 export function createComponentFactory(selector, componentType, viewDefFactory) {
     return new ComponentFactory_(selector, componentType, viewDefFactory);
 }
-class ComponentFactory_ {
+class ComponentFactory_ extends ComponentFactory {
     /**
      * @param {?} selector
      * @param {?} componentType
-     * @param {?} _viewDefFactory
+     * @param {?} viewDefFactory
      */
-    constructor(selector, componentType, _viewDefFactory) {
-        this.selector = selector;
-        this.componentType = componentType;
-        this._viewClass = _viewDefFactory;
+    constructor(selector, componentType, viewDefFactory) {
+        super(selector, viewDefFactory, componentType);
     }
     /**
      * Creates a new component.
@@ -42,28 +43,18 @@ class ComponentFactory_ {
         const /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.component.index;
         const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
         const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
+        view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
         return new ComponentRef_(view, new ViewRef_(view), component);
     }
 }
-function ComponentFactory__tsickle_Closure_declarations() {
-    /**
-     * We are not renaming this field as the old ComponentFactory is using it.
-     * \@internal
-     * @type {?}
-     */
-    ComponentFactory_.prototype._viewClass;
-    /** @type {?} */
-    ComponentFactory_.prototype.selector;
-    /** @type {?} */
-    ComponentFactory_.prototype.componentType;
-}
-class ComponentRef_ {
+class ComponentRef_ extends ComponentRef {
     /**
      * @param {?} _view
      * @param {?} _viewRef
      * @param {?} _component
      */
     constructor(_view, _viewRef, _component) {
+        super();
         this._view = _view;
         this._viewRef = _viewRef;
         this._component = _component;
@@ -170,7 +161,11 @@ class ViewContainerRef_ {
      * @param {?} index
      * @return {?}
      */
-    get(index) { return new ViewRef_(this._data.embeddedViews[index]); }
+    get(index) {
+        const /** @type {?} */ ref = new ViewRef_(this._data.embeddedViews[index]);
+        ref.attachToViewContainerRef(this);
+        return ref;
+    }
     /**
      * @return {?}
      */
@@ -206,8 +201,10 @@ class ViewContainerRef_ {
      * @return {?}
      */
     insert(viewRef, index) {
-        const /** @type {?} */ viewData = ((viewRef))._view;
+        const /** @type {?} */ viewRef_ = (viewRef);
+        const /** @type {?} */ viewData = viewRef_._view;
         Services.attachEmbeddedView(this._data, index, viewData);
+        viewRef_.attachToViewContainerRef(this);
         return viewRef;
     }
     /**
@@ -242,6 +239,7 @@ class ViewContainerRef_ {
     detach(index) {
         const /** @type {?} */ view = this.get(index);
         Services.detachEmbeddedView(this._data, index);
+        ((view)).detachFromContainer();
         return view;
     }
 }
@@ -260,11 +258,15 @@ function ViewContainerRef__tsickle_Closure_declarations() {
 export function createChangeDetectorRef(view) {
     return new ViewRef_(view);
 }
-class ViewRef_ {
+export class ViewRef_ {
     /**
      * @param {?} _view
      */
-    constructor(_view) { this._view = _view; }
+    constructor(_view) {
+        this._view = _view;
+        this._viewContainerRef = null;
+        this._appRef = null;
+    }
     /**
      * @return {?}
      */
@@ -301,11 +303,51 @@ class ViewRef_ {
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) { this._view.disposables.push(/** @type {?} */ (callback)); }
+    onDestroy(callback) {
+        if (!this._view.disposables) {
+            this._view.disposables = [];
+        }
+        this._view.disposables.push(/** @type {?} */ (callback));
+    }
     /**
      * @return {?}
      */
-    destroy() { Services.destroyView(this._view); }
+    destroy() {
+        if (this._appRef) {
+            this._appRef.detachView(this);
+        }
+        else if (this._viewContainerRef) {
+            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+        }
+        Services.destroyView(this._view);
+    }
+    /**
+     * @return {?}
+     */
+    detachFromContainer() {
+        this._appRef = null;
+        this._viewContainerRef = null;
+    }
+    /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    attachToAppRef(appRef) {
+        if (this._viewContainerRef) {
+            throw new Error('This view is already attached to a ViewContainer!');
+        }
+        this._appRef = appRef;
+    }
+    /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    attachToViewContainerRef(vcRef) {
+        if (this._appRef) {
+            throw new Error('This view is already attached directly to the ApplicationRef!');
+        }
+        this._viewContainerRef = vcRef;
+    }
 }
 function ViewRef__tsickle_Closure_declarations() {
     /**
@@ -313,6 +355,10 @@ function ViewRef__tsickle_Closure_declarations() {
      * @type {?}
      */
     ViewRef_.prototype._view;
+    /** @type {?} */
+    ViewRef_.prototype._viewContainerRef;
+    /** @type {?} */
+    ViewRef_.prototype._appRef;
 }
 /**
  * @param {?} view
@@ -383,5 +429,235 @@ function Injector__tsickle_Closure_declarations() {
     Injector_.prototype.view;
     /** @type {?} */
     Injector_.prototype.elDef;
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @return {?}
+ */
+export function nodeValue(view, index) {
+    const /** @type {?} */ def = view.def.nodes[index];
+    switch (def.type) {
+        case NodeType.Element:
+            if (def.element.template) {
+                return createTemplateRef(view, def);
+            }
+            else {
+                return asElementData(view, def.index).renderElement;
+            }
+        case NodeType.Text:
+            return asTextData(view, def.index).renderText;
+        case NodeType.Directive:
+        case NodeType.Pipe:
+        case NodeType.Provider:
+            return asProviderData(view, def.index).instance;
+    }
+    return undefined;
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+export function createRendererV1(view) {
+    return new RendererAdapter(view.renderer);
+}
+class RendererAdapter {
+    /**
+     * @param {?} delegate
+     */
+    constructor(delegate) {
+        this.delegate = delegate;
+    }
+    /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    selectRootElement(selectorOrNode) {
+        return this.delegate.selectRootElement(selectorOrNode);
+    }
+    /**
+     * @param {?} parent
+     * @param {?} namespaceAndName
+     * @return {?}
+     */
+    createElement(parent, namespaceAndName) {
+        const [ns, name] = splitNamespace(namespaceAndName);
+        const /** @type {?} */ el = this.delegate.createElement(name, ns);
+        if (parent) {
+            this.delegate.appendChild(parent, el);
+        }
+        return el;
+    }
+    /**
+     * @param {?} hostElement
+     * @return {?}
+     */
+    createViewRoot(hostElement) { return hostElement; }
+    /**
+     * @param {?} parentElement
+     * @return {?}
+     */
+    createTemplateAnchor(parentElement) {
+        const /** @type {?} */ comment = this.delegate.createComment('');
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, comment);
+        }
+        return comment;
+    }
+    /**
+     * @param {?} parentElement
+     * @param {?} value
+     * @return {?}
+     */
+    createText(parentElement, value) {
+        const /** @type {?} */ node = this.delegate.createText(value);
+        if (parentElement) {
+            this.delegate.appendChild(parentElement, node);
+        }
+        return node;
+    }
+    /**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */
+    projectNodes(parentElement, nodes) {
+        for (let /** @type {?} */ i = 0; i < nodes.length; i++) {
+            this.delegate.appendChild(parentElement, nodes[i]);
+        }
+    }
+    /**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    attachViewAfter(node, viewRootNodes) {
+        const /** @type {?} */ parentElement = this.delegate.parentNode(node);
+        const /** @type {?} */ nextSibling = this.delegate.nextSibling(node);
+        for (let /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
+            this.delegate.insertBefore(parentElement, viewRootNodes[i], nextSibling);
+        }
+    }
+    /**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    detachView(viewRootNodes) {
+        for (let /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
+            const /** @type {?} */ node = viewRootNodes[i];
+            const /** @type {?} */ parentElement = this.delegate.parentNode(node);
+            this.delegate.removeChild(parentElement, node);
+        }
+    }
+    /**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */
+    destroyView(hostElement, viewAllNodes) {
+        for (let /** @type {?} */ i = 0; i < viewAllNodes.length; i++) {
+            this.delegate.destroyNode(viewAllNodes[i]);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    listen(renderElement, name, callback) {
+        return this.delegate.listen(renderElement, name, /** @type {?} */ (callback));
+    }
+    /**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    listenGlobal(target, name, callback) {
+        return this.delegate.listen(target, name, /** @type {?} */ (callback));
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setElementProperty(renderElement, propertyName, propertyValue) {
+        this.delegate.setProperty(renderElement, propertyName, propertyValue);
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} namespaceAndName
+     * @param {?} attributeValue
+     * @return {?}
+     */
+    setElementAttribute(renderElement, namespaceAndName, attributeValue) {
+        const [ns, name] = splitNamespace(namespaceAndName);
+        if (attributeValue != null) {
+            this.delegate.setAttribute(renderElement, name, attributeValue, ns);
+        }
+        else {
+            this.delegate.removeAttribute(renderElement, name, ns);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    setBindingDebugInfo(renderElement, propertyName, propertyValue) { }
+    /**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */
+    setElementClass(renderElement, className, isAdd) {
+        if (isAdd) {
+            this.delegate.addClass(renderElement, className);
+        }
+        else {
+            this.delegate.removeClass(renderElement, className);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */
+    setElementStyle(renderElement, styleName, styleValue) {
+        if (styleValue != null) {
+            this.delegate.setStyle(renderElement, styleName, styleValue, false, false);
+        }
+        else {
+            this.delegate.removeStyle(renderElement, styleName, false);
+        }
+    }
+    /**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?} args
+     * @return {?}
+     */
+    invokeElementMethod(renderElement, methodName, args) {
+        ((renderElement))[methodName].apply(renderElement, args);
+    }
+    /**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */
+    setText(renderNode, text) { this.delegate.setValue(renderNode, text); }
+    /**
+     * @return {?}
+     */
+    animate() { return new NoOpAnimationPlayer(); }
+}
+function RendererAdapter_tsickle_Closure_declarations() {
+    /** @type {?} */
+    RendererAdapter.prototype.delegate;
 }
 //# sourceMappingURL=refs.js.map
