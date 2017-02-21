@@ -164,6 +164,15 @@ export class ViewRef_ {
      * @return {?}
      */
     destroy() { this._view.detachAndDestroy(); }
+    /**
+     * @return {?}
+     */
+    detachFromContainer() { this._view.detach(); }
+    /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    attachToAppRef(appRef) { this._view.attachToAppRef(appRef); }
 }
 function ViewRef__tsickle_Closure_declarations() {
     /**

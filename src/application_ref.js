@@ -560,7 +560,7 @@ export class ApplicationRef_ extends ApplicationRef {
      * @return {?}
      */
     attachView(viewRef) {
-        const /** @type {?} */ view = ((viewRef)).internalView;
+        const /** @type {?} */ view = ((viewRef));
         this._views.push(view);
         view.attachToAppRef(this);
     }
@@ -569,9 +569,9 @@ export class ApplicationRef_ extends ApplicationRef {
      * @return {?}
      */
     detachView(viewRef) {
-        const /** @type {?} */ view = ((viewRef)).internalView;
+        const /** @type {?} */ view = ((viewRef));
         ListWrapper.remove(this._views, view);
-        view.detach();
+        view.detachFromContainer();
     }
     /**
      * @param {?} componentOrFactory
@@ -632,9 +632,9 @@ export class ApplicationRef_ extends ApplicationRef {
         const /** @type {?} */ scope = ApplicationRef_._tickScope();
         try {
             this._runningTick = true;
-            this._views.forEach((view) => view.ref.detectChanges());
+            this._views.forEach((view) => view.detectChanges());
             if (this._enforceNoNewChanges) {
-                this._views.forEach((view) => view.ref.checkNoChanges());
+                this._views.forEach((view) => view.checkNoChanges());
             }
         }
         finally {

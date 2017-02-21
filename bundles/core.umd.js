@@ -8418,7 +8418,7 @@
          * @return {?}
          */
         ApplicationRef_.prototype.attachView = function (viewRef) {
-            var /** @type {?} */ view = ((viewRef)).internalView;
+            var /** @type {?} */ view = ((viewRef));
             this._views.push(view);
             view.attachToAppRef(this);
         };
@@ -8427,9 +8427,9 @@
          * @return {?}
          */
         ApplicationRef_.prototype.detachView = function (viewRef) {
-            var /** @type {?} */ view = ((viewRef)).internalView;
+            var /** @type {?} */ view = ((viewRef));
             ListWrapper.remove(this._views, view);
-            view.detach();
+            view.detachFromContainer();
         };
         /**
          * @param {?} componentOrFactory
@@ -8491,9 +8491,9 @@
             var /** @type {?} */ scope = ApplicationRef_._tickScope();
             try {
                 this._runningTick = true;
-                this._views.forEach(function (view) { return view.ref.detectChanges(); });
+                this._views.forEach(function (view) { return view.detectChanges(); });
                 if (this._enforceNoNewChanges) {
-                    this._views.forEach(function (view) { return view.ref.checkNoChanges(); });
+                    this._views.forEach(function (view) { return view.checkNoChanges(); });
                 }
             }
             finally {
@@ -9609,6 +9609,15 @@
          * @return {?}
          */
         ViewRef_.prototype.destroy = function () { this._view.detachAndDestroy(); };
+        /**
+         * @return {?}
+         */
+        ViewRef_.prototype.detachFromContainer = function () { this._view.detach(); };
+        /**
+         * @param {?} appRef
+         * @return {?}
+         */
+        ViewRef_.prototype.attachToAppRef = function (appRef) { this._view.attachToAppRef(appRef); };
         return ViewRef_;
     }());
 
@@ -10815,7 +10824,7 @@
     function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
         // We need to re-compute the parent node in case the nodes have been moved around manually
         if (action === RenderNodeAction.RemoveChild) {
-            parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRootNode));
+            parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
         }
         visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
     }
@@ -10944,15 +10953,20 @@
         return ['', name];
     }
 
+    var /** @type {?} */ NOOP = function () { };
     /**
      * @param {?} flags
      * @param {?} matchedQueriesDsl
      * @param {?} ngContentIndex
      * @param {?} childCount
+     * @param {?=} handleEvent
      * @param {?=} templateFactory
      * @return {?}
      */
-    function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, templateFactory) {
+    function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
+        if (!handleEvent) {
+            handleEvent = NOOP;
+        }
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
         // skip the call to sliceErrorStack itself + the call to this function.
         var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
@@ -10980,7 +10994,7 @@
                 // will bet set by the view definition
                 component: undefined,
                 publicProviders: undefined,
-                allProviders: undefined,
+                allProviders: undefined, handleEvent: handleEvent
             },
             provider: undefined,
             text: undefined,
@@ -10998,10 +11012,14 @@
      * @param {?=} fixedAttrs
      * @param {?=} bindings
      * @param {?=} outputs
+     * @param {?=} handleEvent
      * @return {?}
      */
-    function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs, bindings, outputs) {
+    function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs, bindings, outputs, handleEvent) {
         if (fixedAttrs === void 0) { fixedAttrs = []; }
+        if (!handleEvent) {
+            handleEvent = NOOP;
+        }
         // skip the call to sliceErrorStack itself + the call to this function.
         var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
@@ -11074,7 +11092,7 @@
                 // will bet set by the view definition
                 component: undefined,
                 publicProviders: undefined,
-                allProviders: undefined,
+                allProviders: undefined, handleEvent: handleEvent,
             },
             provider: undefined,
             text: undefined,
@@ -11155,29 +11173,27 @@
      * @return {?}
      */
     function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-        // Note: fallthrough is intended!
-        switch (def.bindings.length) {
-            case 10:
-                checkAndUpdateElementValue(view, def, 9, v9);
-            case 9:
-                checkAndUpdateElementValue(view, def, 8, v8);
-            case 8:
-                checkAndUpdateElementValue(view, def, 7, v7);
-            case 7:
-                checkAndUpdateElementValue(view, def, 6, v6);
-            case 6:
-                checkAndUpdateElementValue(view, def, 5, v5);
-            case 5:
-                checkAndUpdateElementValue(view, def, 4, v4);
-            case 4:
-                checkAndUpdateElementValue(view, def, 3, v3);
-            case 3:
-                checkAndUpdateElementValue(view, def, 2, v2);
-            case 2:
-                checkAndUpdateElementValue(view, def, 1, v1);
-            case 1:
-                checkAndUpdateElementValue(view, def, 0, v0);
-        }
+        var /** @type {?} */ bindLen = def.bindings.length;
+        if (bindLen > 0)
+            checkAndUpdateElementValue(view, def, 0, v0);
+        if (bindLen > 1)
+            checkAndUpdateElementValue(view, def, 1, v1);
+        if (bindLen > 2)
+            checkAndUpdateElementValue(view, def, 2, v2);
+        if (bindLen > 3)
+            checkAndUpdateElementValue(view, def, 3, v3);
+        if (bindLen > 4)
+            checkAndUpdateElementValue(view, def, 4, v4);
+        if (bindLen > 5)
+            checkAndUpdateElementValue(view, def, 5, v5);
+        if (bindLen > 6)
+            checkAndUpdateElementValue(view, def, 6, v6);
+        if (bindLen > 7)
+            checkAndUpdateElementValue(view, def, 7, v7);
+        if (bindLen > 8)
+            checkAndUpdateElementValue(view, def, 8, v8);
+        if (bindLen > 9)
+            checkAndUpdateElementValue(view, def, 9, v9);
     }
     /**
      * @param {?} view
@@ -11541,10 +11557,18 @@
          * @param {?} index
          * @return {?}
          */
-        ViewContainerRef_.prototype.get = function (index) {
-            var /** @type {?} */ ref = new ViewRef_$1(this._data.embeddedViews[index]);
-            ref.attachToViewContainerRef(this);
-            return ref;
+        ViewContainerRef_.prototype.get = function (index) { return this._getViewRef(this._data.embeddedViews[index]); };
+        /**
+         * @param {?} view
+         * @return {?}
+         */
+        ViewContainerRef_.prototype._getViewRef = function (view) {
+            if (view) {
+                var /** @type {?} */ ref = new ViewRef_$1(view);
+                ref.attachToViewContainerRef(this);
+                return ref;
+            }
+            return null;
         };
         Object.defineProperty(ViewContainerRef_.prototype, "length", {
             /**
@@ -11614,17 +11638,22 @@
          */
         ViewContainerRef_.prototype.remove = function (index) {
             var /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
-            Services.destroyView(viewData);
+            if (viewData) {
+                Services.destroyView(viewData);
+            }
         };
         /**
          * @param {?=} index
          * @return {?}
          */
         ViewContainerRef_.prototype.detach = function (index) {
-            var /** @type {?} */ view = this.get(index);
-            Services.detachEmbeddedView(this._data, index);
-            ((view)).detachFromContainer();
-            return view;
+            var /** @type {?} */ view = Services.detachEmbeddedView(this._data, index);
+            if (view) {
+                var /** @type {?} */ viewRef = this._getViewRef(view);
+                viewRef.detachFromContainer();
+                return viewRef;
+            }
+            return null;
         };
         return ViewContainerRef_;
     }());
@@ -12238,29 +12267,27 @@
         var /** @type {?} */ providerData = asProviderData(view, def.index);
         var /** @type {?} */ directive = providerData.instance;
         var /** @type {?} */ changes;
-        // Note: fallthrough is intended!
-        switch (def.bindings.length) {
-            case 10:
-                changes = checkAndUpdateProp(view, providerData, def, 9, v9, changes);
-            case 9:
-                changes = checkAndUpdateProp(view, providerData, def, 8, v8, changes);
-            case 8:
-                changes = checkAndUpdateProp(view, providerData, def, 7, v7, changes);
-            case 7:
-                changes = checkAndUpdateProp(view, providerData, def, 6, v6, changes);
-            case 6:
-                changes = checkAndUpdateProp(view, providerData, def, 5, v5, changes);
-            case 5:
-                changes = checkAndUpdateProp(view, providerData, def, 4, v4, changes);
-            case 4:
-                changes = checkAndUpdateProp(view, providerData, def, 3, v3, changes);
-            case 3:
-                changes = checkAndUpdateProp(view, providerData, def, 2, v2, changes);
-            case 2:
-                changes = checkAndUpdateProp(view, providerData, def, 1, v1, changes);
-            case 1:
-                changes = checkAndUpdateProp(view, providerData, def, 0, v0, changes);
-        }
+        var /** @type {?} */ bindLen = def.bindings.length;
+        if (bindLen > 0)
+            changes = checkAndUpdateProp(view, providerData, def, 0, v0, changes);
+        if (bindLen > 1)
+            changes = checkAndUpdateProp(view, providerData, def, 1, v1, changes);
+        if (bindLen > 2)
+            changes = checkAndUpdateProp(view, providerData, def, 2, v2, changes);
+        if (bindLen > 3)
+            changes = checkAndUpdateProp(view, providerData, def, 3, v3, changes);
+        if (bindLen > 4)
+            changes = checkAndUpdateProp(view, providerData, def, 4, v4, changes);
+        if (bindLen > 5)
+            changes = checkAndUpdateProp(view, providerData, def, 5, v5, changes);
+        if (bindLen > 6)
+            changes = checkAndUpdateProp(view, providerData, def, 6, v6, changes);
+        if (bindLen > 7)
+            changes = checkAndUpdateProp(view, providerData, def, 7, v7, changes);
+        if (bindLen > 8)
+            changes = checkAndUpdateProp(view, providerData, def, 8, v8, changes);
+        if (bindLen > 9)
+            changes = checkAndUpdateProp(view, providerData, def, 9, v9, changes);
         if (changes) {
             directive.ngOnChanges(changes);
         }
@@ -12659,127 +12686,109 @@
     function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
         var /** @type {?} */ bindings = def.bindings;
         var /** @type {?} */ changed = false;
-        // Note: fallthrough is intended!
-        switch (bindings.length) {
-            case 10:
-                if (checkAndUpdateBinding(view, def, 9, v9))
-                    changed = true;
-            case 9:
-                if (checkAndUpdateBinding(view, def, 8, v8))
-                    changed = true;
-            case 8:
-                if (checkAndUpdateBinding(view, def, 7, v7))
-                    changed = true;
-            case 7:
-                if (checkAndUpdateBinding(view, def, 6, v6))
-                    changed = true;
-            case 6:
-                if (checkAndUpdateBinding(view, def, 5, v5))
-                    changed = true;
-            case 5:
-                if (checkAndUpdateBinding(view, def, 4, v4))
-                    changed = true;
-            case 4:
-                if (checkAndUpdateBinding(view, def, 3, v3))
-                    changed = true;
-            case 3:
-                if (checkAndUpdateBinding(view, def, 2, v2))
-                    changed = true;
-            case 2:
-                if (checkAndUpdateBinding(view, def, 1, v1))
-                    changed = true;
-            case 1:
-                if (checkAndUpdateBinding(view, def, 0, v0))
-                    changed = true;
-        }
+        var /** @type {?} */ bindLen = bindings.length;
+        if (bindLen > 0 && checkAndUpdateBinding(view, def, 0, v0))
+            changed = true;
+        if (bindLen > 1 && checkAndUpdateBinding(view, def, 1, v1))
+            changed = true;
+        if (bindLen > 2 && checkAndUpdateBinding(view, def, 2, v2))
+            changed = true;
+        if (bindLen > 3 && checkAndUpdateBinding(view, def, 3, v3))
+            changed = true;
+        if (bindLen > 4 && checkAndUpdateBinding(view, def, 4, v4))
+            changed = true;
+        if (bindLen > 5 && checkAndUpdateBinding(view, def, 5, v5))
+            changed = true;
+        if (bindLen > 6 && checkAndUpdateBinding(view, def, 6, v6))
+            changed = true;
+        if (bindLen > 7 && checkAndUpdateBinding(view, def, 7, v7))
+            changed = true;
+        if (bindLen > 8 && checkAndUpdateBinding(view, def, 8, v8))
+            changed = true;
+        if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
+            changed = true;
         var /** @type {?} */ data = asPureExpressionData(view, def.index);
         if (changed) {
             var /** @type {?} */ value = void 0;
             switch (def.pureExpression.type) {
                 case PureExpressionType.Array:
                     value = new Array(bindings.length);
-                    // Note: fallthrough is intended!
-                    switch (bindings.length) {
-                        case 10:
-                            value[9] = v9;
-                        case 9:
-                            value[8] = v8;
-                        case 8:
-                            value[7] = v7;
-                        case 7:
-                            value[6] = v6;
-                        case 6:
-                            value[5] = v5;
-                        case 5:
-                            value[4] = v4;
-                        case 4:
-                            value[3] = v3;
-                        case 3:
-                            value[2] = v2;
-                        case 2:
-                            value[1] = v1;
-                        case 1:
-                            value[0] = v0;
-                    }
+                    if (bindLen > 0)
+                        value[0] = v0;
+                    if (bindLen > 1)
+                        value[1] = v1;
+                    if (bindLen > 2)
+                        value[2] = v2;
+                    if (bindLen > 3)
+                        value[3] = v3;
+                    if (bindLen > 4)
+                        value[4] = v4;
+                    if (bindLen > 5)
+                        value[5] = v5;
+                    if (bindLen > 6)
+                        value[6] = v6;
+                    if (bindLen > 7)
+                        value[7] = v7;
+                    if (bindLen > 8)
+                        value[8] = v8;
+                    if (bindLen > 9)
+                        value[9] = v9;
                     break;
                 case PureExpressionType.Object:
                     value = {};
-                    // Note: fallthrough is intended!
-                    switch (bindings.length) {
-                        case 10:
-                            value[bindings[9].name] = v9;
-                        case 9:
-                            value[bindings[8].name] = v8;
-                        case 8:
-                            value[bindings[7].name] = v7;
-                        case 7:
-                            value[bindings[6].name] = v6;
-                        case 6:
-                            value[bindings[5].name] = v5;
-                        case 5:
-                            value[bindings[4].name] = v4;
-                        case 4:
-                            value[bindings[3].name] = v3;
-                        case 3:
-                            value[bindings[2].name] = v2;
-                        case 2:
-                            value[bindings[1].name] = v1;
-                        case 1:
-                            value[bindings[0].name] = v0;
-                    }
+                    if (bindLen > 0)
+                        value[bindings[0].name] = v0;
+                    if (bindLen > 1)
+                        value[bindings[1].name] = v1;
+                    if (bindLen > 2)
+                        value[bindings[2].name] = v2;
+                    if (bindLen > 3)
+                        value[bindings[3].name] = v3;
+                    if (bindLen > 4)
+                        value[bindings[4].name] = v4;
+                    if (bindLen > 5)
+                        value[bindings[5].name] = v5;
+                    if (bindLen > 6)
+                        value[bindings[6].name] = v6;
+                    if (bindLen > 7)
+                        value[bindings[7].name] = v7;
+                    if (bindLen > 8)
+                        value[bindings[8].name] = v8;
+                    if (bindLen > 9)
+                        value[bindings[9].name] = v9;
                     break;
                 case PureExpressionType.Pipe:
                     var /** @type {?} */ pipe = v0;
-                    switch (bindings.length) {
-                        case 10:
-                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                            break;
-                        case 9:
-                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8);
-                            break;
-                        case 8:
-                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7);
-                            break;
-                        case 7:
-                            value = pipe.transform(v1, v2, v3, v4, v5, v6);
-                            break;
-                        case 6:
-                            value = pipe.transform(v1, v2, v3, v4, v5);
-                            break;
-                        case 5:
-                            value = pipe.transform(v1, v2, v3, v4);
-                            break;
-                        case 4:
-                            value = pipe.transform(v1, v2, v3);
-                            break;
-                        case 3:
-                            value = pipe.transform(v1, v2);
+                    switch (bindLen) {
+                        case 1:
+                            value = pipe.transform(v0);
                             break;
                         case 2:
                             value = pipe.transform(v1);
                             break;
-                        case 1:
-                            value = pipe.transform(v0);
+                        case 3:
+                            value = pipe.transform(v1, v2);
+                            break;
+                        case 4:
+                            value = pipe.transform(v1, v2, v3);
+                            break;
+                        case 5:
+                            value = pipe.transform(v1, v2, v3, v4);
+                            break;
+                        case 6:
+                            value = pipe.transform(v1, v2, v3, v4, v5);
+                            break;
+                        case 7:
+                            value = pipe.transform(v1, v2, v3, v4, v5, v6);
+                            break;
+                        case 8:
+                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7);
+                            break;
+                        case 9:
+                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8);
+                            break;
+                        case 10:
+                            value = pipe.transform(v1, v2, v3, v4, v5, v6, v7, v8, v9);
                             break;
                     }
                     break;
@@ -13106,67 +13115,51 @@
      * @return {?}
      */
     function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-        var /** @type {?} */ bindings = def.bindings;
         var /** @type {?} */ changed = false;
-        // Note: fallthrough is intended!
-        switch (bindings.length) {
-            case 10:
-                if (checkAndUpdateBinding(view, def, 9, v9))
-                    changed = true;
-            case 9:
-                if (checkAndUpdateBinding(view, def, 8, v8))
-                    changed = true;
-            case 8:
-                if (checkAndUpdateBinding(view, def, 7, v7))
-                    changed = true;
-            case 7:
-                if (checkAndUpdateBinding(view, def, 6, v6))
-                    changed = true;
-            case 6:
-                if (checkAndUpdateBinding(view, def, 5, v5))
-                    changed = true;
-            case 5:
-                if (checkAndUpdateBinding(view, def, 4, v4))
-                    changed = true;
-            case 4:
-                if (checkAndUpdateBinding(view, def, 3, v3))
-                    changed = true;
-            case 3:
-                if (checkAndUpdateBinding(view, def, 2, v2))
-                    changed = true;
-            case 2:
-                if (checkAndUpdateBinding(view, def, 1, v1))
-                    changed = true;
-            case 1:
-                if (checkAndUpdateBinding(view, def, 0, v0))
-                    changed = true;
-        }
+        var /** @type {?} */ bindings = def.bindings;
+        var /** @type {?} */ bindLen = bindings.length;
+        if (bindLen > 0 && checkAndUpdateBinding(view, def, 0, v0))
+            changed = true;
+        if (bindLen > 1 && checkAndUpdateBinding(view, def, 1, v1))
+            changed = true;
+        if (bindLen > 2 && checkAndUpdateBinding(view, def, 2, v2))
+            changed = true;
+        if (bindLen > 3 && checkAndUpdateBinding(view, def, 3, v3))
+            changed = true;
+        if (bindLen > 4 && checkAndUpdateBinding(view, def, 4, v4))
+            changed = true;
+        if (bindLen > 5 && checkAndUpdateBinding(view, def, 5, v5))
+            changed = true;
+        if (bindLen > 6 && checkAndUpdateBinding(view, def, 6, v6))
+            changed = true;
+        if (bindLen > 7 && checkAndUpdateBinding(view, def, 7, v7))
+            changed = true;
+        if (bindLen > 8 && checkAndUpdateBinding(view, def, 8, v8))
+            changed = true;
+        if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
+            changed = true;
         if (changed) {
-            var /** @type {?} */ value = '';
-            // Note: fallthrough is intended!
-            switch (bindings.length) {
-                case 10:
-                    value = _addInterpolationPart(v9, bindings[9]);
-                case 9:
-                    value = _addInterpolationPart(v8, bindings[8]) + value;
-                case 8:
-                    value = _addInterpolationPart(v7, bindings[7]) + value;
-                case 7:
-                    value = _addInterpolationPart(v6, bindings[6]) + value;
-                case 6:
-                    value = _addInterpolationPart(v5, bindings[5]) + value;
-                case 5:
-                    value = _addInterpolationPart(v4, bindings[4]) + value;
-                case 4:
-                    value = _addInterpolationPart(v3, bindings[3]) + value;
-                case 3:
-                    value = _addInterpolationPart(v2, bindings[2]) + value;
-                case 2:
-                    value = _addInterpolationPart(v1, bindings[1]) + value;
-                case 1:
-                    value = _addInterpolationPart(v0, bindings[0]) + value;
-            }
-            value = def.text.prefix + value;
+            var /** @type {?} */ value = def.text.prefix;
+            if (bindLen > 0)
+                value += _addInterpolationPart(v0, bindings[0]);
+            if (bindLen > 1)
+                value += _addInterpolationPart(v1, bindings[1]);
+            if (bindLen > 2)
+                value += _addInterpolationPart(v2, bindings[2]);
+            if (bindLen > 3)
+                value += _addInterpolationPart(v3, bindings[3]);
+            if (bindLen > 4)
+                value += _addInterpolationPart(v4, bindings[4]);
+            if (bindLen > 5)
+                value += _addInterpolationPart(v5, bindings[5]);
+            if (bindLen > 6)
+                value += _addInterpolationPart(v6, bindings[6]);
+            if (bindLen > 7)
+                value += _addInterpolationPart(v7, bindings[7]);
+            if (bindLen > 8)
+                value += _addInterpolationPart(v8, bindings[8]);
+            if (bindLen > 9)
+                value += _addInterpolationPart(v9, bindings[9]);
             var /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
             view.renderer.setValue(renderNode, value);
         }
@@ -13207,16 +13200,15 @@
         return valueStr + binding.suffix;
     }
 
-    var /** @type {?} */ NOOP = function () { return undefined; };
+    var /** @type {?} */ NOOP$1 = function () { return undefined; };
     /**
      * @param {?} flags
      * @param {?} nodes
      * @param {?=} updateDirectives
      * @param {?=} updateRenderer
-     * @param {?=} handleEvent
      * @return {?}
      */
-    function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent) {
+    function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         // clone nodes and set auto calculated values
         if (nodes.length === 0) {
             throw new Error("Illegal State: Views without nodes are not allowed!");
@@ -13229,7 +13221,7 @@
         var /** @type {?} */ currentParent = null;
         var /** @type {?} */ currentElementHasPublicProviders = false;
         var /** @type {?} */ currentElementHasPrivateProviders = false;
-        var /** @type {?} */ lastRootNode = null;
+        var /** @type {?} */ lastRenderRootNode = null;
         for (var /** @type {?} */ i = 0; i < nodes.length; i++) {
             while (currentParent && i > currentParent.index + currentParent.childCount) {
                 var /** @type {?} */ newParent = currentParent.parent;
@@ -13280,8 +13272,8 @@
             }
             viewBindingCount += node.bindings.length;
             viewDisposableCount += node.disposableCount;
-            if (!currentRenderParent) {
-                lastRootNode = node;
+            if (!currentRenderParent && (node.type === NodeType.Element || node.type === NodeType.Text)) {
+                lastRenderRootNode = node;
             }
             if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
                 if (!currentElementHasPublicProviders) {
@@ -13320,15 +13312,18 @@
             }
             currentParent = newParent;
         }
+        var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) {
+            return nodes[nodeIndex].element.handleEvent(view, eventName, event);
+        };
         return {
             nodeFlags: viewNodeFlags,
             nodeMatchedQueries: viewMatchedQueries, flags: flags,
             nodes: nodes, reverseChildNodes: reverseChildNodes,
-            updateDirectives: updateDirectives || NOOP,
-            updateRenderer: updateRenderer || NOOP,
-            handleEvent: handleEvent || NOOP,
+            updateDirectives: updateDirectives || NOOP$1,
+            updateRenderer: updateRenderer || NOOP$1,
+            handleEvent: handleEvent || NOOP$1,
             bindingCount: viewBindingCount,
-            disposableCount: viewDisposableCount, lastRootNode: lastRootNode
+            disposableCount: viewDisposableCount, lastRenderRootNode: lastRenderRootNode
         };
     }
     /**
@@ -13383,7 +13378,8 @@
     function validateNode(parent, node, nodeCount) {
         var /** @type {?} */ template = node.element && node.element.template;
         if (template) {
-            if (template.lastRootNode && template.lastRootNode.flags & NodeFlags.HasEmbeddedViews) {
+            if (template.lastRenderRootNode &&
+                template.lastRenderRootNode.flags & NodeFlags.HasEmbeddedViews) {
                 throw new Error("Illegal State: Last root node of a template can't have embedded views, at index " + node.index + "!");
             }
         }
@@ -13691,29 +13687,27 @@
      */
     function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        // Note: fallthrough is intended!
-        switch (nodeDef.bindings.length) {
-            case 10:
-                checkBindingNoChanges(view, nodeDef, 9, v9);
-            case 9:
-                checkBindingNoChanges(view, nodeDef, 8, v8);
-            case 8:
-                checkBindingNoChanges(view, nodeDef, 7, v7);
-            case 7:
-                checkBindingNoChanges(view, nodeDef, 6, v6);
-            case 6:
-                checkBindingNoChanges(view, nodeDef, 5, v5);
-            case 5:
-                checkBindingNoChanges(view, nodeDef, 4, v4);
-            case 4:
-                checkBindingNoChanges(view, nodeDef, 3, v3);
-            case 3:
-                checkBindingNoChanges(view, nodeDef, 2, v2);
-            case 2:
-                checkBindingNoChanges(view, nodeDef, 1, v1);
-            case 1:
-                checkBindingNoChanges(view, nodeDef, 0, v0);
-        }
+        var /** @type {?} */ bindLen = nodeDef.bindings.length;
+        if (bindLen > 0)
+            checkBindingNoChanges(view, nodeDef, 0, v0);
+        if (bindLen > 1)
+            checkBindingNoChanges(view, nodeDef, 1, v1);
+        if (bindLen > 2)
+            checkBindingNoChanges(view, nodeDef, 2, v2);
+        if (bindLen > 3)
+            checkBindingNoChanges(view, nodeDef, 3, v3);
+        if (bindLen > 4)
+            checkBindingNoChanges(view, nodeDef, 4, v4);
+        if (bindLen > 5)
+            checkBindingNoChanges(view, nodeDef, 5, v5);
+        if (bindLen > 6)
+            checkBindingNoChanges(view, nodeDef, 6, v6);
+        if (bindLen > 7)
+            checkBindingNoChanges(view, nodeDef, 7, v7);
+        if (bindLen > 8)
+            checkBindingNoChanges(view, nodeDef, 8, v8);
+        if (bindLen > 9)
+            checkBindingNoChanges(view, nodeDef, 9, v9);
         return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
             undefined;
     }
@@ -13747,6 +13741,9 @@
      * @return {?}
      */
     function destroyView(view) {
+        if (view.state & ViewState.Destroyed) {
+            return;
+        }
         execEmbeddedViewsAction(view, ViewAction.Destroy);
         execComponentViewsAction(view, ViewAction.Destroy);
         callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
@@ -13939,8 +13936,11 @@
      */
     function detachEmbeddedView(elementData, viewIndex) {
         var /** @type {?} */ embeddedViews = elementData.embeddedViews;
-        if (viewIndex == null) {
-            viewIndex = embeddedViews.length;
+        if (viewIndex == null || viewIndex >= embeddedViews.length) {
+            viewIndex = embeddedViews.length - 1;
+        }
+        if (viewIndex < 0) {
+            return null;
         }
         var /** @type {?} */ view = embeddedViews[viewIndex];
         removeFromArray(embeddedViews, viewIndex);
@@ -13982,7 +13982,7 @@
      * @return {?}
      */
     function renderAttachEmbeddedView(elementData, prevView, view) {
-        var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
+        var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) : elementData.renderElement;
         var /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
         var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
         // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!

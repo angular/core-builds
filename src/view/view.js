@@ -20,10 +20,9 @@ const /** @type {?} */ NOOP = () => undefined;
  * @param {?} nodes
  * @param {?=} updateDirectives
  * @param {?=} updateRenderer
- * @param {?=} handleEvent
  * @return {?}
  */
-export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEvent) {
+export function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     // clone nodes and set auto calculated values
     if (nodes.length === 0) {
         throw new Error(`Illegal State: Views without nodes are not allowed!`);
@@ -36,7 +35,7 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
     let /** @type {?} */ currentParent = null;
     let /** @type {?} */ currentElementHasPublicProviders = false;
     let /** @type {?} */ currentElementHasPrivateProviders = false;
-    let /** @type {?} */ lastRootNode = null;
+    let /** @type {?} */ lastRenderRootNode = null;
     for (let /** @type {?} */ i = 0; i < nodes.length; i++) {
         while (currentParent && i > currentParent.index + currentParent.childCount) {
             const /** @type {?} */ newParent = currentParent.parent;
@@ -87,8 +86,8 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         }
         viewBindingCount += node.bindings.length;
         viewDisposableCount += node.disposableCount;
-        if (!currentRenderParent) {
-            lastRootNode = node;
+        if (!currentRenderParent && (node.type === NodeType.Element || node.type === NodeType.Text)) {
+            lastRenderRootNode = node;
         }
         if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
             if (!currentElementHasPublicProviders) {
@@ -127,6 +126,7 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         }
         currentParent = newParent;
     }
+    const /** @type {?} */ handleEvent = (view, nodeIndex, eventName, event) => nodes[nodeIndex].element.handleEvent(view, eventName, event);
     return {
         nodeFlags: viewNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags,
@@ -135,7 +135,7 @@ export function viewDef(flags, nodes, updateDirectives, updateRenderer, handleEv
         updateRenderer: updateRenderer || NOOP,
         handleEvent: handleEvent || NOOP,
         bindingCount: viewBindingCount,
-        disposableCount: viewDisposableCount, lastRootNode
+        disposableCount: viewDisposableCount, lastRenderRootNode
     };
 }
 /**
@@ -190,7 +190,8 @@ function calculateReverseChildIndex(currentParent, i, childCount, nodeCount) {
 function validateNode(parent, node, nodeCount) {
     const /** @type {?} */ template = node.element && node.element.template;
     if (template) {
-        if (template.lastRootNode && template.lastRootNode.flags & NodeFlags.HasEmbeddedViews) {
+        if (template.lastRenderRootNode &&
+            template.lastRenderRootNode.flags & NodeFlags.HasEmbeddedViews) {
             throw new Error(`Illegal State: Last root node of a template can't have embedded views, at index ${node.index}!`);
         }
     }
@@ -498,29 +499,27 @@ function checkNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v
  */
 function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-    // Note: fallthrough is intended!
-    switch (nodeDef.bindings.length) {
-        case 10:
-            checkBindingNoChanges(view, nodeDef, 9, v9);
-        case 9:
-            checkBindingNoChanges(view, nodeDef, 8, v8);
-        case 8:
-            checkBindingNoChanges(view, nodeDef, 7, v7);
-        case 7:
-            checkBindingNoChanges(view, nodeDef, 6, v6);
-        case 6:
-            checkBindingNoChanges(view, nodeDef, 5, v5);
-        case 5:
-            checkBindingNoChanges(view, nodeDef, 4, v4);
-        case 4:
-            checkBindingNoChanges(view, nodeDef, 3, v3);
-        case 3:
-            checkBindingNoChanges(view, nodeDef, 2, v2);
-        case 2:
-            checkBindingNoChanges(view, nodeDef, 1, v1);
-        case 1:
-            checkBindingNoChanges(view, nodeDef, 0, v0);
-    }
+    const /** @type {?} */ bindLen = nodeDef.bindings.length;
+    if (bindLen > 0)
+        checkBindingNoChanges(view, nodeDef, 0, v0);
+    if (bindLen > 1)
+        checkBindingNoChanges(view, nodeDef, 1, v1);
+    if (bindLen > 2)
+        checkBindingNoChanges(view, nodeDef, 2, v2);
+    if (bindLen > 3)
+        checkBindingNoChanges(view, nodeDef, 3, v3);
+    if (bindLen > 4)
+        checkBindingNoChanges(view, nodeDef, 4, v4);
+    if (bindLen > 5)
+        checkBindingNoChanges(view, nodeDef, 5, v5);
+    if (bindLen > 6)
+        checkBindingNoChanges(view, nodeDef, 6, v6);
+    if (bindLen > 7)
+        checkBindingNoChanges(view, nodeDef, 7, v7);
+    if (bindLen > 8)
+        checkBindingNoChanges(view, nodeDef, 8, v8);
+    if (bindLen > 9)
+        checkBindingNoChanges(view, nodeDef, 9, v9);
     return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
@@ -554,6 +553,9 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 export function destroyView(view) {
+    if (view.state & ViewState.Destroyed) {
+        return;
+    }
     execEmbeddedViewsAction(view, ViewAction.Destroy);
     execComponentViewsAction(view, ViewAction.Destroy);
     callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);

@@ -9,15 +9,20 @@ import { isDevMode } from '../application_ref';
 import { SecurityContext } from '../security';
 import { BindingType, NodeFlags, NodeType, asElementData } from './types';
 import { checkAndUpdateBinding, dispatchEvent, elementEventFullName, getParentRenderElement, resolveViewDefinition, sliceErrorStack, splitMatchedQueriesDsl, splitNamespace } from './util';
+const /** @type {?} */ NOOP = () => { };
 /**
  * @param {?} flags
  * @param {?} matchedQueriesDsl
  * @param {?} ngContentIndex
  * @param {?} childCount
+ * @param {?=} handleEvent
  * @param {?=} templateFactory
  * @return {?}
  */
-export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, templateFactory) {
+export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
+    if (!handleEvent) {
+        handleEvent = NOOP;
+    }
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
     // skip the call to sliceErrorStack itself + the call to this function.
     const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
@@ -45,7 +50,7 @@ export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, 
             // will bet set by the view definition
             component: undefined,
             publicProviders: undefined,
-            allProviders: undefined,
+            allProviders: undefined, handleEvent
         },
         provider: undefined,
         text: undefined,
@@ -63,9 +68,13 @@ export function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, 
  * @param {?=} fixedAttrs
  * @param {?=} bindings
  * @param {?=} outputs
+ * @param {?=} handleEvent
  * @return {?}
  */
-export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs) {
+export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs, handleEvent) {
+    if (!handleEvent) {
+        handleEvent = NOOP;
+    }
     // skip the call to sliceErrorStack itself + the call to this function.
     const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
@@ -137,7 +146,7 @@ export function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount,
             // will bet set by the view definition
             component: undefined,
             publicProviders: undefined,
-            allProviders: undefined,
+            allProviders: undefined, handleEvent,
         },
         provider: undefined,
         text: undefined,
@@ -217,29 +226,27 @@ function renderEventHandlerClosure(view, index, eventName) {
  * @return {?}
  */
 export function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    // Note: fallthrough is intended!
-    switch (def.bindings.length) {
-        case 10:
-            checkAndUpdateElementValue(view, def, 9, v9);
-        case 9:
-            checkAndUpdateElementValue(view, def, 8, v8);
-        case 8:
-            checkAndUpdateElementValue(view, def, 7, v7);
-        case 7:
-            checkAndUpdateElementValue(view, def, 6, v6);
-        case 6:
-            checkAndUpdateElementValue(view, def, 5, v5);
-        case 5:
-            checkAndUpdateElementValue(view, def, 4, v4);
-        case 4:
-            checkAndUpdateElementValue(view, def, 3, v3);
-        case 3:
-            checkAndUpdateElementValue(view, def, 2, v2);
-        case 2:
-            checkAndUpdateElementValue(view, def, 1, v1);
-        case 1:
-            checkAndUpdateElementValue(view, def, 0, v0);
-    }
+    const /** @type {?} */ bindLen = def.bindings.length;
+    if (bindLen > 0)
+        checkAndUpdateElementValue(view, def, 0, v0);
+    if (bindLen > 1)
+        checkAndUpdateElementValue(view, def, 1, v1);
+    if (bindLen > 2)
+        checkAndUpdateElementValue(view, def, 2, v2);
+    if (bindLen > 3)
+        checkAndUpdateElementValue(view, def, 3, v3);
+    if (bindLen > 4)
+        checkAndUpdateElementValue(view, def, 4, v4);
+    if (bindLen > 5)
+        checkAndUpdateElementValue(view, def, 5, v5);
+    if (bindLen > 6)
+        checkAndUpdateElementValue(view, def, 6, v6);
+    if (bindLen > 7)
+        checkAndUpdateElementValue(view, def, 7, v7);
+    if (bindLen > 8)
+        checkAndUpdateElementValue(view, def, 8, v8);
+    if (bindLen > 9)
+        checkAndUpdateElementValue(view, def, 9, v9);
 }
 /**
  * @param {?} view

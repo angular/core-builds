@@ -161,10 +161,18 @@ class ViewContainerRef_ {
      * @param {?} index
      * @return {?}
      */
-    get(index) {
-        const /** @type {?} */ ref = new ViewRef_(this._data.embeddedViews[index]);
-        ref.attachToViewContainerRef(this);
-        return ref;
+    get(index) { return this._getViewRef(this._data.embeddedViews[index]); }
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    _getViewRef(view) {
+        if (view) {
+            const /** @type {?} */ ref = new ViewRef_(view);
+            ref.attachToViewContainerRef(this);
+            return ref;
+        }
+        return null;
     }
     /**
      * @return {?}
@@ -230,17 +238,22 @@ class ViewContainerRef_ {
      */
     remove(index) {
         const /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
-        Services.destroyView(viewData);
+        if (viewData) {
+            Services.destroyView(viewData);
+        }
     }
     /**
      * @param {?=} index
      * @return {?}
      */
     detach(index) {
-        const /** @type {?} */ view = this.get(index);
-        Services.detachEmbeddedView(this._data, index);
-        ((view)).detachFromContainer();
-        return view;
+        const /** @type {?} */ view = Services.detachEmbeddedView(this._data, index);
+        if (view) {
+            const /** @type {?} */ viewRef = this._getViewRef(view);
+            viewRef.detachFromContainer();
+            return viewRef;
+        }
+        return null;
     }
 }
 function ViewContainerRef__tsickle_Closure_declarations() {
