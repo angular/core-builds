@@ -2505,6 +2505,9 @@
             else if (paramMetadata instanceof Self || paramMetadata instanceof SkipSelf) {
                 visibility = paramMetadata;
             }
+            else if (paramMetadata instanceof InjectionToken) {
+                token = paramMetadata;
+            }
         }
         token = resolveForwardRef(token);
         if (token != null) {

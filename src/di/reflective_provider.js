@@ -8,6 +8,7 @@
 import { reflector } from '../reflection/reflection';
 import { Type } from '../type';
 import { resolveForwardRef } from './forward_ref';
+import { InjectionToken } from './injection_token';
 import { Inject, Optional, Self, SkipSelf } from './metadata';
 import { invalidProviderError, mixingMultiProvidersWithRegularProvidersError, noAnnotationError } from './reflective_errors';
 import { ReflectiveKey } from './reflective_key';
@@ -261,6 +262,9 @@ function _extractToken(typeOrFunc, metadata, params) {
         }
         else if (paramMetadata instanceof Self || paramMetadata instanceof SkipSelf) {
             visibility = paramMetadata;
+        }
+        else if (paramMetadata instanceof InjectionToken) {
+            token = paramMetadata;
         }
     }
     token = resolveForwardRef(token);
