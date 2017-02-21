@@ -596,7 +596,7 @@ var ApplicationRef_ = (function (_super) {
      * @return {?}
      */
     ApplicationRef_.prototype.attachView = function (viewRef) {
-        var /** @type {?} */ view = ((viewRef)).internalView;
+        var /** @type {?} */ view = ((viewRef));
         this._views.push(view);
         view.attachToAppRef(this);
     };
@@ -605,9 +605,9 @@ var ApplicationRef_ = (function (_super) {
      * @return {?}
      */
     ApplicationRef_.prototype.detachView = function (viewRef) {
-        var /** @type {?} */ view = ((viewRef)).internalView;
+        var /** @type {?} */ view = ((viewRef));
         ListWrapper.remove(this._views, view);
-        view.detach();
+        view.detachFromContainer();
     };
     /**
      * @param {?} componentOrFactory
@@ -669,9 +669,9 @@ var ApplicationRef_ = (function (_super) {
         var /** @type {?} */ scope = ApplicationRef_._tickScope();
         try {
             this._runningTick = true;
-            this._views.forEach(function (view) { return view.ref.detectChanges(); });
+            this._views.forEach(function (view) { return view.detectChanges(); });
             if (this._enforceNoNewChanges) {
-                this._views.forEach(function (view) { return view.ref.checkNoChanges(); });
+                this._views.forEach(function (view) { return view.checkNoChanges(); });
             }
         }
         finally {

@@ -209,10 +209,18 @@ var ViewContainerRef_ = (function () {
      * @param {?} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.get = function (index) {
-        var /** @type {?} */ ref = new ViewRef_(this._data.embeddedViews[index]);
-        ref.attachToViewContainerRef(this);
-        return ref;
+    ViewContainerRef_.prototype.get = function (index) { return this._getViewRef(this._data.embeddedViews[index]); };
+    /**
+     * @param {?} view
+     * @return {?}
+     */
+    ViewContainerRef_.prototype._getViewRef = function (view) {
+        if (view) {
+            var /** @type {?} */ ref = new ViewRef_(view);
+            ref.attachToViewContainerRef(this);
+            return ref;
+        }
+        return null;
     };
     Object.defineProperty(ViewContainerRef_.prototype, "length", {
         /**
@@ -282,17 +290,22 @@ var ViewContainerRef_ = (function () {
      */
     ViewContainerRef_.prototype.remove = function (index) {
         var /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
-        Services.destroyView(viewData);
+        if (viewData) {
+            Services.destroyView(viewData);
+        }
     };
     /**
      * @param {?=} index
      * @return {?}
      */
     ViewContainerRef_.prototype.detach = function (index) {
-        var /** @type {?} */ view = this.get(index);
-        Services.detachEmbeddedView(this._data, index);
-        ((view)).detachFromContainer();
-        return view;
+        var /** @type {?} */ view = Services.detachEmbeddedView(this._data, index);
+        if (view) {
+            var /** @type {?} */ viewRef = this._getViewRef(view);
+            viewRef.detachFromContainer();
+            return viewRef;
+        }
+        return null;
     };
     return ViewContainerRef_;
 }());

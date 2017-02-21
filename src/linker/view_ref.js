@@ -197,6 +197,15 @@ var ViewRef_ = (function () {
      * @return {?}
      */
     ViewRef_.prototype.destroy = function () { this._view.detachAndDestroy(); };
+    /**
+     * @return {?}
+     */
+    ViewRef_.prototype.detachFromContainer = function () { this._view.detach(); };
+    /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    ViewRef_.prototype.attachToAppRef = function (appRef) { this._view.attachToAppRef(appRef); };
     return ViewRef_;
 }());
 export { ViewRef_ };

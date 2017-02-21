@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { AnimationQueue } from '../animation/animation_queue';
+import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { AppView } from './view';
 /**
@@ -77,7 +78,11 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     readonly abstract context: C;
     readonly abstract rootNodes: any[];
 }
-export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRef {
+export interface InternalViewRef extends ViewRef {
+    detachFromContainer(): void;
+    attachToAppRef(appRef: ApplicationRef): void;
+}
+export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRef, InternalViewRef {
     private _view;
     animationQueue: AnimationQueue;
     constructor(_view: AppView<C>, animationQueue: AnimationQueue);
@@ -92,4 +97,6 @@ export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRe
     reattach(): void;
     onDestroy(callback: Function): void;
     destroy(): void;
+    detachFromContainer(): void;
+    attachToAppRef(appRef: ApplicationRef): void;
 }

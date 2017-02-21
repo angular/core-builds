@@ -19,7 +19,7 @@ export interface ViewDefinition {
      * Especially providers are after elements / anchors.
      */
     reverseChildNodes: NodeDef[];
-    lastRootNode: NodeDef;
+    lastRenderRootNode: NodeDef;
     bindingCount: number;
     disposableCount: number;
     /**
@@ -176,11 +176,13 @@ export interface ElementDef {
         [tokenKey: string]: NodeDef;
     };
     source: string;
+    handleEvent: ElementHandleEventFn;
 }
 export interface ElementOutputDef {
     target: string;
     eventName: string;
 }
+export declare type ElementHandleEventFn = (view: ViewData, eventName: string, event: any) => boolean;
 export interface ProviderDef {
     type: ProviderType;
     token: any;

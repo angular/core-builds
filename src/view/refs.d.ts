@@ -4,14 +4,14 @@ import { Injector } from '../di';
 import { ComponentFactory } from '../linker/component_factory';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
-import { EmbeddedViewRef } from '../linker/view_ref';
+import { EmbeddedViewRef, InternalViewRef } from '../linker/view_ref';
 import { Renderer as RendererV1 } from '../render/api';
 import { Type } from '../type';
 import { NodeDef, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory): ComponentFactory<any>;
 export declare function createViewContainerRef(view: ViewData, elDef: NodeDef): ViewContainerRef;
 export declare function createChangeDetectorRef(view: ViewData): ChangeDetectorRef;
-export declare class ViewRef_ implements EmbeddedViewRef<any> {
+export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     private _viewContainerRef;
     private _appRef;
     constructor(_view: ViewData);

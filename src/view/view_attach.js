@@ -38,8 +38,11 @@ export function attachEmbeddedView(elementData, viewIndex, view) {
  */
 export function detachEmbeddedView(elementData, viewIndex) {
     var /** @type {?} */ embeddedViews = elementData.embeddedViews;
-    if (viewIndex == null) {
-        viewIndex = embeddedViews.length;
+    if (viewIndex == null || viewIndex >= embeddedViews.length) {
+        viewIndex = embeddedViews.length - 1;
+    }
+    if (viewIndex < 0) {
+        return null;
     }
     var /** @type {?} */ view = embeddedViews[viewIndex];
     removeFromArray(embeddedViews, viewIndex);
@@ -81,7 +84,7 @@ export function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
  * @return {?}
  */
 function renderAttachEmbeddedView(elementData, prevView, view) {
-    var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRootNode) : elementData.renderElement;
+    var /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) : elementData.renderElement;
     var /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
     var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
     // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
