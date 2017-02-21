@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-5f3c844
+ * @license Angular v4.0.0-beta.8-d6a58f9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1133,7 +1133,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-beta.8-5f3c844');
+    var /** @type {?} */ VERSION = new Version('4.0.0-beta.8-d6a58f9');
 
     /**
      * Inject decorator and metadata.
@@ -2504,6 +2504,9 @@
             }
             else if (paramMetadata instanceof Self || paramMetadata instanceof SkipSelf) {
                 visibility = paramMetadata;
+            }
+            else if (paramMetadata instanceof InjectionToken) {
+                token = paramMetadata;
             }
         }
         token = resolveForwardRef(token);
