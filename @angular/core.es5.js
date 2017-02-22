@@ -1,8 +1,55 @@
-(function(global,factory){if(typeof define==="function"&&define.amd){define('@angular/core',['exports','rxjs/Observable','rxjs/observable/merge','rxjs/operator/share','rxjs/symbol/observable','rxjs/Subject'],factory);}else if(typeof exports!=="undefined"){factory(exports,require('rxjs/Observable'),require('rxjs/observable/merge'),require('rxjs/operator/share'),require('rxjs/symbol/observable'),require('rxjs/Subject'));}else{var mod={exports:{}};factory(mod.exports,global.rxjsObservable,global.rxjsObservableMerge,global.rxjsOperatorShare,global.rxjsSymbolObservable,global.Rx);global.ng=global.ng||{};global.ng.core=mod.exports;}})(this,function(exports,_Observable,_merge,_share,_observable,_Subject2){'use strict';Object.defineProperty(exports,"__esModule",{value:true});exports.ɵy=exports.ɵx=exports.ɵb=exports.ɵa=exports.ɵu=exports.ɵt=exports.ɵv=exports.ɵr=exports.ɵs=exports.ɵq=exports.ɵj=exports.ɵe=exports.ɵd=exports.ɵc=exports.ɵl=exports.ɵk=exports.ɵi=exports.ɵh=exports.ɵg=exports.ɵf=exports.ɵo=exports.ɵn=exports.ɵm=exports.ɵp=exports.ɵz=exports.ɵviewDef=exports.ɵunwrapValue=exports.ɵtextDef=exports.ɵqueryDef=exports.ɵpurePipeDef=exports.ɵpureObjectDef=exports.ɵpureArrayDef=exports.ɵproviderDef=exports.ɵpipeDef=exports.ɵnodeValue=exports.ɵngContentDef=exports.ɵelementEventFullName=exports.ɵelementDef=exports.ɵdirectiveDef=exports.ɵcreateRendererTypeV2=exports.ɵcreateComponentFactory=exports.ɵanchorDef=exports.ɵViewFlags=exports.ɵQueryValueType=exports.ɵQueryBindingType=exports.ɵProviderType=exports.ɵNodeFlags=exports.ɵDepFlags=exports.ɵBindingType=exports.ɵArgumentType=exports.ɵsubscribeToRenderElement=exports.ɵsetBindingDebugInfoForChanges=exports.ɵsetBindingDebugInfo=exports.ɵselectOrCreateRenderHostElement=exports.ɵpureProxy9=exports.ɵpureProxy8=exports.ɵpureProxy7=exports.ɵpureProxy6=exports.ɵpureProxy5=exports.ɵpureProxy4=exports.ɵpureProxy3=exports.ɵpureProxy2=exports.ɵpureProxy10=exports.ɵpureProxy1=exports.ɵnoop=exports.ɵinterpolate=exports.ɵinlineInterpolate=exports.ɵgetComponentFactoryViewClass=exports.ɵcreateRenderElement=exports.ɵcreateRenderComponentType=exports.ɵcheckRenderText=exports.ɵcheckRenderStyle=exports.ɵcheckRenderProperty=exports.ɵcheckRenderClass=undefined;exports.ɵcheckRenderAttribute=exports.ɵcheckBindingChange=exports.ɵcheckBinding=exports.ɵcastByValue=exports.ɵViewUtils=exports.ɵInlineArrayDynamic=exports.ɵInlineArray8=exports.ɵInlineArray4=exports.ɵInlineArray2=exports.ɵInlineArray16=exports.ɵEMPTY_MAP=exports.ɵEMPTY_INLINE_ARRAY=exports.ɵEMPTY_ARRAY=exports.ɵTemplateRef_=exports.ɵregisterModuleFactory=exports.ɵNgModuleInjector=exports.ɵComponentRef_=exports.trigger=exports.transition=exports.keyframes=exports.state=exports.style=exports.sequence=exports.group=exports.animate=exports.AnimationGroupMetadata=exports.AnimationSequenceMetadata=exports.AnimationWithStepsMetadata=exports.AnimationAnimateMetadata=exports.AnimationStyleMetadata=exports.AnimationKeyframesSequenceMetadata=exports.AnimationMetadata=exports.AnimationStateTransitionMetadata=exports.AnimationStateDeclarationMetadata=exports.AnimationStateMetadata=exports.AnimationEntryMetadata=exports.AUTO_STYLE=exports.ɵisPromise=exports.ɵisObservable=exports.ɵmakeDecorator=exports.ɵTransitionEngine=exports.ɵRenderDebugInfo=exports.ɵReflectorReader=exports.ɵReflectionCapabilities=exports.ɵreflector=exports.ɵReflector=exports.ɵViewMetadata=exports.ɵLifecycleHooks=exports.ɵLIFECYCLE_HOOKS_VALUES=exports.ɵViewType=exports.ɵViewContainer=exports.ɵDebugAppView=exports.ɵAppView=exports.ɵStaticNodeDebugInfo=exports.ɵDebugContext=exports.ɵCodegenComponentFactoryResolver=exports.ɵComponentFactory=exports.ɵERROR_COMPONENT_TYPE=exports.ɵDebugDomRootRenderer=exports.ɵConsole=exports.ɵisDefaultChangeDetectionStrategy=exports.ɵChangeDetectorStatus=exports.ɵdevModeEqual=exports.ɵValueUnwrapper=exports.ɵAPP_ID_RANDOM_PROVIDER=exports.ɵALLOW_MULTIPLE_PLATFORMS=exports.ɵAnimationTransition=exports.ɵAnimationStyles=exports.ɵrenderStyles=exports.ɵprepareFinalAnimationStyles=exports.ɵflattenStyles=exports.ɵcollectAndResolveStyles=exports.ɵclearStyles=exports.ɵbalanceAnimationKeyframes=exports.ɵAnimationSequencePlayer=exports.ɵNoOpAnimationPlayer=exports.ɵAnimationPlayer=exports.ɵAnimationKeyframe=exports.ɵAnimationGroupPlayer=exports.ɵFILL_STYLE_FLAG=exports.ɵEMPTY_STATE=exports.ɵDEFAULT_STATE=exports.ɵANY_STATE=exports.platformCore=exports.WrappedValue=exports.SimpleChange=exports.KeyValueDiffers=exports.IterableDiffers=exports.DefaultIterableDiffer=exports.ChangeDetectorRef=exports.ChangeDetectionStrategy=exports.ViewRef=exports.EmbeddedViewRef=exports.ViewContainerRef=exports.TemplateRef=exports.SystemJsNgModuleLoaderConfig=exports.SystemJsNgModuleLoader=exports.QueryList=exports.getModuleFactory=exports.NgModuleFactoryLoader=undefined;exports.NgModuleRef=exports.NgModuleFactory=exports.ElementRef=exports.ComponentFactoryResolver=exports.ComponentRef=exports.ComponentFactory=exports.ModuleWithComponentFactories=exports.CompilerFactory=exports.Compiler=exports.COMPILER_OPTIONS=exports.RootRenderer=exports.RendererV2=exports.RendererFactoryV2=exports.Renderer=exports.RenderComponentType=exports.NgZone=exports.Host=exports.SkipSelf=exports.Self=exports.Injectable=exports.Optional=exports.Inject=exports.OpaqueToken=exports.InjectionToken=exports.ReflectiveKey=exports.ResolvedReflectiveFactory=exports.ReflectiveInjector=exports.Injector=exports.resolveForwardRef=exports.forwardRef=exports.Class=exports.VERSION=exports.Version=exports.ViewEncapsulation=exports.NgModule=exports.NO_ERRORS_SCHEMA=exports.CUSTOM_ELEMENTS_SCHEMA=exports.OnInit=exports.OnDestroy=exports.OnChanges=exports.DoCheck=exports.AfterViewInit=exports.AfterViewChecked=exports.AfterContentInit=exports.AfterContentChecked=exports.Pipe=exports.Output=exports.Input=exports.HostListener=exports.HostBinding=exports.Directive=exports.Component=exports.ViewChildren=exports.ViewChild=exports.Query=exports.ContentChildren=exports.ContentChild=exports.Attribute=exports.ANALYZE_FOR_ENTRY_COMPONENTS=exports.SecurityContext=exports.Sanitizer=exports.AnimationKeyframe=exports.AnimationStyles=exports.AnimationPlayer=exports.AnimationTransitionEvent=exports.ErrorHandler=exports.EventEmitter=exports.Type=exports.wtfEndTimeRange=exports.wtfStartTimeRange=exports.wtfLeave=exports.wtfCreateScope=exports.ApplicationModule=exports.MissingTranslationStrategy=exports.LOCALE_ID=exports.TRANSLATIONS_FORMAT=exports.TRANSLATIONS=exports.setTestabilityGetter=exports.TestabilityRegistry=exports.Testability=exports.getDebugNode=exports.asNativeElements=exports.DebugNode=exports.DebugElement=exports.ApplicationInitStatus=exports.APP_INITIALIZER=exports.APP_BOOTSTRAP_LISTENER=exports.PLATFORM_INITIALIZER=exports.PACKAGE_ROOT_URL=exports.APP_ID=exports.NgProbeToken=exports.createPlatformFactory=exports.isDevMode=exports.enableProdMode=exports.ApplicationRef=exports.PlatformRef=exports.getPlatform=exports.destroyPlatform=exports.assertPlatform=exports.createPlatform=undefined;var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();var OpaqueToken=function(){/**
+var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}/**
+ * @license Angular v4.0.0-beta.8-fcc1d17
+ * (c) 2010-2017 Google, Inc. https://angular.io/
+ * License: MIT
+ */import{Observable}from'rxjs/Observable';import{merge}from'rxjs/observable/merge';import{share}from'rxjs/operator/share';import{$$observable}from'rxjs/symbol/observable';import{Subject}from'rxjs/Subject';/**
+ * Creates a token that can be used in a DI Provider.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
+ *
+ * ```typescript
+ * var t = new OpaqueToken("value");
+ *
+ * var injector = Injector.resolveAndCreate([
+ *   {provide: t, useValue: "bindingValue"}
+ * ]);
+ *
+ * expect(injector.get(t)).toEqual("bindingValue");
+ * ```
+ *
+ * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
+ * caused by multiple providers using the same string as two different tokens.
+ *
+ * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
+ * error messages.
+ * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
+ * instead.
+ */var OpaqueToken=function(){/**
      * @param {?} _desc
      */function OpaqueToken(_desc){_classCallCheck(this,OpaqueToken);this._desc=_desc;}/**
      * @return {?}
-     */_createClass(OpaqueToken,[{key:'toString',value:function toString(){return'Token '+this._desc;}}]);return OpaqueToken;}();var InjectionToken=function(_OpaqueToken){_inherits(InjectionToken,_OpaqueToken);/**
+     */_createClass(OpaqueToken,[{key:'toString',value:function toString(){return'Token '+this._desc;}}]);return OpaqueToken;}();/**
+ * Creates a token that can be used in a DI Provider.
+ *
+ * Use an `InjectionToken` whenever the type you are injecting is not reified (does not have a
+ * runtime representation) such as when injecting an interface, callable type, array or
+ * parametrized type.
+ *
+ * `InjectionToken` is parametrize on `T` which is the type of object which will be returned by the
+ * `Injector`. This provides additional level of type safety.
+ *
+ * ```
+ * interface MyInterface {...}
+ * var myInterface = injector.get(new InjectionToken<MyInterface>('SomeToken'));
+ * // myInterface is inferred to be MyInterface.
+ * ```
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/injector_spec.ts region='Injector'}
+ *
+ * \@stable
+ */var InjectionToken=function(_OpaqueToken){_inherits(InjectionToken,_OpaqueToken);/**
      * @param {?} desc
      */function InjectionToken(desc){_classCallCheck(this,InjectionToken);return _possibleConstructorReturn(this,(InjectionToken.__proto__||Object.getPrototypeOf(InjectionToken)).call(this,desc));}/**
      * @return {?}
@@ -307,7 +354,124 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
  *
  * \@stable
  * @abstract
- */var OnChanges=function(){function OnChanges(){_classCallCheck(this,OnChanges);}_createClass(OnChanges,[{key:'ngOnChanges',value:function ngOnChanges(changes){}}]);return OnChanges;}();var OnInit=function(){function OnInit(){_classCallCheck(this,OnInit);}_createClass(OnInit,[{key:'ngOnInit',value:function ngOnInit(){}}]);return OnInit;}();var DoCheck=function(){function DoCheck(){_classCallCheck(this,DoCheck);}_createClass(DoCheck,[{key:'ngDoCheck',value:function ngDoCheck(){}}]);return DoCheck;}();var OnDestroy=function(){function OnDestroy(){_classCallCheck(this,OnDestroy);}_createClass(OnDestroy,[{key:'ngOnDestroy',value:function ngOnDestroy(){}}]);return OnDestroy;}();var AfterContentInit=function(){function AfterContentInit(){_classCallCheck(this,AfterContentInit);}_createClass(AfterContentInit,[{key:'ngAfterContentInit',value:function ngAfterContentInit(){}}]);return AfterContentInit;}();var AfterContentChecked=function(){function AfterContentChecked(){_classCallCheck(this,AfterContentChecked);}_createClass(AfterContentChecked,[{key:'ngAfterContentChecked',value:function ngAfterContentChecked(){}}]);return AfterContentChecked;}();var AfterViewInit=function(){function AfterViewInit(){_classCallCheck(this,AfterViewInit);}_createClass(AfterViewInit,[{key:'ngAfterViewInit',value:function ngAfterViewInit(){}}]);return AfterViewInit;}();var AfterViewChecked=function(){function AfterViewChecked(){_classCallCheck(this,AfterViewChecked);}_createClass(AfterViewChecked,[{key:'ngAfterViewChecked',value:function ngAfterViewChecked(){}}]);return AfterViewChecked;}();/**
+ */var OnChanges=function(){function OnChanges(){_classCallCheck(this,OnChanges);}_createClass(OnChanges,[{key:'ngOnChanges',/**
+     * @abstract
+     * @param {?} changes
+     * @return {?}
+     */value:function ngOnChanges(changes){}}]);return OnChanges;}();/**
+ * \@whatItDoes Lifecycle hook that is called after data-bound properties of a directive are
+ * initialized.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
+ *
+ * \@description
+ * `ngOnInit` is called right after the directive's data-bound properties have been checked for the
+ * first time, and before any of its children have been checked. It is invoked only once when the
+ * directive is instantiated.
+ *
+ * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var OnInit=function(){function OnInit(){_classCallCheck(this,OnInit);}_createClass(OnInit,[{key:'ngOnInit',/**
+     * @abstract
+     * @return {?}
+     */value:function ngOnInit(){}}]);return OnInit;}();/**
+ * \@whatItDoes Lifecycle hook that is called when Angular dirty checks a directive.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
+ *
+ * \@description
+ * `ngDoCheck` gets called to check the changes in the directives in addition to the default
+ * algorithm. The default change detection algorithm looks for differences by comparing
+ * bound-property values by reference across change detection runs.
+ *
+ * Note that a directive typically should not use both `DoCheck` and {\@link OnChanges} to respond to
+ * changes on the same input, as `ngOnChanges` will continue to be called when the default change
+ * detector detects changes.
+ *
+ * See {\@link KeyValueDiffers} and {\@link IterableDiffers} for implementing custom dirty checking
+ * for collections.
+ *
+ * See {\@linkDocs guide/lifecycle-hooks#docheck "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var DoCheck=function(){function DoCheck(){_classCallCheck(this,DoCheck);}_createClass(DoCheck,[{key:'ngDoCheck',/**
+     * @abstract
+     * @return {?}
+     */value:function ngDoCheck(){}}]);return DoCheck;}();/**
+ * \@whatItDoes Lifecycle hook that is called when a directive, pipe or service is destroyed.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
+ *
+ * \@description
+ * `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
+ * instance is destroyed.
+ *
+ * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var OnDestroy=function(){function OnDestroy(){_classCallCheck(this,OnDestroy);}_createClass(OnDestroy,[{key:'ngOnDestroy',/**
+     * @abstract
+     * @return {?}
+     */value:function ngOnDestroy(){}}]);return OnDestroy;}();/**
+ *
+ * \@whatItDoes Lifecycle hook that is called after a directive's content has been fully
+ * initialized.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
+ *
+ * \@description
+ * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var AfterContentInit=function(){function AfterContentInit(){_classCallCheck(this,AfterContentInit);}_createClass(AfterContentInit,[{key:'ngAfterContentInit',/**
+     * @abstract
+     * @return {?}
+     */value:function ngAfterContentInit(){}}]);return AfterContentInit;}();/**
+ * \@whatItDoes Lifecycle hook that is called after every check of a directive's content.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
+ *
+ * \@description
+ * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var AfterContentChecked=function(){function AfterContentChecked(){_classCallCheck(this,AfterContentChecked);}_createClass(AfterContentChecked,[{key:'ngAfterContentChecked',/**
+     * @abstract
+     * @return {?}
+     */value:function ngAfterContentChecked(){}}]);return AfterContentChecked;}();/**
+ * \@whatItDoes Lifecycle hook that is called after a component's view has been fully
+ * initialized.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
+ *
+ * \@description
+ * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var AfterViewInit=function(){function AfterViewInit(){_classCallCheck(this,AfterViewInit);}_createClass(AfterViewInit,[{key:'ngAfterViewInit',/**
+     * @abstract
+     * @return {?}
+     */value:function ngAfterViewInit(){}}]);return AfterViewInit;}();/**
+ * \@whatItDoes Lifecycle hook that is called after every check of a component's view.
+ * \@howToUse
+ * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
+ *
+ * \@description
+ * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
+ *
+ * \@stable
+ * @abstract
+ */var AfterViewChecked=function(){function AfterViewChecked(){_classCallCheck(this,AfterViewChecked);}_createClass(AfterViewChecked,[{key:'ngAfterViewChecked',/**
+     * @abstract
+     * @return {?}
+     */value:function ngAfterViewChecked(){}}]);return AfterViewChecked;}();/**
  * Defines a schema that will allow:
  * - any non-Angular elements with a `-` in their name,
  * - any properties on elements with a `-` in their name which is the common rule for custom
@@ -355,13 +519,21 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
  * {\@link Component}
  */var ViewMetadata=/**
      * @param {?=} __0
-     */function ViewMetadata(){var _ref=arguments.length>0&&arguments[0]!==undefined?arguments[0]:{},templateUrl=_ref.templateUrl,template=_ref.template,encapsulation=_ref.encapsulation,styles=_ref.styles,styleUrls=_ref.styleUrls,animations=_ref.animations,interpolation=_ref.interpolation;_classCallCheck(this,ViewMetadata);this.templateUrl=templateUrl;this.template=template;this.styleUrls=styleUrls;this.styles=styles;this.encapsulation=encapsulation;this.animations=animations;this.interpolation=interpolation;};var Version=function(){/**
+     */function ViewMetadata(){var _ref=arguments.length>0&&arguments[0]!==undefined?arguments[0]:{},templateUrl=_ref.templateUrl,template=_ref.template,encapsulation=_ref.encapsulation,styles=_ref.styles,styleUrls=_ref.styleUrls,animations=_ref.animations,interpolation=_ref.interpolation;_classCallCheck(this,ViewMetadata);this.templateUrl=templateUrl;this.template=template;this.styleUrls=styleUrls;this.styles=styles;this.encapsulation=encapsulation;this.animations=animations;this.interpolation=interpolation;};/**
+ * \@whatItDoes Represents the version of Angular
+ *
+ * \@stable
+ */var Version=function(){/**
      * @param {?} full
      */function Version(full){_classCallCheck(this,Version);this.full=full;}/**
      * @return {?}
-     */_createClass(Version,[{key:'major',get:function get(){return this.full.split('.')[0];}},{key:'minor',get:function get(){return this.full.split('.')[1];}},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
+     */_createClass(Version,[{key:'major',get:function get(){return this.full.split('.')[0];}/**
+     * @return {?}
+     */},{key:'minor',get:function get(){return this.full.split('.')[1];}/**
+     * @return {?}
+     */},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
  * @stable
- */var/** @type {?} */VERSION=new Version('0.0.0-PLACEHOLDER');/**
+ */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-fcc1d17');/**
  * Inject decorator and metadata.
  *
  * @stable
@@ -417,7 +589,48 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
  * \@experimental
  * @param {?} type
  * @return {?}
- */function resolveForwardRef(type){if(typeof type==='function'&&type.hasOwnProperty('__forward_ref__')&&type.__forward_ref__===forwardRef){return type();}else{return type;}}var/** @type {?} */_THROW_IF_NOT_FOUND=new Object();var/** @type {?} */THROW_IF_NOT_FOUND=_THROW_IF_NOT_FOUND;var _NullInjector=function(){function _NullInjector(){_classCallCheck(this,_NullInjector);}_createClass(_NullInjector,[{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:_THROW_IF_NOT_FOUND;if(notFoundValue===_THROW_IF_NOT_FOUND){throw new Error('No provider for '+stringify(token)+'!');}return notFoundValue;}}]);return _NullInjector;}();var Injector=function(){function Injector(){_classCallCheck(this,Injector);}_createClass(Injector,[{key:'get',value:function get(token,notFoundValue){}},{key:'get',value:function get(token,notFoundValue){}}]);return Injector;}();Injector.THROW_IF_NOT_FOUND=_THROW_IF_NOT_FOUND;Injector.NULL=new _NullInjector();/**
+ */function resolveForwardRef(type){if(typeof type==='function'&&type.hasOwnProperty('__forward_ref__')&&type.__forward_ref__===forwardRef){return type();}else{return type;}}var/** @type {?} */_THROW_IF_NOT_FOUND=new Object();var/** @type {?} */THROW_IF_NOT_FOUND=_THROW_IF_NOT_FOUND;var _NullInjector=function(){function _NullInjector(){_classCallCheck(this,_NullInjector);}_createClass(_NullInjector,[{key:'get',/**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:_THROW_IF_NOT_FOUND;if(notFoundValue===_THROW_IF_NOT_FOUND){throw new Error('No provider for '+stringify(token)+'!');}return notFoundValue;}}]);return _NullInjector;}();/**
+ * \@whatItDoes Injector interface
+ * \@howToUse
+ * ```
+ * const injector: Injector = ...;
+ * injector.get(...);
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/injector_spec.ts region='Injector'}
+ *
+ * `Injector` returns itself when given `Injector` as a token:
+ * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
+ *
+ * \@stable
+ * @abstract
+ */var Injector=function(){function Injector(){_classCallCheck(this,Injector);}_createClass(Injector,[{key:'get',/**
+     * Retrieves an instance from the injector based on the provided token.
+     * If not found:
+     * - Throws {\@link NoProviderError} if no `notFoundValue` that is not equal to
+     * Injector.THROW_IF_NOT_FOUND is given
+     * - Returns the `notFoundValue` otherwise
+     * @abstract
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */value:function get(token,notFoundValue){}/**
+     * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
+     * @suppress {duplicate}
+     * @abstract
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */},{key:'get',value:function get(token,notFoundValue){}}]);return Injector;}();Injector.THROW_IF_NOT_FOUND=_THROW_IF_NOT_FOUND;Injector.NULL=new _NullInjector();/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -466,7 +679,23 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
      * @return {?}
      */_createClass(ErrorHandler,[{key:'handleError',value:function handleError(error){this._console.error('EXCEPTION: '+this._extractMessage(error));if(error instanceof Error){var/** @type {?} */originalError=this._findOriginalError(error);var/** @type {?} */originalStack=this._findOriginalStack(error);var/** @type {?} */context=this._findContext(error);if(originalError){this._console.error('ORIGINAL EXCEPTION: '+this._extractMessage(originalError));}if(originalStack){this._console.error('ORIGINAL STACKTRACE:');this._console.error(originalStack);}if(context){this._console.error('ERROR CONTEXT:');this._console.error(context);}}// We rethrow exceptions, so operations like 'bootstrap' will result in an error
 // when an error happens. If we do not rethrow, bootstrap will always succeed.
-if(this.rethrowError)throw error;}},{key:'_extractMessage',value:function _extractMessage(error){return error instanceof Error?error.message:error.toString();}},{key:'_findContext',value:function _findContext(error){if(error){return getDebugContext(error)?getDebugContext(error):this._findContext(getOriginalError(error));}return null;}},{key:'_findOriginalError',value:function _findOriginalError(error){var/** @type {?} */e=getOriginalError(error);while(e&&getOriginalError(e)){e=getOriginalError(e);}return e;}},{key:'_findOriginalStack',value:function _findOriginalStack(error){var/** @type {?} */e=error;var/** @type {?} */stack=e.stack;while(e instanceof Error&&getOriginalError(e)){e=getOriginalError(e);if(e instanceof Error&&e.stack){stack=e.stack;}}return stack;}}]);return ErrorHandler;}();/**
+if(this.rethrowError)throw error;}/**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */},{key:'_extractMessage',value:function _extractMessage(error){return error instanceof Error?error.message:error.toString();}/**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */},{key:'_findContext',value:function _findContext(error){if(error){return getDebugContext(error)?getDebugContext(error):this._findContext(getOriginalError(error));}return null;}/**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */},{key:'_findOriginalError',value:function _findOriginalError(error){var/** @type {?} */e=getOriginalError(error);while(e&&getOriginalError(e)){e=getOriginalError(e);}return e;}/**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */},{key:'_findOriginalStack',value:function _findOriginalStack(error){var/** @type {?} */e=error;var/** @type {?} */stack=e.stack;while(e instanceof Error&&getOriginalError(e)){e=getOriginalError(e);if(e instanceof Error&&e.stack){stack=e.stack;}}return stack;}}]);return ErrorHandler;}();/**
  * @param {?} message
  * @param {?} originalError
  * @return {?}
@@ -643,10 +872,20 @@ if(this.rethrowError)throw error;}},{key:'_extractMessage',value:function _extra
      */function ReflectiveKey(token,id){_classCallCheck(this,ReflectiveKey);this.token=token;this.id=id;if(!token){throw new Error('Token must be defined!');}}/**
      * Returns a stringified token.
      * @return {?}
-     */_createClass(ReflectiveKey,[{key:'displayName',get:function get(){return stringify(this.token);}}],[{key:'get',value:function get(token){return _globalKeyRegistry.get(resolveForwardRef(token));}},{key:'numberOfKeys',get:function get(){return _globalKeyRegistry.numberOfKeys;}}]);return ReflectiveKey;}();var KeyRegistry=function(){function KeyRegistry(){_classCallCheck(this,KeyRegistry);this._allKeys=new Map();}/**
+     */_createClass(ReflectiveKey,[{key:'displayName',get:function get(){return stringify(this.token);}/**
+     * Retrieves a `Key` for a token.
      * @param {?} token
      * @return {?}
-     */_createClass(KeyRegistry,[{key:'get',value:function get(token){if(token instanceof ReflectiveKey)return token;if(this._allKeys.has(token)){return this._allKeys.get(token);}var/** @type {?} */newKey=new ReflectiveKey(token,ReflectiveKey.numberOfKeys);this._allKeys.set(token,newKey);return newKey;}},{key:'numberOfKeys',get:function get(){return this._allKeys.size;}}]);return KeyRegistry;}();var/** @type {?} */_globalKeyRegistry=new KeyRegistry();/**
+     */}],[{key:'get',value:function get(token){return _globalKeyRegistry.get(resolveForwardRef(token));}/**
+     * @return {?} the number of keys registered in the system.
+     */},{key:'numberOfKeys',get:function get(){return _globalKeyRegistry.numberOfKeys;}}]);return ReflectiveKey;}();/**
+ * \@internal
+ */var KeyRegistry=function(){function KeyRegistry(){_classCallCheck(this,KeyRegistry);this._allKeys=new Map();}/**
+     * @param {?} token
+     * @return {?}
+     */_createClass(KeyRegistry,[{key:'get',value:function get(token){if(token instanceof ReflectiveKey)return token;if(this._allKeys.has(token)){return this._allKeys.get(token);}var/** @type {?} */newKey=new ReflectiveKey(token,ReflectiveKey.numberOfKeys);this._allKeys.set(token,newKey);return newKey;}/**
+     * @return {?}
+     */},{key:'numberOfKeys',get:function get(){return this._allKeys.size;}}]);return KeyRegistry;}();var/** @type {?} */_globalKeyRegistry=new KeyRegistry();/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -676,10 +915,22 @@ if(this.rethrowError)throw error;}},{key:'_extractMessage',value:function _extra
      * @param {?=} reflect
      */function ReflectionCapabilities(reflect){_classCallCheck(this,ReflectionCapabilities);this._reflect=reflect||global$1.Reflect;}/**
      * @return {?}
-     */_createClass(ReflectionCapabilities,[{key:'isReflectionEnabled',value:function isReflectionEnabled(){return true;}},{key:'factory',value:function factory(t){return function(){for(var _len4=arguments.length,args=Array(_len4),_key4=0;_key4<_len4;_key4++){args[_key4]=arguments[_key4];}return new(Function.prototype.bind.apply(t,[null].concat(args)))();};}},{key:'_zipTypesAndAnnotations',value:function _zipTypesAndAnnotations(paramTypes,paramAnnotations){var/** @type {?} */result=void 0;if(typeof paramTypes==='undefined'){result=new Array(paramAnnotations.length);}else{result=new Array(paramTypes.length);}for(var/** @type {?} */i=0;i<result.length;i++){// TS outputs Object for parameters without types, while Traceur omits
+     */_createClass(ReflectionCapabilities,[{key:'isReflectionEnabled',value:function isReflectionEnabled(){return true;}/**
+     * @param {?} t
+     * @return {?}
+     */},{key:'factory',value:function factory(t){return function(){for(var _len4=arguments.length,args=Array(_len4),_key4=0;_key4<_len4;_key4++){args[_key4]=arguments[_key4];}return new(Function.prototype.bind.apply(t,[null].concat(args)))();};}/**
+     * \@internal
+     * @param {?} paramTypes
+     * @param {?} paramAnnotations
+     * @return {?}
+     */},{key:'_zipTypesAndAnnotations',value:function _zipTypesAndAnnotations(paramTypes,paramAnnotations){var/** @type {?} */result=void 0;if(typeof paramTypes==='undefined'){result=new Array(paramAnnotations.length);}else{result=new Array(paramTypes.length);}for(var/** @type {?} */i=0;i<result.length;i++){// TS outputs Object for parameters without types, while Traceur omits
 // the annotations. For now we preserve the Traceur behavior to aid
 // migration, but this can be revisited.
-if(typeof paramTypes==='undefined'){result[i]=[];}else if(paramTypes[i]!=Object){result[i]=[paramTypes[i]];}else{result[i]=[];}if(paramAnnotations&&isPresent(paramAnnotations[i])){result[i]=result[i].concat(paramAnnotations[i]);}}return result;}},{key:'_ownParameters',value:function _ownParameters(type,parentCtor){// If we have no decorators, we only have function.length as metadata.
+if(typeof paramTypes==='undefined'){result[i]=[];}else if(paramTypes[i]!=Object){result[i]=[paramTypes[i]];}else{result[i]=[];}if(paramAnnotations&&isPresent(paramAnnotations[i])){result[i]=result[i].concat(paramAnnotations[i]);}}return result;}/**
+     * @param {?} type
+     * @param {?} parentCtor
+     * @return {?}
+     */},{key:'_ownParameters',value:function _ownParameters(type,parentCtor){// If we have no decorators, we only have function.length as metadata.
 // In that case, to detect whether a child class declared an own constructor or not,
 // we need to look inside of that constructor to check whether it is
 // just calling the parent.
@@ -695,17 +946,60 @@ if(isPresent(this._reflect)&&isPresent(this._reflect.getOwnMetadata)){var/** @ty
 // based on function.length.
 // Note: We know that this is a real constructor as we checked
 // the content of the constructor above.
-return new Array(type.length).fill(undefined);}},{key:'parameters',value:function parameters(type){// Note: only report metadata if we have at least one class decorator
+return new Array(type.length).fill(undefined);}/**
+     * @param {?} type
+     * @return {?}
+     */},{key:'parameters',value:function parameters(type){// Note: only report metadata if we have at least one class decorator
 // to stay in sync with the static reflector.
-if(!isType(type)){return[];}var/** @type {?} */parentCtor=getParentCtor(type);var/** @type {?} */parameters=this._ownParameters(type,parentCtor);if(!parameters&&parentCtor!==Object){parameters=this.parameters(parentCtor);}return parameters||[];}},{key:'_ownAnnotations',value:function _ownAnnotations(typeOrFunc,parentCtor){// Prefer the direct API.
+if(!isType(type)){return[];}var/** @type {?} */parentCtor=getParentCtor(type);var/** @type {?} */parameters=this._ownParameters(type,parentCtor);if(!parameters&&parentCtor!==Object){parameters=this.parameters(parentCtor);}return parameters||[];}/**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */},{key:'_ownAnnotations',value:function _ownAnnotations(typeOrFunc,parentCtor){// Prefer the direct API.
 if(typeOrFunc.annotations&&typeOrFunc.annotations!==parentCtor.annotations){var/** @type {?} */annotations=typeOrFunc.annotations;if(typeof annotations==='function'&&annotations.annotations){annotations=annotations.annotations;}return annotations;}// API of tsickle for lowering decorators to properties on the class.
 if(typeOrFunc.decorators&&typeOrFunc.decorators!==parentCtor.decorators){return convertTsickleDecoratorIntoMetadata(typeOrFunc.decorators);}// API for metadata created by invoking the decorators.
-if(this._reflect&&this._reflect.getOwnMetadata){return this._reflect.getOwnMetadata('annotations',typeOrFunc);}}},{key:'annotations',value:function annotations(typeOrFunc){if(!isType(typeOrFunc)){return[];}var/** @type {?} */parentCtor=getParentCtor(typeOrFunc);var/** @type {?} */ownAnnotations=this._ownAnnotations(typeOrFunc,parentCtor)||[];var/** @type {?} */parentAnnotations=parentCtor!==Object?this.annotations(parentCtor):[];return parentAnnotations.concat(ownAnnotations);}},{key:'_ownPropMetadata',value:function _ownPropMetadata(typeOrFunc,parentCtor){// Prefer the direct API.
+if(this._reflect&&this._reflect.getOwnMetadata){return this._reflect.getOwnMetadata('annotations',typeOrFunc);}}/**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'annotations',value:function annotations(typeOrFunc){if(!isType(typeOrFunc)){return[];}var/** @type {?} */parentCtor=getParentCtor(typeOrFunc);var/** @type {?} */ownAnnotations=this._ownAnnotations(typeOrFunc,parentCtor)||[];var/** @type {?} */parentAnnotations=parentCtor!==Object?this.annotations(parentCtor):[];return parentAnnotations.concat(ownAnnotations);}/**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */},{key:'_ownPropMetadata',value:function _ownPropMetadata(typeOrFunc,parentCtor){// Prefer the direct API.
 if(typeOrFunc.propMetadata&&typeOrFunc.propMetadata!==parentCtor.propMetadata){var/** @type {?} */propMetadata=typeOrFunc.propMetadata;if(typeof propMetadata==='function'&&propMetadata.propMetadata){propMetadata=propMetadata.propMetadata;}return propMetadata;}// API of tsickle for lowering decorators to properties on the class.
 if(typeOrFunc.propDecorators&&typeOrFunc.propDecorators!==parentCtor.propDecorators){var/** @type {?} */propDecorators=typeOrFunc.propDecorators;var/** @type {?} */_propMetadata={};Object.keys(propDecorators).forEach(function(prop){_propMetadata[prop]=convertTsickleDecoratorIntoMetadata(propDecorators[prop]);});return _propMetadata;}// API for metadata created by invoking the decorators.
-if(this._reflect&&this._reflect.getOwnMetadata){return this._reflect.getOwnMetadata('propMetadata',typeOrFunc);}}},{key:'propMetadata',value:function propMetadata(typeOrFunc){if(!isType(typeOrFunc)){return{};}var/** @type {?} */parentCtor=getParentCtor(typeOrFunc);var/** @type {?} */propMetadata={};if(parentCtor!==Object){var/** @type {?} */parentPropMetadata=this.propMetadata(parentCtor);Object.keys(parentPropMetadata).forEach(function(propName){propMetadata[propName]=parentPropMetadata[propName];});}var/** @type {?} */ownPropMetadata=this._ownPropMetadata(typeOrFunc,parentCtor);if(ownPropMetadata){Object.keys(ownPropMetadata).forEach(function(propName){var/** @type {?} */decorators=[];if(propMetadata.hasOwnProperty(propName)){decorators.push.apply(decorators,_toConsumableArray(propMetadata[propName]));}decorators.push.apply(decorators,_toConsumableArray(ownPropMetadata[propName]));propMetadata[propName]=decorators;});}return propMetadata;}},{key:'hasLifecycleHook',value:function hasLifecycleHook(type,lcProperty){return type instanceof Type&&lcProperty in type.prototype;}},{key:'getter',value:function getter(name){return new Function('o','return o.'+name+';');}},{key:'setter',value:function setter(name){return new Function('o','v','return o.'+name+' = v;');}},{key:'method',value:function method(name){var/** @type {?} */functionBody='if (!o.'+name+') throw new Error(\'"'+name+'" is undefined\');\n        return o.'+name+'.apply(o, args);';return new Function('o','args',functionBody);}},{key:'importUri',value:function importUri(type){// StaticSymbol
+if(this._reflect&&this._reflect.getOwnMetadata){return this._reflect.getOwnMetadata('propMetadata',typeOrFunc);}}/**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'propMetadata',value:function propMetadata(typeOrFunc){if(!isType(typeOrFunc)){return{};}var/** @type {?} */parentCtor=getParentCtor(typeOrFunc);var/** @type {?} */propMetadata={};if(parentCtor!==Object){var/** @type {?} */parentPropMetadata=this.propMetadata(parentCtor);Object.keys(parentPropMetadata).forEach(function(propName){propMetadata[propName]=parentPropMetadata[propName];});}var/** @type {?} */ownPropMetadata=this._ownPropMetadata(typeOrFunc,parentCtor);if(ownPropMetadata){Object.keys(ownPropMetadata).forEach(function(propName){var/** @type {?} */decorators=[];if(propMetadata.hasOwnProperty(propName)){decorators.push.apply(decorators,_toConsumableArray(propMetadata[propName]));}decorators.push.apply(decorators,_toConsumableArray(ownPropMetadata[propName]));propMetadata[propName]=decorators;});}return propMetadata;}/**
+     * @param {?} type
+     * @param {?} lcProperty
+     * @return {?}
+     */},{key:'hasLifecycleHook',value:function hasLifecycleHook(type,lcProperty){return type instanceof Type&&lcProperty in type.prototype;}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'getter',value:function getter(name){return new Function('o','return o.'+name+';');}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'setter',value:function setter(name){return new Function('o','v','return o.'+name+' = v;');}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'method',value:function method(name){var/** @type {?} */functionBody='if (!o.'+name+') throw new Error(\'"'+name+'" is undefined\');\n        return o.'+name+'.apply(o, args);';return new Function('o','args',functionBody);}/**
+     * @param {?} type
+     * @return {?}
+     */},{key:'importUri',value:function importUri(type){// StaticSymbol
 if((typeof type==='undefined'?'undefined':_typeof(type))==='object'&&type['filePath']){return type['filePath'];}// Runtime type
-return'./'+stringify(type);}},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){return runtime;}},{key:'resolveEnum',value:function resolveEnum(enumIdentifier,name){return enumIdentifier[name];}}]);return ReflectionCapabilities;}();/**
+return'./'+stringify(type);}/**
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){return runtime;}/**
+     * @param {?} enumIdentifier
+     * @param {?} name
+     * @return {?}
+     */},{key:'resolveEnum',value:function resolveEnum(enumIdentifier,name){return enumIdentifier[name];}}]);return ReflectionCapabilities;}();/**
  * @param {?} decoratorInvocations
  * @return {?}
  */function convertTsickleDecoratorIntoMetadata(decoratorInvocations){if(!decoratorInvocations){return[];}return decoratorInvocations.map(function(decoratorInvocation){var/** @type {?} */decoratorType=decoratorInvocation.type;var/** @type {?} */annotationCls=decoratorType.annotationCls;var/** @type {?} */annotationArgs=decoratorInvocation.args?decoratorInvocation.args:[];return new(Function.prototype.bind.apply(annotationCls,[null].concat(_toConsumableArray(annotationArgs))))();});}/**
@@ -717,12 +1011,81 @@ return parentCtor||Object;}/**
  * Provides read-only access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  * @abstract
- */var ReflectorReader=function(){function ReflectorReader(){_classCallCheck(this,ReflectorReader);}_createClass(ReflectorReader,[{key:'parameters',value:function parameters(typeOrFunc){}},{key:'annotations',value:function annotations(typeOrFunc){}},{key:'propMetadata',value:function propMetadata(typeOrFunc){}},{key:'importUri',value:function importUri(typeOrFunc){}},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){}},{key:'resolveEnum',value:function resolveEnum(identifier,name){}}]);return ReflectorReader;}();var Reflector=function(_ReflectorReader){_inherits(Reflector,_ReflectorReader);/**
+ */var ReflectorReader=function(){function ReflectorReader(){_classCallCheck(this,ReflectorReader);}_createClass(ReflectorReader,[{key:'parameters',/**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */value:function parameters(typeOrFunc){}/**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'annotations',value:function annotations(typeOrFunc){}/**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'propMetadata',value:function propMetadata(typeOrFunc){}/**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'importUri',value:function importUri(typeOrFunc){}/**
+     * @abstract
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){}/**
+     * @abstract
+     * @param {?} identifier
+     * @param {?} name
+     * @return {?}
+     */},{key:'resolveEnum',value:function resolveEnum(identifier,name){}}]);return ReflectorReader;}();/**
+ * Provides access to reflection data about symbols. Used internally by Angular
+ * to power dependency injection and compilation.
+ */var Reflector=function(_ReflectorReader){_inherits(Reflector,_ReflectorReader);/**
      * @param {?} reflectionCapabilities
      */function Reflector(reflectionCapabilities){_classCallCheck(this,Reflector);var _this3=_possibleConstructorReturn(this,(Reflector.__proto__||Object.getPrototypeOf(Reflector)).call(this));_this3.reflectionCapabilities=reflectionCapabilities;return _this3;}/**
      * @param {?} caps
      * @return {?}
-     */_createClass(Reflector,[{key:'updateCapabilities',value:function updateCapabilities(caps){this.reflectionCapabilities=caps;}},{key:'factory',value:function factory(type){return this.reflectionCapabilities.factory(type);}},{key:'parameters',value:function parameters(typeOrFunc){return this.reflectionCapabilities.parameters(typeOrFunc);}},{key:'annotations',value:function annotations(typeOrFunc){return this.reflectionCapabilities.annotations(typeOrFunc);}},{key:'propMetadata',value:function propMetadata(typeOrFunc){return this.reflectionCapabilities.propMetadata(typeOrFunc);}},{key:'hasLifecycleHook',value:function hasLifecycleHook(type,lcProperty){return this.reflectionCapabilities.hasLifecycleHook(type,lcProperty);}},{key:'getter',value:function getter(name){return this.reflectionCapabilities.getter(name);}},{key:'setter',value:function setter(name){return this.reflectionCapabilities.setter(name);}},{key:'method',value:function method(name){return this.reflectionCapabilities.method(name);}},{key:'importUri',value:function importUri(type){return this.reflectionCapabilities.importUri(type);}},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){return this.reflectionCapabilities.resolveIdentifier(name,moduleUrl,members,runtime);}},{key:'resolveEnum',value:function resolveEnum(identifier,name){return this.reflectionCapabilities.resolveEnum(identifier,name);}}]);return Reflector;}(ReflectorReader);/**
+     */_createClass(Reflector,[{key:'updateCapabilities',value:function updateCapabilities(caps){this.reflectionCapabilities=caps;}/**
+     * @param {?} type
+     * @return {?}
+     */},{key:'factory',value:function factory(type){return this.reflectionCapabilities.factory(type);}/**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'parameters',value:function parameters(typeOrFunc){return this.reflectionCapabilities.parameters(typeOrFunc);}/**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'annotations',value:function annotations(typeOrFunc){return this.reflectionCapabilities.annotations(typeOrFunc);}/**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */},{key:'propMetadata',value:function propMetadata(typeOrFunc){return this.reflectionCapabilities.propMetadata(typeOrFunc);}/**
+     * @param {?} type
+     * @param {?} lcProperty
+     * @return {?}
+     */},{key:'hasLifecycleHook',value:function hasLifecycleHook(type,lcProperty){return this.reflectionCapabilities.hasLifecycleHook(type,lcProperty);}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'getter',value:function getter(name){return this.reflectionCapabilities.getter(name);}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'setter',value:function setter(name){return this.reflectionCapabilities.setter(name);}/**
+     * @param {?} name
+     * @return {?}
+     */},{key:'method',value:function method(name){return this.reflectionCapabilities.method(name);}/**
+     * @param {?} type
+     * @return {?}
+     */},{key:'importUri',value:function importUri(type){return this.reflectionCapabilities.importUri(type);}/**
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */},{key:'resolveIdentifier',value:function resolveIdentifier(name,moduleUrl,members,runtime){return this.reflectionCapabilities.resolveIdentifier(name,moduleUrl,members,runtime);}/**
+     * @param {?} identifier
+     * @param {?} name
+     * @return {?}
+     */},{key:'resolveEnum',value:function resolveEnum(identifier,name){return this.reflectionCapabilities.resolveEnum(identifier,name);}}]);return Reflector;}(ReflectorReader);/**
  * The {@link Reflector} used internally in Angular to access metadata
  * about symbols.
  */var/** @type {?} */reflector=new Reflector(new ReflectionCapabilities());/**
@@ -741,7 +1104,11 @@ return parentCtor||Object;}/**
      * @param {?} multiProvider
      */function ResolvedReflectiveProvider_(key,resolvedFactories,multiProvider){_classCallCheck(this,ResolvedReflectiveProvider_);this.key=key;this.resolvedFactories=resolvedFactories;this.multiProvider=multiProvider;}/**
      * @return {?}
-     */_createClass(ResolvedReflectiveProvider_,[{key:'resolvedFactory',get:function get(){return this.resolvedFactories[0];}}]);return ResolvedReflectiveProvider_;}();var ResolvedReflectiveFactory=/**
+     */_createClass(ResolvedReflectiveProvider_,[{key:'resolvedFactory',get:function get(){return this.resolvedFactories[0];}}]);return ResolvedReflectiveProvider_;}();/**
+ * An internal resolved representation of a factory function created by resolving {\@link
+ * Provider}.
+ * \@experimental
+ */var ResolvedReflectiveFactory=/**
      * @param {?} factory
      * @param {?} dependencies
      */function ResolvedReflectiveFactory(factory,dependencies){_classCallCheck(this,ResolvedReflectiveFactory);this.factory=factory;this.dependencies=dependencies;};/**
@@ -823,7 +1190,222 @@ var/** @type {?} */UNDEFINED=new Object();/**
  *
  * \@stable
  * @abstract
- */var ReflectiveInjector=function(){function ReflectiveInjector(){_classCallCheck(this,ReflectiveInjector);}_createClass(ReflectiveInjector,[{key:'parent',value:function parent(){}},{key:'resolveAndCreateChild',value:function resolveAndCreateChild(providers){}},{key:'createChildFromResolved',value:function createChildFromResolved(providers){}},{key:'resolveAndInstantiate',value:function resolveAndInstantiate(provider){}},{key:'instantiateResolved',value:function instantiateResolved(provider){}},{key:'get',value:function get(token,notFoundValue){}}],[{key:'resolve',value:function resolve(providers){return resolveReflectiveProviders(providers);}},{key:'resolveAndCreate',value:function resolveAndCreate(providers){var parent=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */ResolvedReflectiveProviders=ReflectiveInjector.resolve(providers);return ReflectiveInjector.fromResolvedProviders(ResolvedReflectiveProviders,parent);}},{key:'fromResolvedProviders',value:function fromResolvedProviders(providers){var parent=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return new ReflectiveInjector_(providers,parent);}}]);return ReflectiveInjector;}();var ReflectiveInjector_=function(){/**
+ */var ReflectiveInjector=function(){function ReflectiveInjector(){_classCallCheck(this,ReflectiveInjector);}_createClass(ReflectiveInjector,[{key:'parent',/**
+     * Parent of this injector.
+     *
+     * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
+     * -->
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
+     *
+     * ```typescript
+     * var parent = ReflectiveInjector.resolveAndCreate([]);
+     * var child = parent.resolveAndCreateChild([]);
+     * expect(child.parent).toBe(parent);
+     * ```
+     * @abstract
+     * @return {?}
+     */value:function parent(){}/**
+     * Resolves an array of providers and creates a child injector from those providers.
+     *
+     * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
+     * -->
+     *
+     * The passed-in providers can be an array of `Type`, {\@link Provider},
+     * or a recursive array of more providers.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/opB3T4?p=preview))
+     *
+     * ```typescript
+     * class ParentProvider {}
+     * class ChildProvider {}
+     *
+     * var parent = ReflectiveInjector.resolveAndCreate([ParentProvider]);
+     * var child = parent.resolveAndCreateChild([ChildProvider]);
+     *
+     * expect(child.get(ParentProvider) instanceof ParentProvider).toBe(true);
+     * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
+     * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
+     * ```
+     *
+     * This function is slower than the corresponding `createChildFromResolved`
+     * because it needs to resolve the passed-in providers first.
+     * See {\@link Injector#resolve} and {\@link Injector#createChildFromResolved}.
+     * @abstract
+     * @param {?} providers
+     * @return {?}
+     */},{key:'resolveAndCreateChild',value:function resolveAndCreateChild(providers){}/**
+     * Creates a child injector from previously resolved providers.
+     *
+     * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
+     * -->
+     *
+     * This API is the recommended way to construct injectors in performance-sensitive parts.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/VhyfjN?p=preview))
+     *
+     * ```typescript
+     * class ParentProvider {}
+     * class ChildProvider {}
+     *
+     * var parentProviders = ReflectiveInjector.resolve([ParentProvider]);
+     * var childProviders = ReflectiveInjector.resolve([ChildProvider]);
+     *
+     * var parent = ReflectiveInjector.fromResolvedProviders(parentProviders);
+     * var child = parent.createChildFromResolved(childProviders);
+     *
+     * expect(child.get(ParentProvider) instanceof ParentProvider).toBe(true);
+     * expect(child.get(ChildProvider) instanceof ChildProvider).toBe(true);
+     * expect(child.get(ParentProvider)).toBe(parent.get(ParentProvider));
+     * ```
+     * @abstract
+     * @param {?} providers
+     * @return {?}
+     */},{key:'createChildFromResolved',value:function createChildFromResolved(providers){}/**
+     * Resolves a provider and instantiates an object in the context of the injector.
+     *
+     * The created object does not get cached by the injector.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/yvVXoB?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var injector = ReflectiveInjector.resolveAndCreate([Engine]);
+     *
+     * var car = injector.resolveAndInstantiate(Car);
+     * expect(car.engine).toBe(injector.get(Engine));
+     * expect(car).not.toBe(injector.resolveAndInstantiate(Car));
+     * ```
+     * @abstract
+     * @param {?} provider
+     * @return {?}
+     */},{key:'resolveAndInstantiate',value:function resolveAndInstantiate(provider){}/**
+     * Instantiates an object using a resolved provider in the context of the injector.
+     *
+     * The created object does not get cached by the injector.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/ptCImQ?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var injector = ReflectiveInjector.resolveAndCreate([Engine]);
+     * var carProvider = ReflectiveInjector.resolve([Car])[0];
+     * var car = injector.instantiateResolved(carProvider);
+     * expect(car.engine).toBe(injector.get(Engine));
+     * expect(car).not.toBe(injector.instantiateResolved(carProvider));
+     * ```
+     * @abstract
+     * @param {?} provider
+     * @return {?}
+     */},{key:'instantiateResolved',value:function instantiateResolved(provider){}/**
+     * @abstract
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */},{key:'get',value:function get(token,notFoundValue){}}],[{key:'resolve',/**
+     * Turns an array of provider definitions into an array of resolved providers.
+     *
+     * A resolution is a process of flattening multiple nested arrays and converting individual
+     * providers into an array of {\@link ResolvedReflectiveProvider}s.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, [[Engine]]]);
+     *
+     * expect(providers.length).toEqual(2);
+     *
+     * expect(providers[0] instanceof ResolvedReflectiveProvider).toBe(true);
+     * expect(providers[0].key.displayName).toBe("Car");
+     * expect(providers[0].dependencies.length).toEqual(1);
+     * expect(providers[0].factory).toBeDefined();
+     *
+     * expect(providers[1].key.displayName).toBe("Engine");
+     * });
+     * ```
+     *
+     * See {\@link ReflectiveInjector#fromResolvedProviders} for more info.
+     * @param {?} providers
+     * @return {?}
+     */value:function resolve(providers){return resolveReflectiveProviders(providers);}/**
+     * Resolves an array of providers and creates an injector from those providers.
+     *
+     * The passed-in providers can be an array of `Type`, {\@link Provider},
+     * or a recursive array of more providers.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var injector = ReflectiveInjector.resolveAndCreate([Car, Engine]);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     *
+     * This function is slower than the corresponding `fromResolvedProviders`
+     * because it needs to resolve the passed-in providers first.
+     * See {\@link Injector#resolve} and {\@link Injector#fromResolvedProviders}.
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */},{key:'resolveAndCreate',value:function resolveAndCreate(providers){var parent=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */ResolvedReflectiveProviders=ReflectiveInjector.resolve(providers);return ReflectiveInjector.fromResolvedProviders(ResolvedReflectiveProviders,parent);}/**
+     * Creates an injector from previously resolved providers.
+     *
+     * This API is the recommended way to construct injectors in performance-sensitive parts.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/KrSMci?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, Engine]);
+     * var injector = ReflectiveInjector.fromResolvedProviders(providers);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     * \@experimental
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */},{key:'fromResolvedProviders',value:function fromResolvedProviders(providers){var parent=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return new ReflectiveInjector_(providers,parent);}}]);return ReflectiveInjector;}();var ReflectiveInjector_=function(){/**
      * Private
      * @param {?} _providers
      * @param {?=} _parent
@@ -831,13 +1413,101 @@ var/** @type {?} */UNDEFINED=new Object();/**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
-     */_createClass(ReflectiveInjector_,[{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:THROW_IF_NOT_FOUND;return this._getByKey(ReflectiveKey.get(token),null,notFoundValue);}},{key:'resolveAndCreateChild',value:function resolveAndCreateChild(providers){var/** @type {?} */ResolvedReflectiveProviders=ReflectiveInjector.resolve(providers);return this.createChildFromResolved(ResolvedReflectiveProviders);}},{key:'createChildFromResolved',value:function createChildFromResolved(providers){var/** @type {?} */inj=new ReflectiveInjector_(providers);inj._parent=this;return inj;}},{key:'resolveAndInstantiate',value:function resolveAndInstantiate(provider){return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);}},{key:'instantiateResolved',value:function instantiateResolved(provider){return this._instantiateProvider(provider);}},{key:'getProviderAtIndex',value:function getProviderAtIndex(index){if(index<0||index>=this._providers.length){throw outOfBoundsError(index);}return this._providers[index];}},{key:'_new',value:function _new(provider){if(this._constructionCounter++>this._getMaxNumberOfObjects()){throw cyclicDependencyError(this,provider.key);}return this._instantiateProvider(provider);}},{key:'_getMaxNumberOfObjects',value:function _getMaxNumberOfObjects(){return this.objs.length;}},{key:'_instantiateProvider',value:function _instantiateProvider(provider){if(provider.multiProvider){var/** @type {?} */res=new Array(provider.resolvedFactories.length);for(var/** @type {?} */i=0;i<provider.resolvedFactories.length;++i){res[i]=this._instantiate(provider,provider.resolvedFactories[i]);}return res;}else{return this._instantiate(provider,provider.resolvedFactories[0]);}}},{key:'_instantiate',value:function _instantiate(provider,ResolvedReflectiveFactory){var _this4=this;var/** @type {?} */factory=ResolvedReflectiveFactory.factory;var/** @type {?} */deps=void 0;try{deps=ResolvedReflectiveFactory.dependencies.map(function(dep){return _this4._getByReflectiveDependency(dep);});}catch(e){if(e.addKey){e.addKey(this,provider.key);}throw e;}var/** @type {?} */obj=void 0;try{obj=factory.apply(undefined,_toConsumableArray(deps));}catch(e){throw instantiationError(this,e,e.stack,provider.key);}return obj;}},{key:'_getByReflectiveDependency',value:function _getByReflectiveDependency(dep){return this._getByKey(dep.key,dep.visibility,dep.optional?null:THROW_IF_NOT_FOUND);}},{key:'_getByKey',value:function _getByKey(key,visibility,notFoundValue){if(key===INJECTOR_KEY){return this;}if(visibility instanceof Self){return this._getByKeySelf(key,notFoundValue);}else{return this._getByKeyDefault(key,notFoundValue,visibility);}}},{key:'_getObjByKeyId',value:function _getObjByKeyId(keyId){for(var/** @type {?} */i=0;i<this.keyIds.length;i++){if(this.keyIds[i]===keyId){if(this.objs[i]===UNDEFINED){this.objs[i]=this._new(this._providers[i]);}return this.objs[i];}}return UNDEFINED;}},{key:'_throwOrNull',value:function _throwOrNull(key,notFoundValue){if(notFoundValue!==THROW_IF_NOT_FOUND){return notFoundValue;}else{throw noProviderError(this,key);}}},{key:'_getByKeySelf',value:function _getByKeySelf(key,notFoundValue){var/** @type {?} */obj=this._getObjByKeyId(key.id);return obj!==UNDEFINED?obj:this._throwOrNull(key,notFoundValue);}},{key:'_getByKeyDefault',value:function _getByKeyDefault(key,notFoundValue,visibility){var/** @type {?} */inj=void 0;if(visibility instanceof SkipSelf){inj=this._parent;}else{inj=this;}while(inj instanceof ReflectiveInjector_){var/** @type {?} */inj_=inj;var/** @type {?} */obj=inj_._getObjByKeyId(key.id);if(obj!==UNDEFINED)return obj;inj=inj_._parent;}if(inj!==null){return inj.get(key.token,notFoundValue);}else{return this._throwOrNull(key,notFoundValue);}}},{key:'toString',value:function toString(){return this.displayName;}},{key:'parent',get:function get(){return this._parent;}},{key:'displayName',get:function get(){var/** @type {?} */providers=_mapProviders(this,function(b){return' "'+b.key.displayName+'" ';}).join(', ');return'ReflectiveInjector(providers: ['+providers+'])';}}]);return ReflectiveInjector_;}();var/** @type {?} */INJECTOR_KEY=ReflectiveKey.get(Injector);/**
+     */_createClass(ReflectiveInjector_,[{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:THROW_IF_NOT_FOUND;return this._getByKey(ReflectiveKey.get(token),null,notFoundValue);}/**
+     * @return {?}
+     */},{key:'resolveAndCreateChild',/**
+     * @param {?} providers
+     * @return {?}
+     */value:function resolveAndCreateChild(providers){var/** @type {?} */ResolvedReflectiveProviders=ReflectiveInjector.resolve(providers);return this.createChildFromResolved(ResolvedReflectiveProviders);}/**
+     * @param {?} providers
+     * @return {?}
+     */},{key:'createChildFromResolved',value:function createChildFromResolved(providers){var/** @type {?} */inj=new ReflectiveInjector_(providers);inj._parent=this;return inj;}/**
+     * @param {?} provider
+     * @return {?}
+     */},{key:'resolveAndInstantiate',value:function resolveAndInstantiate(provider){return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);}/**
+     * @param {?} provider
+     * @return {?}
+     */},{key:'instantiateResolved',value:function instantiateResolved(provider){return this._instantiateProvider(provider);}/**
+     * @param {?} index
+     * @return {?}
+     */},{key:'getProviderAtIndex',value:function getProviderAtIndex(index){if(index<0||index>=this._providers.length){throw outOfBoundsError(index);}return this._providers[index];}/**
+     * \@internal
+     * @param {?} provider
+     * @return {?}
+     */},{key:'_new',value:function _new(provider){if(this._constructionCounter++>this._getMaxNumberOfObjects()){throw cyclicDependencyError(this,provider.key);}return this._instantiateProvider(provider);}/**
+     * @return {?}
+     */},{key:'_getMaxNumberOfObjects',value:function _getMaxNumberOfObjects(){return this.objs.length;}/**
+     * @param {?} provider
+     * @return {?}
+     */},{key:'_instantiateProvider',value:function _instantiateProvider(provider){if(provider.multiProvider){var/** @type {?} */res=new Array(provider.resolvedFactories.length);for(var/** @type {?} */i=0;i<provider.resolvedFactories.length;++i){res[i]=this._instantiate(provider,provider.resolvedFactories[i]);}return res;}else{return this._instantiate(provider,provider.resolvedFactories[0]);}}/**
+     * @param {?} provider
+     * @param {?} ResolvedReflectiveFactory
+     * @return {?}
+     */},{key:'_instantiate',value:function _instantiate(provider,ResolvedReflectiveFactory){var _this4=this;var/** @type {?} */factory=ResolvedReflectiveFactory.factory;var/** @type {?} */deps=void 0;try{deps=ResolvedReflectiveFactory.dependencies.map(function(dep){return _this4._getByReflectiveDependency(dep);});}catch(e){if(e.addKey){e.addKey(this,provider.key);}throw e;}var/** @type {?} */obj=void 0;try{obj=factory.apply(undefined,_toConsumableArray(deps));}catch(e){throw instantiationError(this,e,e.stack,provider.key);}return obj;}/**
+     * @param {?} dep
+     * @return {?}
+     */},{key:'_getByReflectiveDependency',value:function _getByReflectiveDependency(dep){return this._getByKey(dep.key,dep.visibility,dep.optional?null:THROW_IF_NOT_FOUND);}/**
+     * @param {?} key
+     * @param {?} visibility
+     * @param {?} notFoundValue
+     * @return {?}
+     */},{key:'_getByKey',value:function _getByKey(key,visibility,notFoundValue){if(key===INJECTOR_KEY){return this;}if(visibility instanceof Self){return this._getByKeySelf(key,notFoundValue);}else{return this._getByKeyDefault(key,notFoundValue,visibility);}}/**
+     * @param {?} keyId
+     * @return {?}
+     */},{key:'_getObjByKeyId',value:function _getObjByKeyId(keyId){for(var/** @type {?} */i=0;i<this.keyIds.length;i++){if(this.keyIds[i]===keyId){if(this.objs[i]===UNDEFINED){this.objs[i]=this._new(this._providers[i]);}return this.objs[i];}}return UNDEFINED;}/**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @return {?}
+     */},{key:'_throwOrNull',value:function _throwOrNull(key,notFoundValue){if(notFoundValue!==THROW_IF_NOT_FOUND){return notFoundValue;}else{throw noProviderError(this,key);}}/**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @return {?}
+     */},{key:'_getByKeySelf',value:function _getByKeySelf(key,notFoundValue){var/** @type {?} */obj=this._getObjByKeyId(key.id);return obj!==UNDEFINED?obj:this._throwOrNull(key,notFoundValue);}/**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @param {?} visibility
+     * @return {?}
+     */},{key:'_getByKeyDefault',value:function _getByKeyDefault(key,notFoundValue,visibility){var/** @type {?} */inj=void 0;if(visibility instanceof SkipSelf){inj=this._parent;}else{inj=this;}while(inj instanceof ReflectiveInjector_){var/** @type {?} */inj_=inj;var/** @type {?} */obj=inj_._getObjByKeyId(key.id);if(obj!==UNDEFINED)return obj;inj=inj_._parent;}if(inj!==null){return inj.get(key.token,notFoundValue);}else{return this._throwOrNull(key,notFoundValue);}}/**
+     * @return {?}
+     */},{key:'toString',/**
+     * @return {?}
+     */value:function toString(){return this.displayName;}},{key:'parent',get:function get(){return this._parent;}},{key:'displayName',get:function get(){var/** @type {?} */providers=_mapProviders(this,function(b){return' "'+b.key.displayName+'" ';}).join(', ');return'ReflectiveInjector(providers: ['+providers+'])';}}]);return ReflectiveInjector_;}();var/** @type {?} */INJECTOR_KEY=ReflectiveKey.get(Injector);/**
  * @param {?} injector
  * @param {?} fn
  * @return {?}
  */function _mapProviders(injector,fn){var/** @type {?} */res=new Array(injector._providers.length);for(var/** @type {?} */i=0;i<injector._providers.length;++i){res[i]=fn(injector.getProviderAtIndex(i));}return res;}/**
  * Wraps Javascript Objects
- */var StringMapWrapper=function(){function StringMapWrapper(){_classCallCheck(this,StringMapWrapper);}_createClass(StringMapWrapper,null,[{key:'merge',value:function merge(m1,m2){var/** @type {?} */m={};var _iteratorNormalCompletion=true;var _didIteratorError=false;var _iteratorError=undefined;try{for(var _iterator=Object.keys(m1)[Symbol.iterator](),_step;!(_iteratorNormalCompletion=(_step=_iterator.next()).done);_iteratorNormalCompletion=true){var k=_step.value;m[k]=m1[k];}}catch(err){_didIteratorError=true;_iteratorError=err;}finally{try{if(!_iteratorNormalCompletion&&_iterator.return){_iterator.return();}}finally{if(_didIteratorError){throw _iteratorError;}}}var _iteratorNormalCompletion2=true;var _didIteratorError2=false;var _iteratorError2=undefined;try{for(var _iterator2=Object.keys(m2)[Symbol.iterator](),_step2;!(_iteratorNormalCompletion2=(_step2=_iterator2.next()).done);_iteratorNormalCompletion2=true){var _k=_step2.value;m[_k]=m2[_k];}}catch(err){_didIteratorError2=true;_iteratorError2=err;}finally{try{if(!_iteratorNormalCompletion2&&_iterator2.return){_iterator2.return();}}finally{if(_didIteratorError2){throw _iteratorError2;}}}return m;}},{key:'equals',value:function equals(m1,m2){var/** @type {?} */k1=Object.keys(m1);var/** @type {?} */k2=Object.keys(m2);if(k1.length!=k2.length){return false;}for(var/** @type {?} */i=0;i<k1.length;i++){var/** @type {?} */key=k1[i];if(m1[key]!==m2[key]){return false;}}return true;}}]);return StringMapWrapper;}();var ListWrapper=function(){function ListWrapper(){_classCallCheck(this,ListWrapper);}_createClass(ListWrapper,null,[{key:'findLast',value:function findLast(arr,condition){for(var/** @type {?} */i=arr.length-1;i>=0;i--){if(condition(arr[i])){return arr[i];}}return null;}},{key:'removeAll',value:function removeAll(list,items){for(var/** @type {?} */i=0;i<items.length;++i){var/** @type {?} */index=list.indexOf(items[i]);if(index>-1){list.splice(index,1);}}}},{key:'remove',value:function remove(list,el){var/** @type {?} */index=list.indexOf(el);if(index>-1){list.splice(index,1);return true;}return false;}},{key:'equals',value:function equals(a,b){if(a.length!=b.length)return false;for(var/** @type {?} */i=0;i<a.length;++i){if(a[i]!==b[i])return false;}return true;}},{key:'flatten',value:function flatten(list){return list.reduce(function(flat,item){var/** @type {?} */flatItem=Array.isArray(item)?ListWrapper.flatten(item):item;return flat.concat(flatItem);},[]);}}]);return ListWrapper;}();/**
+ */var StringMapWrapper=function(){function StringMapWrapper(){_classCallCheck(this,StringMapWrapper);}_createClass(StringMapWrapper,null,[{key:'merge',/**
+     * @param {?} m1
+     * @param {?} m2
+     * @return {?}
+     */value:function merge(m1,m2){var/** @type {?} */m={};var _iteratorNormalCompletion=true;var _didIteratorError=false;var _iteratorError=undefined;try{for(var _iterator=Object.keys(m1)[Symbol.iterator](),_step;!(_iteratorNormalCompletion=(_step=_iterator.next()).done);_iteratorNormalCompletion=true){var k=_step.value;m[k]=m1[k];}}catch(err){_didIteratorError=true;_iteratorError=err;}finally{try{if(!_iteratorNormalCompletion&&_iterator.return){_iterator.return();}}finally{if(_didIteratorError){throw _iteratorError;}}}var _iteratorNormalCompletion2=true;var _didIteratorError2=false;var _iteratorError2=undefined;try{for(var _iterator2=Object.keys(m2)[Symbol.iterator](),_step2;!(_iteratorNormalCompletion2=(_step2=_iterator2.next()).done);_iteratorNormalCompletion2=true){var _k=_step2.value;m[_k]=m2[_k];}}catch(err){_didIteratorError2=true;_iteratorError2=err;}finally{try{if(!_iteratorNormalCompletion2&&_iterator2.return){_iterator2.return();}}finally{if(_didIteratorError2){throw _iteratorError2;}}}return m;}/**
+     * @param {?} m1
+     * @param {?} m2
+     * @return {?}
+     */},{key:'equals',value:function equals(m1,m2){var/** @type {?} */k1=Object.keys(m1);var/** @type {?} */k2=Object.keys(m2);if(k1.length!=k2.length){return false;}for(var/** @type {?} */i=0;i<k1.length;i++){var/** @type {?} */key=k1[i];if(m1[key]!==m2[key]){return false;}}return true;}}]);return StringMapWrapper;}();var ListWrapper=function(){function ListWrapper(){_classCallCheck(this,ListWrapper);}_createClass(ListWrapper,null,[{key:'findLast',/**
+     * @param {?} arr
+     * @param {?} condition
+     * @return {?}
+     */value:function findLast(arr,condition){for(var/** @type {?} */i=arr.length-1;i>=0;i--){if(condition(arr[i])){return arr[i];}}return null;}/**
+     * @param {?} list
+     * @param {?} items
+     * @return {?}
+     */},{key:'removeAll',value:function removeAll(list,items){for(var/** @type {?} */i=0;i<items.length;++i){var/** @type {?} */index=list.indexOf(items[i]);if(index>-1){list.splice(index,1);}}}/**
+     * @param {?} list
+     * @param {?} el
+     * @return {?}
+     */},{key:'remove',value:function remove(list,el){var/** @type {?} */index=list.indexOf(el);if(index>-1){list.splice(index,1);return true;}return false;}/**
+     * @param {?} a
+     * @param {?} b
+     * @return {?}
+     */},{key:'equals',value:function equals(a,b){if(a.length!=b.length)return false;for(var/** @type {?} */i=0;i<a.length;++i){if(a[i]!==b[i])return false;}return true;}/**
+     * @param {?} list
+     * @return {?}
+     */},{key:'flatten',value:function flatten(list){return list.reduce(function(flat,item){var/** @type {?} */flatItem=Array.isArray(item)?ListWrapper.flatten(item):item;return flat.concat(flatItem);},[]);}}]);return ListWrapper;}();/**
  * @param {?} obj
  * @return {?}
  */function isListLikeIterable(obj){if(!isJsObject(obj))return false;return Array.isArray(obj)||!(obj instanceof Map)&&getSymbolIterator()in obj;// JS Iterable have a Symbol.iterator prop
@@ -860,7 +1530,7 @@ return!!obj&&typeof obj.then==='function';}/**
  * Determine if the argument is an Observable
  * @param {?} obj
  * @return {?}
- */function isObservable(obj){return!!(obj&&obj[_observable.$$observable]);}/**
+ */function isObservable(obj){return!!(obj&&obj[$$observable]);}/**
  * A function that will be executed when an application is initialized.
  * @experimental
  */var/** @type {?} */APP_INITIALIZER=new InjectionToken('Application Initializer');/**
@@ -871,7 +1541,9 @@ return!!obj&&typeof obj.then==='function';}/**
      * @param {?} appInits
      */function ApplicationInitStatus(appInits){var _this5=this;_classCallCheck(this,ApplicationInitStatus);this._done=false;var asyncInitPromises=[];if(appInits){for(var i=0;i<appInits.length;i++){var initResult=appInits[i]();if(isPromise(initResult)){asyncInitPromises.push(initResult);}}}this._donePromise=Promise.all(asyncInitPromises).then(function(){_this5._done=true;});if(asyncInitPromises.length===0){this._done=true;}}/**
      * @return {?}
-     */_createClass(ApplicationInitStatus,[{key:'done',get:function get(){return this._done;}},{key:'donePromise',get:function get(){return this._donePromise;}}]);return ApplicationInitStatus;}();ApplicationInitStatus.decorators=[{type:Injectable}];/** @nocollapse */ApplicationInitStatus.ctorParameters=function(){return[{type:Array,decorators:[{type:Inject,args:[APP_INITIALIZER]},{type:Optional}]}];};/**
+     */_createClass(ApplicationInitStatus,[{key:'done',get:function get(){return this._done;}/**
+     * @return {?}
+     */},{key:'donePromise',get:function get(){return this._donePromise;}}]);return ApplicationInitStatus;}();ApplicationInitStatus.decorators=[{type:Injectable}];/** @nocollapse */ApplicationInitStatus.ctorParameters=function(){return[{type:Array,decorators:[{type:Inject,args:[APP_INITIALIZER]},{type:Optional}]}];};/**
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
  * {@link ViewEncapsulation#Emulated} is being used.
@@ -900,7 +1572,13 @@ return!!obj&&typeof obj.then==='function';}/**
  */var/** @type {?} */APP_BOOTSTRAP_LISTENER=new InjectionToken('appBootstrapListener');/**
  * A token which indicates the root directory of the application
  * @experimental
- */var/** @type {?} */PACKAGE_ROOT_URL=new InjectionToken('Application Packages Root URL');var Console=function(){function Console(){_classCallCheck(this,Console);}_createClass(Console,[{key:'log',value:function log(message){print(message);}},{key:'warn',value:function warn(message){_warn(message);}}]);return Console;}();Console.decorators=[{type:Injectable}];/** @nocollapse */Console.ctorParameters=function(){return[];};/**
+ */var/** @type {?} */PACKAGE_ROOT_URL=new InjectionToken('Application Packages Root URL');var Console=function(){function Console(){_classCallCheck(this,Console);}_createClass(Console,[{key:'log',/**
+     * @param {?} message
+     * @return {?}
+     */value:function log(message){print(message);}/**
+     * @param {?} message
+     * @return {?}
+     */},{key:'warn',value:function warn(message){_warn(message);}}]);return Console;}();Console.decorators=[{type:Injectable}];/** @nocollapse */Console.ctorParameters=function(){return[];};/**
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * \@experimental
@@ -918,7 +1596,38 @@ return!!obj&&typeof obj.then==='function';}/**
  * that will use the directives/pipes of the ng module for compilation
  * of components.
  * \@stable
- */var Compiler=function(){function Compiler(){_classCallCheck(this,Compiler);}_createClass(Compiler,[{key:'compileModuleSync',value:function compileModuleSync(moduleType){throw _throwError();}},{key:'compileModuleAsync',value:function compileModuleAsync(moduleType){throw _throwError();}},{key:'compileModuleAndAllComponentsSync',value:function compileModuleAndAllComponentsSync(moduleType){throw _throwError();}},{key:'compileModuleAndAllComponentsAsync',value:function compileModuleAndAllComponentsAsync(moduleType){throw _throwError();}},{key:'getNgContentSelectors',value:function getNgContentSelectors(component){throw _throwError();}},{key:'clearCache',value:function clearCache(){}},{key:'clearCacheFor',value:function clearCacheFor(type){}}]);return Compiler;}();Compiler.decorators=[{type:Injectable}];/** @nocollapse */Compiler.ctorParameters=function(){return[];};/**
+ */var Compiler=function(){function Compiler(){_classCallCheck(this,Compiler);}_createClass(Compiler,[{key:'compileModuleSync',/**
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents` have to be inlined.
+     * @param {?} moduleType
+     * @return {?}
+     */value:function compileModuleSync(moduleType){throw _throwError();}/**
+     * Compiles the given NgModule and all of its components
+     * @param {?} moduleType
+     * @return {?}
+     */},{key:'compileModuleAsync',value:function compileModuleAsync(moduleType){throw _throwError();}/**
+     * Same as {\@link compileModuleSync} but also creates ComponentFactories for all components.
+     * @param {?} moduleType
+     * @return {?}
+     */},{key:'compileModuleAndAllComponentsSync',value:function compileModuleAndAllComponentsSync(moduleType){throw _throwError();}/**
+     * Same as {\@link compileModuleAsync} but also creates ComponentFactories for all components.
+     * @param {?} moduleType
+     * @return {?}
+     */},{key:'compileModuleAndAllComponentsAsync',value:function compileModuleAndAllComponentsAsync(moduleType){throw _throwError();}/**
+     * Exposes the CSS-style selectors that have been used in `ngContent` directives within
+     * the template of the given component.
+     * This is used by the `upgrade` library to compile the appropriate transclude content
+     * in the AngularJS wrapper component.
+     * @param {?} component
+     * @return {?}
+     */},{key:'getNgContentSelectors',value:function getNgContentSelectors(component){throw _throwError();}/**
+     * Clears all caches.
+     * @return {?}
+     */},{key:'clearCache',value:function clearCache(){}/**
+     * Clears the cache for the given component/ngModule.
+     * @param {?} type
+     * @return {?}
+     */},{key:'clearCacheFor',value:function clearCacheFor(type){}}]);return Compiler;}();Compiler.decorators=[{type:Injectable}];/** @nocollapse */Compiler.ctorParameters=function(){return[];};/**
  * Token to provide CompilerOptions in the platform injector.
  *
  * @experimental
@@ -927,27 +1636,230 @@ return!!obj&&typeof obj.then==='function';}/**
  *
  * \@experimental
  * @abstract
- */var CompilerFactory=function(){function CompilerFactory(){_classCallCheck(this,CompilerFactory);}_createClass(CompilerFactory,[{key:'createCompiler',value:function createCompiler(options){}}]);return CompilerFactory;}();var ElementRef=/**
+ */var CompilerFactory=function(){function CompilerFactory(){_classCallCheck(this,CompilerFactory);}_createClass(CompilerFactory,[{key:'createCompiler',/**
+     * @abstract
+     * @param {?=} options
+     * @return {?}
+     */value:function createCompiler(options){}}]);return CompilerFactory;}();var ElementRef=/**
      * @param {?} nativeElement
-     */function ElementRef(nativeElement){_classCallCheck(this,ElementRef);this.nativeElement=nativeElement;};var EventEmitter=function(_Subject){_inherits(EventEmitter,_Subject);/**
+     */function ElementRef(nativeElement){_classCallCheck(this,ElementRef);this.nativeElement=nativeElement;};/**
+ * Use by directives and components to emit custom Events.
+ *
+ * ### Examples
+ *
+ * In the following example, `Zippy` alternatively emits `open` and `close` events when its
+ * title gets clicked:
+ *
+ * ```
+ * \@Component({
+ *   selector: 'zippy',
+ *   template: `
+ *   <div class="zippy">
+ *     <div (click)="toggle()">Toggle</div>
+ *     <div [hidden]="!visible">
+ *       <ng-content></ng-content>
+ *     </div>
+ *  </div>`})
+ * export class Zippy {
+ *   visible: boolean = true;
+ *   \@Output() open: EventEmitter<any> = new EventEmitter();
+ *   \@Output() close: EventEmitter<any> = new EventEmitter();
+ *
+ *   toggle() {
+ *     this.visible = !this.visible;
+ *     if (this.visible) {
+ *       this.open.emit(null);
+ *     } else {
+ *       this.close.emit(null);
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * The events payload can be accessed by the parameter `$event` on the components output event
+ * handler:
+ *
+ * ```
+ * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
+ * ```
+ *
+ * Uses Rx.Observable but provides an adapter to make it work as specified here:
+ * https://github.com/jhusain/observable-spec
+ *
+ * Once a reference implementation of the spec is available, switch to it.
+ * \@stable
+ */var EventEmitter=function(_Subject){_inherits(EventEmitter,_Subject);/**
      * Creates an instance of [EventEmitter], which depending on [isAsync],
      * delivers events synchronously or asynchronously.
      * @param {?=} isAsync
      */function EventEmitter(){var isAsync=arguments.length>0&&arguments[0]!==undefined?arguments[0]:false;_classCallCheck(this,EventEmitter);var _this6=_possibleConstructorReturn(this,(EventEmitter.__proto__||Object.getPrototypeOf(EventEmitter)).call(this));_this6.__isAsync=isAsync;return _this6;}/**
      * @param {?=} value
      * @return {?}
-     */_createClass(EventEmitter,[{key:'emit',value:function emit(value){_get(EventEmitter.prototype.__proto__||Object.getPrototypeOf(EventEmitter.prototype),'next',this).call(this,value);}},{key:'subscribe',value:function subscribe(generatorOrNext,error,complete){var/** @type {?} */schedulerFn=void 0;var/** @type {?} */errorFn=function errorFn(err){return null;};var/** @type {?} */completeFn=function completeFn(){return null;};if(generatorOrNext&&(typeof generatorOrNext==='undefined'?'undefined':_typeof(generatorOrNext))==='object'){schedulerFn=this.__isAsync?function(value){setTimeout(function(){return generatorOrNext.next(value);});}:function(value){generatorOrNext.next(value);};if(generatorOrNext.error){errorFn=this.__isAsync?function(err){setTimeout(function(){return generatorOrNext.error(err);});}:function(err){generatorOrNext.error(err);};}if(generatorOrNext.complete){completeFn=this.__isAsync?function(){setTimeout(function(){return generatorOrNext.complete();});}:function(){generatorOrNext.complete();};}}else{schedulerFn=this.__isAsync?function(value){setTimeout(function(){return generatorOrNext(value);});}:function(value){generatorOrNext(value);};if(error){errorFn=this.__isAsync?function(err){setTimeout(function(){return error(err);});}:function(err){error(err);};}if(complete){completeFn=this.__isAsync?function(){setTimeout(function(){return complete();});}:function(){complete();};}}return _get(EventEmitter.prototype.__proto__||Object.getPrototypeOf(EventEmitter.prototype),'subscribe',this).call(this,schedulerFn,errorFn,completeFn);}}]);return EventEmitter;}(_Subject2.Subject);var NgZone=function(){/**
+     */_createClass(EventEmitter,[{key:'emit',value:function emit(value){_get(EventEmitter.prototype.__proto__||Object.getPrototypeOf(EventEmitter.prototype),'next',this).call(this,value);}/**
+     * @param {?=} generatorOrNext
+     * @param {?=} error
+     * @param {?=} complete
+     * @return {?}
+     */},{key:'subscribe',value:function subscribe(generatorOrNext,error,complete){var/** @type {?} */schedulerFn=void 0;var/** @type {?} */errorFn=function errorFn(err){return null;};var/** @type {?} */completeFn=function completeFn(){return null;};if(generatorOrNext&&(typeof generatorOrNext==='undefined'?'undefined':_typeof(generatorOrNext))==='object'){schedulerFn=this.__isAsync?function(value){setTimeout(function(){return generatorOrNext.next(value);});}:function(value){generatorOrNext.next(value);};if(generatorOrNext.error){errorFn=this.__isAsync?function(err){setTimeout(function(){return generatorOrNext.error(err);});}:function(err){generatorOrNext.error(err);};}if(generatorOrNext.complete){completeFn=this.__isAsync?function(){setTimeout(function(){return generatorOrNext.complete();});}:function(){generatorOrNext.complete();};}}else{schedulerFn=this.__isAsync?function(value){setTimeout(function(){return generatorOrNext(value);});}:function(value){generatorOrNext(value);};if(error){errorFn=this.__isAsync?function(err){setTimeout(function(){return error(err);});}:function(err){error(err);};}if(complete){completeFn=this.__isAsync?function(){setTimeout(function(){return complete();});}:function(){complete();};}}return _get(EventEmitter.prototype.__proto__||Object.getPrototypeOf(EventEmitter.prototype),'subscribe',this).call(this,schedulerFn,errorFn,completeFn);}}]);return EventEmitter;}(Subject);/**
+ * An injectable service for executing work inside or outside of the Angular zone.
+ *
+ * The most common use of this service is to optimize performance when starting a work consisting of
+ * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
+ * Angular. Such tasks can be kicked off via {\@link runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {\@link run}.
+ *
+ * <!-- TODO: add/fix links to:
+ *   - docs explaining zones and the use of zones in Angular and change-detection
+ *   - link to runOutsideAngular/run (throughout this file!)
+ *   -->
+ *
+ * ### Example
+ *
+ * ```
+ * import {Component, NgZone} from '\@angular/core';
+ * import {NgIf} from '\@angular/common';
+ *
+ * \@Component({
+ *   selector: 'ng-zone-demo'.
+ *   template: `
+ *     <h2>Demo: NgZone</h2>
+ *
+ *     <p>Progress: {{progress}}%</p>
+ *     <p *ngIf="progress >= 100">Done processing {{label}} of Angular zone!</p>
+ *
+ *     <button (click)="processWithinAngularZone()">Process within Angular zone</button>
+ *     <button (click)="processOutsideOfAngularZone()">Process outside of Angular zone</button>
+ *   `,
+ * })
+ * export class NgZoneDemo {
+ *   progress: number = 0;
+ *   label: string;
+ *
+ *   constructor(private _ngZone: NgZone) {}
+ *
+ *   // Loop inside the Angular zone
+ *   // so the UI DOES refresh after each setTimeout cycle
+ *   processWithinAngularZone() {
+ *     this.label = 'inside';
+ *     this.progress = 0;
+ *     this._increaseProgress(() => console.log('Inside Done!'));
+ *   }
+ *
+ *   // Loop outside of the Angular zone
+ *   // so the UI DOES NOT refresh after each setTimeout cycle
+ *   processOutsideOfAngularZone() {
+ *     this.label = 'outside';
+ *     this.progress = 0;
+ *     this._ngZone.runOutsideAngular(() => {
+ *       this._increaseProgress(() => {
+ *       // reenter the Angular zone and display done
+ *       this._ngZone.run(() => {console.log('Outside Done!') });
+ *     }}));
+ *   }
+ *
+ *   _increaseProgress(doneCallback: () => void) {
+ *     this.progress += 1;
+ *     console.log(`Current progress: ${this.progress}%`);
+ *
+ *     if (this.progress < 100) {
+ *       window.setTimeout(() => this._increaseProgress(doneCallback)), 10)
+ *     } else {
+ *       doneCallback();
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * \@experimental
+ */var NgZone=function(){/**
      * @param {?} __0
      */function NgZone(_ref2){var _ref2$enableLongStack=_ref2.enableLongStackTrace,enableLongStackTrace=_ref2$enableLongStack===undefined?false:_ref2$enableLongStack;_classCallCheck(this,NgZone);this._hasPendingMicrotasks=false;this._hasPendingMacrotasks=false;this._isStable=true;this._nesting=0;this._onUnstable=new EventEmitter(false);this._onMicrotaskEmpty=new EventEmitter(false);this._onStable=new EventEmitter(false);this._onErrorEvents=new EventEmitter(false);if(typeof Zone=='undefined'){throw new Error('Angular requires Zone.js prolyfill.');}Zone.assertZonePatched();this.outer=this.inner=Zone.current;if(Zone['wtfZoneSpec']){this.inner=this.inner.fork(Zone['wtfZoneSpec']);}if(enableLongStackTrace&&Zone['longStackTraceZoneSpec']){this.inner=this.inner.fork(Zone['longStackTraceZoneSpec']);}this.forkInnerZoneWithAngularBehavior();}/**
      * @return {?}
-     */_createClass(NgZone,[{key:'run',value:function run(fn){return this.inner.run(fn);}},{key:'runGuarded',value:function runGuarded(fn){return this.inner.runGuarded(fn);}},{key:'runOutsideAngular',value:function runOutsideAngular(fn){return this.outer.run(fn);}},{key:'checkStable',value:function checkStable(){var _this7=this;if(this._nesting==0&&!this._hasPendingMicrotasks&&!this._isStable){try{this._nesting++;this._onMicrotaskEmpty.emit(null);}finally{this._nesting--;if(!this._hasPendingMicrotasks){try{this.runOutsideAngular(function(){return _this7._onStable.emit(null);});}finally{this._isStable=true;}}}}}},{key:'forkInnerZoneWithAngularBehavior',value:function forkInnerZoneWithAngularBehavior(){var _this8=this;this.inner=this.inner.fork({name:'angular',properties:/** @type {?} */{'isAngularZone':true},onInvokeTask:function onInvokeTask(delegate,current,target,task,applyThis,applyArgs){try{_this8.onEnter();return delegate.invokeTask(target,task,applyThis,applyArgs);}finally{_this8.onLeave();}},onInvoke:function onInvoke(delegate,current,target,callback,applyThis,applyArgs,source){try{_this8.onEnter();return delegate.invoke(target,callback,applyThis,applyArgs,source);}finally{_this8.onLeave();}},onHasTask:function onHasTask(delegate,current,target,hasTaskState){delegate.hasTask(target,hasTaskState);if(current===target){// We are only interested in hasTask events which originate from our zone
+     */_createClass(NgZone,[{key:'run',/**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {\@link runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * @param {?} fn
+     * @return {?}
+     */value:function run(fn){return this.inner.run(fn);}/**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     * @param {?} fn
+     * @return {?}
+     */},{key:'runGuarded',value:function runGuarded(fn){return this.inner.runGuarded(fn);}/**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `runOutsideAngular` allows you to escape Angular's zone and do work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {\@link run} to reenter the Angular zone and do work that updates the application model.
+     * @param {?} fn
+     * @return {?}
+     */},{key:'runOutsideAngular',value:function runOutsideAngular(fn){return this.outer.run(fn);}/**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     * @return {?}
+     */},{key:'checkStable',/**
+     * @return {?}
+     */value:function checkStable(){var _this7=this;if(this._nesting==0&&!this._hasPendingMicrotasks&&!this._isStable){try{this._nesting++;this._onMicrotaskEmpty.emit(null);}finally{this._nesting--;if(!this._hasPendingMicrotasks){try{this.runOutsideAngular(function(){return _this7._onStable.emit(null);});}finally{this._isStable=true;}}}}}/**
+     * @return {?}
+     */},{key:'forkInnerZoneWithAngularBehavior',value:function forkInnerZoneWithAngularBehavior(){var _this8=this;this.inner=this.inner.fork({name:'angular',properties:/** @type {?} */{'isAngularZone':true},onInvokeTask:function onInvokeTask(delegate,current,target,task,applyThis,applyArgs){try{_this8.onEnter();return delegate.invokeTask(target,task,applyThis,applyArgs);}finally{_this8.onLeave();}},onInvoke:function onInvoke(delegate,current,target,callback,applyThis,applyArgs,source){try{_this8.onEnter();return delegate.invoke(target,callback,applyThis,applyArgs,source);}finally{_this8.onLeave();}},onHasTask:function onHasTask(delegate,current,target,hasTaskState){delegate.hasTask(target,hasTaskState);if(current===target){// We are only interested in hasTask events which originate from our zone
 // (A child hasTask event is not interesting to us)
-if(hasTaskState.change=='microTask'){_this8.setHasMicrotask(hasTaskState.microTask);}else if(hasTaskState.change=='macroTask'){_this8.setHasMacrotask(hasTaskState.macroTask);}}},onHandleError:function onHandleError(delegate,current,target,error){delegate.handleError(target,error);_this8.triggerError(error);return false;}});}},{key:'onEnter',value:function onEnter(){this._nesting++;if(this._isStable){this._isStable=false;this._onUnstable.emit(null);}}},{key:'onLeave',value:function onLeave(){this._nesting--;this.checkStable();}},{key:'setHasMicrotask',value:function setHasMicrotask(hasMicrotasks){this._hasPendingMicrotasks=hasMicrotasks;this.checkStable();}},{key:'setHasMacrotask',value:function setHasMacrotask(hasMacrotasks){this._hasPendingMacrotasks=hasMacrotasks;}},{key:'triggerError',value:function triggerError(error){this._onErrorEvents.emit(error);}},{key:'onUnstable',get:function get(){return this._onUnstable;}},{key:'onMicrotaskEmpty',get:function get(){return this._onMicrotaskEmpty;}},{key:'onStable',get:function get(){return this._onStable;}},{key:'onError',get:function get(){return this._onErrorEvents;}},{key:'isStable',get:function get(){return this._isStable;}},{key:'hasPendingMicrotasks',get:function get(){return this._hasPendingMicrotasks;}},{key:'hasPendingMacrotasks',get:function get(){return this._hasPendingMacrotasks;}}],[{key:'isInAngularZone',value:function isInAngularZone(){return Zone.current.get('isAngularZone')===true;}},{key:'assertInAngularZone',value:function assertInAngularZone(){if(!NgZone.isInAngularZone()){throw new Error('Expected to be in Angular Zone, but it is not!');}}},{key:'assertNotInAngularZone',value:function assertNotInAngularZone(){if(NgZone.isInAngularZone()){throw new Error('Expected to not be in Angular Zone, but it is!');}}}]);return NgZone;}();var AnimationQueue=function(){/**
+if(hasTaskState.change=='microTask'){_this8.setHasMicrotask(hasTaskState.microTask);}else if(hasTaskState.change=='macroTask'){_this8.setHasMacrotask(hasTaskState.macroTask);}}},onHandleError:function onHandleError(delegate,current,target,error){delegate.handleError(target,error);_this8.triggerError(error);return false;}});}/**
+     * @return {?}
+     */},{key:'onEnter',value:function onEnter(){this._nesting++;if(this._isStable){this._isStable=false;this._onUnstable.emit(null);}}/**
+     * @return {?}
+     */},{key:'onLeave',value:function onLeave(){this._nesting--;this.checkStable();}/**
+     * @param {?} hasMicrotasks
+     * @return {?}
+     */},{key:'setHasMicrotask',value:function setHasMicrotask(hasMicrotasks){this._hasPendingMicrotasks=hasMicrotasks;this.checkStable();}/**
+     * @param {?} hasMacrotasks
+     * @return {?}
+     */},{key:'setHasMacrotask',value:function setHasMacrotask(hasMacrotasks){this._hasPendingMacrotasks=hasMacrotasks;}/**
+     * @param {?} error
+     * @return {?}
+     */},{key:'triggerError',value:function triggerError(error){this._onErrorEvents.emit(error);}},{key:'onUnstable',get:function get(){return this._onUnstable;}/**
+     * Notifies when there is no more microtasks enqueue in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     * @return {?}
+     */},{key:'onMicrotaskEmpty',get:function get(){return this._onMicrotaskEmpty;}/**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     * @return {?}
+     */},{key:'onStable',get:function get(){return this._onStable;}/**
+     * Notify that an error has been delivered.
+     * @return {?}
+     */},{key:'onError',get:function get(){return this._onErrorEvents;}/**
+     * Whether there are no outstanding microtasks or macrotasks.
+     * @return {?}
+     */},{key:'isStable',get:function get(){return this._isStable;}/**
+     * @return {?}
+     */},{key:'hasPendingMicrotasks',get:function get(){return this._hasPendingMicrotasks;}/**
+     * @return {?}
+     */},{key:'hasPendingMacrotasks',get:function get(){return this._hasPendingMacrotasks;}}],[{key:'isInAngularZone',value:function isInAngularZone(){return Zone.current.get('isAngularZone')===true;}/**
+     * @return {?}
+     */},{key:'assertInAngularZone',value:function assertInAngularZone(){if(!NgZone.isInAngularZone()){throw new Error('Expected to be in Angular Zone, but it is not!');}}/**
+     * @return {?}
+     */},{key:'assertNotInAngularZone',value:function assertNotInAngularZone(){if(NgZone.isInAngularZone()){throw new Error('Expected to not be in Angular Zone, but it is!');}}}]);return NgZone;}();var AnimationQueue=function(){/**
      * @param {?} _zone
      */function AnimationQueue(_zone){_classCallCheck(this,AnimationQueue);this._zone=_zone;this.entries=[];}/**
      * @param {?} player
      * @return {?}
-     */_createClass(AnimationQueue,[{key:'enqueue',value:function enqueue(player){this.entries.push(player);}},{key:'flush',value:function flush(){var _this9=this;// given that each animation player may set aside
+     */_createClass(AnimationQueue,[{key:'enqueue',value:function enqueue(player){this.entries.push(player);}/**
+     * @return {?}
+     */},{key:'flush',value:function flush(){var _this9=this;// given that each animation player may set aside
 // microtasks and rely on DOM-based events, this
 // will cause Angular to run change detection after
 // each request. This sidesteps the issue. If a user
@@ -957,25 +1869,85 @@ if(hasTaskState.change=='microTask'){_this8.setHasMicrotask(hasTaskState.microTa
 if(this.entries.length){this._zone.runOutsideAngular(function(){// this code is wrapped into a single promise such that the
 // onStart and onDone player callbacks are triggered outside
 // of the digest cycle of animations
-Promise.resolve(null).then(function(){return _this9._triggerAnimations();});});}}},{key:'_triggerAnimations',value:function _triggerAnimations(){NgZone.assertNotInAngularZone();while(this.entries.length){var/** @type {?} */player=this.entries.shift();// in the event that an animation throws an error then we do
+Promise.resolve(null).then(function(){return _this9._triggerAnimations();});});}}/**
+     * @return {?}
+     */},{key:'_triggerAnimations',value:function _triggerAnimations(){NgZone.assertNotInAngularZone();while(this.entries.length){var/** @type {?} */player=this.entries.shift();// in the event that an animation throws an error then we do
 // not want to re-run animations on any previous animations
 // if they have already been kicked off beforehand
 if(!player.hasStarted()){player.play();}}}}]);return AnimationQueue;}();AnimationQueue.decorators=[{type:Injectable}];/** @nocollapse */AnimationQueue.ctorParameters=function(){return[{type:NgZone}];};var DefaultIterableDifferFactory=function(){function DefaultIterableDifferFactory(){_classCallCheck(this,DefaultIterableDifferFactory);}/**
      * @param {?} obj
      * @return {?}
-     */_createClass(DefaultIterableDifferFactory,[{key:'supports',value:function supports(obj){return isListLikeIterable(obj);}},{key:'create',value:function create(cdRefOrTrackBy,trackByFn){return new DefaultIterableDiffer(trackByFn||cdRefOrTrackBy);}}]);return DefaultIterableDifferFactory;}();var/** @type {?} */trackByIdentity=function trackByIdentity(index,item){return item;};/**
+     */_createClass(DefaultIterableDifferFactory,[{key:'supports',value:function supports(obj){return isListLikeIterable(obj);}/**
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cdRefOrTrackBy
+     * @param {?=} trackByFn
+     * @return {?}
+     */},{key:'create',value:function create(cdRefOrTrackBy,trackByFn){return new DefaultIterableDiffer(trackByFn||cdRefOrTrackBy);}}]);return DefaultIterableDifferFactory;}();var/** @type {?} */trackByIdentity=function trackByIdentity(index,item){return item;};/**
  * @deprecated v4.0.0 - Should not be part of public API.
  */var DefaultIterableDiffer=function(){/**
      * @param {?=} _trackByFn
      */function DefaultIterableDiffer(_trackByFn){_classCallCheck(this,DefaultIterableDiffer);this._trackByFn=_trackByFn;this._length=null;this._collection=null;this._linkedRecords=null;this._unlinkedRecords=null;this._previousItHead=null;this._itHead=null;this._itTail=null;this._additionsHead=null;this._additionsTail=null;this._movesHead=null;this._movesTail=null;this._removalsHead=null;this._removalsTail=null;this._identityChangesHead=null;this._identityChangesTail=null;this._trackByFn=this._trackByFn||trackByIdentity;}/**
      * @return {?}
-     */_createClass(DefaultIterableDiffer,[{key:'forEachItem',value:function forEachItem(fn){var/** @type {?} */record=void 0;for(record=this._itHead;record!==null;record=record._next){fn(record);}}},{key:'forEachOperation',value:function forEachOperation(fn){var/** @type {?} */nextIt=this._itHead;var/** @type {?} */nextRemove=this._removalsHead;var/** @type {?} */addRemoveOffset=0;var/** @type {?} */moveOffsets=null;while(nextIt||nextRemove){// Figure out which is the next record to process
+     */_createClass(DefaultIterableDiffer,[{key:'forEachItem',/**
+     * @param {?} fn
+     * @return {?}
+     */value:function forEachItem(fn){var/** @type {?} */record=void 0;for(record=this._itHead;record!==null;record=record._next){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachOperation',value:function forEachOperation(fn){var/** @type {?} */nextIt=this._itHead;var/** @type {?} */nextRemove=this._removalsHead;var/** @type {?} */addRemoveOffset=0;var/** @type {?} */moveOffsets=null;while(nextIt||nextRemove){// Figure out which is the next record to process
 // Order: remove, add, move
 var/** @type {?} */record=!nextRemove||nextIt&&nextIt.currentIndex<getPreviousIndex(nextRemove,addRemoveOffset,moveOffsets)?nextIt:nextRemove;var/** @type {?} */adjPreviousIndex=getPreviousIndex(record,addRemoveOffset,moveOffsets);var/** @type {?} */currentIndex=record.currentIndex;// consume the item, and adjust the addRemoveOffset and update moveDistance if necessary
 if(record===nextRemove){addRemoveOffset--;nextRemove=nextRemove._nextRemoved;}else{nextIt=nextIt._next;if(record.previousIndex==null){addRemoveOffset++;}else{// INVARIANT:  currentIndex < previousIndex
-if(!moveOffsets)moveOffsets=[];var/** @type {?} */localMovePreviousIndex=adjPreviousIndex-addRemoveOffset;var/** @type {?} */localCurrentIndex=currentIndex-addRemoveOffset;if(localMovePreviousIndex!=localCurrentIndex){for(var/** @type {?} */i=0;i<localMovePreviousIndex;i++){var/** @type {?} */offset=i<moveOffsets.length?moveOffsets[i]:moveOffsets[i]=0;var/** @type {?} */index=offset+i;if(localCurrentIndex<=index&&index<localMovePreviousIndex){moveOffsets[i]=offset+1;}}var/** @type {?} */previousIndex=record.previousIndex;moveOffsets[previousIndex]=localCurrentIndex-localMovePreviousIndex;}}}if(adjPreviousIndex!==currentIndex){fn(record,adjPreviousIndex,currentIndex);}}}},{key:'forEachPreviousItem',value:function forEachPreviousItem(fn){var/** @type {?} */record=void 0;for(record=this._previousItHead;record!==null;record=record._nextPrevious){fn(record);}}},{key:'forEachAddedItem',value:function forEachAddedItem(fn){var/** @type {?} */record=void 0;for(record=this._additionsHead;record!==null;record=record._nextAdded){fn(record);}}},{key:'forEachMovedItem',value:function forEachMovedItem(fn){var/** @type {?} */record=void 0;for(record=this._movesHead;record!==null;record=record._nextMoved){fn(record);}}},{key:'forEachRemovedItem',value:function forEachRemovedItem(fn){var/** @type {?} */record=void 0;for(record=this._removalsHead;record!==null;record=record._nextRemoved){fn(record);}}},{key:'forEachIdentityChange',value:function forEachIdentityChange(fn){var/** @type {?} */record=void 0;for(record=this._identityChangesHead;record!==null;record=record._nextIdentityChange){fn(record);}}},{key:'diff',value:function diff(collection){if(isBlank(collection))collection=[];if(!isListLikeIterable(collection)){throw new Error('Error trying to diff \''+collection+'\'');}if(this.check(collection)){return this;}else{return null;}}},{key:'onDestroy',value:function onDestroy(){}},{key:'check',value:function check(collection){var _this10=this;this._reset();var/** @type {?} */record=this._itHead;var/** @type {?} */mayBeDirty=false;var/** @type {?} */index=void 0;var/** @type {?} */item=void 0;var/** @type {?} */itemTrackBy=void 0;if(Array.isArray(collection)){this._length=collection.length;for(var/** @type {?} */_index2=0;_index2<this._length;_index2++){item=collection[_index2];itemTrackBy=this._trackByFn(_index2,item);if(record===null||!looseIdentical(record.trackById,itemTrackBy)){record=this._mismatch(record,item,itemTrackBy,_index2);mayBeDirty=true;}else{if(mayBeDirty){// TODO(misko): can we limit this to duplicates only?
+if(!moveOffsets)moveOffsets=[];var/** @type {?} */localMovePreviousIndex=adjPreviousIndex-addRemoveOffset;var/** @type {?} */localCurrentIndex=currentIndex-addRemoveOffset;if(localMovePreviousIndex!=localCurrentIndex){for(var/** @type {?} */i=0;i<localMovePreviousIndex;i++){var/** @type {?} */offset=i<moveOffsets.length?moveOffsets[i]:moveOffsets[i]=0;var/** @type {?} */index=offset+i;if(localCurrentIndex<=index&&index<localMovePreviousIndex){moveOffsets[i]=offset+1;}}var/** @type {?} */previousIndex=record.previousIndex;moveOffsets[previousIndex]=localCurrentIndex-localMovePreviousIndex;}}}if(adjPreviousIndex!==currentIndex){fn(record,adjPreviousIndex,currentIndex);}}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachPreviousItem',value:function forEachPreviousItem(fn){var/** @type {?} */record=void 0;for(record=this._previousItHead;record!==null;record=record._nextPrevious){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachAddedItem',value:function forEachAddedItem(fn){var/** @type {?} */record=void 0;for(record=this._additionsHead;record!==null;record=record._nextAdded){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachMovedItem',value:function forEachMovedItem(fn){var/** @type {?} */record=void 0;for(record=this._movesHead;record!==null;record=record._nextMoved){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachRemovedItem',value:function forEachRemovedItem(fn){var/** @type {?} */record=void 0;for(record=this._removalsHead;record!==null;record=record._nextRemoved){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachIdentityChange',value:function forEachIdentityChange(fn){var/** @type {?} */record=void 0;for(record=this._identityChangesHead;record!==null;record=record._nextIdentityChange){fn(record);}}/**
+     * @param {?} collection
+     * @return {?}
+     */},{key:'diff',value:function diff(collection){if(isBlank(collection))collection=[];if(!isListLikeIterable(collection)){throw new Error('Error trying to diff \''+collection+'\'');}if(this.check(collection)){return this;}else{return null;}}/**
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(){}/**
+     * @param {?} collection
+     * @return {?}
+     */},{key:'check',value:function check(collection){var _this10=this;this._reset();var/** @type {?} */record=this._itHead;var/** @type {?} */mayBeDirty=false;var/** @type {?} */index=void 0;var/** @type {?} */item=void 0;var/** @type {?} */itemTrackBy=void 0;if(Array.isArray(collection)){this._length=collection.length;for(var/** @type {?} */_index2=0;_index2<this._length;_index2++){item=collection[_index2];itemTrackBy=this._trackByFn(_index2,item);if(record===null||!looseIdentical(record.trackById,itemTrackBy)){record=this._mismatch(record,item,itemTrackBy,_index2);mayBeDirty=true;}else{if(mayBeDirty){// TODO(misko): can we limit this to duplicates only?
 record=this._verifyReinsertion(record,item,itemTrackBy,_index2);}if(!looseIdentical(record.item,item))this._addIdentityChange(record,item);}record=record._next;}}else{index=0;iterateListLike(collection,function(item){itemTrackBy=_this10._trackByFn(index,item);if(record===null||!looseIdentical(record.trackById,itemTrackBy)){record=_this10._mismatch(record,item,itemTrackBy,index);mayBeDirty=true;}else{if(mayBeDirty){// TODO(misko): can we limit this to duplicates only?
-record=_this10._verifyReinsertion(record,item,itemTrackBy,index);}if(!looseIdentical(record.item,item))_this10._addIdentityChange(record,item);}record=record._next;index++;});this._length=index;}this._truncate(record);this._collection=collection;return this.isDirty;}},{key:'_reset',value:function _reset(){if(this.isDirty){var/** @type {?} */record=void 0;var/** @type {?} */nextRecord=void 0;for(record=this._previousItHead=this._itHead;record!==null;record=record._next){record._nextPrevious=record._next;}for(record=this._additionsHead;record!==null;record=record._nextAdded){record.previousIndex=record.currentIndex;}this._additionsHead=this._additionsTail=null;for(record=this._movesHead;record!==null;record=nextRecord){record.previousIndex=record.currentIndex;nextRecord=record._nextMoved;}this._movesHead=this._movesTail=null;this._removalsHead=this._removalsTail=null;this._identityChangesHead=this._identityChangesTail=null;}}},{key:'_mismatch',value:function _mismatch(record,item,itemTrackBy,index){// The previous record after which we will append the current one.
+record=_this10._verifyReinsertion(record,item,itemTrackBy,index);}if(!looseIdentical(record.item,item))_this10._addIdentityChange(record,item);}record=record._next;index++;});this._length=index;}this._truncate(record);this._collection=collection;return this.isDirty;}/**
+     * @return {?}
+     */},{key:'_reset',/**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
+     * \@internal
+     * @return {?}
+     */value:function _reset(){if(this.isDirty){var/** @type {?} */record=void 0;var/** @type {?} */nextRecord=void 0;for(record=this._previousItHead=this._itHead;record!==null;record=record._next){record._nextPrevious=record._next;}for(record=this._additionsHead;record!==null;record=record._nextAdded){record.previousIndex=record.currentIndex;}this._additionsHead=this._additionsTail=null;for(record=this._movesHead;record!==null;record=nextRecord){record.previousIndex=record.currentIndex;nextRecord=record._nextMoved;}this._movesHead=this._movesTail=null;this._removalsHead=this._removalsTail=null;this._identityChangesHead=this._identityChangesTail=null;}}/**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */},{key:'_mismatch',value:function _mismatch(record,item,itemTrackBy,index){// The previous record after which we will append the current one.
 var/** @type {?} */previousRecord=void 0;if(record===null){previousRecord=this._itTail;}else{previousRecord=record._prev;// Remove the record from the collection since we know it does not match the item.
 this._remove(record);}// Attempt to see if we have seen the item before.
 record=this._linkedRecords===null?null:this._linkedRecords.get(itemTrackBy,index);if(record!==null){// We have seen this before, we need to move it forward in the collection.
@@ -984,34 +1956,124 @@ if(!looseIdentical(record.item,item))this._addIdentityChange(record,item);this._
 record=this._unlinkedRecords===null?null:this._unlinkedRecords.get(itemTrackBy);if(record!==null){// It is an item which we have evicted earlier: reinsert it back into the list.
 // But first we need to check if identity changed, so we can update in view if necessary
 if(!looseIdentical(record.item,item))this._addIdentityChange(record,item);this._reinsertAfter(record,previousRecord,index);}else{// It is a new item: add it.
-record=this._addAfter(new IterableChangeRecord_(item,itemTrackBy),previousRecord,index);}}return record;}},{key:'_verifyReinsertion',value:function _verifyReinsertion(record,item,itemTrackBy,index){var/** @type {?} */reinsertRecord=this._unlinkedRecords===null?null:this._unlinkedRecords.get(itemTrackBy);if(reinsertRecord!==null){record=this._reinsertAfter(reinsertRecord,record._prev,index);}else if(record.currentIndex!=index){record.currentIndex=index;this._addToMoves(record,index);}return record;}},{key:'_truncate',value:function _truncate(record){// Anything after that needs to be removed;
-while(record!==null){var/** @type {?} */nextRecord=record._next;this._addToRemovals(this._unlink(record));record=nextRecord;}if(this._unlinkedRecords!==null){this._unlinkedRecords.clear();}if(this._additionsTail!==null){this._additionsTail._nextAdded=null;}if(this._movesTail!==null){this._movesTail._nextMoved=null;}if(this._itTail!==null){this._itTail._next=null;}if(this._removalsTail!==null){this._removalsTail._nextRemoved=null;}if(this._identityChangesTail!==null){this._identityChangesTail._nextIdentityChange=null;}}},{key:'_reinsertAfter',value:function _reinsertAfter(record,prevRecord,index){if(this._unlinkedRecords!==null){this._unlinkedRecords.remove(record);}var/** @type {?} */prev=record._prevRemoved;var/** @type {?} */next=record._nextRemoved;if(prev===null){this._removalsHead=next;}else{prev._nextRemoved=next;}if(next===null){this._removalsTail=prev;}else{next._prevRemoved=prev;}this._insertAfter(record,prevRecord,index);this._addToMoves(record,index);return record;}},{key:'_moveAfter',value:function _moveAfter(record,prevRecord,index){this._unlink(record);this._insertAfter(record,prevRecord,index);this._addToMoves(record,index);return record;}},{key:'_addAfter',value:function _addAfter(record,prevRecord,index){this._insertAfter(record,prevRecord,index);if(this._additionsTail===null){// todo(vicb)
+record=this._addAfter(new IterableChangeRecord_(item,itemTrackBy),previousRecord,index);}}return record;}/**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */},{key:'_verifyReinsertion',value:function _verifyReinsertion(record,item,itemTrackBy,index){var/** @type {?} */reinsertRecord=this._unlinkedRecords===null?null:this._unlinkedRecords.get(itemTrackBy);if(reinsertRecord!==null){record=this._reinsertAfter(reinsertRecord,record._prev,index);}else if(record.currentIndex!=index){record.currentIndex=index;this._addToMoves(record,index);}return record;}/**
+     * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {\@link IterableChangeRecord_}.
+     *
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */},{key:'_truncate',value:function _truncate(record){// Anything after that needs to be removed;
+while(record!==null){var/** @type {?} */nextRecord=record._next;this._addToRemovals(this._unlink(record));record=nextRecord;}if(this._unlinkedRecords!==null){this._unlinkedRecords.clear();}if(this._additionsTail!==null){this._additionsTail._nextAdded=null;}if(this._movesTail!==null){this._movesTail._nextMoved=null;}if(this._itTail!==null){this._itTail._next=null;}if(this._removalsTail!==null){this._removalsTail._nextRemoved=null;}if(this._identityChangesTail!==null){this._identityChangesTail._nextIdentityChange=null;}}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */},{key:'_reinsertAfter',value:function _reinsertAfter(record,prevRecord,index){if(this._unlinkedRecords!==null){this._unlinkedRecords.remove(record);}var/** @type {?} */prev=record._prevRemoved;var/** @type {?} */next=record._nextRemoved;if(prev===null){this._removalsHead=next;}else{prev._nextRemoved=next;}if(next===null){this._removalsTail=prev;}else{next._prevRemoved=prev;}this._insertAfter(record,prevRecord,index);this._addToMoves(record,index);return record;}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */},{key:'_moveAfter',value:function _moveAfter(record,prevRecord,index){this._unlink(record);this._insertAfter(record,prevRecord,index);this._addToMoves(record,index);return record;}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */},{key:'_addAfter',value:function _addAfter(record,prevRecord,index){this._insertAfter(record,prevRecord,index);if(this._additionsTail===null){// todo(vicb)
 // assert(this._additionsHead === null);
 this._additionsTail=this._additionsHead=record;}else{// todo(vicb)
 // assert(_additionsTail._nextAdded === null);
 // assert(record._nextAdded === null);
-this._additionsTail=this._additionsTail._nextAdded=record;}return record;}},{key:'_insertAfter',value:function _insertAfter(record,prevRecord,index){// todo(vicb)
+this._additionsTail=this._additionsTail._nextAdded=record;}return record;}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */},{key:'_insertAfter',value:function _insertAfter(record,prevRecord,index){// todo(vicb)
 // assert(record != prevRecord);
 // assert(record._next === null);
 // assert(record._prev === null);
 var/** @type {?} */next=prevRecord===null?this._itHead:prevRecord._next;// todo(vicb)
 // assert(next != record);
 // assert(prevRecord != record);
-record._next=next;record._prev=prevRecord;if(next===null){this._itTail=record;}else{next._prev=record;}if(prevRecord===null){this._itHead=record;}else{prevRecord._next=record;}if(this._linkedRecords===null){this._linkedRecords=new _DuplicateMap();}this._linkedRecords.put(record);record.currentIndex=index;return record;}},{key:'_remove',value:function _remove(record){return this._addToRemovals(this._unlink(record));}},{key:'_unlink',value:function _unlink(record){if(this._linkedRecords!==null){this._linkedRecords.remove(record);}var/** @type {?} */prev=record._prev;var/** @type {?} */next=record._next;// todo(vicb)
+record._next=next;record._prev=prevRecord;if(next===null){this._itTail=record;}else{next._prev=record;}if(prevRecord===null){this._itHead=record;}else{prevRecord._next=record;}if(this._linkedRecords===null){this._linkedRecords=new _DuplicateMap();}this._linkedRecords.put(record);record.currentIndex=index;return record;}/**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */},{key:'_remove',value:function _remove(record){return this._addToRemovals(this._unlink(record));}/**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */},{key:'_unlink',value:function _unlink(record){if(this._linkedRecords!==null){this._linkedRecords.remove(record);}var/** @type {?} */prev=record._prev;var/** @type {?} */next=record._next;// todo(vicb)
 // assert((record._prev = null) === null);
 // assert((record._next = null) === null);
-if(prev===null){this._itHead=next;}else{prev._next=next;}if(next===null){this._itTail=prev;}else{next._prev=prev;}return record;}},{key:'_addToMoves',value:function _addToMoves(record,toIndex){// todo(vicb)
+if(prev===null){this._itHead=next;}else{prev._next=next;}if(next===null){this._itTail=prev;}else{next._prev=prev;}return record;}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} toIndex
+     * @return {?}
+     */},{key:'_addToMoves',value:function _addToMoves(record,toIndex){// todo(vicb)
 // assert(record._nextMoved === null);
 if(record.previousIndex===toIndex){return record;}if(this._movesTail===null){// todo(vicb)
 // assert(_movesHead === null);
 this._movesTail=this._movesHead=record;}else{// todo(vicb)
 // assert(_movesTail._nextMoved === null);
-this._movesTail=this._movesTail._nextMoved=record;}return record;}},{key:'_addToRemovals',value:function _addToRemovals(record){if(this._unlinkedRecords===null){this._unlinkedRecords=new _DuplicateMap();}this._unlinkedRecords.put(record);record.currentIndex=null;record._nextRemoved=null;if(this._removalsTail===null){// todo(vicb)
+this._movesTail=this._movesTail._nextMoved=record;}return record;}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_addToRemovals',value:function _addToRemovals(record){if(this._unlinkedRecords===null){this._unlinkedRecords=new _DuplicateMap();}this._unlinkedRecords.put(record);record.currentIndex=null;record._nextRemoved=null;if(this._removalsTail===null){// todo(vicb)
 // assert(_removalsHead === null);
 this._removalsTail=this._removalsHead=record;record._prevRemoved=null;}else{// todo(vicb)
 // assert(_removalsTail._nextRemoved === null);
 // assert(record._nextRemoved === null);
-record._prevRemoved=this._removalsTail;this._removalsTail=this._removalsTail._nextRemoved=record;}return record;}},{key:'_addIdentityChange',value:function _addIdentityChange(record,item){record.item=item;if(this._identityChangesTail===null){this._identityChangesTail=this._identityChangesHead=record;}else{this._identityChangesTail=this._identityChangesTail._nextIdentityChange=record;}return record;}},{key:'toString',value:function toString(){var/** @type {?} */list=[];this.forEachItem(function(record){return list.push(record);});var/** @type {?} */previous=[];this.forEachPreviousItem(function(record){return previous.push(record);});var/** @type {?} */additions=[];this.forEachAddedItem(function(record){return additions.push(record);});var/** @type {?} */moves=[];this.forEachMovedItem(function(record){return moves.push(record);});var/** @type {?} */removals=[];this.forEachRemovedItem(function(record){return removals.push(record);});var/** @type {?} */identityChanges=[];this.forEachIdentityChange(function(record){return identityChanges.push(record);});return'collection: '+list.join(', ')+'\n'+'previous: '+previous.join(', ')+'\n'+'additions: '+additions.join(', ')+'\n'+'moves: '+moves.join(', ')+'\n'+'removals: '+removals.join(', ')+'\n'+'identityChanges: '+identityChanges.join(', ')+'\n';}},{key:'collection',get:function get(){return this._collection;}},{key:'length',get:function get(){return this._length;}},{key:'isDirty',get:function get(){return this._additionsHead!==null||this._movesHead!==null||this._removalsHead!==null||this._identityChangesHead!==null;}}]);return DefaultIterableDiffer;}();var IterableChangeRecord_=function(){/**
+record._prevRemoved=this._removalsTail;this._removalsTail=this._removalsTail._nextRemoved=record;}return record;}/**
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @return {?}
+     */},{key:'_addIdentityChange',value:function _addIdentityChange(record,item){record.item=item;if(this._identityChangesTail===null){this._identityChangesTail=this._identityChangesHead=record;}else{this._identityChangesTail=this._identityChangesTail._nextIdentityChange=record;}return record;}/**
+     * @return {?}
+     */},{key:'toString',value:function toString(){var/** @type {?} */list=[];this.forEachItem(function(record){return list.push(record);});var/** @type {?} */previous=[];this.forEachPreviousItem(function(record){return previous.push(record);});var/** @type {?} */additions=[];this.forEachAddedItem(function(record){return additions.push(record);});var/** @type {?} */moves=[];this.forEachMovedItem(function(record){return moves.push(record);});var/** @type {?} */removals=[];this.forEachRemovedItem(function(record){return removals.push(record);});var/** @type {?} */identityChanges=[];this.forEachIdentityChange(function(record){return identityChanges.push(record);});return'collection: '+list.join(', ')+'\n'+'previous: '+previous.join(', ')+'\n'+'additions: '+additions.join(', ')+'\n'+'moves: '+moves.join(', ')+'\n'+'removals: '+removals.join(', ')+'\n'+'identityChanges: '+identityChanges.join(', ')+'\n';}},{key:'collection',get:function get(){return this._collection;}/**
+     * @return {?}
+     */},{key:'length',get:function get(){return this._length;}},{key:'isDirty',get:function get(){return this._additionsHead!==null||this._movesHead!==null||this._removalsHead!==null||this._identityChangesHead!==null;}}]);return DefaultIterableDiffer;}();/**
+ * \@stable
+ */var IterableChangeRecord_=function(){/**
      * @param {?} item
      * @param {?} trackById
      */function IterableChangeRecord_(item,trackById){_classCallCheck(this,IterableChangeRecord_);this.item=item;this.trackById=trackById;this.currentIndex=null;this.previousIndex=null;/** @internal */this._nextPrevious=null;/** @internal */this._prev=null;/** @internal */this._next=null;/** @internal */this._prevDup=null;/** @internal */this._nextDup=null;/** @internal */this._prevRemoved=null;/** @internal */this._nextRemoved=null;/** @internal */this._nextAdded=null;/** @internal */this._nextMoved=null;/** @internal */this._nextIdentityChange=null;}/**
@@ -1025,7 +2087,17 @@ record._prevRemoved=this._removalsTail;this._removalsTail=this._removalsTail._ne
      */_createClass(_DuplicateItemRecordList,[{key:'add',value:function add(record){if(this._head===null){this._head=this._tail=record;record._nextDup=null;record._prevDup=null;}else{// todo(vicb)
 // assert(record.item ==  _head.item ||
 //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
-this._tail._nextDup=record;record._prevDup=this._tail;record._nextDup=null;this._tail=record;}}},{key:'get',value:function get(trackById,afterIndex){var/** @type {?} */record=void 0;for(record=this._head;record!==null;record=record._nextDup){if((afterIndex===null||afterIndex<record.currentIndex)&&looseIdentical(record.trackById,trackById)){return record;}}return null;}},{key:'remove',value:function remove(record){// todo(vicb)
+this._tail._nextDup=record;record._prevDup=this._tail;record._nextDup=null;this._tail=record;}}/**
+     * @param {?} trackById
+     * @param {?} afterIndex
+     * @return {?}
+     */},{key:'get',value:function get(trackById,afterIndex){var/** @type {?} */record=void 0;for(record=this._head;record!==null;record=record._nextDup){if((afterIndex===null||afterIndex<record.currentIndex)&&looseIdentical(record.trackById,trackById)){return record;}}return null;}/**
+     * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     * @param {?} record
+     * @return {?}
+     */},{key:'remove',value:function remove(record){// todo(vicb)
 // assert(() {
 //  // verify that the record being removed is in the list.
 //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {
@@ -1036,8 +2108,29 @@ this._tail._nextDup=record;record._prevDup=this._tail;record._nextDup=null;this.
 var/** @type {?} */prev=record._prevDup;var/** @type {?} */next=record._nextDup;if(prev===null){this._head=next;}else{prev._nextDup=next;}if(next===null){this._tail=prev;}else{next._prevDup=prev;}return this._head===null;}}]);return _DuplicateItemRecordList;}();var _DuplicateMap=function(){function _DuplicateMap(){_classCallCheck(this,_DuplicateMap);this.map=new Map();}/**
      * @param {?} record
      * @return {?}
-     */_createClass(_DuplicateMap,[{key:'put',value:function put(record){var/** @type {?} */key=record.trackById;var/** @type {?} */duplicates=this.map.get(key);if(!duplicates){duplicates=new _DuplicateItemRecordList();this.map.set(key,duplicates);}duplicates.add(record);}},{key:'get',value:function get(trackById){var afterIndex=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */key=trackById;var/** @type {?} */recordList=this.map.get(key);return recordList?recordList.get(trackById,afterIndex):null;}},{key:'remove',value:function remove(record){var/** @type {?} */key=record.trackById;var/** @type {?} */recordList=this.map.get(key);// Remove the list of duplicates when it gets empty
-if(recordList.remove(record)){this.map.delete(key);}return record;}},{key:'clear',value:function clear(){this.map.clear();}},{key:'toString',value:function toString(){return'_DuplicateMap('+stringify(this.map)+')';}},{key:'isEmpty',get:function get(){return this.map.size===0;}}]);return _DuplicateMap;}();/**
+     */_createClass(_DuplicateMap,[{key:'put',value:function put(record){var/** @type {?} */key=record.trackById;var/** @type {?} */duplicates=this.map.get(key);if(!duplicates){duplicates=new _DuplicateItemRecordList();this.map.set(key,duplicates);}duplicates.add(record);}/**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the afterIndex to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the last `a` not the first or second.
+     * @param {?} trackById
+     * @param {?=} afterIndex
+     * @return {?}
+     */},{key:'get',value:function get(trackById){var afterIndex=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */key=trackById;var/** @type {?} */recordList=this.map.get(key);return recordList?recordList.get(trackById,afterIndex):null;}/**
+     * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     * @param {?} record
+     * @return {?}
+     */},{key:'remove',value:function remove(record){var/** @type {?} */key=record.trackById;var/** @type {?} */recordList=this.map.get(key);// Remove the list of duplicates when it gets empty
+if(recordList.remove(record)){this.map.delete(key);}return record;}/**
+     * @return {?}
+     */},{key:'clear',/**
+     * @return {?}
+     */value:function clear(){this.map.clear();}/**
+     * @return {?}
+     */},{key:'toString',value:function toString(){return'_DuplicateMap('+stringify(this.map)+')';}},{key:'isEmpty',get:function get(){return this.map.size===0;}}]);return _DuplicateMap;}();/**
  * @param {?} item
  * @param {?} addRemoveOffset
  * @param {?} moveOffsets
@@ -1045,30 +2138,148 @@ if(recordList.remove(record)){this.map.delete(key);}return record;}},{key:'clear
  */function getPreviousIndex(item,addRemoveOffset,moveOffsets){var/** @type {?} */previousIndex=item.previousIndex;if(previousIndex===null)return previousIndex;var/** @type {?} */moveOffset=0;if(moveOffsets&&previousIndex<moveOffsets.length){moveOffset=moveOffsets[previousIndex];}return previousIndex+addRemoveOffset+moveOffset;}var DefaultKeyValueDifferFactory=function(){function DefaultKeyValueDifferFactory(){_classCallCheck(this,DefaultKeyValueDifferFactory);}/**
      * @param {?} obj
      * @return {?}
-     */_createClass(DefaultKeyValueDifferFactory,[{key:'supports',value:function supports(obj){return obj instanceof Map||isJsObject(obj);}},{key:'create',value:function create(cd){return new DefaultKeyValueDiffer();}}]);return DefaultKeyValueDifferFactory;}();var DefaultKeyValueDiffer=function(){function DefaultKeyValueDiffer(){_classCallCheck(this,DefaultKeyValueDiffer);this._records=new Map();this._mapHead=null;this._previousMapHead=null;this._changesHead=null;this._changesTail=null;this._additionsHead=null;this._additionsTail=null;this._removalsHead=null;this._removalsTail=null;}/**
+     */_createClass(DefaultKeyValueDifferFactory,[{key:'supports',value:function supports(obj){return obj instanceof Map||isJsObject(obj);}/**
+     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @param {?=} cd
      * @return {?}
-     */_createClass(DefaultKeyValueDiffer,[{key:'forEachItem',value:function forEachItem(fn){var/** @type {?} */record=void 0;for(record=this._mapHead;record!==null;record=record._next){fn(record);}}},{key:'forEachPreviousItem',value:function forEachPreviousItem(fn){var/** @type {?} */record=void 0;for(record=this._previousMapHead;record!==null;record=record._nextPrevious){fn(record);}}},{key:'forEachChangedItem',value:function forEachChangedItem(fn){var/** @type {?} */record=void 0;for(record=this._changesHead;record!==null;record=record._nextChanged){fn(record);}}},{key:'forEachAddedItem',value:function forEachAddedItem(fn){var/** @type {?} */record=void 0;for(record=this._additionsHead;record!==null;record=record._nextAdded){fn(record);}}},{key:'forEachRemovedItem',value:function forEachRemovedItem(fn){var/** @type {?} */record=void 0;for(record=this._removalsHead;record!==null;record=record._nextRemoved){fn(record);}}},{key:'diff',value:function diff(map){if(!map){map=new Map();}else if(!(map instanceof Map||isJsObject(map))){throw new Error('Error trying to diff \''+map+'\'');}return this.check(map)?this:null;}},{key:'onDestroy',value:function onDestroy(){}},{key:'check',value:function check(map){var _this11=this;this._reset();var/** @type {?} */records=this._records;var/** @type {?} */oldSeqRecord=this._mapHead;var/** @type {?} */lastOldSeqRecord=null;var/** @type {?} */lastNewSeqRecord=null;var/** @type {?} */seqChanged=false;this._forEach(map,function(value,key){var/** @type {?} */newSeqRecord=void 0;if(oldSeqRecord&&key===oldSeqRecord.key){newSeqRecord=oldSeqRecord;_this11._maybeAddToChanges(newSeqRecord,value);}else{seqChanged=true;if(oldSeqRecord!==null){_this11._removeFromSeq(lastOldSeqRecord,oldSeqRecord);_this11._addToRemovals(oldSeqRecord);}if(records.has(key)){newSeqRecord=records.get(key);_this11._maybeAddToChanges(newSeqRecord,value);}else{newSeqRecord=new KeyValueChangeRecord_(key);records.set(key,newSeqRecord);newSeqRecord.currentValue=value;_this11._addToAdditions(newSeqRecord);}}if(seqChanged){if(_this11._isInRemovals(newSeqRecord)){_this11._removeFromRemovals(newSeqRecord);}if(lastNewSeqRecord==null){_this11._mapHead=newSeqRecord;}else{lastNewSeqRecord._next=newSeqRecord;}}lastOldSeqRecord=oldSeqRecord;lastNewSeqRecord=newSeqRecord;oldSeqRecord=oldSeqRecord&&oldSeqRecord._next;});this._truncate(lastOldSeqRecord,oldSeqRecord);return this.isDirty;}},{key:'_reset',value:function _reset(){if(this.isDirty){var/** @type {?} */record=void 0;// Record the state of the mapping
-for(record=this._previousMapHead=this._mapHead;record!==null;record=record._next){record._nextPrevious=record._next;}for(record=this._changesHead;record!==null;record=record._nextChanged){record.previousValue=record.currentValue;}for(record=this._additionsHead;record!=null;record=record._nextAdded){record.previousValue=record.currentValue;}this._changesHead=this._changesTail=null;this._additionsHead=this._additionsTail=null;this._removalsHead=this._removalsTail=null;}}},{key:'_truncate',value:function _truncate(lastRecord,record){while(record!==null){if(lastRecord===null){this._mapHead=null;}else{lastRecord._next=null;}var/** @type {?} */nextRecord=record._next;this._addToRemovals(record);lastRecord=record;record=nextRecord;}for(var/** @type {?} */rec=this._removalsHead;rec!==null;rec=rec._nextRemoved){rec.previousValue=rec.currentValue;rec.currentValue=null;this._records.delete(rec.key);}}},{key:'_maybeAddToChanges',value:function _maybeAddToChanges(record,newValue){if(!looseIdentical(newValue,record.currentValue)){record.previousValue=record.currentValue;record.currentValue=newValue;this._addToChanges(record);}}},{key:'_isInRemovals',value:function _isInRemovals(record){return record===this._removalsHead||record._nextRemoved!==null||record._prevRemoved!==null;}},{key:'_addToRemovals',value:function _addToRemovals(record){if(this._removalsHead===null){this._removalsHead=this._removalsTail=record;}else{this._removalsTail._nextRemoved=record;record._prevRemoved=this._removalsTail;this._removalsTail=record;}}},{key:'_removeFromSeq',value:function _removeFromSeq(prev,record){var/** @type {?} */next=record._next;if(prev===null){this._mapHead=next;}else{prev._next=next;}record._next=null;}},{key:'_removeFromRemovals',value:function _removeFromRemovals(record){var/** @type {?} */prev=record._prevRemoved;var/** @type {?} */next=record._nextRemoved;if(prev===null){this._removalsHead=next;}else{prev._nextRemoved=next;}if(next===null){this._removalsTail=prev;}else{next._prevRemoved=prev;}record._prevRemoved=record._nextRemoved=null;}},{key:'_addToAdditions',value:function _addToAdditions(record){if(this._additionsHead===null){this._additionsHead=this._additionsTail=record;}else{this._additionsTail._nextAdded=record;this._additionsTail=record;}}},{key:'_addToChanges',value:function _addToChanges(record){if(this._changesHead===null){this._changesHead=this._changesTail=record;}else{this._changesTail._nextChanged=record;this._changesTail=record;}}},{key:'toString',value:function toString(){var/** @type {?} */items=[];var/** @type {?} */previous=[];var/** @type {?} */changes=[];var/** @type {?} */additions=[];var/** @type {?} */removals=[];var/** @type {?} */record=void 0;for(record=this._mapHead;record!==null;record=record._next){items.push(stringify(record));}for(record=this._previousMapHead;record!==null;record=record._nextPrevious){previous.push(stringify(record));}for(record=this._changesHead;record!==null;record=record._nextChanged){changes.push(stringify(record));}for(record=this._additionsHead;record!==null;record=record._nextAdded){additions.push(stringify(record));}for(record=this._removalsHead;record!==null;record=record._nextRemoved){removals.push(stringify(record));}return'map: '+items.join(', ')+'\n'+'previous: '+previous.join(', ')+'\n'+'additions: '+additions.join(', ')+'\n'+'changes: '+changes.join(', ')+'\n'+'removals: '+removals.join(', ')+'\n';}},{key:'_forEach',value:function _forEach(obj,fn){if(obj instanceof Map){obj.forEach(fn);}else{Object.keys(obj).forEach(function(k){return fn(obj[k],k);});}}},{key:'isDirty',get:function get(){return this._additionsHead!==null||this._changesHead!==null||this._removalsHead!==null;}}]);return DefaultKeyValueDiffer;}();var KeyValueChangeRecord_=function(){/**
+     */},{key:'create',value:function create(cd){return new DefaultKeyValueDiffer();}}]);return DefaultKeyValueDifferFactory;}();var DefaultKeyValueDiffer=function(){function DefaultKeyValueDiffer(){_classCallCheck(this,DefaultKeyValueDiffer);this._records=new Map();this._mapHead=null;this._previousMapHead=null;this._changesHead=null;this._changesTail=null;this._additionsHead=null;this._additionsTail=null;this._removalsHead=null;this._removalsTail=null;}/**
+     * @return {?}
+     */_createClass(DefaultKeyValueDiffer,[{key:'forEachItem',/**
+     * @param {?} fn
+     * @return {?}
+     */value:function forEachItem(fn){var/** @type {?} */record=void 0;for(record=this._mapHead;record!==null;record=record._next){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachPreviousItem',value:function forEachPreviousItem(fn){var/** @type {?} */record=void 0;for(record=this._previousMapHead;record!==null;record=record._nextPrevious){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachChangedItem',value:function forEachChangedItem(fn){var/** @type {?} */record=void 0;for(record=this._changesHead;record!==null;record=record._nextChanged){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachAddedItem',value:function forEachAddedItem(fn){var/** @type {?} */record=void 0;for(record=this._additionsHead;record!==null;record=record._nextAdded){fn(record);}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEachRemovedItem',value:function forEachRemovedItem(fn){var/** @type {?} */record=void 0;for(record=this._removalsHead;record!==null;record=record._nextRemoved){fn(record);}}/**
+     * @param {?} map
+     * @return {?}
+     */},{key:'diff',value:function diff(map){if(!map){map=new Map();}else if(!(map instanceof Map||isJsObject(map))){throw new Error('Error trying to diff \''+map+'\'');}return this.check(map)?this:null;}/**
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(){}/**
+     * @param {?} map
+     * @return {?}
+     */},{key:'check',value:function check(map){var _this11=this;this._reset();var/** @type {?} */records=this._records;var/** @type {?} */oldSeqRecord=this._mapHead;var/** @type {?} */lastOldSeqRecord=null;var/** @type {?} */lastNewSeqRecord=null;var/** @type {?} */seqChanged=false;this._forEach(map,function(value,key){var/** @type {?} */newSeqRecord=void 0;if(oldSeqRecord&&key===oldSeqRecord.key){newSeqRecord=oldSeqRecord;_this11._maybeAddToChanges(newSeqRecord,value);}else{seqChanged=true;if(oldSeqRecord!==null){_this11._removeFromSeq(lastOldSeqRecord,oldSeqRecord);_this11._addToRemovals(oldSeqRecord);}if(records.has(key)){newSeqRecord=records.get(key);_this11._maybeAddToChanges(newSeqRecord,value);}else{newSeqRecord=new KeyValueChangeRecord_(key);records.set(key,newSeqRecord);newSeqRecord.currentValue=value;_this11._addToAdditions(newSeqRecord);}}if(seqChanged){if(_this11._isInRemovals(newSeqRecord)){_this11._removeFromRemovals(newSeqRecord);}if(lastNewSeqRecord==null){_this11._mapHead=newSeqRecord;}else{lastNewSeqRecord._next=newSeqRecord;}}lastOldSeqRecord=oldSeqRecord;lastNewSeqRecord=newSeqRecord;oldSeqRecord=oldSeqRecord&&oldSeqRecord._next;});this._truncate(lastOldSeqRecord,oldSeqRecord);return this.isDirty;}/**
+     * \@internal
+     * @return {?}
+     */},{key:'_reset',value:function _reset(){if(this.isDirty){var/** @type {?} */record=void 0;// Record the state of the mapping
+for(record=this._previousMapHead=this._mapHead;record!==null;record=record._next){record._nextPrevious=record._next;}for(record=this._changesHead;record!==null;record=record._nextChanged){record.previousValue=record.currentValue;}for(record=this._additionsHead;record!=null;record=record._nextAdded){record.previousValue=record.currentValue;}this._changesHead=this._changesTail=null;this._additionsHead=this._additionsTail=null;this._removalsHead=this._removalsTail=null;}}/**
+     * @param {?} lastRecord
+     * @param {?} record
+     * @return {?}
+     */},{key:'_truncate',value:function _truncate(lastRecord,record){while(record!==null){if(lastRecord===null){this._mapHead=null;}else{lastRecord._next=null;}var/** @type {?} */nextRecord=record._next;this._addToRemovals(record);lastRecord=record;record=nextRecord;}for(var/** @type {?} */rec=this._removalsHead;rec!==null;rec=rec._nextRemoved){rec.previousValue=rec.currentValue;rec.currentValue=null;this._records.delete(rec.key);}}/**
+     * @param {?} record
+     * @param {?} newValue
+     * @return {?}
+     */},{key:'_maybeAddToChanges',value:function _maybeAddToChanges(record,newValue){if(!looseIdentical(newValue,record.currentValue)){record.previousValue=record.currentValue;record.currentValue=newValue;this._addToChanges(record);}}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_isInRemovals',value:function _isInRemovals(record){return record===this._removalsHead||record._nextRemoved!==null||record._prevRemoved!==null;}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_addToRemovals',value:function _addToRemovals(record){if(this._removalsHead===null){this._removalsHead=this._removalsTail=record;}else{this._removalsTail._nextRemoved=record;record._prevRemoved=this._removalsTail;this._removalsTail=record;}}/**
+     * @param {?} prev
+     * @param {?} record
+     * @return {?}
+     */},{key:'_removeFromSeq',value:function _removeFromSeq(prev,record){var/** @type {?} */next=record._next;if(prev===null){this._mapHead=next;}else{prev._next=next;}record._next=null;}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_removeFromRemovals',value:function _removeFromRemovals(record){var/** @type {?} */prev=record._prevRemoved;var/** @type {?} */next=record._nextRemoved;if(prev===null){this._removalsHead=next;}else{prev._nextRemoved=next;}if(next===null){this._removalsTail=prev;}else{next._prevRemoved=prev;}record._prevRemoved=record._nextRemoved=null;}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_addToAdditions',value:function _addToAdditions(record){if(this._additionsHead===null){this._additionsHead=this._additionsTail=record;}else{this._additionsTail._nextAdded=record;this._additionsTail=record;}}/**
+     * @param {?} record
+     * @return {?}
+     */},{key:'_addToChanges',value:function _addToChanges(record){if(this._changesHead===null){this._changesHead=this._changesTail=record;}else{this._changesTail._nextChanged=record;this._changesTail=record;}}/**
+     * @return {?}
+     */},{key:'toString',value:function toString(){var/** @type {?} */items=[];var/** @type {?} */previous=[];var/** @type {?} */changes=[];var/** @type {?} */additions=[];var/** @type {?} */removals=[];var/** @type {?} */record=void 0;for(record=this._mapHead;record!==null;record=record._next){items.push(stringify(record));}for(record=this._previousMapHead;record!==null;record=record._nextPrevious){previous.push(stringify(record));}for(record=this._changesHead;record!==null;record=record._nextChanged){changes.push(stringify(record));}for(record=this._additionsHead;record!==null;record=record._nextAdded){additions.push(stringify(record));}for(record=this._removalsHead;record!==null;record=record._nextRemoved){removals.push(stringify(record));}return'map: '+items.join(', ')+'\n'+'previous: '+previous.join(', ')+'\n'+'additions: '+additions.join(', ')+'\n'+'changes: '+changes.join(', ')+'\n'+'removals: '+removals.join(', ')+'\n';}/**
+     * \@internal
+     * @param {?} obj
+     * @param {?} fn
+     * @return {?}
+     */},{key:'_forEach',value:function _forEach(obj,fn){if(obj instanceof Map){obj.forEach(fn);}else{Object.keys(obj).forEach(function(k){return fn(obj[k],k);});}}},{key:'isDirty',get:function get(){return this._additionsHead!==null||this._changesHead!==null||this._removalsHead!==null;}}]);return DefaultKeyValueDiffer;}();/**
+ * \@stable
+ */var KeyValueChangeRecord_=function(){/**
      * @param {?} key
      */function KeyValueChangeRecord_(key){_classCallCheck(this,KeyValueChangeRecord_);this.key=key;this.previousValue=null;this.currentValue=null;/** @internal */this._nextPrevious=null;/** @internal */this._next=null;/** @internal */this._nextAdded=null;/** @internal */this._nextRemoved=null;/** @internal */this._prevRemoved=null;/** @internal */this._nextChanged=null;}/**
      * @return {?}
-     */_createClass(KeyValueChangeRecord_,[{key:'toString',value:function toString(){return looseIdentical(this.previousValue,this.currentValue)?stringify(this.key):stringify(this.key)+'['+stringify(this.previousValue)+'->'+stringify(this.currentValue)+']';}}]);return KeyValueChangeRecord_;}();var IterableDiffers=function(){/**
+     */_createClass(KeyValueChangeRecord_,[{key:'toString',value:function toString(){return looseIdentical(this.previousValue,this.currentValue)?stringify(this.key):stringify(this.key)+'['+stringify(this.previousValue)+'->'+stringify(this.currentValue)+']';}}]);return KeyValueChangeRecord_;}();/**
+ * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
+ * \@stable
+ */var IterableDiffers=function(){/**
      * @param {?} factories
      */function IterableDiffers(factories){_classCallCheck(this,IterableDiffers);this.factories=factories;}/**
      * @param {?} factories
      * @param {?=} parent
      * @return {?}
-     */_createClass(IterableDiffers,[{key:'find',value:function find(iterable){var/** @type {?} */factory=this.factories.find(function(f){return f.supports(iterable);});if(isPresent(factory)){return factory;}else{throw new Error('Cannot find a differ supporting object \''+iterable+'\' of type \''+getTypeNameForDebugging(iterable)+'\'');}}}],[{key:'create',value:function create(factories,parent){if(isPresent(parent)){var/** @type {?} */copied=parent.factories.slice();factories=factories.concat(copied);return new IterableDiffers(factories);}else{return new IterableDiffers(factories);}}},{key:'extend',value:function extend(factories){return{provide:IterableDiffers,useFactory:function useFactory(parent){if(!parent){// Typically would occur when calling IterableDiffers.extend inside of dependencies passed
+     */_createClass(IterableDiffers,[{key:'find',/**
+     * @param {?} iterable
+     * @return {?}
+     */value:function find(iterable){var/** @type {?} */factory=this.factories.find(function(f){return f.supports(iterable);});if(isPresent(factory)){return factory;}else{throw new Error('Cannot find a differ supporting object \''+iterable+'\' of type \''+getTypeNameForDebugging(iterable)+'\'');}}}],[{key:'create',value:function create(factories,parent){if(isPresent(parent)){var/** @type {?} */copied=parent.factories.slice();factories=factories.concat(copied);return new IterableDiffers(factories);}else{return new IterableDiffers(factories);}}/**
+     * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {\@link IterableDiffers} instance with the provided factories and return a new
+     * {\@link IterableDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link IterableDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     * @param {?} factories
+     * @return {?}
+     */},{key:'extend',value:function extend(factories){return{provide:IterableDiffers,useFactory:function useFactory(parent){if(!parent){// Typically would occur when calling IterableDiffers.extend inside of dependencies passed
 // to
 // bootstrap(), which would override default pipes instead of extending them.
 throw new Error('Cannot extend IterableDiffers without a parent injector');}return IterableDiffers.create(factories,parent);},// Dependency technically isn't optional, but we can provide a better error message this way.
-deps:[[IterableDiffers,new SkipSelf(),new Optional()]]};}}]);return IterableDiffers;}();var KeyValueDiffers=function(){/**
+deps:[[IterableDiffers,new SkipSelf(),new Optional()]]};}}]);return IterableDiffers;}();/**
+ * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
+ * \@stable
+ */var KeyValueDiffers=function(){/**
      * @param {?} factories
      */function KeyValueDiffers(factories){_classCallCheck(this,KeyValueDiffers);this.factories=factories;}/**
      * @param {?} factories
      * @param {?=} parent
      * @return {?}
-     */_createClass(KeyValueDiffers,[{key:'find',value:function find(kv){var/** @type {?} */factory=this.factories.find(function(f){return f.supports(kv);});if(factory){return factory;}throw new Error('Cannot find a differ supporting object \''+kv+'\'');}}],[{key:'create',value:function create(factories,parent){if(parent){var/** @type {?} */copied=parent.factories.slice();factories=factories.concat(copied);}return new KeyValueDiffers(factories);}},{key:'extend',value:function extend(factories){return{provide:KeyValueDiffers,useFactory:function useFactory(parent){if(!parent){// Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
+     */_createClass(KeyValueDiffers,[{key:'find',/**
+     * @param {?} kv
+     * @return {?}
+     */value:function find(kv){var/** @type {?} */factory=this.factories.find(function(f){return f.supports(kv);});if(factory){return factory;}throw new Error('Cannot find a differ supporting object \''+kv+'\'');}}],[{key:'create',value:function create(factories,parent){if(parent){var/** @type {?} */copied=parent.factories.slice();factories=factories.concat(copied);}return new KeyValueDiffers(factories);}/**
+     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
+     * {\@link KeyValueDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     * @param {?} factories
+     * @return {?}
+     */},{key:'extend',value:function extend(factories){return{provide:KeyValueDiffers,useFactory:function useFactory(parent){if(!parent){// Typically would occur when calling KeyValueDiffers.extend inside of dependencies passed
 // to bootstrap(), which would override default pipes instead of extending them.
 throw new Error('Cannot extend KeyValueDiffers without a parent injector');}return KeyValueDiffers.create(factories,parent);},// Dependency technically isn't optional, but we can provide a better error message this way.
 deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiffers;}();/**
@@ -1098,17 +2309,203 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      */function WrappedValue(wrapped){_classCallCheck(this,WrappedValue);this.wrapped=wrapped;}/**
      * @param {?} value
      * @return {?}
-     */_createClass(WrappedValue,null,[{key:'wrap',value:function wrap(value){return new WrappedValue(value);}}]);return WrappedValue;}();var ValueUnwrapper=function(){function ValueUnwrapper(){_classCallCheck(this,ValueUnwrapper);this.hasWrappedValue=false;}/**
+     */_createClass(WrappedValue,null,[{key:'wrap',value:function wrap(value){return new WrappedValue(value);}}]);return WrappedValue;}();/**
+ * Helper class for unwrapping WrappedValue s
+ */var ValueUnwrapper=function(){function ValueUnwrapper(){_classCallCheck(this,ValueUnwrapper);this.hasWrappedValue=false;}/**
      * @param {?} value
      * @return {?}
-     */_createClass(ValueUnwrapper,[{key:'unwrap',value:function unwrap(value){if(value instanceof WrappedValue){this.hasWrappedValue=true;return value.wrapped;}return value;}},{key:'reset',value:function reset(){this.hasWrappedValue=false;}}]);return ValueUnwrapper;}();var SimpleChange=function(){/**
+     */_createClass(ValueUnwrapper,[{key:'unwrap',value:function unwrap(value){if(value instanceof WrappedValue){this.hasWrappedValue=true;return value.wrapped;}return value;}/**
+     * @return {?}
+     */},{key:'reset',value:function reset(){this.hasWrappedValue=false;}}]);return ValueUnwrapper;}();/**
+ * Represents a basic change from a previous to a new value.
+ * \@stable
+ */var SimpleChange=function(){/**
      * @param {?} previousValue
      * @param {?} currentValue
      * @param {?} firstChange
      */function SimpleChange(previousValue,currentValue,firstChange){_classCallCheck(this,SimpleChange);this.previousValue=previousValue;this.currentValue=currentValue;this.firstChange=firstChange;}/**
      * Check whether the new value is the first value assigned.
      * @return {?}
-     */_createClass(SimpleChange,[{key:'isFirstChange',value:function isFirstChange(){return this.firstChange;}}]);return SimpleChange;}();var ChangeDetectorRef=function(){function ChangeDetectorRef(){_classCallCheck(this,ChangeDetectorRef);}_createClass(ChangeDetectorRef,[{key:'markForCheck',value:function markForCheck(){}},{key:'detach',value:function detach(){}},{key:'detectChanges',value:function detectChanges(){}},{key:'checkNoChanges',value:function checkNoChanges(){}},{key:'reattach',value:function reattach(){}}]);return ChangeDetectorRef;}();/**
+     */_createClass(SimpleChange,[{key:'isFirstChange',value:function isFirstChange(){return this.firstChange;}}]);return SimpleChange;}();/**
+ * \@stable
+ * @abstract
+ */var ChangeDetectorRef=function(){function ChangeDetectorRef(){_classCallCheck(this,ChangeDetectorRef);}_createClass(ChangeDetectorRef,[{key:'markForCheck',/**
+     * Marks all {\@link ChangeDetectionStrategy#OnPush} ancestors as to be checked.
+     *
+     * <!-- TODO: Add a link to a chapter on OnPush components -->
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/GC512b?p=preview))
+     *
+     * ```typescript
+     * \@Component({
+     *   selector: 'cmp',
+     *   changeDetection: ChangeDetectionStrategy.OnPush,
+     *   template: `Number of ticks: {{numberOfTicks}}`
+     * })
+     * class Cmp {
+     *   numberOfTicks = 0;
+     *
+     *   constructor(ref: ChangeDetectorRef) {
+     *     setInterval(() => {
+     *       this.numberOfTicks ++
+     *       // the following is required, otherwise the view will not be updated
+     *       this.ref.markForCheck();
+     *     }, 1000);
+     *   }
+     * }
+     *
+     * \@Component({
+     *   selector: 'app',
+     *   changeDetection: ChangeDetectionStrategy.OnPush,
+     *   template: `
+     *     <cmp><cmp>
+     *   `,
+     * })
+     * class App {
+     * }
+     * ```
+     * @abstract
+     * @return {?}
+     */value:function markForCheck(){}/**
+     * Detaches the change detector from the change detector tree.
+     *
+     * The detached change detector will not be checked until it is reattached.
+     *
+     * This can also be used in combination with {\@link ChangeDetectorRef#detectChanges} to implement
+     * local change
+     * detection checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds. We can do that by detaching
+     * the component's change detector and doing a local check every five seconds.
+     *
+     * ```typescript
+     * class DataProvider {
+     *   // in a real application the returned data will be different every time
+     *   get data() {
+     *     return [1,2,3,4,5];
+     *   }
+     * }
+     *
+     * \@Component({
+     *   selector: 'giant-list',
+     *   template: `
+     *     <li *ngFor="let d of dataProvider.data">Data {{d}}</lig>
+     *   `,
+     * })
+     * class GiantList {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider:DataProvider) {
+     *     ref.detach();
+     *     setInterval(() => {
+     *       this.ref.detectChanges();
+     *     }, 5000);
+     *   }
+     * }
+     *
+     * \@Component({
+     *   selector: 'app',
+     *   providers: [DataProvider],
+     *   template: `
+     *     <giant-list><giant-list>
+     *   `,
+     * })
+     * class App {
+     * }
+     * ```
+     * @abstract
+     * @return {?}
+     */},{key:'detach',value:function detach(){}/**
+     * Checks the change detector and its children.
+     *
+     * This can also be used in combination with {\@link ChangeDetectorRef#detach} to implement local
+     * change detection
+     * checks.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
+     *
+     * ### Example
+     *
+     * The following example defines a component with a large list of readonly data.
+     * Imagine, the data changes constantly, many times per second. For performance reasons,
+     * we want to check and update the list every five seconds.
+     *
+     * We can do that by detaching the component's change detector and doing a local change detection
+     * check
+     * every five seconds.
+     *
+     * See {\@link ChangeDetectorRef#detach} for more information.
+     * @abstract
+     * @return {?}
+     */},{key:'detectChanges',value:function detectChanges(){}/**
+     * Checks the change detector and its children, and throws if any changes are detected.
+     *
+     * This is used in development mode to verify that running change detection doesn't introduce
+     * other changes.
+     * @abstract
+     * @return {?}
+     */},{key:'checkNoChanges',value:function checkNoChanges(){}/**
+     * Reattach the change detector to the change detector tree.
+     *
+     * This also marks OnPush ancestors as to be checked. This reattached change detector will be
+     * checked during the next change detection run.
+     *
+     * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/aUhZha?p=preview))
+     *
+     * The following example creates a component displaying `live` data. The component will detach
+     * its change detector from the main change detector tree when the component's live property
+     * is set to false.
+     *
+     * ```typescript
+     * class DataProvider {
+     *   data = 1;
+     *
+     *   constructor() {
+     *     setInterval(() => {
+     *       this.data = this.data * 2;
+     *     }, 500);
+     *   }
+     * }
+     *
+     * \@Component({
+     *   selector: 'live-data',
+     *   inputs: ['live'],
+     *   template: 'Data: {{dataProvider.data}}'
+     * })
+     * class LiveData {
+     *   constructor(private ref: ChangeDetectorRef, private dataProvider:DataProvider) {}
+     *
+     *   set live(value) {
+     *     if (value)
+     *       this.ref.reattach();
+     *     else
+     *       this.ref.detach();
+     *   }
+     * }
+     *
+     * \@Component({
+     *   selector: 'app',
+     *   providers: [DataProvider],
+     *   template: `
+     *     Live Update: <input type="checkbox" [(ngModel)]="live">
+     *     <live-data [live]="live"><live-data>
+     *   `,
+     * })
+     * class App {
+     *   live = true;
+     * }
+     * ```
+     * @abstract
+     * @return {?}
+     */},{key:'reattach',value:function reattach(){}}]);return ChangeDetectorRef;}();/**
  * Structural diffing for `Object`s and `Map`s.
  */var/** @type {?} */keyValDiff=[new DefaultKeyValueDifferFactory()];/**
  * Structural diffing for `Iterable` types such as `Array`s.
@@ -1125,12 +2522,281 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      * @param {?} encapsulation
      * @param {?} styles
      * @param {?} animations
-     */function RenderComponentType(id,templateUrl,slotCount,encapsulation,styles,animations){_classCallCheck(this,RenderComponentType);this.id=id;this.templateUrl=templateUrl;this.slotCount=slotCount;this.encapsulation=encapsulation;this.styles=styles;this.animations=animations;};var RenderDebugInfo=function(){function RenderDebugInfo(){_classCallCheck(this,RenderDebugInfo);}_createClass(RenderDebugInfo,[{key:'injector',value:function injector(){}},{key:'component',value:function component(){}},{key:'providerTokens',value:function providerTokens(){}},{key:'references',value:function references(){}},{key:'context',value:function context(){}},{key:'source',value:function source(){}}]);return RenderDebugInfo;}();var RendererV1=function(){function RendererV1(){_classCallCheck(this,RendererV1);}_createClass(RendererV1,[{key:'selectRootElement',value:function selectRootElement(selectorOrNode,debugInfo){}},{key:'createElement',value:function createElement(parentElement,name,debugInfo){}},{key:'createViewRoot',value:function createViewRoot(hostElement){}},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement,debugInfo){}},{key:'createText',value:function createText(parentElement,value,debugInfo){}},{key:'projectNodes',value:function projectNodes(parentElement,nodes){}},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){}},{key:'detachView',value:function detachView(viewRootNodes){}},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){}},{key:'listen',value:function listen(renderElement,name,callback){}},{key:'listenGlobal',value:function listenGlobal(target,name,callback){}},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){}},{key:'setElementAttribute',value:function setElementAttribute(renderElement,attributeName,attributeValue){}},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){}},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){}},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){}},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){}},{key:'setText',value:function setText(renderNode,text){}},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers){}}]);return RendererV1;}();var RootRenderer=function(){function RootRenderer(){_classCallCheck(this,RootRenderer);}_createClass(RootRenderer,[{key:'renderComponent',value:function renderComponent(componentType){}}]);return RootRenderer;}();var RendererFactoryV2=function(){function RendererFactoryV2(){_classCallCheck(this,RendererFactoryV2);}_createClass(RendererFactoryV2,[{key:'createRenderer',value:function createRenderer(hostElement,type){}}]);return RendererFactoryV2;}();var RendererV2=function(){function RendererV2(){_classCallCheck(this,RendererV2);}_createClass(RendererV2,[{key:'destroy',value:function destroy(){}},{key:'createElement',value:function createElement(name,namespace){}},{key:'createComment',value:function createComment(value){}},{key:'createText',value:function createText(value){}},{key:'appendChild',value:function appendChild(parent,newChild){}},{key:'insertBefore',value:function insertBefore(parent,newChild,refChild){}},{key:'removeChild',value:function removeChild(parent,oldChild){}},{key:'selectRootElement',value:function selectRootElement(selectorOrNode){}},{key:'parentNode',value:function parentNode(node){}},{key:'nextSibling',value:function nextSibling(node){}},{key:'setAttribute',value:function setAttribute(el,name,value,namespace){}},{key:'removeAttribute',value:function removeAttribute(el,name,namespace){}},{key:'addClass',value:function addClass(el,name){}},{key:'removeClass',value:function removeClass(el,name){}},{key:'setStyle',value:function setStyle(el,style,value,hasVendorPrefix,hasImportant){}},{key:'removeStyle',value:function removeStyle(el,style,hasVendorPrefix){}},{key:'setProperty',value:function setProperty(el,name,value){}},{key:'setValue',value:function setValue(node,value){}},{key:'listen',value:function listen(target,eventName,callback){}}]);return RendererV2;}();var SecurityContext={};SecurityContext.NONE=0;SecurityContext.HTML=1;SecurityContext.STYLE=2;SecurityContext.SCRIPT=3;SecurityContext.URL=4;SecurityContext.RESOURCE_URL=5;SecurityContext[SecurityContext.NONE]="NONE";SecurityContext[SecurityContext.HTML]="HTML";SecurityContext[SecurityContext.STYLE]="STYLE";SecurityContext[SecurityContext.SCRIPT]="SCRIPT";SecurityContext[SecurityContext.URL]="URL";SecurityContext[SecurityContext.RESOURCE_URL]="RESOURCE_URL";/**
+     */function RenderComponentType(id,templateUrl,slotCount,encapsulation,styles,animations){_classCallCheck(this,RenderComponentType);this.id=id;this.templateUrl=templateUrl;this.slotCount=slotCount;this.encapsulation=encapsulation;this.styles=styles;this.animations=animations;};/**
+ * @abstract
+ */var RenderDebugInfo=function(){function RenderDebugInfo(){_classCallCheck(this,RenderDebugInfo);}_createClass(RenderDebugInfo,[{key:'injector',/**
+     * @abstract
+     * @return {?}
+     */value:function injector(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'component',value:function component(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'providerTokens',value:function providerTokens(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'references',value:function references(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'context',value:function context(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'source',value:function source(){}}]);return RenderDebugInfo;}();/**
+ * \@experimental
+ * @abstract
+ */var RendererV1=function(){function RendererV1(){_classCallCheck(this,RendererV1);}_createClass(RendererV1,[{key:'selectRootElement',/**
+     * @abstract
+     * @param {?} selectorOrNode
+     * @param {?=} debugInfo
+     * @return {?}
+     */value:function selectRootElement(selectorOrNode,debugInfo){}/**
+     * @abstract
+     * @param {?} parentElement
+     * @param {?} name
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createElement',value:function createElement(parentElement,name,debugInfo){}/**
+     * @abstract
+     * @param {?} hostElement
+     * @return {?}
+     */},{key:'createViewRoot',value:function createViewRoot(hostElement){}/**
+     * @abstract
+     * @param {?} parentElement
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement,debugInfo){}/**
+     * @abstract
+     * @param {?} parentElement
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createText',value:function createText(parentElement,value,debugInfo){}/**
+     * @abstract
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */},{key:'projectNodes',value:function projectNodes(parentElement,nodes){}/**
+     * @abstract
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){}/**
+     * @abstract
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'detachView',value:function detachView(viewRootNodes){}/**
+     * @abstract
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listen',value:function listen(renderElement,name,callback){}/**
+     * @abstract
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listenGlobal',value:function listenGlobal(target,name,callback){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} attributeName
+     * @param {?} attributeValue
+     * @return {?}
+     */},{key:'setElementAttribute',value:function setElementAttribute(renderElement,attributeName,attributeValue){}/**
+     * Used only in debug mode to serialize property changes to dom nodes as attributes.
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){}/**
+     * @abstract
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?=} args
+     * @return {?}
+     */},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){}/**
+     * @abstract
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */},{key:'setText',value:function setText(renderNode,text){}/**
+     * @abstract
+     * @param {?} element
+     * @param {?} startingStyles
+     * @param {?} keyframes
+     * @param {?} duration
+     * @param {?} delay
+     * @param {?} easing
+     * @param {?=} previousPlayers
+     * @return {?}
+     */},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers){}}]);return RendererV1;}();/**
+ * Injectable service that provides a low-level interface for modifying the UI.
+ *
+ * Use this service to bypass Angular's templating and make custom UI changes that can't be
+ * expressed declaratively. For example if you need to set a property or an attribute whose name is
+ * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
+ * respectively.
+ *
+ * If you are implementing a custom renderer, you must implement this interface.
+ *
+ * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+ * \@experimental
+ * @abstract
+ */var RootRenderer=function(){function RootRenderer(){_classCallCheck(this,RootRenderer);}_createClass(RootRenderer,[{key:'renderComponent',/**
+     * @abstract
+     * @param {?} componentType
+     * @return {?}
+     */value:function renderComponent(componentType){}}]);return RootRenderer;}();/**
+ * \@experimental
+ * @abstract
+ */var RendererFactoryV2=function(){function RendererFactoryV2(){_classCallCheck(this,RendererFactoryV2);}_createClass(RendererFactoryV2,[{key:'createRenderer',/**
+     * @abstract
+     * @param {?} hostElement
+     * @param {?} type
+     * @return {?}
+     */value:function createRenderer(hostElement,type){}}]);return RendererFactoryV2;}();/**
+ * \@experimental
+ * @abstract
+ */var RendererV2=function(){function RendererV2(){_classCallCheck(this,RendererV2);}_createClass(RendererV2,[{key:'destroy',/**
+     * @abstract
+     * @return {?}
+     */value:function destroy(){}/**
+     * @abstract
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'createElement',value:function createElement(name,namespace){}/**
+     * @abstract
+     * @param {?} value
+     * @return {?}
+     */},{key:'createComment',value:function createComment(value){}/**
+     * @abstract
+     * @param {?} value
+     * @return {?}
+     */},{key:'createText',value:function createText(value){}/**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */},{key:'appendChild',value:function appendChild(parent,newChild){}/**
+     * @abstract
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */},{key:'insertBefore',value:function insertBefore(parent,newChild,refChild){}/**
+     * @abstract
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */},{key:'removeChild',value:function removeChild(parent,oldChild){}/**
+     * @abstract
+     * @param {?} selectorOrNode
+     * @return {?}
+     */},{key:'selectRootElement',value:function selectRootElement(selectorOrNode){}/**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */},{key:'parentNode',value:function parentNode(node){}/**
+     * Attention: On WebWorkers, this will always return a value,
+     * as we are asking for a result synchronously. I.e.
+     * the caller can't rely on checking whether this is null or not.
+     * @abstract
+     * @param {?} node
+     * @return {?}
+     */},{key:'nextSibling',value:function nextSibling(node){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'setAttribute',value:function setAttribute(el,name,value,namespace){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'removeAttribute',value:function removeAttribute(el,name,namespace){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */},{key:'addClass',value:function addClass(el,name){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */},{key:'removeClass',value:function removeClass(el,name){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
+     * @return {?}
+     */},{key:'setStyle',value:function setStyle(el,style,value,hasVendorPrefix,hasImportant){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} style
+     * @param {?} hasVendorPrefix
+     * @return {?}
+     */},{key:'removeStyle',value:function removeStyle(el,style,hasVendorPrefix){}/**
+     * @abstract
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */},{key:'setProperty',value:function setProperty(el,name,value){}/**
+     * @abstract
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */},{key:'setValue',value:function setValue(node,value){}/**
+     * @abstract
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listen',value:function listen(target,eventName,callback){}}]);return RendererV2;}();var SecurityContext={};SecurityContext.NONE=0;SecurityContext.HTML=1;SecurityContext.STYLE=2;SecurityContext.SCRIPT=3;SecurityContext.URL=4;SecurityContext.RESOURCE_URL=5;SecurityContext[SecurityContext.NONE]="NONE";SecurityContext[SecurityContext.HTML]="HTML";SecurityContext[SecurityContext.STYLE]="STYLE";SecurityContext[SecurityContext.SCRIPT]="SCRIPT";SecurityContext[SecurityContext.URL]="URL";SecurityContext[SecurityContext.RESOURCE_URL]="RESOURCE_URL";/**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
  * \@stable
  * @abstract
- */var Sanitizer=function(){function Sanitizer(){_classCallCheck(this,Sanitizer);}_createClass(Sanitizer,[{key:'sanitize',value:function sanitize(context,value){}}]);return Sanitizer;}();/**
+ */var Sanitizer=function(){function Sanitizer(){_classCallCheck(this,Sanitizer);}_createClass(Sanitizer,[{key:'sanitize',/**
+     * @abstract
+     * @param {?} context
+     * @param {?} value
+     * @return {?}
+     */value:function sanitize(context,value){}}]);return Sanitizer;}();/**
  * An error thrown if application changes model breaking the top-down data flow.
  *
  * This exception is only thrown in dev mode.
@@ -1361,14 +3027,22 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  */function createEmptyInlineArray(length){var/** @type {?} */ctor=void 0;if(length<=2){ctor=InlineArray2;}else if(length<=4){ctor=InlineArray4;}else if(length<=8){ctor=InlineArray8;}else if(length<=16){ctor=InlineArray16;}else{ctor=InlineArrayDynamic;}return new ctor(length);}var InlineArray0=function(){function InlineArray0(){_classCallCheck(this,InlineArray0);this.length=0;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArray0,[{key:'get',value:function get(index){return undefined;}},{key:'set',value:function set(index,value){}}]);return InlineArray0;}();var InlineArray2=function(){/**
+     */_createClass(InlineArray0,[{key:'get',value:function get(index){return undefined;}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){}}]);return InlineArray0;}();var InlineArray2=function(){/**
      * @param {?} length
      * @param {?=} _v0
      * @param {?=} _v1
      */function InlineArray2(length,_v0,_v1){_classCallCheck(this,InlineArray2);this.length=length;this._v0=_v0;this._v1=_v1;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArray2,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;default:return undefined;}}},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;}}}]);return InlineArray2;}();var InlineArray4=function(){/**
+     */_createClass(InlineArray2,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;default:return undefined;}}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;}}}]);return InlineArray2;}();var InlineArray4=function(){/**
      * @param {?} length
      * @param {?=} _v0
      * @param {?=} _v1
@@ -1377,7 +3051,11 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      */function InlineArray4(length,_v0,_v1,_v2,_v3){_classCallCheck(this,InlineArray4);this.length=length;this._v0=_v0;this._v1=_v1;this._v2=_v2;this._v3=_v3;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArray4,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;default:return undefined;}}},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;}}}]);return InlineArray4;}();var InlineArray8=function(){/**
+     */_createClass(InlineArray4,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;default:return undefined;}}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;}}}]);return InlineArray4;}();var InlineArray8=function(){/**
      * @param {?} length
      * @param {?=} _v0
      * @param {?=} _v1
@@ -1390,7 +3068,11 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      */function InlineArray8(length,_v0,_v1,_v2,_v3,_v4,_v5,_v6,_v7){_classCallCheck(this,InlineArray8);this.length=length;this._v0=_v0;this._v1=_v1;this._v2=_v2;this._v3=_v3;this._v4=_v4;this._v5=_v5;this._v6=_v6;this._v7=_v7;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArray8,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;case 4:return this._v4;case 5:return this._v5;case 6:return this._v6;case 7:return this._v7;default:return undefined;}}},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;case 4:this._v4=value;break;case 5:this._v5=value;break;case 6:this._v6=value;break;case 7:this._v7=value;break;}}}]);return InlineArray8;}();var InlineArray16=function(){/**
+     */_createClass(InlineArray8,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;case 4:return this._v4;case 5:return this._v5;case 6:return this._v6;case 7:return this._v7;default:return undefined;}}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;case 4:this._v4=value;break;case 5:this._v5=value;break;case 6:this._v6=value;break;case 7:this._v7=value;break;}}}]);return InlineArray8;}();var InlineArray16=function(){/**
      * @param {?} length
      * @param {?=} _v0
      * @param {?=} _v1
@@ -1411,13 +3093,21 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      */function InlineArray16(length,_v0,_v1,_v2,_v3,_v4,_v5,_v6,_v7,_v8,_v9,_v10,_v11,_v12,_v13,_v14,_v15){_classCallCheck(this,InlineArray16);this.length=length;this._v0=_v0;this._v1=_v1;this._v2=_v2;this._v3=_v3;this._v4=_v4;this._v5=_v5;this._v6=_v6;this._v7=_v7;this._v8=_v8;this._v9=_v9;this._v10=_v10;this._v11=_v11;this._v12=_v12;this._v13=_v13;this._v14=_v14;this._v15=_v15;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArray16,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;case 4:return this._v4;case 5:return this._v5;case 6:return this._v6;case 7:return this._v7;case 8:return this._v8;case 9:return this._v9;case 10:return this._v10;case 11:return this._v11;case 12:return this._v12;case 13:return this._v13;case 14:return this._v14;case 15:return this._v15;default:return undefined;}}},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;case 4:this._v4=value;break;case 5:this._v5=value;break;case 6:this._v6=value;break;case 7:this._v7=value;break;case 8:this._v8=value;break;case 9:this._v9=value;break;case 10:this._v10=value;break;case 11:this._v11=value;break;case 12:this._v12=value;break;case 13:this._v13=value;break;case 14:this._v14=value;break;case 15:this._v15=value;break;}}}]);return InlineArray16;}();var InlineArrayDynamic=function(){/**
+     */_createClass(InlineArray16,[{key:'get',value:function get(index){switch(index){case 0:return this._v0;case 1:return this._v1;case 2:return this._v2;case 3:return this._v3;case 4:return this._v4;case 5:return this._v5;case 6:return this._v6;case 7:return this._v7;case 8:return this._v8;case 9:return this._v9;case 10:return this._v10;case 11:return this._v11;case 12:return this._v12;case 13:return this._v13;case 14:return this._v14;case 15:return this._v15;default:return undefined;}}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){switch(index){case 0:this._v0=value;break;case 1:this._v1=value;break;case 2:this._v2=value;break;case 3:this._v3=value;break;case 4:this._v4=value;break;case 5:this._v5=value;break;case 6:this._v6=value;break;case 7:this._v7=value;break;case 8:this._v8=value;break;case 9:this._v9=value;break;case 10:this._v10=value;break;case 11:this._v11=value;break;case 12:this._v12=value;break;case 13:this._v13=value;break;case 14:this._v14=value;break;case 15:this._v15=value;break;}}}]);return InlineArray16;}();var InlineArrayDynamic=function(){/**
      * @param {?} length
      * @param {...?} values
      */function InlineArrayDynamic(length){_classCallCheck(this,InlineArrayDynamic);this.length=length;for(var _len6=arguments.length,values=Array(_len6>1?_len6-1:0),_key6=1;_key6<_len6;_key6++){values[_key6-1]=arguments[_key6];}this._values=values;}/**
      * @param {?} index
      * @return {?}
-     */_createClass(InlineArrayDynamic,[{key:'get',value:function get(index){return this._values[index];}},{key:'set',value:function set(index,value){this._values[index]=value;}}]);return InlineArrayDynamic;}();var/** @type {?} */EMPTY_INLINE_ARRAY=new InlineArray0();/**
+     */_createClass(InlineArrayDynamic,[{key:'get',value:function get(index){return this._values[index];}/**
+     * @param {?} index
+     * @param {?} value
+     * @return {?}
+     */},{key:'set',value:function set(index,value){this._values[index]=value;}}]);return InlineArrayDynamic;}();var/** @type {?} */EMPTY_INLINE_ARRAY=new InlineArray0();/**
  * This is a private API only used by the compiler to read the view class.
  * @param {?} componentFactory
  * @return {?}
@@ -1429,14 +3119,67 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * method.
  * \@stable
  * @abstract
- */var ComponentRef=function(){function ComponentRef(){_classCallCheck(this,ComponentRef);}_createClass(ComponentRef,[{key:'location',value:function location(){}},{key:'injector',value:function injector(){}},{key:'instance',value:function instance(){}},{key:'hostView',value:function hostView(){}},{key:'changeDetectorRef',value:function changeDetectorRef(){}},{key:'componentType',value:function componentType(){}},{key:'destroy',value:function destroy(){}},{key:'onDestroy',value:function onDestroy(callback){}}]);return ComponentRef;}();var ComponentRef_=function(_ComponentRef){_inherits(ComponentRef_,_ComponentRef);/**
+ */var ComponentRef=function(){function ComponentRef(){_classCallCheck(this,ComponentRef);}_createClass(ComponentRef,[{key:'location',/**
+     * Location of the Host Element of this Component Instance.
+     * @abstract
+     * @return {?}
+     */value:function location(){}/**
+     * The injector on which the component instance exists.
+     * @abstract
+     * @return {?}
+     */},{key:'injector',value:function injector(){}/**
+     * The instance of the Component.
+     * @abstract
+     * @return {?}
+     */},{key:'instance',value:function instance(){}/**
+     * The {\@link ViewRef} of the Host View of this Component instance.
+     * @abstract
+     * @return {?}
+     */},{key:'hostView',value:function hostView(){}/**
+     * The {\@link ChangeDetectorRef} of the Component instance.
+     * @abstract
+     * @return {?}
+     */},{key:'changeDetectorRef',value:function changeDetectorRef(){}/**
+     * The component type.
+     * @abstract
+     * @return {?}
+     */},{key:'componentType',value:function componentType(){}/**
+     * Destroys the component instance and all of the data structures associated with it.
+     * @abstract
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){}/**
+     * Allows to register a callback that will be called when the component is destroyed.
+     * @abstract
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){}}]);return ComponentRef;}();/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */var ComponentRef_=function(_ComponentRef){_inherits(ComponentRef_,_ComponentRef);/**
      * @param {?} _index
      * @param {?} _parentView
      * @param {?} _nativeElement
      * @param {?} _component
      */function ComponentRef_(_index,_parentView,_nativeElement,_component){_classCallCheck(this,ComponentRef_);var _this12=_possibleConstructorReturn(this,(ComponentRef_.__proto__||Object.getPrototypeOf(ComponentRef_)).call(this));_this12._index=_index;_this12._parentView=_parentView;_this12._nativeElement=_nativeElement;_this12._component=_component;return _this12;}/**
      * @return {?}
-     */_createClass(ComponentRef_,[{key:'destroy',value:function destroy(){this._parentView.detachAndDestroy();}},{key:'onDestroy',value:function onDestroy(callback){this.hostView.onDestroy(callback);}},{key:'location',get:function get(){return new ElementRef(this._nativeElement);}},{key:'injector',get:function get(){return this._parentView.injector(this._index);}},{key:'instance',get:function get(){return this._component;}},{key:'hostView',get:function get(){return this._parentView.ref;}},{key:'changeDetectorRef',get:function get(){return this._parentView.ref;}},{key:'componentType',get:function get(){return this._component.constructor;}}]);return ComponentRef_;}(ComponentRef);var ComponentFactory=function(){/**
+     */_createClass(ComponentRef_,[{key:'destroy',/**
+     * @return {?}
+     */value:function destroy(){this._parentView.detachAndDestroy();}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){this.hostView.onDestroy(callback);}},{key:'location',get:function get(){return new ElementRef(this._nativeElement);}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return this._parentView.injector(this._index);}/**
+     * @return {?}
+     */},{key:'instance',get:function get(){return this._component;}},{key:'hostView',/**
+     * @return {?}
+     */get:function get(){return this._parentView.ref;}},{key:'changeDetectorRef',/**
+     * @return {?}
+     */get:function get(){return this._parentView.ref;}},{key:'componentType',/**
+     * @return {?}
+     */get:function get(){return this._component.constructor;}}]);return ComponentRef_;}(ComponentRef);/**
+ * \@stable
+ */var ComponentFactory=function(){/**
      * @param {?} selector
      * @param {?} _viewClass
      * @param {?} componentType
@@ -1449,7 +3192,17 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      */_createClass(ComponentFactory,[{key:'create',value:function create(injector){var projectableNodes=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var rootSelectorOrNode=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */vu=injector.get(ViewUtils);if(!projectableNodes){projectableNodes=[];}var/** @type {?} */hostView=new this._viewClass(vu,null,null,null);return hostView.createHostView(rootSelectorOrNode,injector,projectableNodes);}}]);return ComponentFactory;}();/**
  * @param {?} component
  * @return {?}
- */function noComponentFactoryError(component){var/** @type {?} */error=Error('No component factory found for '+stringify(component)+'. Did you add it to @NgModule.entryComponents?');error[ERROR_COMPONENT]=component;return error;}var/** @type {?} */ERROR_COMPONENT='ngComponent';var _NullComponentFactoryResolver=function(){function _NullComponentFactoryResolver(){_classCallCheck(this,_NullComponentFactoryResolver);}_createClass(_NullComponentFactoryResolver,[{key:'resolveComponentFactory',value:function resolveComponentFactory(component){throw noComponentFactoryError(component);}}]);return _NullComponentFactoryResolver;}();var ComponentFactoryResolver=function(){function ComponentFactoryResolver(){_classCallCheck(this,ComponentFactoryResolver);}_createClass(ComponentFactoryResolver,[{key:'resolveComponentFactory',value:function resolveComponentFactory(component){}}]);return ComponentFactoryResolver;}();ComponentFactoryResolver.NULL=new _NullComponentFactoryResolver();var CodegenComponentFactoryResolver=function(){/**
+ */function noComponentFactoryError(component){var/** @type {?} */error=Error('No component factory found for '+stringify(component)+'. Did you add it to @NgModule.entryComponents?');error[ERROR_COMPONENT]=component;return error;}var/** @type {?} */ERROR_COMPONENT='ngComponent';var _NullComponentFactoryResolver=function(){function _NullComponentFactoryResolver(){_classCallCheck(this,_NullComponentFactoryResolver);}_createClass(_NullComponentFactoryResolver,[{key:'resolveComponentFactory',/**
+     * @param {?} component
+     * @return {?}
+     */value:function resolveComponentFactory(component){throw noComponentFactoryError(component);}}]);return _NullComponentFactoryResolver;}();/**
+ * \@stable
+ * @abstract
+ */var ComponentFactoryResolver=function(){function ComponentFactoryResolver(){_classCallCheck(this,ComponentFactoryResolver);}_createClass(ComponentFactoryResolver,[{key:'resolveComponentFactory',/**
+     * @abstract
+     * @param {?} component
+     * @return {?}
+     */value:function resolveComponentFactory(component){}}]);return ComponentFactoryResolver;}();ComponentFactoryResolver.NULL=new _NullComponentFactoryResolver();var CodegenComponentFactoryResolver=function(){/**
      * @param {?} factories
      * @param {?} _parent
      */function CodegenComponentFactoryResolver(factories,_parent){_classCallCheck(this,CodegenComponentFactoryResolver);this._parent=_parent;this._factories=new Map();for(var i=0;i<factories.length;i++){var factory=factories[i];this._factories.set(factory.componentType,factory);}}/**
@@ -1547,10 +3300,35 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
          */this._didWork=false;/** @internal */this._callbacks=[];this._watchAngularEvents();}/**
      * \@internal
      * @return {?}
-     */_createClass(Testability,[{key:'_watchAngularEvents',value:function _watchAngularEvents(){var _this13=this;this._ngZone.onUnstable.subscribe({next:function next(){_this13._didWork=true;_this13._isZoneStable=false;}});this._ngZone.runOutsideAngular(function(){_this13._ngZone.onStable.subscribe({next:function next(){NgZone.assertNotInAngularZone();scheduleMicroTask(function(){_this13._isZoneStable=true;_this13._runCallbacksIfReady();});}});});}},{key:'increasePendingRequestCount',value:function increasePendingRequestCount(){this._pendingCount+=1;this._didWork=true;return this._pendingCount;}},{key:'decreasePendingRequestCount',value:function decreasePendingRequestCount(){this._pendingCount-=1;if(this._pendingCount<0){throw new Error('pending async requests below zero');}this._runCallbacksIfReady();return this._pendingCount;}},{key:'isStable',value:function isStable(){return this._isZoneStable&&this._pendingCount==0&&!this._ngZone.hasPendingMacrotasks;}},{key:'_runCallbacksIfReady',value:function _runCallbacksIfReady(){var _this14=this;if(this.isStable()){// Schedules the call backs in a new frame so that it is always async.
+     */_createClass(Testability,[{key:'_watchAngularEvents',value:function _watchAngularEvents(){var _this13=this;this._ngZone.onUnstable.subscribe({next:function next(){_this13._didWork=true;_this13._isZoneStable=false;}});this._ngZone.runOutsideAngular(function(){_this13._ngZone.onStable.subscribe({next:function next(){NgZone.assertNotInAngularZone();scheduleMicroTask(function(){_this13._isZoneStable=true;_this13._runCallbacksIfReady();});}});});}/**
+     * @return {?}
+     */},{key:'increasePendingRequestCount',value:function increasePendingRequestCount(){this._pendingCount+=1;this._didWork=true;return this._pendingCount;}/**
+     * @return {?}
+     */},{key:'decreasePendingRequestCount',value:function decreasePendingRequestCount(){this._pendingCount-=1;if(this._pendingCount<0){throw new Error('pending async requests below zero');}this._runCallbacksIfReady();return this._pendingCount;}/**
+     * @return {?}
+     */},{key:'isStable',value:function isStable(){return this._isZoneStable&&this._pendingCount==0&&!this._ngZone.hasPendingMacrotasks;}/**
+     * \@internal
+     * @return {?}
+     */},{key:'_runCallbacksIfReady',value:function _runCallbacksIfReady(){var _this14=this;if(this.isStable()){// Schedules the call backs in a new frame so that it is always async.
 scheduleMicroTask(function(){while(_this14._callbacks.length!==0){_this14._callbacks.pop()(_this14._didWork);}_this14._didWork=false;});}else{// Not Ready
-this._didWork=true;}}},{key:'whenStable',value:function whenStable(callback){this._callbacks.push(callback);this._runCallbacksIfReady();}},{key:'getPendingRequestCount',value:function getPendingRequestCount(){return this._pendingCount;}},{key:'findBindings',value:function findBindings(using,provider,exactMatch){// TODO(juliemr): implement.
-return[];}},{key:'findProviders',value:function findProviders(using,provider,exactMatch){// TODO(juliemr): implement.
+this._didWork=true;}}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'whenStable',value:function whenStable(callback){this._callbacks.push(callback);this._runCallbacksIfReady();}/**
+     * @return {?}
+     */},{key:'getPendingRequestCount',value:function getPendingRequestCount(){return this._pendingCount;}/**
+     * @deprecated use findProviders
+     * @param {?} using
+     * @param {?} provider
+     * @param {?} exactMatch
+     * @return {?}
+     */},{key:'findBindings',value:function findBindings(using,provider,exactMatch){// TODO(juliemr): implement.
+return[];}/**
+     * @param {?} using
+     * @param {?} provider
+     * @param {?} exactMatch
+     * @return {?}
+     */},{key:'findProviders',value:function findProviders(using,provider,exactMatch){// TODO(juliemr): implement.
 return[];}}]);return Testability;}();Testability.decorators=[{type:Injectable}];/** @nocollapse */Testability.ctorParameters=function(){return[{type:NgZone}];};/**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@experimental
@@ -1558,7 +3336,26 @@ return[];}}]);return Testability;}();Testability.decorators=[{type:Injectable}];
      * @param {?} token
      * @param {?} testability
      * @return {?}
-     */_createClass(TestabilityRegistry,[{key:'registerApplication',value:function registerApplication(token,testability){this._applications.set(token,testability);}},{key:'getTestability',value:function getTestability(elem){return this._applications.get(elem);}},{key:'getAllTestabilities',value:function getAllTestabilities(){return Array.from(this._applications.values());}},{key:'getAllRootElements',value:function getAllRootElements(){return Array.from(this._applications.keys());}},{key:'findTestabilityInTree',value:function findTestabilityInTree(elem){var findInAncestors=arguments.length>1&&arguments[1]!==undefined?arguments[1]:true;return _testabilityGetter.findTestabilityInTree(this,elem,findInAncestors);}}]);return TestabilityRegistry;}();TestabilityRegistry.decorators=[{type:Injectable}];/** @nocollapse */TestabilityRegistry.ctorParameters=function(){return[];};var _NoopGetTestability=function(){function _NoopGetTestability(){_classCallCheck(this,_NoopGetTestability);}_createClass(_NoopGetTestability,[{key:'addToWindow',value:function addToWindow(registry){}},{key:'findTestabilityInTree',value:function findTestabilityInTree(registry,elem,findInAncestors){return null;}}]);return _NoopGetTestability;}();/**
+     */_createClass(TestabilityRegistry,[{key:'registerApplication',value:function registerApplication(token,testability){this._applications.set(token,testability);}/**
+     * @param {?} elem
+     * @return {?}
+     */},{key:'getTestability',value:function getTestability(elem){return this._applications.get(elem);}/**
+     * @return {?}
+     */},{key:'getAllTestabilities',value:function getAllTestabilities(){return Array.from(this._applications.values());}/**
+     * @return {?}
+     */},{key:'getAllRootElements',value:function getAllRootElements(){return Array.from(this._applications.keys());}/**
+     * @param {?} elem
+     * @param {?=} findInAncestors
+     * @return {?}
+     */},{key:'findTestabilityInTree',value:function findTestabilityInTree(elem){var findInAncestors=arguments.length>1&&arguments[1]!==undefined?arguments[1]:true;return _testabilityGetter.findTestabilityInTree(this,elem,findInAncestors);}}]);return TestabilityRegistry;}();TestabilityRegistry.decorators=[{type:Injectable}];/** @nocollapse */TestabilityRegistry.ctorParameters=function(){return[];};var _NoopGetTestability=function(){function _NoopGetTestability(){_classCallCheck(this,_NoopGetTestability);}_createClass(_NoopGetTestability,[{key:'addToWindow',/**
+     * @param {?} registry
+     * @return {?}
+     */value:function addToWindow(registry){}/**
+     * @param {?} registry
+     * @param {?} elem
+     * @param {?} findInAncestors
+     * @return {?}
+     */},{key:'findTestabilityInTree',value:function findTestabilityInTree(registry,elem,findInAncestors){return null;}}]);return _NoopGetTestability;}();/**
  * Set the {\@link GetTestability} implementation used by the Angular testing framework.
  * \@experimental
  * @param {?} getter
@@ -1629,7 +3426,67 @@ return[];}}]);return Testability;}();Testability.decorators=[{type:Injectable}];
  *
  * \@stable
  * @abstract
- */var PlatformRef=function(){function PlatformRef(){_classCallCheck(this,PlatformRef);}_createClass(PlatformRef,[{key:'bootstrapModuleFactory',value:function bootstrapModuleFactory(moduleFactory){}},{key:'bootstrapModule',value:function bootstrapModule(moduleType,compilerOptions){}},{key:'onDestroy',value:function onDestroy(callback){}},{key:'injector',value:function injector(){}},{key:'destroy',value:function destroy(){}},{key:'destroyed',value:function destroyed(){}}]);return PlatformRef;}();/**
+ */var PlatformRef=function(){function PlatformRef(){_classCallCheck(this,PlatformRef);}_createClass(PlatformRef,[{key:'bootstrapModuleFactory',/**
+     * Creates an instance of an `\@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {platformBrowser} from '\@angular/platform-browser';
+     *
+     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @abstract
+     * @param {?} moduleFactory
+     * @return {?}
+     */value:function bootstrapModuleFactory(moduleFactory){}/**
+     * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     * \@stable
+     * @abstract
+     * @param {?} moduleType
+     * @param {?=} compilerOptions
+     * @return {?}
+     */},{key:'bootstrapModule',value:function bootstrapModule(moduleType,compilerOptions){}/**
+     * Register a listener to be called when the platform is disposed.
+     * @abstract
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){}/**
+     * Retrieve the platform {\@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     * @abstract
+     * @return {?}
+     */},{key:'injector',value:function injector(){}/**
+     * Destroy the Angular platform and all Angular applications on the page.
+     * @abstract
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'destroyed',value:function destroyed(){}}]);return PlatformRef;}();/**
  * @param {?} errorHandler
  * @param {?} callback
  * @return {?}
@@ -1643,20 +3500,102 @@ throw e;}}/**
      */function PlatformRef_(_injector){_classCallCheck(this,PlatformRef_);var _this15=_possibleConstructorReturn(this,(PlatformRef_.__proto__||Object.getPrototypeOf(PlatformRef_)).call(this));_this15._injector=_injector;_this15._modules=[];_this15._destroyListeners=[];_this15._destroyed=false;return _this15;}/**
      * @param {?} callback
      * @return {?}
-     */_createClass(PlatformRef_,[{key:'onDestroy',value:function onDestroy(callback){this._destroyListeners.push(callback);}},{key:'destroy',value:function destroy(){if(this._destroyed){throw new Error('The platform has already been destroyed!');}this._modules.slice().forEach(function(module){return module.destroy();});this._destroyListeners.forEach(function(listener){return listener();});this._destroyed=true;}},{key:'bootstrapModuleFactory',value:function bootstrapModuleFactory(moduleFactory){return this._bootstrapModuleFactoryWithZone(moduleFactory,null);}},{key:'_bootstrapModuleFactoryWithZone',value:function _bootstrapModuleFactoryWithZone(moduleFactory,ngZone){var _this16=this;// Note: We need to create the NgZone _before_ we instantiate the module,
+     */_createClass(PlatformRef_,[{key:'onDestroy',value:function onDestroy(callback){this._destroyListeners.push(callback);}/**
+     * @return {?}
+     */},{key:'destroy',/**
+     * @return {?}
+     */value:function destroy(){if(this._destroyed){throw new Error('The platform has already been destroyed!');}this._modules.slice().forEach(function(module){return module.destroy();});this._destroyListeners.forEach(function(listener){return listener();});this._destroyed=true;}/**
+     * @param {?} moduleFactory
+     * @return {?}
+     */},{key:'bootstrapModuleFactory',value:function bootstrapModuleFactory(moduleFactory){return this._bootstrapModuleFactoryWithZone(moduleFactory,null);}/**
+     * @param {?} moduleFactory
+     * @param {?} ngZone
+     * @return {?}
+     */},{key:'_bootstrapModuleFactoryWithZone',value:function _bootstrapModuleFactoryWithZone(moduleFactory,ngZone){var _this16=this;// Note: We need to create the NgZone _before_ we instantiate the module,
 // as instantiating the module creates some providers eagerly.
 // So we create a mini parent injector that just contains the new NgZone and
 // pass that as parent to the NgModuleFactory.
 if(!ngZone)ngZone=new NgZone({enableLongStackTrace:isDevMode()});// Attention: Don't use ApplicationRef.run here,
 // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
-return ngZone.run(function(){var/** @type {?} */ngZoneInjector=ReflectiveInjector.resolveAndCreate([{provide:NgZone,useValue:ngZone}],_this16.injector);var/** @type {?} */moduleRef=moduleFactory.create(ngZoneInjector);var/** @type {?} */exceptionHandler=moduleRef.injector.get(ErrorHandler,null);if(!exceptionHandler){throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');}moduleRef.onDestroy(function(){return ListWrapper.remove(_this16._modules,moduleRef);});ngZone.onError.subscribe({next:function next(error){exceptionHandler.handleError(error);}});return _callAndReportToErrorHandler(exceptionHandler,function(){var/** @type {?} */initStatus=moduleRef.injector.get(ApplicationInitStatus);return initStatus.donePromise.then(function(){_this16._moduleDoBootstrap(moduleRef);return moduleRef;});});});}},{key:'bootstrapModule',value:function bootstrapModule(moduleType){var compilerOptions=arguments.length>1&&arguments[1]!==undefined?arguments[1]:[];return this._bootstrapModuleWithZone(moduleType,compilerOptions,null);}},{key:'_bootstrapModuleWithZone',value:function _bootstrapModuleWithZone(moduleType){var _this17=this;var compilerOptions=arguments.length>1&&arguments[1]!==undefined?arguments[1]:[];var ngZone=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */compilerFactory=this.injector.get(CompilerFactory);var/** @type {?} */compiler=compilerFactory.createCompiler(Array.isArray(compilerOptions)?compilerOptions:[compilerOptions]);return compiler.compileModuleAsync(moduleType).then(function(moduleFactory){return _this17._bootstrapModuleFactoryWithZone(moduleFactory,ngZone);});}},{key:'_moduleDoBootstrap',value:function _moduleDoBootstrap(moduleRef){var/** @type {?} */appRef=moduleRef.injector.get(ApplicationRef);if(moduleRef.bootstrapFactories.length>0){moduleRef.bootstrapFactories.forEach(function(compFactory){return appRef.bootstrap(compFactory);});}else if(moduleRef.instance.ngDoBootstrap){moduleRef.instance.ngDoBootstrap(appRef);}else{throw new Error('The module '+stringify(moduleRef.instance.constructor)+' was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. '+'Please define one of these.');}this._modules.push(moduleRef);}},{key:'injector',get:function get(){return this._injector;}},{key:'destroyed',get:function get(){return this._destroyed;}}]);return PlatformRef_;}(PlatformRef);PlatformRef_.decorators=[{type:Injectable}];/** @nocollapse */PlatformRef_.ctorParameters=function(){return[{type:Injector}];};/**
+return ngZone.run(function(){var/** @type {?} */ngZoneInjector=ReflectiveInjector.resolveAndCreate([{provide:NgZone,useValue:ngZone}],_this16.injector);var/** @type {?} */moduleRef=moduleFactory.create(ngZoneInjector);var/** @type {?} */exceptionHandler=moduleRef.injector.get(ErrorHandler,null);if(!exceptionHandler){throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');}moduleRef.onDestroy(function(){return ListWrapper.remove(_this16._modules,moduleRef);});ngZone.onError.subscribe({next:function next(error){exceptionHandler.handleError(error);}});return _callAndReportToErrorHandler(exceptionHandler,function(){var/** @type {?} */initStatus=moduleRef.injector.get(ApplicationInitStatus);return initStatus.donePromise.then(function(){_this16._moduleDoBootstrap(moduleRef);return moduleRef;});});});}/**
+     * @param {?} moduleType
+     * @param {?=} compilerOptions
+     * @return {?}
+     */},{key:'bootstrapModule',value:function bootstrapModule(moduleType){var compilerOptions=arguments.length>1&&arguments[1]!==undefined?arguments[1]:[];return this._bootstrapModuleWithZone(moduleType,compilerOptions,null);}/**
+     * @param {?} moduleType
+     * @param {?=} compilerOptions
+     * @param {?=} ngZone
+     * @return {?}
+     */},{key:'_bootstrapModuleWithZone',value:function _bootstrapModuleWithZone(moduleType){var _this17=this;var compilerOptions=arguments.length>1&&arguments[1]!==undefined?arguments[1]:[];var ngZone=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */compilerFactory=this.injector.get(CompilerFactory);var/** @type {?} */compiler=compilerFactory.createCompiler(Array.isArray(compilerOptions)?compilerOptions:[compilerOptions]);return compiler.compileModuleAsync(moduleType).then(function(moduleFactory){return _this17._bootstrapModuleFactoryWithZone(moduleFactory,ngZone);});}/**
+     * @param {?} moduleRef
+     * @return {?}
+     */},{key:'_moduleDoBootstrap',value:function _moduleDoBootstrap(moduleRef){var/** @type {?} */appRef=moduleRef.injector.get(ApplicationRef);if(moduleRef.bootstrapFactories.length>0){moduleRef.bootstrapFactories.forEach(function(compFactory){return appRef.bootstrap(compFactory);});}else if(moduleRef.instance.ngDoBootstrap){moduleRef.instance.ngDoBootstrap(appRef);}else{throw new Error('The module '+stringify(moduleRef.instance.constructor)+' was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. '+'Please define one of these.');}this._modules.push(moduleRef);}},{key:'injector',get:function get(){return this._injector;}/**
+     * @return {?}
+     */},{key:'destroyed',get:function get(){return this._destroyed;}}]);return PlatformRef_;}(PlatformRef);PlatformRef_.decorators=[{type:Injectable}];/** @nocollapse */PlatformRef_.ctorParameters=function(){return[{type:Injector}];};/**
  * A reference to an Angular application running on a page.
  *
  * For more about Angular applications, see the documentation for {\@link bootstrap}.
  *
  * \@stable
  * @abstract
- */var ApplicationRef=function(){function ApplicationRef(){_classCallCheck(this,ApplicationRef);}_createClass(ApplicationRef,[{key:'bootstrap',value:function bootstrap(componentFactory){}},{key:'tick',value:function tick(){}},{key:'componentTypes',value:function componentTypes(){}},{key:'components',value:function components(){}},{key:'attachView',value:function attachView(view){}},{key:'detachView',value:function detachView(view){}},{key:'viewCount',value:function viewCount(){}},{key:'isStable',value:function isStable(){}}]);return ApplicationRef;}();var ApplicationRef_=function(_ApplicationRef){_inherits(ApplicationRef_,_ApplicationRef);/**
+ */var ApplicationRef=function(){function ApplicationRef(){_classCallCheck(this,ApplicationRef);}_createClass(ApplicationRef,[{key:'bootstrap',/**
+     * Bootstrap a new component at the root level of the application.
+     *
+     * ### Bootstrap process
+     *
+     * When bootstrapping a new root component into an application, Angular mounts the
+     * specified application component onto DOM elements identified by the [componentType]'s
+     * selector and kicks off automatic change detection to finish initializing the component.
+     *
+     * ### Example
+     * {\@example core/ts/platform/platform.ts region='longform'}
+     * @abstract
+     * @param {?} componentFactory
+     * @return {?}
+     */value:function bootstrap(componentFactory){}/**
+     * Invoke this method to explicitly process change detection and its side-effects.
+     *
+     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+     * further changes are detected. If additional changes are picked up during this second cycle,
+     * bindings in the app have side-effects that cannot be resolved in a single change detection
+     * pass.
+     * In this case, Angular throws an error, since an Angular application can only have one change
+     * detection pass during which all change detection must complete.
+     * @abstract
+     * @return {?}
+     */},{key:'tick',value:function tick(){}/**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     * @abstract
+     * @return {?}
+     */},{key:'componentTypes',value:function componentTypes(){}/**
+     * Get a list of components registered to this application.
+     * @abstract
+     * @return {?}
+     */},{key:'components',value:function components(){}/**
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
+     * @abstract
+     * @param {?} view
+     * @return {?}
+     */},{key:'attachView',value:function attachView(view){}/**
+     * Detaches a view from dirty checking again.
+     * @abstract
+     * @param {?} view
+     * @return {?}
+     */},{key:'detachView',value:function detachView(view){}/**
+     * Returns the number of attached views.
+     * @abstract
+     * @return {?}
+     */},{key:'viewCount',value:function viewCount(){}/**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     * @abstract
+     * @return {?}
+     */},{key:'isStable',value:function isStable(){}}]);return ApplicationRef;}();/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */var ApplicationRef_=function(_ApplicationRef){_inherits(ApplicationRef_,_ApplicationRef);/**
      * @param {?} _zone
      * @param {?} _console
      * @param {?} _injector
@@ -1665,14 +3604,38 @@ return ngZone.run(function(){var/** @type {?} */ngZoneInjector=ReflectiveInjecto
      * @param {?} _initStatus
      * @param {?} _testabilityRegistry
      * @param {?} _testability
-     */function ApplicationRef_(_zone,_console,_injector,_exceptionHandler,_componentFactoryResolver,_initStatus,_testabilityRegistry,_testability){_classCallCheck(this,ApplicationRef_);var _this18=_possibleConstructorReturn(this,(ApplicationRef_.__proto__||Object.getPrototypeOf(ApplicationRef_)).call(this));_this18._zone=_zone;_this18._console=_console;_this18._injector=_injector;_this18._exceptionHandler=_exceptionHandler;_this18._componentFactoryResolver=_componentFactoryResolver;_this18._initStatus=_initStatus;_this18._testabilityRegistry=_testabilityRegistry;_this18._testability=_testability;_this18._bootstrapListeners=[];_this18._rootComponents=[];_this18._rootComponentTypes=[];_this18._views=[];_this18._runningTick=false;_this18._enforceNoNewChanges=false;_this18._stable=true;_this18._enforceNoNewChanges=isDevMode();_this18._zone.onMicrotaskEmpty.subscribe({next:function next(){_this18._zone.run(function(){_this18.tick();});}});var isCurrentlyStable=new _Observable.Observable(function(observer){_this18._stable=_this18._zone.isStable&&!_this18._zone.hasPendingMacrotasks&&!_this18._zone.hasPendingMicrotasks;_this18._zone.runOutsideAngular(function(){observer.next(_this18._stable);observer.complete();});});var isStable=new _Observable.Observable(function(observer){var stableSub=_this18._zone.onStable.subscribe(function(){NgZone.assertNotInAngularZone();// Check whether there are no pending macro/micro tasks in the next tick
+     */function ApplicationRef_(_zone,_console,_injector,_exceptionHandler,_componentFactoryResolver,_initStatus,_testabilityRegistry,_testability){_classCallCheck(this,ApplicationRef_);var _this18=_possibleConstructorReturn(this,(ApplicationRef_.__proto__||Object.getPrototypeOf(ApplicationRef_)).call(this));_this18._zone=_zone;_this18._console=_console;_this18._injector=_injector;_this18._exceptionHandler=_exceptionHandler;_this18._componentFactoryResolver=_componentFactoryResolver;_this18._initStatus=_initStatus;_this18._testabilityRegistry=_testabilityRegistry;_this18._testability=_testability;_this18._bootstrapListeners=[];_this18._rootComponents=[];_this18._rootComponentTypes=[];_this18._views=[];_this18._runningTick=false;_this18._enforceNoNewChanges=false;_this18._stable=true;_this18._enforceNoNewChanges=isDevMode();_this18._zone.onMicrotaskEmpty.subscribe({next:function next(){_this18._zone.run(function(){_this18.tick();});}});var isCurrentlyStable=new Observable(function(observer){_this18._stable=_this18._zone.isStable&&!_this18._zone.hasPendingMacrotasks&&!_this18._zone.hasPendingMicrotasks;_this18._zone.runOutsideAngular(function(){observer.next(_this18._stable);observer.complete();});});var isStable=new Observable(function(observer){var stableSub=_this18._zone.onStable.subscribe(function(){NgZone.assertNotInAngularZone();// Check whether there are no pending macro/micro tasks in the next tick
 // to allow for NgZone to update the state.
-scheduleMicroTask(function(){if(!_this18._stable&&!_this18._zone.hasPendingMacrotasks&&!_this18._zone.hasPendingMicrotasks){_this18._stable=true;observer.next(true);}});});var unstableSub=_this18._zone.onUnstable.subscribe(function(){NgZone.assertInAngularZone();if(_this18._stable){_this18._stable=false;_this18._zone.runOutsideAngular(function(){observer.next(false);});}});return function(){stableSub.unsubscribe();unstableSub.unsubscribe();};});_this18._isStable=(0,_merge.merge)(isCurrentlyStable,_share.share.call(isStable));return _this18;}/**
+scheduleMicroTask(function(){if(!_this18._stable&&!_this18._zone.hasPendingMacrotasks&&!_this18._zone.hasPendingMicrotasks){_this18._stable=true;observer.next(true);}});});var unstableSub=_this18._zone.onUnstable.subscribe(function(){NgZone.assertInAngularZone();if(_this18._stable){_this18._stable=false;_this18._zone.runOutsideAngular(function(){observer.next(false);});}});return function(){stableSub.unsubscribe();unstableSub.unsubscribe();};});_this18._isStable=merge(isCurrentlyStable,share.call(isStable));return _this18;}/**
      * @param {?} viewRef
      * @return {?}
-     */_createClass(ApplicationRef_,[{key:'attachView',value:function attachView(viewRef){var/** @type {?} */view=viewRef;this._views.push(view);view.attachToAppRef(this);}},{key:'detachView',value:function detachView(viewRef){var/** @type {?} */view=viewRef;ListWrapper.remove(this._views,view);view.detachFromContainer();}},{key:'bootstrap',value:function bootstrap(componentOrFactory){var _this19=this;if(!this._initStatus.done){throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');}var/** @type {?} */componentFactory=void 0;if(componentOrFactory instanceof ComponentFactory){componentFactory=componentOrFactory;}else{componentFactory=this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);}this._rootComponentTypes.push(componentFactory.componentType);var/** @type {?} */compRef=componentFactory.create(this._injector,[],componentFactory.selector);compRef.onDestroy(function(){_this19._unloadComponent(compRef);});var/** @type {?} */testability=compRef.injector.get(Testability,null);if(testability){compRef.injector.get(TestabilityRegistry).registerApplication(compRef.location.nativeElement,testability);}this._loadComponent(compRef);if(isDevMode()){this._console.log('Angular is running in the development mode. Call enableProdMode() to enable the production mode.');}return compRef;}},{key:'_loadComponent',value:function _loadComponent(componentRef){this.attachView(componentRef.hostView);this.tick();this._rootComponents.push(componentRef);// Get the listeners lazily to prevent DI cycles.
-var/** @type {?} */listeners=this._injector.get(APP_BOOTSTRAP_LISTENER,[]).concat(this._bootstrapListeners);listeners.forEach(function(listener){return listener(componentRef);});}},{key:'_unloadComponent',value:function _unloadComponent(componentRef){this.detachView(componentRef.hostView);ListWrapper.remove(this._rootComponents,componentRef);}},{key:'tick',value:function tick(){if(this._runningTick){throw new Error('ApplicationRef.tick is called recursively');}var/** @type {?} */scope=ApplicationRef_._tickScope();try{this._runningTick=true;this._views.forEach(function(view){return view.detectChanges();});if(this._enforceNoNewChanges){this._views.forEach(function(view){return view.checkNoChanges();});}}finally{this._runningTick=false;wtfLeave(scope);}}},{key:'ngOnDestroy',value:function ngOnDestroy(){// TODO(alxhub): Dispose of the NgZone.
-this._views.slice().forEach(function(view){return view.destroy();});}},{key:'viewCount',get:function get(){return this._views.length;}},{key:'componentTypes',get:function get(){return this._rootComponentTypes;}},{key:'components',get:function get(){return this._rootComponents;}},{key:'isStable',get:function get(){return this._isStable;}}]);return ApplicationRef_;}(ApplicationRef);/** @internal */ApplicationRef_._tickScope=wtfCreateScope('ApplicationRef#tick()');ApplicationRef_.decorators=[{type:Injectable}];/** @nocollapse */ApplicationRef_.ctorParameters=function(){return[{type:NgZone},{type:Console},{type:Injector},{type:ErrorHandler},{type:ComponentFactoryResolver},{type:ApplicationInitStatus},{type:TestabilityRegistry,decorators:[{type:Optional}]},{type:Testability,decorators:[{type:Optional}]}];};/**
+     */_createClass(ApplicationRef_,[{key:'attachView',value:function attachView(viewRef){var/** @type {?} */view=viewRef;this._views.push(view);view.attachToAppRef(this);}/**
+     * @param {?} viewRef
+     * @return {?}
+     */},{key:'detachView',value:function detachView(viewRef){var/** @type {?} */view=viewRef;ListWrapper.remove(this._views,view);view.detachFromContainer();}/**
+     * @param {?} componentOrFactory
+     * @return {?}
+     */},{key:'bootstrap',value:function bootstrap(componentOrFactory){var _this19=this;if(!this._initStatus.done){throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');}var/** @type {?} */componentFactory=void 0;if(componentOrFactory instanceof ComponentFactory){componentFactory=componentOrFactory;}else{componentFactory=this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);}this._rootComponentTypes.push(componentFactory.componentType);var/** @type {?} */compRef=componentFactory.create(this._injector,[],componentFactory.selector);compRef.onDestroy(function(){_this19._unloadComponent(compRef);});var/** @type {?} */testability=compRef.injector.get(Testability,null);if(testability){compRef.injector.get(TestabilityRegistry).registerApplication(compRef.location.nativeElement,testability);}this._loadComponent(compRef);if(isDevMode()){this._console.log('Angular is running in the development mode. Call enableProdMode() to enable the production mode.');}return compRef;}/**
+     * @param {?} componentRef
+     * @return {?}
+     */},{key:'_loadComponent',value:function _loadComponent(componentRef){this.attachView(componentRef.hostView);this.tick();this._rootComponents.push(componentRef);// Get the listeners lazily to prevent DI cycles.
+var/** @type {?} */listeners=this._injector.get(APP_BOOTSTRAP_LISTENER,[]).concat(this._bootstrapListeners);listeners.forEach(function(listener){return listener(componentRef);});}/**
+     * @param {?} componentRef
+     * @return {?}
+     */},{key:'_unloadComponent',value:function _unloadComponent(componentRef){this.detachView(componentRef.hostView);ListWrapper.remove(this._rootComponents,componentRef);}/**
+     * @return {?}
+     */},{key:'tick',value:function tick(){if(this._runningTick){throw new Error('ApplicationRef.tick is called recursively');}var/** @type {?} */scope=ApplicationRef_._tickScope();try{this._runningTick=true;this._views.forEach(function(view){return view.detectChanges();});if(this._enforceNoNewChanges){this._views.forEach(function(view){return view.checkNoChanges();});}}finally{this._runningTick=false;wtfLeave(scope);}}/**
+     * @return {?}
+     */},{key:'ngOnDestroy',value:function ngOnDestroy(){// TODO(alxhub): Dispose of the NgZone.
+this._views.slice().forEach(function(view){return view.destroy();});}/**
+     * @return {?}
+     */},{key:'viewCount',get:function get(){return this._views.length;}/**
+     * @return {?}
+     */},{key:'componentTypes',get:function get(){return this._rootComponentTypes;}/**
+     * @return {?}
+     */},{key:'components',get:function get(){return this._rootComponents;}/**
+     * @return {?}
+     */},{key:'isStable',get:function get(){return this._isStable;}}]);return ApplicationRef_;}(ApplicationRef);/** @internal */ApplicationRef_._tickScope=wtfCreateScope('ApplicationRef#tick()');ApplicationRef_.decorators=[{type:Injectable}];/** @nocollapse */ApplicationRef_.ctorParameters=function(){return[{type:NgZone},{type:Console},{type:Injector},{type:ErrorHandler},{type:ComponentFactoryResolver},{type:ApplicationInitStatus},{type:TestabilityRegistry,decorators:[{type:Optional}]},{type:Testability,decorators:[{type:Optional}]}];};/**
  * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
  *
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
@@ -1680,12 +3643,39 @@ this._views.slice().forEach(function(view){return view.destroy();});}},{key:'vie
  *
  * \@stable
  * @abstract
- */var NgModuleRef=function(){function NgModuleRef(){_classCallCheck(this,NgModuleRef);}_createClass(NgModuleRef,[{key:'injector',value:function injector(){}},{key:'componentFactoryResolver',value:function componentFactoryResolver(){}},{key:'instance',value:function instance(){}},{key:'destroy',value:function destroy(){}},{key:'onDestroy',value:function onDestroy(callback){}}]);return NgModuleRef;}();var NgModuleFactory=function(){/**
+ */var NgModuleRef=function(){function NgModuleRef(){_classCallCheck(this,NgModuleRef);}_createClass(NgModuleRef,[{key:'injector',/**
+     * The injector that contains all of the providers of the NgModule.
+     * @abstract
+     * @return {?}
+     */value:function injector(){}/**
+     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * declared in the `entryComponents` property of the module.
+     * @abstract
+     * @return {?}
+     */},{key:'componentFactoryResolver',value:function componentFactoryResolver(){}/**
+     * The NgModule instance.
+     * @abstract
+     * @return {?}
+     */},{key:'instance',value:function instance(){}/**
+     * Destroys the module instance and all of the data structures associated with it.
+     * @abstract
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){}/**
+     * Allows to register a callback that will be called when the module is destroyed.
+     * @abstract
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){}}]);return NgModuleRef;}();/**
+ * \@experimental
+ */var NgModuleFactory=function(){/**
      * @param {?} _injectorClass
      * @param {?} _moduleType
      */function NgModuleFactory(_injectorClass,_moduleType){_classCallCheck(this,NgModuleFactory);this._injectorClass=_injectorClass;this._moduleType=_moduleType;}/**
      * @return {?}
-     */_createClass(NgModuleFactory,[{key:'create',value:function create(parentInjector){if(!parentInjector){parentInjector=Injector.NULL;}var/** @type {?} */instance=new this._injectorClass(parentInjector);instance.create();return instance;}},{key:'moduleType',get:function get(){return this._moduleType;}}]);return NgModuleFactory;}();var/** @type {?} */_UNDEFINED=new Object();/**
+     */_createClass(NgModuleFactory,[{key:'create',/**
+     * @param {?} parentInjector
+     * @return {?}
+     */value:function create(parentInjector){if(!parentInjector){parentInjector=Injector.NULL;}var/** @type {?} */instance=new this._injectorClass(parentInjector);instance.create();return instance;}},{key:'moduleType',get:function get(){return this._moduleType;}}]);return NgModuleFactory;}();var/** @type {?} */_UNDEFINED=new Object();/**
  * @abstract
  */var NgModuleInjector=function(_CodegenComponentFact){_inherits(NgModuleInjector,_CodegenComponentFact);/**
      * @param {?} parent
@@ -1693,7 +3683,45 @@ this._views.slice().forEach(function(view){return view.destroy();});}},{key:'vie
      * @param {?} bootstrapFactories
      */function NgModuleInjector(parent,factories,bootstrapFactories){_classCallCheck(this,NgModuleInjector);var _this20=_possibleConstructorReturn(this,(NgModuleInjector.__proto__||Object.getPrototypeOf(NgModuleInjector)).call(this,factories,parent.get(ComponentFactoryResolver,ComponentFactoryResolver.NULL)));_this20.parent=parent;_this20.bootstrapFactories=bootstrapFactories;_this20._destroyListeners=[];_this20._destroyed=false;return _this20;}/**
      * @return {?}
-     */_createClass(NgModuleInjector,[{key:'create',value:function create(){this.instance=this.createInternal();}},{key:'createInternal',value:function createInternal(){}},{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:THROW_IF_NOT_FOUND;if(token===Injector||token===ComponentFactoryResolver){return this;}var/** @type {?} */result=this.getInternal(token,_UNDEFINED);return result===_UNDEFINED?this.parent.get(token,notFoundValue):result;}},{key:'getInternal',value:function getInternal(token,notFoundValue){}},{key:'destroy',value:function destroy(){if(this._destroyed){throw new Error('The ng module '+stringify(this.instance.constructor)+' has already been destroyed.');}this._destroyed=true;this.destroyInternal();this._destroyListeners.forEach(function(listener){return listener();});}},{key:'onDestroy',value:function onDestroy(callback){this._destroyListeners.push(callback);}},{key:'destroyInternal',value:function destroyInternal(){}},{key:'injector',get:function get(){return this;}},{key:'componentFactoryResolver',get:function get(){return this;}}]);return NgModuleInjector;}(CodegenComponentFactoryResolver);var NgModuleFactoryLoader=function(){function NgModuleFactoryLoader(){_classCallCheck(this,NgModuleFactoryLoader);}_createClass(NgModuleFactoryLoader,[{key:'load',value:function load(path){}}]);return NgModuleFactoryLoader;}();var/** @type {?} */moduleFactories=new Map();/**
+     */_createClass(NgModuleInjector,[{key:'create',value:function create(){this.instance=this.createInternal();}/**
+     * @abstract
+     * @return {?}
+     */},{key:'createInternal',value:function createInternal(){}/**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */},{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:THROW_IF_NOT_FOUND;if(token===Injector||token===ComponentFactoryResolver){return this;}var/** @type {?} */result=this.getInternal(token,_UNDEFINED);return result===_UNDEFINED?this.parent.get(token,notFoundValue):result;}/**
+     * @abstract
+     * @param {?} token
+     * @param {?} notFoundValue
+     * @return {?}
+     */},{key:'getInternal',value:function getInternal(token,notFoundValue){}/**
+     * @return {?}
+     */},{key:'destroy',/**
+     * @return {?}
+     */value:function destroy(){if(this._destroyed){throw new Error('The ng module '+stringify(this.instance.constructor)+' has already been destroyed.');}this._destroyed=true;this.destroyInternal();this._destroyListeners.forEach(function(listener){return listener();});}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){this._destroyListeners.push(callback);}/**
+     * @abstract
+     * @return {?}
+     */},{key:'destroyInternal',value:function destroyInternal(){}},{key:'injector',get:function get(){return this;}/**
+     * @return {?}
+     */},{key:'componentFactoryResolver',get:function get(){return this;}}]);return NgModuleInjector;}(CodegenComponentFactoryResolver);/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ *//**
+ * Used to load ng module factories.
+ * \@stable
+ * @abstract
+ */var NgModuleFactoryLoader=function(){function NgModuleFactoryLoader(){_classCallCheck(this,NgModuleFactoryLoader);}_createClass(NgModuleFactoryLoader,[{key:'load',/**
+     * @abstract
+     * @param {?} path
+     * @return {?}
+     */value:function load(path){}}]);return NgModuleFactoryLoader;}();var/** @type {?} */moduleFactories=new Map();/**
  * Registers a loaded module. Should only be called from generated NgModuleFactory code.
  * \@experimental
  * @param {?} id
@@ -1730,7 +3758,61 @@ this._views.slice().forEach(function(view){return view.destroy();});}},{key:'vie
  * \@stable
  */var QueryList=function(){function QueryList(){_classCallCheck(this,QueryList);this._dirty=true;this._results=[];this._emitter=new EventEmitter();}/**
      * @return {?}
-     */_createClass(QueryList,[{key:'map',value:function map(fn){return this._results.map(fn);}},{key:'filter',value:function filter(fn){return this._results.filter(fn);}},{key:'find',value:function find(fn){return this._results.find(fn);}},{key:'reduce',value:function reduce(fn,init){return this._results.reduce(fn,init);}},{key:'forEach',value:function forEach(fn){this._results.forEach(fn);}},{key:'some',value:function some(fn){return this._results.some(fn);}},{key:'toArray',value:function toArray(){return this._results.slice();}},{key:getSymbolIterator(),value:function value(){return this._results[getSymbolIterator()]();}},{key:'toString',value:function toString(){return this._results.toString();}},{key:'reset',value:function reset(res){this._results=ListWrapper.flatten(res);this._dirty=false;}},{key:'notifyOnChanges',value:function notifyOnChanges(){this._emitter.emit(this);}},{key:'setDirty',value:function setDirty(){this._dirty=true;}},{key:'changes',get:function get(){return this._emitter;}},{key:'length',get:function get(){return this._results.length;}},{key:'first',get:function get(){return this._results[0];}},{key:'last',get:function get(){return this._results[this.length-1];}},{key:'dirty',get:function get(){return this._dirty;}}]);return QueryList;}();var/** @type {?} */_SEPARATOR='#';var/** @type {?} */FACTORY_CLASS_SUFFIX='NgFactory';/**
+     */_createClass(QueryList,[{key:'map',/**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     * @param {?} fn
+     * @return {?}
+     */value:function map(fn){return this._results.map(fn);}/**
+     * See
+     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+     * @param {?} fn
+     * @return {?}
+     */},{key:'filter',value:function filter(fn){return this._results.filter(fn);}/**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     * @param {?} fn
+     * @return {?}
+     */},{key:'find',value:function find(fn){return this._results.find(fn);}/**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     * @param {?} fn
+     * @param {?} init
+     * @return {?}
+     */},{key:'reduce',value:function reduce(fn,init){return this._results.reduce(fn,init);}/**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     * @param {?} fn
+     * @return {?}
+     */},{key:'forEach',value:function forEach(fn){this._results.forEach(fn);}/**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     * @param {?} fn
+     * @return {?}
+     */},{key:'some',value:function some(fn){return this._results.some(fn);}/**
+     * @return {?}
+     */},{key:'toArray',value:function toArray(){return this._results.slice();}/**
+     * @return {?}
+     */},{key:getSymbolIterator(),value:function value(){return this._results[getSymbolIterator()]();}/**
+     * @return {?}
+     */},{key:'toString',value:function toString(){return this._results.toString();}/**
+     * @param {?} res
+     * @return {?}
+     */},{key:'reset',value:function reset(res){this._results=ListWrapper.flatten(res);this._dirty=false;}/**
+     * @return {?}
+     */},{key:'notifyOnChanges',value:function notifyOnChanges(){this._emitter.emit(this);}/**
+     * internal
+     * @return {?}
+     */},{key:'setDirty',value:function setDirty(){this._dirty=true;}/**
+     * internal
+     * @return {?}
+     */},{key:'changes',get:function get(){return this._emitter;}/**
+     * @return {?}
+     */},{key:'length',get:function get(){return this._results.length;}/**
+     * @return {?}
+     */},{key:'first',get:function get(){return this._results[0];}/**
+     * @return {?}
+     */},{key:'last',get:function get(){return this._results[this.length-1];}},{key:'dirty',get:function get(){return this._dirty;}}]);return QueryList;}();var/** @type {?} */_SEPARATOR='#';var/** @type {?} */FACTORY_CLASS_SUFFIX='NgFactory';/**
  * Configuration for SystemJsNgModuleLoader.
  * token.
  *
@@ -1745,7 +3827,13 @@ this._views.slice().forEach(function(view){return view.destroy();});}},{key:'vie
      */function SystemJsNgModuleLoader(_compiler,config){_classCallCheck(this,SystemJsNgModuleLoader);this._compiler=_compiler;this._config=config||DEFAULT_CONFIG;}/**
      * @param {?} path
      * @return {?}
-     */_createClass(SystemJsNgModuleLoader,[{key:'load',value:function load(path){var/** @type {?} */offlineMode=this._compiler instanceof Compiler;return offlineMode?this.loadFactory(path):this.loadAndCompile(path);}},{key:'loadAndCompile',value:function loadAndCompile(path){var _this21=this;var _path$split=path.split(_SEPARATOR),_path$split2=_slicedToArray(_path$split,2),module=_path$split2[0],exportName=_path$split2[1];if(exportName===undefined){exportName='default';}return System.import(module).then(function(module){return module[exportName];}).then(function(type){return checkNotEmpty(type,module,exportName);}).then(function(type){return _this21._compiler.compileModuleAsync(type);});}},{key:'loadFactory',value:function loadFactory(path){var _path$split3=path.split(_SEPARATOR),_path$split4=_slicedToArray(_path$split3,2),module=_path$split4[0],exportName=_path$split4[1];var/** @type {?} */factoryClassSuffix=FACTORY_CLASS_SUFFIX;if(exportName===undefined){exportName='default';factoryClassSuffix='';}return System.import(this._config.factoryPathPrefix+module+this._config.factoryPathSuffix).then(function(module){return module[exportName+factoryClassSuffix];}).then(function(factory){return checkNotEmpty(factory,module,exportName);});}}]);return SystemJsNgModuleLoader;}();SystemJsNgModuleLoader.decorators=[{type:Injectable}];/** @nocollapse */SystemJsNgModuleLoader.ctorParameters=function(){return[{type:Compiler},{type:SystemJsNgModuleLoaderConfig,decorators:[{type:Optional}]}];};/**
+     */_createClass(SystemJsNgModuleLoader,[{key:'load',value:function load(path){var/** @type {?} */offlineMode=this._compiler instanceof Compiler;return offlineMode?this.loadFactory(path):this.loadAndCompile(path);}/**
+     * @param {?} path
+     * @return {?}
+     */},{key:'loadAndCompile',value:function loadAndCompile(path){var _this21=this;var _path$split=path.split(_SEPARATOR),_path$split2=_slicedToArray(_path$split,2),module=_path$split2[0],exportName=_path$split2[1];if(exportName===undefined){exportName='default';}return System.import(module).then(function(module){return module[exportName];}).then(function(type){return checkNotEmpty(type,module,exportName);}).then(function(type){return _this21._compiler.compileModuleAsync(type);});}/**
+     * @param {?} path
+     * @return {?}
+     */},{key:'loadFactory',value:function loadFactory(path){var _path$split3=path.split(_SEPARATOR),_path$split4=_slicedToArray(_path$split3,2),module=_path$split4[0],exportName=_path$split4[1];var/** @type {?} */factoryClassSuffix=FACTORY_CLASS_SUFFIX;if(exportName===undefined){exportName='default';factoryClassSuffix='';}return System.import(this._config.factoryPathPrefix+module+this._config.factoryPathSuffix).then(function(module){return module[exportName+factoryClassSuffix];}).then(function(factory){return checkNotEmpty(factory,module,exportName);});}}]);return SystemJsNgModuleLoader;}();SystemJsNgModuleLoader.decorators=[{type:Injectable}];/** @nocollapse */SystemJsNgModuleLoader.ctorParameters=function(){return[{type:Compiler},{type:SystemJsNgModuleLoaderConfig,decorators:[{type:Optional}]}];};/**
  * @param {?} value
  * @param {?} modulePath
  * @param {?} exportName
@@ -1763,41 +3851,347 @@ this._views.slice().forEach(function(view){return view.destroy();});}},{key:'vie
  * View Container.
  * \@stable
  * @abstract
- */var TemplateRef=function(){function TemplateRef(){_classCallCheck(this,TemplateRef);}_createClass(TemplateRef,[{key:'elementRef',value:function elementRef(){}},{key:'createEmbeddedView',value:function createEmbeddedView(context){}}]);return TemplateRef;}();var TemplateRef_=function(_TemplateRef){_inherits(TemplateRef_,_TemplateRef);/**
+ */var TemplateRef=function(){function TemplateRef(){_classCallCheck(this,TemplateRef);}_createClass(TemplateRef,[{key:'elementRef',/**
+     * @abstract
+     * @return {?}
+     */value:function elementRef(){}/**
+     * @abstract
+     * @param {?} context
+     * @return {?}
+     */},{key:'createEmbeddedView',value:function createEmbeddedView(context){}}]);return TemplateRef;}();/**
+ * workaround https://github.com/angular/tsickle/issues/350
+ * @suppress {checkTypes}
+ */var TemplateRef_=function(_TemplateRef){_inherits(TemplateRef_,_TemplateRef);/**
      * @param {?} _parentView
      * @param {?} _nodeIndex
      * @param {?} _nativeElement
      */function TemplateRef_(_parentView,_nodeIndex,_nativeElement){_classCallCheck(this,TemplateRef_);var _this22=_possibleConstructorReturn(this,(TemplateRef_.__proto__||Object.getPrototypeOf(TemplateRef_)).call(this));_this22._parentView=_parentView;_this22._nodeIndex=_nodeIndex;_this22._nativeElement=_nativeElement;return _this22;}/**
      * @param {?} context
      * @return {?}
-     */_createClass(TemplateRef_,[{key:'createEmbeddedView',value:function createEmbeddedView(context){var/** @type {?} */view=this._parentView.createEmbeddedViewInternal(this._nodeIndex);view.create(context||{});return view.ref;}},{key:'elementRef',get:function get(){return new ElementRef(this._nativeElement);}}]);return TemplateRef_;}(TemplateRef);var ViewContainerRef=function(){function ViewContainerRef(){_classCallCheck(this,ViewContainerRef);}_createClass(ViewContainerRef,[{key:'element',value:function element(){}},{key:'injector',value:function injector(){}},{key:'parentInjector',value:function parentInjector(){}},{key:'clear',value:function clear(){}},{key:'get',value:function get(index){}},{key:'length',value:function length(){}},{key:'createEmbeddedView',value:function createEmbeddedView(templateRef,context,index){}},{key:'createComponent',value:function createComponent(componentFactory,index,injector,projectableNodes){}},{key:'insert',value:function insert(viewRef,index){}},{key:'move',value:function move(viewRef,currentIndex){}},{key:'indexOf',value:function indexOf(viewRef){}},{key:'remove',value:function remove(index){}},{key:'detach',value:function detach(index){}}]);return ViewContainerRef;}();var ViewContainerRef_=function(){/**
+     */_createClass(TemplateRef_,[{key:'createEmbeddedView',value:function createEmbeddedView(context){var/** @type {?} */view=this._parentView.createEmbeddedViewInternal(this._nodeIndex);view.create(context||{});return view.ref;}/**
+     * @return {?}
+     */},{key:'elementRef',get:function get(){return new ElementRef(this._nativeElement);}}]);return TemplateRef_;}(TemplateRef);/**
+ * Represents a container where one or more Views can be attached.
+ *
+ * The container can contain two kinds of Views. Host Views, created by instantiating a
+ * {\@link Component} via {\@link #createComponent}, and Embedded Views, created by instantiating an
+ * {\@link TemplateRef Embedded Template} via {\@link #createEmbeddedView}.
+ *
+ * The location of the View Container within the containing View is specified by the Anchor
+ * `element`. Each View Container can have only one Anchor Element and each Anchor Element can only
+ * have a single View Container.
+ *
+ * Root elements of Views attached to this container become siblings of the Anchor Element in
+ * the Rendered View.
+ *
+ * To access a `ViewContainerRef` of an Element, you can either place a {\@link Directive} injected
+ * with `ViewContainerRef` on the Element, or you obtain it via a {\@link ViewChild} query.
+ * \@stable
+ * @abstract
+ */var ViewContainerRef=function(){function ViewContainerRef(){_classCallCheck(this,ViewContainerRef);}_createClass(ViewContainerRef,[{key:'element',/**
+     * Anchor element that specifies the location of this container in the containing View.
+     * <!-- TODO: rename to anchorElement -->
+     * @abstract
+     * @return {?}
+     */value:function element(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'injector',value:function injector(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'parentInjector',value:function parentInjector(){}/**
+     * Destroys all Views in this container.
+     * @abstract
+     * @return {?}
+     */},{key:'clear',value:function clear(){}/**
+     * Returns the {\@link ViewRef} for the View located in this container at the specified index.
+     * @abstract
+     * @param {?} index
+     * @return {?}
+     */},{key:'get',value:function get(index){}/**
+     * Returns the number of Views currently attached to this container.
+     * @abstract
+     * @return {?}
+     */},{key:'length',value:function length(){}/**
+     * Instantiates an Embedded View based on the {\@link TemplateRef `templateRef`} and inserts it
+     * into this container at the specified `index`.
+     *
+     * If `index` is not specified, the new View will be inserted as the last View in the container.
+     *
+     * Returns the {\@link ViewRef} for the newly created View.
+     * @abstract
+     * @param {?} templateRef
+     * @param {?=} context
+     * @param {?=} index
+     * @return {?}
+     */},{key:'createEmbeddedView',value:function createEmbeddedView(templateRef,context,index){}/**
+     * Instantiates a single {\@link Component} and inserts its Host View into this container at the
+     * specified `index`.
+     *
+     * The component is instantiated using its {\@link ComponentFactory} which can be
+     * obtained via {\@link ComponentFactoryResolver#resolveComponentFactory}.
+     *
+     * If `index` is not specified, the new View will be inserted as the last View in the container.
+     *
+     * You can optionally specify the {\@link Injector} that will be used as parent for the Component.
+     *
+     * Returns the {\@link ComponentRef} of the Host View created for the newly instantiated Component.
+     * @abstract
+     * @param {?} componentFactory
+     * @param {?=} index
+     * @param {?=} injector
+     * @param {?=} projectableNodes
+     * @return {?}
+     */},{key:'createComponent',value:function createComponent(componentFactory,index,injector,projectableNodes){}/**
+     * Inserts a View identified by a {\@link ViewRef} into the container at the specified `index`.
+     *
+     * If `index` is not specified, the new View will be inserted as the last View in the container.
+     *
+     * Returns the inserted {\@link ViewRef}.
+     * @abstract
+     * @param {?} viewRef
+     * @param {?=} index
+     * @return {?}
+     */},{key:'insert',value:function insert(viewRef,index){}/**
+     * Moves a View identified by a {\@link ViewRef} into the container at the specified `index`.
+     *
+     * Returns the inserted {\@link ViewRef}.
+     * @abstract
+     * @param {?} viewRef
+     * @param {?} currentIndex
+     * @return {?}
+     */},{key:'move',value:function move(viewRef,currentIndex){}/**
+     * Returns the index of the View, specified via {\@link ViewRef}, within the current container or
+     * `-1` if this container doesn't contain the View.
+     * @abstract
+     * @param {?} viewRef
+     * @return {?}
+     */},{key:'indexOf',value:function indexOf(viewRef){}/**
+     * Destroys a View attached to this container at the specified `index`.
+     *
+     * If `index` is not specified, the last View in the container will be removed.
+     * @abstract
+     * @param {?=} index
+     * @return {?}
+     */},{key:'remove',value:function remove(index){}/**
+     * Use along with {\@link #insert} to move a View within the current container.
+     *
+     * If the `index` param is omitted, the last {\@link ViewRef} is detached.
+     * @abstract
+     * @param {?=} index
+     * @return {?}
+     */},{key:'detach',value:function detach(index){}}]);return ViewContainerRef;}();var ViewContainerRef_=function(){/**
      * @param {?} _element
      */function ViewContainerRef_(_element){_classCallCheck(this,ViewContainerRef_);this._element=_element;/** @internal */this._createComponentInContainerScope=wtfCreateScope('ViewContainerRef#createComponent()');/** @internal */this._insertScope=wtfCreateScope('ViewContainerRef#insert()');/** @internal */this._removeScope=wtfCreateScope('ViewContainerRef#remove()');/** @internal */this._detachScope=wtfCreateScope('ViewContainerRef#detach()');}/**
      * @param {?} index
      * @return {?}
-     */_createClass(ViewContainerRef_,[{key:'get',value:function get(index){return this._element.nestedViews[index].ref;}},{key:'createEmbeddedView',value:function createEmbeddedView(templateRef){var context=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var index=arguments.length>2&&arguments[2]!==undefined?arguments[2]:-1;var/** @type {?} */viewRef=templateRef.createEmbeddedView(context);this.insert(viewRef,index);return viewRef;}},{key:'createComponent',value:function createComponent(componentFactory){var index=arguments.length>1&&arguments[1]!==undefined?arguments[1]:-1;var injector=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var projectableNodes=arguments.length>3&&arguments[3]!==undefined?arguments[3]:null;var/** @type {?} */s=this._createComponentInContainerScope();var/** @type {?} */contextInjector=injector||this._element.parentInjector;var/** @type {?} */componentRef=componentFactory.create(contextInjector,projectableNodes);this.insert(componentRef.hostView,index);return wtfLeave(s,componentRef);}},{key:'insert',value:function insert(viewRef){var index=arguments.length>1&&arguments[1]!==undefined?arguments[1]:-1;var/** @type {?} */s=this._insertScope();if(index==-1)index=this.length;var/** @type {?} */viewRef_=viewRef;this._element.attachView(viewRef_.internalView,index);return wtfLeave(s,viewRef_);}},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */s=this._insertScope();if(currentIndex==-1)return;var/** @type {?} */viewRef_=viewRef;this._element.moveView(viewRef_.internalView,currentIndex);return wtfLeave(s,viewRef_);}},{key:'indexOf',value:function indexOf(viewRef){return this.length?this._element.nestedViews.indexOf(viewRef.internalView):-1;}},{key:'remove',value:function remove(){var index=arguments.length>0&&arguments[0]!==undefined?arguments[0]:-1;var/** @type {?} */s=this._removeScope();if(index==-1)index=this.length-1;var/** @type {?} */view=this._element.detachView(index);view.destroy();// view is intentionally not returned to the client.
-wtfLeave(s);}},{key:'detach',value:function detach(){var index=arguments.length>0&&arguments[0]!==undefined?arguments[0]:-1;var/** @type {?} */s=this._detachScope();if(index==-1)index=this.length-1;var/** @type {?} */view=this._element.detachView(index);return wtfLeave(s,view.ref);}},{key:'clear',value:function clear(){for(var/** @type {?} */i=this.length-1;i>=0;i--){this.remove(i);}}},{key:'length',get:function get(){var/** @type {?} */views=this._element.nestedViews;return views?views.length:0;}},{key:'element',get:function get(){return this._element.elementRef;}},{key:'injector',get:function get(){return this._element.injector;}},{key:'parentInjector',get:function get(){return this._element.parentInjector;}}]);return ViewContainerRef_;}();var ViewRef=function(_ChangeDetectorRef){_inherits(ViewRef,_ChangeDetectorRef);function ViewRef(){_classCallCheck(this,ViewRef);return _possibleConstructorReturn(this,(ViewRef.__proto__||Object.getPrototypeOf(ViewRef)).apply(this,arguments));}_createClass(ViewRef,[{key:'destroy',value:function destroy(){}},{key:'destroyed',value:function destroyed(){}},{key:'onDestroy',value:function onDestroy(callback){}}]);return ViewRef;}(ChangeDetectorRef);var EmbeddedViewRef=function(_ViewRef){_inherits(EmbeddedViewRef,_ViewRef);function EmbeddedViewRef(){_classCallCheck(this,EmbeddedViewRef);return _possibleConstructorReturn(this,(EmbeddedViewRef.__proto__||Object.getPrototypeOf(EmbeddedViewRef)).apply(this,arguments));}_createClass(EmbeddedViewRef,[{key:'context',value:function context(){}},{key:'rootNodes',value:function rootNodes(){}}]);return EmbeddedViewRef;}(ViewRef);var ViewRef_=function(){/**
+     */_createClass(ViewContainerRef_,[{key:'get',value:function get(index){return this._element.nestedViews[index].ref;}/**
+     * @return {?}
+     */},{key:'createEmbeddedView',/**
+     * @param {?} templateRef
+     * @param {?=} context
+     * @param {?=} index
+     * @return {?}
+     */value:function createEmbeddedView(templateRef){var context=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var index=arguments.length>2&&arguments[2]!==undefined?arguments[2]:-1;var/** @type {?} */viewRef=templateRef.createEmbeddedView(context);this.insert(viewRef,index);return viewRef;}/**
+     * @param {?} componentFactory
+     * @param {?=} index
+     * @param {?=} injector
+     * @param {?=} projectableNodes
+     * @return {?}
+     */},{key:'createComponent',value:function createComponent(componentFactory){var index=arguments.length>1&&arguments[1]!==undefined?arguments[1]:-1;var injector=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var projectableNodes=arguments.length>3&&arguments[3]!==undefined?arguments[3]:null;var/** @type {?} */s=this._createComponentInContainerScope();var/** @type {?} */contextInjector=injector||this._element.parentInjector;var/** @type {?} */componentRef=componentFactory.create(contextInjector,projectableNodes);this.insert(componentRef.hostView,index);return wtfLeave(s,componentRef);}/**
+     * @param {?} viewRef
+     * @param {?=} index
+     * @return {?}
+     */},{key:'insert',value:function insert(viewRef){var index=arguments.length>1&&arguments[1]!==undefined?arguments[1]:-1;var/** @type {?} */s=this._insertScope();if(index==-1)index=this.length;var/** @type {?} */viewRef_=viewRef;this._element.attachView(viewRef_.internalView,index);return wtfLeave(s,viewRef_);}/**
+     * @param {?} viewRef
+     * @param {?} currentIndex
+     * @return {?}
+     */},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */s=this._insertScope();if(currentIndex==-1)return;var/** @type {?} */viewRef_=viewRef;this._element.moveView(viewRef_.internalView,currentIndex);return wtfLeave(s,viewRef_);}/**
+     * @param {?} viewRef
+     * @return {?}
+     */},{key:'indexOf',value:function indexOf(viewRef){return this.length?this._element.nestedViews.indexOf(viewRef.internalView):-1;}/**
+     * @param {?=} index
+     * @return {?}
+     */},{key:'remove',value:function remove(){var index=arguments.length>0&&arguments[0]!==undefined?arguments[0]:-1;var/** @type {?} */s=this._removeScope();if(index==-1)index=this.length-1;var/** @type {?} */view=this._element.detachView(index);view.destroy();// view is intentionally not returned to the client.
+wtfLeave(s);}/**
+     * @param {?=} index
+     * @return {?}
+     */},{key:'detach',value:function detach(){var index=arguments.length>0&&arguments[0]!==undefined?arguments[0]:-1;var/** @type {?} */s=this._detachScope();if(index==-1)index=this.length-1;var/** @type {?} */view=this._element.detachView(index);return wtfLeave(s,view.ref);}/**
+     * @return {?}
+     */},{key:'clear',value:function clear(){for(var/** @type {?} */i=this.length-1;i>=0;i--){this.remove(i);}}},{key:'length',get:function get(){var/** @type {?} */views=this._element.nestedViews;return views?views.length:0;}/**
+     * @return {?}
+     */},{key:'element',get:function get(){return this._element.elementRef;}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return this._element.injector;}/**
+     * @return {?}
+     */},{key:'parentInjector',get:function get(){return this._element.parentInjector;}}]);return ViewContainerRef_;}();/**
+ * \@stable
+ * @abstract
+ */var ViewRef=function(_ChangeDetectorRef){_inherits(ViewRef,_ChangeDetectorRef);function ViewRef(){_classCallCheck(this,ViewRef);return _possibleConstructorReturn(this,(ViewRef.__proto__||Object.getPrototypeOf(ViewRef)).apply(this,arguments));}_createClass(ViewRef,[{key:'destroy',/**
+     * Destroys the view and all of the data structures associated with it.
+     * @abstract
+     * @return {?}
+     */value:function destroy(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'destroyed',value:function destroyed(){}/**
+     * @abstract
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){}}]);return ViewRef;}(ChangeDetectorRef);/**
+ * Represents an Angular View.
+ *
+ * <!-- TODO: move the next two paragraphs to the dev guide -->
+ * A View is a fundamental building block of the application UI. It is the smallest grouping of
+ * Elements which are created and destroyed together.
+ *
+ * Properties of elements in a View can change, but the structure (number and order) of elements in
+ * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
+ * removing nested Views via a {\@link ViewContainerRef}. Each View can contain many View Containers.
+ * <!-- /TODO -->
+ *
+ * ### Example
+ *
+ * Given this template...
+ *
+ * ```
+ * Count: {{items.length}}
+ * <ul>
+ *   <li *ngFor="let  item of items">{{item}}</li>
+ * </ul>
+ * ```
+ *
+ * We have two {\@link TemplateRef}s:
+ *
+ * Outer {\@link TemplateRef}:
+ * ```
+ * Count: {{items.length}}
+ * <ul>
+ *   <template ngFor let-item [ngForOf]="items"></template>
+ * </ul>
+ * ```
+ *
+ * Inner {\@link TemplateRef}:
+ * ```
+ *   <li>{{item}}</li>
+ * ```
+ *
+ * Notice that the original template is broken down into two separate {\@link TemplateRef}s.
+ *
+ * The outer/inner {\@link TemplateRef}s are then assembled into views like so:
+ *
+ * ```
+ * <!-- ViewRef: outer-0 -->
+ * Count: 2
+ * <ul>
+ *   <template view-container-ref></template>
+ *   <!-- ViewRef: inner-1 --><li>first</li><!-- /ViewRef: inner-1 -->
+ *   <!-- ViewRef: inner-2 --><li>second</li><!-- /ViewRef: inner-2 -->
+ * </ul>
+ * <!-- /ViewRef: outer-0 -->
+ * ```
+ * \@experimental
+ * @abstract
+ */var EmbeddedViewRef=function(_ViewRef){_inherits(EmbeddedViewRef,_ViewRef);function EmbeddedViewRef(){_classCallCheck(this,EmbeddedViewRef);return _possibleConstructorReturn(this,(EmbeddedViewRef.__proto__||Object.getPrototypeOf(EmbeddedViewRef)).apply(this,arguments));}_createClass(EmbeddedViewRef,[{key:'context',/**
+     * @abstract
+     * @return {?}
+     */value:function context(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'rootNodes',value:function rootNodes(){}}]);return EmbeddedViewRef;}(ViewRef);var ViewRef_=function(){/**
      * @param {?} _view
      * @param {?} animationQueue
      */function ViewRef_(_view,animationQueue){_classCallCheck(this,ViewRef_);this._view=_view;this.animationQueue=animationQueue;this._view=_view;this._originalMode=this._view.cdMode;}/**
      * @return {?}
-     */_createClass(ViewRef_,[{key:'markForCheck',value:function markForCheck(){this._view.markPathToRootAsCheckOnce();}},{key:'detach',value:function detach(){this._view.cdMode=ChangeDetectorStatus.Detached;}},{key:'detectChanges',value:function detectChanges(){this._view.detectChanges(false);this.animationQueue.flush();}},{key:'checkNoChanges',value:function checkNoChanges(){this._view.detectChanges(true);}},{key:'reattach',value:function reattach(){this._view.cdMode=this._originalMode;this.markForCheck();}},{key:'onDestroy',value:function onDestroy(callback){if(!this._view.disposables){this._view.disposables=[];}this._view.disposables.push(callback);}},{key:'destroy',value:function destroy(){this._view.detachAndDestroy();}},{key:'detachFromContainer',value:function detachFromContainer(){this._view.detach();}},{key:'attachToAppRef',value:function attachToAppRef(appRef){this._view.attachToAppRef(appRef);}},{key:'internalView',get:function get(){return this._view;}},{key:'rootNodes',get:function get(){return this._view.flatRootNodes;}},{key:'context',get:function get(){return this._view.context;}},{key:'destroyed',get:function get(){return this._view.destroyed;}}]);return ViewRef_;}();var EventListener=/**
+     */_createClass(ViewRef_,[{key:'markForCheck',/**
+     * @return {?}
+     */value:function markForCheck(){this._view.markPathToRootAsCheckOnce();}/**
+     * @return {?}
+     */},{key:'detach',value:function detach(){this._view.cdMode=ChangeDetectorStatus.Detached;}/**
+     * @return {?}
+     */},{key:'detectChanges',value:function detectChanges(){this._view.detectChanges(false);this.animationQueue.flush();}/**
+     * @return {?}
+     */},{key:'checkNoChanges',value:function checkNoChanges(){this._view.detectChanges(true);}/**
+     * @return {?}
+     */},{key:'reattach',value:function reattach(){this._view.cdMode=this._originalMode;this.markForCheck();}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){if(!this._view.disposables){this._view.disposables=[];}this._view.disposables.push(callback);}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){this._view.detachAndDestroy();}/**
+     * @return {?}
+     */},{key:'detachFromContainer',value:function detachFromContainer(){this._view.detach();}/**
+     * @param {?} appRef
+     * @return {?}
+     */},{key:'attachToAppRef',value:function attachToAppRef(appRef){this._view.attachToAppRef(appRef);}},{key:'internalView',get:function get(){return this._view;}/**
+     * @return {?}
+     */},{key:'rootNodes',get:function get(){return this._view.flatRootNodes;}/**
+     * @return {?}
+     */},{key:'context',get:function get(){return this._view.context;}/**
+     * @return {?}
+     */},{key:'destroyed',get:function get(){return this._view.destroyed;}}]);return ViewRef_;}();/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */var EventListener=/**
      * @param {?} name
      * @param {?} callback
-     */function EventListener(name,callback){_classCallCheck(this,EventListener);this.name=name;this.callback=callback;};var DebugNode=function(){/**
+     */function EventListener(name,callback){_classCallCheck(this,EventListener);this.name=name;this.callback=callback;};/**
+ * \@experimental All debugging apis are currently experimental.
+ */var DebugNode=function(){/**
      * @param {?} nativeNode
      * @param {?} parent
      * @param {?} _debugInfo
      */function DebugNode(nativeNode,parent,_debugInfo){_classCallCheck(this,DebugNode);this._debugInfo=_debugInfo;this.nativeNode=nativeNode;if(parent&&parent instanceof DebugElement){parent.addChild(this);}else{this.parent=null;}this.listeners=[];}/**
      * @return {?}
-     */_createClass(DebugNode,[{key:'injector',get:function get(){return this._debugInfo?this._debugInfo.injector:null;}},{key:'componentInstance',get:function get(){return this._debugInfo?this._debugInfo.component:null;}},{key:'context',get:function get(){return this._debugInfo?this._debugInfo.context:null;}},{key:'references',get:function get(){return this._debugInfo?this._debugInfo.references:null;}},{key:'providerTokens',get:function get(){return this._debugInfo?this._debugInfo.providerTokens:null;}},{key:'source',get:function get(){return this._debugInfo?this._debugInfo.source:null;}}]);return DebugNode;}();var DebugElement=function(_DebugNode){_inherits(DebugElement,_DebugNode);/**
+     */_createClass(DebugNode,[{key:'injector',get:function get(){return this._debugInfo?this._debugInfo.injector:null;}/**
+     * @return {?}
+     */},{key:'componentInstance',get:function get(){return this._debugInfo?this._debugInfo.component:null;}/**
+     * @return {?}
+     */},{key:'context',get:function get(){return this._debugInfo?this._debugInfo.context:null;}/**
+     * @return {?}
+     */},{key:'references',get:function get(){return this._debugInfo?this._debugInfo.references:null;}/**
+     * @return {?}
+     */},{key:'providerTokens',get:function get(){return this._debugInfo?this._debugInfo.providerTokens:null;}/**
+     * @return {?}
+     */},{key:'source',get:function get(){return this._debugInfo?this._debugInfo.source:null;}}]);return DebugNode;}();/**
+ * \@experimental All debugging apis are currently experimental.
+ */var DebugElement=function(_DebugNode){_inherits(DebugElement,_DebugNode);/**
      * @param {?} nativeNode
      * @param {?} parent
      * @param {?} _debugInfo
      */function DebugElement(nativeNode,parent,_debugInfo){_classCallCheck(this,DebugElement);var _this25=_possibleConstructorReturn(this,(DebugElement.__proto__||Object.getPrototypeOf(DebugElement)).call(this,nativeNode,parent,_debugInfo));_this25.properties={};_this25.attributes={};_this25.classes={};_this25.styles={};_this25.childNodes=[];_this25.nativeElement=nativeNode;return _this25;}/**
      * @param {?} child
      * @return {?}
-     */_createClass(DebugElement,[{key:'addChild',value:function addChild(child){if(child){this.childNodes.push(child);child.parent=this;}}},{key:'removeChild',value:function removeChild(child){var/** @type {?} */childIndex=this.childNodes.indexOf(child);if(childIndex!==-1){child.parent=null;this.childNodes.splice(childIndex,1);}}},{key:'insertChildrenAfter',value:function insertChildrenAfter(child,newChildren){var _this26=this;var/** @type {?} */siblingIndex=this.childNodes.indexOf(child);if(siblingIndex!==-1){var _childNodes;(_childNodes=this.childNodes).splice.apply(_childNodes,[siblingIndex+1,0].concat(_toConsumableArray(newChildren)));newChildren.forEach(function(c){if(c.parent){c.parent.removeChild(c);}c.parent=_this26;});}}},{key:'insertBefore',value:function insertBefore(refChild,newChild){var/** @type {?} */refIndex=this.childNodes.indexOf(refChild);if(refIndex===-1){this.addChild(newChild);}else{if(newChild.parent){newChild.parent.removeChild(newChild);}newChild.parent=this;this.childNodes.splice(refIndex,0,newChild);}}},{key:'query',value:function query(predicate){var/** @type {?} */results=this.queryAll(predicate);return results[0]||null;}},{key:'queryAll',value:function queryAll(predicate){var/** @type {?} */matches=[];_queryElementChildren(this,predicate,matches);return matches;}},{key:'queryAllNodes',value:function queryAllNodes(predicate){var/** @type {?} */matches=[];_queryNodeChildren(this,predicate,matches);return matches;}},{key:'triggerEventHandler',value:function triggerEventHandler(eventName,eventObj){this.listeners.forEach(function(listener){if(listener.name==eventName){listener.callback(eventObj);}});}},{key:'children',get:function get(){return this.childNodes.filter(function(node){return node instanceof DebugElement;});}}]);return DebugElement;}(DebugNode);/**
+     */_createClass(DebugElement,[{key:'addChild',value:function addChild(child){if(child){this.childNodes.push(child);child.parent=this;}}/**
+     * @param {?} child
+     * @return {?}
+     */},{key:'removeChild',value:function removeChild(child){var/** @type {?} */childIndex=this.childNodes.indexOf(child);if(childIndex!==-1){child.parent=null;this.childNodes.splice(childIndex,1);}}/**
+     * @param {?} child
+     * @param {?} newChildren
+     * @return {?}
+     */},{key:'insertChildrenAfter',value:function insertChildrenAfter(child,newChildren){var _this26=this;var/** @type {?} */siblingIndex=this.childNodes.indexOf(child);if(siblingIndex!==-1){var _childNodes;(_childNodes=this.childNodes).splice.apply(_childNodes,[siblingIndex+1,0].concat(_toConsumableArray(newChildren)));newChildren.forEach(function(c){if(c.parent){c.parent.removeChild(c);}c.parent=_this26;});}}/**
+     * @param {?} refChild
+     * @param {?} newChild
+     * @return {?}
+     */},{key:'insertBefore',value:function insertBefore(refChild,newChild){var/** @type {?} */refIndex=this.childNodes.indexOf(refChild);if(refIndex===-1){this.addChild(newChild);}else{if(newChild.parent){newChild.parent.removeChild(newChild);}newChild.parent=this;this.childNodes.splice(refIndex,0,newChild);}}/**
+     * @param {?} predicate
+     * @return {?}
+     */},{key:'query',value:function query(predicate){var/** @type {?} */results=this.queryAll(predicate);return results[0]||null;}/**
+     * @param {?} predicate
+     * @return {?}
+     */},{key:'queryAll',value:function queryAll(predicate){var/** @type {?} */matches=[];_queryElementChildren(this,predicate,matches);return matches;}/**
+     * @param {?} predicate
+     * @return {?}
+     */},{key:'queryAllNodes',value:function queryAllNodes(predicate){var/** @type {?} */matches=[];_queryNodeChildren(this,predicate,matches);return matches;}/**
+     * @return {?}
+     */},{key:'triggerEventHandler',/**
+     * @param {?} eventName
+     * @param {?} eventObj
+     * @return {?}
+     */value:function triggerEventHandler(eventName,eventObj){this.listeners.forEach(function(listener){if(listener.name==eventName){listener.callback(eventObj);}});}},{key:'children',get:function get(){return this.childNodes.filter(function(node){return node instanceof DebugElement;});}}]);return DebugElement;}(DebugNode);/**
  * \@experimental
  * @param {?} debugEls
  * @return {?}
@@ -1825,13 +4219,122 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  */function removeDebugNodeFromIndex(node){_nativeNodeToDebugNode.delete(node.nativeNode);}/**
  * \@experimental Animation support is experimental.
  * @abstract
- */var AnimationPlayer=function(){function AnimationPlayer(){_classCallCheck(this,AnimationPlayer);}_createClass(AnimationPlayer,[{key:'onDone',value:function onDone(fn){}},{key:'onStart',value:function onStart(fn){}},{key:'onDestroy',value:function onDestroy(fn){}},{key:'init',value:function init(){}},{key:'hasStarted',value:function hasStarted(){}},{key:'play',value:function play(){}},{key:'pause',value:function pause(){}},{key:'restart',value:function restart(){}},{key:'finish',value:function finish(){}},{key:'destroy',value:function destroy(){}},{key:'reset',value:function reset(){}},{key:'setPosition',value:function setPosition(p){}},{key:'getPosition',value:function getPosition(){}},{key:'parentPlayer',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');},set:function set(player){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationPlayer;}();var NoOpAnimationPlayer=function(){function NoOpAnimationPlayer(){var _this27=this;_classCallCheck(this,NoOpAnimationPlayer);this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._started=false;this._destroyed=false;this._finished=false;this.parentPlayer=null;scheduleMicroTask(function(){return _this27._onFinish();});}/**
+ */var AnimationPlayer=function(){function AnimationPlayer(){_classCallCheck(this,AnimationPlayer);}_createClass(AnimationPlayer,[{key:'onDone',/**
+     * @abstract
+     * @param {?} fn
      * @return {?}
-     */_createClass(NoOpAnimationPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}},{key:'hasStarted',value:function hasStarted(){return this._started;}},{key:'init',value:function init(){}},{key:'play',value:function play(){if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];}this._started=true;}},{key:'pause',value:function pause(){}},{key:'restart',value:function restart(){}},{key:'finish',value:function finish(){this._onFinish();}},{key:'destroy',value:function destroy(){if(!this._destroyed){this._destroyed=true;this.finish();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}},{key:'reset',value:function reset(){}},{key:'setPosition',value:function setPosition(p){}},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();var TransitionEngine=function(){function TransitionEngine(){_classCallCheck(this,TransitionEngine);}_createClass(TransitionEngine,[{key:'insertNode',value:function insertNode(container,element){}},{key:'removeNode',value:function removeNode(element){}},{key:'process',value:function process(element,instructions){}},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return TransitionEngine;}();var NoOpTransitionEngine=function(_TransitionEngine){_inherits(NoOpTransitionEngine,_TransitionEngine);function NoOpTransitionEngine(){_classCallCheck(this,NoOpTransitionEngine);return _possibleConstructorReturn(this,(NoOpTransitionEngine.__proto__||Object.getPrototypeOf(NoOpTransitionEngine)).call(this));}/**
+     */value:function onDone(fn){}/**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){}/**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'init',value:function init(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'play',value:function play(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'pause',value:function pause(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'restart',value:function restart(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'finish',value:function finish(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'reset',value:function reset(){}/**
+     * @abstract
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){}/**
+     * @return {?}
+     */},{key:'parentPlayer',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}/**
+     * @param {?} player
+     * @return {?}
+     */,set:function set(player){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationPlayer;}();var NoOpAnimationPlayer=function(){function NoOpAnimationPlayer(){var _this27=this;_classCallCheck(this,NoOpAnimationPlayer);this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._started=false;this._destroyed=false;this._finished=false;this.parentPlayer=null;scheduleMicroTask(function(){return _this27._onFinish();});}/**
+     * @return {?}
+     */_createClass(NoOpAnimationPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}/**
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){return this._started;}/**
+     * @return {?}
+     */},{key:'init',value:function init(){}/**
+     * @return {?}
+     */},{key:'play',value:function play(){if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];}this._started=true;}/**
+     * @return {?}
+     */},{key:'pause',value:function pause(){}/**
+     * @return {?}
+     */},{key:'restart',value:function restart(){}/**
+     * @return {?}
+     */},{key:'finish',value:function finish(){this._onFinish();}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){if(!this._destroyed){this._destroyed=true;this.finish();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}/**
+     * @return {?}
+     */},{key:'reset',value:function reset(){}/**
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){}/**
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();/**
+ * \@experimental Transition support is experimental.
+ * @abstract
+ */var TransitionEngine=function(){function TransitionEngine(){_classCallCheck(this,TransitionEngine);}_createClass(TransitionEngine,[{key:'insertNode',/**
+     * @abstract
      * @param {?} container
      * @param {?} element
      * @return {?}
-     */_createClass(NoOpTransitionEngine,[{key:'insertNode',value:function insertNode(container,element){container.appendChild(element);}},{key:'removeNode',value:function removeNode(element){remove(element);}},{key:'process',value:function process(element,instructions){return new NoOpAnimationPlayer();}},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return NoOpTransitionEngine;}(TransitionEngine);/**
+     */value:function insertNode(container,element){}/**
+     * @abstract
+     * @param {?} element
+     * @return {?}
+     */},{key:'removeNode',value:function removeNode(element){}/**
+     * @abstract
+     * @param {?} element
+     * @param {?} instructions
+     * @return {?}
+     */},{key:'process',value:function process(element,instructions){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return TransitionEngine;}();/**
+ * \@experimental Transition support is experimental.
+ */var NoOpTransitionEngine=function(_TransitionEngine){_inherits(NoOpTransitionEngine,_TransitionEngine);function NoOpTransitionEngine(){_classCallCheck(this,NoOpTransitionEngine);return _possibleConstructorReturn(this,(NoOpTransitionEngine.__proto__||Object.getPrototypeOf(NoOpTransitionEngine)).call(this));}/**
+     * @param {?} container
+     * @param {?} element
+     * @return {?}
+     */_createClass(NoOpTransitionEngine,[{key:'insertNode',value:function insertNode(container,element){container.appendChild(element);}/**
+     * @param {?} element
+     * @return {?}
+     */},{key:'removeNode',value:function removeNode(element){remove(element);}/**
+     * @param {?} element
+     * @param {?} instructions
+     * @return {?}
+     */},{key:'process',value:function process(element,instructions){return new NoOpAnimationPlayer();}/**
+     * @return {?}
+     */},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return NoOpTransitionEngine;}(TransitionEngine);/**
  * @param {?} element
  * @return {?}
  */function remove(element){element.parentNode.removeChild(element);}/**
@@ -2150,7 +4653,22 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?} _component
      */function ComponentRef_$1(_view,_viewRef,_component){_classCallCheck(this,ComponentRef_$1);var _this30=_possibleConstructorReturn(this,(ComponentRef_$1.__proto__||Object.getPrototypeOf(ComponentRef_$1)).call(this));_this30._view=_view;_this30._viewRef=_viewRef;_this30._component=_component;_this30._elDef=_this30._view.def.nodes[0];return _this30;}/**
      * @return {?}
-     */_createClass(ComponentRef_$1,[{key:'destroy',value:function destroy(){this._viewRef.destroy();}},{key:'onDestroy',value:function onDestroy(callback){this._viewRef.onDestroy(callback);}},{key:'location',get:function get(){return new ElementRef(asElementData(this._view,this._elDef.index).renderElement);}},{key:'injector',get:function get(){return new Injector_(this._view,this._elDef);}},{key:'instance',get:function get(){return this._component;}},{key:'hostView',get:function get(){return this._viewRef;}},{key:'changeDetectorRef',get:function get(){return this._viewRef;}},{key:'componentType',get:function get(){return this._component.constructor;}}]);return ComponentRef_$1;}(ComponentRef);/**
+     */_createClass(ComponentRef_$1,[{key:'destroy',/**
+     * @return {?}
+     */value:function destroy(){this._viewRef.destroy();}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){this._viewRef.onDestroy(callback);}},{key:'location',get:function get(){return new ElementRef(asElementData(this._view,this._elDef.index).renderElement);}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return new Injector_(this._view,this._elDef);}/**
+     * @return {?}
+     */},{key:'instance',get:function get(){return this._component;}},{key:'hostView',/**
+     * @return {?}
+     */get:function get(){return this._viewRef;}},{key:'changeDetectorRef',/**
+     * @return {?}
+     */get:function get(){return this._viewRef;}},{key:'componentType',/**
+     * @return {?}
+     */get:function get(){return this._component.constructor;}}]);return ComponentRef_$1;}(ComponentRef);/**
  * @param {?} view
  * @param {?} elDef
  * @return {?}
@@ -2159,14 +4677,83 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?} _elDef
      */function ViewContainerRef_$1(_view,_elDef){_classCallCheck(this,ViewContainerRef_$1);this._view=_view;this._elDef=_elDef;this._data=asElementData(_view,_elDef.index);}/**
      * @return {?}
-     */_createClass(ViewContainerRef_$1,[{key:'clear',value:function clear(){var/** @type {?} */len=this._data.embeddedViews.length;for(var/** @type {?} */i=len-1;i>=0;i--){var/** @type {?} */view=Services.detachEmbeddedView(this._data,i);Services.destroyView(view);}}},{key:'get',value:function get(index){return this._getViewRef(this._data.embeddedViews[index]);}},{key:'_getViewRef',value:function _getViewRef(view){if(view){var/** @type {?} */ref=new ViewRef_$1(view);ref.attachToViewContainerRef(this);return ref;}return null;}},{key:'createEmbeddedView',value:function createEmbeddedView(templateRef,context,index){var/** @type {?} */viewRef=templateRef.createEmbeddedView(context||{});this.insert(viewRef,index);return viewRef;}},{key:'createComponent',value:function createComponent(componentFactory,index,injector,projectableNodes){var/** @type {?} */contextInjector=injector||this.parentInjector;var/** @type {?} */componentRef=componentFactory.create(contextInjector,projectableNodes);this.insert(componentRef.hostView,index);return componentRef;}},{key:'insert',value:function insert(viewRef,index){var/** @type {?} */viewRef_=viewRef;var/** @type {?} */viewData=viewRef_._view;Services.attachEmbeddedView(this._data,index,viewData);viewRef_.attachToViewContainerRef(this);return viewRef;}},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */previousIndex=this._data.embeddedViews.indexOf(viewRef._view);Services.moveEmbeddedView(this._data,previousIndex,currentIndex);return viewRef;}},{key:'indexOf',value:function indexOf(viewRef){return this._data.embeddedViews.indexOf(viewRef._view);}},{key:'remove',value:function remove(index){var/** @type {?} */viewData=Services.detachEmbeddedView(this._data,index);if(viewData){Services.destroyView(viewData);}}},{key:'detach',value:function detach(index){var/** @type {?} */view=Services.detachEmbeddedView(this._data,index);if(view){var/** @type {?} */viewRef=this._getViewRef(view);viewRef.detachFromContainer();return viewRef;}return null;}},{key:'element',get:function get(){return new ElementRef(this._data.renderElement);}},{key:'injector',get:function get(){return new Injector_(this._view,this._elDef);}},{key:'parentInjector',get:function get(){var/** @type {?} */view=this._view;var/** @type {?} */elDef=this._elDef.parent;while(!elDef&&view){elDef=viewParentEl(view);view=view.parent;}return view?new Injector_(view,elDef):this._view.root.injector;}},{key:'length',get:function get(){return this._data.embeddedViews.length;}}]);return ViewContainerRef_$1;}();/**
+     */_createClass(ViewContainerRef_$1,[{key:'clear',/**
+     * @return {?}
+     */value:function clear(){var/** @type {?} */len=this._data.embeddedViews.length;for(var/** @type {?} */i=len-1;i>=0;i--){var/** @type {?} */view=Services.detachEmbeddedView(this._data,i);Services.destroyView(view);}}/**
+     * @param {?} index
+     * @return {?}
+     */},{key:'get',value:function get(index){return this._getViewRef(this._data.embeddedViews[index]);}/**
+     * @param {?} view
+     * @return {?}
+     */},{key:'_getViewRef',value:function _getViewRef(view){if(view){var/** @type {?} */ref=new ViewRef_$1(view);ref.attachToViewContainerRef(this);return ref;}return null;}/**
+     * @return {?}
+     */},{key:'createEmbeddedView',/**
+     * @param {?} templateRef
+     * @param {?=} context
+     * @param {?=} index
+     * @return {?}
+     */value:function createEmbeddedView(templateRef,context,index){var/** @type {?} */viewRef=templateRef.createEmbeddedView(context||{});this.insert(viewRef,index);return viewRef;}/**
+     * @param {?} componentFactory
+     * @param {?=} index
+     * @param {?=} injector
+     * @param {?=} projectableNodes
+     * @return {?}
+     */},{key:'createComponent',value:function createComponent(componentFactory,index,injector,projectableNodes){var/** @type {?} */contextInjector=injector||this.parentInjector;var/** @type {?} */componentRef=componentFactory.create(contextInjector,projectableNodes);this.insert(componentRef.hostView,index);return componentRef;}/**
+     * @param {?} viewRef
+     * @param {?=} index
+     * @return {?}
+     */},{key:'insert',value:function insert(viewRef,index){var/** @type {?} */viewRef_=viewRef;var/** @type {?} */viewData=viewRef_._view;Services.attachEmbeddedView(this._data,index,viewData);viewRef_.attachToViewContainerRef(this);return viewRef;}/**
+     * @param {?} viewRef
+     * @param {?} currentIndex
+     * @return {?}
+     */},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */previousIndex=this._data.embeddedViews.indexOf(viewRef._view);Services.moveEmbeddedView(this._data,previousIndex,currentIndex);return viewRef;}/**
+     * @param {?} viewRef
+     * @return {?}
+     */},{key:'indexOf',value:function indexOf(viewRef){return this._data.embeddedViews.indexOf(viewRef._view);}/**
+     * @param {?=} index
+     * @return {?}
+     */},{key:'remove',value:function remove(index){var/** @type {?} */viewData=Services.detachEmbeddedView(this._data,index);if(viewData){Services.destroyView(viewData);}}/**
+     * @param {?=} index
+     * @return {?}
+     */},{key:'detach',value:function detach(index){var/** @type {?} */view=Services.detachEmbeddedView(this._data,index);if(view){var/** @type {?} */viewRef=this._getViewRef(view);viewRef.detachFromContainer();return viewRef;}return null;}},{key:'element',get:function get(){return new ElementRef(this._data.renderElement);}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return new Injector_(this._view,this._elDef);}/**
+     * @return {?}
+     */},{key:'parentInjector',get:function get(){var/** @type {?} */view=this._view;var/** @type {?} */elDef=this._elDef.parent;while(!elDef&&view){elDef=viewParentEl(view);view=view.parent;}return view?new Injector_(view,elDef):this._view.root.injector;}},{key:'length',get:function get(){return this._data.embeddedViews.length;}}]);return ViewContainerRef_$1;}();/**
  * @param {?} view
  * @return {?}
  */function createChangeDetectorRef(view){return new ViewRef_$1(view);}var ViewRef_$1=function(){/**
      * @param {?} _view
      */function ViewRef_$1(_view){_classCallCheck(this,ViewRef_$1);this._view=_view;this._viewContainerRef=null;this._appRef=null;}/**
      * @return {?}
-     */_createClass(ViewRef_$1,[{key:'markForCheck',value:function markForCheck(){this.reattach();}},{key:'detach',value:function detach(){this._view.state&=~ViewState.ChecksEnabled;}},{key:'detectChanges',value:function detectChanges(){Services.checkAndUpdateView(this._view);}},{key:'checkNoChanges',value:function checkNoChanges(){Services.checkNoChangesView(this._view);}},{key:'reattach',value:function reattach(){this._view.state|=ViewState.ChecksEnabled;}},{key:'onDestroy',value:function onDestroy(callback){if(!this._view.disposables){this._view.disposables=[];}this._view.disposables.push(/** @type {?} */callback);}},{key:'destroy',value:function destroy(){if(this._appRef){this._appRef.detachView(this);}else if(this._viewContainerRef){this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));}Services.destroyView(this._view);}},{key:'detachFromContainer',value:function detachFromContainer(){this._appRef=null;this._viewContainerRef=null;}},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this._viewContainerRef){throw new Error('This view is already attached to a ViewContainer!');}this._appRef=appRef;}},{key:'attachToViewContainerRef',value:function attachToViewContainerRef(vcRef){if(this._appRef){throw new Error('This view is already attached directly to the ApplicationRef!');}this._viewContainerRef=vcRef;}},{key:'rootNodes',get:function get(){return rootRenderNodes(this._view);}},{key:'context',get:function get(){return this._view.context;}},{key:'destroyed',get:function get(){return(this._view.state&ViewState.Destroyed)!==0;}}]);return ViewRef_$1;}();/**
+     */_createClass(ViewRef_$1,[{key:'markForCheck',/**
+     * @return {?}
+     */value:function markForCheck(){this.reattach();}/**
+     * @return {?}
+     */},{key:'detach',value:function detach(){this._view.state&=~ViewState.ChecksEnabled;}/**
+     * @return {?}
+     */},{key:'detectChanges',value:function detectChanges(){Services.checkAndUpdateView(this._view);}/**
+     * @return {?}
+     */},{key:'checkNoChanges',value:function checkNoChanges(){Services.checkNoChangesView(this._view);}/**
+     * @return {?}
+     */},{key:'reattach',value:function reattach(){this._view.state|=ViewState.ChecksEnabled;}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(callback){if(!this._view.disposables){this._view.disposables=[];}this._view.disposables.push(/** @type {?} */callback);}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){if(this._appRef){this._appRef.detachView(this);}else if(this._viewContainerRef){this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));}Services.destroyView(this._view);}/**
+     * @return {?}
+     */},{key:'detachFromContainer',value:function detachFromContainer(){this._appRef=null;this._viewContainerRef=null;}/**
+     * @param {?} appRef
+     * @return {?}
+     */},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this._viewContainerRef){throw new Error('This view is already attached to a ViewContainer!');}this._appRef=appRef;}/**
+     * @param {?} vcRef
+     * @return {?}
+     */},{key:'attachToViewContainerRef',value:function attachToViewContainerRef(vcRef){if(this._appRef){throw new Error('This view is already attached directly to the ApplicationRef!');}this._viewContainerRef=vcRef;}},{key:'rootNodes',get:function get(){return rootRenderNodes(this._view);}/**
+     * @return {?}
+     */},{key:'context',get:function get(){return this._view.context;}/**
+     * @return {?}
+     */},{key:'destroyed',get:function get(){return(this._view.state&ViewState.Destroyed)!==0;}}]);return ViewRef_$1;}();/**
  * @param {?} view
  * @param {?} def
  * @return {?}
@@ -2176,7 +4763,9 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      */function TemplateRef_$1(_parentView,_def){_classCallCheck(this,TemplateRef_$1);this._parentView=_parentView;this._def=_def;}/**
      * @param {?} context
      * @return {?}
-     */_createClass(TemplateRef_$1,[{key:'createEmbeddedView',value:function createEmbeddedView(context){return new ViewRef_$1(Services.createEmbeddedView(this._parentView,this._def,context));}},{key:'elementRef',get:function get(){return new ElementRef(asElementData(this._parentView,this._def.index).renderElement);}}]);return TemplateRef_$1;}();/**
+     */_createClass(TemplateRef_$1,[{key:'createEmbeddedView',value:function createEmbeddedView(context){return new ViewRef_$1(Services.createEmbeddedView(this._parentView,this._def,context));}/**
+     * @return {?}
+     */},{key:'elementRef',get:function get(){return new ElementRef(asElementData(this._parentView,this._def.index).renderElement);}}]);return TemplateRef_$1;}();/**
  * @param {?} view
  * @param {?} elDef
  * @return {?}
@@ -2199,7 +4788,82 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      */function RendererAdapter(delegate){_classCallCheck(this,RendererAdapter);this.delegate=delegate;}/**
      * @param {?} selectorOrNode
      * @return {?}
-     */_createClass(RendererAdapter,[{key:'selectRootElement',value:function selectRootElement(selectorOrNode){return this.delegate.selectRootElement(selectorOrNode);}},{key:'createElement',value:function createElement(parent,namespaceAndName){var _splitNamespace7=splitNamespace(namespaceAndName),_splitNamespace8=_slicedToArray(_splitNamespace7,2),ns=_splitNamespace8[0],name=_splitNamespace8[1];var/** @type {?} */el=this.delegate.createElement(name,ns);if(parent){this.delegate.appendChild(parent,el);}return el;}},{key:'createViewRoot',value:function createViewRoot(hostElement){return hostElement;}},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement){var/** @type {?} */comment=this.delegate.createComment('');if(parentElement){this.delegate.appendChild(parentElement,comment);}return comment;}},{key:'createText',value:function createText(parentElement,value){var/** @type {?} */node=this.delegate.createText(value);if(parentElement){this.delegate.appendChild(parentElement,node);}return node;}},{key:'projectNodes',value:function projectNodes(parentElement,nodes){for(var/** @type {?} */i=0;i<nodes.length;i++){this.delegate.appendChild(parentElement,nodes[i]);}}},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){var/** @type {?} */parentElement=this.delegate.parentNode(node);var/** @type {?} */nextSibling=this.delegate.nextSibling(node);for(var/** @type {?} */i=0;i<viewRootNodes.length;i++){this.delegate.insertBefore(parentElement,viewRootNodes[i],nextSibling);}}},{key:'detachView',value:function detachView(viewRootNodes){for(var/** @type {?} */i=0;i<viewRootNodes.length;i++){var/** @type {?} */node=viewRootNodes[i];var/** @type {?} */parentElement=this.delegate.parentNode(node);this.delegate.removeChild(parentElement,node);}}},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){for(var/** @type {?} */i=0;i<viewAllNodes.length;i++){this.delegate.destroyNode(viewAllNodes[i]);}}},{key:'listen',value:function listen(renderElement,name,callback){return this.delegate.listen(renderElement,name,/** @type {?} */callback);}},{key:'listenGlobal',value:function listenGlobal(target,name,callback){return this.delegate.listen(target,name,/** @type {?} */callback);}},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){this.delegate.setProperty(renderElement,propertyName,propertyValue);}},{key:'setElementAttribute',value:function setElementAttribute(renderElement,namespaceAndName,attributeValue){var _splitNamespace9=splitNamespace(namespaceAndName),_splitNamespace10=_slicedToArray(_splitNamespace9,2),ns=_splitNamespace10[0],name=_splitNamespace10[1];if(attributeValue!=null){this.delegate.setAttribute(renderElement,name,attributeValue,ns);}else{this.delegate.removeAttribute(renderElement,name,ns);}}},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){}},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){if(isAdd){this.delegate.addClass(renderElement,className);}else{this.delegate.removeClass(renderElement,className);}}},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){if(styleValue!=null){this.delegate.setStyle(renderElement,styleName,styleValue,false,false);}else{this.delegate.removeStyle(renderElement,styleName,false);}}},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){renderElement[methodName].apply(renderElement,args);}},{key:'setText',value:function setText(renderNode,text){this.delegate.setValue(renderNode,text);}},{key:'animate',value:function animate(){return new NoOpAnimationPlayer();}}]);return RendererAdapter;}();var/** @type {?} */RendererV1TokenKey=tokenKey(RendererV1);var/** @type {?} */RendererV2TokenKey=tokenKey(RendererV2);var/** @type {?} */ElementRefTokenKey=tokenKey(ElementRef);var/** @type {?} */ViewContainerRefTokenKey=tokenKey(ViewContainerRef);var/** @type {?} */TemplateRefTokenKey=tokenKey(TemplateRef);var/** @type {?} */ChangeDetectorRefTokenKey=tokenKey(ChangeDetectorRef);var/** @type {?} */InjectorRefTokenKey=tokenKey(Injector);var/** @type {?} */NOT_CREATED=new Object();/**
+     */_createClass(RendererAdapter,[{key:'selectRootElement',value:function selectRootElement(selectorOrNode){return this.delegate.selectRootElement(selectorOrNode);}/**
+     * @param {?} parent
+     * @param {?} namespaceAndName
+     * @return {?}
+     */},{key:'createElement',value:function createElement(parent,namespaceAndName){var _splitNamespace7=splitNamespace(namespaceAndName),_splitNamespace8=_slicedToArray(_splitNamespace7,2),ns=_splitNamespace8[0],name=_splitNamespace8[1];var/** @type {?} */el=this.delegate.createElement(name,ns);if(parent){this.delegate.appendChild(parent,el);}return el;}/**
+     * @param {?} hostElement
+     * @return {?}
+     */},{key:'createViewRoot',value:function createViewRoot(hostElement){return hostElement;}/**
+     * @param {?} parentElement
+     * @return {?}
+     */},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement){var/** @type {?} */comment=this.delegate.createComment('');if(parentElement){this.delegate.appendChild(parentElement,comment);}return comment;}/**
+     * @param {?} parentElement
+     * @param {?} value
+     * @return {?}
+     */},{key:'createText',value:function createText(parentElement,value){var/** @type {?} */node=this.delegate.createText(value);if(parentElement){this.delegate.appendChild(parentElement,node);}return node;}/**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */},{key:'projectNodes',value:function projectNodes(parentElement,nodes){for(var/** @type {?} */i=0;i<nodes.length;i++){this.delegate.appendChild(parentElement,nodes[i]);}}/**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){var/** @type {?} */parentElement=this.delegate.parentNode(node);var/** @type {?} */nextSibling=this.delegate.nextSibling(node);for(var/** @type {?} */i=0;i<viewRootNodes.length;i++){this.delegate.insertBefore(parentElement,viewRootNodes[i],nextSibling);}}/**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'detachView',value:function detachView(viewRootNodes){for(var/** @type {?} */i=0;i<viewRootNodes.length;i++){var/** @type {?} */node=viewRootNodes[i];var/** @type {?} */parentElement=this.delegate.parentNode(node);this.delegate.removeChild(parentElement,node);}}/**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){for(var/** @type {?} */i=0;i<viewAllNodes.length;i++){this.delegate.destroyNode(viewAllNodes[i]);}}/**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listen',value:function listen(renderElement,name,callback){return this.delegate.listen(renderElement,name,/** @type {?} */callback);}/**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listenGlobal',value:function listenGlobal(target,name,callback){return this.delegate.listen(target,name,/** @type {?} */callback);}/**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){this.delegate.setProperty(renderElement,propertyName,propertyValue);}/**
+     * @param {?} renderElement
+     * @param {?} namespaceAndName
+     * @param {?} attributeValue
+     * @return {?}
+     */},{key:'setElementAttribute',value:function setElementAttribute(renderElement,namespaceAndName,attributeValue){var _splitNamespace9=splitNamespace(namespaceAndName),_splitNamespace10=_slicedToArray(_splitNamespace9,2),ns=_splitNamespace10[0],name=_splitNamespace10[1];if(attributeValue!=null){this.delegate.setAttribute(renderElement,name,attributeValue,ns);}else{this.delegate.removeAttribute(renderElement,name,ns);}}/**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){}/**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){if(isAdd){this.delegate.addClass(renderElement,className);}else{this.delegate.removeClass(renderElement,className);}}/**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){if(styleValue!=null){this.delegate.setStyle(renderElement,styleName,styleValue,false,false);}else{this.delegate.removeStyle(renderElement,styleName,false);}}/**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?} args
+     * @return {?}
+     */},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){renderElement[methodName].apply(renderElement,args);}/**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */},{key:'setText',value:function setText(renderNode,text){this.delegate.setValue(renderNode,text);}/**
+     * @return {?}
+     */},{key:'animate',value:function animate(){return new NoOpAnimationPlayer();}}]);return RendererAdapter;}();var/** @type {?} */RendererV1TokenKey=tokenKey(RendererV1);var/** @type {?} */RendererV2TokenKey=tokenKey(RendererV2);var/** @type {?} */ElementRefTokenKey=tokenKey(ElementRef);var/** @type {?} */ViewContainerRefTokenKey=tokenKey(ViewContainerRef);var/** @type {?} */TemplateRefTokenKey=tokenKey(TemplateRef);var/** @type {?} */ChangeDetectorRefTokenKey=tokenKey(ChangeDetectorRef);var/** @type {?} */InjectorRefTokenKey=tokenKey(Injector);var/** @type {?} */NOT_CREATED=new Object();/**
  * @param {?} flags
  * @param {?} matchedQueries
  * @param {?} childCount
@@ -2781,7 +5445,21 @@ return value?value.toString().slice(0,20):value;}catch(e){return'[ERROR] Excepti
      * @param {?} nodeIndex
      */function DebugContext_(view,nodeIndex){_classCallCheck(this,DebugContext_);this.view=view;this.nodeIndex=nodeIndex;if(nodeIndex==null){this.nodeIndex=nodeIndex=0;}this.nodeDef=view.def.nodes[nodeIndex];var elDef=this.nodeDef;var elView=view;while(elDef&&elDef.type!==NodeType.Element){elDef=elDef.parent;}if(!elDef){while(!elDef&&elView){elDef=viewParentEl(elView);elView=elView.parent;}}this.elDef=elDef;this.elView=elView;this.compProviderDef=elView?this.elDef.element.component:null;}/**
      * @return {?}
-     */_createClass(DebugContext_,[{key:'injector',get:function get(){return createInjector(this.elView,this.elDef);}},{key:'component',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.component;}},{key:'context',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.context;}},{key:'providerTokens',get:function get(){var/** @type {?} */tokens=[];if(this.elDef){for(var/** @type {?} */i=this.elDef.index+1;i<=this.elDef.index+this.elDef.childCount;i++){var/** @type {?} */childDef=this.elView.def.nodes[i];if(childDef.type===NodeType.Provider||childDef.type===NodeType.Directive){tokens.push(childDef.provider.token);}i+=childDef.childCount;}}return tokens;}},{key:'references',get:function get(){var/** @type {?} */references={};if(this.elDef){collectReferences(this.elView,this.elDef,references);for(var/** @type {?} */i=this.elDef.index+1;i<=this.elDef.index+this.elDef.childCount;i++){var/** @type {?} */childDef=this.elView.def.nodes[i];if(childDef.type===NodeType.Provider||childDef.type===NodeType.Directive){collectReferences(this.elView,childDef,references);}i+=childDef.childCount;}}return references;}},{key:'source',get:function get(){if(this.nodeDef.type===NodeType.Text){return this.nodeDef.text.source;}else{return this.elDef.element.source;}}},{key:'componentRenderElement',get:function get(){var/** @type {?} */view=this.compProviderDef?asProviderData(this.elView,this.compProviderDef.index).componentView:this.view;var/** @type {?} */elData=findHostElement(view);return elData?elData.renderElement:undefined;}},{key:'renderNode',get:function get(){return this.nodeDef.type===NodeType.Text?renderNode(this.view,this.nodeDef):renderNode(this.elView,this.elDef);}}]);return DebugContext_;}();/**
+     */_createClass(DebugContext_,[{key:'injector',get:function get(){return createInjector(this.elView,this.elDef);}/**
+     * @return {?}
+     */},{key:'component',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.component;}/**
+     * @return {?}
+     */},{key:'context',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.context;}/**
+     * @return {?}
+     */},{key:'providerTokens',get:function get(){var/** @type {?} */tokens=[];if(this.elDef){for(var/** @type {?} */i=this.elDef.index+1;i<=this.elDef.index+this.elDef.childCount;i++){var/** @type {?} */childDef=this.elView.def.nodes[i];if(childDef.type===NodeType.Provider||childDef.type===NodeType.Directive){tokens.push(childDef.provider.token);}i+=childDef.childCount;}}return tokens;}/**
+     * @return {?}
+     */},{key:'references',get:function get(){var/** @type {?} */references={};if(this.elDef){collectReferences(this.elView,this.elDef,references);for(var/** @type {?} */i=this.elDef.index+1;i<=this.elDef.index+this.elDef.childCount;i++){var/** @type {?} */childDef=this.elView.def.nodes[i];if(childDef.type===NodeType.Provider||childDef.type===NodeType.Directive){collectReferences(this.elView,childDef,references);}i+=childDef.childCount;}}return references;}/**
+     * @return {?}
+     */},{key:'source',get:function get(){if(this.nodeDef.type===NodeType.Text){return this.nodeDef.text.source;}else{return this.elDef.element.source;}}/**
+     * @return {?}
+     */},{key:'componentRenderElement',get:function get(){var/** @type {?} */view=this.compProviderDef?asProviderData(this.elView,this.compProviderDef.index).componentView:this.view;var/** @type {?} */elData=findHostElement(view);return elData?elData.renderElement:undefined;}/**
+     * @return {?}
+     */},{key:'renderNode',get:function get(){return this.nodeDef.type===NodeType.Text?renderNode(this.view,this.nodeDef):renderNode(this.elView,this.elDef);}}]);return DebugContext_;}();/**
  * @param {?} view
  * @return {?}
  */function findHostElement(view){while(view&&!isComponentView(view)){view=view.parent;}if(view.parent){return asElementData(view.parent,viewParentEl(view).index);}return undefined;}/**
@@ -2808,7 +5486,86 @@ return value?value.toString().slice(0,20):value;}catch(e){return'[ERROR] Excepti
      */function DebugRendererV2(delegate){_classCallCheck(this,DebugRendererV2);this.delegate=delegate;}/**
      * @param {?} node
      * @return {?}
-     */_createClass(DebugRendererV2,[{key:'destroyNode',value:function destroyNode(node){removeDebugNodeFromIndex(getDebugNode(node));if(this.delegate.destroyNode){this.delegate.destroyNode(node);}}},{key:'destroy',value:function destroy(){this.delegate.destroy();}},{key:'createElement',value:function createElement(name,namespace){var/** @type {?} */el=this.delegate.createElement(name,namespace);var/** @type {?} */debugEl=new DebugElement(el,null,getCurrentDebugContext());debugEl.name=name;indexDebugNode(debugEl);return el;}},{key:'createComment',value:function createComment(value){var/** @type {?} */comment=this.delegate.createComment(value);var/** @type {?} */debugEl=new DebugNode(comment,null,getCurrentDebugContext());indexDebugNode(debugEl);return comment;}},{key:'createText',value:function createText(value){var/** @type {?} */text=this.delegate.createText(value);var/** @type {?} */debugEl=new DebugNode(text,null,getCurrentDebugContext());indexDebugNode(debugEl);return text;}},{key:'appendChild',value:function appendChild(parent,newChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(newChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.addChild(debugChildEl);}this.delegate.appendChild(parent,newChild);}},{key:'insertBefore',value:function insertBefore(parent,newChild,refChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(newChild);var/** @type {?} */debugRefEl=getDebugNode(refChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.insertBefore(debugRefEl,debugChildEl);}this.delegate.insertBefore(parent,newChild,refChild);}},{key:'removeChild',value:function removeChild(parent,oldChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(oldChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.removeChild(debugChildEl);}this.delegate.removeChild(parent,oldChild);}},{key:'selectRootElement',value:function selectRootElement(selectorOrNode){var/** @type {?} */el=this.delegate.selectRootElement(selectorOrNode);var/** @type {?} */debugEl=new DebugElement(el,null,getCurrentDebugContext());indexDebugNode(debugEl);return el;}},{key:'setAttribute',value:function setAttribute(el,name,value,namespace){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){var/** @type {?} */fullName=namespace?namespace+':'+name:name;debugEl.attributes[fullName]=value;}this.delegate.setAttribute(el,name,value,namespace);}},{key:'removeAttribute',value:function removeAttribute(el,name,namespace){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){var/** @type {?} */fullName=namespace?namespace+':'+name:name;debugEl.attributes[fullName]=null;}this.delegate.removeAttribute(el,name,namespace);}},{key:'addClass',value:function addClass(el,name){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.classes[name]=true;}this.delegate.addClass(el,name);}},{key:'removeClass',value:function removeClass(el,name){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.classes[name]=false;}this.delegate.removeClass(el,name);}},{key:'setStyle',value:function setStyle(el,style,value,hasVendorPrefix,hasImportant){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.styles[style]=value;}this.delegate.setStyle(el,style,value,hasVendorPrefix,hasImportant);}},{key:'removeStyle',value:function removeStyle(el,style,hasVendorPrefix){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.styles[style]=null;}this.delegate.removeStyle(el,style,hasVendorPrefix);}},{key:'setProperty',value:function setProperty(el,name,value){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.properties[name]=value;}this.delegate.setProperty(el,name,value);}},{key:'listen',value:function listen(target,eventName,callback){if(typeof target!=='string'){var/** @type {?} */debugEl=getDebugNode(target);if(debugEl){debugEl.listeners.push(new EventListener(eventName,callback));}}return this.delegate.listen(target,eventName,callback);}},{key:'parentNode',value:function parentNode(node){return this.delegate.parentNode(node);}},{key:'nextSibling',value:function nextSibling(node){return this.delegate.nextSibling(node);}},{key:'setValue',value:function setValue(node,value){return this.delegate.setValue(node,value);}}]);return DebugRendererV2;}();/**
+     */_createClass(DebugRendererV2,[{key:'destroyNode',value:function destroyNode(node){removeDebugNodeFromIndex(getDebugNode(node));if(this.delegate.destroyNode){this.delegate.destroyNode(node);}}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){this.delegate.destroy();}/**
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'createElement',value:function createElement(name,namespace){var/** @type {?} */el=this.delegate.createElement(name,namespace);var/** @type {?} */debugEl=new DebugElement(el,null,getCurrentDebugContext());debugEl.name=name;indexDebugNode(debugEl);return el;}/**
+     * @param {?} value
+     * @return {?}
+     */},{key:'createComment',value:function createComment(value){var/** @type {?} */comment=this.delegate.createComment(value);var/** @type {?} */debugEl=new DebugNode(comment,null,getCurrentDebugContext());indexDebugNode(debugEl);return comment;}/**
+     * @param {?} value
+     * @return {?}
+     */},{key:'createText',value:function createText(value){var/** @type {?} */text=this.delegate.createText(value);var/** @type {?} */debugEl=new DebugNode(text,null,getCurrentDebugContext());indexDebugNode(debugEl);return text;}/**
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */},{key:'appendChild',value:function appendChild(parent,newChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(newChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.addChild(debugChildEl);}this.delegate.appendChild(parent,newChild);}/**
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */},{key:'insertBefore',value:function insertBefore(parent,newChild,refChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(newChild);var/** @type {?} */debugRefEl=getDebugNode(refChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.insertBefore(debugRefEl,debugChildEl);}this.delegate.insertBefore(parent,newChild,refChild);}/**
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */},{key:'removeChild',value:function removeChild(parent,oldChild){var/** @type {?} */debugEl=getDebugNode(parent);var/** @type {?} */debugChildEl=getDebugNode(oldChild);if(debugEl&&debugChildEl&&debugEl instanceof DebugElement){debugEl.removeChild(debugChildEl);}this.delegate.removeChild(parent,oldChild);}/**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */},{key:'selectRootElement',value:function selectRootElement(selectorOrNode){var/** @type {?} */el=this.delegate.selectRootElement(selectorOrNode);var/** @type {?} */debugEl=new DebugElement(el,null,getCurrentDebugContext());indexDebugNode(debugEl);return el;}/**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'setAttribute',value:function setAttribute(el,name,value,namespace){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){var/** @type {?} */fullName=namespace?namespace+':'+name:name;debugEl.attributes[fullName]=value;}this.delegate.setAttribute(el,name,value,namespace);}/**
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */},{key:'removeAttribute',value:function removeAttribute(el,name,namespace){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){var/** @type {?} */fullName=namespace?namespace+':'+name:name;debugEl.attributes[fullName]=null;}this.delegate.removeAttribute(el,name,namespace);}/**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */},{key:'addClass',value:function addClass(el,name){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.classes[name]=true;}this.delegate.addClass(el,name);}/**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */},{key:'removeClass',value:function removeClass(el,name){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.classes[name]=false;}this.delegate.removeClass(el,name);}/**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} hasVendorPrefix
+     * @param {?} hasImportant
+     * @return {?}
+     */},{key:'setStyle',value:function setStyle(el,style,value,hasVendorPrefix,hasImportant){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.styles[style]=value;}this.delegate.setStyle(el,style,value,hasVendorPrefix,hasImportant);}/**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} hasVendorPrefix
+     * @return {?}
+     */},{key:'removeStyle',value:function removeStyle(el,style,hasVendorPrefix){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.styles[style]=null;}this.delegate.removeStyle(el,style,hasVendorPrefix);}/**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */},{key:'setProperty',value:function setProperty(el,name,value){var/** @type {?} */debugEl=getDebugNode(el);if(debugEl&&debugEl instanceof DebugElement){debugEl.properties[name]=value;}this.delegate.setProperty(el,name,value);}/**
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listen',value:function listen(target,eventName,callback){if(typeof target!=='string'){var/** @type {?} */debugEl=getDebugNode(target);if(debugEl){debugEl.listeners.push(new EventListener(eventName,callback));}}return this.delegate.listen(target,eventName,callback);}/**
+     * @param {?} node
+     * @return {?}
+     */},{key:'parentNode',value:function parentNode(node){return this.delegate.parentNode(node);}/**
+     * @param {?} node
+     * @return {?}
+     */},{key:'nextSibling',value:function nextSibling(node){return this.delegate.nextSibling(node);}/**
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */},{key:'setValue',value:function setValue(node,value){return this.delegate.setValue(node,value);}}]);return DebugRendererV2;}();/**
  * @return {?}
  */function _iterableDiffersFactory(){return defaultIterableDiffers;}/**
  * @return {?}
@@ -2840,7 +5597,54 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
      * @param {?} _players
      */function AnimationGroupPlayer(_players){var _this31=this;_classCallCheck(this,AnimationGroupPlayer);this._players=_players;this._onDoneFns=[];this._onStartFns=[];this._finished=false;this._started=false;this._destroyed=false;this._onDestroyFns=[];this.parentPlayer=null;var count=0;var total=this._players.length;if(total==0){scheduleMicroTask(function(){return _this31._onFinish();});}else{this._players.forEach(function(player){player.parentPlayer=_this31;player.onDone(function(){if(++count>=total){_this31._onFinish();}});});}}/**
      * @return {?}
-     */_createClass(AnimationGroupPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}},{key:'init',value:function init(){this._players.forEach(function(player){return player.init();});}},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}},{key:'hasStarted',value:function hasStarted(){return this._started;}},{key:'play',value:function play(){if(!isPresent(this.parentPlayer)){this.init();}if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];this._started=true;}this._players.forEach(function(player){return player.play();});}},{key:'pause',value:function pause(){this._players.forEach(function(player){return player.pause();});}},{key:'restart',value:function restart(){this._players.forEach(function(player){return player.restart();});}},{key:'finish',value:function finish(){this._onFinish();this._players.forEach(function(player){return player.finish();});}},{key:'destroy',value:function destroy(){if(!this._destroyed){this._onFinish();this._players.forEach(function(player){return player.destroy();});this._destroyed=true;this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}},{key:'reset',value:function reset(){this._players.forEach(function(player){return player.reset();});this._destroyed=false;this._finished=false;this._started=false;}},{key:'setPosition',value:function setPosition(p){this._players.forEach(function(player){player.setPosition(p);});}},{key:'getPosition',value:function getPosition(){var/** @type {?} */min=0;this._players.forEach(function(player){var/** @type {?} */p=player.getPosition();min=Math.min(p,min);});return min;}},{key:'players',get:function get(){return this._players;}}]);return AnimationGroupPlayer;}();var AnimationKeyframe=/**
+     */_createClass(AnimationGroupPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
+     * @return {?}
+     */},{key:'init',value:function init(){this._players.forEach(function(player){return player.init();});}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}/**
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){return this._started;}/**
+     * @return {?}
+     */},{key:'play',value:function play(){if(!isPresent(this.parentPlayer)){this.init();}if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];this._started=true;}this._players.forEach(function(player){return player.play();});}/**
+     * @return {?}
+     */},{key:'pause',value:function pause(){this._players.forEach(function(player){return player.pause();});}/**
+     * @return {?}
+     */},{key:'restart',value:function restart(){this._players.forEach(function(player){return player.restart();});}/**
+     * @return {?}
+     */},{key:'finish',value:function finish(){this._onFinish();this._players.forEach(function(player){return player.finish();});}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){if(!this._destroyed){this._onFinish();this._players.forEach(function(player){return player.destroy();});this._destroyed=true;this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}/**
+     * @return {?}
+     */},{key:'reset',value:function reset(){this._players.forEach(function(player){return player.reset();});this._destroyed=false;this._finished=false;this._started=false;}/**
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){this._players.forEach(function(player){player.setPosition(p);});}/**
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){var/** @type {?} */min=0;this._players.forEach(function(player){var/** @type {?} */p=player.getPosition();min=Math.min(p,min);});return min;}/**
+     * @return {?}
+     */},{key:'players',get:function get(){return this._players;}}]);return AnimationGroupPlayer;}();/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ *//**
+ * `AnimationKeyframe` consists of a series of styles (contained within {\@link AnimationStyles
+ * `AnimationStyles`})
+ * and an offset value indicating when those styles are applied within the `duration/delay/easing`
+ * timings.
+ * `AnimationKeyframe` is mostly an internal class which is designed to be used alongside {\@link
+ * Renderer#animate-anchor `Renderer.animate`}.
+ *
+ * \@experimental Animation support is experimental
+ */var AnimationKeyframe=/**
      * @param {?} offset
      * @param {?} styles
      */function AnimationKeyframe(offset,styles){_classCallCheck(this,AnimationKeyframe);this.offset=offset;this.styles=styles;};var AnimationSequencePlayer=function(){/**
@@ -2848,7 +5652,41 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
      */function AnimationSequencePlayer(_players){var _this32=this;_classCallCheck(this,AnimationSequencePlayer);this._players=_players;this._currentIndex=0;this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._finished=false;this._started=false;this._destroyed=false;this.parentPlayer=null;this._players.forEach(function(player){player.parentPlayer=_this32;});this._onNext(false);}/**
      * @param {?} start
      * @return {?}
-     */_createClass(AnimationSequencePlayer,[{key:'_onNext',value:function _onNext(start){var _this33=this;if(this._finished)return;if(this._players.length==0){this._activePlayer=new NoOpAnimationPlayer();scheduleMicroTask(function(){return _this33._onFinish();});}else if(this._currentIndex>=this._players.length){this._activePlayer=new NoOpAnimationPlayer();this._onFinish();}else{var/** @type {?} */player=this._players[this._currentIndex++];player.onDone(function(){return _this33._onNext(true);});this._activePlayer=player;if(start){player.play();}}}},{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}},{key:'init',value:function init(){this._players.forEach(function(player){return player.init();});}},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}},{key:'hasStarted',value:function hasStarted(){return this._started;}},{key:'play',value:function play(){if(!isPresent(this.parentPlayer)){this.init();}if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];this._started=true;}this._activePlayer.play();}},{key:'pause',value:function pause(){this._activePlayer.pause();}},{key:'restart',value:function restart(){this.reset();if(this._players.length>0){this._players[0].restart();}}},{key:'reset',value:function reset(){this._players.forEach(function(player){return player.reset();});this._destroyed=false;this._finished=false;this._started=false;}},{key:'finish',value:function finish(){this._onFinish();this._players.forEach(function(player){return player.finish();});}},{key:'destroy',value:function destroy(){if(!this._destroyed){this._onFinish();this._players.forEach(function(player){return player.destroy();});this._destroyed=true;this._activePlayer=new NoOpAnimationPlayer();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}},{key:'setPosition',value:function setPosition(p){this._players[0].setPosition(p);}},{key:'getPosition',value:function getPosition(){return this._players[0].getPosition();}},{key:'players',get:function get(){return this._players;}}]);return AnimationSequencePlayer;}();/**
+     */_createClass(AnimationSequencePlayer,[{key:'_onNext',value:function _onNext(start){var _this33=this;if(this._finished)return;if(this._players.length==0){this._activePlayer=new NoOpAnimationPlayer();scheduleMicroTask(function(){return _this33._onFinish();});}else if(this._currentIndex>=this._players.length){this._activePlayer=new NoOpAnimationPlayer();this._onFinish();}else{var/** @type {?} */player=this._players[this._currentIndex++];player.onDone(function(){return _this33._onNext(true);});this._activePlayer=player;if(start){player.play();}}}/**
+     * @return {?}
+     */},{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
+     * @return {?}
+     */},{key:'init',value:function init(){this._players.forEach(function(player){return player.init();});}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}/**
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){return this._started;}/**
+     * @return {?}
+     */},{key:'play',value:function play(){if(!isPresent(this.parentPlayer)){this.init();}if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];this._started=true;}this._activePlayer.play();}/**
+     * @return {?}
+     */},{key:'pause',value:function pause(){this._activePlayer.pause();}/**
+     * @return {?}
+     */},{key:'restart',value:function restart(){this.reset();if(this._players.length>0){this._players[0].restart();}}/**
+     * @return {?}
+     */},{key:'reset',value:function reset(){this._players.forEach(function(player){return player.reset();});this._destroyed=false;this._finished=false;this._started=false;}/**
+     * @return {?}
+     */},{key:'finish',value:function finish(){this._onFinish();this._players.forEach(function(player){return player.finish();});}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){if(!this._destroyed){this._onFinish();this._players.forEach(function(player){return player.destroy();});this._destroyed=true;this._activePlayer=new NoOpAnimationPlayer();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}/**
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){this._players[0].setPosition(p);}/**
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){return this._players[0].getPosition();}/**
+     * @return {?}
+     */},{key:'players',get:function get(){return this._players;}}]);return AnimationSequencePlayer;}();/**
  * @experimental Animation support is experimental.
  */var/** @type {?} */AUTO_STYLE='*';/**
  * Metadata representing the entry of animations.
@@ -2859,27 +5697,78 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  */var AnimationEntryMetadata=/**
      * @param {?} name
      * @param {?} definitions
-     */function AnimationEntryMetadata(name,definitions){_classCallCheck(this,AnimationEntryMetadata);this.name=name;this.definitions=definitions;};var AnimationStateMetadata=function AnimationStateMetadata(){_classCallCheck(this,AnimationStateMetadata);};var AnimationStateDeclarationMetadata=function(_AnimationStateMetada){_inherits(AnimationStateDeclarationMetadata,_AnimationStateMetada);/**
+     */function AnimationEntryMetadata(name,definitions){_classCallCheck(this,AnimationEntryMetadata);this.name=name;this.definitions=definitions;};/**
+ * \@experimental Animation support is experimental.
+ * @abstract
+ */var AnimationStateMetadata=function AnimationStateMetadata(){_classCallCheck(this,AnimationStateMetadata);};/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link state state animation
+ * function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationStateDeclarationMetadata=function(_AnimationStateMetada){_inherits(AnimationStateDeclarationMetadata,_AnimationStateMetada);/**
      * @param {?} stateNameExpr
      * @param {?} styles
-     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this34.stateNameExpr=stateNameExpr;_this34.styles=styles;return _this34;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);var AnimationStateTransitionMetadata=function(_AnimationStateMetada2){_inherits(AnimationStateTransitionMetadata,_AnimationStateMetada2);/**
+     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this34.stateNameExpr=stateNameExpr;_this34.styles=styles;return _this34;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the
+ * {\@link transition transition animation function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationStateTransitionMetadata=function(_AnimationStateMetada2){_inherits(AnimationStateTransitionMetadata,_AnimationStateMetada2);/**
      * @param {?} stateChangeExpr
      * @param {?} steps
-     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this35=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this35.stateChangeExpr=stateChangeExpr;_this35.steps=steps;return _this35;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);var AnimationMetadata=function AnimationMetadata(){_classCallCheck(this,AnimationMetadata);};var AnimationKeyframesSequenceMetadata=function(_AnimationMetadata){_inherits(AnimationKeyframesSequenceMetadata,_AnimationMetadata);/**
+     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this35=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this35.stateChangeExpr=stateChangeExpr;_this35.steps=steps;return _this35;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);/**
+ * \@experimental Animation support is experimental.
+ * @abstract
+ */var AnimationMetadata=function AnimationMetadata(){_classCallCheck(this,AnimationMetadata);};/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link keyframes keyframes
+ * animation function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationKeyframesSequenceMetadata=function(_AnimationMetadata){_inherits(AnimationKeyframesSequenceMetadata,_AnimationMetadata);/**
      * @param {?} steps
-     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this36=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this36.steps=steps;return _this36;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);var AnimationStyleMetadata=function(_AnimationMetadata2){_inherits(AnimationStyleMetadata,_AnimationMetadata2);/**
+     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this36=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this36.steps=steps;return _this36;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link style style animation
+ * function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationStyleMetadata=function(_AnimationMetadata2){_inherits(AnimationStyleMetadata,_AnimationMetadata2);/**
      * @param {?} styles
      * @param {?=} offset
-     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this37=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this37.styles=styles;_this37.offset=offset;return _this37;}return AnimationStyleMetadata;}(AnimationMetadata);var AnimationAnimateMetadata=function(_AnimationMetadata3){_inherits(AnimationAnimateMetadata,_AnimationMetadata3);/**
+     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this37=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this37.styles=styles;_this37.offset=offset;return _this37;}return AnimationStyleMetadata;}(AnimationMetadata);/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link animate animate
+ * animation function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationAnimateMetadata=function(_AnimationMetadata3){_inherits(AnimationAnimateMetadata,_AnimationMetadata3);/**
      * @param {?} timings
      * @param {?} styles
-     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this38=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this38.timings=timings;_this38.styles=styles;return _this38;}return AnimationAnimateMetadata;}(AnimationMetadata);var AnimationWithStepsMetadata=function(_AnimationMetadata4){_inherits(AnimationWithStepsMetadata,_AnimationMetadata4);function AnimationWithStepsMetadata(){_classCallCheck(this,AnimationWithStepsMetadata);return _possibleConstructorReturn(this,(AnimationWithStepsMetadata.__proto__||Object.getPrototypeOf(AnimationWithStepsMetadata)).call(this));}/**
+     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this38=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this38.timings=timings;_this38.styles=styles;return _this38;}return AnimationAnimateMetadata;}(AnimationMetadata);/**
+ * \@experimental Animation support is experimental.
+ * @abstract
+ */var AnimationWithStepsMetadata=function(_AnimationMetadata4){_inherits(AnimationWithStepsMetadata,_AnimationMetadata4);function AnimationWithStepsMetadata(){_classCallCheck(this,AnimationWithStepsMetadata);return _possibleConstructorReturn(this,(AnimationWithStepsMetadata.__proto__||Object.getPrototypeOf(AnimationWithStepsMetadata)).call(this));}/**
      * @return {?}
-     */_createClass(AnimationWithStepsMetadata,[{key:'steps',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationWithStepsMetadata;}(AnimationMetadata);var AnimationSequenceMetadata=function(_AnimationWithStepsMe){_inherits(AnimationSequenceMetadata,_AnimationWithStepsMe);/**
+     */_createClass(AnimationWithStepsMetadata,[{key:'steps',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationWithStepsMetadata;}(AnimationMetadata);/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link sequence sequence
+ * animation function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationSequenceMetadata=function(_AnimationWithStepsMe){_inherits(AnimationSequenceMetadata,_AnimationWithStepsMe);/**
      * @param {?} _steps
      */function AnimationSequenceMetadata(_steps){_classCallCheck(this,AnimationSequenceMetadata);var _this40=_possibleConstructorReturn(this,(AnimationSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationSequenceMetadata)).call(this));_this40._steps=_steps;return _this40;}/**
      * @return {?}
-     */_createClass(AnimationSequenceMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationSequenceMetadata;}(AnimationWithStepsMetadata);var AnimationGroupMetadata=function(_AnimationWithStepsMe2){_inherits(AnimationGroupMetadata,_AnimationWithStepsMe2);/**
+     */_createClass(AnimationSequenceMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationSequenceMetadata;}(AnimationWithStepsMetadata);/**
+ * Metadata representing the entry of animations.
+ * Instances of this class are provided via the animation DSL when the {\@link group group animation
+ * function} is called.
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationGroupMetadata=function(_AnimationWithStepsMe2){_inherits(AnimationGroupMetadata,_AnimationWithStepsMe2);/**
      * @param {?} _steps
      */function AnimationGroupMetadata(_steps){_classCallCheck(this,AnimationGroupMetadata);var _this41=_possibleConstructorReturn(this,(AnimationGroupMetadata.__proto__||Object.getPrototypeOf(AnimationGroupMetadata)).call(this));_this41._steps=_steps;return _this41;}/**
      * @return {?}
@@ -3390,7 +6279,37 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
  * \@experimental Animation support is experimental
  */var AnimationStyles=/**
      * @param {?} styles
-     */function AnimationStyles(styles){_classCallCheck(this,AnimationStyles);this.styles=styles;};var AnimationTransitionEvent=/**
+     */function AnimationStyles(styles){_classCallCheck(this,AnimationStyles);this.styles=styles;};/**
+ * An instance of this class is returned as an event parameter when an animation
+ * callback is captured for an animation either during the start or done phase.
+ *
+ * ```typescript
+ * \@Component({
+ *   host: {
+ *     '[\@myAnimationTrigger]': 'someExpression',
+ *     '(\@myAnimationTrigger.start)': 'captureStartEvent($event)',
+ *     '(\@myAnimationTrigger.done)': 'captureDoneEvent($event)',
+ *   },
+ *   animations: [
+ *     trigger("myAnimationTrigger", [
+ *        // ...
+ *     ])
+ *   ]
+ * })
+ * class MyComponent {
+ *   someExpression: any = false;
+ *   captureStartEvent(event: AnimationTransitionEvent) {
+ *     // the toState, fromState and totalTime data is accessible from the event variable
+ *   }
+ *
+ *   captureDoneEvent(event: AnimationTransitionEvent) {
+ *     // the toState, fromState and totalTime data is accessible from the event variable
+ *   }
+ * }
+ * ```
+ *
+ * \@experimental Animation support is experimental.
+ */var AnimationTransitionEvent=/**
      * @param {?} __0
      */function AnimationTransitionEvent(_ref7){var fromState=_ref7.fromState,toState=_ref7.toState,totalTime=_ref7.totalTime,phaseName=_ref7.phaseName,element=_ref7.element,triggerName=_ref7.triggerName;_classCallCheck(this,AnimationTransitionEvent);this.fromState=fromState;this.toState=toState;this.totalTime=totalTime;this.phaseName=phaseName;this.element=new ElementRef(element);this.triggerName=triggerName;};var AnimationTransition=function(){/**
      * @param {?} _player
@@ -3402,7 +6321,13 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      */function AnimationTransition(_player,_element,_triggerName,_fromState,_toState,_totalTime){_classCallCheck(this,AnimationTransition);this._player=_player;this._element=_element;this._triggerName=_triggerName;this._fromState=_fromState;this._toState=_toState;this._totalTime=_totalTime;}/**
      * @param {?} phaseName
      * @return {?}
-     */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}},{key:'onStart',value:function onStart(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('start'));},'player.onStart');this._player.onStart(fn);}},{key:'onDone',value:function onDone(callback){var _this43=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this43._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
+     */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onStart',value:function onStart(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('start'));},'player.onStart');this._player.onStart(fn);}/**
+     * @param {?} callback
+     * @return {?}
+     */},{key:'onDone',value:function onDone(callback){var _this43=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this43._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
      * @param {?} _delegate
      */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;}/**
      * @param {?} componentProto
@@ -3413,7 +6338,92 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @param {?} selectorOrNode
      * @param {?=} debugInfo
      * @return {?}
-     */_createClass(DebugDomRenderer,[{key:'selectRootElement',value:function selectRootElement(selectorOrNode,debugInfo){var/** @type {?} */nativeEl=this._delegate.selectRootElement(selectorOrNode,debugInfo);var/** @type {?} */debugEl=new DebugElement(nativeEl,null,debugInfo);indexDebugNode(debugEl);return nativeEl;}},{key:'createElement',value:function createElement(parentElement,name,debugInfo){var/** @type {?} */nativeEl=this._delegate.createElement(parentElement,name,debugInfo);var/** @type {?} */debugEl=new DebugElement(nativeEl,getDebugNode(parentElement),debugInfo);debugEl.name=name;indexDebugNode(debugEl);return nativeEl;}},{key:'createViewRoot',value:function createViewRoot(hostElement){return this._delegate.createViewRoot(hostElement);}},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement,debugInfo){var/** @type {?} */comment=this._delegate.createTemplateAnchor(parentElement,debugInfo);var/** @type {?} */debugEl=new DebugNode(comment,getDebugNode(parentElement),debugInfo);indexDebugNode(debugEl);return comment;}},{key:'createText',value:function createText(parentElement,value,debugInfo){var/** @type {?} */text=this._delegate.createText(parentElement,value,debugInfo);var/** @type {?} */debugEl=new DebugNode(text,getDebugNode(parentElement),debugInfo);indexDebugNode(debugEl);return text;}},{key:'projectNodes',value:function projectNodes(parentElement,nodes){var/** @type {?} */debugParent=getDebugNode(parentElement);if(isPresent(debugParent)&&debugParent instanceof DebugElement){var/** @type {?} */debugElement=debugParent;nodes.forEach(function(node){debugElement.addChild(getDebugNode(node));});}this._delegate.projectNodes(parentElement,nodes);}},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){var/** @type {?} */debugNode=getDebugNode(node);if(isPresent(debugNode)){var/** @type {?} */debugParent=debugNode.parent;if(viewRootNodes.length>0&&isPresent(debugParent)){var/** @type {?} */debugViewRootNodes=[];viewRootNodes.forEach(function(rootNode){return debugViewRootNodes.push(getDebugNode(rootNode));});debugParent.insertChildrenAfter(debugNode,debugViewRootNodes);}}this._delegate.attachViewAfter(node,viewRootNodes);}},{key:'detachView',value:function detachView(viewRootNodes){viewRootNodes.forEach(function(node){var/** @type {?} */debugNode=getDebugNode(node);if(debugNode&&debugNode.parent){debugNode.parent.removeChild(debugNode);}});this._delegate.detachView(viewRootNodes);}},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){viewAllNodes=viewAllNodes||[];viewAllNodes.forEach(function(node){removeDebugNodeFromIndex(getDebugNode(node));});this._delegate.destroyView(hostElement,viewAllNodes);}},{key:'listen',value:function listen(renderElement,name,callback){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)){debugEl.listeners.push(new EventListener(name,callback));}return this._delegate.listen(renderElement,name,callback);}},{key:'listenGlobal',value:function listenGlobal(target,name,callback){return this._delegate.listenGlobal(target,name,callback);}},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.properties[propertyName]=propertyValue;}this._delegate.setElementProperty(renderElement,propertyName,propertyValue);}},{key:'setElementAttribute',value:function setElementAttribute(renderElement,attributeName,attributeValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.attributes[attributeName]=attributeValue;}this._delegate.setElementAttribute(renderElement,attributeName,attributeValue);}},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){this._delegate.setBindingDebugInfo(renderElement,propertyName,propertyValue);}},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.classes[className]=isAdd;}this._delegate.setElementClass(renderElement,className,isAdd);}},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.styles[styleName]=styleValue;}this._delegate.setElementStyle(renderElement,styleName,styleValue);}},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){this._delegate.invokeElementMethod(renderElement,methodName,args);}},{key:'setText',value:function setText(renderNode,text){this._delegate.setText(renderNode,text);}},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing){var previousPlayers=arguments.length>6&&arguments[6]!==undefined?arguments[6]:[];return this._delegate.animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers);}}]);return DebugDomRenderer;}();var ViewType={};ViewType.HOST=0;ViewType.COMPONENT=1;ViewType.EMBEDDED=2;ViewType[ViewType.HOST]="HOST";ViewType[ViewType.COMPONENT]="COMPONENT";ViewType[ViewType.EMBEDDED]="EMBEDDED";var StaticNodeDebugInfo=/**
+     */_createClass(DebugDomRenderer,[{key:'selectRootElement',value:function selectRootElement(selectorOrNode,debugInfo){var/** @type {?} */nativeEl=this._delegate.selectRootElement(selectorOrNode,debugInfo);var/** @type {?} */debugEl=new DebugElement(nativeEl,null,debugInfo);indexDebugNode(debugEl);return nativeEl;}/**
+     * @param {?} parentElement
+     * @param {?} name
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createElement',value:function createElement(parentElement,name,debugInfo){var/** @type {?} */nativeEl=this._delegate.createElement(parentElement,name,debugInfo);var/** @type {?} */debugEl=new DebugElement(nativeEl,getDebugNode(parentElement),debugInfo);debugEl.name=name;indexDebugNode(debugEl);return nativeEl;}/**
+     * @param {?} hostElement
+     * @return {?}
+     */},{key:'createViewRoot',value:function createViewRoot(hostElement){return this._delegate.createViewRoot(hostElement);}/**
+     * @param {?} parentElement
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createTemplateAnchor',value:function createTemplateAnchor(parentElement,debugInfo){var/** @type {?} */comment=this._delegate.createTemplateAnchor(parentElement,debugInfo);var/** @type {?} */debugEl=new DebugNode(comment,getDebugNode(parentElement),debugInfo);indexDebugNode(debugEl);return comment;}/**
+     * @param {?} parentElement
+     * @param {?} value
+     * @param {?=} debugInfo
+     * @return {?}
+     */},{key:'createText',value:function createText(parentElement,value,debugInfo){var/** @type {?} */text=this._delegate.createText(parentElement,value,debugInfo);var/** @type {?} */debugEl=new DebugNode(text,getDebugNode(parentElement),debugInfo);indexDebugNode(debugEl);return text;}/**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */},{key:'projectNodes',value:function projectNodes(parentElement,nodes){var/** @type {?} */debugParent=getDebugNode(parentElement);if(isPresent(debugParent)&&debugParent instanceof DebugElement){var/** @type {?} */debugElement=debugParent;nodes.forEach(function(node){debugElement.addChild(getDebugNode(node));});}this._delegate.projectNodes(parentElement,nodes);}/**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'attachViewAfter',value:function attachViewAfter(node,viewRootNodes){var/** @type {?} */debugNode=getDebugNode(node);if(isPresent(debugNode)){var/** @type {?} */debugParent=debugNode.parent;if(viewRootNodes.length>0&&isPresent(debugParent)){var/** @type {?} */debugViewRootNodes=[];viewRootNodes.forEach(function(rootNode){return debugViewRootNodes.push(getDebugNode(rootNode));});debugParent.insertChildrenAfter(debugNode,debugViewRootNodes);}}this._delegate.attachViewAfter(node,viewRootNodes);}/**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */},{key:'detachView',value:function detachView(viewRootNodes){viewRootNodes.forEach(function(node){var/** @type {?} */debugNode=getDebugNode(node);if(debugNode&&debugNode.parent){debugNode.parent.removeChild(debugNode);}});this._delegate.detachView(viewRootNodes);}/**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */},{key:'destroyView',value:function destroyView(hostElement,viewAllNodes){viewAllNodes=viewAllNodes||[];viewAllNodes.forEach(function(node){removeDebugNodeFromIndex(getDebugNode(node));});this._delegate.destroyView(hostElement,viewAllNodes);}/**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listen',value:function listen(renderElement,name,callback){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)){debugEl.listeners.push(new EventListener(name,callback));}return this._delegate.listen(renderElement,name,callback);}/**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */},{key:'listenGlobal',value:function listenGlobal(target,name,callback){return this._delegate.listenGlobal(target,name,callback);}/**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setElementProperty',value:function setElementProperty(renderElement,propertyName,propertyValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.properties[propertyName]=propertyValue;}this._delegate.setElementProperty(renderElement,propertyName,propertyValue);}/**
+     * @param {?} renderElement
+     * @param {?} attributeName
+     * @param {?} attributeValue
+     * @return {?}
+     */},{key:'setElementAttribute',value:function setElementAttribute(renderElement,attributeName,attributeValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.attributes[attributeName]=attributeValue;}this._delegate.setElementAttribute(renderElement,attributeName,attributeValue);}/**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */},{key:'setBindingDebugInfo',value:function setBindingDebugInfo(renderElement,propertyName,propertyValue){this._delegate.setBindingDebugInfo(renderElement,propertyName,propertyValue);}/**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */},{key:'setElementClass',value:function setElementClass(renderElement,className,isAdd){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.classes[className]=isAdd;}this._delegate.setElementClass(renderElement,className,isAdd);}/**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */},{key:'setElementStyle',value:function setElementStyle(renderElement,styleName,styleValue){var/** @type {?} */debugEl=getDebugNode(renderElement);if(isPresent(debugEl)&&debugEl instanceof DebugElement){debugEl.styles[styleName]=styleValue;}this._delegate.setElementStyle(renderElement,styleName,styleValue);}/**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?=} args
+     * @return {?}
+     */},{key:'invokeElementMethod',value:function invokeElementMethod(renderElement,methodName,args){this._delegate.invokeElementMethod(renderElement,methodName,args);}/**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */},{key:'setText',value:function setText(renderNode,text){this._delegate.setText(renderNode,text);}/**
+     * @param {?} element
+     * @param {?} startingStyles
+     * @param {?} keyframes
+     * @param {?} duration
+     * @param {?} delay
+     * @param {?} easing
+     * @param {?=} previousPlayers
+     * @return {?}
+     */},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing){var previousPlayers=arguments.length>6&&arguments[6]!==undefined?arguments[6]:[];return this._delegate.animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers);}}]);return DebugDomRenderer;}();var ViewType={};ViewType.HOST=0;ViewType.COMPONENT=1;ViewType.EMBEDDED=2;ViewType[ViewType.HOST]="HOST";ViewType[ViewType.COMPONENT]="COMPONENT";ViewType[ViewType.EMBEDDED]="EMBEDDED";var StaticNodeDebugInfo=/**
      * @param {?} providerTokens
      * @param {?} componentToken
      * @param {?} refTokens
@@ -3424,18 +6434,58 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @param {?} _tplCol
      */function DebugContext$1(_view,_nodeIndex,_tplRow,_tplCol){_classCallCheck(this,DebugContext$1);this._view=_view;this._nodeIndex=_nodeIndex;this._tplRow=_tplRow;this._tplCol=_tplCol;}/**
      * @return {?}
-     */_createClass(DebugContext$1,[{key:'_staticNodeInfo',get:function get(){return isPresent(this._nodeIndex)?this._view.staticNodeDebugInfos[this._nodeIndex]:null;}},{key:'context',get:function get(){return this._view.context;}},{key:'component',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)&&isPresent(staticNodeInfo.componentToken)){return this.injector.get(staticNodeInfo.componentToken);}return null;}},{key:'componentRenderElement',get:function get(){var/** @type {?} */componentView=this._view;while(isPresent(componentView.parentView)&&componentView.type!==ViewType.COMPONENT){componentView=componentView.parentView;}return componentView.parentElement;}},{key:'injector',get:function get(){return this._view.injector(this._nodeIndex);}},{key:'renderNode',get:function get(){if(isPresent(this._nodeIndex)&&this._view.allNodes){return this._view.allNodes[this._nodeIndex];}else{return null;}}},{key:'providerTokens',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;return isPresent(staticNodeInfo)?staticNodeInfo.providerTokens:null;}},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}},{key:'references',get:function get(){var _this44=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this44._view.allNodes?_this44._view.allNodes[_this44._nodeIndex]:null;}else{varValue=_this44._view.injectorGet(refToken,_this44._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
+     */_createClass(DebugContext$1,[{key:'_staticNodeInfo',get:function get(){return isPresent(this._nodeIndex)?this._view.staticNodeDebugInfos[this._nodeIndex]:null;}/**
+     * @return {?}
+     */},{key:'context',get:function get(){return this._view.context;}/**
+     * @return {?}
+     */},{key:'component',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)&&isPresent(staticNodeInfo.componentToken)){return this.injector.get(staticNodeInfo.componentToken);}return null;}/**
+     * @return {?}
+     */},{key:'componentRenderElement',get:function get(){var/** @type {?} */componentView=this._view;while(isPresent(componentView.parentView)&&componentView.type!==ViewType.COMPONENT){componentView=componentView.parentView;}return componentView.parentElement;}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return this._view.injector(this._nodeIndex);}/**
+     * @return {?}
+     */},{key:'renderNode',get:function get(){if(isPresent(this._nodeIndex)&&this._view.allNodes){return this._view.allNodes[this._nodeIndex];}else{return null;}}/**
+     * @return {?}
+     */},{key:'providerTokens',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;return isPresent(staticNodeInfo)?staticNodeInfo.providerTokens:null;}/**
+     * @return {?}
+     */},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}/**
+     * @return {?}
+     */},{key:'references',get:function get(){var _this44=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this44._view.allNodes?_this44._view.allNodes[_this44._nodeIndex]:null;}else{varValue=_this44._view.injectorGet(refToken,_this44._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
      * @param {?} element
      * @param {?} animationName
      * @return {?}
-     */_createClass(ViewAnimationMap,[{key:'find',value:function find(element,animationName){var/** @type {?} */playersByAnimation=this._map.get(element);if(isPresent(playersByAnimation)){return playersByAnimation[animationName];}}},{key:'findAllPlayersByElement',value:function findAllPlayersByElement(element){var/** @type {?} */el=this._map.get(element);return el?Object.keys(el).map(function(k){return el[k];}):[];}},{key:'set',value:function set(element,animationName,player){var/** @type {?} */playersByAnimation=this._map.get(element);if(!isPresent(playersByAnimation)){playersByAnimation={};}var/** @type {?} */existingEntry=playersByAnimation[animationName];if(isPresent(existingEntry)){this.remove(element,animationName);}playersByAnimation[animationName]=player;this._allPlayers.push(player);this._map.set(element,playersByAnimation);}},{key:'getAllPlayers',value:function getAllPlayers(){return this._allPlayers;}},{key:'remove',value:function remove(element,animationName){var targetPlayer=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */playersByAnimation=this._map.get(element);if(playersByAnimation){var/** @type {?} */player=playersByAnimation[animationName];if(!targetPlayer||player===targetPlayer){delete playersByAnimation[animationName];var/** @type {?} */index=this._allPlayers.indexOf(player);this._allPlayers.splice(index,1);if(Object.keys(playersByAnimation).length===0){this._map.delete(element);}}}}}]);return ViewAnimationMap;}();var AnimationViewContext=function(){/**
+     */_createClass(ViewAnimationMap,[{key:'find',value:function find(element,animationName){var/** @type {?} */playersByAnimation=this._map.get(element);if(isPresent(playersByAnimation)){return playersByAnimation[animationName];}}/**
+     * @param {?} element
+     * @return {?}
+     */},{key:'findAllPlayersByElement',value:function findAllPlayersByElement(element){var/** @type {?} */el=this._map.get(element);return el?Object.keys(el).map(function(k){return el[k];}):[];}/**
+     * @param {?} element
+     * @param {?} animationName
+     * @param {?} player
+     * @return {?}
+     */},{key:'set',value:function set(element,animationName,player){var/** @type {?} */playersByAnimation=this._map.get(element);if(!isPresent(playersByAnimation)){playersByAnimation={};}var/** @type {?} */existingEntry=playersByAnimation[animationName];if(isPresent(existingEntry)){this.remove(element,animationName);}playersByAnimation[animationName]=player;this._allPlayers.push(player);this._map.set(element,playersByAnimation);}/**
+     * @return {?}
+     */},{key:'getAllPlayers',value:function getAllPlayers(){return this._allPlayers;}/**
+     * @param {?} element
+     * @param {?} animationName
+     * @param {?=} targetPlayer
+     * @return {?}
+     */},{key:'remove',value:function remove(element,animationName){var targetPlayer=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */playersByAnimation=this._map.get(element);if(playersByAnimation){var/** @type {?} */player=playersByAnimation[animationName];if(!targetPlayer||player===targetPlayer){delete playersByAnimation[animationName];var/** @type {?} */index=this._allPlayers.indexOf(player);this._allPlayers.splice(index,1);if(Object.keys(playersByAnimation).length===0){this._map.delete(element);}}}}}]);return ViewAnimationMap;}();var AnimationViewContext=function(){/**
      * @param {?} _animationQueue
      */function AnimationViewContext(_animationQueue){_classCallCheck(this,AnimationViewContext);this._animationQueue=_animationQueue;this._players=new ViewAnimationMap();}/**
      * @param {?} callback
      * @return {?}
      */_createClass(AnimationViewContext,[{key:'onAllActiveAnimationsDone',value:function onAllActiveAnimationsDone(callback){var/** @type {?} */activeAnimationPlayers=this._players.getAllPlayers();// we check for the length to avoid having GroupAnimationPlayer
 // issue an unnecessary microtask when zero players are passed in
-if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayers).onDone(function(){return callback();});}else{callback();}}},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this45=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this45._players.remove(element,animationName,player);});}},{key:'getAnimationPlayers',value:function getAnimationPlayers(element){var animationName=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */players=[];if(animationName){var/** @type {?} */currentPlayer=this._players.find(element,animationName);if(currentPlayer){_recursePlayers(currentPlayer,players);}}else{this._players.findAllPlayersByElement(element).forEach(function(player){return _recursePlayers(player,players);});}return players;}}]);return AnimationViewContext;}();/**
+if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayers).onDone(function(){return callback();});}else{callback();}}/**
+     * @param {?} element
+     * @param {?} animationName
+     * @param {?} player
+     * @return {?}
+     */},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this45=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this45._players.remove(element,animationName,player);});}/**
+     * @param {?} element
+     * @param {?=} animationName
+     * @return {?}
+     */},{key:'getAnimationPlayers',value:function getAnimationPlayers(element){var animationName=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */players=[];if(animationName){var/** @type {?} */currentPlayer=this._players.find(element,animationName);if(currentPlayer){_recursePlayers(currentPlayer,players);}}else{this._players.findAllPlayersByElement(element).forEach(function(player){return _recursePlayers(player,players);});}return players;}}]);return AnimationViewContext;}();/**
  * @param {?} player
  * @param {?} collectedPlayers
  * @return {?}
@@ -3464,8 +6514,122 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @param {?=} declaredViewContainer
      */function AppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentElement,cdMode){var declaredViewContainer=arguments.length>8&&arguments[8]!==undefined?arguments[8]:null;_classCallCheck(this,AppView);this.clazz=clazz;this.componentType=componentType;this.type=type;this.viewUtils=viewUtils;this.parentView=parentView;this.parentIndex=parentIndex;this.parentElement=parentElement;this.cdMode=cdMode;this.declaredViewContainer=declaredViewContainer;this.numberOfChecks=0;this.throwOnChange=false;this.ref=new ViewRef_(this,viewUtils.animationQueue);if(type===ViewType.COMPONENT||type===ViewType.HOST){this.renderer=viewUtils.renderComponent(componentType);}else{this.renderer=parentView.renderer;}this._directRenderer=this.renderer.directRenderer;}/**
      * @return {?}
-     */_createClass(AppView,[{key:'create',value:function create(context){this.context=context;return this.createInternal(null);}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,hostInjector,projectableNodes){this.context=EMPTY_CONTEXT$1;this._hasExternalHostElement=isPresent(rootSelectorOrNode);this._hostInjector=hostInjector;this._hostProjectableNodes=projectableNodes;return this.createInternal(rootSelectorOrNode);}},{key:'createInternal',value:function createInternal(rootSelectorOrNode){return null;}},{key:'createEmbeddedViewInternal',value:function createEmbeddedViewInternal(templateNodeIndex){return null;}},{key:'init',value:function init(lastRootNode,allNodes,disposables){this.lastRootNode=lastRootNode;this.allNodes=allNodes;this.disposables=disposables;if(this.type===ViewType.COMPONENT){this.dirtyParentQueriesInternal();}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex){var notFoundValue=arguments.length>2&&arguments[2]!==undefined?arguments[2]:THROW_IF_NOT_FOUND;var/** @type {?} */result=UNDEFINED$1;var/** @type {?} */view=this;while(result===UNDEFINED$1){if(isPresent(nodeIndex)){result=view.injectorGetInternal(token,nodeIndex,UNDEFINED$1);}if(result===UNDEFINED$1&&view.type===ViewType.HOST){result=view._hostInjector.get(token,notFoundValue);}nodeIndex=view.parentIndex;view=view.parentView;}return result;}},{key:'injectorGetInternal',value:function injectorGetInternal(token,nodeIndex,notFoundResult){return notFoundResult;}},{key:'injector',value:function injector(nodeIndex){return new ElementInjector(this,nodeIndex);}},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}},{key:'destroy',value:function destroy(){var _this47=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47.renderer.destroyView(hostElement,_this47.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}},{key:'destroyInternal',value:function destroyInternal(){}},{key:'detachInternal',value:function detachInternal(){}},{key:'detach',value:function detach(){var _this48=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this48._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
-if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.splice(index,1);}}this.appRef=null;this.viewContainer=null;this.dirtyParentQueriesInternal();}},{key:'_renderDetach',value:function _renderDetach(){if(this._directRenderer){this.visitRootNodesInternal(this._directRenderer.remove,null);}else{this.renderer.detachView(this.flatRootNodes);}}},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this.viewContainer){throw new Error('This view is already attached to a ViewContainer!');}this.appRef=appRef;this.dirtyParentQueriesInternal();}},{key:'attachAfter',value:function attachAfter(viewContainer,prevView){if(this.appRef){throw new Error('This view is already attached directly to the ApplicationRef!');}this._renderAttach(viewContainer,prevView);this.viewContainer=viewContainer;if(this.declaredViewContainer&&this.declaredViewContainer!==viewContainer){if(!this.declaredViewContainer.projectedViews){this.declaredViewContainer.projectedViews=[];}this.declaredViewContainer.projectedViews.push(this);}this.dirtyParentQueriesInternal();}},{key:'moveAfter',value:function moveAfter(viewContainer,prevView){this._renderAttach(viewContainer,prevView);this.dirtyParentQueriesInternal();}},{key:'_renderAttach',value:function _renderAttach(viewContainer,prevView){var/** @type {?} */prevNode=prevView?prevView.lastRootNode:viewContainer.nativeElement;if(this._directRenderer){var/** @type {?} */nextSibling=this._directRenderer.nextSibling(prevNode);if(nextSibling){this.visitRootNodesInternal(this._directRenderer.insertBefore,nextSibling);}else{var/** @type {?} */parentElement=this._directRenderer.parentElement(prevNode);if(parentElement){this.visitRootNodesInternal(this._directRenderer.appendChild,parentElement);}}}else{this.renderer.attachViewAfter(prevNode,this.flatRootNodes);}}},{key:'projectNodes',value:function projectNodes(parentElement,ngContentIndex){if(this._directRenderer){this.visitProjectedNodes(ngContentIndex,this._directRenderer.appendChild,parentElement);}else{var/** @type {?} */nodes=[];this.visitProjectedNodes(ngContentIndex,addToArray,nodes);this.renderer.projectNodes(parentElement,nodes);}}},{key:'visitProjectedNodes',value:function visitProjectedNodes(ngContentIndex,cb,c){switch(this.type){case ViewType.EMBEDDED:this.parentView.visitProjectedNodes(ngContentIndex,cb,c);break;case ViewType.COMPONENT:if(this.parentView.type===ViewType.HOST){var/** @type {?} */nodes=this.parentView._hostProjectableNodes[ngContentIndex]||[];for(var/** @type {?} */i=0;i<nodes.length;i++){cb(nodes[i],c);}}else{this.parentView.visitProjectableNodesInternal(this.parentIndex,ngContentIndex,cb,c);}break;}}},{key:'visitRootNodesInternal',value:function visitRootNodesInternal(cb,c){}},{key:'visitProjectableNodesInternal',value:function visitProjectableNodesInternal(nodeIndex,ngContentIndex,cb,c){}},{key:'dirtyParentQueriesInternal',value:function dirtyParentQueriesInternal(){}},{key:'internalDetectChanges',value:function internalDetectChanges(throwOnChange){if(this.cdMode!==ChangeDetectorStatus.Detached){this.detectChanges(throwOnChange);}}},{key:'detectChanges',value:function detectChanges(throwOnChange){var/** @type {?} */s=_scope_check(this.clazz);if(this.cdMode===ChangeDetectorStatus.Checked||this.cdMode===ChangeDetectorStatus.Errored)return;if(this.cdMode===ChangeDetectorStatus.Destroyed){this.throwDestroyedError('detectChanges');}this.throwOnChange=throwOnChange;this.detectChangesInternal();if(this.cdMode===ChangeDetectorStatus.CheckOnce)this.cdMode=ChangeDetectorStatus.Checked;this.numberOfChecks++;wtfLeave(s);}},{key:'detectChangesInternal',value:function detectChangesInternal(){}},{key:'markAsCheckOnce',value:function markAsCheckOnce(){this.cdMode=ChangeDetectorStatus.CheckOnce;}},{key:'markPathToRootAsCheckOnce',value:function markPathToRootAsCheckOnce(){var/** @type {?} */c=this;while(isPresent(c)&&c.cdMode!==ChangeDetectorStatus.Detached){if(c.cdMode===ChangeDetectorStatus.Checked){c.cdMode=ChangeDetectorStatus.CheckOnce;}if(c.type===ViewType.COMPONENT){c=c.parentView;}else{c=c.viewContainer?c.viewContainer.parentView:null;}}}},{key:'eventHandler',value:function eventHandler(cb){return cb;}},{key:'throwDestroyedError',value:function throwDestroyedError(details){throw viewDestroyedError(details);}},{key:'animationContext',get:function get(){if(!this._animationContext){this._animationContext=new AnimationViewContext(this.viewUtils.animationQueue);}return this._animationContext;}},{key:'destroyed',get:function get(){return this.cdMode===ChangeDetectorStatus.Destroyed;}},{key:'changeDetectorRef',get:function get(){return this.ref;}},{key:'flatRootNodes',get:function get(){var/** @type {?} */nodes=[];this.visitRootNodesInternal(addToArray,nodes);return nodes;}}]);return AppView;}();var DebugAppView=function(_AppView){_inherits(DebugAppView,_AppView);/**
+     */_createClass(AppView,[{key:'create',/**
+     * @param {?} context
+     * @return {?}
+     */value:function create(context){this.context=context;return this.createInternal(null);}/**
+     * @param {?} rootSelectorOrNode
+     * @param {?} hostInjector
+     * @param {?} projectableNodes
+     * @return {?}
+     */},{key:'createHostView',value:function createHostView(rootSelectorOrNode,hostInjector,projectableNodes){this.context=EMPTY_CONTEXT$1;this._hasExternalHostElement=isPresent(rootSelectorOrNode);this._hostInjector=hostInjector;this._hostProjectableNodes=projectableNodes;return this.createInternal(rootSelectorOrNode);}/**
+     * Overwritten by implementations.
+     * Returns the ComponentRef for the host element for ViewType.HOST.
+     * @param {?} rootSelectorOrNode
+     * @return {?}
+     */},{key:'createInternal',value:function createInternal(rootSelectorOrNode){return null;}/**
+     * Overwritten by implementations.
+     * @param {?} templateNodeIndex
+     * @return {?}
+     */},{key:'createEmbeddedViewInternal',value:function createEmbeddedViewInternal(templateNodeIndex){return null;}/**
+     * @param {?} lastRootNode
+     * @param {?} allNodes
+     * @param {?} disposables
+     * @return {?}
+     */},{key:'init',value:function init(lastRootNode,allNodes,disposables){this.lastRootNode=lastRootNode;this.allNodes=allNodes;this.disposables=disposables;if(this.type===ViewType.COMPONENT){this.dirtyParentQueriesInternal();}}/**
+     * @param {?} token
+     * @param {?} nodeIndex
+     * @param {?=} notFoundValue
+     * @return {?}
+     */},{key:'injectorGet',value:function injectorGet(token,nodeIndex){var notFoundValue=arguments.length>2&&arguments[2]!==undefined?arguments[2]:THROW_IF_NOT_FOUND;var/** @type {?} */result=UNDEFINED$1;var/** @type {?} */view=this;while(result===UNDEFINED$1){if(isPresent(nodeIndex)){result=view.injectorGetInternal(token,nodeIndex,UNDEFINED$1);}if(result===UNDEFINED$1&&view.type===ViewType.HOST){result=view._hostInjector.get(token,notFoundValue);}nodeIndex=view.parentIndex;view=view.parentView;}return result;}/**
+     * Overwritten by implementations
+     * @param {?} token
+     * @param {?} nodeIndex
+     * @param {?} notFoundResult
+     * @return {?}
+     */},{key:'injectorGetInternal',value:function injectorGetInternal(token,nodeIndex,notFoundResult){return notFoundResult;}/**
+     * @param {?} nodeIndex
+     * @return {?}
+     */},{key:'injector',value:function injector(nodeIndex){return new ElementInjector(this,nodeIndex);}/**
+     * @return {?}
+     */},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){var _this47=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47.renderer.destroyView(hostElement,_this47.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}/**
+     * Overwritten by implementations
+     * @return {?}
+     */},{key:'destroyInternal',value:function destroyInternal(){}/**
+     * Overwritten by implementations
+     * @return {?}
+     */},{key:'detachInternal',value:function detachInternal(){}/**
+     * @return {?}
+     */},{key:'detach',value:function detach(){var _this48=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this48._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
+if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.splice(index,1);}}this.appRef=null;this.viewContainer=null;this.dirtyParentQueriesInternal();}/**
+     * @return {?}
+     */},{key:'_renderDetach',value:function _renderDetach(){if(this._directRenderer){this.visitRootNodesInternal(this._directRenderer.remove,null);}else{this.renderer.detachView(this.flatRootNodes);}}/**
+     * @param {?} appRef
+     * @return {?}
+     */},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this.viewContainer){throw new Error('This view is already attached to a ViewContainer!');}this.appRef=appRef;this.dirtyParentQueriesInternal();}/**
+     * @param {?} viewContainer
+     * @param {?} prevView
+     * @return {?}
+     */},{key:'attachAfter',value:function attachAfter(viewContainer,prevView){if(this.appRef){throw new Error('This view is already attached directly to the ApplicationRef!');}this._renderAttach(viewContainer,prevView);this.viewContainer=viewContainer;if(this.declaredViewContainer&&this.declaredViewContainer!==viewContainer){if(!this.declaredViewContainer.projectedViews){this.declaredViewContainer.projectedViews=[];}this.declaredViewContainer.projectedViews.push(this);}this.dirtyParentQueriesInternal();}/**
+     * @param {?} viewContainer
+     * @param {?} prevView
+     * @return {?}
+     */},{key:'moveAfter',value:function moveAfter(viewContainer,prevView){this._renderAttach(viewContainer,prevView);this.dirtyParentQueriesInternal();}/**
+     * @param {?} viewContainer
+     * @param {?} prevView
+     * @return {?}
+     */},{key:'_renderAttach',value:function _renderAttach(viewContainer,prevView){var/** @type {?} */prevNode=prevView?prevView.lastRootNode:viewContainer.nativeElement;if(this._directRenderer){var/** @type {?} */nextSibling=this._directRenderer.nextSibling(prevNode);if(nextSibling){this.visitRootNodesInternal(this._directRenderer.insertBefore,nextSibling);}else{var/** @type {?} */parentElement=this._directRenderer.parentElement(prevNode);if(parentElement){this.visitRootNodesInternal(this._directRenderer.appendChild,parentElement);}}}else{this.renderer.attachViewAfter(prevNode,this.flatRootNodes);}}/**
+     * @return {?}
+     */},{key:'projectNodes',/**
+     * @param {?} parentElement
+     * @param {?} ngContentIndex
+     * @return {?}
+     */value:function projectNodes(parentElement,ngContentIndex){if(this._directRenderer){this.visitProjectedNodes(ngContentIndex,this._directRenderer.appendChild,parentElement);}else{var/** @type {?} */nodes=[];this.visitProjectedNodes(ngContentIndex,addToArray,nodes);this.renderer.projectNodes(parentElement,nodes);}}/**
+     * @param {?} ngContentIndex
+     * @param {?} cb
+     * @param {?} c
+     * @return {?}
+     */},{key:'visitProjectedNodes',value:function visitProjectedNodes(ngContentIndex,cb,c){switch(this.type){case ViewType.EMBEDDED:this.parentView.visitProjectedNodes(ngContentIndex,cb,c);break;case ViewType.COMPONENT:if(this.parentView.type===ViewType.HOST){var/** @type {?} */nodes=this.parentView._hostProjectableNodes[ngContentIndex]||[];for(var/** @type {?} */i=0;i<nodes.length;i++){cb(nodes[i],c);}}else{this.parentView.visitProjectableNodesInternal(this.parentIndex,ngContentIndex,cb,c);}break;}}/**
+     * Overwritten by implementations
+     * @param {?} cb
+     * @param {?} c
+     * @return {?}
+     */},{key:'visitRootNodesInternal',value:function visitRootNodesInternal(cb,c){}/**
+     * Overwritten by implementations
+     * @param {?} nodeIndex
+     * @param {?} ngContentIndex
+     * @param {?} cb
+     * @param {?} c
+     * @return {?}
+     */},{key:'visitProjectableNodesInternal',value:function visitProjectableNodesInternal(nodeIndex,ngContentIndex,cb,c){}/**
+     * Overwritten by implementations
+     * @return {?}
+     */},{key:'dirtyParentQueriesInternal',value:function dirtyParentQueriesInternal(){}/**
+     * @param {?} throwOnChange
+     * @return {?}
+     */},{key:'internalDetectChanges',value:function internalDetectChanges(throwOnChange){if(this.cdMode!==ChangeDetectorStatus.Detached){this.detectChanges(throwOnChange);}}/**
+     * @param {?} throwOnChange
+     * @return {?}
+     */},{key:'detectChanges',value:function detectChanges(throwOnChange){var/** @type {?} */s=_scope_check(this.clazz);if(this.cdMode===ChangeDetectorStatus.Checked||this.cdMode===ChangeDetectorStatus.Errored)return;if(this.cdMode===ChangeDetectorStatus.Destroyed){this.throwDestroyedError('detectChanges');}this.throwOnChange=throwOnChange;this.detectChangesInternal();if(this.cdMode===ChangeDetectorStatus.CheckOnce)this.cdMode=ChangeDetectorStatus.Checked;this.numberOfChecks++;wtfLeave(s);}/**
+     * Overwritten by implementations
+     * @return {?}
+     */},{key:'detectChangesInternal',value:function detectChangesInternal(){}/**
+     * @return {?}
+     */},{key:'markAsCheckOnce',value:function markAsCheckOnce(){this.cdMode=ChangeDetectorStatus.CheckOnce;}/**
+     * @return {?}
+     */},{key:'markPathToRootAsCheckOnce',value:function markPathToRootAsCheckOnce(){var/** @type {?} */c=this;while(isPresent(c)&&c.cdMode!==ChangeDetectorStatus.Detached){if(c.cdMode===ChangeDetectorStatus.Checked){c.cdMode=ChangeDetectorStatus.CheckOnce;}if(c.type===ViewType.COMPONENT){c=c.parentView;}else{c=c.viewContainer?c.viewContainer.parentView:null;}}}/**
+     * @param {?} cb
+     * @return {?}
+     */},{key:'eventHandler',value:function eventHandler(cb){return cb;}/**
+     * @param {?} details
+     * @return {?}
+     */},{key:'throwDestroyedError',value:function throwDestroyedError(details){throw viewDestroyedError(details);}},{key:'animationContext',get:function get(){if(!this._animationContext){this._animationContext=new AnimationViewContext(this.viewUtils.animationQueue);}return this._animationContext;}/**
+     * @return {?}
+     */},{key:'destroyed',get:function get(){return this.cdMode===ChangeDetectorStatus.Destroyed;}},{key:'changeDetectorRef',get:function get(){return this.ref;}/**
+     * @return {?}
+     */},{key:'flatRootNodes',get:function get(){var/** @type {?} */nodes=[];this.visitRootNodesInternal(addToArray,nodes);return nodes;}}]);return AppView;}();var DebugAppView=function(_AppView){_inherits(DebugAppView,_AppView);/**
      * @param {?} clazz
      * @param {?} componentType
      * @param {?} type
@@ -3479,13 +6643,76 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this49=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this49.staticNodeDebugInfos=staticNodeDebugInfos;_this49._currentDebugContext=null;return _this49;}/**
      * @param {?} context
      * @return {?}
-     */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,injector){var projectableNodes=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'createHostView',this).call(this,rootSelectorOrNode,injector,projectableNodes);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex,notFoundResult){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'injectorGet',this).call(this,token,nodeIndex,notFoundResult);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detach',value:function detach(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detach',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'destroy',value:function destroy(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'destroy',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detectChanges',value:function detectChanges(throwOnChange){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detectChanges',this).call(this,throwOnChange);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'_resetDebug',value:function _resetDebug(){this._currentDebugContext=null;}},{key:'debug',value:function debug(nodeIndex,rowNum,colNum){return this._currentDebugContext=new DebugContext$1(this,nodeIndex,rowNum,colNum);}},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}},{key:'eventHandler',value:function eventHandler(cb){var _this50=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this50._resetDebug();try{return superHandler.call(_this50,eventName,event);}catch(e){_this50._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);var ViewContainer=function(){/**
+     */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @param {?} rootSelectorOrNode
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @return {?}
+     */},{key:'createHostView',value:function createHostView(rootSelectorOrNode,injector){var projectableNodes=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'createHostView',this).call(this,rootSelectorOrNode,injector,projectableNodes);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @param {?} token
+     * @param {?} nodeIndex
+     * @param {?=} notFoundResult
+     * @return {?}
+     */},{key:'injectorGet',value:function injectorGet(token,nodeIndex,notFoundResult){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'injectorGet',this).call(this,token,nodeIndex,notFoundResult);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @return {?}
+     */},{key:'detach',value:function detach(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detach',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'destroy',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @param {?} throwOnChange
+     * @return {?}
+     */},{key:'detectChanges',value:function detectChanges(throwOnChange){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detectChanges',this).call(this,throwOnChange);}catch(e){this._rethrowWithContext(e);throw e;}}/**
+     * @return {?}
+     */},{key:'_resetDebug',value:function _resetDebug(){this._currentDebugContext=null;}/**
+     * @param {?} nodeIndex
+     * @param {?} rowNum
+     * @param {?} colNum
+     * @return {?}
+     */},{key:'debug',value:function debug(nodeIndex,rowNum,colNum){return this._currentDebugContext=new DebugContext$1(this,nodeIndex,rowNum,colNum);}/**
+     * @param {?} e
+     * @return {?}
+     */},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}/**
+     * @param {?} cb
+     * @return {?}
+     */},{key:'eventHandler',value:function eventHandler(cb){var _this50=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this50._resetDebug();try{return superHandler.call(_this50,eventName,event);}catch(e){_this50._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);/**
+ * A ViewContainer is created for elements that have a ViewContainerRef
+ * to keep track of the nested views.
+ */var ViewContainer=function(){/**
      * @param {?} index
      * @param {?} parentIndex
      * @param {?} parentView
      * @param {?} nativeElement
      */function ViewContainer(index,parentIndex,parentView,nativeElement){_classCallCheck(this,ViewContainer);this.index=index;this.parentIndex=parentIndex;this.parentView=parentView;this.nativeElement=nativeElement;}/**
      * @return {?}
-     */_createClass(ViewContainer,[{key:'detectChangesInNestedViews',value:function detectChangesInNestedViews(throwOnChange){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].detectChanges(throwOnChange);}}}},{key:'destroyNestedViews',value:function destroyNestedViews(){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].destroy();}}}},{key:'visitNestedViewRootNodes',value:function visitNestedViewRootNodes(cb,c){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].visitRootNodesInternal(cb,c);}}}},{key:'mapNestedViews',value:function mapNestedViews(nestedViewClass,callback){var/** @type {?} */result=[];if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){var/** @type {?} */nestedView=this.nestedViews[i];if(nestedView.clazz===nestedViewClass){result.push(callback(nestedView));}}}if(this.projectedViews){for(var/** @type {?} */_i7=0;_i7<this.projectedViews.length;_i7++){var/** @type {?} */projectedView=this.projectedViews[_i7];if(projectedView.clazz===nestedViewClass){result.push(callback(projectedView));}}}return result;}},{key:'moveView',value:function moveView(view,toIndex){var/** @type {?} */fromIndex=this.nestedViews.indexOf(view);if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}nestedViews.splice(fromIndex,1);nestedViews.splice(toIndex,0,view);var/** @type {?} */prevView=toIndex>0?nestedViews[toIndex-1]:null;view.moveAfter(this,prevView);}},{key:'attachView',value:function attachView(view,viewIndex){if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}// perf: array.push is faster than array.splice!
-if(viewIndex>=nestedViews.length){nestedViews.push(view);}else{nestedViews.splice(viewIndex,0,view);}var/** @type {?} */prevView=viewIndex>0?nestedViews[viewIndex-1]:null;view.attachAfter(this,prevView);}},{key:'detachView',value:function detachView(viewIndex){var/** @type {?} */view=this.nestedViews[viewIndex];// perf: array.pop is faster than array.splice!
-if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.nestedViews.splice(viewIndex,1);}if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}view.detach();return view;}},{key:'elementRef',get:function get(){return new ElementRef(this.nativeElement);}},{key:'vcRef',get:function get(){return new ViewContainerRef_(this);}},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();exports.createPlatform=createPlatform;exports.assertPlatform=assertPlatform;exports.destroyPlatform=destroyPlatform;exports.getPlatform=getPlatform;exports.PlatformRef=PlatformRef;exports.ApplicationRef=ApplicationRef;exports.enableProdMode=enableProdMode;exports.isDevMode=isDevMode;exports.createPlatformFactory=createPlatformFactory;exports.NgProbeToken=NgProbeToken;exports.APP_ID=APP_ID;exports.PACKAGE_ROOT_URL=PACKAGE_ROOT_URL;exports.PLATFORM_INITIALIZER=PLATFORM_INITIALIZER;exports.APP_BOOTSTRAP_LISTENER=APP_BOOTSTRAP_LISTENER;exports.APP_INITIALIZER=APP_INITIALIZER;exports.ApplicationInitStatus=ApplicationInitStatus;exports.DebugElement=DebugElement;exports.DebugNode=DebugNode;exports.asNativeElements=asNativeElements;exports.getDebugNode=getDebugNode;exports.Testability=Testability;exports.TestabilityRegistry=TestabilityRegistry;exports.setTestabilityGetter=setTestabilityGetter;exports.TRANSLATIONS=TRANSLATIONS;exports.TRANSLATIONS_FORMAT=TRANSLATIONS_FORMAT;exports.LOCALE_ID=LOCALE_ID;exports.MissingTranslationStrategy=MissingTranslationStrategy;exports.ApplicationModule=ApplicationModule;exports.wtfCreateScope=wtfCreateScope;exports.wtfLeave=wtfLeave;exports.wtfStartTimeRange=wtfStartTimeRange;exports.wtfEndTimeRange=wtfEndTimeRange;exports.Type=Type;exports.EventEmitter=EventEmitter;exports.ErrorHandler=ErrorHandler;exports.AnimationTransitionEvent=AnimationTransitionEvent;exports.AnimationPlayer=AnimationPlayer;exports.AnimationStyles=AnimationStyles;exports.AnimationKeyframe=AnimationKeyframe;exports.Sanitizer=Sanitizer;exports.SecurityContext=SecurityContext;exports.ANALYZE_FOR_ENTRY_COMPONENTS=ANALYZE_FOR_ENTRY_COMPONENTS;exports.Attribute=Attribute;exports.ContentChild=ContentChild;exports.ContentChildren=ContentChildren;exports.Query=Query;exports.ViewChild=ViewChild;exports.ViewChildren=ViewChildren;exports.Component=Component;exports.Directive=Directive;exports.HostBinding=HostBinding;exports.HostListener=HostListener;exports.Input=Input;exports.Output=Output;exports.Pipe=Pipe;exports.AfterContentChecked=AfterContentChecked;exports.AfterContentInit=AfterContentInit;exports.AfterViewChecked=AfterViewChecked;exports.AfterViewInit=AfterViewInit;exports.DoCheck=DoCheck;exports.OnChanges=OnChanges;exports.OnDestroy=OnDestroy;exports.OnInit=OnInit;exports.CUSTOM_ELEMENTS_SCHEMA=CUSTOM_ELEMENTS_SCHEMA;exports.NO_ERRORS_SCHEMA=NO_ERRORS_SCHEMA;exports.NgModule=NgModule;exports.ViewEncapsulation=ViewEncapsulation;exports.Version=Version;exports.VERSION=VERSION;exports.Class=Class;exports.forwardRef=forwardRef;exports.resolveForwardRef=resolveForwardRef;exports.Injector=Injector;exports.ReflectiveInjector=ReflectiveInjector;exports.ResolvedReflectiveFactory=ResolvedReflectiveFactory;exports.ReflectiveKey=ReflectiveKey;exports.InjectionToken=InjectionToken;exports.OpaqueToken=OpaqueToken;exports.Inject=Inject;exports.Optional=Optional;exports.Injectable=Injectable;exports.Self=Self;exports.SkipSelf=SkipSelf;exports.Host=Host;exports.NgZone=NgZone;exports.RenderComponentType=RenderComponentType;exports.Renderer=RendererV1;exports.RendererFactoryV2=RendererFactoryV2;exports.RendererV2=RendererV2;exports.RootRenderer=RootRenderer;exports.COMPILER_OPTIONS=COMPILER_OPTIONS;exports.Compiler=Compiler;exports.CompilerFactory=CompilerFactory;exports.ModuleWithComponentFactories=ModuleWithComponentFactories;exports.ComponentFactory=ComponentFactory;exports.ComponentRef=ComponentRef;exports.ComponentFactoryResolver=ComponentFactoryResolver;exports.ElementRef=ElementRef;exports.NgModuleFactory=NgModuleFactory;exports.NgModuleRef=NgModuleRef;exports.NgModuleFactoryLoader=NgModuleFactoryLoader;exports.getModuleFactory=getModuleFactory;exports.QueryList=QueryList;exports.SystemJsNgModuleLoader=SystemJsNgModuleLoader;exports.SystemJsNgModuleLoaderConfig=SystemJsNgModuleLoaderConfig;exports.TemplateRef=TemplateRef;exports.ViewContainerRef=ViewContainerRef;exports.EmbeddedViewRef=EmbeddedViewRef;exports.ViewRef=ViewRef;exports.ChangeDetectionStrategy=ChangeDetectionStrategy;exports.ChangeDetectorRef=ChangeDetectorRef;exports.DefaultIterableDiffer=DefaultIterableDiffer;exports.IterableDiffers=IterableDiffers;exports.KeyValueDiffers=KeyValueDiffers;exports.SimpleChange=SimpleChange;exports.WrappedValue=WrappedValue;exports.platformCore=platformCore;exports.ɵANY_STATE=ANY_STATE;exports.ɵDEFAULT_STATE=DEFAULT_STATE;exports.ɵEMPTY_STATE=EMPTY_STATE;exports.ɵFILL_STYLE_FLAG=FILL_STYLE_FLAG;exports.ɵAnimationGroupPlayer=AnimationGroupPlayer;exports.ɵAnimationKeyframe=AnimationKeyframe;exports.ɵAnimationPlayer=AnimationPlayer;exports.ɵNoOpAnimationPlayer=NoOpAnimationPlayer;exports.ɵAnimationSequencePlayer=AnimationSequencePlayer;exports.ɵbalanceAnimationKeyframes=balanceAnimationKeyframes;exports.ɵclearStyles=clearStyles;exports.ɵcollectAndResolveStyles=collectAndResolveStyles;exports.ɵflattenStyles=flattenStyles;exports.ɵprepareFinalAnimationStyles=prepareFinalAnimationStyles;exports.ɵrenderStyles=renderStyles;exports.ɵAnimationStyles=AnimationStyles;exports.ɵAnimationTransition=AnimationTransition;exports.ɵALLOW_MULTIPLE_PLATFORMS=ALLOW_MULTIPLE_PLATFORMS;exports.ɵAPP_ID_RANDOM_PROVIDER=APP_ID_RANDOM_PROVIDER;exports.ɵValueUnwrapper=ValueUnwrapper;exports.ɵdevModeEqual=devModeEqual;exports.ɵChangeDetectorStatus=ChangeDetectorStatus;exports.ɵisDefaultChangeDetectionStrategy=isDefaultChangeDetectionStrategy;exports.ɵConsole=Console;exports.ɵDebugDomRootRenderer=DebugDomRootRenderer;exports.ɵERROR_COMPONENT_TYPE=ERROR_COMPONENT_TYPE;exports.ɵComponentFactory=ComponentFactory;exports.ɵCodegenComponentFactoryResolver=CodegenComponentFactoryResolver;exports.ɵDebugContext=DebugContext$1;exports.ɵStaticNodeDebugInfo=StaticNodeDebugInfo;exports.ɵAppView=AppView;exports.ɵDebugAppView=DebugAppView;exports.ɵViewContainer=ViewContainer;exports.ɵViewType=ViewType;exports.ɵLIFECYCLE_HOOKS_VALUES=LIFECYCLE_HOOKS_VALUES;exports.ɵLifecycleHooks=LifecycleHooks;exports.ɵViewMetadata=ViewMetadata;exports.ɵReflector=Reflector;exports.ɵreflector=reflector;exports.ɵReflectionCapabilities=ReflectionCapabilities;exports.ɵReflectorReader=ReflectorReader;exports.ɵRenderDebugInfo=RenderDebugInfo;exports.ɵTransitionEngine=TransitionEngine;exports.ɵmakeDecorator=makeDecorator;exports.ɵisObservable=isObservable;exports.ɵisPromise=isPromise;exports.AUTO_STYLE=AUTO_STYLE;exports.AnimationEntryMetadata=AnimationEntryMetadata;exports.AnimationStateMetadata=AnimationStateMetadata;exports.AnimationStateDeclarationMetadata=AnimationStateDeclarationMetadata;exports.AnimationStateTransitionMetadata=AnimationStateTransitionMetadata;exports.AnimationMetadata=AnimationMetadata;exports.AnimationKeyframesSequenceMetadata=AnimationKeyframesSequenceMetadata;exports.AnimationStyleMetadata=AnimationStyleMetadata;exports.AnimationAnimateMetadata=AnimationAnimateMetadata;exports.AnimationWithStepsMetadata=AnimationWithStepsMetadata;exports.AnimationSequenceMetadata=AnimationSequenceMetadata;exports.AnimationGroupMetadata=AnimationGroupMetadata;exports.animate=animate;exports.group=group;exports.sequence=sequence;exports.style=style;exports.state=state;exports.keyframes=keyframes;exports.transition=transition;exports.trigger=trigger;exports.ɵComponentRef_=ComponentRef_;exports.ɵNgModuleInjector=NgModuleInjector;exports.ɵregisterModuleFactory=registerModuleFactory;exports.ɵTemplateRef_=TemplateRef_;exports.ɵEMPTY_ARRAY=EMPTY_ARRAY;exports.ɵEMPTY_INLINE_ARRAY=EMPTY_INLINE_ARRAY;exports.ɵEMPTY_MAP=EMPTY_MAP;exports.ɵInlineArray16=InlineArray16;exports.ɵInlineArray2=InlineArray2;exports.ɵInlineArray4=InlineArray4;exports.ɵInlineArray8=InlineArray8;exports.ɵInlineArrayDynamic=InlineArrayDynamic;exports.ɵViewUtils=ViewUtils;exports.ɵcastByValue=castByValue;exports.ɵcheckBinding=checkBinding;exports.ɵcheckBindingChange=checkBindingChange;exports.ɵcheckRenderAttribute=checkRenderAttribute;exports.ɵcheckRenderClass=checkRenderClass;exports.ɵcheckRenderProperty=checkRenderProperty;exports.ɵcheckRenderStyle=checkRenderStyle;exports.ɵcheckRenderText=checkRenderText;exports.ɵcreateRenderComponentType=createRenderComponentType;exports.ɵcreateRenderElement=createRenderElement;exports.ɵgetComponentFactoryViewClass=getComponentFactoryViewClass;exports.ɵinlineInterpolate=inlineInterpolate;exports.ɵinterpolate=interpolate;exports.ɵnoop=noop;exports.ɵpureProxy1=pureProxy1;exports.ɵpureProxy10=pureProxy10;exports.ɵpureProxy2=pureProxy2;exports.ɵpureProxy3=pureProxy3;exports.ɵpureProxy4=pureProxy4;exports.ɵpureProxy5=pureProxy5;exports.ɵpureProxy6=pureProxy6;exports.ɵpureProxy7=pureProxy7;exports.ɵpureProxy8=pureProxy8;exports.ɵpureProxy9=pureProxy9;exports.ɵselectOrCreateRenderHostElement=selectOrCreateRenderHostElement;exports.ɵsetBindingDebugInfo=setBindingDebugInfo;exports.ɵsetBindingDebugInfoForChanges=setBindingDebugInfoForChanges;exports.ɵsubscribeToRenderElement=subscribeToRenderElement;exports.ɵArgumentType=ArgumentType;exports.ɵBindingType=BindingType;exports.ɵDepFlags=DepFlags;exports.ɵNodeFlags=NodeFlags;exports.ɵProviderType=ProviderType;exports.ɵQueryBindingType=QueryBindingType;exports.ɵQueryValueType=QueryValueType;exports.ɵViewFlags=ViewFlags;exports.ɵanchorDef=anchorDef;exports.ɵcreateComponentFactory=createComponentFactory;exports.ɵcreateRendererTypeV2=createRendererTypeV2;exports.ɵdirectiveDef=directiveDef;exports.ɵelementDef=elementDef;exports.ɵelementEventFullName=elementEventFullName;exports.ɵngContentDef=ngContentDef;exports.ɵnodeValue=nodeValue;exports.ɵpipeDef=pipeDef;exports.ɵproviderDef=providerDef;exports.ɵpureArrayDef=pureArrayDef;exports.ɵpureObjectDef=pureObjectDef;exports.ɵpurePipeDef=purePipeDef;exports.ɵqueryDef=queryDef;exports.ɵtextDef=textDef;exports.ɵunwrapValue=unwrapValue;exports.ɵviewDef=viewDef;exports.ɵz=AnimationQueue;exports.ɵp=_initViewEngine;exports.ɵm=_iterableDiffersFactory;exports.ɵn=_keyValueDiffersFactory;exports.ɵo=_localeFactory;exports.ɵf=ApplicationRef_;exports.ɵg=_appIdRandomProviderFactory;exports.ɵh=defaultIterableDiffers;exports.ɵi=defaultKeyValueDiffers;exports.ɵk=DefaultIterableDifferFactory;exports.ɵl=DefaultKeyValueDifferFactory;exports.ɵc=ReflectiveInjector_;exports.ɵd=ReflectiveDependency;exports.ɵe=resolveReflectiveProviders;exports.ɵj=isBlank;exports.ɵq=wtfEnabled;exports.ɵs=createScope;exports.ɵr=detectWTF;exports.ɵv=endTimeRange;exports.ɵt=leave;exports.ɵu=startTimeRange;exports.ɵa=makeParamDecorator;exports.ɵb=makePropDecorator;exports.ɵx=_def;exports.ɵy=NodeType;});
+     */_createClass(ViewContainer,[{key:'detectChangesInNestedViews',/**
+     * @param {?} throwOnChange
+     * @return {?}
+     */value:function detectChangesInNestedViews(throwOnChange){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].detectChanges(throwOnChange);}}}/**
+     * @return {?}
+     */},{key:'destroyNestedViews',value:function destroyNestedViews(){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].destroy();}}}/**
+     * @param {?} cb
+     * @param {?} c
+     * @return {?}
+     */},{key:'visitNestedViewRootNodes',value:function visitNestedViewRootNodes(cb,c){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].visitRootNodesInternal(cb,c);}}}/**
+     * @param {?} nestedViewClass
+     * @param {?} callback
+     * @return {?}
+     */},{key:'mapNestedViews',value:function mapNestedViews(nestedViewClass,callback){var/** @type {?} */result=[];if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){var/** @type {?} */nestedView=this.nestedViews[i];if(nestedView.clazz===nestedViewClass){result.push(callback(nestedView));}}}if(this.projectedViews){for(var/** @type {?} */_i7=0;_i7<this.projectedViews.length;_i7++){var/** @type {?} */projectedView=this.projectedViews[_i7];if(projectedView.clazz===nestedViewClass){result.push(callback(projectedView));}}}return result;}/**
+     * @param {?} view
+     * @param {?} toIndex
+     * @return {?}
+     */},{key:'moveView',value:function moveView(view,toIndex){var/** @type {?} */fromIndex=this.nestedViews.indexOf(view);if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}nestedViews.splice(fromIndex,1);nestedViews.splice(toIndex,0,view);var/** @type {?} */prevView=toIndex>0?nestedViews[toIndex-1]:null;view.moveAfter(this,prevView);}/**
+     * @param {?} view
+     * @param {?} viewIndex
+     * @return {?}
+     */},{key:'attachView',value:function attachView(view,viewIndex){if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}// perf: array.push is faster than array.splice!
+if(viewIndex>=nestedViews.length){nestedViews.push(view);}else{nestedViews.splice(viewIndex,0,view);}var/** @type {?} */prevView=viewIndex>0?nestedViews[viewIndex-1]:null;view.attachAfter(this,prevView);}/**
+     * @param {?} viewIndex
+     * @return {?}
+     */},{key:'detachView',value:function detachView(viewIndex){var/** @type {?} */view=this.nestedViews[viewIndex];// perf: array.pop is faster than array.splice!
+if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.nestedViews.splice(viewIndex,1);}if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}view.detach();return view;}},{key:'elementRef',get:function get(){return new ElementRef(this.nativeElement);}/**
+     * @return {?}
+     */},{key:'vcRef',get:function get(){return new ViewContainerRef_(this);}/**
+     * @return {?}
+     */},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}/**
+     * @return {?}
+     */},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();export{createPlatform,assertPlatform,destroyPlatform,getPlatform,PlatformRef,ApplicationRef,enableProdMode,isDevMode,createPlatformFactory,NgProbeToken,APP_ID,PACKAGE_ROOT_URL,PLATFORM_INITIALIZER,APP_BOOTSTRAP_LISTENER,APP_INITIALIZER,ApplicationInitStatus,DebugElement,DebugNode,asNativeElements,getDebugNode,Testability,TestabilityRegistry,setTestabilityGetter,TRANSLATIONS,TRANSLATIONS_FORMAT,LOCALE_ID,MissingTranslationStrategy,ApplicationModule,wtfCreateScope,wtfLeave,wtfStartTimeRange,wtfEndTimeRange,Type,EventEmitter,ErrorHandler,AnimationTransitionEvent,AnimationPlayer,AnimationStyles,AnimationKeyframe,Sanitizer,SecurityContext,ANALYZE_FOR_ENTRY_COMPONENTS,Attribute,ContentChild,ContentChildren,Query,ViewChild,ViewChildren,Component,Directive,HostBinding,HostListener,Input,Output,Pipe,AfterContentChecked,AfterContentInit,AfterViewChecked,AfterViewInit,DoCheck,OnChanges,OnDestroy,OnInit,CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA,NgModule,ViewEncapsulation,Version,VERSION,Class,forwardRef,resolveForwardRef,Injector,ReflectiveInjector,ResolvedReflectiveFactory,ReflectiveKey,InjectionToken,OpaqueToken,Inject,Optional,Injectable,Self,SkipSelf,Host,NgZone,RenderComponentType,RendererV1 as Renderer,RendererFactoryV2,RendererV2,RootRenderer,COMPILER_OPTIONS,Compiler,CompilerFactory,ModuleWithComponentFactories,ComponentFactory,ComponentRef,ComponentFactoryResolver,ElementRef,NgModuleFactory,NgModuleRef,NgModuleFactoryLoader,getModuleFactory,QueryList,SystemJsNgModuleLoader,SystemJsNgModuleLoaderConfig,TemplateRef,ViewContainerRef,EmbeddedViewRef,ViewRef,ChangeDetectionStrategy,ChangeDetectorRef,DefaultIterableDiffer,IterableDiffers,KeyValueDiffers,SimpleChange,WrappedValue,platformCore,ANY_STATE as ɵANY_STATE,DEFAULT_STATE as ɵDEFAULT_STATE,EMPTY_STATE as ɵEMPTY_STATE,FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG,AnimationGroupPlayer as ɵAnimationGroupPlayer,AnimationKeyframe as ɵAnimationKeyframe,AnimationPlayer as ɵAnimationPlayer,NoOpAnimationPlayer as ɵNoOpAnimationPlayer,AnimationSequencePlayer as ɵAnimationSequencePlayer,balanceAnimationKeyframes as ɵbalanceAnimationKeyframes,clearStyles as ɵclearStyles,collectAndResolveStyles as ɵcollectAndResolveStyles,flattenStyles as ɵflattenStyles,prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles,renderStyles as ɵrenderStyles,AnimationStyles as ɵAnimationStyles,AnimationTransition as ɵAnimationTransition,ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS,APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER,ValueUnwrapper as ɵValueUnwrapper,devModeEqual as ɵdevModeEqual,ChangeDetectorStatus as ɵChangeDetectorStatus,isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy,Console as ɵConsole,DebugDomRootRenderer as ɵDebugDomRootRenderer,ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE,ComponentFactory as ɵComponentFactory,CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver,DebugContext$1 as ɵDebugContext,StaticNodeDebugInfo as ɵStaticNodeDebugInfo,AppView as ɵAppView,DebugAppView as ɵDebugAppView,ViewContainer as ɵViewContainer,ViewType as ɵViewType,LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES,LifecycleHooks as ɵLifecycleHooks,ViewMetadata as ɵViewMetadata,Reflector as ɵReflector,reflector as ɵreflector,ReflectionCapabilities as ɵReflectionCapabilities,ReflectorReader as ɵReflectorReader,RenderDebugInfo as ɵRenderDebugInfo,TransitionEngine as ɵTransitionEngine,makeDecorator as ɵmakeDecorator,isObservable as ɵisObservable,isPromise as ɵisPromise,AUTO_STYLE,AnimationEntryMetadata,AnimationStateMetadata,AnimationStateDeclarationMetadata,AnimationStateTransitionMetadata,AnimationMetadata,AnimationKeyframesSequenceMetadata,AnimationStyleMetadata,AnimationAnimateMetadata,AnimationWithStepsMetadata,AnimationSequenceMetadata,AnimationGroupMetadata,animate,group,sequence,style,state,keyframes,transition,trigger,ComponentRef_ as ɵComponentRef_,NgModuleInjector as ɵNgModuleInjector,registerModuleFactory as ɵregisterModuleFactory,TemplateRef_ as ɵTemplateRef_,EMPTY_ARRAY as ɵEMPTY_ARRAY,EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY,EMPTY_MAP as ɵEMPTY_MAP,InlineArray16 as ɵInlineArray16,InlineArray2 as ɵInlineArray2,InlineArray4 as ɵInlineArray4,InlineArray8 as ɵInlineArray8,InlineArrayDynamic as ɵInlineArrayDynamic,ViewUtils as ɵViewUtils,castByValue as ɵcastByValue,checkBinding as ɵcheckBinding,checkBindingChange as ɵcheckBindingChange,checkRenderAttribute as ɵcheckRenderAttribute,checkRenderClass as ɵcheckRenderClass,checkRenderProperty as ɵcheckRenderProperty,checkRenderStyle as ɵcheckRenderStyle,checkRenderText as ɵcheckRenderText,createRenderComponentType as ɵcreateRenderComponentType,createRenderElement as ɵcreateRenderElement,getComponentFactoryViewClass as ɵgetComponentFactoryViewClass,inlineInterpolate as ɵinlineInterpolate,interpolate as ɵinterpolate,noop as ɵnoop,pureProxy1 as ɵpureProxy1,pureProxy10 as ɵpureProxy10,pureProxy2 as ɵpureProxy2,pureProxy3 as ɵpureProxy3,pureProxy4 as ɵpureProxy4,pureProxy5 as ɵpureProxy5,pureProxy6 as ɵpureProxy6,pureProxy7 as ɵpureProxy7,pureProxy8 as ɵpureProxy8,pureProxy9 as ɵpureProxy9,selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement,setBindingDebugInfo as ɵsetBindingDebugInfo,setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges,subscribeToRenderElement as ɵsubscribeToRenderElement,ArgumentType as ɵArgumentType,BindingType as ɵBindingType,DepFlags as ɵDepFlags,NodeFlags as ɵNodeFlags,ProviderType as ɵProviderType,QueryBindingType as ɵQueryBindingType,QueryValueType as ɵQueryValueType,ViewFlags as ɵViewFlags,anchorDef as ɵanchorDef,createComponentFactory as ɵcreateComponentFactory,createRendererTypeV2 as ɵcreateRendererTypeV2,directiveDef as ɵdirectiveDef,elementDef as ɵelementDef,elementEventFullName as ɵelementEventFullName,ngContentDef as ɵngContentDef,nodeValue as ɵnodeValue,pipeDef as ɵpipeDef,providerDef as ɵproviderDef,pureArrayDef as ɵpureArrayDef,pureObjectDef as ɵpureObjectDef,purePipeDef as ɵpurePipeDef,queryDef as ɵqueryDef,textDef as ɵtextDef,unwrapValue as ɵunwrapValue,viewDef as ɵviewDef,AnimationQueue as ɵz,_initViewEngine as ɵp,_iterableDiffersFactory as ɵm,_keyValueDiffersFactory as ɵn,_localeFactory as ɵo,ApplicationRef_ as ɵf,_appIdRandomProviderFactory as ɵg,defaultIterableDiffers as ɵh,defaultKeyValueDiffers as ɵi,DefaultIterableDifferFactory as ɵk,DefaultKeyValueDifferFactory as ɵl,ReflectiveInjector_ as ɵc,ReflectiveDependency as ɵd,resolveReflectiveProviders as ɵe,isBlank as ɵj,wtfEnabled as ɵq,createScope as ɵs,detectWTF as ɵr,endTimeRange as ɵv,leave as ɵt,startTimeRange as ɵu,makeParamDecorator as ɵa,makePropDecorator as ɵb,_def as ɵx,NodeType as ɵy};
