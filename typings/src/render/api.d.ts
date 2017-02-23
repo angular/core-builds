@@ -11,7 +11,7 @@ import { AnimationStyles } from '../../src/animation/animation_styles';
 import { InjectionToken, Injector } from '../di';
 import { ViewEncapsulation } from '../metadata/view';
 /**
- * @experimental
+ * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
  */
 export declare class RenderComponentType {
     id: string;
@@ -22,6 +22,9 @@ export declare class RenderComponentType {
     animations: any;
     constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: any);
 }
+/**
+ * @deprecated Debug info is handeled internally in the view engine now.
+ */
 export declare abstract class RenderDebugInfo {
     readonly abstract injector: Injector;
     readonly abstract component: any;
@@ -32,6 +35,9 @@ export declare abstract class RenderDebugInfo {
     readonly abstract context: any;
     readonly abstract source: string;
 }
+/**
+ * @deprecated Use the `RendererV2` instead.
+ */
 export interface DirectRenderer {
     remove(node: any): void;
     appendChild(node: any, parent: any): void;
@@ -40,7 +46,7 @@ export interface DirectRenderer {
     parentElement(node: any): any;
 }
 /**
- * @experimental
+ * @deprecated Use the `RendererV2` instead.
  */
 export declare abstract class Renderer {
     abstract selectRootElement(selectorOrNode: string | any, debugInfo?: RenderDebugInfo): any;
@@ -78,7 +84,8 @@ export declare const RendererV2Interceptor: InjectionToken<RendererV2[]>;
  * If you are implementing a custom renderer, you must implement this interface.
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
- * @experimental
+ *
+ * @deprecated Use `RendererFactoryV2` instead.
  */
 export declare abstract class RootRenderer {
     abstract renderComponent(componentType: RenderComponentType): Renderer;

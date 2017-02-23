@@ -3,6 +3,7 @@
  */
 export * from './public_api';
 export { AnimationQueue as ɵz } from './src/animation/animation_queue';
+export { AnimationMetadataType as ɵba, animate as ɵbc, group as ɵbd, keyframes as ɵbh, sequence as ɵbe, state as ɵbg, style as ɵbf, transition as ɵbi, trigger as ɵbb } from './src/animation_next/dsl';
 export { _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo } from './src/application_module';
 export { ApplicationRef_ as ɵf } from './src/application_ref';
 export { _appIdRandomProviderFactory as ɵg } from './src/application_tokens';

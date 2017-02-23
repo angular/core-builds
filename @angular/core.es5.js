@@ -1,5 +1,5 @@
 var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}/**
- * @license Angular v4.0.0-beta.8-187f7b6
+ * @license Angular v4.0.0-beta.8-4b54c0e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */import{Observable}from'rxjs/Observable';import{merge}from'rxjs/observable/merge';import{share}from'rxjs/operator/share';import{$$observable}from'rxjs/symbol/observable';import{Subject}from'rxjs/Subject';/**
@@ -533,7 +533,7 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
      * @return {?}
      */},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
  * @stable
- */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-187f7b6');/**
+ */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-4b54c0e');/**
  * Inject decorator and metadata.
  *
  * @stable
@@ -2512,7 +2512,9 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * Structural diffing for `Object`s and `Map`s.
  */var/** @type {?} */keyValDiff=[new DefaultKeyValueDifferFactory()];/**
  * Structural diffing for `Iterable` types such as `Array`s.
- */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);var RenderComponentType=/**
+ */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);/**
+ * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+ */var RenderComponentType=/**
      * @param {?} id
      * @param {?} templateUrl
      * @param {?} slotCount
@@ -2520,6 +2522,7 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      * @param {?} styles
      * @param {?} animations
      */function RenderComponentType(id,templateUrl,slotCount,encapsulation,styles,animations){_classCallCheck(this,RenderComponentType);this.id=id;this.templateUrl=templateUrl;this.slotCount=slotCount;this.encapsulation=encapsulation;this.styles=styles;this.animations=animations;};/**
+ * @deprecated Debug info is handeled internally in the view engine now.
  * @abstract
  */var RenderDebugInfo=function(){function RenderDebugInfo(){_classCallCheck(this,RenderDebugInfo);}_createClass(RenderDebugInfo,[{key:'injector',/**
      * @abstract
@@ -2540,7 +2543,7 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      * @abstract
      * @return {?}
      */},{key:'source',value:function source(){}}]);return RenderDebugInfo;}();/**
- * \@experimental
+ * @deprecated Use the `RendererV2` instead.
  * @abstract
  */var RendererV1=function(){function RendererV1(){_classCallCheck(this,RendererV1);}_createClass(RendererV1,[{key:'selectRootElement',/**
      * @abstract
@@ -2662,7 +2665,8 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * If you are implementing a custom renderer, you must implement this interface.
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
- * \@experimental
+ *
+ * @deprecated Use `RendererFactoryV2` instead.
  * @abstract
  */var RootRenderer=function(){function RootRenderer(){_classCallCheck(this,RootRenderer);}_createClass(RootRenderer,[{key:'renderComponent',/**
      * @abstract
@@ -5690,551 +5694,6 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
      */},{key:'players',get:function get(){return this._players;}}]);return AnimationSequencePlayer;}();/**
  * @experimental Animation support is experimental.
  */var/** @type {?} */AUTO_STYLE='*';/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link trigger trigger
- * animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationEntryMetadata=/**
-     * @param {?} name
-     * @param {?} definitions
-     */function AnimationEntryMetadata(name,definitions){_classCallCheck(this,AnimationEntryMetadata);this.name=name;this.definitions=definitions;};/**
- * \@experimental Animation support is experimental.
- * @abstract
- */var AnimationStateMetadata=function AnimationStateMetadata(){_classCallCheck(this,AnimationStateMetadata);};/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link state state animation
- * function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationStateDeclarationMetadata=function(_AnimationStateMetada){_inherits(AnimationStateDeclarationMetadata,_AnimationStateMetada);/**
-     * @param {?} stateNameExpr
-     * @param {?} styles
-     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this34.stateNameExpr=stateNameExpr;_this34.styles=styles;return _this34;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the
- * {\@link transition transition animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationStateTransitionMetadata=function(_AnimationStateMetada2){_inherits(AnimationStateTransitionMetadata,_AnimationStateMetada2);/**
-     * @param {?} stateChangeExpr
-     * @param {?} steps
-     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this35=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this35.stateChangeExpr=stateChangeExpr;_this35.steps=steps;return _this35;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);/**
- * \@experimental Animation support is experimental.
- * @abstract
- */var AnimationMetadata=function AnimationMetadata(){_classCallCheck(this,AnimationMetadata);};/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link keyframes keyframes
- * animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationKeyframesSequenceMetadata=function(_AnimationMetadata){_inherits(AnimationKeyframesSequenceMetadata,_AnimationMetadata);/**
-     * @param {?} steps
-     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this36=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this36.steps=steps;return _this36;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link style style animation
- * function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationStyleMetadata=function(_AnimationMetadata2){_inherits(AnimationStyleMetadata,_AnimationMetadata2);/**
-     * @param {?} styles
-     * @param {?=} offset
-     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this37=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this37.styles=styles;_this37.offset=offset;return _this37;}return AnimationStyleMetadata;}(AnimationMetadata);/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link animate animate
- * animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationAnimateMetadata=function(_AnimationMetadata3){_inherits(AnimationAnimateMetadata,_AnimationMetadata3);/**
-     * @param {?} timings
-     * @param {?} styles
-     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this38=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this38.timings=timings;_this38.styles=styles;return _this38;}return AnimationAnimateMetadata;}(AnimationMetadata);/**
- * \@experimental Animation support is experimental.
- * @abstract
- */var AnimationWithStepsMetadata=function(_AnimationMetadata4){_inherits(AnimationWithStepsMetadata,_AnimationMetadata4);function AnimationWithStepsMetadata(){_classCallCheck(this,AnimationWithStepsMetadata);return _possibleConstructorReturn(this,(AnimationWithStepsMetadata.__proto__||Object.getPrototypeOf(AnimationWithStepsMetadata)).call(this));}/**
-     * @return {?}
-     */_createClass(AnimationWithStepsMetadata,[{key:'steps',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationWithStepsMetadata;}(AnimationMetadata);/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link sequence sequence
- * animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationSequenceMetadata=function(_AnimationWithStepsMe){_inherits(AnimationSequenceMetadata,_AnimationWithStepsMe);/**
-     * @param {?} _steps
-     */function AnimationSequenceMetadata(_steps){_classCallCheck(this,AnimationSequenceMetadata);var _this40=_possibleConstructorReturn(this,(AnimationSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationSequenceMetadata)).call(this));_this40._steps=_steps;return _this40;}/**
-     * @return {?}
-     */_createClass(AnimationSequenceMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationSequenceMetadata;}(AnimationWithStepsMetadata);/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link group group animation
- * function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationGroupMetadata=function(_AnimationWithStepsMe2){_inherits(AnimationGroupMetadata,_AnimationWithStepsMe2);/**
-     * @param {?} _steps
-     */function AnimationGroupMetadata(_steps){_classCallCheck(this,AnimationGroupMetadata);var _this41=_possibleConstructorReturn(this,(AnimationGroupMetadata.__proto__||Object.getPrototypeOf(AnimationGroupMetadata)).call(this));_this41._steps=_steps;return _this41;}/**
-     * @return {?}
-     */_createClass(AnimationGroupMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationGroupMetadata;}(AnimationWithStepsMetadata);/**
- * `animate` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `animate` specifies an animation step that will apply the provided `styles` data for a given
- * amount of
- * time based on the provided `timing` expression value. Calls to `animate` are expected to be
- * used within {\@link sequence an animation sequence}, {\@link group group}, or {\@link transition
- * transition}.
- *
- * ### Usage
- *
- * The `animate` function accepts two input parameters: `timing` and `styles`:
- *
- * - `timing` is a string based value that can be a combination of a duration with optional
- * delay and easing values. The format for the expression breaks down to `duration delay easing`
- * (therefore a value such as `1s 100ms ease-out` will be parse itself into `duration=1000,
- * delay=100, easing=ease-out`.
- * If a numeric value is provided then that will be used as the `duration` value in millisecond
- * form.
- * - `styles` is the style input data which can either be a call to {\@link style style} or {\@link
- * keyframes keyframes}.
- * If left empty then the styles from the destination state will be collected and used (this is
- * useful when
- * describing an animation step that will complete an animation by {\@link
- * transition#the-final-animate-call animating to the final state}).
- *
- * ```typescript
- * // various functions for specifying timing data
- * animate(500, style(...))
- * animate("1s", style(...))
- * animate("100ms 0.5s", style(...))
- * animate("5s ease", style(...))
- * animate("5s 10ms cubic-bezier(.17,.67,.88,.1)", style(...))
- *
- * // either style() of keyframes() can be used
- * animate(500, style({ background: "red" }))
- * animate(500, keyframes([
- *   style({ background: "blue" })),
- *   style({ background: "red" }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} timing
- * @param {?=} styles
- * @return {?}
- */function animate(timing){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */stylesEntry=styles;if(!isPresent(stylesEntry)){var/** @type {?} */EMPTY_STYLE={};stylesEntry=new AnimationStyleMetadata([EMPTY_STYLE],1);}return new AnimationAnimateMetadata(timing,stylesEntry);}/**
- * `group` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `group` specifies a list of animation steps that are all run in parallel. Grouped animations
- * are useful when a series of styles must be animated/closed off
- * at different statrting/ending times.
- *
- * The `group` function can either be used within a {\@link sequence sequence} or a {\@link transition
- * transition}
- * and it will only continue to the next instruction once all of the inner animation steps
- * have completed.
- *
- * ### Usage
- *
- * The `steps` data that is passed into the `group` animation function can either consist
- * of {\@link style style} or {\@link animate animate} function calls. Each call to `style()` or
- * `animate()`
- * within a group will be executed instantly (use {\@link keyframes keyframes} or a
- * {\@link animate#usage animate() with a delay value} to offset styles to be applied at a later
- * time).
- *
- * ```typescript
- * group([
- *   animate("1s", { background: "black" }))
- *   animate("2s", { color: "white" }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function group(steps){return new AnimationGroupMetadata(steps);}/**
- * `sequence` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `sequence` Specifies a list of animation steps that are run one by one. (`sequence` is used
- * by default when an array is passed as animation data into {\@link transition transition}.)
- *
- * The `sequence` function can either be used within a {\@link group group} or a {\@link transition
- * transition}
- * and it will only continue to the next instruction once each of the inner animation steps
- * have completed.
- *
- * To perform animation styling in parallel with other animation steps then
- * have a look at the {\@link group group} animation function.
- *
- * ### Usage
- *
- * The `steps` data that is passed into the `sequence` animation function can either consist
- * of {\@link style style} or {\@link animate animate} function calls. A call to `style()` will apply
- * the
- * provided styling data immediately while a call to `animate()` will apply its styling
- * data over a given time depending on its timing data.
- *
- * ```typescript
- * sequence([
- *   style({ opacity: 0 })),
- *   animate("1s", { opacity: 1 }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function sequence(steps){return new AnimationSequenceMetadata(steps);}/**
- * `style` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `style` declares a key/value object containing CSS properties/styles that can then
- * be used for {\@link state animation states}, within an {\@link sequence animation sequence}, or as
- * styling data for both {\@link animate animate} and {\@link keyframes keyframes}.
- *
- * ### Usage
- *
- * `style` takes in a key/value string map as data and expects one or more CSS property/value
- * pairs to be defined.
- *
- * ```typescript
- * // string values are used for css properties
- * style({ background: "red", color: "blue" })
- *
- * // numerical (pixel) values are also supported
- * style({ width: 100, height: 0 })
- * ```
- *
- * #### Auto-styles (using `*`)
- *
- * When an asterix (`*`) character is used as a value then it will be detected from the element
- * being animated
- * and applied as animation data when the animation starts.
- *
- * This feature proves useful for a state depending on layout and/or environment factors; in such
- * cases
- * the styles are calculated just before the animation starts.
- *
- * ```typescript
- * // the steps below will animate from 0 to the
- * // actual height of the element
- * style({ height: 0 }),
- * animate("1s", style({ height: "*" }))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} tokens
- * @return {?}
- */function style(tokens){var/** @type {?} */input=void 0;var/** @type {?} */offset=null;if(typeof tokens==='string'){input=[/** @type {?} */tokens];}else{if(Array.isArray(tokens)){input=tokens;}else{input=[/** @type {?} */tokens];}input.forEach(function(entry){var/** @type {?} */entryOffset=entry[/** TODO #9100 */'offset'];if(isPresent(entryOffset)){offset=offset==null?parseFloat(entryOffset):offset;}});}return new AnimationStyleMetadata(input,offset);}/**
- * `state` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `state` declares an animation state within the given trigger. When a state is
- * active within a component then its associated styles will persist on
- * the element that the trigger is attached to (even when the animation ends).
- *
- * To animate between states, have a look at the animation {\@link transition transition}
- * DSL function. To register states to an animation trigger please have a look
- * at the {\@link trigger trigger} function.
- *
- * #### The `void` state
- *
- * The `void` state value is a reserved word that angular uses to determine when the element is not
- * apart
- * of the application anymore (e.g. when an `ngIf` evaluates to false then the state of the
- * associated element
- * is void).
- *
- * #### The `*` (default) state
- *
- * The `*` state (when styled) is a fallback state that will be used if
- * the state that is being animated is not declared within the trigger.
- *
- * ### Usage
- *
- * `state` will declare an animation state with its associated styles
- * within the given trigger.
- *
- * - `stateNameExpr` can be one or more state names separated by commas.
- * - `styles` refers to the {\@link style styling data} that will be persisted on the element once
- * the state
- * has been reached.
- *
- * ```typescript
- * // "void" is a reserved name for a state and is used to represent
- * // the state in which an element is detached from from the application.
- * state("void", style({ height: 0 }))
- *
- * // user-defined states
- * state("closed", style({ height: 0 }))
- * state("open, visible", style({ height: "*" }))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} stateNameExpr
- * @param {?} styles
- * @return {?}
- */function state(stateNameExpr,styles){return new AnimationStateDeclarationMetadata(stateNameExpr,styles);}/**
- * `keyframes` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `keyframes` specifies a collection of {\@link style style} entries each optionally characterized
- * by an `offset` value.
- *
- * ### Usage
- *
- * The `keyframes` animation function is designed to be used alongside the {\@link animate animate}
- * animation function. Instead of applying animations from where they are
- * currently to their destination, keyframes can describe how each style entry is applied
- * and at what point within the animation arc (much like CSS Keyframe Animations do).
- *
- * For each `style()` entry an `offset` value can be set. Doing so allows to specifiy at
- * what percentage of the animate time the styles will be applied.
- *
- * ```typescript
- * // the provided offset values describe when each backgroundColor value is applied.
- * animate("5s", keyframes([
- *   style({ backgroundColor: "red", offset: 0 }),
- *   style({ backgroundColor: "blue", offset: 0.2 }),
- *   style({ backgroundColor: "orange", offset: 0.3 }),
- *   style({ backgroundColor: "black", offset: 1 })
- * ]))
- * ```
- *
- * Alternatively, if there are no `offset` values used within the style entries then the offsets
- * will
- * be calculated automatically.
- *
- * ```typescript
- * animate("5s", keyframes([
- *   style({ backgroundColor: "red" }) // offset = 0
- *   style({ backgroundColor: "blue" }) // offset = 0.33
- *   style({ backgroundColor: "orange" }) // offset = 0.66
- *   style({ backgroundColor: "black" }) // offset = 1
- * ]))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function keyframes(steps){return new AnimationKeyframesSequenceMetadata(steps);}/**
- * `transition` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `transition` declares the {\@link sequence sequence of animation steps} that will be run when the
- * provided
- * `stateChangeExpr` value is satisfied. The `stateChangeExpr` consists of a `state1 => state2`
- * which consists
- * of two known states (use an asterix (`*`) to refer to a dynamic starting and/or ending state).
- *
- * A function can also be provided as the `stateChangeExpr` argument for a transition and this
- * function will be executed each time a state change occurs. If the value returned within the
- * function is true then the associated animation will be run.
- *
- * Animation transitions are placed within an {\@link trigger animation trigger}. For an transition
- * to animate to
- * a state value and persist its styles then one or more {\@link state animation states} is expected
- * to be defined.
- *
- * ### Usage
- *
- * An animation transition is kicked off the `stateChangeExpr` predicate evaluates to true based on
- * what the
- * previous state is and what the current state has become. In other words, if a transition is
- * defined that
- * matches the old/current state criteria then the associated animation will be triggered.
- *
- * ```typescript
- * // all transition/state changes are defined within an animation trigger
- * trigger("myAnimationTrigger", [
- *   // if a state is defined then its styles will be persisted when the
- *   // animation has fully completed itself
- *   state("on", style({ background: "green" })),
- *   state("off", style({ background: "grey" })),
- *
- *   // a transition animation that will be kicked off when the state value
- *   // bound to "myAnimationTrigger" changes from "on" to "off"
- *   transition("on => off", animate(500)),
- *
- *   // it is also possible to do run the same animation for both directions
- *   transition("on <=> off", animate(500)),
- *
- *   // or to define multiple states pairs separated by commas
- *   transition("on => off, off => void", animate(500)),
- *
- *   // this is a catch-all state change for when an element is inserted into
- *   // the page and the destination state is unknown
- *   transition("void => *", [
- *     style({ opacity: 0 }),
- *     animate(500)
- *   ]),
- *
- *   // this will capture a state change between any states
- *   transition("* => *", animate("1s 0s")),
- *
- *   // you can also go full out and include a function
- *   transition((fromState, toState) => {
- *     // when `true` then it will allow the animation below to be invoked
- *     return fromState == "off" && toState == "on";
- *   }, animate("1s 0s"))
- * ])
- * ```
- *
- * The template associated with this component will make use of the `myAnimationTrigger`
- * animation trigger by binding to an element within its template code.
- *
- * ```html
- * <!-- somewhere inside of my-component-tpl.html -->
- * <div [\@myAnimationTrigger]="myStatusExp">...</div>
- * ```
- *
- * #### The final `animate` call
- *
- * If the final step within the transition steps is a call to `animate()` that **only**
- * uses a timing value with **no style data** then it will be automatically used as the final
- * animation
- * arc for the element to animate itself to the final state. This involves an automatic mix of
- * adding/removing CSS styles so that the element will be in the exact state it should be for the
- * applied state to be presented correctly.
- *
- * ```
- * // start off by hiding the element, but make sure that it animates properly to whatever state
- * // is currently active for "myAnimationTrigger"
- * transition("void => *", [
- *   style({ opacity: 0 }),
- *   animate(500)
- * ])
- * ```
- *
- * ### Transition Aliases (`:enter` and `:leave`)
- *
- * Given that enter (insertion) and leave (removal) animations are so common,
- * the `transition` function accepts both `:enter` and `:leave` values which
- * are aliases for the `void => *` and `* => void` state changes.
- *
- * ```
- * transition(":enter", [
- *   style({ opacity: 0 }),
- *   animate(500, style({ opacity: 1 }))
- * ])
- * transition(":leave", [
- *   animate(500, style({ opacity: 0 }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} stateChangeExpr
- * @param {?} steps
- * @return {?}
- */function transition(stateChangeExpr,steps){var/** @type {?} */animationData=Array.isArray(steps)?new AnimationSequenceMetadata(steps):steps;return new AnimationStateTransitionMetadata(stateChangeExpr,animationData);}/**
- * `trigger` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `trigger` Creates an animation trigger which will a list of {\@link state state} and {\@link
- * transition transition}
- * entries that will be evaluated when the expression bound to the trigger changes.
- *
- * Triggers are registered within the component annotation data under the
- * {\@link Component#animations-anchor animations section}. An animation trigger can
- * be placed on an element within a template by referencing the name of the
- * trigger followed by the expression value that the trigger is bound to
- * (in the form of `[\@triggerName]="expression"`.
- *
- * ### Usage
- *
- * `trigger` will create an animation trigger reference based on the provided `name` value.
- * The provided `animation` value is expected to be an array consisting of {\@link state state} and
- * {\@link transition transition}
- * declarations.
- *
- * ```typescript
- * \@Component({
- *   selector: 'my-component',
- *   templateUrl: 'my-component-tpl.html',
- *   animations: [
- *     trigger("myAnimationTrigger", [
- *       state(...),
- *       state(...),
- *       transition(...),
- *       transition(...)
- *     ])
- *   ]
- * })
- * class MyComponent {
- *   myStatusExp = "something";
- * }
- * ```
- *
- * The template associated with this component will make use of the `myAnimationTrigger`
- * animation trigger by binding to an element within its template code.
- *
- * ```html
- * <!-- somewhere inside of my-component-tpl.html -->
- * <div [\@myAnimationTrigger]="myStatusExp">...</div>
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} name
- * @param {?} animation
- * @return {?}
- */function trigger(name,animation){return new AnimationEntryMetadata(name,animation);}/**
  * @param {?} previousStyles
  * @param {?} newStyles
  * @param {?=} nullValue
@@ -6325,12 +5784,12 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}/**
      * @param {?} callback
      * @return {?}
-     */},{key:'onStart',value:function onStart(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('start'));},'player.onStart');this._player.onStart(fn);}/**
+     */},{key:'onStart',value:function onStart(callback){var _this34=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this34._createEvent('start'));},'player.onStart');this._player.onStart(fn);}/**
      * @param {?} callback
      * @return {?}
-     */},{key:'onDone',value:function onDone(callback){var _this43=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this43._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
+     */},{key:'onDone',value:function onDone(callback){var _this35=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this35._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
      * @param {?} _delegate
-     */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;}/**
+     */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;throw new Error('RootRenderer is no longer supported. Please use the `RendererFactoryV2` instead!');}/**
      * @param {?} componentProto
      * @return {?}
      */_createClass(DebugDomRootRenderer,[{key:'renderComponent',value:function renderComponent(componentProto){return new DebugDomRenderer(this._delegate.renderComponent(componentProto));}}]);return DebugDomRootRenderer;}();var DebugDomRenderer=function(){/**
@@ -6451,7 +5910,7 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @return {?}
      */},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}/**
      * @return {?}
-     */},{key:'references',get:function get(){var _this44=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this44._view.allNodes?_this44._view.allNodes[_this44._nodeIndex]:null;}else{varValue=_this44._view.injectorGet(refToken,_this44._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
+     */},{key:'references',get:function get(){var _this36=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this36._view.allNodes?_this36._view.allNodes[_this36._nodeIndex]:null;}else{varValue=_this36._view.injectorGet(refToken,_this36._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
      * @param {?} element
      * @param {?} animationName
      * @return {?}
@@ -6482,7 +5941,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @param {?} animationName
      * @param {?} player
      * @return {?}
-     */},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this45=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this45._players.remove(element,animationName,player);});}/**
+     */},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this37=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this37._players.remove(element,animationName,player);});}/**
      * @param {?} element
      * @param {?=} animationName
      * @return {?}
@@ -6493,7 +5952,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
  */function _recursePlayers(player,collectedPlayers){if(player instanceof AnimationGroupPlayer||player instanceof AnimationSequencePlayer){player.players.forEach(function(player){return _recursePlayers(player,collectedPlayers);});}else{collectedPlayers.push(player);}}var ElementInjector=function(_Injector){_inherits(ElementInjector,_Injector);/**
      * @param {?} _view
      * @param {?} _nodeIndex
-     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this46=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this46._view=_view;_this46._nodeIndex=_nodeIndex;return _this46;}/**
+     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this38=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this38._view=_view;_this38._nodeIndex=_nodeIndex;return _this38;}/**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
@@ -6555,7 +6014,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @return {?}
      */},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}/**
      * @return {?}
-     */},{key:'destroy',value:function destroy(){var _this47=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47.renderer.destroyView(hostElement,_this47.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}/**
+     */},{key:'destroy',value:function destroy(){var _this39=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this39.renderer.destroyView(hostElement,_this39.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}/**
      * Overwritten by implementations
      * @return {?}
      */},{key:'destroyInternal',value:function destroyInternal(){}/**
@@ -6563,7 +6022,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @return {?}
      */},{key:'detachInternal',value:function detachInternal(){}/**
      * @return {?}
-     */},{key:'detach',value:function detach(){var _this48=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this48._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
+     */},{key:'detach',value:function detach(){var _this40=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this40._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
 if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.splice(index,1);}}this.appRef=null;this.viewContainer=null;this.dirtyParentQueriesInternal();}/**
      * @return {?}
      */},{key:'_renderDetach',value:function _renderDetach(){if(this._directRenderer){this.visitRootNodesInternal(this._directRenderer.remove,null);}else{this.renderer.detachView(this.flatRootNodes);}}/**
@@ -6641,7 +6100,7 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      * @param {?} cdMode
      * @param {?} staticNodeDebugInfos
      * @param {?=} declaredViewContainer
-     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this49=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this49.staticNodeDebugInfos=staticNodeDebugInfos;_this49._currentDebugContext=null;return _this49;}/**
+     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this41=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this41.staticNodeDebugInfos=staticNodeDebugInfos;_this41._currentDebugContext=null;return _this41;}/**
      * @param {?} context
      * @return {?}
      */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}/**
@@ -6674,7 +6133,7 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      */},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}/**
      * @param {?} cb
      * @return {?}
-     */},{key:'eventHandler',value:function eventHandler(cb){var _this50=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this50._resetDebug();try{return superHandler.call(_this50,eventName,event);}catch(e){_this50._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);/**
+     */},{key:'eventHandler',value:function eventHandler(cb){var _this42=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this42._resetDebug();try{return superHandler.call(_this42,eventName,event);}catch(e){_this42._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);/**
  * A ViewContainer is created for elements that have a ViewContainerRef
  * to keep track of the nested views.
  */var ViewContainer=function(){/**
@@ -6716,4 +6175,461 @@ if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.neste
      * @return {?}
      */},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}/**
      * @return {?}
-     */},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();export{createPlatform,assertPlatform,destroyPlatform,getPlatform,PlatformRef,ApplicationRef,enableProdMode,isDevMode,createPlatformFactory,NgProbeToken,APP_ID,PACKAGE_ROOT_URL,PLATFORM_INITIALIZER,PLATFORM_ID,APP_BOOTSTRAP_LISTENER,APP_INITIALIZER,ApplicationInitStatus,DebugElement,DebugNode,asNativeElements,getDebugNode,Testability,TestabilityRegistry,setTestabilityGetter,TRANSLATIONS,TRANSLATIONS_FORMAT,LOCALE_ID,MissingTranslationStrategy,ApplicationModule,wtfCreateScope,wtfLeave,wtfStartTimeRange,wtfEndTimeRange,Type,EventEmitter,ErrorHandler,AnimationPlayer,AnimationStyles,AnimationKeyframe,Sanitizer,SecurityContext,AnimationTransitionEvent,ANALYZE_FOR_ENTRY_COMPONENTS,Attribute,ContentChild,ContentChildren,Query,ViewChild,ViewChildren,Component,Directive,HostBinding,HostListener,Input,Output,Pipe,AfterContentChecked,AfterContentInit,AfterViewChecked,AfterViewInit,DoCheck,OnChanges,OnDestroy,OnInit,CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA,NgModule,ViewEncapsulation,Version,VERSION,Class,forwardRef,resolveForwardRef,Injector,ReflectiveInjector,ResolvedReflectiveFactory,ReflectiveKey,InjectionToken,OpaqueToken,Inject,Optional,Injectable,Self,SkipSelf,Host,NgZone,RenderComponentType,RendererV1 as Renderer,RendererFactoryV2,RendererV2,RootRenderer,COMPILER_OPTIONS,Compiler,CompilerFactory,ModuleWithComponentFactories,ComponentFactory,ComponentRef,ComponentFactoryResolver,ElementRef,NgModuleFactory,NgModuleRef,NgModuleFactoryLoader,getModuleFactory,QueryList,SystemJsNgModuleLoader,SystemJsNgModuleLoaderConfig,TemplateRef,ViewContainerRef,EmbeddedViewRef,ViewRef,ChangeDetectionStrategy,ChangeDetectorRef,DefaultIterableDiffer,IterableDiffers,KeyValueDiffers,SimpleChange,WrappedValue,platformCore,ANY_STATE as ɵANY_STATE,DEFAULT_STATE as ɵDEFAULT_STATE,EMPTY_STATE as ɵEMPTY_STATE,FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG,AnimationGroupPlayer as ɵAnimationGroupPlayer,AnimationKeyframe as ɵAnimationKeyframe,AnimationPlayer as ɵAnimationPlayer,NoOpAnimationPlayer as ɵNoOpAnimationPlayer,AnimationSequencePlayer as ɵAnimationSequencePlayer,balanceAnimationKeyframes as ɵbalanceAnimationKeyframes,clearStyles as ɵclearStyles,collectAndResolveStyles as ɵcollectAndResolveStyles,flattenStyles as ɵflattenStyles,prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles,renderStyles as ɵrenderStyles,AnimationStyles as ɵAnimationStyles,AnimationTransition as ɵAnimationTransition,ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS,APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER,ValueUnwrapper as ɵValueUnwrapper,devModeEqual as ɵdevModeEqual,ChangeDetectorStatus as ɵChangeDetectorStatus,isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy,Console as ɵConsole,DebugDomRootRenderer as ɵDebugDomRootRenderer,ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE,ComponentFactory as ɵComponentFactory,CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver,DebugContext$1 as ɵDebugContext,StaticNodeDebugInfo as ɵStaticNodeDebugInfo,AppView as ɵAppView,DebugAppView as ɵDebugAppView,ViewContainer as ɵViewContainer,ViewType as ɵViewType,LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES,LifecycleHooks as ɵLifecycleHooks,ViewMetadata as ɵViewMetadata,Reflector as ɵReflector,reflector as ɵreflector,ReflectionCapabilities as ɵReflectionCapabilities,ReflectorReader as ɵReflectorReader,RenderDebugInfo as ɵRenderDebugInfo,makeDecorator as ɵmakeDecorator,isObservable as ɵisObservable,isPromise as ɵisPromise,ComponentRef_ as ɵComponentRef_,NgModuleInjector as ɵNgModuleInjector,registerModuleFactory as ɵregisterModuleFactory,TemplateRef_ as ɵTemplateRef_,EMPTY_ARRAY as ɵEMPTY_ARRAY,EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY,EMPTY_MAP as ɵEMPTY_MAP,InlineArray16 as ɵInlineArray16,InlineArray2 as ɵInlineArray2,InlineArray4 as ɵInlineArray4,InlineArray8 as ɵInlineArray8,InlineArrayDynamic as ɵInlineArrayDynamic,ViewUtils as ɵViewUtils,castByValue as ɵcastByValue,checkBinding as ɵcheckBinding,checkBindingChange as ɵcheckBindingChange,checkRenderAttribute as ɵcheckRenderAttribute,checkRenderClass as ɵcheckRenderClass,checkRenderProperty as ɵcheckRenderProperty,checkRenderStyle as ɵcheckRenderStyle,checkRenderText as ɵcheckRenderText,createRenderComponentType as ɵcreateRenderComponentType,createRenderElement as ɵcreateRenderElement,getComponentFactoryViewClass as ɵgetComponentFactoryViewClass,inlineInterpolate as ɵinlineInterpolate,interpolate as ɵinterpolate,noop as ɵnoop,pureProxy1 as ɵpureProxy1,pureProxy10 as ɵpureProxy10,pureProxy2 as ɵpureProxy2,pureProxy3 as ɵpureProxy3,pureProxy4 as ɵpureProxy4,pureProxy5 as ɵpureProxy5,pureProxy6 as ɵpureProxy6,pureProxy7 as ɵpureProxy7,pureProxy8 as ɵpureProxy8,pureProxy9 as ɵpureProxy9,selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement,setBindingDebugInfo as ɵsetBindingDebugInfo,setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges,subscribeToRenderElement as ɵsubscribeToRenderElement,ArgumentType as ɵArgumentType,BindingType as ɵBindingType,DepFlags as ɵDepFlags,NodeFlags as ɵNodeFlags,ProviderType as ɵProviderType,QueryBindingType as ɵQueryBindingType,QueryValueType as ɵQueryValueType,ViewFlags as ɵViewFlags,anchorDef as ɵanchorDef,createComponentFactory as ɵcreateComponentFactory,createRendererTypeV2 as ɵcreateRendererTypeV2,directiveDef as ɵdirectiveDef,elementDef as ɵelementDef,elementEventFullName as ɵelementEventFullName,ngContentDef as ɵngContentDef,nodeValue as ɵnodeValue,pipeDef as ɵpipeDef,providerDef as ɵproviderDef,pureArrayDef as ɵpureArrayDef,pureObjectDef as ɵpureObjectDef,purePipeDef as ɵpurePipeDef,queryDef as ɵqueryDef,textDef as ɵtextDef,unwrapValue as ɵunwrapValue,viewDef as ɵviewDef,AUTO_STYLE,AnimationEntryMetadata,AnimationStateMetadata,AnimationStateDeclarationMetadata,AnimationStateTransitionMetadata,AnimationMetadata,AnimationKeyframesSequenceMetadata,AnimationStyleMetadata,AnimationAnimateMetadata,AnimationWithStepsMetadata,AnimationSequenceMetadata,AnimationGroupMetadata,animate,group,sequence,style,state,keyframes,transition,trigger,AnimationQueue as ɵz,_initViewEngine as ɵp,_iterableDiffersFactory as ɵm,_keyValueDiffersFactory as ɵn,_localeFactory as ɵo,ApplicationRef_ as ɵf,_appIdRandomProviderFactory as ɵg,defaultIterableDiffers as ɵh,defaultKeyValueDiffers as ɵi,DefaultIterableDifferFactory as ɵk,DefaultKeyValueDifferFactory as ɵl,ReflectiveInjector_ as ɵc,ReflectiveDependency as ɵd,resolveReflectiveProviders as ɵe,isBlank as ɵj,wtfEnabled as ɵq,createScope as ɵs,detectWTF as ɵr,endTimeRange as ɵv,leave as ɵt,startTimeRange as ɵu,makeParamDecorator as ɵa,makePropDecorator as ɵb,_def as ɵx,NodeType as ɵy};
+     */},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();/**
+ * `trigger` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `trigger` Creates an animation trigger which will a list of {\@link state state} and {\@link
+ * transition transition} entries that will be evaluated when the expression bound to the trigger
+ * changes.
+ *
+ * Triggers are registered within the component annotation data under the {\@link
+ * Component#animations-anchor animations section}. An animation trigger can be placed on an element
+ * within a template by referencing the name of the trigger followed by the expression value that the
+ * trigger is bound to (in the form of `[\@triggerName]="expression"`.
+ *
+ * ### Usage
+ *
+ * `trigger` will create an animation trigger reference based on the provided `name` value. The
+ * provided `animation` value is expected to be an array consisting of {\@link state state} and {\@link
+ * transition transition} declarations.
+ *
+ * ```typescript
+ * \@Component({
+ *   selector: 'my-component',
+ *   templateUrl: 'my-component-tpl.html',
+ *   animations: [
+ *     trigger("myAnimationTrigger", [
+ *       state(...),
+ *       state(...),
+ *       transition(...),
+ *       transition(...)
+ *     ])
+ *   ]
+ * })
+ * class MyComponent {
+ *   myStatusExp = "something";
+ * }
+ * ```
+ *
+ * The template associated with this component will make use of the `myAnimationTrigger` animation
+ * trigger by binding to an element within its template code.
+ *
+ * ```html
+ * <!-- somewhere inside of my-component-tpl.html -->
+ * <div [\@myAnimationTrigger]="myStatusExp">...</div>
+ * tools/gulp-tasks/validate-commit-message.js ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} name
+ * @param {?} definitions
+ * @return {?}
+ */function trigger$2(name,definitions){return{name:name,definitions:definitions};}/**
+ * `animate` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `animate` specifies an animation step that will apply the provided `styles` data for a given
+ * amount of time based on the provided `timing` expression value. Calls to `animate` are expected
+ * to be used within {\@link sequence an animation sequence}, {\@link group group}, or {\@link
+ * transition transition}.
+ *
+ * ### Usage
+ *
+ * The `animate` function accepts two input parameters: `timing` and `styles`:
+ *
+ * - `timing` is a string based value that can be a combination of a duration with optional delay
+ * and easing values. The format for the expression breaks down to `duration delay easing`
+ * (therefore a value such as `1s 100ms ease-out` will be parse itself into `duration=1000,
+ * delay=100, easing=ease-out`. If a numeric value is provided then that will be used as the
+ * `duration` value in millisecond form.
+ * - `styles` is the style input data which can either be a call to {\@link style style} or {\@link
+ * keyframes keyframes}. If left empty then the styles from the destination state will be collected
+ * and used (this is useful when describing an animation step that will complete an animation by
+ * {\@link transition#the-final-animate-call animating to the final state}).
+ *
+ * ```typescript
+ * // various functions for specifying timing data
+ * animate(500, style(...))
+ * animate("1s", style(...))
+ * animate("100ms 0.5s", style(...))
+ * animate("5s ease", style(...))
+ * animate("5s 10ms cubic-bezier(.17,.67,.88,.1)", style(...))
+ *
+ * // either style() of keyframes() can be used
+ * animate(500, style({ background: "red" }))
+ * animate(500, keyframes([
+ *   style({ background: "blue" })),
+ *   style({ background: "red" }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} timings
+ * @param {?=} styles
+ * @return {?}
+ */function animate$2(timings){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return{type:4/* Animate */,styles:styles,timings:timings};}/**
+ * `group` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `group` specifies a list of animation steps that are all run in parallel. Grouped animations are
+ * useful when a series of styles must be animated/closed off at different statrting/ending times.
+ *
+ * The `group` function can either be used within a {\@link sequence sequence} or a {\@link transition
+ * transition} and it will only continue to the next instruction once all of the inner animation
+ * steps have completed.
+ *
+ * ### Usage
+ *
+ * The `steps` data that is passed into the `group` animation function can either consist of {\@link
+ * style style} or {\@link animate animate} function calls. Each call to `style()` or `animate()`
+ * within a group will be executed instantly (use {\@link keyframes keyframes} or a {\@link
+ * animate#usage animate() with a delay value} to offset styles to be applied at a later time).
+ *
+ * ```typescript
+ * group([
+ *   animate("1s", { background: "black" }))
+ *   animate("2s", { color: "white" }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function group$2(steps){return{type:3/* Group */,steps:steps};}/**
+ * `sequence` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `sequence` Specifies a list of animation steps that are run one by one. (`sequence` is used by
+ * default when an array is passed as animation data into {\@link transition transition}.)
+ *
+ * The `sequence` function can either be used within a {\@link group group} or a {\@link transition
+ * transition} and it will only continue to the next instruction once each of the inner animation
+ * steps have completed.
+ *
+ * To perform animation styling in parallel with other animation steps then have a look at the
+ * {\@link group group} animation function.
+ *
+ * ### Usage
+ *
+ * The `steps` data that is passed into the `sequence` animation function can either consist of
+ * {\@link style style} or {\@link animate animate} function calls. A call to `style()` will apply the
+ * provided styling data immediately while a call to `animate()` will apply its styling data over a
+ * given time depending on its timing data.
+ *
+ * ```typescript
+ * sequence([
+ *   style({ opacity: 0 })),
+ *   animate("1s", { opacity: 1 }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function sequence$2(steps){return{type:2/* Sequence */,steps:steps};}/**
+ * `style` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `style` declares a key/value object containing CSS properties/styles that can then be used for
+ * {\@link state animation states}, within an {\@link sequence animation sequence}, or as styling data
+ * for both {\@link animate animate} and {\@link keyframes keyframes}.
+ *
+ * ### Usage
+ *
+ * `style` takes in a key/value string map as data and expects one or more CSS property/value pairs
+ * to be defined.
+ *
+ * ```typescript
+ * // string values are used for css properties
+ * style({ background: "red", color: "blue" })
+ *
+ * // numerical (pixel) values are also supported
+ * style({ width: 100, height: 0 })
+ * ```
+ *
+ * #### Auto-styles (using `*`)
+ *
+ * When an asterix (`*`) character is used as a value then it will be detected from the element
+ * being animated and applied as animation data when the animation starts.
+ *
+ * This feature proves useful for a state depending on layout and/or environment factors; in such
+ * cases the styles are calculated just before the animation starts.
+ *
+ * ```typescript
+ * // the steps below will animate from 0 to the
+ * // actual height of the element
+ * style({ height: 0 }),
+ * animate("1s", style({ height: "*" }))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} tokens
+ * @return {?}
+ */function style$2(tokens){var/** @type {?} */input=void 0;var/** @type {?} */offset=null;if(Array.isArray(tokens)){input=tokens;}else{input=[/** @type {?} */tokens];}input.forEach(function(entry){var/** @type {?} */entryOffset=entry['offset'];if(entryOffset!=null){offset=offset==null?parseFloat(/** @type {?} */entryOffset):offset;}});return _style(offset,input);}/**
+ * @param {?} offset
+ * @param {?} styles
+ * @return {?}
+ */function _style(offset,styles){return{type:6/* Style */,styles:styles,offset:offset};}/**
+ * `state` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `state` declares an animation state within the given trigger. When a state is active within a
+ * component then its associated styles will persist on the element that the trigger is attached to
+ * (even when the animation ends).
+ *
+ * To animate between states, have a look at the animation {\@link transition transition} DSL
+ * function. To register states to an animation trigger please have a look at the {\@link trigger
+ * trigger} function.
+ *
+ * #### The `void` state
+ *
+ * The `void` state value is a reserved word that angular uses to determine when the element is not
+ * apart of the application anymore (e.g. when an `ngIf` evaluates to false then the state of the
+ * associated element is void).
+ *
+ * #### The `*` (default) state
+ *
+ * The `*` state (when styled) is a fallback state that will be used if the state that is being
+ * animated is not declared within the trigger.
+ *
+ * ### Usage
+ *
+ * `state` will declare an animation state with its associated styles
+ * within the given trigger.
+ *
+ * - `stateNameExpr` can be one or more state names separated by commas.
+ * - `styles` refers to the {\@link style styling data} that will be persisted on the element once
+ * the state has been reached.
+ *
+ * ```typescript
+ * // "void" is a reserved name for a state and is used to represent
+ * // the state in which an element is detached from from the application.
+ * state("void", style({ height: 0 }))
+ *
+ * // user-defined states
+ * state("closed", style({ height: 0 }))
+ * state("open, visible", style({ height: "*" }))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} name
+ * @param {?} styles
+ * @return {?}
+ */function state$2(name,styles){return{type:0/* State */,name:name,styles:styles};}/**
+ * `keyframes` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `keyframes` specifies a collection of {\@link style style} entries each optionally characterized
+ * by an `offset` value.
+ *
+ * ### Usage
+ *
+ * The `keyframes` animation function is designed to be used alongside the {\@link animate animate}
+ * animation function. Instead of applying animations from where they are currently to their
+ * destination, keyframes can describe how each style entry is applied and at what point within the
+ * animation arc (much like CSS Keyframe Animations do).
+ *
+ * For each `style()` entry an `offset` value can be set. Doing so allows to specifiy at what
+ * percentage of the animate time the styles will be applied.
+ *
+ * ```typescript
+ * // the provided offset values describe when each backgroundColor value is applied.
+ * animate("5s", keyframes([
+ *   style({ backgroundColor: "red", offset: 0 }),
+ *   style({ backgroundColor: "blue", offset: 0.2 }),
+ *   style({ backgroundColor: "orange", offset: 0.3 }),
+ *   style({ backgroundColor: "black", offset: 1 })
+ * ]))
+ * ```
+ *
+ * Alternatively, if there are no `offset` values used within the style entries then the offsets
+ * will be calculated automatically.
+ *
+ * ```typescript
+ * animate("5s", keyframes([
+ *   style({ backgroundColor: "red" }) // offset = 0
+ *   style({ backgroundColor: "blue" }) // offset = 0.33
+ *   style({ backgroundColor: "orange" }) // offset = 0.66
+ *   style({ backgroundColor: "black" }) // offset = 1
+ * ]))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function keyframes$2(steps){return{type:5/* KeyframeSequence */,steps:steps};}/**
+ * `transition` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `transition` declares the {\@link sequence sequence of animation steps} that will be run when the
+ * provided `stateChangeExpr` value is satisfied. The `stateChangeExpr` consists of a `state1 =>
+ * state2` which consists of two known states (use an asterix (`*`) to refer to a dynamic starting
+ * and/or ending state).
+ *
+ * A function can also be provided as the `stateChangeExpr` argument for a transition and this
+ * function will be executed each time a state change occurs. If the value returned within the
+ * function is true then the associated animation will be run.
+ *
+ * Animation transitions are placed within an {\@link trigger animation trigger}. For an transition
+ * to animate to a state value and persist its styles then one or more {\@link state animation
+ * states} is expected to be defined.
+ *
+ * ### Usage
+ *
+ * An animation transition is kicked off the `stateChangeExpr` predicate evaluates to true based on
+ * what the previous state is and what the current state has become. In other words, if a transition
+ * is defined that matches the old/current state criteria then the associated animation will be
+ * triggered.
+ *
+ * ```typescript
+ * // all transition/state changes are defined within an animation trigger
+ * trigger("myAnimationTrigger", [
+ *   // if a state is defined then its styles will be persisted when the
+ *   // animation has fully completed itself
+ *   state("on", style({ background: "green" })),
+ *   state("off", style({ background: "grey" })),
+ *
+ *   // a transition animation that will be kicked off when the state value
+ *   // bound to "myAnimationTrigger" changes from "on" to "off"
+ *   transition("on => off", animate(500)),
+ *
+ *   // it is also possible to do run the same animation for both directions
+ *   transition("on <=> off", animate(500)),
+ *
+ *   // or to define multiple states pairs separated by commas
+ *   transition("on => off, off => void", animate(500)),
+ *
+ *   // this is a catch-all state change for when an element is inserted into
+ *   // the page and the destination state is unknown
+ *   transition("void => *", [
+ *     style({ opacity: 0 }),
+ *     animate(500)
+ *   ]),
+ *
+ *   // this will capture a state change between any states
+ *   transition("* => *", animate("1s 0s")),
+ *
+ *   // you can also go full out and include a function
+ *   transition((fromState, toState) => {
+ *     // when `true` then it will allow the animation below to be invoked
+ *     return fromState == "off" && toState == "on";
+ *   }, animate("1s 0s"))
+ * ])
+ * ```
+ *
+ * The template associated with this component will make use of the `myAnimationTrigger` animation
+ * trigger by binding to an element within its template code.
+ *
+ * ```html
+ * <!-- somewhere inside of my-component-tpl.html -->
+ * <div [\@myAnimationTrigger]="myStatusExp">...</div>
+ * ```
+ *
+ * #### The final `animate` call
+ *
+ * If the final step within the transition steps is a call to `animate()` that **only** uses a
+ * timing value with **no style data** then it will be automatically used as the final animation arc
+ * for the element to animate itself to the final state. This involves an automatic mix of
+ * adding/removing CSS styles so that the element will be in the exact state it should be for the
+ * applied state to be presented correctly.
+ *
+ * ```
+ * // start off by hiding the element, but make sure that it animates properly to whatever state
+ * // is currently active for "myAnimationTrigger"
+ * transition("void => *", [
+ *   style({ opacity: 0 }),
+ *   animate(500)
+ * ])
+ * ```
+ *
+ * ### Transition Aliases (`:enter` and `:leave`)
+ *
+ * Given that enter (insertion) and leave (removal) animations are so common, the `transition`
+ * function accepts both `:enter` and `:leave` values which are aliases for the `void => *` and `*
+ * => void` state changes.
+ *
+ * ```
+ * transition(":enter", [
+ *   style({ opacity: 0 }),
+ *   animate(500, style({ opacity: 1 }))
+ * ])
+ * transition(":leave", [
+ *   animate(500, style({ opacity: 0 }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} stateChangeExpr
+ * @param {?} steps
+ * @return {?}
+ */function transition$2(stateChangeExpr,steps){return{type:1/* Transition */,expr:stateChangeExpr,animation:Array.isArray(steps)?sequence$2(steps):steps};}/**
+ * @deprecated This symbol has moved. Please Import from @angular/animations instead!
+ */var/** @type {?} */AUTO_STYLE$1='*';/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} name
+ * @param {?} definitions
+ * @return {?}
+ */function trigger$1(name,definitions){return trigger$2(name,definitions);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} timings
+ * @param {?=} styles
+ * @return {?}
+ */function animate$1(timings){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return animate$2(timings,styles);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function group$1(steps){return group$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function sequence$1(steps){return sequence$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} tokens
+ * @return {?}
+ */function style$1(tokens){return style$2(tokens);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} name
+ * @param {?} styles
+ * @return {?}
+ */function state$1(name,styles){return state$2(name,styles);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function keyframes$1(steps){return keyframes$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} stateChangeExpr
+ * @param {?} steps
+ * @return {?}
+ */function transition$1(stateChangeExpr,steps){return transition$2(stateChangeExpr,steps);}export{createPlatform,assertPlatform,destroyPlatform,getPlatform,PlatformRef,ApplicationRef,enableProdMode,isDevMode,createPlatformFactory,NgProbeToken,APP_ID,PACKAGE_ROOT_URL,PLATFORM_INITIALIZER,PLATFORM_ID,APP_BOOTSTRAP_LISTENER,APP_INITIALIZER,ApplicationInitStatus,DebugElement,DebugNode,asNativeElements,getDebugNode,Testability,TestabilityRegistry,setTestabilityGetter,TRANSLATIONS,TRANSLATIONS_FORMAT,LOCALE_ID,MissingTranslationStrategy,ApplicationModule,wtfCreateScope,wtfLeave,wtfStartTimeRange,wtfEndTimeRange,Type,EventEmitter,ErrorHandler,AnimationPlayer,AnimationStyles,AnimationKeyframe,Sanitizer,SecurityContext,ANALYZE_FOR_ENTRY_COMPONENTS,Attribute,ContentChild,ContentChildren,Query,ViewChild,ViewChildren,Component,Directive,HostBinding,HostListener,Input,Output,Pipe,AfterContentChecked,AfterContentInit,AfterViewChecked,AfterViewInit,DoCheck,OnChanges,OnDestroy,OnInit,CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA,NgModule,ViewEncapsulation,Version,VERSION,Class,forwardRef,resolveForwardRef,Injector,ReflectiveInjector,ResolvedReflectiveFactory,ReflectiveKey,InjectionToken,OpaqueToken,Inject,Optional,Injectable,Self,SkipSelf,Host,NgZone,RenderComponentType,RendererV1 as Renderer,RendererFactoryV2,RendererV2,RootRenderer,COMPILER_OPTIONS,Compiler,CompilerFactory,ModuleWithComponentFactories,ComponentFactory,ComponentRef,ComponentFactoryResolver,ElementRef,NgModuleFactory,NgModuleRef,NgModuleFactoryLoader,getModuleFactory,QueryList,SystemJsNgModuleLoader,SystemJsNgModuleLoaderConfig,TemplateRef,ViewContainerRef,EmbeddedViewRef,ViewRef,ChangeDetectionStrategy,ChangeDetectorRef,DefaultIterableDiffer,IterableDiffers,KeyValueDiffers,SimpleChange,WrappedValue,platformCore,ANY_STATE as ɵANY_STATE,DEFAULT_STATE as ɵDEFAULT_STATE,EMPTY_STATE as ɵEMPTY_STATE,FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG,AnimationGroupPlayer as ɵAnimationGroupPlayer,AnimationKeyframe as ɵAnimationKeyframe,AnimationPlayer as ɵAnimationPlayer,NoOpAnimationPlayer as ɵNoOpAnimationPlayer,AnimationSequencePlayer as ɵAnimationSequencePlayer,balanceAnimationKeyframes as ɵbalanceAnimationKeyframes,clearStyles as ɵclearStyles,collectAndResolveStyles as ɵcollectAndResolveStyles,flattenStyles as ɵflattenStyles,prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles,renderStyles as ɵrenderStyles,AnimationStyles as ɵAnimationStyles,AnimationTransition as ɵAnimationTransition,ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS,APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER,ValueUnwrapper as ɵValueUnwrapper,devModeEqual as ɵdevModeEqual,ChangeDetectorStatus as ɵChangeDetectorStatus,isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy,Console as ɵConsole,DebugDomRootRenderer as ɵDebugDomRootRenderer,ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE,ComponentFactory as ɵComponentFactory,CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver,DebugContext$1 as ɵDebugContext,StaticNodeDebugInfo as ɵStaticNodeDebugInfo,AppView as ɵAppView,DebugAppView as ɵDebugAppView,ViewContainer as ɵViewContainer,ViewType as ɵViewType,LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES,LifecycleHooks as ɵLifecycleHooks,ViewMetadata as ɵViewMetadata,Reflector as ɵReflector,reflector as ɵreflector,ReflectionCapabilities as ɵReflectionCapabilities,ReflectorReader as ɵReflectorReader,RenderDebugInfo as ɵRenderDebugInfo,makeDecorator as ɵmakeDecorator,isObservable as ɵisObservable,isPromise as ɵisPromise,ComponentRef_ as ɵComponentRef_,NgModuleInjector as ɵNgModuleInjector,registerModuleFactory as ɵregisterModuleFactory,TemplateRef_ as ɵTemplateRef_,EMPTY_ARRAY as ɵEMPTY_ARRAY,EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY,EMPTY_MAP as ɵEMPTY_MAP,InlineArray16 as ɵInlineArray16,InlineArray2 as ɵInlineArray2,InlineArray4 as ɵInlineArray4,InlineArray8 as ɵInlineArray8,InlineArrayDynamic as ɵInlineArrayDynamic,ViewUtils as ɵViewUtils,castByValue as ɵcastByValue,checkBinding as ɵcheckBinding,checkBindingChange as ɵcheckBindingChange,checkRenderAttribute as ɵcheckRenderAttribute,checkRenderClass as ɵcheckRenderClass,checkRenderProperty as ɵcheckRenderProperty,checkRenderStyle as ɵcheckRenderStyle,checkRenderText as ɵcheckRenderText,createRenderComponentType as ɵcreateRenderComponentType,createRenderElement as ɵcreateRenderElement,getComponentFactoryViewClass as ɵgetComponentFactoryViewClass,inlineInterpolate as ɵinlineInterpolate,interpolate as ɵinterpolate,noop as ɵnoop,pureProxy1 as ɵpureProxy1,pureProxy10 as ɵpureProxy10,pureProxy2 as ɵpureProxy2,pureProxy3 as ɵpureProxy3,pureProxy4 as ɵpureProxy4,pureProxy5 as ɵpureProxy5,pureProxy6 as ɵpureProxy6,pureProxy7 as ɵpureProxy7,pureProxy8 as ɵpureProxy8,pureProxy9 as ɵpureProxy9,selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement,setBindingDebugInfo as ɵsetBindingDebugInfo,setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges,subscribeToRenderElement as ɵsubscribeToRenderElement,ArgumentType as ɵArgumentType,BindingType as ɵBindingType,DepFlags as ɵDepFlags,NodeFlags as ɵNodeFlags,ProviderType as ɵProviderType,QueryBindingType as ɵQueryBindingType,QueryValueType as ɵQueryValueType,ViewFlags as ɵViewFlags,anchorDef as ɵanchorDef,createComponentFactory as ɵcreateComponentFactory,createRendererTypeV2 as ɵcreateRendererTypeV2,directiveDef as ɵdirectiveDef,elementDef as ɵelementDef,elementEventFullName as ɵelementEventFullName,ngContentDef as ɵngContentDef,nodeValue as ɵnodeValue,pipeDef as ɵpipeDef,providerDef as ɵproviderDef,pureArrayDef as ɵpureArrayDef,pureObjectDef as ɵpureObjectDef,purePipeDef as ɵpurePipeDef,queryDef as ɵqueryDef,textDef as ɵtextDef,unwrapValue as ɵunwrapValue,viewDef as ɵviewDef,AUTO_STYLE$1 as AUTO_STYLE,trigger$1 as trigger,animate$1 as animate,group$1 as group,sequence$1 as sequence,style$1 as style,state$1 as state,keyframes$1 as keyframes,transition$1 as transition,AnimationQueue as ɵz,animate$2 as ɵbc,group$2 as ɵbd,keyframes$2 as ɵbh,sequence$2 as ɵbe,state$2 as ɵbg,style$2 as ɵbf,transition$2 as ɵbi,trigger$2 as ɵbb,_initViewEngine as ɵp,_iterableDiffersFactory as ɵm,_keyValueDiffersFactory as ɵn,_localeFactory as ɵo,ApplicationRef_ as ɵf,_appIdRandomProviderFactory as ɵg,defaultIterableDiffers as ɵh,defaultKeyValueDiffers as ɵi,DefaultIterableDifferFactory as ɵk,DefaultKeyValueDifferFactory as ɵl,ReflectiveInjector_ as ɵc,ReflectiveDependency as ɵd,resolveReflectiveProviders as ɵe,isBlank as ɵj,wtfEnabled as ɵq,createScope as ɵs,detectWTF as ɵr,endTimeRange as ɵv,leave as ɵt,startTimeRange as ɵu,makeParamDecorator as ɵa,makePropDecorator as ɵb,_def as ɵx,NodeType as ɵy};

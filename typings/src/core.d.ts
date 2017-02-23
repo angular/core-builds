@@ -36,5 +36,12 @@ export { AnimationStyles } from './animation/animation_styles';
 export { AnimationKeyframe } from './animation/animation_keyframe';
 export { Sanitizer, SecurityContext } from './security';
 export * from './codegen_private_exports';
-export { AnimationTransitionEvent } from './animation/animation_transition_event';
-export * from './animation/metadata';
+export * from './animation_next/animation_metadata_wrapped';
+/**
+ * @deprecated
+ */
+export declare type AnimationEntryMetadata = any;
+/**
+ * @deprecated
+ */
+export declare type AnimationStateTransitionMetadata = any;

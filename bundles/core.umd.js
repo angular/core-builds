@@ -1,4 +1,4 @@
-(function(global,factory){if(typeof define==="function"&&define.amd){define('@angular/core',['exports','rxjs/Observable','rxjs/observable/merge','rxjs/operator/share','rxjs/symbol/observable','rxjs/Subject'],factory);}else if(typeof exports!=="undefined"){factory(exports,require('rxjs/Observable'),require('rxjs/observable/merge'),require('rxjs/operator/share'),require('rxjs/symbol/observable'),require('rxjs/Subject'));}else{var mod={exports:{}};factory(mod.exports,global.rxjsObservable,global.rxjsObservableMerge,global.rxjsOperatorShare,global.rxjsSymbolObservable,global.Rx);global.ng=global.ng||{};global.ng.core=mod.exports;}})(this,function(exports,_Observable,_merge,_share,_observable,_Subject2){'use strict';Object.defineProperty(exports,"__esModule",{value:true});exports.ɵy=exports.ɵx=exports.ɵb=exports.ɵa=exports.ɵu=exports.ɵt=exports.ɵv=exports.ɵr=exports.ɵs=exports.ɵq=exports.ɵj=exports.ɵe=exports.ɵd=exports.ɵc=exports.ɵl=exports.ɵk=exports.ɵi=exports.ɵh=exports.ɵg=exports.ɵf=exports.ɵo=exports.ɵn=exports.ɵm=exports.ɵp=exports.ɵz=exports.trigger=exports.transition=exports.keyframes=exports.state=exports.style=exports.sequence=exports.group=exports.animate=exports.AnimationGroupMetadata=exports.AnimationSequenceMetadata=exports.AnimationWithStepsMetadata=exports.AnimationAnimateMetadata=exports.AnimationStyleMetadata=exports.AnimationKeyframesSequenceMetadata=exports.AnimationMetadata=exports.AnimationStateTransitionMetadata=exports.AnimationStateDeclarationMetadata=exports.AnimationStateMetadata=exports.AnimationEntryMetadata=exports.AUTO_STYLE=exports.ɵviewDef=exports.ɵunwrapValue=exports.ɵtextDef=exports.ɵqueryDef=exports.ɵpurePipeDef=exports.ɵpureObjectDef=exports.ɵpureArrayDef=exports.ɵproviderDef=exports.ɵpipeDef=exports.ɵnodeValue=exports.ɵngContentDef=exports.ɵelementEventFullName=exports.ɵelementDef=exports.ɵdirectiveDef=exports.ɵcreateRendererTypeV2=exports.ɵcreateComponentFactory=exports.ɵanchorDef=exports.ɵViewFlags=exports.ɵQueryValueType=exports.ɵQueryBindingType=exports.ɵProviderType=exports.ɵNodeFlags=exports.ɵDepFlags=exports.ɵBindingType=exports.ɵArgumentType=exports.ɵsubscribeToRenderElement=exports.ɵsetBindingDebugInfoForChanges=exports.ɵsetBindingDebugInfo=exports.ɵselectOrCreateRenderHostElement=undefined;exports.ɵpureProxy9=exports.ɵpureProxy8=exports.ɵpureProxy7=exports.ɵpureProxy6=exports.ɵpureProxy5=exports.ɵpureProxy4=exports.ɵpureProxy3=exports.ɵpureProxy2=exports.ɵpureProxy10=exports.ɵpureProxy1=exports.ɵnoop=exports.ɵinterpolate=exports.ɵinlineInterpolate=exports.ɵgetComponentFactoryViewClass=exports.ɵcreateRenderElement=exports.ɵcreateRenderComponentType=exports.ɵcheckRenderText=exports.ɵcheckRenderStyle=exports.ɵcheckRenderProperty=exports.ɵcheckRenderClass=exports.ɵcheckRenderAttribute=exports.ɵcheckBindingChange=exports.ɵcheckBinding=exports.ɵcastByValue=exports.ɵViewUtils=exports.ɵInlineArrayDynamic=exports.ɵInlineArray8=exports.ɵInlineArray4=exports.ɵInlineArray2=exports.ɵInlineArray16=exports.ɵEMPTY_MAP=exports.ɵEMPTY_INLINE_ARRAY=exports.ɵEMPTY_ARRAY=exports.ɵTemplateRef_=exports.ɵregisterModuleFactory=exports.ɵNgModuleInjector=exports.ɵComponentRef_=exports.ɵisPromise=exports.ɵisObservable=exports.ɵmakeDecorator=exports.ɵRenderDebugInfo=exports.ɵReflectorReader=exports.ɵReflectionCapabilities=exports.ɵreflector=exports.ɵReflector=exports.ɵViewMetadata=exports.ɵLifecycleHooks=exports.ɵLIFECYCLE_HOOKS_VALUES=exports.ɵViewType=exports.ɵViewContainer=exports.ɵDebugAppView=exports.ɵAppView=exports.ɵStaticNodeDebugInfo=exports.ɵDebugContext=exports.ɵCodegenComponentFactoryResolver=exports.ɵComponentFactory=exports.ɵERROR_COMPONENT_TYPE=exports.ɵDebugDomRootRenderer=exports.ɵConsole=exports.ɵisDefaultChangeDetectionStrategy=exports.ɵChangeDetectorStatus=exports.ɵdevModeEqual=exports.ɵValueUnwrapper=exports.ɵAPP_ID_RANDOM_PROVIDER=exports.ɵALLOW_MULTIPLE_PLATFORMS=exports.ɵAnimationTransition=exports.ɵAnimationStyles=exports.ɵrenderStyles=exports.ɵprepareFinalAnimationStyles=exports.ɵflattenStyles=exports.ɵcollectAndResolveStyles=exports.ɵclearStyles=exports.ɵbalanceAnimationKeyframes=exports.ɵAnimationSequencePlayer=exports.ɵNoOpAnimationPlayer=exports.ɵAnimationPlayer=exports.ɵAnimationKeyframe=exports.ɵAnimationGroupPlayer=exports.ɵFILL_STYLE_FLAG=exports.ɵEMPTY_STATE=exports.ɵDEFAULT_STATE=exports.ɵANY_STATE=exports.platformCore=exports.WrappedValue=exports.SimpleChange=exports.KeyValueDiffers=exports.IterableDiffers=exports.DefaultIterableDiffer=exports.ChangeDetectorRef=exports.ChangeDetectionStrategy=exports.ViewRef=exports.EmbeddedViewRef=exports.ViewContainerRef=exports.TemplateRef=exports.SystemJsNgModuleLoaderConfig=exports.SystemJsNgModuleLoader=exports.QueryList=exports.getModuleFactory=exports.NgModuleFactoryLoader=exports.NgModuleRef=undefined;exports.NgModuleFactory=exports.ElementRef=exports.ComponentFactoryResolver=exports.ComponentRef=exports.ComponentFactory=exports.ModuleWithComponentFactories=exports.CompilerFactory=exports.Compiler=exports.COMPILER_OPTIONS=exports.RootRenderer=exports.RendererV2=exports.RendererFactoryV2=exports.Renderer=exports.RenderComponentType=exports.NgZone=exports.Host=exports.SkipSelf=exports.Self=exports.Injectable=exports.Optional=exports.Inject=exports.OpaqueToken=exports.InjectionToken=exports.ReflectiveKey=exports.ResolvedReflectiveFactory=exports.ReflectiveInjector=exports.Injector=exports.resolveForwardRef=exports.forwardRef=exports.Class=exports.VERSION=exports.Version=exports.ViewEncapsulation=exports.NgModule=exports.NO_ERRORS_SCHEMA=exports.CUSTOM_ELEMENTS_SCHEMA=exports.OnInit=exports.OnDestroy=exports.OnChanges=exports.DoCheck=exports.AfterViewInit=exports.AfterViewChecked=exports.AfterContentInit=exports.AfterContentChecked=exports.Pipe=exports.Output=exports.Input=exports.HostListener=exports.HostBinding=exports.Directive=exports.Component=exports.ViewChildren=exports.ViewChild=exports.Query=exports.ContentChildren=exports.ContentChild=exports.Attribute=exports.ANALYZE_FOR_ENTRY_COMPONENTS=exports.AnimationTransitionEvent=exports.SecurityContext=exports.Sanitizer=exports.AnimationKeyframe=exports.AnimationStyles=exports.AnimationPlayer=exports.ErrorHandler=exports.EventEmitter=exports.Type=exports.wtfEndTimeRange=exports.wtfStartTimeRange=exports.wtfLeave=exports.wtfCreateScope=exports.ApplicationModule=exports.MissingTranslationStrategy=exports.LOCALE_ID=exports.TRANSLATIONS_FORMAT=exports.TRANSLATIONS=exports.setTestabilityGetter=exports.TestabilityRegistry=exports.Testability=exports.getDebugNode=exports.asNativeElements=exports.DebugNode=exports.DebugElement=exports.ApplicationInitStatus=exports.APP_INITIALIZER=exports.APP_BOOTSTRAP_LISTENER=exports.PLATFORM_ID=exports.PLATFORM_INITIALIZER=exports.PACKAGE_ROOT_URL=exports.APP_ID=exports.NgProbeToken=exports.createPlatformFactory=exports.isDevMode=exports.enableProdMode=exports.ApplicationRef=exports.PlatformRef=exports.getPlatform=exports.destroyPlatform=exports.assertPlatform=exports.createPlatform=undefined;var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();var OpaqueToken=function(){/**
+(function(global,factory){if(typeof define==="function"&&define.amd){define('@angular/core',['exports','rxjs/Observable','rxjs/observable/merge','rxjs/operator/share','rxjs/symbol/observable','rxjs/Subject'],factory);}else if(typeof exports!=="undefined"){factory(exports,require('rxjs/Observable'),require('rxjs/observable/merge'),require('rxjs/operator/share'),require('rxjs/symbol/observable'),require('rxjs/Subject'));}else{var mod={exports:{}};factory(mod.exports,global.rxjsObservable,global.rxjsObservableMerge,global.rxjsOperatorShare,global.rxjsSymbolObservable,global.Rx);global.ng=global.ng||{};global.ng.core=mod.exports;}})(this,function(exports,_Observable,_merge,_share,_observable,_Subject2){'use strict';Object.defineProperty(exports,"__esModule",{value:true});exports.ɵy=exports.ɵx=exports.ɵb=exports.ɵa=exports.ɵu=exports.ɵt=exports.ɵv=exports.ɵr=exports.ɵs=exports.ɵq=exports.ɵj=exports.ɵe=exports.ɵd=exports.ɵc=exports.ɵl=exports.ɵk=exports.ɵi=exports.ɵh=exports.ɵg=exports.ɵf=exports.ɵo=exports.ɵn=exports.ɵm=exports.ɵp=exports.ɵbb=exports.ɵbi=exports.ɵbf=exports.ɵbg=exports.ɵbe=exports.ɵbh=exports.ɵbd=exports.ɵbc=exports.ɵz=exports.transition=exports.keyframes=exports.state=exports.style=exports.sequence=exports.group=exports.animate=exports.trigger=exports.AUTO_STYLE=exports.ɵviewDef=exports.ɵunwrapValue=exports.ɵtextDef=exports.ɵqueryDef=exports.ɵpurePipeDef=exports.ɵpureObjectDef=exports.ɵpureArrayDef=exports.ɵproviderDef=exports.ɵpipeDef=exports.ɵnodeValue=exports.ɵngContentDef=exports.ɵelementEventFullName=exports.ɵelementDef=exports.ɵdirectiveDef=exports.ɵcreateRendererTypeV2=exports.ɵcreateComponentFactory=exports.ɵanchorDef=exports.ɵViewFlags=exports.ɵQueryValueType=exports.ɵQueryBindingType=exports.ɵProviderType=exports.ɵNodeFlags=exports.ɵDepFlags=exports.ɵBindingType=exports.ɵArgumentType=exports.ɵsubscribeToRenderElement=exports.ɵsetBindingDebugInfoForChanges=exports.ɵsetBindingDebugInfo=undefined;exports.ɵselectOrCreateRenderHostElement=exports.ɵpureProxy9=exports.ɵpureProxy8=exports.ɵpureProxy7=exports.ɵpureProxy6=exports.ɵpureProxy5=exports.ɵpureProxy4=exports.ɵpureProxy3=exports.ɵpureProxy2=exports.ɵpureProxy10=exports.ɵpureProxy1=exports.ɵnoop=exports.ɵinterpolate=exports.ɵinlineInterpolate=exports.ɵgetComponentFactoryViewClass=exports.ɵcreateRenderElement=exports.ɵcreateRenderComponentType=exports.ɵcheckRenderText=exports.ɵcheckRenderStyle=exports.ɵcheckRenderProperty=exports.ɵcheckRenderClass=exports.ɵcheckRenderAttribute=exports.ɵcheckBindingChange=exports.ɵcheckBinding=exports.ɵcastByValue=exports.ɵViewUtils=exports.ɵInlineArrayDynamic=exports.ɵInlineArray8=exports.ɵInlineArray4=exports.ɵInlineArray2=exports.ɵInlineArray16=exports.ɵEMPTY_MAP=exports.ɵEMPTY_INLINE_ARRAY=exports.ɵEMPTY_ARRAY=exports.ɵTemplateRef_=exports.ɵregisterModuleFactory=exports.ɵNgModuleInjector=exports.ɵComponentRef_=exports.ɵisPromise=exports.ɵisObservable=exports.ɵmakeDecorator=exports.ɵRenderDebugInfo=exports.ɵReflectorReader=exports.ɵReflectionCapabilities=exports.ɵreflector=exports.ɵReflector=exports.ɵViewMetadata=exports.ɵLifecycleHooks=exports.ɵLIFECYCLE_HOOKS_VALUES=exports.ɵViewType=exports.ɵViewContainer=exports.ɵDebugAppView=exports.ɵAppView=exports.ɵStaticNodeDebugInfo=exports.ɵDebugContext=exports.ɵCodegenComponentFactoryResolver=exports.ɵComponentFactory=exports.ɵERROR_COMPONENT_TYPE=exports.ɵDebugDomRootRenderer=exports.ɵConsole=exports.ɵisDefaultChangeDetectionStrategy=exports.ɵChangeDetectorStatus=exports.ɵdevModeEqual=exports.ɵValueUnwrapper=exports.ɵAPP_ID_RANDOM_PROVIDER=exports.ɵALLOW_MULTIPLE_PLATFORMS=exports.ɵAnimationTransition=exports.ɵAnimationStyles=exports.ɵrenderStyles=exports.ɵprepareFinalAnimationStyles=exports.ɵflattenStyles=exports.ɵcollectAndResolveStyles=exports.ɵclearStyles=exports.ɵbalanceAnimationKeyframes=exports.ɵAnimationSequencePlayer=exports.ɵNoOpAnimationPlayer=exports.ɵAnimationPlayer=exports.ɵAnimationKeyframe=exports.ɵAnimationGroupPlayer=exports.ɵFILL_STYLE_FLAG=exports.ɵEMPTY_STATE=exports.ɵDEFAULT_STATE=exports.ɵANY_STATE=exports.platformCore=exports.WrappedValue=exports.SimpleChange=exports.KeyValueDiffers=exports.IterableDiffers=exports.DefaultIterableDiffer=exports.ChangeDetectorRef=exports.ChangeDetectionStrategy=exports.ViewRef=exports.EmbeddedViewRef=exports.ViewContainerRef=exports.TemplateRef=exports.SystemJsNgModuleLoaderConfig=exports.SystemJsNgModuleLoader=exports.QueryList=exports.getModuleFactory=exports.NgModuleFactoryLoader=undefined;exports.NgModuleRef=exports.NgModuleFactory=exports.ElementRef=exports.ComponentFactoryResolver=exports.ComponentRef=exports.ComponentFactory=exports.ModuleWithComponentFactories=exports.CompilerFactory=exports.Compiler=exports.COMPILER_OPTIONS=exports.RootRenderer=exports.RendererV2=exports.RendererFactoryV2=exports.Renderer=exports.RenderComponentType=exports.NgZone=exports.Host=exports.SkipSelf=exports.Self=exports.Injectable=exports.Optional=exports.Inject=exports.OpaqueToken=exports.InjectionToken=exports.ReflectiveKey=exports.ResolvedReflectiveFactory=exports.ReflectiveInjector=exports.Injector=exports.resolveForwardRef=exports.forwardRef=exports.Class=exports.VERSION=exports.Version=exports.ViewEncapsulation=exports.NgModule=exports.NO_ERRORS_SCHEMA=exports.CUSTOM_ELEMENTS_SCHEMA=exports.OnInit=exports.OnDestroy=exports.OnChanges=exports.DoCheck=exports.AfterViewInit=exports.AfterViewChecked=exports.AfterContentInit=exports.AfterContentChecked=exports.Pipe=exports.Output=exports.Input=exports.HostListener=exports.HostBinding=exports.Directive=exports.Component=exports.ViewChildren=exports.ViewChild=exports.Query=exports.ContentChildren=exports.ContentChild=exports.Attribute=exports.ANALYZE_FOR_ENTRY_COMPONENTS=exports.SecurityContext=exports.Sanitizer=exports.AnimationKeyframe=exports.AnimationStyles=exports.AnimationPlayer=exports.ErrorHandler=exports.EventEmitter=exports.Type=exports.wtfEndTimeRange=exports.wtfStartTimeRange=exports.wtfLeave=exports.wtfCreateScope=exports.ApplicationModule=exports.MissingTranslationStrategy=exports.LOCALE_ID=exports.TRANSLATIONS_FORMAT=exports.TRANSLATIONS=exports.setTestabilityGetter=exports.TestabilityRegistry=exports.Testability=exports.getDebugNode=exports.asNativeElements=exports.DebugNode=exports.DebugElement=exports.ApplicationInitStatus=exports.APP_INITIALIZER=exports.APP_BOOTSTRAP_LISTENER=exports.PLATFORM_ID=exports.PLATFORM_INITIALIZER=exports.PACKAGE_ROOT_URL=exports.APP_ID=exports.NgProbeToken=exports.createPlatformFactory=exports.isDevMode=exports.enableProdMode=exports.ApplicationRef=exports.PlatformRef=exports.getPlatform=exports.destroyPlatform=exports.assertPlatform=exports.createPlatform=undefined;var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();var OpaqueToken=function(){/**
      * @param {?} _desc
      */function OpaqueToken(_desc){_classCallCheck(this,OpaqueToken);this._desc=_desc;}/**
      * @return {?}
@@ -1115,7 +1115,9 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * Structural diffing for `Object`s and `Map`s.
  */var/** @type {?} */keyValDiff=[new DefaultKeyValueDifferFactory()];/**
  * Structural diffing for `Iterable` types such as `Array`s.
- */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);var RenderComponentType=/**
+ */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);/**
+ * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+ */var RenderComponentType=/**
      * @param {?} id
      * @param {?} templateUrl
      * @param {?} slotCount
@@ -1133,7 +1135,8 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * If you are implementing a custom renderer, you must implement this interface.
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
- * \@experimental
+ *
+ * @deprecated Use `RendererFactoryV2` instead.
  * @abstract
  */var RootRenderer=function(){function RootRenderer(){_classCallCheck(this,RootRenderer);}_createClass(RootRenderer,[{key:'renderComponent',value:function renderComponent(componentType){}}]);return RootRenderer;}();var RendererFactoryV2=function(){function RendererFactoryV2(){_classCallCheck(this,RendererFactoryV2);}_createClass(RendererFactoryV2,[{key:'createRenderer',value:function createRenderer(hostElement,type){}}]);return RendererFactoryV2;}();var RendererV2=function(){function RendererV2(){_classCallCheck(this,RendererV2);}_createClass(RendererV2,[{key:'destroy',value:function destroy(){}},{key:'createElement',value:function createElement(name,namespace){}},{key:'createComment',value:function createComment(value){}},{key:'createText',value:function createText(value){}},{key:'appendChild',value:function appendChild(parent,newChild){}},{key:'insertBefore',value:function insertBefore(parent,newChild,refChild){}},{key:'removeChild',value:function removeChild(parent,oldChild){}},{key:'selectRootElement',value:function selectRootElement(selectorOrNode){}},{key:'parentNode',value:function parentNode(node){}},{key:'nextSibling',value:function nextSibling(node){}},{key:'setAttribute',value:function setAttribute(el,name,value,namespace){}},{key:'removeAttribute',value:function removeAttribute(el,name,namespace){}},{key:'addClass',value:function addClass(el,name){}},{key:'removeClass',value:function removeClass(el,name){}},{key:'setStyle',value:function setStyle(el,style,value,hasVendorPrefix,hasImportant){}},{key:'removeStyle',value:function removeStyle(el,style,hasVendorPrefix){}},{key:'setProperty',value:function setProperty(el,name,value){}},{key:'setValue',value:function setValue(node,value){}},{key:'listen',value:function listen(target,eventName,callback){}}]);return RendererV2;}();var SecurityContext={};SecurityContext.NONE=0;SecurityContext.HTML=1;SecurityContext.STYLE=2;SecurityContext.SCRIPT=3;SecurityContext.URL=4;SecurityContext.RESOURCE_URL=5;SecurityContext[SecurityContext.NONE]="NONE";SecurityContext[SecurityContext.HTML]="HTML";SecurityContext[SecurityContext.STYLE]="STYLE";SecurityContext[SecurityContext.SCRIPT]="SCRIPT";SecurityContext[SecurityContext.URL]="URL";SecurityContext[SecurityContext.RESOURCE_URL]="RESOURCE_URL";/**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
@@ -2897,500 +2900,6 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
      */_createClass(AnimationSequencePlayer,[{key:'_onNext',value:function _onNext(start){var _this33=this;if(this._finished)return;if(this._players.length==0){this._activePlayer=new NoOpAnimationPlayer();scheduleMicroTask(function(){return _this33._onFinish();});}else if(this._currentIndex>=this._players.length){this._activePlayer=new NoOpAnimationPlayer();this._onFinish();}else{var/** @type {?} */player=this._players[this._currentIndex++];player.onDone(function(){return _this33._onNext(true);});this._activePlayer=player;if(start){player.play();}}}},{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}},{key:'init',value:function init(){this._players.forEach(function(player){return player.init();});}},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}},{key:'hasStarted',value:function hasStarted(){return this._started;}},{key:'play',value:function play(){if(!isPresent(this.parentPlayer)){this.init();}if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];this._started=true;}this._activePlayer.play();}},{key:'pause',value:function pause(){this._activePlayer.pause();}},{key:'restart',value:function restart(){this.reset();if(this._players.length>0){this._players[0].restart();}}},{key:'reset',value:function reset(){this._players.forEach(function(player){return player.reset();});this._destroyed=false;this._finished=false;this._started=false;}},{key:'finish',value:function finish(){this._onFinish();this._players.forEach(function(player){return player.finish();});}},{key:'destroy',value:function destroy(){if(!this._destroyed){this._onFinish();this._players.forEach(function(player){return player.destroy();});this._destroyed=true;this._activePlayer=new NoOpAnimationPlayer();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}},{key:'setPosition',value:function setPosition(p){this._players[0].setPosition(p);}},{key:'getPosition',value:function getPosition(){return this._players[0].getPosition();}},{key:'players',get:function get(){return this._players;}}]);return AnimationSequencePlayer;}();/**
  * @experimental Animation support is experimental.
  */var/** @type {?} */AUTO_STYLE='*';/**
- * Metadata representing the entry of animations.
- * Instances of this class are provided via the animation DSL when the {\@link trigger trigger
- * animation function} is called.
- *
- * \@experimental Animation support is experimental.
- */var AnimationEntryMetadata=/**
-     * @param {?} name
-     * @param {?} definitions
-     */function AnimationEntryMetadata(name,definitions){_classCallCheck(this,AnimationEntryMetadata);this.name=name;this.definitions=definitions;};var AnimationStateMetadata=function AnimationStateMetadata(){_classCallCheck(this,AnimationStateMetadata);};var AnimationStateDeclarationMetadata=function(_AnimationStateMetada){_inherits(AnimationStateDeclarationMetadata,_AnimationStateMetada);/**
-     * @param {?} stateNameExpr
-     * @param {?} styles
-     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this34.stateNameExpr=stateNameExpr;_this34.styles=styles;return _this34;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);var AnimationStateTransitionMetadata=function(_AnimationStateMetada2){_inherits(AnimationStateTransitionMetadata,_AnimationStateMetada2);/**
-     * @param {?} stateChangeExpr
-     * @param {?} steps
-     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this35=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this35.stateChangeExpr=stateChangeExpr;_this35.steps=steps;return _this35;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);var AnimationMetadata=function AnimationMetadata(){_classCallCheck(this,AnimationMetadata);};var AnimationKeyframesSequenceMetadata=function(_AnimationMetadata){_inherits(AnimationKeyframesSequenceMetadata,_AnimationMetadata);/**
-     * @param {?} steps
-     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this36=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this36.steps=steps;return _this36;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);var AnimationStyleMetadata=function(_AnimationMetadata2){_inherits(AnimationStyleMetadata,_AnimationMetadata2);/**
-     * @param {?} styles
-     * @param {?=} offset
-     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this37=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this37.styles=styles;_this37.offset=offset;return _this37;}return AnimationStyleMetadata;}(AnimationMetadata);var AnimationAnimateMetadata=function(_AnimationMetadata3){_inherits(AnimationAnimateMetadata,_AnimationMetadata3);/**
-     * @param {?} timings
-     * @param {?} styles
-     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this38=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this38.timings=timings;_this38.styles=styles;return _this38;}return AnimationAnimateMetadata;}(AnimationMetadata);var AnimationWithStepsMetadata=function(_AnimationMetadata4){_inherits(AnimationWithStepsMetadata,_AnimationMetadata4);function AnimationWithStepsMetadata(){_classCallCheck(this,AnimationWithStepsMetadata);return _possibleConstructorReturn(this,(AnimationWithStepsMetadata.__proto__||Object.getPrototypeOf(AnimationWithStepsMetadata)).call(this));}/**
-     * @return {?}
-     */_createClass(AnimationWithStepsMetadata,[{key:'steps',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationWithStepsMetadata;}(AnimationMetadata);var AnimationSequenceMetadata=function(_AnimationWithStepsMe){_inherits(AnimationSequenceMetadata,_AnimationWithStepsMe);/**
-     * @param {?} _steps
-     */function AnimationSequenceMetadata(_steps){_classCallCheck(this,AnimationSequenceMetadata);var _this40=_possibleConstructorReturn(this,(AnimationSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationSequenceMetadata)).call(this));_this40._steps=_steps;return _this40;}/**
-     * @return {?}
-     */_createClass(AnimationSequenceMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationSequenceMetadata;}(AnimationWithStepsMetadata);var AnimationGroupMetadata=function(_AnimationWithStepsMe2){_inherits(AnimationGroupMetadata,_AnimationWithStepsMe2);/**
-     * @param {?} _steps
-     */function AnimationGroupMetadata(_steps){_classCallCheck(this,AnimationGroupMetadata);var _this41=_possibleConstructorReturn(this,(AnimationGroupMetadata.__proto__||Object.getPrototypeOf(AnimationGroupMetadata)).call(this));_this41._steps=_steps;return _this41;}/**
-     * @return {?}
-     */_createClass(AnimationGroupMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationGroupMetadata;}(AnimationWithStepsMetadata);/**
- * `animate` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `animate` specifies an animation step that will apply the provided `styles` data for a given
- * amount of
- * time based on the provided `timing` expression value. Calls to `animate` are expected to be
- * used within {\@link sequence an animation sequence}, {\@link group group}, or {\@link transition
- * transition}.
- *
- * ### Usage
- *
- * The `animate` function accepts two input parameters: `timing` and `styles`:
- *
- * - `timing` is a string based value that can be a combination of a duration with optional
- * delay and easing values. The format for the expression breaks down to `duration delay easing`
- * (therefore a value such as `1s 100ms ease-out` will be parse itself into `duration=1000,
- * delay=100, easing=ease-out`.
- * If a numeric value is provided then that will be used as the `duration` value in millisecond
- * form.
- * - `styles` is the style input data which can either be a call to {\@link style style} or {\@link
- * keyframes keyframes}.
- * If left empty then the styles from the destination state will be collected and used (this is
- * useful when
- * describing an animation step that will complete an animation by {\@link
- * transition#the-final-animate-call animating to the final state}).
- *
- * ```typescript
- * // various functions for specifying timing data
- * animate(500, style(...))
- * animate("1s", style(...))
- * animate("100ms 0.5s", style(...))
- * animate("5s ease", style(...))
- * animate("5s 10ms cubic-bezier(.17,.67,.88,.1)", style(...))
- *
- * // either style() of keyframes() can be used
- * animate(500, style({ background: "red" }))
- * animate(500, keyframes([
- *   style({ background: "blue" })),
- *   style({ background: "red" }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} timing
- * @param {?=} styles
- * @return {?}
- */function animate(timing){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */stylesEntry=styles;if(!isPresent(stylesEntry)){var/** @type {?} */EMPTY_STYLE={};stylesEntry=new AnimationStyleMetadata([EMPTY_STYLE],1);}return new AnimationAnimateMetadata(timing,stylesEntry);}/**
- * `group` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `group` specifies a list of animation steps that are all run in parallel. Grouped animations
- * are useful when a series of styles must be animated/closed off
- * at different statrting/ending times.
- *
- * The `group` function can either be used within a {\@link sequence sequence} or a {\@link transition
- * transition}
- * and it will only continue to the next instruction once all of the inner animation steps
- * have completed.
- *
- * ### Usage
- *
- * The `steps` data that is passed into the `group` animation function can either consist
- * of {\@link style style} or {\@link animate animate} function calls. Each call to `style()` or
- * `animate()`
- * within a group will be executed instantly (use {\@link keyframes keyframes} or a
- * {\@link animate#usage animate() with a delay value} to offset styles to be applied at a later
- * time).
- *
- * ```typescript
- * group([
- *   animate("1s", { background: "black" }))
- *   animate("2s", { color: "white" }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function group(steps){return new AnimationGroupMetadata(steps);}/**
- * `sequence` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `sequence` Specifies a list of animation steps that are run one by one. (`sequence` is used
- * by default when an array is passed as animation data into {\@link transition transition}.)
- *
- * The `sequence` function can either be used within a {\@link group group} or a {\@link transition
- * transition}
- * and it will only continue to the next instruction once each of the inner animation steps
- * have completed.
- *
- * To perform animation styling in parallel with other animation steps then
- * have a look at the {\@link group group} animation function.
- *
- * ### Usage
- *
- * The `steps` data that is passed into the `sequence` animation function can either consist
- * of {\@link style style} or {\@link animate animate} function calls. A call to `style()` will apply
- * the
- * provided styling data immediately while a call to `animate()` will apply its styling
- * data over a given time depending on its timing data.
- *
- * ```typescript
- * sequence([
- *   style({ opacity: 0 })),
- *   animate("1s", { opacity: 1 }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function sequence(steps){return new AnimationSequenceMetadata(steps);}/**
- * `style` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `style` declares a key/value object containing CSS properties/styles that can then
- * be used for {\@link state animation states}, within an {\@link sequence animation sequence}, or as
- * styling data for both {\@link animate animate} and {\@link keyframes keyframes}.
- *
- * ### Usage
- *
- * `style` takes in a key/value string map as data and expects one or more CSS property/value
- * pairs to be defined.
- *
- * ```typescript
- * // string values are used for css properties
- * style({ background: "red", color: "blue" })
- *
- * // numerical (pixel) values are also supported
- * style({ width: 100, height: 0 })
- * ```
- *
- * #### Auto-styles (using `*`)
- *
- * When an asterix (`*`) character is used as a value then it will be detected from the element
- * being animated
- * and applied as animation data when the animation starts.
- *
- * This feature proves useful for a state depending on layout and/or environment factors; in such
- * cases
- * the styles are calculated just before the animation starts.
- *
- * ```typescript
- * // the steps below will animate from 0 to the
- * // actual height of the element
- * style({ height: 0 }),
- * animate("1s", style({ height: "*" }))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} tokens
- * @return {?}
- */function style(tokens){var/** @type {?} */input=void 0;var/** @type {?} */offset=null;if(typeof tokens==='string'){input=[/** @type {?} */tokens];}else{if(Array.isArray(tokens)){input=tokens;}else{input=[/** @type {?} */tokens];}input.forEach(function(entry){var/** @type {?} */entryOffset=entry[/** TODO #9100 */'offset'];if(isPresent(entryOffset)){offset=offset==null?parseFloat(entryOffset):offset;}});}return new AnimationStyleMetadata(input,offset);}/**
- * `state` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `state` declares an animation state within the given trigger. When a state is
- * active within a component then its associated styles will persist on
- * the element that the trigger is attached to (even when the animation ends).
- *
- * To animate between states, have a look at the animation {\@link transition transition}
- * DSL function. To register states to an animation trigger please have a look
- * at the {\@link trigger trigger} function.
- *
- * #### The `void` state
- *
- * The `void` state value is a reserved word that angular uses to determine when the element is not
- * apart
- * of the application anymore (e.g. when an `ngIf` evaluates to false then the state of the
- * associated element
- * is void).
- *
- * #### The `*` (default) state
- *
- * The `*` state (when styled) is a fallback state that will be used if
- * the state that is being animated is not declared within the trigger.
- *
- * ### Usage
- *
- * `state` will declare an animation state with its associated styles
- * within the given trigger.
- *
- * - `stateNameExpr` can be one or more state names separated by commas.
- * - `styles` refers to the {\@link style styling data} that will be persisted on the element once
- * the state
- * has been reached.
- *
- * ```typescript
- * // "void" is a reserved name for a state and is used to represent
- * // the state in which an element is detached from from the application.
- * state("void", style({ height: 0 }))
- *
- * // user-defined states
- * state("closed", style({ height: 0 }))
- * state("open, visible", style({ height: "*" }))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} stateNameExpr
- * @param {?} styles
- * @return {?}
- */function state(stateNameExpr,styles){return new AnimationStateDeclarationMetadata(stateNameExpr,styles);}/**
- * `keyframes` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `keyframes` specifies a collection of {\@link style style} entries each optionally characterized
- * by an `offset` value.
- *
- * ### Usage
- *
- * The `keyframes` animation function is designed to be used alongside the {\@link animate animate}
- * animation function. Instead of applying animations from where they are
- * currently to their destination, keyframes can describe how each style entry is applied
- * and at what point within the animation arc (much like CSS Keyframe Animations do).
- *
- * For each `style()` entry an `offset` value can be set. Doing so allows to specifiy at
- * what percentage of the animate time the styles will be applied.
- *
- * ```typescript
- * // the provided offset values describe when each backgroundColor value is applied.
- * animate("5s", keyframes([
- *   style({ backgroundColor: "red", offset: 0 }),
- *   style({ backgroundColor: "blue", offset: 0.2 }),
- *   style({ backgroundColor: "orange", offset: 0.3 }),
- *   style({ backgroundColor: "black", offset: 1 })
- * ]))
- * ```
- *
- * Alternatively, if there are no `offset` values used within the style entries then the offsets
- * will
- * be calculated automatically.
- *
- * ```typescript
- * animate("5s", keyframes([
- *   style({ backgroundColor: "red" }) // offset = 0
- *   style({ backgroundColor: "blue" }) // offset = 0.33
- *   style({ backgroundColor: "orange" }) // offset = 0.66
- *   style({ backgroundColor: "black" }) // offset = 1
- * ]))
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} steps
- * @return {?}
- */function keyframes(steps){return new AnimationKeyframesSequenceMetadata(steps);}/**
- * `transition` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `transition` declares the {\@link sequence sequence of animation steps} that will be run when the
- * provided
- * `stateChangeExpr` value is satisfied. The `stateChangeExpr` consists of a `state1 => state2`
- * which consists
- * of two known states (use an asterix (`*`) to refer to a dynamic starting and/or ending state).
- *
- * A function can also be provided as the `stateChangeExpr` argument for a transition and this
- * function will be executed each time a state change occurs. If the value returned within the
- * function is true then the associated animation will be run.
- *
- * Animation transitions are placed within an {\@link trigger animation trigger}. For an transition
- * to animate to
- * a state value and persist its styles then one or more {\@link state animation states} is expected
- * to be defined.
- *
- * ### Usage
- *
- * An animation transition is kicked off the `stateChangeExpr` predicate evaluates to true based on
- * what the
- * previous state is and what the current state has become. In other words, if a transition is
- * defined that
- * matches the old/current state criteria then the associated animation will be triggered.
- *
- * ```typescript
- * // all transition/state changes are defined within an animation trigger
- * trigger("myAnimationTrigger", [
- *   // if a state is defined then its styles will be persisted when the
- *   // animation has fully completed itself
- *   state("on", style({ background: "green" })),
- *   state("off", style({ background: "grey" })),
- *
- *   // a transition animation that will be kicked off when the state value
- *   // bound to "myAnimationTrigger" changes from "on" to "off"
- *   transition("on => off", animate(500)),
- *
- *   // it is also possible to do run the same animation for both directions
- *   transition("on <=> off", animate(500)),
- *
- *   // or to define multiple states pairs separated by commas
- *   transition("on => off, off => void", animate(500)),
- *
- *   // this is a catch-all state change for when an element is inserted into
- *   // the page and the destination state is unknown
- *   transition("void => *", [
- *     style({ opacity: 0 }),
- *     animate(500)
- *   ]),
- *
- *   // this will capture a state change between any states
- *   transition("* => *", animate("1s 0s")),
- *
- *   // you can also go full out and include a function
- *   transition((fromState, toState) => {
- *     // when `true` then it will allow the animation below to be invoked
- *     return fromState == "off" && toState == "on";
- *   }, animate("1s 0s"))
- * ])
- * ```
- *
- * The template associated with this component will make use of the `myAnimationTrigger`
- * animation trigger by binding to an element within its template code.
- *
- * ```html
- * <!-- somewhere inside of my-component-tpl.html -->
- * <div [\@myAnimationTrigger]="myStatusExp">...</div>
- * ```
- *
- * #### The final `animate` call
- *
- * If the final step within the transition steps is a call to `animate()` that **only**
- * uses a timing value with **no style data** then it will be automatically used as the final
- * animation
- * arc for the element to animate itself to the final state. This involves an automatic mix of
- * adding/removing CSS styles so that the element will be in the exact state it should be for the
- * applied state to be presented correctly.
- *
- * ```
- * // start off by hiding the element, but make sure that it animates properly to whatever state
- * // is currently active for "myAnimationTrigger"
- * transition("void => *", [
- *   style({ opacity: 0 }),
- *   animate(500)
- * ])
- * ```
- *
- * ### Transition Aliases (`:enter` and `:leave`)
- *
- * Given that enter (insertion) and leave (removal) animations are so common,
- * the `transition` function accepts both `:enter` and `:leave` values which
- * are aliases for the `void => *` and `* => void` state changes.
- *
- * ```
- * transition(":enter", [
- *   style({ opacity: 0 }),
- *   animate(500, style({ opacity: 1 }))
- * ])
- * transition(":leave", [
- *   animate(500, style({ opacity: 0 }))
- * ])
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} stateChangeExpr
- * @param {?} steps
- * @return {?}
- */function transition(stateChangeExpr,steps){var/** @type {?} */animationData=Array.isArray(steps)?new AnimationSequenceMetadata(steps):steps;return new AnimationStateTransitionMetadata(stateChangeExpr,animationData);}/**
- * `trigger` is an animation-specific function that is designed to be used inside of Angular2's
- * animation
- * DSL language. If this information is new, please navigate to the
- * {\@link Component#animations-anchor component animations metadata
- * page} to gain a better understanding of how animations in Angular2 are used.
- *
- * `trigger` Creates an animation trigger which will a list of {\@link state state} and {\@link
- * transition transition}
- * entries that will be evaluated when the expression bound to the trigger changes.
- *
- * Triggers are registered within the component annotation data under the
- * {\@link Component#animations-anchor animations section}. An animation trigger can
- * be placed on an element within a template by referencing the name of the
- * trigger followed by the expression value that the trigger is bound to
- * (in the form of `[\@triggerName]="expression"`.
- *
- * ### Usage
- *
- * `trigger` will create an animation trigger reference based on the provided `name` value.
- * The provided `animation` value is expected to be an array consisting of {\@link state state} and
- * {\@link transition transition}
- * declarations.
- *
- * ```typescript
- * \@Component({
- *   selector: 'my-component',
- *   templateUrl: 'my-component-tpl.html',
- *   animations: [
- *     trigger("myAnimationTrigger", [
- *       state(...),
- *       state(...),
- *       transition(...),
- *       transition(...)
- *     ])
- *   ]
- * })
- * class MyComponent {
- *   myStatusExp = "something";
- * }
- * ```
- *
- * The template associated with this component will make use of the `myAnimationTrigger`
- * animation trigger by binding to an element within its template code.
- *
- * ```html
- * <!-- somewhere inside of my-component-tpl.html -->
- * <div [\@myAnimationTrigger]="myStatusExp">...</div>
- * ```
- *
- * ### Example ([live demo](http://plnkr.co/edit/Kez8XGWBxWue7qP7nNvF?p=preview))
- *
- * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
- *
- * \@experimental Animation support is experimental.
- * @param {?} name
- * @param {?} animation
- * @return {?}
- */function trigger(name,animation){return new AnimationEntryMetadata(name,animation);}/**
  * @param {?} previousStyles
  * @param {?} newStyles
  * @param {?=} nullValue
@@ -3448,9 +2957,9 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      */function AnimationTransition(_player,_element,_triggerName,_fromState,_toState,_totalTime){_classCallCheck(this,AnimationTransition);this._player=_player;this._element=_element;this._triggerName=_triggerName;this._fromState=_fromState;this._toState=_toState;this._totalTime=_totalTime;}/**
      * @param {?} phaseName
      * @return {?}
-     */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}},{key:'onStart',value:function onStart(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('start'));},'player.onStart');this._player.onStart(fn);}},{key:'onDone',value:function onDone(callback){var _this43=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this43._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
+     */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}},{key:'onStart',value:function onStart(callback){var _this34=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this34._createEvent('start'));},'player.onStart');this._player.onStart(fn);}},{key:'onDone',value:function onDone(callback){var _this35=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this35._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
      * @param {?} _delegate
-     */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;}/**
+     */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;throw new Error('RootRenderer is no longer supported. Please use the `RendererFactoryV2` instead!');}/**
      * @param {?} componentProto
      * @return {?}
      */_createClass(DebugDomRootRenderer,[{key:'renderComponent',value:function renderComponent(componentProto){return new DebugDomRenderer(this._delegate.renderComponent(componentProto));}}]);return DebugDomRootRenderer;}();var DebugDomRenderer=function(){/**
@@ -3470,7 +2979,7 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @param {?} _tplCol
      */function DebugContext$1(_view,_nodeIndex,_tplRow,_tplCol){_classCallCheck(this,DebugContext$1);this._view=_view;this._nodeIndex=_nodeIndex;this._tplRow=_tplRow;this._tplCol=_tplCol;}/**
      * @return {?}
-     */_createClass(DebugContext$1,[{key:'_staticNodeInfo',get:function get(){return isPresent(this._nodeIndex)?this._view.staticNodeDebugInfos[this._nodeIndex]:null;}},{key:'context',get:function get(){return this._view.context;}},{key:'component',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)&&isPresent(staticNodeInfo.componentToken)){return this.injector.get(staticNodeInfo.componentToken);}return null;}},{key:'componentRenderElement',get:function get(){var/** @type {?} */componentView=this._view;while(isPresent(componentView.parentView)&&componentView.type!==ViewType.COMPONENT){componentView=componentView.parentView;}return componentView.parentElement;}},{key:'injector',get:function get(){return this._view.injector(this._nodeIndex);}},{key:'renderNode',get:function get(){if(isPresent(this._nodeIndex)&&this._view.allNodes){return this._view.allNodes[this._nodeIndex];}else{return null;}}},{key:'providerTokens',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;return isPresent(staticNodeInfo)?staticNodeInfo.providerTokens:null;}},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}},{key:'references',get:function get(){var _this44=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this44._view.allNodes?_this44._view.allNodes[_this44._nodeIndex]:null;}else{varValue=_this44._view.injectorGet(refToken,_this44._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
+     */_createClass(DebugContext$1,[{key:'_staticNodeInfo',get:function get(){return isPresent(this._nodeIndex)?this._view.staticNodeDebugInfos[this._nodeIndex]:null;}},{key:'context',get:function get(){return this._view.context;}},{key:'component',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)&&isPresent(staticNodeInfo.componentToken)){return this.injector.get(staticNodeInfo.componentToken);}return null;}},{key:'componentRenderElement',get:function get(){var/** @type {?} */componentView=this._view;while(isPresent(componentView.parentView)&&componentView.type!==ViewType.COMPONENT){componentView=componentView.parentView;}return componentView.parentElement;}},{key:'injector',get:function get(){return this._view.injector(this._nodeIndex);}},{key:'renderNode',get:function get(){if(isPresent(this._nodeIndex)&&this._view.allNodes){return this._view.allNodes[this._nodeIndex];}else{return null;}}},{key:'providerTokens',get:function get(){var/** @type {?} */staticNodeInfo=this._staticNodeInfo;return isPresent(staticNodeInfo)?staticNodeInfo.providerTokens:null;}},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}},{key:'references',get:function get(){var _this36=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this36._view.allNodes?_this36._view.allNodes[_this36._nodeIndex]:null;}else{varValue=_this36._view.injectorGet(refToken,_this36._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
      * @param {?} element
      * @param {?} animationName
      * @return {?}
@@ -3481,14 +2990,14 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @return {?}
      */_createClass(AnimationViewContext,[{key:'onAllActiveAnimationsDone',value:function onAllActiveAnimationsDone(callback){var/** @type {?} */activeAnimationPlayers=this._players.getAllPlayers();// we check for the length to avoid having GroupAnimationPlayer
 // issue an unnecessary microtask when zero players are passed in
-if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayers).onDone(function(){return callback();});}else{callback();}}},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this45=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this45._players.remove(element,animationName,player);});}},{key:'getAnimationPlayers',value:function getAnimationPlayers(element){var animationName=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */players=[];if(animationName){var/** @type {?} */currentPlayer=this._players.find(element,animationName);if(currentPlayer){_recursePlayers(currentPlayer,players);}}else{this._players.findAllPlayersByElement(element).forEach(function(player){return _recursePlayers(player,players);});}return players;}}]);return AnimationViewContext;}();/**
+if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayers).onDone(function(){return callback();});}else{callback();}}},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this37=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this37._players.remove(element,animationName,player);});}},{key:'getAnimationPlayers',value:function getAnimationPlayers(element){var animationName=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var/** @type {?} */players=[];if(animationName){var/** @type {?} */currentPlayer=this._players.find(element,animationName);if(currentPlayer){_recursePlayers(currentPlayer,players);}}else{this._players.findAllPlayersByElement(element).forEach(function(player){return _recursePlayers(player,players);});}return players;}}]);return AnimationViewContext;}();/**
  * @param {?} player
  * @param {?} collectedPlayers
  * @return {?}
  */function _recursePlayers(player,collectedPlayers){if(player instanceof AnimationGroupPlayer||player instanceof AnimationSequencePlayer){player.players.forEach(function(player){return _recursePlayers(player,collectedPlayers);});}else{collectedPlayers.push(player);}}var ElementInjector=function(_Injector){_inherits(ElementInjector,_Injector);/**
      * @param {?} _view
      * @param {?} _nodeIndex
-     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this46=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this46._view=_view;_this46._nodeIndex=_nodeIndex;return _this46;}/**
+     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this38=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this38._view=_view;_this38._nodeIndex=_nodeIndex;return _this38;}/**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
@@ -3510,7 +3019,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @param {?=} declaredViewContainer
      */function AppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentElement,cdMode){var declaredViewContainer=arguments.length>8&&arguments[8]!==undefined?arguments[8]:null;_classCallCheck(this,AppView);this.clazz=clazz;this.componentType=componentType;this.type=type;this.viewUtils=viewUtils;this.parentView=parentView;this.parentIndex=parentIndex;this.parentElement=parentElement;this.cdMode=cdMode;this.declaredViewContainer=declaredViewContainer;this.numberOfChecks=0;this.throwOnChange=false;this.ref=new ViewRef_(this,viewUtils.animationQueue);if(type===ViewType.COMPONENT||type===ViewType.HOST){this.renderer=viewUtils.renderComponent(componentType);}else{this.renderer=parentView.renderer;}this._directRenderer=this.renderer.directRenderer;}/**
      * @return {?}
-     */_createClass(AppView,[{key:'create',value:function create(context){this.context=context;return this.createInternal(null);}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,hostInjector,projectableNodes){this.context=EMPTY_CONTEXT$1;this._hasExternalHostElement=isPresent(rootSelectorOrNode);this._hostInjector=hostInjector;this._hostProjectableNodes=projectableNodes;return this.createInternal(rootSelectorOrNode);}},{key:'createInternal',value:function createInternal(rootSelectorOrNode){return null;}},{key:'createEmbeddedViewInternal',value:function createEmbeddedViewInternal(templateNodeIndex){return null;}},{key:'init',value:function init(lastRootNode,allNodes,disposables){this.lastRootNode=lastRootNode;this.allNodes=allNodes;this.disposables=disposables;if(this.type===ViewType.COMPONENT){this.dirtyParentQueriesInternal();}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex){var notFoundValue=arguments.length>2&&arguments[2]!==undefined?arguments[2]:THROW_IF_NOT_FOUND;var/** @type {?} */result=UNDEFINED$1;var/** @type {?} */view=this;while(result===UNDEFINED$1){if(isPresent(nodeIndex)){result=view.injectorGetInternal(token,nodeIndex,UNDEFINED$1);}if(result===UNDEFINED$1&&view.type===ViewType.HOST){result=view._hostInjector.get(token,notFoundValue);}nodeIndex=view.parentIndex;view=view.parentView;}return result;}},{key:'injectorGetInternal',value:function injectorGetInternal(token,nodeIndex,notFoundResult){return notFoundResult;}},{key:'injector',value:function injector(nodeIndex){return new ElementInjector(this,nodeIndex);}},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}},{key:'destroy',value:function destroy(){var _this47=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47.renderer.destroyView(hostElement,_this47.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}},{key:'destroyInternal',value:function destroyInternal(){}},{key:'detachInternal',value:function detachInternal(){}},{key:'detach',value:function detach(){var _this48=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this48._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
+     */_createClass(AppView,[{key:'create',value:function create(context){this.context=context;return this.createInternal(null);}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,hostInjector,projectableNodes){this.context=EMPTY_CONTEXT$1;this._hasExternalHostElement=isPresent(rootSelectorOrNode);this._hostInjector=hostInjector;this._hostProjectableNodes=projectableNodes;return this.createInternal(rootSelectorOrNode);}},{key:'createInternal',value:function createInternal(rootSelectorOrNode){return null;}},{key:'createEmbeddedViewInternal',value:function createEmbeddedViewInternal(templateNodeIndex){return null;}},{key:'init',value:function init(lastRootNode,allNodes,disposables){this.lastRootNode=lastRootNode;this.allNodes=allNodes;this.disposables=disposables;if(this.type===ViewType.COMPONENT){this.dirtyParentQueriesInternal();}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex){var notFoundValue=arguments.length>2&&arguments[2]!==undefined?arguments[2]:THROW_IF_NOT_FOUND;var/** @type {?} */result=UNDEFINED$1;var/** @type {?} */view=this;while(result===UNDEFINED$1){if(isPresent(nodeIndex)){result=view.injectorGetInternal(token,nodeIndex,UNDEFINED$1);}if(result===UNDEFINED$1&&view.type===ViewType.HOST){result=view._hostInjector.get(token,notFoundValue);}nodeIndex=view.parentIndex;view=view.parentView;}return result;}},{key:'injectorGetInternal',value:function injectorGetInternal(token,nodeIndex,notFoundResult){return notFoundResult;}},{key:'injector',value:function injector(nodeIndex){return new ElementInjector(this,nodeIndex);}},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}},{key:'destroy',value:function destroy(){var _this39=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this39.renderer.destroyView(hostElement,_this39.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}},{key:'destroyInternal',value:function destroyInternal(){}},{key:'detachInternal',value:function detachInternal(){}},{key:'detach',value:function detach(){var _this40=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this40._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
 if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.splice(index,1);}}this.appRef=null;this.viewContainer=null;this.dirtyParentQueriesInternal();}},{key:'_renderDetach',value:function _renderDetach(){if(this._directRenderer){this.visitRootNodesInternal(this._directRenderer.remove,null);}else{this.renderer.detachView(this.flatRootNodes);}}},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this.viewContainer){throw new Error('This view is already attached to a ViewContainer!');}this.appRef=appRef;this.dirtyParentQueriesInternal();}},{key:'attachAfter',value:function attachAfter(viewContainer,prevView){if(this.appRef){throw new Error('This view is already attached directly to the ApplicationRef!');}this._renderAttach(viewContainer,prevView);this.viewContainer=viewContainer;if(this.declaredViewContainer&&this.declaredViewContainer!==viewContainer){if(!this.declaredViewContainer.projectedViews){this.declaredViewContainer.projectedViews=[];}this.declaredViewContainer.projectedViews.push(this);}this.dirtyParentQueriesInternal();}},{key:'moveAfter',value:function moveAfter(viewContainer,prevView){this._renderAttach(viewContainer,prevView);this.dirtyParentQueriesInternal();}},{key:'_renderAttach',value:function _renderAttach(viewContainer,prevView){var/** @type {?} */prevNode=prevView?prevView.lastRootNode:viewContainer.nativeElement;if(this._directRenderer){var/** @type {?} */nextSibling=this._directRenderer.nextSibling(prevNode);if(nextSibling){this.visitRootNodesInternal(this._directRenderer.insertBefore,nextSibling);}else{var/** @type {?} */parentElement=this._directRenderer.parentElement(prevNode);if(parentElement){this.visitRootNodesInternal(this._directRenderer.appendChild,parentElement);}}}else{this.renderer.attachViewAfter(prevNode,this.flatRootNodes);}}},{key:'projectNodes',value:function projectNodes(parentElement,ngContentIndex){if(this._directRenderer){this.visitProjectedNodes(ngContentIndex,this._directRenderer.appendChild,parentElement);}else{var/** @type {?} */nodes=[];this.visitProjectedNodes(ngContentIndex,addToArray,nodes);this.renderer.projectNodes(parentElement,nodes);}}},{key:'visitProjectedNodes',value:function visitProjectedNodes(ngContentIndex,cb,c){switch(this.type){case ViewType.EMBEDDED:this.parentView.visitProjectedNodes(ngContentIndex,cb,c);break;case ViewType.COMPONENT:if(this.parentView.type===ViewType.HOST){var/** @type {?} */nodes=this.parentView._hostProjectableNodes[ngContentIndex]||[];for(var/** @type {?} */i=0;i<nodes.length;i++){cb(nodes[i],c);}}else{this.parentView.visitProjectableNodesInternal(this.parentIndex,ngContentIndex,cb,c);}break;}}},{key:'visitRootNodesInternal',value:function visitRootNodesInternal(cb,c){}},{key:'visitProjectableNodesInternal',value:function visitProjectableNodesInternal(nodeIndex,ngContentIndex,cb,c){}},{key:'dirtyParentQueriesInternal',value:function dirtyParentQueriesInternal(){}},{key:'internalDetectChanges',value:function internalDetectChanges(throwOnChange){if(this.cdMode!==ChangeDetectorStatus.Detached){this.detectChanges(throwOnChange);}}},{key:'detectChanges',value:function detectChanges(throwOnChange){var/** @type {?} */s=_scope_check(this.clazz);if(this.cdMode===ChangeDetectorStatus.Checked||this.cdMode===ChangeDetectorStatus.Errored)return;if(this.cdMode===ChangeDetectorStatus.Destroyed){this.throwDestroyedError('detectChanges');}this.throwOnChange=throwOnChange;this.detectChangesInternal();if(this.cdMode===ChangeDetectorStatus.CheckOnce)this.cdMode=ChangeDetectorStatus.Checked;this.numberOfChecks++;wtfLeave(s);}},{key:'detectChangesInternal',value:function detectChangesInternal(){}},{key:'markAsCheckOnce',value:function markAsCheckOnce(){this.cdMode=ChangeDetectorStatus.CheckOnce;}},{key:'markPathToRootAsCheckOnce',value:function markPathToRootAsCheckOnce(){var/** @type {?} */c=this;while(isPresent(c)&&c.cdMode!==ChangeDetectorStatus.Detached){if(c.cdMode===ChangeDetectorStatus.Checked){c.cdMode=ChangeDetectorStatus.CheckOnce;}if(c.type===ViewType.COMPONENT){c=c.parentView;}else{c=c.viewContainer?c.viewContainer.parentView:null;}}}},{key:'eventHandler',value:function eventHandler(cb){return cb;}},{key:'throwDestroyedError',value:function throwDestroyedError(details){throw viewDestroyedError(details);}},{key:'animationContext',get:function get(){if(!this._animationContext){this._animationContext=new AnimationViewContext(this.viewUtils.animationQueue);}return this._animationContext;}},{key:'destroyed',get:function get(){return this.cdMode===ChangeDetectorStatus.Destroyed;}},{key:'changeDetectorRef',get:function get(){return this.ref;}},{key:'flatRootNodes',get:function get(){var/** @type {?} */nodes=[];this.visitRootNodesInternal(addToArray,nodes);return nodes;}}]);return AppView;}();var DebugAppView=function(_AppView){_inherits(DebugAppView,_AppView);/**
      * @param {?} clazz
      * @param {?} componentType
@@ -3522,10 +3031,10 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      * @param {?} cdMode
      * @param {?} staticNodeDebugInfos
      * @param {?=} declaredViewContainer
-     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this49=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this49.staticNodeDebugInfos=staticNodeDebugInfos;_this49._currentDebugContext=null;return _this49;}/**
+     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this41=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this41.staticNodeDebugInfos=staticNodeDebugInfos;_this41._currentDebugContext=null;return _this41;}/**
      * @param {?} context
      * @return {?}
-     */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,injector){var projectableNodes=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'createHostView',this).call(this,rootSelectorOrNode,injector,projectableNodes);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex,notFoundResult){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'injectorGet',this).call(this,token,nodeIndex,notFoundResult);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detach',value:function detach(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detach',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'destroy',value:function destroy(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'destroy',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detectChanges',value:function detectChanges(throwOnChange){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detectChanges',this).call(this,throwOnChange);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'_resetDebug',value:function _resetDebug(){this._currentDebugContext=null;}},{key:'debug',value:function debug(nodeIndex,rowNum,colNum){return this._currentDebugContext=new DebugContext$1(this,nodeIndex,rowNum,colNum);}},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}},{key:'eventHandler',value:function eventHandler(cb){var _this50=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this50._resetDebug();try{return superHandler.call(_this50,eventName,event);}catch(e){_this50._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);var ViewContainer=function(){/**
+     */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'createHostView',value:function createHostView(rootSelectorOrNode,injector){var projectableNodes=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'createHostView',this).call(this,rootSelectorOrNode,injector,projectableNodes);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'injectorGet',value:function injectorGet(token,nodeIndex,notFoundResult){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'injectorGet',this).call(this,token,nodeIndex,notFoundResult);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detach',value:function detach(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detach',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'destroy',value:function destroy(){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'destroy',this).call(this);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'detectChanges',value:function detectChanges(throwOnChange){this._resetDebug();try{_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'detectChanges',this).call(this,throwOnChange);}catch(e){this._rethrowWithContext(e);throw e;}}},{key:'_resetDebug',value:function _resetDebug(){this._currentDebugContext=null;}},{key:'debug',value:function debug(nodeIndex,rowNum,colNum){return this._currentDebugContext=new DebugContext$1(this,nodeIndex,rowNum,colNum);}},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}},{key:'eventHandler',value:function eventHandler(cb){var _this42=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this42._resetDebug();try{return superHandler.call(_this42,eventName,event);}catch(e){_this42._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);var ViewContainer=function(){/**
      * @param {?} index
      * @param {?} parentIndex
      * @param {?} parentView
@@ -3534,4 +3043,461 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      * @return {?}
      */_createClass(ViewContainer,[{key:'detectChangesInNestedViews',value:function detectChangesInNestedViews(throwOnChange){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].detectChanges(throwOnChange);}}}},{key:'destroyNestedViews',value:function destroyNestedViews(){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].destroy();}}}},{key:'visitNestedViewRootNodes',value:function visitNestedViewRootNodes(cb,c){if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){this.nestedViews[i].visitRootNodesInternal(cb,c);}}}},{key:'mapNestedViews',value:function mapNestedViews(nestedViewClass,callback){var/** @type {?} */result=[];if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){var/** @type {?} */nestedView=this.nestedViews[i];if(nestedView.clazz===nestedViewClass){result.push(callback(nestedView));}}}if(this.projectedViews){for(var/** @type {?} */_i6=0;_i6<this.projectedViews.length;_i6++){var/** @type {?} */projectedView=this.projectedViews[_i6];if(projectedView.clazz===nestedViewClass){result.push(callback(projectedView));}}}return result;}},{key:'moveView',value:function moveView(view,toIndex){var/** @type {?} */fromIndex=this.nestedViews.indexOf(view);if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}nestedViews.splice(fromIndex,1);nestedViews.splice(toIndex,0,view);var/** @type {?} */prevView=toIndex>0?nestedViews[toIndex-1]:null;view.moveAfter(this,prevView);}},{key:'attachView',value:function attachView(view,viewIndex){if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}var/** @type {?} */nestedViews=this.nestedViews;if(nestedViews==null){nestedViews=[];this.nestedViews=nestedViews;}// perf: array.push is faster than array.splice!
 if(viewIndex>=nestedViews.length){nestedViews.push(view);}else{nestedViews.splice(viewIndex,0,view);}var/** @type {?} */prevView=viewIndex>0?nestedViews[viewIndex-1]:null;view.attachAfter(this,prevView);}},{key:'detachView',value:function detachView(viewIndex){var/** @type {?} */view=this.nestedViews[viewIndex];// perf: array.pop is faster than array.splice!
-if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.nestedViews.splice(viewIndex,1);}if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}view.detach();return view;}},{key:'elementRef',get:function get(){return new ElementRef(this.nativeElement);}},{key:'vcRef',get:function get(){return new ViewContainerRef_(this);}},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();exports.createPlatform=createPlatform;exports.assertPlatform=assertPlatform;exports.destroyPlatform=destroyPlatform;exports.getPlatform=getPlatform;exports.PlatformRef=PlatformRef;exports.ApplicationRef=ApplicationRef;exports.enableProdMode=enableProdMode;exports.isDevMode=isDevMode;exports.createPlatformFactory=createPlatformFactory;exports.NgProbeToken=NgProbeToken;exports.APP_ID=APP_ID;exports.PACKAGE_ROOT_URL=PACKAGE_ROOT_URL;exports.PLATFORM_INITIALIZER=PLATFORM_INITIALIZER;exports.PLATFORM_ID=PLATFORM_ID;exports.APP_BOOTSTRAP_LISTENER=APP_BOOTSTRAP_LISTENER;exports.APP_INITIALIZER=APP_INITIALIZER;exports.ApplicationInitStatus=ApplicationInitStatus;exports.DebugElement=DebugElement;exports.DebugNode=DebugNode;exports.asNativeElements=asNativeElements;exports.getDebugNode=getDebugNode;exports.Testability=Testability;exports.TestabilityRegistry=TestabilityRegistry;exports.setTestabilityGetter=setTestabilityGetter;exports.TRANSLATIONS=TRANSLATIONS;exports.TRANSLATIONS_FORMAT=TRANSLATIONS_FORMAT;exports.LOCALE_ID=LOCALE_ID;exports.MissingTranslationStrategy=MissingTranslationStrategy;exports.ApplicationModule=ApplicationModule;exports.wtfCreateScope=wtfCreateScope;exports.wtfLeave=wtfLeave;exports.wtfStartTimeRange=wtfStartTimeRange;exports.wtfEndTimeRange=wtfEndTimeRange;exports.Type=Type;exports.EventEmitter=EventEmitter;exports.ErrorHandler=ErrorHandler;exports.AnimationPlayer=AnimationPlayer;exports.AnimationStyles=AnimationStyles;exports.AnimationKeyframe=AnimationKeyframe;exports.Sanitizer=Sanitizer;exports.SecurityContext=SecurityContext;exports.AnimationTransitionEvent=AnimationTransitionEvent;exports.ANALYZE_FOR_ENTRY_COMPONENTS=ANALYZE_FOR_ENTRY_COMPONENTS;exports.Attribute=Attribute;exports.ContentChild=ContentChild;exports.ContentChildren=ContentChildren;exports.Query=Query;exports.ViewChild=ViewChild;exports.ViewChildren=ViewChildren;exports.Component=Component;exports.Directive=Directive;exports.HostBinding=HostBinding;exports.HostListener=HostListener;exports.Input=Input;exports.Output=Output;exports.Pipe=Pipe;exports.AfterContentChecked=AfterContentChecked;exports.AfterContentInit=AfterContentInit;exports.AfterViewChecked=AfterViewChecked;exports.AfterViewInit=AfterViewInit;exports.DoCheck=DoCheck;exports.OnChanges=OnChanges;exports.OnDestroy=OnDestroy;exports.OnInit=OnInit;exports.CUSTOM_ELEMENTS_SCHEMA=CUSTOM_ELEMENTS_SCHEMA;exports.NO_ERRORS_SCHEMA=NO_ERRORS_SCHEMA;exports.NgModule=NgModule;exports.ViewEncapsulation=ViewEncapsulation;exports.Version=Version;exports.VERSION=VERSION;exports.Class=Class;exports.forwardRef=forwardRef;exports.resolveForwardRef=resolveForwardRef;exports.Injector=Injector;exports.ReflectiveInjector=ReflectiveInjector;exports.ResolvedReflectiveFactory=ResolvedReflectiveFactory;exports.ReflectiveKey=ReflectiveKey;exports.InjectionToken=InjectionToken;exports.OpaqueToken=OpaqueToken;exports.Inject=Inject;exports.Optional=Optional;exports.Injectable=Injectable;exports.Self=Self;exports.SkipSelf=SkipSelf;exports.Host=Host;exports.NgZone=NgZone;exports.RenderComponentType=RenderComponentType;exports.Renderer=RendererV1;exports.RendererFactoryV2=RendererFactoryV2;exports.RendererV2=RendererV2;exports.RootRenderer=RootRenderer;exports.COMPILER_OPTIONS=COMPILER_OPTIONS;exports.Compiler=Compiler;exports.CompilerFactory=CompilerFactory;exports.ModuleWithComponentFactories=ModuleWithComponentFactories;exports.ComponentFactory=ComponentFactory;exports.ComponentRef=ComponentRef;exports.ComponentFactoryResolver=ComponentFactoryResolver;exports.ElementRef=ElementRef;exports.NgModuleFactory=NgModuleFactory;exports.NgModuleRef=NgModuleRef;exports.NgModuleFactoryLoader=NgModuleFactoryLoader;exports.getModuleFactory=getModuleFactory;exports.QueryList=QueryList;exports.SystemJsNgModuleLoader=SystemJsNgModuleLoader;exports.SystemJsNgModuleLoaderConfig=SystemJsNgModuleLoaderConfig;exports.TemplateRef=TemplateRef;exports.ViewContainerRef=ViewContainerRef;exports.EmbeddedViewRef=EmbeddedViewRef;exports.ViewRef=ViewRef;exports.ChangeDetectionStrategy=ChangeDetectionStrategy;exports.ChangeDetectorRef=ChangeDetectorRef;exports.DefaultIterableDiffer=DefaultIterableDiffer;exports.IterableDiffers=IterableDiffers;exports.KeyValueDiffers=KeyValueDiffers;exports.SimpleChange=SimpleChange;exports.WrappedValue=WrappedValue;exports.platformCore=platformCore;exports.ɵANY_STATE=ANY_STATE;exports.ɵDEFAULT_STATE=DEFAULT_STATE;exports.ɵEMPTY_STATE=EMPTY_STATE;exports.ɵFILL_STYLE_FLAG=FILL_STYLE_FLAG;exports.ɵAnimationGroupPlayer=AnimationGroupPlayer;exports.ɵAnimationKeyframe=AnimationKeyframe;exports.ɵAnimationPlayer=AnimationPlayer;exports.ɵNoOpAnimationPlayer=NoOpAnimationPlayer;exports.ɵAnimationSequencePlayer=AnimationSequencePlayer;exports.ɵbalanceAnimationKeyframes=balanceAnimationKeyframes;exports.ɵclearStyles=clearStyles;exports.ɵcollectAndResolveStyles=collectAndResolveStyles;exports.ɵflattenStyles=flattenStyles;exports.ɵprepareFinalAnimationStyles=prepareFinalAnimationStyles;exports.ɵrenderStyles=renderStyles;exports.ɵAnimationStyles=AnimationStyles;exports.ɵAnimationTransition=AnimationTransition;exports.ɵALLOW_MULTIPLE_PLATFORMS=ALLOW_MULTIPLE_PLATFORMS;exports.ɵAPP_ID_RANDOM_PROVIDER=APP_ID_RANDOM_PROVIDER;exports.ɵValueUnwrapper=ValueUnwrapper;exports.ɵdevModeEqual=devModeEqual;exports.ɵChangeDetectorStatus=ChangeDetectorStatus;exports.ɵisDefaultChangeDetectionStrategy=isDefaultChangeDetectionStrategy;exports.ɵConsole=Console;exports.ɵDebugDomRootRenderer=DebugDomRootRenderer;exports.ɵERROR_COMPONENT_TYPE=ERROR_COMPONENT_TYPE;exports.ɵComponentFactory=ComponentFactory;exports.ɵCodegenComponentFactoryResolver=CodegenComponentFactoryResolver;exports.ɵDebugContext=DebugContext$1;exports.ɵStaticNodeDebugInfo=StaticNodeDebugInfo;exports.ɵAppView=AppView;exports.ɵDebugAppView=DebugAppView;exports.ɵViewContainer=ViewContainer;exports.ɵViewType=ViewType;exports.ɵLIFECYCLE_HOOKS_VALUES=LIFECYCLE_HOOKS_VALUES;exports.ɵLifecycleHooks=LifecycleHooks;exports.ɵViewMetadata=ViewMetadata;exports.ɵReflector=Reflector;exports.ɵreflector=reflector;exports.ɵReflectionCapabilities=ReflectionCapabilities;exports.ɵReflectorReader=ReflectorReader;exports.ɵRenderDebugInfo=RenderDebugInfo;exports.ɵmakeDecorator=makeDecorator;exports.ɵisObservable=isObservable;exports.ɵisPromise=isPromise;exports.ɵComponentRef_=ComponentRef_;exports.ɵNgModuleInjector=NgModuleInjector;exports.ɵregisterModuleFactory=registerModuleFactory;exports.ɵTemplateRef_=TemplateRef_;exports.ɵEMPTY_ARRAY=EMPTY_ARRAY;exports.ɵEMPTY_INLINE_ARRAY=EMPTY_INLINE_ARRAY;exports.ɵEMPTY_MAP=EMPTY_MAP;exports.ɵInlineArray16=InlineArray16;exports.ɵInlineArray2=InlineArray2;exports.ɵInlineArray4=InlineArray4;exports.ɵInlineArray8=InlineArray8;exports.ɵInlineArrayDynamic=InlineArrayDynamic;exports.ɵViewUtils=ViewUtils;exports.ɵcastByValue=castByValue;exports.ɵcheckBinding=checkBinding;exports.ɵcheckBindingChange=checkBindingChange;exports.ɵcheckRenderAttribute=checkRenderAttribute;exports.ɵcheckRenderClass=checkRenderClass;exports.ɵcheckRenderProperty=checkRenderProperty;exports.ɵcheckRenderStyle=checkRenderStyle;exports.ɵcheckRenderText=checkRenderText;exports.ɵcreateRenderComponentType=createRenderComponentType;exports.ɵcreateRenderElement=createRenderElement;exports.ɵgetComponentFactoryViewClass=getComponentFactoryViewClass;exports.ɵinlineInterpolate=inlineInterpolate;exports.ɵinterpolate=interpolate;exports.ɵnoop=noop;exports.ɵpureProxy1=pureProxy1;exports.ɵpureProxy10=pureProxy10;exports.ɵpureProxy2=pureProxy2;exports.ɵpureProxy3=pureProxy3;exports.ɵpureProxy4=pureProxy4;exports.ɵpureProxy5=pureProxy5;exports.ɵpureProxy6=pureProxy6;exports.ɵpureProxy7=pureProxy7;exports.ɵpureProxy8=pureProxy8;exports.ɵpureProxy9=pureProxy9;exports.ɵselectOrCreateRenderHostElement=selectOrCreateRenderHostElement;exports.ɵsetBindingDebugInfo=setBindingDebugInfo;exports.ɵsetBindingDebugInfoForChanges=setBindingDebugInfoForChanges;exports.ɵsubscribeToRenderElement=subscribeToRenderElement;exports.ɵArgumentType=ArgumentType;exports.ɵBindingType=BindingType;exports.ɵDepFlags=DepFlags;exports.ɵNodeFlags=NodeFlags;exports.ɵProviderType=ProviderType;exports.ɵQueryBindingType=QueryBindingType;exports.ɵQueryValueType=QueryValueType;exports.ɵViewFlags=ViewFlags;exports.ɵanchorDef=anchorDef;exports.ɵcreateComponentFactory=createComponentFactory;exports.ɵcreateRendererTypeV2=createRendererTypeV2;exports.ɵdirectiveDef=directiveDef;exports.ɵelementDef=elementDef;exports.ɵelementEventFullName=elementEventFullName;exports.ɵngContentDef=ngContentDef;exports.ɵnodeValue=nodeValue;exports.ɵpipeDef=pipeDef;exports.ɵproviderDef=providerDef;exports.ɵpureArrayDef=pureArrayDef;exports.ɵpureObjectDef=pureObjectDef;exports.ɵpurePipeDef=purePipeDef;exports.ɵqueryDef=queryDef;exports.ɵtextDef=textDef;exports.ɵunwrapValue=unwrapValue;exports.ɵviewDef=viewDef;exports.AUTO_STYLE=AUTO_STYLE;exports.AnimationEntryMetadata=AnimationEntryMetadata;exports.AnimationStateMetadata=AnimationStateMetadata;exports.AnimationStateDeclarationMetadata=AnimationStateDeclarationMetadata;exports.AnimationStateTransitionMetadata=AnimationStateTransitionMetadata;exports.AnimationMetadata=AnimationMetadata;exports.AnimationKeyframesSequenceMetadata=AnimationKeyframesSequenceMetadata;exports.AnimationStyleMetadata=AnimationStyleMetadata;exports.AnimationAnimateMetadata=AnimationAnimateMetadata;exports.AnimationWithStepsMetadata=AnimationWithStepsMetadata;exports.AnimationSequenceMetadata=AnimationSequenceMetadata;exports.AnimationGroupMetadata=AnimationGroupMetadata;exports.animate=animate;exports.group=group;exports.sequence=sequence;exports.style=style;exports.state=state;exports.keyframes=keyframes;exports.transition=transition;exports.trigger=trigger;exports.ɵz=AnimationQueue;exports.ɵp=_initViewEngine;exports.ɵm=_iterableDiffersFactory;exports.ɵn=_keyValueDiffersFactory;exports.ɵo=_localeFactory;exports.ɵf=ApplicationRef_;exports.ɵg=_appIdRandomProviderFactory;exports.ɵh=defaultIterableDiffers;exports.ɵi=defaultKeyValueDiffers;exports.ɵk=DefaultIterableDifferFactory;exports.ɵl=DefaultKeyValueDifferFactory;exports.ɵc=ReflectiveInjector_;exports.ɵd=ReflectiveDependency;exports.ɵe=resolveReflectiveProviders;exports.ɵj=isBlank;exports.ɵq=wtfEnabled;exports.ɵs=createScope;exports.ɵr=detectWTF;exports.ɵv=endTimeRange;exports.ɵt=leave;exports.ɵu=startTimeRange;exports.ɵa=makeParamDecorator;exports.ɵb=makePropDecorator;exports.ɵx=_def;exports.ɵy=NodeType;});
+if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.nestedViews.splice(viewIndex,1);}if(view.type===ViewType.COMPONENT){throw new Error('Component views can\'t be moved!');}view.detach();return view;}},{key:'elementRef',get:function get(){return new ElementRef(this.nativeElement);}},{key:'vcRef',get:function get(){return new ViewContainerRef_(this);}},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();/**
+ * `trigger` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `trigger` Creates an animation trigger which will a list of {\@link state state} and {\@link
+ * transition transition} entries that will be evaluated when the expression bound to the trigger
+ * changes.
+ *
+ * Triggers are registered within the component annotation data under the {\@link
+ * Component#animations-anchor animations section}. An animation trigger can be placed on an element
+ * within a template by referencing the name of the trigger followed by the expression value that the
+ * trigger is bound to (in the form of `[\@triggerName]="expression"`.
+ *
+ * ### Usage
+ *
+ * `trigger` will create an animation trigger reference based on the provided `name` value. The
+ * provided `animation` value is expected to be an array consisting of {\@link state state} and {\@link
+ * transition transition} declarations.
+ *
+ * ```typescript
+ * \@Component({
+ *   selector: 'my-component',
+ *   templateUrl: 'my-component-tpl.html',
+ *   animations: [
+ *     trigger("myAnimationTrigger", [
+ *       state(...),
+ *       state(...),
+ *       transition(...),
+ *       transition(...)
+ *     ])
+ *   ]
+ * })
+ * class MyComponent {
+ *   myStatusExp = "something";
+ * }
+ * ```
+ *
+ * The template associated with this component will make use of the `myAnimationTrigger` animation
+ * trigger by binding to an element within its template code.
+ *
+ * ```html
+ * <!-- somewhere inside of my-component-tpl.html -->
+ * <div [\@myAnimationTrigger]="myStatusExp">...</div>
+ * tools/gulp-tasks/validate-commit-message.js ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} name
+ * @param {?} definitions
+ * @return {?}
+ */function trigger$2(name,definitions){return{name:name,definitions:definitions};}/**
+ * `animate` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `animate` specifies an animation step that will apply the provided `styles` data for a given
+ * amount of time based on the provided `timing` expression value. Calls to `animate` are expected
+ * to be used within {\@link sequence an animation sequence}, {\@link group group}, or {\@link
+ * transition transition}.
+ *
+ * ### Usage
+ *
+ * The `animate` function accepts two input parameters: `timing` and `styles`:
+ *
+ * - `timing` is a string based value that can be a combination of a duration with optional delay
+ * and easing values. The format for the expression breaks down to `duration delay easing`
+ * (therefore a value such as `1s 100ms ease-out` will be parse itself into `duration=1000,
+ * delay=100, easing=ease-out`. If a numeric value is provided then that will be used as the
+ * `duration` value in millisecond form.
+ * - `styles` is the style input data which can either be a call to {\@link style style} or {\@link
+ * keyframes keyframes}. If left empty then the styles from the destination state will be collected
+ * and used (this is useful when describing an animation step that will complete an animation by
+ * {\@link transition#the-final-animate-call animating to the final state}).
+ *
+ * ```typescript
+ * // various functions for specifying timing data
+ * animate(500, style(...))
+ * animate("1s", style(...))
+ * animate("100ms 0.5s", style(...))
+ * animate("5s ease", style(...))
+ * animate("5s 10ms cubic-bezier(.17,.67,.88,.1)", style(...))
+ *
+ * // either style() of keyframes() can be used
+ * animate(500, style({ background: "red" }))
+ * animate(500, keyframes([
+ *   style({ background: "blue" })),
+ *   style({ background: "red" }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} timings
+ * @param {?=} styles
+ * @return {?}
+ */function animate$2(timings){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return{type:4/* Animate */,styles:styles,timings:timings};}/**
+ * `group` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `group` specifies a list of animation steps that are all run in parallel. Grouped animations are
+ * useful when a series of styles must be animated/closed off at different statrting/ending times.
+ *
+ * The `group` function can either be used within a {\@link sequence sequence} or a {\@link transition
+ * transition} and it will only continue to the next instruction once all of the inner animation
+ * steps have completed.
+ *
+ * ### Usage
+ *
+ * The `steps` data that is passed into the `group` animation function can either consist of {\@link
+ * style style} or {\@link animate animate} function calls. Each call to `style()` or `animate()`
+ * within a group will be executed instantly (use {\@link keyframes keyframes} or a {\@link
+ * animate#usage animate() with a delay value} to offset styles to be applied at a later time).
+ *
+ * ```typescript
+ * group([
+ *   animate("1s", { background: "black" }))
+ *   animate("2s", { color: "white" }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function group$2(steps){return{type:3/* Group */,steps:steps};}/**
+ * `sequence` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `sequence` Specifies a list of animation steps that are run one by one. (`sequence` is used by
+ * default when an array is passed as animation data into {\@link transition transition}.)
+ *
+ * The `sequence` function can either be used within a {\@link group group} or a {\@link transition
+ * transition} and it will only continue to the next instruction once each of the inner animation
+ * steps have completed.
+ *
+ * To perform animation styling in parallel with other animation steps then have a look at the
+ * {\@link group group} animation function.
+ *
+ * ### Usage
+ *
+ * The `steps` data that is passed into the `sequence` animation function can either consist of
+ * {\@link style style} or {\@link animate animate} function calls. A call to `style()` will apply the
+ * provided styling data immediately while a call to `animate()` will apply its styling data over a
+ * given time depending on its timing data.
+ *
+ * ```typescript
+ * sequence([
+ *   style({ opacity: 0 })),
+ *   animate("1s", { opacity: 1 }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function sequence$2(steps){return{type:2/* Sequence */,steps:steps};}/**
+ * `style` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `style` declares a key/value object containing CSS properties/styles that can then be used for
+ * {\@link state animation states}, within an {\@link sequence animation sequence}, or as styling data
+ * for both {\@link animate animate} and {\@link keyframes keyframes}.
+ *
+ * ### Usage
+ *
+ * `style` takes in a key/value string map as data and expects one or more CSS property/value pairs
+ * to be defined.
+ *
+ * ```typescript
+ * // string values are used for css properties
+ * style({ background: "red", color: "blue" })
+ *
+ * // numerical (pixel) values are also supported
+ * style({ width: 100, height: 0 })
+ * ```
+ *
+ * #### Auto-styles (using `*`)
+ *
+ * When an asterix (`*`) character is used as a value then it will be detected from the element
+ * being animated and applied as animation data when the animation starts.
+ *
+ * This feature proves useful for a state depending on layout and/or environment factors; in such
+ * cases the styles are calculated just before the animation starts.
+ *
+ * ```typescript
+ * // the steps below will animate from 0 to the
+ * // actual height of the element
+ * style({ height: 0 }),
+ * animate("1s", style({ height: "*" }))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} tokens
+ * @return {?}
+ */function style$2(tokens){var/** @type {?} */input=void 0;var/** @type {?} */offset=null;if(Array.isArray(tokens)){input=tokens;}else{input=[/** @type {?} */tokens];}input.forEach(function(entry){var/** @type {?} */entryOffset=entry['offset'];if(entryOffset!=null){offset=offset==null?parseFloat(/** @type {?} */entryOffset):offset;}});return _style(offset,input);}/**
+ * @param {?} offset
+ * @param {?} styles
+ * @return {?}
+ */function _style(offset,styles){return{type:6/* Style */,styles:styles,offset:offset};}/**
+ * `state` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `state` declares an animation state within the given trigger. When a state is active within a
+ * component then its associated styles will persist on the element that the trigger is attached to
+ * (even when the animation ends).
+ *
+ * To animate between states, have a look at the animation {\@link transition transition} DSL
+ * function. To register states to an animation trigger please have a look at the {\@link trigger
+ * trigger} function.
+ *
+ * #### The `void` state
+ *
+ * The `void` state value is a reserved word that angular uses to determine when the element is not
+ * apart of the application anymore (e.g. when an `ngIf` evaluates to false then the state of the
+ * associated element is void).
+ *
+ * #### The `*` (default) state
+ *
+ * The `*` state (when styled) is a fallback state that will be used if the state that is being
+ * animated is not declared within the trigger.
+ *
+ * ### Usage
+ *
+ * `state` will declare an animation state with its associated styles
+ * within the given trigger.
+ *
+ * - `stateNameExpr` can be one or more state names separated by commas.
+ * - `styles` refers to the {\@link style styling data} that will be persisted on the element once
+ * the state has been reached.
+ *
+ * ```typescript
+ * // "void" is a reserved name for a state and is used to represent
+ * // the state in which an element is detached from from the application.
+ * state("void", style({ height: 0 }))
+ *
+ * // user-defined states
+ * state("closed", style({ height: 0 }))
+ * state("open, visible", style({ height: "*" }))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} name
+ * @param {?} styles
+ * @return {?}
+ */function state$2(name,styles){return{type:0/* State */,name:name,styles:styles};}/**
+ * `keyframes` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `keyframes` specifies a collection of {\@link style style} entries each optionally characterized
+ * by an `offset` value.
+ *
+ * ### Usage
+ *
+ * The `keyframes` animation function is designed to be used alongside the {\@link animate animate}
+ * animation function. Instead of applying animations from where they are currently to their
+ * destination, keyframes can describe how each style entry is applied and at what point within the
+ * animation arc (much like CSS Keyframe Animations do).
+ *
+ * For each `style()` entry an `offset` value can be set. Doing so allows to specifiy at what
+ * percentage of the animate time the styles will be applied.
+ *
+ * ```typescript
+ * // the provided offset values describe when each backgroundColor value is applied.
+ * animate("5s", keyframes([
+ *   style({ backgroundColor: "red", offset: 0 }),
+ *   style({ backgroundColor: "blue", offset: 0.2 }),
+ *   style({ backgroundColor: "orange", offset: 0.3 }),
+ *   style({ backgroundColor: "black", offset: 1 })
+ * ]))
+ * ```
+ *
+ * Alternatively, if there are no `offset` values used within the style entries then the offsets
+ * will be calculated automatically.
+ *
+ * ```typescript
+ * animate("5s", keyframes([
+ *   style({ backgroundColor: "red" }) // offset = 0
+ *   style({ backgroundColor: "blue" }) // offset = 0.33
+ *   style({ backgroundColor: "orange" }) // offset = 0.66
+ *   style({ backgroundColor: "black" }) // offset = 1
+ * ]))
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @return {?}
+ */function keyframes$2(steps){return{type:5/* KeyframeSequence */,steps:steps};}/**
+ * `transition` is an animation-specific function that is designed to be used inside of Angular2's
+ * animation DSL language. If this information is new, please navigate to the {\@link
+ * Component#animations-anchor component animations metadata page} to gain a better understanding of
+ * how animations in Angular2 are used.
+ *
+ * `transition` declares the {\@link sequence sequence of animation steps} that will be run when the
+ * provided `stateChangeExpr` value is satisfied. The `stateChangeExpr` consists of a `state1 =>
+ * state2` which consists of two known states (use an asterix (`*`) to refer to a dynamic starting
+ * and/or ending state).
+ *
+ * A function can also be provided as the `stateChangeExpr` argument for a transition and this
+ * function will be executed each time a state change occurs. If the value returned within the
+ * function is true then the associated animation will be run.
+ *
+ * Animation transitions are placed within an {\@link trigger animation trigger}. For an transition
+ * to animate to a state value and persist its styles then one or more {\@link state animation
+ * states} is expected to be defined.
+ *
+ * ### Usage
+ *
+ * An animation transition is kicked off the `stateChangeExpr` predicate evaluates to true based on
+ * what the previous state is and what the current state has become. In other words, if a transition
+ * is defined that matches the old/current state criteria then the associated animation will be
+ * triggered.
+ *
+ * ```typescript
+ * // all transition/state changes are defined within an animation trigger
+ * trigger("myAnimationTrigger", [
+ *   // if a state is defined then its styles will be persisted when the
+ *   // animation has fully completed itself
+ *   state("on", style({ background: "green" })),
+ *   state("off", style({ background: "grey" })),
+ *
+ *   // a transition animation that will be kicked off when the state value
+ *   // bound to "myAnimationTrigger" changes from "on" to "off"
+ *   transition("on => off", animate(500)),
+ *
+ *   // it is also possible to do run the same animation for both directions
+ *   transition("on <=> off", animate(500)),
+ *
+ *   // or to define multiple states pairs separated by commas
+ *   transition("on => off, off => void", animate(500)),
+ *
+ *   // this is a catch-all state change for when an element is inserted into
+ *   // the page and the destination state is unknown
+ *   transition("void => *", [
+ *     style({ opacity: 0 }),
+ *     animate(500)
+ *   ]),
+ *
+ *   // this will capture a state change between any states
+ *   transition("* => *", animate("1s 0s")),
+ *
+ *   // you can also go full out and include a function
+ *   transition((fromState, toState) => {
+ *     // when `true` then it will allow the animation below to be invoked
+ *     return fromState == "off" && toState == "on";
+ *   }, animate("1s 0s"))
+ * ])
+ * ```
+ *
+ * The template associated with this component will make use of the `myAnimationTrigger` animation
+ * trigger by binding to an element within its template code.
+ *
+ * ```html
+ * <!-- somewhere inside of my-component-tpl.html -->
+ * <div [\@myAnimationTrigger]="myStatusExp">...</div>
+ * ```
+ *
+ * #### The final `animate` call
+ *
+ * If the final step within the transition steps is a call to `animate()` that **only** uses a
+ * timing value with **no style data** then it will be automatically used as the final animation arc
+ * for the element to animate itself to the final state. This involves an automatic mix of
+ * adding/removing CSS styles so that the element will be in the exact state it should be for the
+ * applied state to be presented correctly.
+ *
+ * ```
+ * // start off by hiding the element, but make sure that it animates properly to whatever state
+ * // is currently active for "myAnimationTrigger"
+ * transition("void => *", [
+ *   style({ opacity: 0 }),
+ *   animate(500)
+ * ])
+ * ```
+ *
+ * ### Transition Aliases (`:enter` and `:leave`)
+ *
+ * Given that enter (insertion) and leave (removal) animations are so common, the `transition`
+ * function accepts both `:enter` and `:leave` values which are aliases for the `void => *` and `*
+ * => void` state changes.
+ *
+ * ```
+ * transition(":enter", [
+ *   style({ opacity: 0 }),
+ *   animate(500, style({ opacity: 1 }))
+ * ])
+ * transition(":leave", [
+ *   animate(500, style({ opacity: 0 }))
+ * ])
+ * ```
+ *
+ * {\@example core/animation/ts/dsl/animation_example.ts region='Component'}
+ *
+ * \@experimental Animation support is experimental.
+ * @param {?} stateChangeExpr
+ * @param {?} steps
+ * @return {?}
+ */function transition$2(stateChangeExpr,steps){return{type:1/* Transition */,expr:stateChangeExpr,animation:Array.isArray(steps)?sequence$2(steps):steps};}/**
+ * @deprecated This symbol has moved. Please Import from @angular/animations instead!
+ */var/** @type {?} */AUTO_STYLE$1='*';/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} name
+ * @param {?} definitions
+ * @return {?}
+ */function trigger$1(name,definitions){return trigger$2(name,definitions);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} timings
+ * @param {?=} styles
+ * @return {?}
+ */function animate$1(timings){var styles=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;return animate$2(timings,styles);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function group$1(steps){return group$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function sequence$1(steps){return sequence$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} tokens
+ * @return {?}
+ */function style$1(tokens){return style$2(tokens);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} name
+ * @param {?} styles
+ * @return {?}
+ */function state$1(name,styles){return state$2(name,styles);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} steps
+ * @return {?}
+ */function keyframes$1(steps){return keyframes$2(steps);}/**
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
+ * @param {?} stateChangeExpr
+ * @param {?} steps
+ * @return {?}
+ */function transition$1(stateChangeExpr,steps){return transition$2(stateChangeExpr,steps);}exports.createPlatform=createPlatform;exports.assertPlatform=assertPlatform;exports.destroyPlatform=destroyPlatform;exports.getPlatform=getPlatform;exports.PlatformRef=PlatformRef;exports.ApplicationRef=ApplicationRef;exports.enableProdMode=enableProdMode;exports.isDevMode=isDevMode;exports.createPlatformFactory=createPlatformFactory;exports.NgProbeToken=NgProbeToken;exports.APP_ID=APP_ID;exports.PACKAGE_ROOT_URL=PACKAGE_ROOT_URL;exports.PLATFORM_INITIALIZER=PLATFORM_INITIALIZER;exports.PLATFORM_ID=PLATFORM_ID;exports.APP_BOOTSTRAP_LISTENER=APP_BOOTSTRAP_LISTENER;exports.APP_INITIALIZER=APP_INITIALIZER;exports.ApplicationInitStatus=ApplicationInitStatus;exports.DebugElement=DebugElement;exports.DebugNode=DebugNode;exports.asNativeElements=asNativeElements;exports.getDebugNode=getDebugNode;exports.Testability=Testability;exports.TestabilityRegistry=TestabilityRegistry;exports.setTestabilityGetter=setTestabilityGetter;exports.TRANSLATIONS=TRANSLATIONS;exports.TRANSLATIONS_FORMAT=TRANSLATIONS_FORMAT;exports.LOCALE_ID=LOCALE_ID;exports.MissingTranslationStrategy=MissingTranslationStrategy;exports.ApplicationModule=ApplicationModule;exports.wtfCreateScope=wtfCreateScope;exports.wtfLeave=wtfLeave;exports.wtfStartTimeRange=wtfStartTimeRange;exports.wtfEndTimeRange=wtfEndTimeRange;exports.Type=Type;exports.EventEmitter=EventEmitter;exports.ErrorHandler=ErrorHandler;exports.AnimationPlayer=AnimationPlayer;exports.AnimationStyles=AnimationStyles;exports.AnimationKeyframe=AnimationKeyframe;exports.Sanitizer=Sanitizer;exports.SecurityContext=SecurityContext;exports.ANALYZE_FOR_ENTRY_COMPONENTS=ANALYZE_FOR_ENTRY_COMPONENTS;exports.Attribute=Attribute;exports.ContentChild=ContentChild;exports.ContentChildren=ContentChildren;exports.Query=Query;exports.ViewChild=ViewChild;exports.ViewChildren=ViewChildren;exports.Component=Component;exports.Directive=Directive;exports.HostBinding=HostBinding;exports.HostListener=HostListener;exports.Input=Input;exports.Output=Output;exports.Pipe=Pipe;exports.AfterContentChecked=AfterContentChecked;exports.AfterContentInit=AfterContentInit;exports.AfterViewChecked=AfterViewChecked;exports.AfterViewInit=AfterViewInit;exports.DoCheck=DoCheck;exports.OnChanges=OnChanges;exports.OnDestroy=OnDestroy;exports.OnInit=OnInit;exports.CUSTOM_ELEMENTS_SCHEMA=CUSTOM_ELEMENTS_SCHEMA;exports.NO_ERRORS_SCHEMA=NO_ERRORS_SCHEMA;exports.NgModule=NgModule;exports.ViewEncapsulation=ViewEncapsulation;exports.Version=Version;exports.VERSION=VERSION;exports.Class=Class;exports.forwardRef=forwardRef;exports.resolveForwardRef=resolveForwardRef;exports.Injector=Injector;exports.ReflectiveInjector=ReflectiveInjector;exports.ResolvedReflectiveFactory=ResolvedReflectiveFactory;exports.ReflectiveKey=ReflectiveKey;exports.InjectionToken=InjectionToken;exports.OpaqueToken=OpaqueToken;exports.Inject=Inject;exports.Optional=Optional;exports.Injectable=Injectable;exports.Self=Self;exports.SkipSelf=SkipSelf;exports.Host=Host;exports.NgZone=NgZone;exports.RenderComponentType=RenderComponentType;exports.Renderer=RendererV1;exports.RendererFactoryV2=RendererFactoryV2;exports.RendererV2=RendererV2;exports.RootRenderer=RootRenderer;exports.COMPILER_OPTIONS=COMPILER_OPTIONS;exports.Compiler=Compiler;exports.CompilerFactory=CompilerFactory;exports.ModuleWithComponentFactories=ModuleWithComponentFactories;exports.ComponentFactory=ComponentFactory;exports.ComponentRef=ComponentRef;exports.ComponentFactoryResolver=ComponentFactoryResolver;exports.ElementRef=ElementRef;exports.NgModuleFactory=NgModuleFactory;exports.NgModuleRef=NgModuleRef;exports.NgModuleFactoryLoader=NgModuleFactoryLoader;exports.getModuleFactory=getModuleFactory;exports.QueryList=QueryList;exports.SystemJsNgModuleLoader=SystemJsNgModuleLoader;exports.SystemJsNgModuleLoaderConfig=SystemJsNgModuleLoaderConfig;exports.TemplateRef=TemplateRef;exports.ViewContainerRef=ViewContainerRef;exports.EmbeddedViewRef=EmbeddedViewRef;exports.ViewRef=ViewRef;exports.ChangeDetectionStrategy=ChangeDetectionStrategy;exports.ChangeDetectorRef=ChangeDetectorRef;exports.DefaultIterableDiffer=DefaultIterableDiffer;exports.IterableDiffers=IterableDiffers;exports.KeyValueDiffers=KeyValueDiffers;exports.SimpleChange=SimpleChange;exports.WrappedValue=WrappedValue;exports.platformCore=platformCore;exports.ɵANY_STATE=ANY_STATE;exports.ɵDEFAULT_STATE=DEFAULT_STATE;exports.ɵEMPTY_STATE=EMPTY_STATE;exports.ɵFILL_STYLE_FLAG=FILL_STYLE_FLAG;exports.ɵAnimationGroupPlayer=AnimationGroupPlayer;exports.ɵAnimationKeyframe=AnimationKeyframe;exports.ɵAnimationPlayer=AnimationPlayer;exports.ɵNoOpAnimationPlayer=NoOpAnimationPlayer;exports.ɵAnimationSequencePlayer=AnimationSequencePlayer;exports.ɵbalanceAnimationKeyframes=balanceAnimationKeyframes;exports.ɵclearStyles=clearStyles;exports.ɵcollectAndResolveStyles=collectAndResolveStyles;exports.ɵflattenStyles=flattenStyles;exports.ɵprepareFinalAnimationStyles=prepareFinalAnimationStyles;exports.ɵrenderStyles=renderStyles;exports.ɵAnimationStyles=AnimationStyles;exports.ɵAnimationTransition=AnimationTransition;exports.ɵALLOW_MULTIPLE_PLATFORMS=ALLOW_MULTIPLE_PLATFORMS;exports.ɵAPP_ID_RANDOM_PROVIDER=APP_ID_RANDOM_PROVIDER;exports.ɵValueUnwrapper=ValueUnwrapper;exports.ɵdevModeEqual=devModeEqual;exports.ɵChangeDetectorStatus=ChangeDetectorStatus;exports.ɵisDefaultChangeDetectionStrategy=isDefaultChangeDetectionStrategy;exports.ɵConsole=Console;exports.ɵDebugDomRootRenderer=DebugDomRootRenderer;exports.ɵERROR_COMPONENT_TYPE=ERROR_COMPONENT_TYPE;exports.ɵComponentFactory=ComponentFactory;exports.ɵCodegenComponentFactoryResolver=CodegenComponentFactoryResolver;exports.ɵDebugContext=DebugContext$1;exports.ɵStaticNodeDebugInfo=StaticNodeDebugInfo;exports.ɵAppView=AppView;exports.ɵDebugAppView=DebugAppView;exports.ɵViewContainer=ViewContainer;exports.ɵViewType=ViewType;exports.ɵLIFECYCLE_HOOKS_VALUES=LIFECYCLE_HOOKS_VALUES;exports.ɵLifecycleHooks=LifecycleHooks;exports.ɵViewMetadata=ViewMetadata;exports.ɵReflector=Reflector;exports.ɵreflector=reflector;exports.ɵReflectionCapabilities=ReflectionCapabilities;exports.ɵReflectorReader=ReflectorReader;exports.ɵRenderDebugInfo=RenderDebugInfo;exports.ɵmakeDecorator=makeDecorator;exports.ɵisObservable=isObservable;exports.ɵisPromise=isPromise;exports.ɵComponentRef_=ComponentRef_;exports.ɵNgModuleInjector=NgModuleInjector;exports.ɵregisterModuleFactory=registerModuleFactory;exports.ɵTemplateRef_=TemplateRef_;exports.ɵEMPTY_ARRAY=EMPTY_ARRAY;exports.ɵEMPTY_INLINE_ARRAY=EMPTY_INLINE_ARRAY;exports.ɵEMPTY_MAP=EMPTY_MAP;exports.ɵInlineArray16=InlineArray16;exports.ɵInlineArray2=InlineArray2;exports.ɵInlineArray4=InlineArray4;exports.ɵInlineArray8=InlineArray8;exports.ɵInlineArrayDynamic=InlineArrayDynamic;exports.ɵViewUtils=ViewUtils;exports.ɵcastByValue=castByValue;exports.ɵcheckBinding=checkBinding;exports.ɵcheckBindingChange=checkBindingChange;exports.ɵcheckRenderAttribute=checkRenderAttribute;exports.ɵcheckRenderClass=checkRenderClass;exports.ɵcheckRenderProperty=checkRenderProperty;exports.ɵcheckRenderStyle=checkRenderStyle;exports.ɵcheckRenderText=checkRenderText;exports.ɵcreateRenderComponentType=createRenderComponentType;exports.ɵcreateRenderElement=createRenderElement;exports.ɵgetComponentFactoryViewClass=getComponentFactoryViewClass;exports.ɵinlineInterpolate=inlineInterpolate;exports.ɵinterpolate=interpolate;exports.ɵnoop=noop;exports.ɵpureProxy1=pureProxy1;exports.ɵpureProxy10=pureProxy10;exports.ɵpureProxy2=pureProxy2;exports.ɵpureProxy3=pureProxy3;exports.ɵpureProxy4=pureProxy4;exports.ɵpureProxy5=pureProxy5;exports.ɵpureProxy6=pureProxy6;exports.ɵpureProxy7=pureProxy7;exports.ɵpureProxy8=pureProxy8;exports.ɵpureProxy9=pureProxy9;exports.ɵselectOrCreateRenderHostElement=selectOrCreateRenderHostElement;exports.ɵsetBindingDebugInfo=setBindingDebugInfo;exports.ɵsetBindingDebugInfoForChanges=setBindingDebugInfoForChanges;exports.ɵsubscribeToRenderElement=subscribeToRenderElement;exports.ɵArgumentType=ArgumentType;exports.ɵBindingType=BindingType;exports.ɵDepFlags=DepFlags;exports.ɵNodeFlags=NodeFlags;exports.ɵProviderType=ProviderType;exports.ɵQueryBindingType=QueryBindingType;exports.ɵQueryValueType=QueryValueType;exports.ɵViewFlags=ViewFlags;exports.ɵanchorDef=anchorDef;exports.ɵcreateComponentFactory=createComponentFactory;exports.ɵcreateRendererTypeV2=createRendererTypeV2;exports.ɵdirectiveDef=directiveDef;exports.ɵelementDef=elementDef;exports.ɵelementEventFullName=elementEventFullName;exports.ɵngContentDef=ngContentDef;exports.ɵnodeValue=nodeValue;exports.ɵpipeDef=pipeDef;exports.ɵproviderDef=providerDef;exports.ɵpureArrayDef=pureArrayDef;exports.ɵpureObjectDef=pureObjectDef;exports.ɵpurePipeDef=purePipeDef;exports.ɵqueryDef=queryDef;exports.ɵtextDef=textDef;exports.ɵunwrapValue=unwrapValue;exports.ɵviewDef=viewDef;exports.AUTO_STYLE=AUTO_STYLE$1;exports.trigger=trigger$1;exports.animate=animate$1;exports.group=group$1;exports.sequence=sequence$1;exports.style=style$1;exports.state=state$1;exports.keyframes=keyframes$1;exports.transition=transition$1;exports.ɵz=AnimationQueue;exports.ɵbc=animate$2;exports.ɵbd=group$2;exports.ɵbh=keyframes$2;exports.ɵbe=sequence$2;exports.ɵbg=state$2;exports.ɵbf=style$2;exports.ɵbi=transition$2;exports.ɵbb=trigger$2;exports.ɵp=_initViewEngine;exports.ɵm=_iterableDiffersFactory;exports.ɵn=_keyValueDiffersFactory;exports.ɵo=_localeFactory;exports.ɵf=ApplicationRef_;exports.ɵg=_appIdRandomProviderFactory;exports.ɵh=defaultIterableDiffers;exports.ɵi=defaultKeyValueDiffers;exports.ɵk=DefaultIterableDifferFactory;exports.ɵl=DefaultKeyValueDifferFactory;exports.ɵc=ReflectiveInjector_;exports.ɵd=ReflectiveDependency;exports.ɵe=resolveReflectiveProviders;exports.ɵj=isBlank;exports.ɵq=wtfEnabled;exports.ɵs=createScope;exports.ɵr=detectWTF;exports.ɵv=endTimeRange;exports.ɵt=leave;exports.ɵu=startTimeRange;exports.ɵa=makeParamDecorator;exports.ɵb=makePropDecorator;exports.ɵx=_def;exports.ɵy=NodeType;});
