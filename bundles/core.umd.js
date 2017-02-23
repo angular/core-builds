@@ -2768,7 +2768,7 @@ i+=nodeDef.childCount;}}}var/** @type {?} */initialized=false;/**
  * @param {?} eventName
  * @param {?} event
  * @return {?}
- */function debugHandleEvent(view,nodeIndex,eventName,event){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nodeIndex);return callWithDebugContext(DebugAction.handleEvent,view.def.handleEvent,null,[view,nodeIndex,eventName,event]);}/**
+ */function debugHandleEvent(view,nodeIndex,eventName,event){debugSetCurrentNode(view,nodeIndex);return callWithDebugContext(DebugAction.handleEvent,view.def.handleEvent,null,[view,nodeIndex,eventName,event]);}/**
  * @param {?} view
  * @param {?} checkType
  * @return {?}

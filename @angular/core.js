@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-4301dce
+ * @license Angular v4.0.0-beta.8-187f7b6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1065,7 +1065,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-4301dce');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-187f7b6');
 
 /**
  * Inject decorator and metadata.
@@ -13390,9 +13390,6 @@ function debugSetCurrentNode(view, nodeIndex) {
  * @return {?}
  */
 function debugHandleEvent(view, nodeIndex, eventName, event) {
-    if (view.state & ViewState.Destroyed) {
-        throw viewDestroyedError$1(DebugAction[_currentAction]);
-    }
     debugSetCurrentNode(view, nodeIndex);
     return callWithDebugContext(DebugAction.handleEvent, view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
 }
