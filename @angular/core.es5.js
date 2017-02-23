@@ -1,5 +1,5 @@
 var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}/**
- * @license Angular v4.0.0-beta.8-88755b0
+ * @license Angular v4.0.0-beta.8-88bc143
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */import{Observable}from'rxjs/Observable';import{merge}from'rxjs/observable/merge';import{share}from'rxjs/operator/share';import{$$observable}from'rxjs/symbol/observable';import{Subject}from'rxjs/Subject';/**
@@ -533,7 +533,7 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
      * @return {?}
      */},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
  * @stable
- */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-88755b0');/**
+ */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-88bc143');/**
  * Inject decorator and metadata.
  *
  * @stable
@@ -2509,13 +2509,7 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
  * Structural diffing for `Object`s and `Map`s.
  */var/** @type {?} */keyValDiff=[new DefaultKeyValueDifferFactory()];/**
  * Structural diffing for `Iterable` types such as `Array`s.
- */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */var RenderComponentType=/**
+ */var/** @type {?} */iterableDiff=[new DefaultIterableDifferFactory()];var/** @type {?} */defaultIterableDiffers=new IterableDiffers(iterableDiff);var/** @type {?} */defaultKeyValueDiffers=new KeyValueDiffers(keyValDiff);var RenderComponentType=/**
      * @param {?} id
      * @param {?} templateUrl
      * @param {?} slotCount
@@ -2654,7 +2648,7 @@ deps:[[KeyValueDiffers,new SkipSelf(),new Optional()]]};}}]);return KeyValueDiff
      * @param {?} easing
      * @param {?=} previousPlayers
      * @return {?}
-     */},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers){}}]);return RendererV1;}();/**
+     */},{key:'animate',value:function animate(element,startingStyles,keyframes,duration,delay,easing,previousPlayers){}}]);return RendererV1;}();var/** @type {?} */RendererV2Interceptor=new InjectionToken('RendererV2Interceptor');/**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
  * Use this service to bypass Angular's templating and make custom UI changes that can't be
@@ -4217,129 +4211,8 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  * @param {?} node
  * @return {?}
  */function removeDebugNodeFromIndex(node){_nativeNodeToDebugNode.delete(node.nativeNode);}/**
- * \@experimental Animation support is experimental.
- * @abstract
- */var AnimationPlayer=function(){function AnimationPlayer(){_classCallCheck(this,AnimationPlayer);}_createClass(AnimationPlayer,[{key:'onDone',/**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */value:function onDone(fn){}/**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */},{key:'onStart',value:function onStart(fn){}/**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */},{key:'onDestroy',value:function onDestroy(fn){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'init',value:function init(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'hasStarted',value:function hasStarted(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'play',value:function play(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'pause',value:function pause(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'restart',value:function restart(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'finish',value:function finish(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'destroy',value:function destroy(){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'reset',value:function reset(){}/**
-     * @abstract
-     * @param {?} p
-     * @return {?}
-     */},{key:'setPosition',value:function setPosition(p){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'getPosition',value:function getPosition(){}/**
-     * @return {?}
-     */},{key:'parentPlayer',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}/**
-     * @param {?} player
-     * @return {?}
-     */,set:function set(player){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationPlayer;}();var NoOpAnimationPlayer=function(){function NoOpAnimationPlayer(){var _this27=this;_classCallCheck(this,NoOpAnimationPlayer);this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._started=false;this._destroyed=false;this._finished=false;this.parentPlayer=null;scheduleMicroTask(function(){return _this27._onFinish();});}/**
-     * @return {?}
-     */_createClass(NoOpAnimationPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
-     * @param {?} fn
-     * @return {?}
-     */},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}/**
-     * @param {?} fn
-     * @return {?}
-     */},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}/**
-     * @param {?} fn
-     * @return {?}
-     */},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}/**
-     * @return {?}
-     */},{key:'hasStarted',value:function hasStarted(){return this._started;}/**
-     * @return {?}
-     */},{key:'init',value:function init(){}/**
-     * @return {?}
-     */},{key:'play',value:function play(){if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];}this._started=true;}/**
-     * @return {?}
-     */},{key:'pause',value:function pause(){}/**
-     * @return {?}
-     */},{key:'restart',value:function restart(){}/**
-     * @return {?}
-     */},{key:'finish',value:function finish(){this._onFinish();}/**
-     * @return {?}
-     */},{key:'destroy',value:function destroy(){if(!this._destroyed){this._destroyed=true;this.finish();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}/**
-     * @return {?}
-     */},{key:'reset',value:function reset(){}/**
-     * @param {?} p
-     * @return {?}
-     */},{key:'setPosition',value:function setPosition(p){}/**
-     * @return {?}
-     */},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();/**
- * \@experimental Transition support is experimental.
- * @abstract
- */var TransitionEngine=function(){function TransitionEngine(){_classCallCheck(this,TransitionEngine);}_createClass(TransitionEngine,[{key:'insertNode',/**
-     * @abstract
-     * @param {?} container
-     * @param {?} element
-     * @return {?}
-     */value:function insertNode(container,element){}/**
-     * @abstract
-     * @param {?} element
-     * @return {?}
-     */},{key:'removeNode',value:function removeNode(element){}/**
-     * @abstract
-     * @param {?} element
-     * @param {?} instructions
-     * @return {?}
-     */},{key:'process',value:function process(element,instructions){}/**
-     * @abstract
-     * @return {?}
-     */},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return TransitionEngine;}();/**
- * \@experimental Transition support is experimental.
- */var NoOpTransitionEngine=function(_TransitionEngine){_inherits(NoOpTransitionEngine,_TransitionEngine);function NoOpTransitionEngine(){_classCallCheck(this,NoOpTransitionEngine);return _possibleConstructorReturn(this,(NoOpTransitionEngine.__proto__||Object.getPrototypeOf(NoOpTransitionEngine)).call(this));}/**
-     * @param {?} container
-     * @param {?} element
-     * @return {?}
-     */_createClass(NoOpTransitionEngine,[{key:'insertNode',value:function insertNode(container,element){container.appendChild(element);}/**
-     * @param {?} element
-     * @return {?}
-     */},{key:'removeNode',value:function removeNode(element){remove(element);}/**
-     * @param {?} element
-     * @param {?} instructions
-     * @return {?}
-     */},{key:'process',value:function process(element,instructions){return new NoOpAnimationPlayer();}/**
-     * @return {?}
-     */},{key:'triggerAnimations',value:function triggerAnimations(){}}]);return NoOpTransitionEngine;}(TransitionEngine);/**
- * @param {?} element
  * @return {?}
- */function remove(element){element.parentNode.removeChild(element);}/**
- * @return {?}
- */function _reflector(){return reflector;}var/** @type {?} */_CORE_PLATFORM_PROVIDERS=[PlatformRef_,{provide:PlatformRef,useExisting:PlatformRef_},{provide:Reflector,useFactory:_reflector,deps:[]},{provide:ReflectorReader,useExisting:Reflector},{provide:TransitionEngine,useClass:NoOpTransitionEngine},TestabilityRegistry,Console];/**
+ */function _reflector(){return reflector;}var/** @type {?} */_CORE_PLATFORM_PROVIDERS=[PlatformRef_,{provide:PlatformRef,useExisting:PlatformRef_},{provide:Reflector,useFactory:_reflector,deps:[]},{provide:ReflectorReader,useExisting:Reflector},TestabilityRegistry,Console];/**
  * This platform has to be included in any other platform
  *
  * @experimental
@@ -4632,7 +4505,90 @@ flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,r
  * @param {?} def
  * @return {?}
  */function appendNgContent(view,renderHost,def){var/** @type {?} */parentEl=getParentRenderElement(view,renderHost,def);if(!parentEl){// Nothing to do if there is no parent element.
-return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRenderNodes(view,ngContentIndex,RenderNodeAction.AppendChild,parentEl,undefined,undefined);}var/** @type {?} */EMPTY_CONTEXT=new Object();/**
+return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRenderNodes(view,ngContentIndex,RenderNodeAction.AppendChild,parentEl,undefined,undefined);}/**
+ * \@experimental Animation support is experimental.
+ * @abstract
+ */var AnimationPlayer=function(){function AnimationPlayer(){_classCallCheck(this,AnimationPlayer);}_createClass(AnimationPlayer,[{key:'onDone',/**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */value:function onDone(fn){}/**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){}/**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'init',value:function init(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'play',value:function play(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'pause',value:function pause(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'restart',value:function restart(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'finish',value:function finish(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'reset',value:function reset(){}/**
+     * @abstract
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){}/**
+     * @abstract
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){}/**
+     * @return {?}
+     */},{key:'parentPlayer',get:function get(){throw new Error('NOT IMPLEMENTED: Base Class');}/**
+     * @param {?} player
+     * @return {?}
+     */,set:function set(player){throw new Error('NOT IMPLEMENTED: Base Class');}}]);return AnimationPlayer;}();var NoOpAnimationPlayer=function(){function NoOpAnimationPlayer(){var _this27=this;_classCallCheck(this,NoOpAnimationPlayer);this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._started=false;this._destroyed=false;this._finished=false;this.parentPlayer=null;scheduleMicroTask(function(){return _this27._onFinish();});}/**
+     * @return {?}
+     */_createClass(NoOpAnimationPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onStart',value:function onStart(fn){this._onStartFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDone',value:function onDone(fn){this._onDoneFns.push(fn);}/**
+     * @param {?} fn
+     * @return {?}
+     */},{key:'onDestroy',value:function onDestroy(fn){this._onDestroyFns.push(fn);}/**
+     * @return {?}
+     */},{key:'hasStarted',value:function hasStarted(){return this._started;}/**
+     * @return {?}
+     */},{key:'init',value:function init(){}/**
+     * @return {?}
+     */},{key:'play',value:function play(){if(!this.hasStarted()){this._onStartFns.forEach(function(fn){return fn();});this._onStartFns=[];}this._started=true;}/**
+     * @return {?}
+     */},{key:'pause',value:function pause(){}/**
+     * @return {?}
+     */},{key:'restart',value:function restart(){}/**
+     * @return {?}
+     */},{key:'finish',value:function finish(){this._onFinish();}/**
+     * @return {?}
+     */},{key:'destroy',value:function destroy(){if(!this._destroyed){this._destroyed=true;this.finish();this._onDestroyFns.forEach(function(fn){return fn();});this._onDestroyFns=[];}}/**
+     * @return {?}
+     */},{key:'reset',value:function reset(){}/**
+     * @param {?} p
+     * @return {?}
+     */},{key:'setPosition',value:function setPosition(p){}/**
+     * @return {?}
+     */},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();var/** @type {?} */EMPTY_CONTEXT=new Object();/**
  * @param {?} selector
  * @param {?} componentType
  * @param {?} viewDefFactory
@@ -4651,7 +4607,7 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?} _view
      * @param {?} _viewRef
      * @param {?} _component
-     */function ComponentRef_$1(_view,_viewRef,_component){_classCallCheck(this,ComponentRef_$1);var _this30=_possibleConstructorReturn(this,(ComponentRef_$1.__proto__||Object.getPrototypeOf(ComponentRef_$1)).call(this));_this30._view=_view;_this30._viewRef=_viewRef;_this30._component=_component;_this30._elDef=_this30._view.def.nodes[0];return _this30;}/**
+     */function ComponentRef_$1(_view,_viewRef,_component){_classCallCheck(this,ComponentRef_$1);var _this29=_possibleConstructorReturn(this,(ComponentRef_$1.__proto__||Object.getPrototypeOf(ComponentRef_$1)).call(this));_this29._view=_view;_this29._viewRef=_viewRef;_this29._component=_component;_this29._elDef=_this29._view.def.nodes[0];return _this29;}/**
      * @return {?}
      */_createClass(ComponentRef_$1,[{key:'destroy',/**
      * @return {?}
@@ -5425,7 +5381,7 @@ for(var/** @type {?} */attr in bindingValues){view.renderer.setAttribute(el,attr
  * @param {?} name
  * @return {?}
  */function normalizeDebugBindingName(name){// Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-name=camelCaseToDashCase$1(name.replace(/\$/g,'_'));return'ng-reflect-'+name;}var/** @type {?} */CAMEL_CASE_REGEXP$1=/([A-Z])/g;/**
+name=camelCaseToDashCase$1(name.replace(/[$@]/g,'_'));return'ng-reflect-'+name;}var/** @type {?} */CAMEL_CASE_REGEXP$1=/([A-Z])/g;/**
  * @param {?} input
  * @return {?}
  */function camelCaseToDashCase$1(input){return input.replace(CAMEL_CASE_REGEXP$1,function(){for(var _len9=arguments.length,m=Array(_len9),_key9=0;_key9<_len9;_key9++){m[_key9]=arguments[_key9];}return'-'+m[1].toLowerCase();});}/**
@@ -5595,7 +5551,7 @@ return value?value.toString().slice(0,20):value;}catch(e){return'[ERROR] Excepti
 // TODO (matsko): change to boolean
 var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @type {?} */EMPTY_STATE='void';var AnimationGroupPlayer=function(){/**
      * @param {?} _players
-     */function AnimationGroupPlayer(_players){var _this31=this;_classCallCheck(this,AnimationGroupPlayer);this._players=_players;this._onDoneFns=[];this._onStartFns=[];this._finished=false;this._started=false;this._destroyed=false;this._onDestroyFns=[];this.parentPlayer=null;var count=0;var total=this._players.length;if(total==0){scheduleMicroTask(function(){return _this31._onFinish();});}else{this._players.forEach(function(player){player.parentPlayer=_this31;player.onDone(function(){if(++count>=total){_this31._onFinish();}});});}}/**
+     */function AnimationGroupPlayer(_players){var _this30=this;_classCallCheck(this,AnimationGroupPlayer);this._players=_players;this._onDoneFns=[];this._onStartFns=[];this._finished=false;this._started=false;this._destroyed=false;this._onDestroyFns=[];this.parentPlayer=null;var count=0;var total=this._players.length;if(total==0){scheduleMicroTask(function(){return _this30._onFinish();});}else{this._players.forEach(function(player){player.parentPlayer=_this30;player.onDone(function(){if(++count>=total){_this30._onFinish();}});});}}/**
      * @return {?}
      */_createClass(AnimationGroupPlayer,[{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
      * @return {?}
@@ -5649,10 +5605,10 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
      * @param {?} styles
      */function AnimationKeyframe(offset,styles){_classCallCheck(this,AnimationKeyframe);this.offset=offset;this.styles=styles;};var AnimationSequencePlayer=function(){/**
      * @param {?} _players
-     */function AnimationSequencePlayer(_players){var _this32=this;_classCallCheck(this,AnimationSequencePlayer);this._players=_players;this._currentIndex=0;this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._finished=false;this._started=false;this._destroyed=false;this.parentPlayer=null;this._players.forEach(function(player){player.parentPlayer=_this32;});this._onNext(false);}/**
+     */function AnimationSequencePlayer(_players){var _this31=this;_classCallCheck(this,AnimationSequencePlayer);this._players=_players;this._currentIndex=0;this._onDoneFns=[];this._onStartFns=[];this._onDestroyFns=[];this._finished=false;this._started=false;this._destroyed=false;this.parentPlayer=null;this._players.forEach(function(player){player.parentPlayer=_this31;});this._onNext(false);}/**
      * @param {?} start
      * @return {?}
-     */_createClass(AnimationSequencePlayer,[{key:'_onNext',value:function _onNext(start){var _this33=this;if(this._finished)return;if(this._players.length==0){this._activePlayer=new NoOpAnimationPlayer();scheduleMicroTask(function(){return _this33._onFinish();});}else if(this._currentIndex>=this._players.length){this._activePlayer=new NoOpAnimationPlayer();this._onFinish();}else{var/** @type {?} */player=this._players[this._currentIndex++];player.onDone(function(){return _this33._onNext(true);});this._activePlayer=player;if(start){player.play();}}}/**
+     */_createClass(AnimationSequencePlayer,[{key:'_onNext',value:function _onNext(start){var _this32=this;if(this._finished)return;if(this._players.length==0){this._activePlayer=new NoOpAnimationPlayer();scheduleMicroTask(function(){return _this32._onFinish();});}else if(this._currentIndex>=this._players.length){this._activePlayer=new NoOpAnimationPlayer();this._onFinish();}else{var/** @type {?} */player=this._players[this._currentIndex++];player.onDone(function(){return _this32._onNext(true);});this._activePlayer=player;if(start){player.play();}}}/**
      * @return {?}
      */},{key:'_onFinish',value:function _onFinish(){if(!this._finished){this._finished=true;this._onDoneFns.forEach(function(fn){return fn();});this._onDoneFns=[];}}/**
      * @return {?}
@@ -5709,7 +5665,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  */var AnimationStateDeclarationMetadata=function(_AnimationStateMetada){_inherits(AnimationStateDeclarationMetadata,_AnimationStateMetada);/**
      * @param {?} stateNameExpr
      * @param {?} styles
-     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this34.stateNameExpr=stateNameExpr;_this34.styles=styles;return _this34;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);/**
+     */function AnimationStateDeclarationMetadata(stateNameExpr,styles){_classCallCheck(this,AnimationStateDeclarationMetadata);var _this33=_possibleConstructorReturn(this,(AnimationStateDeclarationMetadata.__proto__||Object.getPrototypeOf(AnimationStateDeclarationMetadata)).call(this));_this33.stateNameExpr=stateNameExpr;_this33.styles=styles;return _this33;}return AnimationStateDeclarationMetadata;}(AnimationStateMetadata);/**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the
  * {\@link transition transition animation function} is called.
@@ -5718,7 +5674,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  */var AnimationStateTransitionMetadata=function(_AnimationStateMetada2){_inherits(AnimationStateTransitionMetadata,_AnimationStateMetada2);/**
      * @param {?} stateChangeExpr
      * @param {?} steps
-     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this35=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this35.stateChangeExpr=stateChangeExpr;_this35.steps=steps;return _this35;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);/**
+     */function AnimationStateTransitionMetadata(stateChangeExpr,steps){_classCallCheck(this,AnimationStateTransitionMetadata);var _this34=_possibleConstructorReturn(this,(AnimationStateTransitionMetadata.__proto__||Object.getPrototypeOf(AnimationStateTransitionMetadata)).call(this));_this34.stateChangeExpr=stateChangeExpr;_this34.steps=steps;return _this34;}return AnimationStateTransitionMetadata;}(AnimationStateMetadata);/**
  * \@experimental Animation support is experimental.
  * @abstract
  */var AnimationMetadata=function AnimationMetadata(){_classCallCheck(this,AnimationMetadata);};/**
@@ -5729,7 +5685,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  * \@experimental Animation support is experimental.
  */var AnimationKeyframesSequenceMetadata=function(_AnimationMetadata){_inherits(AnimationKeyframesSequenceMetadata,_AnimationMetadata);/**
      * @param {?} steps
-     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this36=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this36.steps=steps;return _this36;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);/**
+     */function AnimationKeyframesSequenceMetadata(steps){_classCallCheck(this,AnimationKeyframesSequenceMetadata);var _this35=_possibleConstructorReturn(this,(AnimationKeyframesSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationKeyframesSequenceMetadata)).call(this));_this35.steps=steps;return _this35;}return AnimationKeyframesSequenceMetadata;}(AnimationMetadata);/**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {\@link style style animation
  * function} is called.
@@ -5738,7 +5694,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  */var AnimationStyleMetadata=function(_AnimationMetadata2){_inherits(AnimationStyleMetadata,_AnimationMetadata2);/**
      * @param {?} styles
      * @param {?=} offset
-     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this37=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this37.styles=styles;_this37.offset=offset;return _this37;}return AnimationStyleMetadata;}(AnimationMetadata);/**
+     */function AnimationStyleMetadata(styles){var offset=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;_classCallCheck(this,AnimationStyleMetadata);var _this36=_possibleConstructorReturn(this,(AnimationStyleMetadata.__proto__||Object.getPrototypeOf(AnimationStyleMetadata)).call(this));_this36.styles=styles;_this36.offset=offset;return _this36;}return AnimationStyleMetadata;}(AnimationMetadata);/**
  * Metadata representing the entry of animations.
  * Instances of this class are provided via the animation DSL when the {\@link animate animate
  * animation function} is called.
@@ -5747,7 +5703,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  */var AnimationAnimateMetadata=function(_AnimationMetadata3){_inherits(AnimationAnimateMetadata,_AnimationMetadata3);/**
      * @param {?} timings
      * @param {?} styles
-     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this38=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this38.timings=timings;_this38.styles=styles;return _this38;}return AnimationAnimateMetadata;}(AnimationMetadata);/**
+     */function AnimationAnimateMetadata(timings,styles){_classCallCheck(this,AnimationAnimateMetadata);var _this37=_possibleConstructorReturn(this,(AnimationAnimateMetadata.__proto__||Object.getPrototypeOf(AnimationAnimateMetadata)).call(this));_this37.timings=timings;_this37.styles=styles;return _this37;}return AnimationAnimateMetadata;}(AnimationMetadata);/**
  * \@experimental Animation support is experimental.
  * @abstract
  */var AnimationWithStepsMetadata=function(_AnimationMetadata4){_inherits(AnimationWithStepsMetadata,_AnimationMetadata4);function AnimationWithStepsMetadata(){_classCallCheck(this,AnimationWithStepsMetadata);return _possibleConstructorReturn(this,(AnimationWithStepsMetadata.__proto__||Object.getPrototypeOf(AnimationWithStepsMetadata)).call(this));}/**
@@ -5760,7 +5716,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  * \@experimental Animation support is experimental.
  */var AnimationSequenceMetadata=function(_AnimationWithStepsMe){_inherits(AnimationSequenceMetadata,_AnimationWithStepsMe);/**
      * @param {?} _steps
-     */function AnimationSequenceMetadata(_steps){_classCallCheck(this,AnimationSequenceMetadata);var _this40=_possibleConstructorReturn(this,(AnimationSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationSequenceMetadata)).call(this));_this40._steps=_steps;return _this40;}/**
+     */function AnimationSequenceMetadata(_steps){_classCallCheck(this,AnimationSequenceMetadata);var _this39=_possibleConstructorReturn(this,(AnimationSequenceMetadata.__proto__||Object.getPrototypeOf(AnimationSequenceMetadata)).call(this));_this39._steps=_steps;return _this39;}/**
      * @return {?}
      */_createClass(AnimationSequenceMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationSequenceMetadata;}(AnimationWithStepsMetadata);/**
  * Metadata representing the entry of animations.
@@ -5770,7 +5726,7 @@ var/** @type {?} */ANY_STATE='*';var/** @type {?} */DEFAULT_STATE='*';var/** @ty
  * \@experimental Animation support is experimental.
  */var AnimationGroupMetadata=function(_AnimationWithStepsMe2){_inherits(AnimationGroupMetadata,_AnimationWithStepsMe2);/**
      * @param {?} _steps
-     */function AnimationGroupMetadata(_steps){_classCallCheck(this,AnimationGroupMetadata);var _this41=_possibleConstructorReturn(this,(AnimationGroupMetadata.__proto__||Object.getPrototypeOf(AnimationGroupMetadata)).call(this));_this41._steps=_steps;return _this41;}/**
+     */function AnimationGroupMetadata(_steps){_classCallCheck(this,AnimationGroupMetadata);var _this40=_possibleConstructorReturn(this,(AnimationGroupMetadata.__proto__||Object.getPrototypeOf(AnimationGroupMetadata)).call(this));_this40._steps=_steps;return _this40;}/**
      * @return {?}
      */_createClass(AnimationGroupMetadata,[{key:'steps',get:function get(){return this._steps;}}]);return AnimationGroupMetadata;}(AnimationWithStepsMetadata);/**
  * `animate` is an animation-specific function that is designed to be used inside of Angular2's
@@ -6324,10 +6280,10 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      */_createClass(AnimationTransition,[{key:'_createEvent',value:function _createEvent(phaseName){return new AnimationTransitionEvent({fromState:this._fromState,toState:this._toState,totalTime:this._totalTime,phaseName:phaseName,element:this._element,triggerName:this._triggerName});}/**
      * @param {?} callback
      * @return {?}
-     */},{key:'onStart',value:function onStart(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('start'));},'player.onStart');this._player.onStart(fn);}/**
+     */},{key:'onStart',value:function onStart(callback){var _this41=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this41._createEvent('start'));},'player.onStart');this._player.onStart(fn);}/**
      * @param {?} callback
      * @return {?}
-     */},{key:'onDone',value:function onDone(callback){var _this43=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this43._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
+     */},{key:'onDone',value:function onDone(callback){var _this42=this;var/** @type {?} */fn=Zone.current.wrap(function(){return callback(_this42._createEvent('done'));},'player.onDone');this._player.onDone(fn);}}]);return AnimationTransition;}();var DebugDomRootRenderer=function(){/**
      * @param {?} _delegate
      */function DebugDomRootRenderer(_delegate){_classCallCheck(this,DebugDomRootRenderer);this._delegate=_delegate;}/**
      * @param {?} componentProto
@@ -6450,7 +6406,7 @@ var/** @type {?} */finalKeyframe=keyframes[limit];finalKeyframe.styles.styles.un
      * @return {?}
      */},{key:'source',get:function get(){return this._view.componentType.templateUrl+':'+this._tplRow+':'+this._tplCol;}/**
      * @return {?}
-     */},{key:'references',get:function get(){var _this44=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this44._view.allNodes?_this44._view.allNodes[_this44._nodeIndex]:null;}else{varValue=_this44._view.injectorGet(refToken,_this44._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
+     */},{key:'references',get:function get(){var _this43=this;var/** @type {?} */varValues={};var/** @type {?} */staticNodeInfo=this._staticNodeInfo;if(isPresent(staticNodeInfo)){var/** @type {?} */refs=staticNodeInfo.refTokens;Object.keys(refs).forEach(function(refName){var/** @type {?} */refToken=refs[refName];var/** @type {?} */varValue=void 0;if(isBlank(refToken)){varValue=_this43._view.allNodes?_this43._view.allNodes[_this43._nodeIndex]:null;}else{varValue=_this43._view.injectorGet(refToken,_this43._nodeIndex,null);}varValues[refName]=varValue;});}return varValues;}}]);return DebugContext$1;}();var ViewAnimationMap=function(){function ViewAnimationMap(){_classCallCheck(this,ViewAnimationMap);this._map=new Map();this._allPlayers=[];}/**
      * @param {?} element
      * @param {?} animationName
      * @return {?}
@@ -6481,7 +6437,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @param {?} animationName
      * @param {?} player
      * @return {?}
-     */},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this45=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this45._players.remove(element,animationName,player);});}/**
+     */},{key:'queueAnimation',value:function queueAnimation(element,animationName,player){var _this44=this;this._animationQueue.enqueue(player);this._players.set(element,animationName,player);player.onDone(function(){return _this44._players.remove(element,animationName,player);});}/**
      * @param {?} element
      * @param {?=} animationName
      * @return {?}
@@ -6492,7 +6448,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
  */function _recursePlayers(player,collectedPlayers){if(player instanceof AnimationGroupPlayer||player instanceof AnimationSequencePlayer){player.players.forEach(function(player){return _recursePlayers(player,collectedPlayers);});}else{collectedPlayers.push(player);}}var ElementInjector=function(_Injector){_inherits(ElementInjector,_Injector);/**
      * @param {?} _view
      * @param {?} _nodeIndex
-     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this46=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this46._view=_view;_this46._nodeIndex=_nodeIndex;return _this46;}/**
+     */function ElementInjector(_view,_nodeIndex){_classCallCheck(this,ElementInjector);var _this45=_possibleConstructorReturn(this,(ElementInjector.__proto__||Object.getPrototypeOf(ElementInjector)).call(this));_this45._view=_view;_this45._nodeIndex=_nodeIndex;return _this45;}/**
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
@@ -6554,7 +6510,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @return {?}
      */},{key:'detachAndDestroy',value:function detachAndDestroy(){if(this.viewContainer){this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));}else if(this.appRef){this.appRef.detachView(this.ref);}else if(this._hasExternalHostElement){this.detach();}this.destroy();}/**
      * @return {?}
-     */},{key:'destroy',value:function destroy(){var _this47=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47.renderer.destroyView(hostElement,_this47.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}/**
+     */},{key:'destroy',value:function destroy(){var _this46=this;if(this.cdMode===ChangeDetectorStatus.Destroyed){return;}var/** @type {?} */hostElement=this.type===ViewType.COMPONENT?this.parentElement:null;if(this.disposables){for(var/** @type {?} */i=0;i<this.disposables.length;i++){this.disposables[i]();}}this.destroyInternal();this.dirtyParentQueriesInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this46.renderer.destroyView(hostElement,_this46.allNodes);});}else{this.renderer.destroyView(hostElement,this.allNodes);}this.cdMode=ChangeDetectorStatus.Destroyed;}/**
      * Overwritten by implementations
      * @return {?}
      */},{key:'destroyInternal',value:function destroyInternal(){}/**
@@ -6562,7 +6518,7 @@ if(activeAnimationPlayers.length){new AnimationGroupPlayer(activeAnimationPlayer
      * @return {?}
      */},{key:'detachInternal',value:function detachInternal(){}/**
      * @return {?}
-     */},{key:'detach',value:function detach(){var _this48=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this48._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
+     */},{key:'detach',value:function detach(){var _this47=this;this.detachInternal();if(this._animationContext){this._animationContext.onAllActiveAnimationsDone(function(){return _this47._renderDetach();});}else{this._renderDetach();}if(this.declaredViewContainer&&this.declaredViewContainer!==this.viewContainer&&this.declaredViewContainer.projectedViews){var/** @type {?} */projectedViews=this.declaredViewContainer.projectedViews;var/** @type {?} */index=projectedViews.indexOf(this);// perf: pop is faster than splice!
 if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.splice(index,1);}}this.appRef=null;this.viewContainer=null;this.dirtyParentQueriesInternal();}/**
      * @return {?}
      */},{key:'_renderDetach',value:function _renderDetach(){if(this._directRenderer){this.visitRootNodesInternal(this._directRenderer.remove,null);}else{this.renderer.detachView(this.flatRootNodes);}}/**
@@ -6640,7 +6596,7 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      * @param {?} cdMode
      * @param {?} staticNodeDebugInfos
      * @param {?=} declaredViewContainer
-     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this49=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this49.staticNodeDebugInfos=staticNodeDebugInfos;_this49._currentDebugContext=null;return _this49;}/**
+     */function DebugAppView(clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,staticNodeDebugInfos){var declaredViewContainer=arguments.length>9&&arguments[9]!==undefined?arguments[9]:null;_classCallCheck(this,DebugAppView);var _this48=_possibleConstructorReturn(this,(DebugAppView.__proto__||Object.getPrototypeOf(DebugAppView)).call(this,clazz,componentType,type,viewUtils,parentView,parentIndex,parentNode,cdMode,declaredViewContainer));_this48.staticNodeDebugInfos=staticNodeDebugInfos;_this48._currentDebugContext=null;return _this48;}/**
      * @param {?} context
      * @return {?}
      */_createClass(DebugAppView,[{key:'create',value:function create(context){this._resetDebug();try{return _get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'create',this).call(this,context);}catch(e){this._rethrowWithContext(e);throw e;}}/**
@@ -6673,7 +6629,7 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      */},{key:'_rethrowWithContext',value:function _rethrowWithContext(e){if(!(getType(e)==viewWrappedError)){if(!(getType(e)==expressionChangedAfterItHasBeenCheckedError)){this.cdMode=ChangeDetectorStatus.Errored;}if(isPresent(this._currentDebugContext)){throw viewWrappedError(e,this._currentDebugContext);}}}/**
      * @param {?} cb
      * @return {?}
-     */},{key:'eventHandler',value:function eventHandler(cb){var _this50=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this50._resetDebug();try{return superHandler.call(_this50,eventName,event);}catch(e){_this50._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);/**
+     */},{key:'eventHandler',value:function eventHandler(cb){var _this49=this;var/** @type {?} */superHandler=_get(DebugAppView.prototype.__proto__||Object.getPrototypeOf(DebugAppView.prototype),'eventHandler',this).call(this,cb);return function(eventName,event){_this49._resetDebug();try{return superHandler.call(_this49,eventName,event);}catch(e){_this49._rethrowWithContext(e);throw e;}};}}]);return DebugAppView;}(AppView);/**
  * A ViewContainer is created for elements that have a ViewContainerRef
  * to keep track of the nested views.
  */var ViewContainer=function(){/**
@@ -6715,4 +6671,4 @@ if(viewIndex>=this.nestedViews.length-1){this.nestedViews.pop();}else{this.neste
      * @return {?}
      */},{key:'parentInjector',get:function get(){return this.parentView.injector(this.parentIndex);}/**
      * @return {?}
-     */},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();export{createPlatform,assertPlatform,destroyPlatform,getPlatform,PlatformRef,ApplicationRef,enableProdMode,isDevMode,createPlatformFactory,NgProbeToken,APP_ID,PACKAGE_ROOT_URL,PLATFORM_INITIALIZER,APP_BOOTSTRAP_LISTENER,APP_INITIALIZER,ApplicationInitStatus,DebugElement,DebugNode,asNativeElements,getDebugNode,Testability,TestabilityRegistry,setTestabilityGetter,TRANSLATIONS,TRANSLATIONS_FORMAT,LOCALE_ID,MissingTranslationStrategy,ApplicationModule,wtfCreateScope,wtfLeave,wtfStartTimeRange,wtfEndTimeRange,Type,EventEmitter,ErrorHandler,AnimationTransitionEvent,AnimationPlayer,AnimationStyles,AnimationKeyframe,Sanitizer,SecurityContext,ANALYZE_FOR_ENTRY_COMPONENTS,Attribute,ContentChild,ContentChildren,Query,ViewChild,ViewChildren,Component,Directive,HostBinding,HostListener,Input,Output,Pipe,AfterContentChecked,AfterContentInit,AfterViewChecked,AfterViewInit,DoCheck,OnChanges,OnDestroy,OnInit,CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA,NgModule,ViewEncapsulation,Version,VERSION,Class,forwardRef,resolveForwardRef,Injector,ReflectiveInjector,ResolvedReflectiveFactory,ReflectiveKey,InjectionToken,OpaqueToken,Inject,Optional,Injectable,Self,SkipSelf,Host,NgZone,RenderComponentType,RendererV1 as Renderer,RendererFactoryV2,RendererV2,RootRenderer,COMPILER_OPTIONS,Compiler,CompilerFactory,ModuleWithComponentFactories,ComponentFactory,ComponentRef,ComponentFactoryResolver,ElementRef,NgModuleFactory,NgModuleRef,NgModuleFactoryLoader,getModuleFactory,QueryList,SystemJsNgModuleLoader,SystemJsNgModuleLoaderConfig,TemplateRef,ViewContainerRef,EmbeddedViewRef,ViewRef,ChangeDetectionStrategy,ChangeDetectorRef,DefaultIterableDiffer,IterableDiffers,KeyValueDiffers,SimpleChange,WrappedValue,platformCore,ANY_STATE as ɵANY_STATE,DEFAULT_STATE as ɵDEFAULT_STATE,EMPTY_STATE as ɵEMPTY_STATE,FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG,AnimationGroupPlayer as ɵAnimationGroupPlayer,AnimationKeyframe as ɵAnimationKeyframe,AnimationPlayer as ɵAnimationPlayer,NoOpAnimationPlayer as ɵNoOpAnimationPlayer,AnimationSequencePlayer as ɵAnimationSequencePlayer,balanceAnimationKeyframes as ɵbalanceAnimationKeyframes,clearStyles as ɵclearStyles,collectAndResolveStyles as ɵcollectAndResolveStyles,flattenStyles as ɵflattenStyles,prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles,renderStyles as ɵrenderStyles,AnimationStyles as ɵAnimationStyles,AnimationTransition as ɵAnimationTransition,ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS,APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER,ValueUnwrapper as ɵValueUnwrapper,devModeEqual as ɵdevModeEqual,ChangeDetectorStatus as ɵChangeDetectorStatus,isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy,Console as ɵConsole,DebugDomRootRenderer as ɵDebugDomRootRenderer,ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE,ComponentFactory as ɵComponentFactory,CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver,DebugContext$1 as ɵDebugContext,StaticNodeDebugInfo as ɵStaticNodeDebugInfo,AppView as ɵAppView,DebugAppView as ɵDebugAppView,ViewContainer as ɵViewContainer,ViewType as ɵViewType,LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES,LifecycleHooks as ɵLifecycleHooks,ViewMetadata as ɵViewMetadata,Reflector as ɵReflector,reflector as ɵreflector,ReflectionCapabilities as ɵReflectionCapabilities,ReflectorReader as ɵReflectorReader,RenderDebugInfo as ɵRenderDebugInfo,TransitionEngine as ɵTransitionEngine,makeDecorator as ɵmakeDecorator,isObservable as ɵisObservable,isPromise as ɵisPromise,AUTO_STYLE,AnimationEntryMetadata,AnimationStateMetadata,AnimationStateDeclarationMetadata,AnimationStateTransitionMetadata,AnimationMetadata,AnimationKeyframesSequenceMetadata,AnimationStyleMetadata,AnimationAnimateMetadata,AnimationWithStepsMetadata,AnimationSequenceMetadata,AnimationGroupMetadata,animate,group,sequence,style,state,keyframes,transition,trigger,ComponentRef_ as ɵComponentRef_,NgModuleInjector as ɵNgModuleInjector,registerModuleFactory as ɵregisterModuleFactory,TemplateRef_ as ɵTemplateRef_,EMPTY_ARRAY as ɵEMPTY_ARRAY,EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY,EMPTY_MAP as ɵEMPTY_MAP,InlineArray16 as ɵInlineArray16,InlineArray2 as ɵInlineArray2,InlineArray4 as ɵInlineArray4,InlineArray8 as ɵInlineArray8,InlineArrayDynamic as ɵInlineArrayDynamic,ViewUtils as ɵViewUtils,castByValue as ɵcastByValue,checkBinding as ɵcheckBinding,checkBindingChange as ɵcheckBindingChange,checkRenderAttribute as ɵcheckRenderAttribute,checkRenderClass as ɵcheckRenderClass,checkRenderProperty as ɵcheckRenderProperty,checkRenderStyle as ɵcheckRenderStyle,checkRenderText as ɵcheckRenderText,createRenderComponentType as ɵcreateRenderComponentType,createRenderElement as ɵcreateRenderElement,getComponentFactoryViewClass as ɵgetComponentFactoryViewClass,inlineInterpolate as ɵinlineInterpolate,interpolate as ɵinterpolate,noop as ɵnoop,pureProxy1 as ɵpureProxy1,pureProxy10 as ɵpureProxy10,pureProxy2 as ɵpureProxy2,pureProxy3 as ɵpureProxy3,pureProxy4 as ɵpureProxy4,pureProxy5 as ɵpureProxy5,pureProxy6 as ɵpureProxy6,pureProxy7 as ɵpureProxy7,pureProxy8 as ɵpureProxy8,pureProxy9 as ɵpureProxy9,selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement,setBindingDebugInfo as ɵsetBindingDebugInfo,setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges,subscribeToRenderElement as ɵsubscribeToRenderElement,ArgumentType as ɵArgumentType,BindingType as ɵBindingType,DepFlags as ɵDepFlags,NodeFlags as ɵNodeFlags,ProviderType as ɵProviderType,QueryBindingType as ɵQueryBindingType,QueryValueType as ɵQueryValueType,ViewFlags as ɵViewFlags,anchorDef as ɵanchorDef,createComponentFactory as ɵcreateComponentFactory,createRendererTypeV2 as ɵcreateRendererTypeV2,directiveDef as ɵdirectiveDef,elementDef as ɵelementDef,elementEventFullName as ɵelementEventFullName,ngContentDef as ɵngContentDef,nodeValue as ɵnodeValue,pipeDef as ɵpipeDef,providerDef as ɵproviderDef,pureArrayDef as ɵpureArrayDef,pureObjectDef as ɵpureObjectDef,purePipeDef as ɵpurePipeDef,queryDef as ɵqueryDef,textDef as ɵtextDef,unwrapValue as ɵunwrapValue,viewDef as ɵviewDef,AnimationQueue as ɵz,_initViewEngine as ɵp,_iterableDiffersFactory as ɵm,_keyValueDiffersFactory as ɵn,_localeFactory as ɵo,ApplicationRef_ as ɵf,_appIdRandomProviderFactory as ɵg,defaultIterableDiffers as ɵh,defaultKeyValueDiffers as ɵi,DefaultIterableDifferFactory as ɵk,DefaultKeyValueDifferFactory as ɵl,ReflectiveInjector_ as ɵc,ReflectiveDependency as ɵd,resolveReflectiveProviders as ɵe,isBlank as ɵj,wtfEnabled as ɵq,createScope as ɵs,detectWTF as ɵr,endTimeRange as ɵv,leave as ɵt,startTimeRange as ɵu,makeParamDecorator as ɵa,makePropDecorator as ɵb,_def as ɵx,NodeType as ɵy};
+     */},{key:'injector',get:function get(){return this.parentView.injector(this.index);}}]);return ViewContainer;}();export{createPlatform,assertPlatform,destroyPlatform,getPlatform,PlatformRef,ApplicationRef,enableProdMode,isDevMode,createPlatformFactory,NgProbeToken,APP_ID,PACKAGE_ROOT_URL,PLATFORM_INITIALIZER,APP_BOOTSTRAP_LISTENER,APP_INITIALIZER,ApplicationInitStatus,DebugElement,DebugNode,asNativeElements,getDebugNode,Testability,TestabilityRegistry,setTestabilityGetter,TRANSLATIONS,TRANSLATIONS_FORMAT,LOCALE_ID,MissingTranslationStrategy,ApplicationModule,wtfCreateScope,wtfLeave,wtfStartTimeRange,wtfEndTimeRange,Type,EventEmitter,ErrorHandler,AnimationPlayer,AnimationStyles,AnimationKeyframe,Sanitizer,SecurityContext,AnimationTransitionEvent,ANALYZE_FOR_ENTRY_COMPONENTS,Attribute,ContentChild,ContentChildren,Query,ViewChild,ViewChildren,Component,Directive,HostBinding,HostListener,Input,Output,Pipe,AfterContentChecked,AfterContentInit,AfterViewChecked,AfterViewInit,DoCheck,OnChanges,OnDestroy,OnInit,CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA,NgModule,ViewEncapsulation,Version,VERSION,Class,forwardRef,resolveForwardRef,Injector,ReflectiveInjector,ResolvedReflectiveFactory,ReflectiveKey,InjectionToken,OpaqueToken,Inject,Optional,Injectable,Self,SkipSelf,Host,NgZone,RenderComponentType,RendererV1 as Renderer,RendererFactoryV2,RendererV2,RootRenderer,COMPILER_OPTIONS,Compiler,CompilerFactory,ModuleWithComponentFactories,ComponentFactory,ComponentRef,ComponentFactoryResolver,ElementRef,NgModuleFactory,NgModuleRef,NgModuleFactoryLoader,getModuleFactory,QueryList,SystemJsNgModuleLoader,SystemJsNgModuleLoaderConfig,TemplateRef,ViewContainerRef,EmbeddedViewRef,ViewRef,ChangeDetectionStrategy,ChangeDetectorRef,DefaultIterableDiffer,IterableDiffers,KeyValueDiffers,SimpleChange,WrappedValue,platformCore,ANY_STATE as ɵANY_STATE,DEFAULT_STATE as ɵDEFAULT_STATE,EMPTY_STATE as ɵEMPTY_STATE,FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG,AnimationGroupPlayer as ɵAnimationGroupPlayer,AnimationKeyframe as ɵAnimationKeyframe,AnimationPlayer as ɵAnimationPlayer,NoOpAnimationPlayer as ɵNoOpAnimationPlayer,AnimationSequencePlayer as ɵAnimationSequencePlayer,balanceAnimationKeyframes as ɵbalanceAnimationKeyframes,clearStyles as ɵclearStyles,collectAndResolveStyles as ɵcollectAndResolveStyles,flattenStyles as ɵflattenStyles,prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles,renderStyles as ɵrenderStyles,AnimationStyles as ɵAnimationStyles,AnimationTransition as ɵAnimationTransition,ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS,APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER,ValueUnwrapper as ɵValueUnwrapper,devModeEqual as ɵdevModeEqual,ChangeDetectorStatus as ɵChangeDetectorStatus,isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy,Console as ɵConsole,DebugDomRootRenderer as ɵDebugDomRootRenderer,ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE,ComponentFactory as ɵComponentFactory,CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver,DebugContext$1 as ɵDebugContext,StaticNodeDebugInfo as ɵStaticNodeDebugInfo,AppView as ɵAppView,DebugAppView as ɵDebugAppView,ViewContainer as ɵViewContainer,ViewType as ɵViewType,LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES,LifecycleHooks as ɵLifecycleHooks,ViewMetadata as ɵViewMetadata,Reflector as ɵReflector,reflector as ɵreflector,ReflectionCapabilities as ɵReflectionCapabilities,ReflectorReader as ɵReflectorReader,RenderDebugInfo as ɵRenderDebugInfo,makeDecorator as ɵmakeDecorator,isObservable as ɵisObservable,isPromise as ɵisPromise,ComponentRef_ as ɵComponentRef_,NgModuleInjector as ɵNgModuleInjector,registerModuleFactory as ɵregisterModuleFactory,TemplateRef_ as ɵTemplateRef_,EMPTY_ARRAY as ɵEMPTY_ARRAY,EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY,EMPTY_MAP as ɵEMPTY_MAP,InlineArray16 as ɵInlineArray16,InlineArray2 as ɵInlineArray2,InlineArray4 as ɵInlineArray4,InlineArray8 as ɵInlineArray8,InlineArrayDynamic as ɵInlineArrayDynamic,ViewUtils as ɵViewUtils,castByValue as ɵcastByValue,checkBinding as ɵcheckBinding,checkBindingChange as ɵcheckBindingChange,checkRenderAttribute as ɵcheckRenderAttribute,checkRenderClass as ɵcheckRenderClass,checkRenderProperty as ɵcheckRenderProperty,checkRenderStyle as ɵcheckRenderStyle,checkRenderText as ɵcheckRenderText,createRenderComponentType as ɵcreateRenderComponentType,createRenderElement as ɵcreateRenderElement,getComponentFactoryViewClass as ɵgetComponentFactoryViewClass,inlineInterpolate as ɵinlineInterpolate,interpolate as ɵinterpolate,noop as ɵnoop,pureProxy1 as ɵpureProxy1,pureProxy10 as ɵpureProxy10,pureProxy2 as ɵpureProxy2,pureProxy3 as ɵpureProxy3,pureProxy4 as ɵpureProxy4,pureProxy5 as ɵpureProxy5,pureProxy6 as ɵpureProxy6,pureProxy7 as ɵpureProxy7,pureProxy8 as ɵpureProxy8,pureProxy9 as ɵpureProxy9,selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement,setBindingDebugInfo as ɵsetBindingDebugInfo,setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges,subscribeToRenderElement as ɵsubscribeToRenderElement,ArgumentType as ɵArgumentType,BindingType as ɵBindingType,DepFlags as ɵDepFlags,NodeFlags as ɵNodeFlags,ProviderType as ɵProviderType,QueryBindingType as ɵQueryBindingType,QueryValueType as ɵQueryValueType,ViewFlags as ɵViewFlags,anchorDef as ɵanchorDef,createComponentFactory as ɵcreateComponentFactory,createRendererTypeV2 as ɵcreateRendererTypeV2,directiveDef as ɵdirectiveDef,elementDef as ɵelementDef,elementEventFullName as ɵelementEventFullName,ngContentDef as ɵngContentDef,nodeValue as ɵnodeValue,pipeDef as ɵpipeDef,providerDef as ɵproviderDef,pureArrayDef as ɵpureArrayDef,pureObjectDef as ɵpureObjectDef,purePipeDef as ɵpurePipeDef,queryDef as ɵqueryDef,textDef as ɵtextDef,unwrapValue as ɵunwrapValue,viewDef as ɵviewDef,AUTO_STYLE,AnimationEntryMetadata,AnimationStateMetadata,AnimationStateDeclarationMetadata,AnimationStateTransitionMetadata,AnimationMetadata,AnimationKeyframesSequenceMetadata,AnimationStyleMetadata,AnimationAnimateMetadata,AnimationWithStepsMetadata,AnimationSequenceMetadata,AnimationGroupMetadata,animate,group,sequence,style,state,keyframes,transition,trigger,AnimationQueue as ɵz,_initViewEngine as ɵp,_iterableDiffersFactory as ɵm,_keyValueDiffersFactory as ɵn,_localeFactory as ɵo,ApplicationRef_ as ɵf,_appIdRandomProviderFactory as ɵg,defaultIterableDiffers as ɵh,defaultKeyValueDiffers as ɵi,DefaultIterableDifferFactory as ɵk,DefaultKeyValueDifferFactory as ɵl,ReflectiveInjector_ as ɵc,ReflectiveDependency as ɵd,resolveReflectiveProviders as ɵe,isBlank as ɵj,wtfEnabled as ɵq,createScope as ɵs,detectWTF as ɵr,endTimeRange as ɵv,leave as ɵt,startTimeRange as ɵu,makeParamDecorator as ɵa,makePropDecorator as ɵb,_def as ɵx,NodeType as ɵy};

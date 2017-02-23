@@ -8,7 +8,7 @@
 import { AnimationKeyframe } from '../../src/animation/animation_keyframe';
 import { AnimationPlayer } from '../../src/animation/animation_player';
 import { AnimationStyles } from '../../src/animation/animation_styles';
-import { Injector } from '../di';
+import { InjectionToken, Injector } from '../di';
 import { ViewEncapsulation } from '../metadata/view';
 /**
  * @experimental
@@ -19,12 +19,8 @@ export declare class RenderComponentType {
     slotCount: number;
     encapsulation: ViewEncapsulation;
     styles: Array<string | any[]>;
-    animations: {
-        [key: string]: Function;
-    };
-    constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: {
-        [key: string]: Function;
-    });
+    animations: any;
+    constructor(id: string, templateUrl: string, slotCount: number, encapsulation: ViewEncapsulation, styles: Array<string | any[]>, animations: any);
 }
 export declare abstract class RenderDebugInfo {
     readonly abstract injector: Injector;
@@ -70,6 +66,7 @@ export declare abstract class Renderer {
     abstract setText(renderNode: any, text: string): void;
     abstract animate(element: any, startingStyles: AnimationStyles, keyframes: AnimationKeyframe[], duration: number, delay: number, easing: string, previousPlayers?: AnimationPlayer[]): AnimationPlayer;
 }
+export declare const RendererV2Interceptor: InjectionToken<RendererV2[]>;
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *

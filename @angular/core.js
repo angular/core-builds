@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-88755b0
+ * @license Angular v4.0.0-beta.8-88bc143
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1065,7 +1065,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-88755b0');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-88bc143');
 
 /**
  * Inject decorator and metadata.
@@ -5445,13 +5445,6 @@ const /** @type {?} */ iterableDiff = [new DefaultIterableDifferFactory()];
 const /** @type {?} */ defaultIterableDiffers = new IterableDiffers(iterableDiff);
 const /** @type {?} */ defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 class RenderComponentType {
     /**
      * @param {?} id
@@ -5658,6 +5651,7 @@ class RendererV1 {
      */
     animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) { }
 }
+const /** @type {?} */ RendererV2Interceptor = new InjectionToken('RendererV2Interceptor');
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -9258,250 +9252,6 @@ function removeDebugNodeFromIndex(node) {
 }
 
 /**
- * \@experimental Animation support is experimental.
- * @abstract
- */
-class AnimationPlayer {
-    /**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */
-    onDone(fn) { }
-    /**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */
-    onStart(fn) { }
-    /**
-     * @abstract
-     * @param {?} fn
-     * @return {?}
-     */
-    onDestroy(fn) { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    init() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    hasStarted() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    play() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    pause() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    restart() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    finish() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    destroy() { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    reset() { }
-    /**
-     * @abstract
-     * @param {?} p
-     * @return {?}
-     */
-    setPosition(p) { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    getPosition() { }
-    /**
-     * @return {?}
-     */
-    get parentPlayer() { throw new Error('NOT IMPLEMENTED: Base Class'); }
-    /**
-     * @param {?} player
-     * @return {?}
-     */
-    set parentPlayer(player) { throw new Error('NOT IMPLEMENTED: Base Class'); }
-}
-class NoOpAnimationPlayer {
-    constructor() {
-        this._onDoneFns = [];
-        this._onStartFns = [];
-        this._onDestroyFns = [];
-        this._started = false;
-        this._destroyed = false;
-        this._finished = false;
-        this.parentPlayer = null;
-        scheduleMicroTask(() => this._onFinish());
-    }
-    /**
-     * @return {?}
-     */
-    _onFinish() {
-        if (!this._finished) {
-            this._finished = true;
-            this._onDoneFns.forEach(fn => fn());
-            this._onDoneFns = [];
-        }
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    onStart(fn) { this._onStartFns.push(fn); }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    onDone(fn) { this._onDoneFns.push(fn); }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    onDestroy(fn) { this._onDestroyFns.push(fn); }
-    /**
-     * @return {?}
-     */
-    hasStarted() { return this._started; }
-    /**
-     * @return {?}
-     */
-    init() { }
-    /**
-     * @return {?}
-     */
-    play() {
-        if (!this.hasStarted()) {
-            this._onStartFns.forEach(fn => fn());
-            this._onStartFns = [];
-        }
-        this._started = true;
-    }
-    /**
-     * @return {?}
-     */
-    pause() { }
-    /**
-     * @return {?}
-     */
-    restart() { }
-    /**
-     * @return {?}
-     */
-    finish() { this._onFinish(); }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        if (!this._destroyed) {
-            this._destroyed = true;
-            this.finish();
-            this._onDestroyFns.forEach(fn => fn());
-            this._onDestroyFns = [];
-        }
-    }
-    /**
-     * @return {?}
-     */
-    reset() { }
-    /**
-     * @param {?} p
-     * @return {?}
-     */
-    setPosition(p) { }
-    /**
-     * @return {?}
-     */
-    getPosition() { return 0; }
-}
-
-/**
- * \@experimental Transition support is experimental.
- * @abstract
- */
-class TransitionEngine {
-    /**
-     * @abstract
-     * @param {?} container
-     * @param {?} element
-     * @return {?}
-     */
-    insertNode(container, element) { }
-    /**
-     * @abstract
-     * @param {?} element
-     * @return {?}
-     */
-    removeNode(element) { }
-    /**
-     * @abstract
-     * @param {?} element
-     * @param {?} instructions
-     * @return {?}
-     */
-    process(element, instructions) { }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    triggerAnimations() { }
-}
-/**
- * \@experimental Transition support is experimental.
- */
-class NoOpTransitionEngine extends TransitionEngine {
-    constructor() { super(); }
-    /**
-     * @param {?} container
-     * @param {?} element
-     * @return {?}
-     */
-    insertNode(container, element) { container.appendChild(element); }
-    /**
-     * @param {?} element
-     * @return {?}
-     */
-    removeNode(element) { remove(element); }
-    /**
-     * @param {?} element
-     * @param {?} instructions
-     * @return {?}
-     */
-    process(element, instructions) {
-        return new NoOpAnimationPlayer();
-    }
-    /**
-     * @return {?}
-     */
-    triggerAnimations() { }
-}
-/**
- * @param {?} element
- * @return {?}
- */
-function remove(element) {
-    element.parentNode.removeChild(element);
-}
-
-/**
  * @return {?}
  */
 function _reflector() {
@@ -9512,7 +9262,6 @@ const /** @type {?} */ _CORE_PLATFORM_PROVIDERS = [
     { provide: PlatformRef, useExisting: PlatformRef_ },
     { provide: Reflector, useFactory: _reflector, deps: [] },
     { provide: ReflectorReader, useExisting: Reflector },
-    { provide: TransitionEngine, useClass: NoOpTransitionEngine },
     TestabilityRegistry,
     Console,
 ];
@@ -10607,6 +10356,182 @@ function appendNgContent(view, renderHost, def) {
     }
     const /** @type {?} */ ngContentIndex = def.ngContent.index;
     visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, undefined, undefined);
+}
+
+/**
+ * \@experimental Animation support is experimental.
+ * @abstract
+ */
+class AnimationPlayer {
+    /**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */
+    onDone(fn) { }
+    /**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */
+    onStart(fn) { }
+    /**
+     * @abstract
+     * @param {?} fn
+     * @return {?}
+     */
+    onDestroy(fn) { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    init() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    hasStarted() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    play() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    pause() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    restart() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    finish() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    destroy() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    reset() { }
+    /**
+     * @abstract
+     * @param {?} p
+     * @return {?}
+     */
+    setPosition(p) { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    getPosition() { }
+    /**
+     * @return {?}
+     */
+    get parentPlayer() { throw new Error('NOT IMPLEMENTED: Base Class'); }
+    /**
+     * @param {?} player
+     * @return {?}
+     */
+    set parentPlayer(player) { throw new Error('NOT IMPLEMENTED: Base Class'); }
+}
+class NoOpAnimationPlayer {
+    constructor() {
+        this._onDoneFns = [];
+        this._onStartFns = [];
+        this._onDestroyFns = [];
+        this._started = false;
+        this._destroyed = false;
+        this._finished = false;
+        this.parentPlayer = null;
+        scheduleMicroTask(() => this._onFinish());
+    }
+    /**
+     * @return {?}
+     */
+    _onFinish() {
+        if (!this._finished) {
+            this._finished = true;
+            this._onDoneFns.forEach(fn => fn());
+            this._onDoneFns = [];
+        }
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onStart(fn) { this._onStartFns.push(fn); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDone(fn) { this._onDoneFns.push(fn); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    onDestroy(fn) { this._onDestroyFns.push(fn); }
+    /**
+     * @return {?}
+     */
+    hasStarted() { return this._started; }
+    /**
+     * @return {?}
+     */
+    init() { }
+    /**
+     * @return {?}
+     */
+    play() {
+        if (!this.hasStarted()) {
+            this._onStartFns.forEach(fn => fn());
+            this._onStartFns = [];
+        }
+        this._started = true;
+    }
+    /**
+     * @return {?}
+     */
+    pause() { }
+    /**
+     * @return {?}
+     */
+    restart() { }
+    /**
+     * @return {?}
+     */
+    finish() { this._onFinish(); }
+    /**
+     * @return {?}
+     */
+    destroy() {
+        if (!this._destroyed) {
+            this._destroyed = true;
+            this.finish();
+            this._onDestroyFns.forEach(fn => fn());
+            this._onDestroyFns = [];
+        }
+    }
+    /**
+     * @return {?}
+     */
+    reset() { }
+    /**
+     * @param {?} p
+     * @return {?}
+     */
+    setPosition(p) { }
+    /**
+     * @return {?}
+     */
+    getPosition() { return 0; }
 }
 
 const /** @type {?} */ EMPTY_CONTEXT = new Object();
@@ -13466,7 +13391,7 @@ function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
  */
 function normalizeDebugBindingName(name) {
     // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-    name = camelCaseToDashCase$1(name.replace(/\$/g, '_'));
+    name = camelCaseToDashCase$1(name.replace(/[$@]/g, '_'));
     return `ng-reflect-${name}`;
 }
 const /** @type {?} */ CAMEL_CASE_REGEXP$1 = /([A-Z])/g;
@@ -16497,4 +16422,4 @@ class ViewContainer {
     }
 }
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, AnimationTransitionEvent, AnimationPlayer, AnimationStyles, AnimationKeyframe, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, Class, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ANY_STATE as ɵANY_STATE, DEFAULT_STATE as ɵDEFAULT_STATE, EMPTY_STATE as ɵEMPTY_STATE, FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG, AnimationGroupPlayer as ɵAnimationGroupPlayer, AnimationKeyframe as ɵAnimationKeyframe, AnimationPlayer as ɵAnimationPlayer, NoOpAnimationPlayer as ɵNoOpAnimationPlayer, AnimationSequencePlayer as ɵAnimationSequencePlayer, balanceAnimationKeyframes as ɵbalanceAnimationKeyframes, clearStyles as ɵclearStyles, collectAndResolveStyles as ɵcollectAndResolveStyles, flattenStyles as ɵflattenStyles, prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles, renderStyles as ɵrenderStyles, AnimationStyles as ɵAnimationStyles, AnimationTransition as ɵAnimationTransition, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, DebugDomRootRenderer as ɵDebugDomRootRenderer, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, DebugContext$1 as ɵDebugContext, StaticNodeDebugInfo as ɵStaticNodeDebugInfo, AppView as ɵAppView, DebugAppView as ɵDebugAppView, ViewContainer as ɵViewContainer, ViewType as ɵViewType, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, TransitionEngine as ɵTransitionEngine, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, AUTO_STYLE, AnimationEntryMetadata, AnimationStateMetadata, AnimationStateDeclarationMetadata, AnimationStateTransitionMetadata, AnimationMetadata, AnimationKeyframesSequenceMetadata, AnimationStyleMetadata, AnimationAnimateMetadata, AnimationWithStepsMetadata, AnimationSequenceMetadata, AnimationGroupMetadata, animate, group, sequence, style, state, keyframes, transition, trigger, ComponentRef_ as ɵComponentRef_, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, TemplateRef_ as ɵTemplateRef_, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, InlineArray16 as ɵInlineArray16, InlineArray2 as ɵInlineArray2, InlineArray4 as ɵInlineArray4, InlineArray8 as ɵInlineArray8, InlineArrayDynamic as ɵInlineArrayDynamic, ViewUtils as ɵViewUtils, castByValue as ɵcastByValue, checkBinding as ɵcheckBinding, checkBindingChange as ɵcheckBindingChange, checkRenderAttribute as ɵcheckRenderAttribute, checkRenderClass as ɵcheckRenderClass, checkRenderProperty as ɵcheckRenderProperty, checkRenderStyle as ɵcheckRenderStyle, checkRenderText as ɵcheckRenderText, createRenderComponentType as ɵcreateRenderComponentType, createRenderElement as ɵcreateRenderElement, getComponentFactoryViewClass as ɵgetComponentFactoryViewClass, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, noop as ɵnoop, pureProxy1 as ɵpureProxy1, pureProxy10 as ɵpureProxy10, pureProxy2 as ɵpureProxy2, pureProxy3 as ɵpureProxy3, pureProxy4 as ɵpureProxy4, pureProxy5 as ɵpureProxy5, pureProxy6 as ɵpureProxy6, pureProxy7 as ɵpureProxy7, pureProxy8 as ɵpureProxy8, pureProxy9 as ɵpureProxy9, selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement, setBindingDebugInfo as ɵsetBindingDebugInfo, setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges, subscribeToRenderElement as ɵsubscribeToRenderElement, ArgumentType as ɵArgumentType, BindingType as ɵBindingType, DepFlags as ɵDepFlags, NodeFlags as ɵNodeFlags, ProviderType as ɵProviderType, QueryBindingType as ɵQueryBindingType, QueryValueType as ɵQueryValueType, ViewFlags as ɵViewFlags, anchorDef as ɵanchorDef, createComponentFactory as ɵcreateComponentFactory, createRendererTypeV2 as ɵcreateRendererTypeV2, directiveDef as ɵdirectiveDef, elementDef as ɵelementDef, elementEventFullName as ɵelementEventFullName, ngContentDef as ɵngContentDef, nodeValue as ɵnodeValue, pipeDef as ɵpipeDef, providerDef as ɵproviderDef, pureArrayDef as ɵpureArrayDef, pureObjectDef as ɵpureObjectDef, purePipeDef as ɵpurePipeDef, queryDef as ɵqueryDef, textDef as ɵtextDef, unwrapValue as ɵunwrapValue, viewDef as ɵviewDef, AnimationQueue as ɵz, _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, isBlank as ɵj, wtfEnabled as ɵq, createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt, startTimeRange as ɵu, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵx, NodeType as ɵy };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, AnimationPlayer, AnimationStyles, AnimationKeyframe, Sanitizer, SecurityContext, AnimationTransitionEvent, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, Class, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ANY_STATE as ɵANY_STATE, DEFAULT_STATE as ɵDEFAULT_STATE, EMPTY_STATE as ɵEMPTY_STATE, FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG, AnimationGroupPlayer as ɵAnimationGroupPlayer, AnimationKeyframe as ɵAnimationKeyframe, AnimationPlayer as ɵAnimationPlayer, NoOpAnimationPlayer as ɵNoOpAnimationPlayer, AnimationSequencePlayer as ɵAnimationSequencePlayer, balanceAnimationKeyframes as ɵbalanceAnimationKeyframes, clearStyles as ɵclearStyles, collectAndResolveStyles as ɵcollectAndResolveStyles, flattenStyles as ɵflattenStyles, prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles, renderStyles as ɵrenderStyles, AnimationStyles as ɵAnimationStyles, AnimationTransition as ɵAnimationTransition, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, DebugDomRootRenderer as ɵDebugDomRootRenderer, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, DebugContext$1 as ɵDebugContext, StaticNodeDebugInfo as ɵStaticNodeDebugInfo, AppView as ɵAppView, DebugAppView as ɵDebugAppView, ViewContainer as ɵViewContainer, ViewType as ɵViewType, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, ComponentRef_ as ɵComponentRef_, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, TemplateRef_ as ɵTemplateRef_, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, InlineArray16 as ɵInlineArray16, InlineArray2 as ɵInlineArray2, InlineArray4 as ɵInlineArray4, InlineArray8 as ɵInlineArray8, InlineArrayDynamic as ɵInlineArrayDynamic, ViewUtils as ɵViewUtils, castByValue as ɵcastByValue, checkBinding as ɵcheckBinding, checkBindingChange as ɵcheckBindingChange, checkRenderAttribute as ɵcheckRenderAttribute, checkRenderClass as ɵcheckRenderClass, checkRenderProperty as ɵcheckRenderProperty, checkRenderStyle as ɵcheckRenderStyle, checkRenderText as ɵcheckRenderText, createRenderComponentType as ɵcreateRenderComponentType, createRenderElement as ɵcreateRenderElement, getComponentFactoryViewClass as ɵgetComponentFactoryViewClass, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, noop as ɵnoop, pureProxy1 as ɵpureProxy1, pureProxy10 as ɵpureProxy10, pureProxy2 as ɵpureProxy2, pureProxy3 as ɵpureProxy3, pureProxy4 as ɵpureProxy4, pureProxy5 as ɵpureProxy5, pureProxy6 as ɵpureProxy6, pureProxy7 as ɵpureProxy7, pureProxy8 as ɵpureProxy8, pureProxy9 as ɵpureProxy9, selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement, setBindingDebugInfo as ɵsetBindingDebugInfo, setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges, subscribeToRenderElement as ɵsubscribeToRenderElement, ArgumentType as ɵArgumentType, BindingType as ɵBindingType, DepFlags as ɵDepFlags, NodeFlags as ɵNodeFlags, ProviderType as ɵProviderType, QueryBindingType as ɵQueryBindingType, QueryValueType as ɵQueryValueType, ViewFlags as ɵViewFlags, anchorDef as ɵanchorDef, createComponentFactory as ɵcreateComponentFactory, createRendererTypeV2 as ɵcreateRendererTypeV2, directiveDef as ɵdirectiveDef, elementDef as ɵelementDef, elementEventFullName as ɵelementEventFullName, ngContentDef as ɵngContentDef, nodeValue as ɵnodeValue, pipeDef as ɵpipeDef, providerDef as ɵproviderDef, pureArrayDef as ɵpureArrayDef, pureObjectDef as ɵpureObjectDef, purePipeDef as ɵpurePipeDef, queryDef as ɵqueryDef, textDef as ɵtextDef, unwrapValue as ɵunwrapValue, viewDef as ɵviewDef, AUTO_STYLE, AnimationEntryMetadata, AnimationStateMetadata, AnimationStateDeclarationMetadata, AnimationStateTransitionMetadata, AnimationMetadata, AnimationKeyframesSequenceMetadata, AnimationStyleMetadata, AnimationAnimateMetadata, AnimationWithStepsMetadata, AnimationSequenceMetadata, AnimationGroupMetadata, animate, group, sequence, style, state, keyframes, transition, trigger, AnimationQueue as ɵz, _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, isBlank as ɵj, wtfEnabled as ɵq, createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt, startTimeRange as ɵu, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵx, NodeType as ɵy };
