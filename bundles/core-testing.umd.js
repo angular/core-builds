@@ -5,7 +5,7 @@
  */
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
-        define('@angular/core', ['exports', '@angular/core'], factory);
+        define('@angular/core/testing', ['exports', '@angular/core'], factory);
     } else if (typeof exports !== "undefined") {
         factory(exports, require('@angular/core'));
     } else {
@@ -14,7 +14,8 @@
         };
         factory(mod.exports, global.ng.core);
         global.ng = global.ng || {};
-        global.ng.core = mod.exports;
+        global.ng.core = global.ng.core || {};
+        global.ng.core.testing = mod.exports;
     }
 })(this, function (exports, _core) {
     'use strict';

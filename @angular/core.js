@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-e8d2743
+ * @license Angular v4.0.0-beta.8-4301dce
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1065,7 +1065,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-e8d2743');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-4301dce');
 
 /**
  * Inject decorator and metadata.
@@ -9771,11 +9771,10 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
 function getParentRenderElement(view, renderHost, def) {
     let /** @type {?} */ renderParent = def.renderParent;
     if (renderParent) {
-        const /** @type {?} */ parent = def.parent;
-        if (parent &&
-            (parent.type !== NodeType.Element || (parent.flags & NodeFlags.HasComponent) === 0 ||
-                (parent.element.componentRendererType &&
-                    parent.element.componentRendererType.encapsulation === ViewEncapsulation.Native))) {
+        if (renderParent.type !== NodeType.Element ||
+            (renderParent.flags & NodeFlags.HasComponent) === 0 ||
+            (renderParent.element.componentRendererType &&
+                renderParent.element.componentRendererType.encapsulation === ViewEncapsulation.Native)) {
             // only children of non components, or children of components with native encapsulation should
             // be attached.
             return asElementData(view, def.renderParent.index).renderElement;
@@ -11043,12 +11042,13 @@ class ViewRef_$1 {
 function createTemplateRef(view, def) {
     return new TemplateRef_$1(view, def);
 }
-class TemplateRef_$1 {
+class TemplateRef_$1 extends TemplateRef {
     /**
      * @param {?} _parentView
      * @param {?} _def
      */
     constructor(_parentView, _def) {
+        super();
         this._parentView = _parentView;
         this._def = _def;
     }
@@ -13497,7 +13497,13 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
             else {
                 // a regular element.
                 for (let /** @type {?} */ attr in bindingValues) {
-                    view.renderer.setAttribute(el, attr, bindingValues[attr]);
+                    const /** @type {?} */ value = bindingValues[attr];
+                    if (value != null) {
+                        view.renderer.setAttribute(el, attr, value);
+                    }
+                    else {
+                        view.renderer.removeAttribute(el, attr);
+                    }
                 }
             }
         }
@@ -13537,7 +13543,7 @@ function camelCaseToDashCase$1(input) {
 function normalizeDebugBindingValue(value) {
     try {
         // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value ? value.toString().slice(0, 20) : value;
+        return value ? value.toString().slice(0, 30) : value;
     }
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';
