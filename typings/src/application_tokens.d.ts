@@ -34,6 +34,11 @@ export declare const APP_ID_RANDOM_PROVIDER: {
  */
 export declare const PLATFORM_INITIALIZER: InjectionToken<(() => void)[]>;
 /**
+ * A token that indicates an opaque platform id.
+ * @experimental
+ */
+export declare const PLATFORM_ID: InjectionToken<Object>;
+/**
  * All callbacks provided via this token will be called for every component that is bootstrapped.
  * Signature of the callback:
  *
