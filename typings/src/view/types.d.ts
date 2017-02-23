@@ -21,7 +21,7 @@ export interface ViewDefinition {
     reverseChildNodes: NodeDef[];
     lastRenderRootNode: NodeDef;
     bindingCount: number;
-    disposableCount: number;
+    outputCount: number;
     /**
      * Binary or of all query ids that are matched by one of the nodes.
      * This includes query ids from templates as well.
@@ -68,8 +68,8 @@ export interface NodeDef {
     childFlags: NodeFlags;
     bindingIndex: number;
     bindings: BindingDef[];
-    disposableIndex: number;
-    disposableCount: number;
+    outputIndex: number;
+    outputs: OutputDef[];
     /**
      * references that the user placed on the element
      */
@@ -122,12 +122,13 @@ export declare enum NodeFlags {
     AfterViewChecked = 128,
     HasEmbeddedViews = 256,
     HasComponent = 512,
-    HasContentQuery = 1024,
-    HasStaticQuery = 2048,
-    HasDynamicQuery = 4096,
-    HasViewQuery = 8192,
-    LazyProvider = 16384,
-    PrivateProvider = 32768,
+    IsComponent = 1024,
+    HasContentQuery = 2048,
+    HasStaticQuery = 4096,
+    HasDynamicQuery = 8192,
+    HasViewQuery = 16384,
+    LazyProvider = 32768,
+    PrivateProvider = 65536,
 }
 export interface BindingDef {
     type: BindingType;
@@ -142,9 +143,20 @@ export declare enum BindingType {
     ElementClass = 1,
     ElementStyle = 2,
     ElementProperty = 3,
-    DirectiveProperty = 4,
-    TextInterpolation = 5,
-    PureExpressionProperty = 6,
+    ComponentHostProperty = 4,
+    DirectiveProperty = 5,
+    TextInterpolation = 6,
+    PureExpressionProperty = 7,
+}
+export interface OutputDef {
+    type: OutputType;
+    target: 'window' | 'document' | 'body' | 'component';
+    eventName: string;
+    propName: string;
+}
+export declare enum OutputType {
+    ElementOutput = 0,
+    DirectiveOutput = 1,
 }
 export declare enum QueryValueType {
     ElementRef = 0,
@@ -158,9 +170,10 @@ export interface ElementDef {
     ns: string;
     /** ns, name, value */
     attrs: [string, string, string][];
-    outputs: ElementOutputDef[];
     template: ViewDefinition;
-    component: NodeDef;
+    componentProvider: NodeDef;
+    componentRendererType: RendererTypeV2;
+    componentView: ViewDefinitionFactory;
     /**
      * visible public providers for DI in the view,
      * as see from this element. This does not include private providers.
@@ -178,10 +191,6 @@ export interface ElementDef {
     source: string;
     handleEvent: ElementHandleEventFn;
 }
-export interface ElementOutputDef {
-    target: string;
-    eventName: string;
-}
 export declare type ElementHandleEventFn = (view: ViewData, eventName: string, event: any) => boolean;
 export interface ProviderDef {
     type: ProviderType;
@@ -189,9 +198,6 @@ export interface ProviderDef {
     tokenKey: string;
     value: any;
     deps: DepDef[];
-    outputs: DirectiveOutputDef[];
-    rendererType: RendererTypeV2;
-    component: ViewDefinitionFactory;
 }
 export declare enum ProviderType {
     Value = 0,
@@ -212,10 +218,6 @@ export declare enum DepFlags {
     SkipSelf = 1,
     Optional = 2,
     Value = 8,
-}
-export interface DirectiveOutputDef {
-    propName: string;
-    eventName: string;
 }
 export interface TextDef {
     prefix: string;
@@ -261,6 +263,7 @@ export interface ViewData {
     renderer: RendererV2;
     parentNodeDef: NodeDef;
     parent: ViewData;
+    viewContainerParent: ViewData;
     component: any;
     context: any;
     nodes: {
@@ -313,6 +316,7 @@ export declare function asTextData(view: ViewData, index: number): TextData;
  */
 export interface ElementData {
     renderElement: any;
+    componentView: ViewData;
     embeddedViews: ViewData[];
     projectedViews: ViewData[];
 }
@@ -327,7 +331,6 @@ export declare function asElementData(view: ViewData, index: number): ElementDat
  */
 export interface ProviderData {
     instance: any;
-    componentView: ViewData;
 }
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -371,21 +374,23 @@ export declare abstract class DebugContext {
     readonly abstract componentRenderElement: any;
     readonly abstract renderNode: any;
 }
+export declare enum CheckType {
+    CheckAndUpdate = 0,
+    CheckNoChanges = 1,
+}
 export interface Services {
     setCurrentNode(view: ViewData, nodeIndex: number): void;
     createRootView(injector: Injector, projectableNodes: any[][], rootSelectorOrNode: string | any, def: ViewDefinition, context?: any): ViewData;
     createEmbeddedView(parent: ViewData, anchorDef: NodeDef, context?: any): ViewData;
     checkAndUpdateView(view: ViewData): void;
     checkNoChangesView(view: ViewData): void;
-    attachEmbeddedView(elementData: ElementData, viewIndex: number, view: ViewData): void;
-    detachEmbeddedView(elementData: ElementData, viewIndex: number): ViewData;
-    moveEmbeddedView(elementData: ElementData, oldViewIndex: number, newViewIndex: number): ViewData;
     destroyView(view: ViewData): void;
     resolveDep(view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, depDef: DepDef, notFoundValue?: any): any;
     createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
     handleEvent: ViewHandleEventFn;
-    updateDirectives: ViewUpdateFn;
-    updateRenderer: ViewUpdateFn;
+    updateDirectives: (view: ViewData, checkType: CheckType) => void;
+    updateRenderer: (view: ViewData, checkType: CheckType) => void;
+    dirtyParentQueries: (view: ViewData) => void;
 }
 /**
  * This object is used to prevent cycles in the source files and to have a place where

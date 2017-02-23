@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-6b7937f
+ * @license Angular v4.0.0-beta.8-e8d2743
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1065,7 +1065,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-6b7937f');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-e8d2743');
 
 /**
  * Inject decorator and metadata.
@@ -7981,7 +7981,7 @@ class ApplicationRef_ extends ApplicationRef {
     detachView(viewRef) {
         const /** @type {?} */ view = ((viewRef));
         ListWrapper.remove(this._views, view);
-        view.detachFromContainer();
+        view.detachFromAppRef();
     }
     /**
      * @param {?} componentOrFactory
@@ -8997,7 +8997,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    detachFromContainer() { this._view.detach(); }
+    detachFromAppRef() { this._view.detach(); }
     /**
      * @param {?} appRef
      * @return {?}
@@ -9345,12 +9345,13 @@ NodeFlags.AfterViewInit = 64;
 NodeFlags.AfterViewChecked = 128;
 NodeFlags.HasEmbeddedViews = 256;
 NodeFlags.HasComponent = 512;
-NodeFlags.HasContentQuery = 1024;
-NodeFlags.HasStaticQuery = 2048;
-NodeFlags.HasDynamicQuery = 4096;
-NodeFlags.HasViewQuery = 8192;
-NodeFlags.LazyProvider = 16384;
-NodeFlags.PrivateProvider = 32768;
+NodeFlags.IsComponent = 1024;
+NodeFlags.HasContentQuery = 2048;
+NodeFlags.HasStaticQuery = 4096;
+NodeFlags.HasDynamicQuery = 8192;
+NodeFlags.HasViewQuery = 16384;
+NodeFlags.LazyProvider = 32768;
+NodeFlags.PrivateProvider = 65536;
 NodeFlags[NodeFlags.None] = "None";
 NodeFlags[NodeFlags.OnInit] = "OnInit";
 NodeFlags[NodeFlags.OnDestroy] = "OnDestroy";
@@ -9362,6 +9363,7 @@ NodeFlags[NodeFlags.AfterViewInit] = "AfterViewInit";
 NodeFlags[NodeFlags.AfterViewChecked] = "AfterViewChecked";
 NodeFlags[NodeFlags.HasEmbeddedViews] = "HasEmbeddedViews";
 NodeFlags[NodeFlags.HasComponent] = "HasComponent";
+NodeFlags[NodeFlags.IsComponent] = "IsComponent";
 NodeFlags[NodeFlags.HasContentQuery] = "HasContentQuery";
 NodeFlags[NodeFlags.HasStaticQuery] = "HasStaticQuery";
 NodeFlags[NodeFlags.HasDynamicQuery] = "HasDynamicQuery";
@@ -9373,16 +9375,23 @@ BindingType.ElementAttribute = 0;
 BindingType.ElementClass = 1;
 BindingType.ElementStyle = 2;
 BindingType.ElementProperty = 3;
-BindingType.DirectiveProperty = 4;
-BindingType.TextInterpolation = 5;
-BindingType.PureExpressionProperty = 6;
+BindingType.ComponentHostProperty = 4;
+BindingType.DirectiveProperty = 5;
+BindingType.TextInterpolation = 6;
+BindingType.PureExpressionProperty = 7;
 BindingType[BindingType.ElementAttribute] = "ElementAttribute";
 BindingType[BindingType.ElementClass] = "ElementClass";
 BindingType[BindingType.ElementStyle] = "ElementStyle";
 BindingType[BindingType.ElementProperty] = "ElementProperty";
+BindingType[BindingType.ComponentHostProperty] = "ComponentHostProperty";
 BindingType[BindingType.DirectiveProperty] = "DirectiveProperty";
 BindingType[BindingType.TextInterpolation] = "TextInterpolation";
 BindingType[BindingType.PureExpressionProperty] = "PureExpressionProperty";
+let OutputType = {};
+OutputType.ElementOutput = 0;
+OutputType.DirectiveOutput = 1;
+OutputType[OutputType.ElementOutput] = "ElementOutput";
+OutputType[OutputType.DirectiveOutput] = "DirectiveOutput";
 let QueryValueType = {};
 QueryValueType.ElementRef = 0;
 QueryValueType.RenderElement = 1;
@@ -9478,6 +9487,11 @@ function asPureExpressionData(view, index) {
 function asQueryList(view, index) {
     return (view.nodes[index]);
 }
+let CheckType = {};
+CheckType.CheckAndUpdate = 0;
+CheckType.CheckNoChanges = 1;
+CheckType[CheckType.CheckAndUpdate] = "CheckAndUpdate";
+CheckType[CheckType.CheckNoChanges] = "CheckNoChanges";
 /**
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
@@ -9489,14 +9503,12 @@ const /** @type {?} */ Services = {
     checkAndUpdateView: undefined,
     checkNoChangesView: undefined,
     destroyView: undefined,
-    attachEmbeddedView: undefined,
-    detachEmbeddedView: undefined,
-    moveEmbeddedView: undefined,
     resolveDep: undefined,
     createDebugContext: undefined,
     handleEvent: undefined,
     updateDirectives: undefined,
     updateRenderer: undefined,
+    dirtyParentQueries: undefined,
 };
 
 /**
@@ -9600,9 +9612,27 @@ function createRendererTypeV2(values) {
  * @return {?}
  */
 function checkBinding$1(view, def, bindingIdx, value) {
-    const /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    return unwrapCounter > 0 || !!(view.state & ViewState.FirstCheck) ||
-        !devModeEqual(oldValue, value);
+    const /** @type {?} */ oldValues = view.oldValues;
+    if (unwrapCounter > 0 || !!(view.state & ViewState.FirstCheck) ||
+        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
+        unwrapCounter = 0;
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */
+function checkAndUpdateBinding(view, def, bindingIdx, value) {
+    if (checkBinding$1(view, def, bindingIdx, value)) {
+        view.oldValues[def.bindingIndex + bindingIdx] = value;
+        return true;
+    }
+    return false;
 }
 /**
  * @param {?} view
@@ -9620,20 +9650,16 @@ function checkBindingNoChanges(view, def, bindingIdx, value) {
 }
 /**
  * @param {?} view
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
  * @return {?}
  */
-function checkAndUpdateBinding(view, def, bindingIdx, value) {
-    const /** @type {?} */ oldValues = view.oldValues;
-    if (unwrapCounter || (view.state & ViewState.FirstCheck) ||
-        !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
-        unwrapCounter = 0;
-        oldValues[def.bindingIndex + bindingIdx] = value;
-        return true;
+function markParentViewsForCheck(view) {
+    let /** @type {?} */ currView = view;
+    while (currView) {
+        if (currView.def.flags & ViewFlags.OnPush) {
+            currView.state |= ViewState.ChecksEnabled;
+        }
+        currView = currView.viewContainerParent || currView.parent;
     }
-    return false;
 }
 /**
  * @param {?} view
@@ -9643,13 +9669,7 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
  * @return {?}
  */
 function dispatchEvent(view, nodeIndex, eventName, event) {
-    let /** @type {?} */ currView = view;
-    while (currView) {
-        if (currView.def.flags & ViewFlags.OnPush) {
-            currView.state |= ViewState.ChecksEnabled;
-        }
-        currView = currView.parent;
-    }
+    markParentViewsForCheck(view);
     return Services.handleEvent(view, nodeIndex, eventName, event);
 }
 /**
@@ -9752,10 +9772,10 @@ function getParentRenderElement(view, renderHost, def) {
     let /** @type {?} */ renderParent = def.renderParent;
     if (renderParent) {
         const /** @type {?} */ parent = def.parent;
-        if (parent && (parent.type !== NodeType.Element || !parent.element.component ||
-            (parent.element.component.provider.rendererType &&
-                parent.element.component.provider.rendererType.encapsulation ===
-                    ViewEncapsulation.Native))) {
+        if (parent &&
+            (parent.type !== NodeType.Element || (parent.flags & NodeFlags.HasComponent) === 0 ||
+                (parent.element.componentRendererType &&
+                    parent.element.componentRendererType.encapsulation === ViewEncapsulation.Native))) {
             // only children of non components, or children of components with native encapsulation should
             // be attached.
             return asElementData(view, def.renderParent.index).renderElement;
@@ -9984,20 +10004,20 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags,
         childFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: [],
-        disposableCount: 0,
+        outputs: [],
         element: {
             ns: undefined,
             name: undefined,
-            attrs: undefined,
-            outputs: [], template, source,
-            // will bet set by the view definition
-            component: undefined,
+            attrs: undefined, template, source,
+            componentProvider: undefined,
+            componentView: undefined,
+            componentRendererType: undefined,
             publicProviders: undefined,
             allProviders: undefined, handleEvent
         },
@@ -10018,9 +10038,11 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
  * @param {?=} bindings
  * @param {?=} outputs
  * @param {?=} handleEvent
+ * @param {?=} componentView
+ * @param {?=} componentRendererType
  * @return {?}
  */
-function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs, handleEvent) {
+function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs = [], bindings, outputs, handleEvent, componentView, componentRendererType) {
     if (!handleEvent) {
         handleEvent = NOOP;
     }
@@ -10047,6 +10069,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
                 break;
             case BindingType.ElementAttribute:
             case BindingType.ElementProperty:
+            case BindingType.ComponentHostProperty:
                 securityContext = (entry[2]);
                 break;
         }
@@ -10055,22 +10078,26 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     outputs = outputs || [];
     const /** @type {?} */ outputDefs = new Array(outputs.length);
     for (let /** @type {?} */ i = 0; i < outputs.length; i++) {
-        const /** @type {?} */ output = outputs[i];
-        let /** @type {?} */ target;
-        let /** @type {?} */ eventName;
-        if (Array.isArray(output)) {
-            [target, eventName] = output;
-        }
-        else {
-            eventName = output;
-        }
-        outputDefs[i] = { eventName: eventName, target: target };
+        const [target, eventName] = outputs[i];
+        outputDefs[i] = {
+            type: OutputType.ElementOutput,
+            target: /** @type {?} */ (target), eventName,
+            propName: undefined
+        };
     }
     fixedAttrs = fixedAttrs || [];
     const /** @type {?} */ attrs = (fixedAttrs.map(([namespaceAndName, value]) => {
         const [ns, name] = splitNamespace(namespaceAndName);
         return [ns, name, value];
     }));
+    // This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
+    // which is not filled for host views.
+    if (componentRendererType && componentRendererType.encapsulation == null) {
+        componentRendererType = null;
+    }
+    if (componentView) {
+        flags |= NodeFlags.HasComponent;
+    }
     return {
         type: NodeType.Element,
         // will bet set by the view definition
@@ -10079,21 +10106,21 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags,
         childFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: bindingDefs,
-        disposableCount: outputDefs.length,
+        outputs: outputDefs,
         element: {
             ns,
             name,
             attrs,
-            outputs: outputDefs, source,
+            source,
             template: undefined,
             // will bet set by the view definition
-            component: undefined,
+            componentProvider: undefined, componentView, componentRendererType,
             publicProviders: undefined,
             allProviders: undefined, handleEvent,
         },
@@ -10136,19 +10163,28 @@ function createElement(view, renderHost, def) {
             renderer.setAttribute(el, name, value, ns);
         }
     }
-    if (elDef.outputs.length) {
-        for (let /** @type {?} */ i = 0; i < elDef.outputs.length; i++) {
-            const /** @type {?} */ output = elDef.outputs[i];
-            const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, elementEventFullName(output.target, output.eventName));
-            const /** @type {?} */ disposable = (renderer.listen(output.target || el, output.eventName, handleEventClosure));
-            view.disposables[def.disposableIndex + i] = disposable;
+    return el;
+}
+/**
+ * @param {?} view
+ * @param {?} compView
+ * @param {?} def
+ * @param {?} el
+ * @return {?}
+ */
+function listenToElementOutputs(view, compView, def, el) {
+    for (let /** @type {?} */ i = 0; i < def.outputs.length; i++) {
+        const /** @type {?} */ output = def.outputs[i];
+        const /** @type {?} */ handleEventClosure = renderEventHandlerClosure(view, def.index, elementEventFullName(output.target, output.eventName));
+        let /** @type {?} */ listenTarget = output.target;
+        let /** @type {?} */ listenerView = view;
+        if (output.target === 'component') {
+            listenTarget = null;
+            listenerView = compView;
         }
+        const /** @type {?} */ disposable = (listenerView.renderer.listen(listenTarget || el, output.eventName, handleEventClosure));
+        view.disposables[def.outputIndex + i] = disposable;
     }
-    return {
-        renderElement: el,
-        embeddedViews: (def.flags & NodeFlags.HasEmbeddedViews) ? [] : undefined,
-        projectedViews: undefined
-    };
 }
 /**
  * @param {?} view
@@ -10176,26 +10212,28 @@ function renderEventHandlerClosure(view, index, eventName) {
  */
 function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ bindLen = def.bindings.length;
-    if (bindLen > 0)
-        checkAndUpdateElementValue(view, def, 0, v0);
-    if (bindLen > 1)
-        checkAndUpdateElementValue(view, def, 1, v1);
-    if (bindLen > 2)
-        checkAndUpdateElementValue(view, def, 2, v2);
-    if (bindLen > 3)
-        checkAndUpdateElementValue(view, def, 3, v3);
-    if (bindLen > 4)
-        checkAndUpdateElementValue(view, def, 4, v4);
-    if (bindLen > 5)
-        checkAndUpdateElementValue(view, def, 5, v5);
-    if (bindLen > 6)
-        checkAndUpdateElementValue(view, def, 6, v6);
-    if (bindLen > 7)
-        checkAndUpdateElementValue(view, def, 7, v7);
-    if (bindLen > 8)
-        checkAndUpdateElementValue(view, def, 8, v8);
-    if (bindLen > 9)
-        checkAndUpdateElementValue(view, def, 9, v9);
+    let /** @type {?} */ changed = false;
+    if (bindLen > 0 && checkAndUpdateElementValue(view, def, 0, v0))
+        changed = true;
+    if (bindLen > 1 && checkAndUpdateElementValue(view, def, 1, v1))
+        changed = true;
+    if (bindLen > 2 && checkAndUpdateElementValue(view, def, 2, v2))
+        changed = true;
+    if (bindLen > 3 && checkAndUpdateElementValue(view, def, 3, v3))
+        changed = true;
+    if (bindLen > 4 && checkAndUpdateElementValue(view, def, 4, v4))
+        changed = true;
+    if (bindLen > 5 && checkAndUpdateElementValue(view, def, 5, v5))
+        changed = true;
+    if (bindLen > 6 && checkAndUpdateElementValue(view, def, 6, v6))
+        changed = true;
+    if (bindLen > 7 && checkAndUpdateElementValue(view, def, 7, v7))
+        changed = true;
+    if (bindLen > 8 && checkAndUpdateElementValue(view, def, 8, v8))
+        changed = true;
+    if (bindLen > 9 && checkAndUpdateElementValue(view, def, 9, v9))
+        changed = true;
+    return changed;
 }
 /**
  * @param {?} view
@@ -10204,9 +10242,12 @@ function checkAndUpdateElementInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, 
  * @return {?}
  */
 function checkAndUpdateElementDynamic(view, def, values) {
+    let /** @type {?} */ changed = false;
     for (let /** @type {?} */ i = 0; i < values.length; i++) {
-        checkAndUpdateElementValue(view, def, i, values[i]);
+        if (checkAndUpdateElementValue(view, def, i, values[i]))
+            changed = true;
     }
+    return changed;
 }
 /**
  * @param {?} view
@@ -10217,10 +10258,11 @@ function checkAndUpdateElementDynamic(view, def, values) {
  */
 function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     if (!checkAndUpdateBinding(view, def, bindingIdx, value)) {
-        return;
+        return false;
     }
     const /** @type {?} */ binding = def.bindings[bindingIdx];
-    const /** @type {?} */ renderNode = asElementData(view, def.index).renderElement;
+    const /** @type {?} */ elData = asElementData(view, def.index);
+    const /** @type {?} */ renderNode = elData.renderElement;
     const /** @type {?} */ name = binding.name;
     switch (binding.type) {
         case BindingType.ElementAttribute:
@@ -10235,7 +10277,11 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
         case BindingType.ElementProperty:
             setElementProperty(view, binding, renderNode, name, value);
             break;
+        case BindingType.ComponentHostProperty:
+            setElementProperty(elData.componentView, binding, renderNode, name, value);
+            break;
     }
+    return true;
 }
 /**
  * @param {?} view
@@ -10330,7 +10376,7 @@ function ngContentDef(ngContentIndex, index) {
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags: 0,
         childFlags: 0,
@@ -10340,7 +10386,7 @@ function ngContentDef(ngContentIndex, index) {
         references: {}, ngContentIndex,
         childCount: 0,
         bindings: [],
-        disposableCount: 0,
+        outputs: [],
         element: undefined,
         provider: undefined,
         text: undefined,
@@ -10541,6 +10587,130 @@ class NoOpAnimationPlayer {
     getPosition() { return 0; }
 }
 
+/**
+ * @param {?} parentView
+ * @param {?} elementData
+ * @param {?} viewIndex
+ * @param {?} view
+ * @return {?}
+ */
+function attachEmbeddedView(parentView, elementData, viewIndex, view) {
+    let /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    if (viewIndex == null) {
+        viewIndex = embeddedViews.length;
+    }
+    view.viewContainerParent = parentView;
+    addToArray$1(embeddedViews, viewIndex, view);
+    const /** @type {?} */ dvcElementData = declaredViewContainer(view);
+    if (dvcElementData && dvcElementData !== elementData) {
+        let /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+        if (!projectedViews) {
+            projectedViews = dvcElementData.projectedViews = [];
+        }
+        projectedViews.push(view);
+    }
+    Services.dirtyParentQueries(view);
+    const /** @type {?} */ prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
+    renderAttachEmbeddedView(elementData, prevView, view);
+}
+/**
+ * @param {?} elementData
+ * @param {?} viewIndex
+ * @return {?}
+ */
+function detachEmbeddedView(elementData, viewIndex) {
+    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    if (viewIndex == null || viewIndex >= embeddedViews.length) {
+        viewIndex = embeddedViews.length - 1;
+    }
+    if (viewIndex < 0) {
+        return null;
+    }
+    const /** @type {?} */ view = embeddedViews[viewIndex];
+    view.viewContainerParent = undefined;
+    removeFromArray(embeddedViews, viewIndex);
+    const /** @type {?} */ dvcElementData = declaredViewContainer(view);
+    if (dvcElementData && dvcElementData !== elementData) {
+        const /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+        removeFromArray(projectedViews, projectedViews.indexOf(view));
+    }
+    Services.dirtyParentQueries(view);
+    renderDetachView(view);
+    return view;
+}
+/**
+ * @param {?} elementData
+ * @param {?} oldViewIndex
+ * @param {?} newViewIndex
+ * @return {?}
+ */
+function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
+    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    const /** @type {?} */ view = embeddedViews[oldViewIndex];
+    removeFromArray(embeddedViews, oldViewIndex);
+    if (newViewIndex == null) {
+        newViewIndex = embeddedViews.length;
+    }
+    addToArray$1(embeddedViews, newViewIndex, view);
+    // Note: Don't need to change projectedViews as the order in there
+    // as always invalid...
+    Services.dirtyParentQueries(view);
+    renderDetachView(view);
+    const /** @type {?} */ prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
+    renderAttachEmbeddedView(elementData, prevView, view);
+    return view;
+}
+/**
+ * @param {?} elementData
+ * @param {?} prevView
+ * @param {?} view
+ * @return {?}
+ */
+function renderAttachEmbeddedView(elementData, prevView, view) {
+    const /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) : elementData.renderElement;
+    const /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
+    const /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
+    // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+    // However, browsers automatically do `appendChild` when there is no `nextSibling`.
+    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function renderDetachView(view) {
+    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, null, null, undefined);
+}
+/**
+ * @param {?} arr
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */
+function addToArray$1(arr, index, value) {
+    // perf: array.push is faster than array.splice!
+    if (index >= arr.length) {
+        arr.push(value);
+    }
+    else {
+        arr.splice(index, 0, value);
+    }
+}
+/**
+ * @param {?} arr
+ * @param {?} index
+ * @return {?}
+ */
+function removeFromArray(arr, index) {
+    // perf: array.pop is faster than array.splice!
+    if (index >= arr.length - 1) {
+        arr.pop();
+    }
+    else {
+        arr.splice(index, 1);
+    }
+}
+
 const /** @type {?} */ EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -10569,7 +10739,7 @@ class ComponentFactory_ extends ComponentFactory {
      */
     create(injector, projectableNodes = null, rootSelectorOrNode = null) {
         const /** @type {?} */ viewDef = resolveViewDefinition(this._viewClass);
-        const /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.component.index;
+        const /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.componentProvider.index;
         const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
         const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
         view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
@@ -10672,7 +10842,7 @@ class ViewContainerRef_$1 {
     clear() {
         const /** @type {?} */ len = this._data.embeddedViews.length;
         for (let /** @type {?} */ i = len - 1; i >= 0; i--) {
-            const /** @type {?} */ view = Services.detachEmbeddedView(this._data, i);
+            const /** @type {?} */ view = detachEmbeddedView(this._data, i);
             Services.destroyView(view);
         }
     }
@@ -10680,12 +10850,8 @@ class ViewContainerRef_$1 {
      * @param {?} index
      * @return {?}
      */
-    get(index) { return this._getViewRef(this._data.embeddedViews[index]); }
-    /**
-     * @param {?} view
-     * @return {?}
-     */
-    _getViewRef(view) {
+    get(index) {
+        const /** @type {?} */ view = this._data.embeddedViews[index];
         if (view) {
             const /** @type {?} */ ref = new ViewRef_$1(view);
             ref.attachToViewContainerRef(this);
@@ -10730,7 +10896,7 @@ class ViewContainerRef_$1 {
     insert(viewRef, index) {
         const /** @type {?} */ viewRef_ = (viewRef);
         const /** @type {?} */ viewData = viewRef_._view;
-        Services.attachEmbeddedView(this._data, index, viewData);
+        attachEmbeddedView(this._view, this._data, index, viewData);
         viewRef_.attachToViewContainerRef(this);
         return viewRef;
     }
@@ -10741,7 +10907,7 @@ class ViewContainerRef_$1 {
      */
     move(viewRef, currentIndex) {
         const /** @type {?} */ previousIndex = this._data.embeddedViews.indexOf(viewRef._view);
-        Services.moveEmbeddedView(this._data, previousIndex, currentIndex);
+        moveEmbeddedView(this._data, previousIndex, currentIndex);
         return viewRef;
     }
     /**
@@ -10756,7 +10922,7 @@ class ViewContainerRef_$1 {
      * @return {?}
      */
     remove(index) {
-        const /** @type {?} */ viewData = Services.detachEmbeddedView(this._data, index);
+        const /** @type {?} */ viewData = detachEmbeddedView(this._data, index);
         if (viewData) {
             Services.destroyView(viewData);
         }
@@ -10766,13 +10932,8 @@ class ViewContainerRef_$1 {
      * @return {?}
      */
     detach(index) {
-        const /** @type {?} */ view = Services.detachEmbeddedView(this._data, index);
-        if (view) {
-            const /** @type {?} */ viewRef = this._getViewRef(view);
-            viewRef.detachFromContainer();
-            return viewRef;
-        }
-        return null;
+        const /** @type {?} */ view = detachEmbeddedView(this._data, index);
+        return view ? new ViewRef_$1(view) : null;
     }
 }
 /**
@@ -10806,7 +10967,7 @@ class ViewRef_$1 {
     /**
      * @return {?}
      */
-    markForCheck() { this.reattach(); }
+    markForCheck() { markParentViewsForCheck(this._view); }
     /**
      * @return {?}
      */
@@ -10848,9 +11009,10 @@ class ViewRef_$1 {
     /**
      * @return {?}
      */
-    detachFromContainer() {
+    detachFromAppRef() {
         this._appRef = null;
-        this._viewContainerRef = null;
+        renderDetachView(this._view);
+        Services.dirtyParentQueries(this._view);
     }
     /**
      * @param {?} appRef
@@ -10927,7 +11089,7 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        const /** @type {?} */ allowPrivateServices = !!this.elDef.element.component;
+        const /** @type {?} */ allowPrivateServices = (this.elDef.flags & NodeFlags.HasComponent) !== 0;
         return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
@@ -11174,11 +11336,9 @@ const /** @type {?} */ NOT_CREATED = new Object();
  * @param {?} deps
  * @param {?=} props
  * @param {?=} outputs
- * @param {?=} component
- * @param {?=} rendererType
  * @return {?}
  */
-function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs, component, rendererType) {
+function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outputs) {
     const /** @type {?} */ bindings = [];
     if (props) {
         for (let /** @type {?} */ prop in props) {
@@ -11195,10 +11355,10 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
     const /** @type {?} */ outputDefs = [];
     if (outputs) {
         for (let /** @type {?} */ propName in outputs) {
-            outputDefs.push({ propName, eventName: outputs[propName] });
+            outputDefs.push({ type: OutputType.DirectiveOutput, propName, target: null, eventName: outputs[propName] });
         }
     }
-    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs, component, rendererType);
+    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs);
 }
 /**
  * @param {?} flags
@@ -11232,17 +11392,10 @@ function providerDef(flags, matchedQueries, type, token, value, deps) {
  * @param {?} deps
  * @param {?=} bindings
  * @param {?=} outputs
- * @param {?=} component
- * @param {?=} rendererType
  * @return {?}
  */
-function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs, component, rendererType) {
+function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs) {
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    // This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
-    // which is not filled for host views.
-    if (rendererType && rendererType.encapsulation == null) {
-        rendererType = null;
-    }
     if (!outputs) {
         outputs = [];
     }
@@ -11261,9 +11414,6 @@ function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, v
         }
         return { flags, token, tokenKey: tokenKey(token) };
     });
-    if (component) {
-        flags = flags | NodeFlags.HasComponent;
-    }
     return {
         type,
         // will bet set by the view definition
@@ -11272,20 +11422,14 @@ function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, v
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags,
         childFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
-        ngContentIndex: undefined, childCount, bindings,
-        disposableCount: outputs.length,
+        ngContentIndex: undefined, childCount, bindings, outputs,
         element: undefined,
-        provider: {
-            type: providerType,
-            token,
-            tokenKey: tokenKey(token), value,
-            deps: depDefs, outputs, component, rendererType
-        },
+        provider: { type: providerType, token, tokenKey: tokenKey(token), value, deps: depDefs },
         text: undefined,
         pureExpression: undefined,
         query: undefined,
@@ -11323,15 +11467,15 @@ function createPipeInstance(view, def) {
  */
 function createDirectiveInstance(view, def) {
     // components can see other private services, other directives can't.
-    const /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.HasComponent) > 0;
+    const /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.IsComponent) > 0;
     const /** @type {?} */ providerDef = def.provider;
     // directives are always eager and classes!
     const /** @type {?} */ instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
-    if (providerDef.outputs.length) {
-        for (let /** @type {?} */ i = 0; i < providerDef.outputs.length; i++) {
-            const /** @type {?} */ output = providerDef.outputs[i];
+    if (def.outputs.length) {
+        for (let /** @type {?} */ i = 0; i < def.outputs.length; i++) {
+            const /** @type {?} */ output = def.outputs[i];
             const /** @type {?} */ subscription = instance[output.propName].subscribe(eventHandlerClosure(view, def.parent.index, output.eventName));
-            view.disposables[def.disposableIndex + i] = subscription.unsubscribe.bind(subscription);
+            view.disposables[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
         }
     }
     return instance;
@@ -11363,28 +11507,59 @@ function eventHandlerClosure(view, index, eventName) {
 function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ providerData = asProviderData(view, def.index);
     const /** @type {?} */ directive = providerData.instance;
+    let /** @type {?} */ changed = false;
     let /** @type {?} */ changes;
     const /** @type {?} */ bindLen = def.bindings.length;
-    if (bindLen > 0)
-        changes = checkAndUpdateProp(view, providerData, def, 0, v0, changes);
-    if (bindLen > 1)
-        changes = checkAndUpdateProp(view, providerData, def, 1, v1, changes);
-    if (bindLen > 2)
-        changes = checkAndUpdateProp(view, providerData, def, 2, v2, changes);
-    if (bindLen > 3)
-        changes = checkAndUpdateProp(view, providerData, def, 3, v3, changes);
-    if (bindLen > 4)
-        changes = checkAndUpdateProp(view, providerData, def, 4, v4, changes);
-    if (bindLen > 5)
-        changes = checkAndUpdateProp(view, providerData, def, 5, v5, changes);
-    if (bindLen > 6)
-        changes = checkAndUpdateProp(view, providerData, def, 6, v6, changes);
-    if (bindLen > 7)
-        changes = checkAndUpdateProp(view, providerData, def, 7, v7, changes);
-    if (bindLen > 8)
-        changes = checkAndUpdateProp(view, providerData, def, 8, v8, changes);
-    if (bindLen > 9)
-        changes = checkAndUpdateProp(view, providerData, def, 9, v9, changes);
+    if (bindLen > 0 && checkBinding$1(view, def, 0, v0)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 0, v0, changes);
+    }
+    ;
+    if (bindLen > 1 && checkBinding$1(view, def, 1, v1)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 1, v1, changes);
+    }
+    ;
+    if (bindLen > 2 && checkBinding$1(view, def, 2, v2)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 2, v2, changes);
+    }
+    ;
+    if (bindLen > 3 && checkBinding$1(view, def, 3, v3)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 3, v3, changes);
+    }
+    ;
+    if (bindLen > 4 && checkBinding$1(view, def, 4, v4)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 4, v4, changes);
+    }
+    ;
+    if (bindLen > 5 && checkBinding$1(view, def, 5, v5)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 5, v5, changes);
+    }
+    ;
+    if (bindLen > 6 && checkBinding$1(view, def, 6, v6)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 6, v6, changes);
+    }
+    ;
+    if (bindLen > 7 && checkBinding$1(view, def, 7, v7)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 7, v7, changes);
+    }
+    ;
+    if (bindLen > 8 && checkBinding$1(view, def, 8, v8)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 8, v8, changes);
+    }
+    ;
+    if (bindLen > 9 && checkBinding$1(view, def, 9, v9)) {
+        changed = true;
+        changes = updateProp(view, providerData, def, 9, v9, changes);
+    }
+    ;
     if (changes) {
         directive.ngOnChanges(changes);
     }
@@ -11394,6 +11569,7 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (def.flags & NodeFlags.DoCheck) {
         directive.ngDoCheck();
     }
+    return changed;
 }
 /**
  * @param {?} view
@@ -11404,9 +11580,13 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
 function checkAndUpdateDirectiveDynamic(view, def, values) {
     const /** @type {?} */ providerData = asProviderData(view, def.index);
     const /** @type {?} */ directive = providerData.instance;
+    let /** @type {?} */ changed = false;
     let /** @type {?} */ changes;
     for (let /** @type {?} */ i = 0; i < values.length; i++) {
-        changes = checkAndUpdateProp(view, providerData, def, i, values[i], changes);
+        if (checkBinding$1(view, def, i, values[i])) {
+            changed = true;
+            changes = updateProp(view, providerData, def, i, values[i], changes);
+        }
     }
     if (changes) {
         directive.ngOnChanges(changes);
@@ -11417,6 +11597,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (def.flags & NodeFlags.DoCheck) {
         directive.ngDoCheck();
     }
+    return changed;
 }
 /**
  * @param {?} view
@@ -11587,7 +11768,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
 function findCompView(view, elDef, allowPrivateServices) {
     let /** @type {?} */ compView;
     if (allowPrivateServices) {
-        compView = asProviderData(view, elDef.element.component.index).componentView;
+        compView = asElementData(view, elDef.index).componentView;
     }
     else {
         compView = view;
@@ -11606,37 +11787,27 @@ function findCompView(view, elDef, allowPrivateServices) {
  * @param {?} changes
  * @return {?}
  */
-function checkAndUpdateProp(view, providerData, def, bindingIdx, value, changes) {
-    let /** @type {?} */ change;
-    let /** @type {?} */ changed;
+function updateProp(view, providerData, def, bindingIdx, value, changes) {
+    if (def.flags & NodeFlags.IsComponent) {
+        const /** @type {?} */ compView = asElementData(view, def.parent.index).componentView;
+        if (compView.def.flags & ViewFlags.OnPush) {
+            compView.state |= ViewState.ChecksEnabled;
+        }
+    }
+    const /** @type {?} */ binding = def.bindings[bindingIdx];
+    const /** @type {?} */ propName = binding.name;
+    // Note: This is still safe with Closure Compiler as
+    // the user passed in the property name as an object has to `providerDef`,
+    // so Closure Compiler will have renamed the property correctly already.
+    providerData.instance[propName] = value;
     if (def.flags & NodeFlags.OnChanges) {
+        changes = changes || {};
         const /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-        changed = checkAndUpdateBinding(view, def, bindingIdx, value);
-        change = changed ?
-            new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0) :
-            null;
-    }
-    else {
-        changed = checkAndUpdateBinding(view, def, bindingIdx, value);
-    }
-    if (changed) {
-        if (def.flags & NodeFlags.HasComponent) {
-            const /** @type {?} */ compView = providerData.componentView;
-            if (compView.def.flags & ViewFlags.OnPush) {
-                compView.state |= ViewState.ChecksEnabled;
-            }
-        }
         const /** @type {?} */ binding = def.bindings[bindingIdx];
-        const /** @type {?} */ propName = binding.name;
-        // Note: This is still safe with Closure Compiler as
-        // the user passed in the property name as an object has to `providerDef`,
-        // so Closure Compiler will have renamed the property correctly already.
-        providerData.instance[propName] = value;
-        if (change) {
-            changes = changes || {};
-            changes[binding.nonMinifiedName] = change;
-        }
+        changes[binding.nonMinifiedName] =
+            new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
     }
+    view.oldValues[def.bindingIndex + bindingIdx] = value;
     return changes;
 }
 /**
@@ -11737,7 +11908,7 @@ function _pureExpressionDef(type, propertyNames) {
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags: 0,
         childFlags: 0,
@@ -11747,7 +11918,7 @@ function _pureExpressionDef(type, propertyNames) {
         references: {},
         ngContentIndex: undefined,
         childCount: 0, bindings,
-        disposableCount: 0,
+        outputs: [],
         element: undefined,
         provider: undefined,
         text: undefined,
@@ -11803,8 +11974,8 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
         changed = true;
     if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
         changed = true;
-    const /** @type {?} */ data = asPureExpressionData(view, def.index);
     if (changed) {
+        const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
@@ -11891,7 +12062,7 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
         }
         data.value = value;
     }
-    return data.value;
+    return changed;
 }
 /**
  * @param {?} view
@@ -11909,8 +12080,8 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
             changed = true;
         }
     }
-    const /** @type {?} */ data = asPureExpressionData(view, def.index);
     if (changed) {
+        const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
         switch (def.pureExpression.type) {
             case PureExpressionType.Array:
@@ -11930,7 +12101,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
         }
         data.value = value;
     }
-    return data.value;
+    return changed;
 }
 
 /**
@@ -11953,7 +12124,7 @@ function queryDef(flags, id, bindings) {
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags,
         childFlags: 0,
@@ -11964,7 +12135,7 @@ function queryDef(flags, id, bindings) {
         references: {},
         childCount: 0,
         bindings: [],
-        disposableCount: 0,
+        outputs: [],
         element: undefined,
         provider: undefined,
         text: undefined,
@@ -12161,7 +12332,7 @@ function textDef(ngContentIndex, constants) {
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
-        disposableIndex: undefined,
+        outputIndex: undefined,
         // regular values
         flags: 0,
         childFlags: 0,
@@ -12170,7 +12341,7 @@ function textDef(ngContentIndex, constants) {
         matchedQueryIds: 0,
         references: {}, ngContentIndex,
         childCount: 0, bindings,
-        disposableCount: 0,
+        outputs: [],
         element: undefined,
         provider: undefined,
         text: { prefix: constants[0], source },
@@ -12259,6 +12430,7 @@ function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8,
         const /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
         view.renderer.setValue(renderNode, value);
     }
+    return changed;
 }
 /**
  * @param {?} view
@@ -12285,6 +12457,7 @@ function checkAndUpdateTextDynamic(view, def, values) {
         const /** @type {?} */ renderNode = asTextData(view, def.index).renderText;
         view.renderer.setValue(renderNode, value);
     }
+    return changed;
 }
 /**
  * @param {?} value
@@ -12331,7 +12504,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         node.index = i;
         node.parent = currentParent;
         node.bindingIndex = viewBindingCount;
-        node.disposableIndex = viewDisposableCount;
+        node.outputIndex = viewDisposableCount;
         node.reverseChildIndex =
             calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
         // renderParent needs to account for ng-container!
@@ -12367,7 +12540,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
             }
         }
         viewBindingCount += node.bindings.length;
-        viewDisposableCount += node.disposableCount;
+        viewDisposableCount += node.outputs.length;
         if (!currentRenderParent && (node.type === NodeType.Element || node.type === NodeType.Text)) {
             lastRenderRootNode = node;
         }
@@ -12380,7 +12553,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
                 currentParent.element.allProviders = currentParent.element.publicProviders;
             }
             const /** @type {?} */ isPrivateService = (node.flags & NodeFlags.PrivateProvider) !== 0;
-            const /** @type {?} */ isComponent = (node.flags & NodeFlags.HasComponent) !== 0;
+            const /** @type {?} */ isComponent = (node.flags & NodeFlags.IsComponent) !== 0;
             if (!isPrivateService || isComponent) {
                 currentParent.element.publicProviders[node.provider.tokenKey] = node;
             }
@@ -12393,7 +12566,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
                 currentParent.element.allProviders[node.provider.tokenKey] = node;
             }
             if (isComponent) {
-                currentParent.element.component = node;
+                currentParent.element.componentProvider = node;
             }
         }
         if (node.childCount) {
@@ -12417,7 +12590,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         updateRenderer: updateRenderer || NOOP$1,
         handleEvent: handleEvent || NOOP$1,
         bindingCount: viewBindingCount,
-        disposableCount: viewDisposableCount, lastRenderRootNode
+        outputCount: viewDisposableCount, lastRenderRootNode
     };
 }
 /**
@@ -12534,11 +12707,11 @@ function createRootView(root, def, context) {
  */
 function createView(root, renderer, parent, parentNodeDef, def) {
     const /** @type {?} */ nodes = new Array(def.nodes.length);
-    const /** @type {?} */ disposables = def.disposableCount ? new Array(def.disposableCount) : undefined;
+    const /** @type {?} */ disposables = def.outputCount ? new Array(def.outputCount) : undefined;
     const /** @type {?} */ view = {
         def,
         parent,
-        parentNodeDef,
+        viewContainerParent: undefined, parentNodeDef,
         context: undefined,
         component: undefined, nodes,
         state: ViewState.FirstCheck | ViewState.ChecksEnabled, root, renderer,
@@ -12571,97 +12744,98 @@ function createViewNodes(view) {
     for (let /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = def.nodes[i];
         Services.setCurrentNode(view, i);
+        let /** @type {?} */ nodeData;
         switch (nodeDef.type) {
             case NodeType.Element:
-                nodes[i] = (createElement(view, renderHost, nodeDef));
-                break;
-            case NodeType.Text:
-                nodes[i] = (createText(view, renderHost, nodeDef));
-                break;
-            case NodeType.Provider: {
-                const /** @type {?} */ instance = createProviderInstance(view, nodeDef);
-                const /** @type {?} */ providerData = ({ componentView: undefined, instance });
-                nodes[i] = (providerData);
-                break;
-            }
-            case NodeType.Pipe: {
-                const /** @type {?} */ instance = createPipeInstance(view, nodeDef);
-                const /** @type {?} */ providerData = ({ componentView: undefined, instance });
-                nodes[i] = (providerData);
-                break;
-            }
-            case NodeType.Directive: {
+                const /** @type {?} */ el = (createElement(view, renderHost, nodeDef));
+                let /** @type {?} */ componentView;
                 if (nodeDef.flags & NodeFlags.HasComponent) {
-                    // Components can inject a ChangeDetectorRef that needs a references to
-                    // the component view. Therefore, we create the component view first
-                    // and set the ProviderData in ViewData, and then instantiate the provider.
-                    const /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.provider.component);
-                    const /** @type {?} */ rendererType = nodeDef.provider.rendererType;
+                    const /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.element.componentView);
+                    const /** @type {?} */ rendererType = nodeDef.element.componentRendererType;
                     let /** @type {?} */ compRenderer;
                     if (!rendererType) {
                         compRenderer = view.root.renderer;
                     }
                     else {
-                        const /** @type {?} */ hostEl = asElementData(view, nodeDef.parent.index).renderElement;
-                        compRenderer = view.root.rendererFactory.createRenderer(hostEl, rendererType);
+                        compRenderer = view.root.rendererFactory.createRenderer(el, rendererType);
                     }
-                    const /** @type {?} */ componentView = createView(view.root, compRenderer, view, nodeDef, compViewDef);
-                    const /** @type {?} */ providerData = ({ componentView, instance: undefined });
-                    nodes[i] = (providerData);
-                    const /** @type {?} */ instance = providerData.instance = createDirectiveInstance(view, nodeDef);
-                    initView(componentView, instance, instance);
+                    componentView = createView(view.root, compRenderer, view, nodeDef.element.componentProvider, compViewDef);
                 }
-                else {
-                    const /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
-                    const /** @type {?} */ providerData = ({ componentView: undefined, instance });
-                    nodes[i] = (providerData);
+                listenToElementOutputs(view, componentView, nodeDef, el);
+                nodeData = ({
+                    renderElement: el,
+                    componentView,
+                    embeddedViews: (nodeDef.flags & NodeFlags.HasEmbeddedViews) ? [] : undefined,
+                    projectedViews: undefined
+                });
+                break;
+            case NodeType.Text:
+                nodeData = (createText(view, renderHost, nodeDef));
+                break;
+            case NodeType.Provider: {
+                const /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                nodeData = ({ instance });
+                break;
+            }
+            case NodeType.Pipe: {
+                const /** @type {?} */ instance = createPipeInstance(view, nodeDef);
+                nodeData = ({ instance });
+                break;
+            }
+            case NodeType.Directive: {
+                const /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
+                nodeData = ({ instance });
+                if (nodeDef.flags & NodeFlags.IsComponent) {
+                    const /** @type {?} */ compView = asElementData(view, nodeDef.parent.index).componentView;
+                    initView(componentView, instance, instance);
                 }
                 break;
             }
             case NodeType.PureExpression:
-                nodes[i] = (createPureExpression(view, nodeDef));
+                nodeData = (createPureExpression(view, nodeDef));
                 break;
             case NodeType.Query:
-                nodes[i] = (createQuery());
+                nodeData = (createQuery());
                 break;
             case NodeType.NgContent:
                 appendNgContent(view, renderHost, nodeDef);
                 // no runtime data needed for NgContent...
-                nodes[i] = undefined;
+                nodeData = undefined;
                 break;
         }
+        nodes[i] = nodeData;
     }
     // Create the ViewData.nodes of component views after we created everything else,
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
     // fill static content and view queries
-    execQueriesAction(view, NodeFlags.HasContentQuery | NodeFlags.HasViewQuery, NodeFlags.HasStaticQuery, QueryAction.CheckAndUpdate);
+    execQueriesAction(view, NodeFlags.HasContentQuery | NodeFlags.HasViewQuery, NodeFlags.HasStaticQuery, CheckType.CheckAndUpdate);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkNoChangesView(view) {
-    Services.updateDirectives(checkNoChangesNode, view);
+    Services.updateDirectives(view, CheckType.CheckNoChanges);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckNoChanges);
-    Services.updateRenderer(checkNoChangesNode, view);
+    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, CheckType.CheckNoChanges);
+    Services.updateRenderer(view, CheckType.CheckNoChanges);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckNoChanges);
+    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, CheckType.CheckNoChanges);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkAndUpdateView(view) {
-    Services.updateDirectives(checkAndUpdateNode, view);
+    Services.updateDirectives(view, CheckType.CheckAndUpdate);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckAndUpdate);
+    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, CheckType.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
         (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
-    Services.updateRenderer(checkAndUpdateNode, view);
+    Services.updateRenderer(view, CheckType.CheckAndUpdate);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, QueryAction.CheckAndUpdate);
+    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, CheckType.CheckAndUpdate);
     callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
         (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
     if (view.def.flags & ViewFlags.OnPush) {
@@ -12671,7 +12845,7 @@ function checkAndUpdateView(view) {
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?=} v0
  * @param {?=} v1
@@ -12685,17 +12859,17 @@ function checkAndUpdateView(view) {
  * @param {?=} v9
  * @return {?}
  */
-function checkAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     if (argStyle === ArgumentType.Inline) {
-        return checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        return checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
-        return checkAndUpdateNodeDynamic(view, nodeIndex, v0);
+        return checkAndUpdateNodeDynamic(view, nodeDef, v0);
     }
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?=} v0
  * @param {?=} v1
  * @param {?=} v2
@@ -12708,41 +12882,63 @@ function checkAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v
  * @param {?=} v9
  * @return {?}
  */
-function checkAndUpdateNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    let /** @type {?} */ changed = false;
     switch (nodeDef.type) {
         case NodeType.Element:
-            return checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            changed = checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            break;
         case NodeType.Text:
-            return checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            changed = checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            break;
         case NodeType.Directive:
-            return checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            changed =
+                checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            break;
         case NodeType.PureExpression:
-            return checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            changed =
+                checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            break;
     }
+    return changed;
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} values
  * @return {?}
  */
-function checkAndUpdateNodeDynamic(view, nodeIndex, values) {
-    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+function checkAndUpdateNodeDynamic(view, nodeDef, values) {
+    let /** @type {?} */ changed = false;
     switch (nodeDef.type) {
         case NodeType.Element:
-            return checkAndUpdateElementDynamic(view, nodeDef, values);
+            changed = checkAndUpdateElementDynamic(view, nodeDef, values);
+            break;
         case NodeType.Text:
-            return checkAndUpdateTextDynamic(view, nodeDef, values);
+            changed = checkAndUpdateTextDynamic(view, nodeDef, values);
+            break;
         case NodeType.Directive:
-            return checkAndUpdateDirectiveDynamic(view, nodeDef, values);
+            changed = checkAndUpdateDirectiveDynamic(view, nodeDef, values);
+            break;
         case NodeType.PureExpression:
-            return checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
+            changed = checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
+            break;
     }
+    if (changed) {
+        // Update oldValues after all bindings have been updated,
+        // as a setter for a property might update other properties.
+        const /** @type {?} */ bindLen = nodeDef.bindings.length;
+        const /** @type {?} */ bindingStart = nodeDef.bindingIndex;
+        const /** @type {?} */ oldValues = view.oldValues;
+        for (let /** @type {?} */ i = 0; i < bindLen; i++) {
+            oldValues[bindingStart + i] = values[i];
+        }
+    }
+    return changed;
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?=} v0
  * @param {?=} v1
@@ -12756,17 +12952,19 @@ function checkAndUpdateNodeDynamic(view, nodeIndex, values) {
  * @param {?=} v9
  * @return {?}
  */
-function checkNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+function checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     if (argStyle === ArgumentType.Inline) {
-        return checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+        checkNoChangesNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
-        return checkNoChangesNodeDynamic(view, nodeIndex, v0);
+        checkNoChangesNodeDynamic(view, nodeDef, v0);
     }
+    // Returning false is ok here as we would have thrown in case of a change.
+    return false;
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} v0
  * @param {?} v1
  * @param {?} v2
@@ -12779,8 +12977,7 @@ function checkNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v
  * @param {?} v9
  * @return {?}
  */
-function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+function checkNoChangesNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ bindLen = nodeDef.bindings.length;
     if (bindLen > 0)
         checkBindingNoChanges(view, nodeDef, 0, v0);
@@ -12802,22 +12999,17 @@ function checkNoChangesNodeInline(view, nodeIndex, v0, v1, v2, v3, v4, v5, v6, v
         checkBindingNoChanges(view, nodeDef, 8, v8);
     if (bindLen > 9)
         checkBindingNoChanges(view, nodeDef, 9, v9);
-    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
-        undefined;
 }
 /**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} values
  * @return {?}
  */
-function checkNoChangesNodeDynamic(view, nodeIndex, values) {
-    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+function checkNoChangesNodeDynamic(view, nodeDef, values) {
     for (let /** @type {?} */ i = 0; i < values.length; i++) {
         checkBindingNoChanges(view, nodeDef, i, values[i]);
     }
-    return nodeDef.type === NodeType.PureExpression ? asPureExpressionData(view, nodeIndex).value :
-        undefined;
 }
 /**
  * @param {?} view
@@ -12849,7 +13041,7 @@ function destroyView(view) {
     if (view.renderer.destroyNode) {
         destroyViewNodes(view);
     }
-    if (view.parentNodeDef && view.parentNodeDef.flags & NodeFlags.HasComponent) {
+    if (isComponentView(view)) {
         view.renderer.destroy();
     }
     view.state |= ViewState.Destroyed;
@@ -12893,8 +13085,7 @@ function execComponentViewsAction(view, action) {
         const /** @type {?} */ nodeDef = def.nodes[i];
         if (nodeDef.flags & NodeFlags.HasComponent) {
             // a leaf
-            const /** @type {?} */ providerData = asProviderData(view, i);
-            callViewAction(providerData.componentView, action);
+            callViewAction(asElementData(view, i).componentView, action);
         }
         else if ((nodeDef.childFlags & NodeFlags.HasComponent) === 0) {
             // a parent with leafs
@@ -12961,19 +13152,14 @@ function callViewAction(view, action) {
             break;
     }
 }
-let QueryAction = {};
-QueryAction.CheckAndUpdate = 0;
-QueryAction.CheckNoChanges = 1;
-QueryAction[QueryAction.CheckAndUpdate] = "CheckAndUpdate";
-QueryAction[QueryAction.CheckNoChanges] = "CheckNoChanges";
 /**
  * @param {?} view
  * @param {?} queryFlags
  * @param {?} staticDynamicQueryFlag
- * @param {?} action
+ * @param {?} checkType
  * @return {?}
  */
-function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, action) {
+function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) {
     if (!(view.def.nodeFlags & queryFlags) || !(view.def.nodeFlags & staticDynamicQueryFlag)) {
         return;
     }
@@ -12982,11 +13168,11 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, action) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
         if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
             Services.setCurrentNode(view, nodeDef.index);
-            switch (action) {
-                case QueryAction.CheckAndUpdate:
+            switch (checkType) {
+                case CheckType.CheckAndUpdate:
                     checkAndUpdateQuery(view, nodeDef);
                     break;
-                case QueryAction.CheckNoChanges:
+                case CheckType.CheckNoChanges:
                     checkNoChangesQuery(view, nodeDef);
                     break;
             }
@@ -12996,129 +13182,6 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, action) {
             // then skip the children
             i += nodeDef.childCount;
         }
-    }
-}
-
-/**
- * @param {?} elementData
- * @param {?} viewIndex
- * @param {?} view
- * @return {?}
- */
-function attachEmbeddedView(elementData, viewIndex, view) {
-    let /** @type {?} */ embeddedViews = elementData.embeddedViews;
-    if (viewIndex == null) {
-        viewIndex = embeddedViews.length;
-    }
-    addToArray$1(embeddedViews, viewIndex, view);
-    const /** @type {?} */ dvcElementData = declaredViewContainer(view);
-    if (dvcElementData && dvcElementData !== elementData) {
-        let /** @type {?} */ projectedViews = dvcElementData.projectedViews;
-        if (!projectedViews) {
-            projectedViews = dvcElementData.projectedViews = [];
-        }
-        projectedViews.push(view);
-    }
-    dirtyParentQueries(view);
-    const /** @type {?} */ prevView = viewIndex > 0 ? embeddedViews[viewIndex - 1] : null;
-    renderAttachEmbeddedView(elementData, prevView, view);
-}
-/**
- * @param {?} elementData
- * @param {?} viewIndex
- * @return {?}
- */
-function detachEmbeddedView(elementData, viewIndex) {
-    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
-    if (viewIndex == null || viewIndex >= embeddedViews.length) {
-        viewIndex = embeddedViews.length - 1;
-    }
-    if (viewIndex < 0) {
-        return null;
-    }
-    const /** @type {?} */ view = embeddedViews[viewIndex];
-    removeFromArray(embeddedViews, viewIndex);
-    const /** @type {?} */ dvcElementData = declaredViewContainer(view);
-    if (dvcElementData && dvcElementData !== elementData) {
-        const /** @type {?} */ projectedViews = dvcElementData.projectedViews;
-        removeFromArray(projectedViews, projectedViews.indexOf(view));
-    }
-    dirtyParentQueries(view);
-    renderDetachEmbeddedView(elementData, view);
-    return view;
-}
-/**
- * @param {?} elementData
- * @param {?} oldViewIndex
- * @param {?} newViewIndex
- * @return {?}
- */
-function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
-    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
-    const /** @type {?} */ view = embeddedViews[oldViewIndex];
-    removeFromArray(embeddedViews, oldViewIndex);
-    if (newViewIndex == null) {
-        newViewIndex = embeddedViews.length;
-    }
-    addToArray$1(embeddedViews, newViewIndex, view);
-    // Note: Don't need to change projectedViews as the order in there
-    // as always invalid...
-    dirtyParentQueries(view);
-    renderDetachEmbeddedView(elementData, view);
-    const /** @type {?} */ prevView = newViewIndex > 0 ? embeddedViews[newViewIndex - 1] : null;
-    renderAttachEmbeddedView(elementData, prevView, view);
-    return view;
-}
-/**
- * @param {?} elementData
- * @param {?} prevView
- * @param {?} view
- * @return {?}
- */
-function renderAttachEmbeddedView(elementData, prevView, view) {
-    const /** @type {?} */ prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode) : elementData.renderElement;
-    const /** @type {?} */ parentNode = view.renderer.parentNode(prevRenderNode);
-    const /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
-    // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
-    // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
-}
-/**
- * @param {?} elementData
- * @param {?} view
- * @return {?}
- */
-function renderDetachEmbeddedView(elementData, view) {
-    const /** @type {?} */ parentNode = view.renderer.parentNode(elementData.renderElement);
-    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, parentNode, null, undefined);
-}
-/**
- * @param {?} arr
- * @param {?} index
- * @param {?} value
- * @return {?}
- */
-function addToArray$1(arr, index, value) {
-    // perf: array.push is faster than array.splice!
-    if (index >= arr.length) {
-        arr.push(value);
-    }
-    else {
-        arr.splice(index, 0, value);
-    }
-}
-/**
- * @param {?} arr
- * @param {?} index
- * @return {?}
- */
-function removeFromArray(arr, index) {
-    // perf: array.pop is faster than array.splice!
-    if (index >= arr.length - 1) {
-        arr.pop();
-    }
-    else {
-        arr.splice(index, 1);
     }
 }
 
@@ -13138,14 +13201,12 @@ function initServicesIfNeeded() {
     Services.checkAndUpdateView = services.checkAndUpdateView;
     Services.checkNoChangesView = services.checkNoChangesView;
     Services.destroyView = services.destroyView;
-    Services.attachEmbeddedView = services.attachEmbeddedView,
-        Services.detachEmbeddedView = services.detachEmbeddedView,
-        Services.moveEmbeddedView = services.moveEmbeddedView;
-    Services.resolveDep = services.resolveDep;
+    Services.resolveDep = resolveDep;
     Services.createDebugContext = services.createDebugContext;
     Services.handleEvent = services.handleEvent;
     Services.updateDirectives = services.updateDirectives;
     Services.updateRenderer = services.updateRenderer;
+    Services.dirtyParentQueries = dirtyParentQueries;
 }
 /**
  * @return {?}
@@ -13158,14 +13219,12 @@ function createProdServices() {
         checkAndUpdateView: checkAndUpdateView,
         checkNoChangesView: checkNoChangesView,
         destroyView: destroyView,
-        attachEmbeddedView: attachEmbeddedView,
-        detachEmbeddedView: detachEmbeddedView,
-        moveEmbeddedView: moveEmbeddedView,
-        resolveDep: resolveDep,
         createDebugContext: (view, nodeIndex) => new DebugContext_(view, nodeIndex),
         handleEvent: (view, nodeIndex, eventName, event) => view.def.handleEvent(view, nodeIndex, eventName, event),
-        updateDirectives: (check, view) => view.def.updateDirectives(check, view),
-        updateRenderer: (check, view) => view.def.updateRenderer(check, view),
+        updateDirectives: (view, checkType) => view.def.updateDirectives(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
+            prodCheckNoChangesNode, view),
+        updateRenderer: (view, checkType) => view.def.updateRenderer(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
+            prodCheckNoChangesNode, view),
     };
 }
 /**
@@ -13179,10 +13238,6 @@ function createDebugServices() {
         checkAndUpdateView: debugCheckAndUpdateView,
         checkNoChangesView: debugCheckNoChangesView,
         destroyView: debugDestroyView,
-        attachEmbeddedView: attachEmbeddedView,
-        detachEmbeddedView: detachEmbeddedView,
-        moveEmbeddedView: moveEmbeddedView,
-        resolveDep: resolveDep,
         createDebugContext: (view, nodeIndex) => new DebugContext_(view, nodeIndex),
         handleEvent: debugHandleEvent,
         updateDirectives: debugUpdateDirectives,
@@ -13229,6 +13284,50 @@ function createRootData(injector, rendererFactory, projectableNodes, rootSelecto
         projectableNodes,
         selectorOrNode: rootSelectorOrNode, sanitizer, rendererFactory, renderer
     };
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */
+function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+    return (nodeDef.type === NodeType.PureExpression) ? asPureExpressionData(view, nodeIndex).value :
+        undefined;
+}
+/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */
+function prodCheckNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
+    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+    return (nodeDef.type === NodeType.PureExpression) ? asPureExpressionData(view, nodeIndex).value :
+        undefined;
 }
 /**
  * @param {?} parent
@@ -13298,11 +13397,11 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
     return callWithDebugContext(DebugAction.handleEvent, view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
 }
 /**
- * @param {?} check
  * @param {?} view
+ * @param {?} checkType
  * @return {?}
  */
-function debugUpdateDirectives(check, view) {
+function debugUpdateDirectives(view, checkType) {
     if (view.state & ViewState.Destroyed) {
         throw viewDestroyedError$1(DebugAction[_currentAction]);
     }
@@ -13316,20 +13415,28 @@ function debugUpdateDirectives(check, view) {
      * @return {?}
      */
     function debugCheckDirectivesFn(view, nodeIndex, argStyle, ...values) {
-        const /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
-        if (view.def.nodes[nodeIndex].type === NodeType.Directive) {
+        const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        if (checkType === CheckType.CheckAndUpdate) {
+            debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
+        }
+        else {
+            debugCheckNoChangesNode(view, nodeDef, argStyle, values);
+        }
+        if (nodeDef.type === NodeType.Directive) {
             debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
         }
-        return result;
+        return (nodeDef.type === NodeType.PureExpression) ?
+            asPureExpressionData(view, nodeDef.index).value :
+            undefined;
     }
     ;
 }
 /**
- * @param {?} check
  * @param {?} view
+ * @param {?} checkType
  * @return {?}
  */
-function debugUpdateRenderer(check, view) {
+function debugUpdateRenderer(view, checkType) {
     if (view.state & ViewState.Destroyed) {
         throw viewDestroyedError$1(DebugAction[_currentAction]);
     }
@@ -13343,34 +13450,40 @@ function debugUpdateRenderer(check, view) {
      * @return {?}
      */
     function debugCheckRenderNodeFn(view, nodeIndex, argStyle, ...values) {
-        const /** @type {?} */ result = debugCheckFn(check, view, nodeIndex, argStyle, values);
         const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        if (checkType === CheckType.CheckAndUpdate) {
+            debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
+        }
+        else {
+            debugCheckNoChangesNode(view, nodeDef, argStyle, values);
+        }
         if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text) {
             debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         }
-        return result;
+        return (nodeDef.type === NodeType.PureExpression) ?
+            asPureExpressionData(view, nodeDef.index).value :
+            undefined;
     }
 }
 /**
- * @param {?} delegate
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?} givenValues
  * @return {?}
  */
-function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
-    if (_currentAction === DebugAction.detectChanges) {
+function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
+    const /** @type {?} */ changed = ((checkAndUpdateNode))(view, nodeDef, argStyle, ...givenValues);
+    if (changed) {
         const /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
-        const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
         if (nodeDef.type === NodeType.Directive || nodeDef.type === NodeType.Element) {
             const /** @type {?} */ bindingValues = {};
             for (let /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
                 const /** @type {?} */ binding = nodeDef.bindings[i];
                 const /** @type {?} */ value = values[i];
                 if ((binding.type === BindingType.ElementProperty ||
-                    binding.type === BindingType.DirectiveProperty) &&
-                    checkBinding$1(view, nodeDef, i, value)) {
+                    binding.type === BindingType.ComponentHostProperty ||
+                    binding.type === BindingType.DirectiveProperty)) {
                     bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)] =
                         normalizeDebugBindingValue(value);
                 }
@@ -13389,9 +13502,17 @@ function debugCheckFn(delegate, view, nodeIndex, argStyle, givenValues) {
             }
         }
     }
-    return ((delegate))(view, nodeIndex, argStyle, ...givenValues);
 }
-;
+/**
+ * @param {?} view
+ * @param {?} nodeDef
+ * @param {?} argStyle
+ * @param {?} values
+ * @return {?}
+ */
+function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
+    ((checkNoChangesNode))(view, nodeDef, argStyle, ...values);
+}
 /**
  * @param {?} name
  * @return {?}
@@ -13476,7 +13597,13 @@ class DebugContext_ {
         }
         this.elDef = elDef;
         this.elView = elView;
-        this.compProviderDef = elView ? this.elDef.element.component : null;
+    }
+    /**
+     * @return {?}
+     */
+    get elOrCompView() {
+        // Has to be done lazily as we use the DebugContext also during creation of elements...
+        return asElementData(this.elView, this.elDef.index).componentView || this.view;
     }
     /**
      * @return {?}
@@ -13485,21 +13612,11 @@ class DebugContext_ {
     /**
      * @return {?}
      */
-    get component() {
-        if (this.compProviderDef) {
-            return asProviderData(this.elView, this.compProviderDef.index).instance;
-        }
-        return this.view.component;
-    }
+    get component() { return this.elOrCompView.component; }
     /**
      * @return {?}
      */
-    get context() {
-        if (this.compProviderDef) {
-            return asProviderData(this.elView, this.compProviderDef.index).instance;
-        }
-        return this.view.context;
-    }
+    get context() { return this.elOrCompView.context; }
     /**
      * @return {?}
      */
@@ -13548,10 +13665,7 @@ class DebugContext_ {
      * @return {?}
      */
     get componentRenderElement() {
-        const /** @type {?} */ view = this.compProviderDef ?
-            asProviderData(this.elView, this.compProviderDef.index).componentView :
-            this.view;
-        const /** @type {?} */ elData = findHostElement(view);
+        const /** @type {?} */ elData = findHostElement(this.elOrCompView);
         return elData ? elData.renderElement : undefined;
     }
     /**

@@ -79,7 +79,7 @@ export declare abstract class EmbeddedViewRef<C> extends ViewRef {
     readonly abstract rootNodes: any[];
 }
 export interface InternalViewRef extends ViewRef {
-    detachFromContainer(): void;
+    detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
 }
 export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRef, InternalViewRef {
@@ -97,6 +97,6 @@ export declare class ViewRef_<C> implements EmbeddedViewRef<C>, ChangeDetectorRe
     reattach(): void;
     onDestroy(callback: Function): void;
     destroy(): void;
-    detachFromContainer(): void;
+    detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
 }

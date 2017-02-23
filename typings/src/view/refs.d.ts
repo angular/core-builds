@@ -25,7 +25,7 @@ export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     reattach(): void;
     onDestroy(callback: Function): void;
     destroy(): void;
-    detachFromContainer(): void;
+    detachFromAppRef(): void;
     attachToAppRef(appRef: ApplicationRef): void;
     attachToViewContainerRef(vcRef: ViewContainerRef): void;
 }

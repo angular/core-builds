@@ -11,8 +11,9 @@ export declare function createRendererTypeV2(values: {
     };
 }): RendererTypeV2;
 export declare function checkBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
-export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
 export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
+export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
+export declare function markParentViewsForCheck(view: ViewData): void;
 export declare function dispatchEvent(view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
 export declare function declaredViewContainer(view: ViewData): ElementData;
 /**

@@ -1,5 +1,5 @@
 var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}/**
- * @license Angular v4.0.0-beta.8-6b7937f
+ * @license Angular v4.0.0-beta.8-e8d2743
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */import{Observable}from'rxjs/Observable';import{merge}from'rxjs/observable/merge';import{share}from'rxjs/operator/share';import{$$observable}from'rxjs/symbol/observable';import{Subject}from'rxjs/Subject';/**
@@ -533,7 +533,7 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
      * @return {?}
      */},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
  * @stable
- */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-6b7937f');/**
+ */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-e8d2743');/**
  * Inject decorator and metadata.
  *
  * @stable
@@ -3609,7 +3609,7 @@ scheduleMicroTask(function(){if(!_this18._stable&&!_this18._zone.hasPendingMacro
      */_createClass(ApplicationRef_,[{key:'attachView',value:function attachView(viewRef){var/** @type {?} */view=viewRef;this._views.push(view);view.attachToAppRef(this);}/**
      * @param {?} viewRef
      * @return {?}
-     */},{key:'detachView',value:function detachView(viewRef){var/** @type {?} */view=viewRef;ListWrapper.remove(this._views,view);view.detachFromContainer();}/**
+     */},{key:'detachView',value:function detachView(viewRef){var/** @type {?} */view=viewRef;ListWrapper.remove(this._views,view);view.detachFromAppRef();}/**
      * @param {?} componentOrFactory
      * @return {?}
      */},{key:'bootstrap',value:function bootstrap(componentOrFactory){var _this19=this;if(!this._initStatus.done){throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');}var/** @type {?} */componentFactory=void 0;if(componentOrFactory instanceof ComponentFactory){componentFactory=componentOrFactory;}else{componentFactory=this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);}this._rootComponentTypes.push(componentFactory.componentType);var/** @type {?} */compRef=componentFactory.create(this._injector,[],componentFactory.selector);compRef.onDestroy(function(){_this19._unloadComponent(compRef);});var/** @type {?} */testability=compRef.injector.get(Testability,null);if(testability){compRef.injector.get(TestabilityRegistry).registerApplication(compRef.location.nativeElement,testability);}this._loadComponent(compRef);if(isDevMode()){this._console.log('Angular is running in the development mode. Call enableProdMode() to enable the production mode.');}return compRef;}/**
@@ -4117,7 +4117,7 @@ wtfLeave(s);}/**
      * @return {?}
      */},{key:'destroy',value:function destroy(){this._view.detachAndDestroy();}/**
      * @return {?}
-     */},{key:'detachFromContainer',value:function detachFromContainer(){this._view.detach();}/**
+     */},{key:'detachFromAppRef',value:function detachFromAppRef(){this._view.detach();}/**
      * @param {?} appRef
      * @return {?}
      */},{key:'attachToAppRef',value:function attachToAppRef(appRef){this._view.attachToAppRef(appRef);}},{key:'internalView',get:function get(){return this._view;}/**
@@ -4232,7 +4232,7 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */var ArgumentType={};ArgumentType.Inline=0;ArgumentType.Dynamic=1;ArgumentType[ArgumentType.Inline]="Inline";ArgumentType[ArgumentType.Dynamic]="Dynamic";var ViewFlags={};ViewFlags.None=0;ViewFlags.OnPush=2;ViewFlags[ViewFlags.None]="None";ViewFlags[ViewFlags.OnPush]="OnPush";var NodeType={};NodeType.Element=0;NodeType.Text=1;NodeType.Directive=2;NodeType.Provider=3;NodeType.Pipe=4;NodeType.PureExpression=5;NodeType.Query=6;NodeType.NgContent=7;NodeType[NodeType.Element]="Element";NodeType[NodeType.Text]="Text";NodeType[NodeType.Directive]="Directive";NodeType[NodeType.Provider]="Provider";NodeType[NodeType.Pipe]="Pipe";NodeType[NodeType.PureExpression]="PureExpression";NodeType[NodeType.Query]="Query";NodeType[NodeType.NgContent]="NgContent";var NodeFlags={};NodeFlags.None=0;NodeFlags.OnInit=1;NodeFlags.OnDestroy=2;NodeFlags.DoCheck=4;NodeFlags.OnChanges=8;NodeFlags.AfterContentInit=16;NodeFlags.AfterContentChecked=32;NodeFlags.AfterViewInit=64;NodeFlags.AfterViewChecked=128;NodeFlags.HasEmbeddedViews=256;NodeFlags.HasComponent=512;NodeFlags.HasContentQuery=1024;NodeFlags.HasStaticQuery=2048;NodeFlags.HasDynamicQuery=4096;NodeFlags.HasViewQuery=8192;NodeFlags.LazyProvider=16384;NodeFlags.PrivateProvider=32768;NodeFlags[NodeFlags.None]="None";NodeFlags[NodeFlags.OnInit]="OnInit";NodeFlags[NodeFlags.OnDestroy]="OnDestroy";NodeFlags[NodeFlags.DoCheck]="DoCheck";NodeFlags[NodeFlags.OnChanges]="OnChanges";NodeFlags[NodeFlags.AfterContentInit]="AfterContentInit";NodeFlags[NodeFlags.AfterContentChecked]="AfterContentChecked";NodeFlags[NodeFlags.AfterViewInit]="AfterViewInit";NodeFlags[NodeFlags.AfterViewChecked]="AfterViewChecked";NodeFlags[NodeFlags.HasEmbeddedViews]="HasEmbeddedViews";NodeFlags[NodeFlags.HasComponent]="HasComponent";NodeFlags[NodeFlags.HasContentQuery]="HasContentQuery";NodeFlags[NodeFlags.HasStaticQuery]="HasStaticQuery";NodeFlags[NodeFlags.HasDynamicQuery]="HasDynamicQuery";NodeFlags[NodeFlags.HasViewQuery]="HasViewQuery";NodeFlags[NodeFlags.LazyProvider]="LazyProvider";NodeFlags[NodeFlags.PrivateProvider]="PrivateProvider";var BindingType={};BindingType.ElementAttribute=0;BindingType.ElementClass=1;BindingType.ElementStyle=2;BindingType.ElementProperty=3;BindingType.DirectiveProperty=4;BindingType.TextInterpolation=5;BindingType.PureExpressionProperty=6;BindingType[BindingType.ElementAttribute]="ElementAttribute";BindingType[BindingType.ElementClass]="ElementClass";BindingType[BindingType.ElementStyle]="ElementStyle";BindingType[BindingType.ElementProperty]="ElementProperty";BindingType[BindingType.DirectiveProperty]="DirectiveProperty";BindingType[BindingType.TextInterpolation]="TextInterpolation";BindingType[BindingType.PureExpressionProperty]="PureExpressionProperty";var QueryValueType={};QueryValueType.ElementRef=0;QueryValueType.RenderElement=1;QueryValueType.TemplateRef=2;QueryValueType.ViewContainerRef=3;QueryValueType.Provider=4;QueryValueType[QueryValueType.ElementRef]="ElementRef";QueryValueType[QueryValueType.RenderElement]="RenderElement";QueryValueType[QueryValueType.TemplateRef]="TemplateRef";QueryValueType[QueryValueType.ViewContainerRef]="ViewContainerRef";QueryValueType[QueryValueType.Provider]="Provider";var ProviderType={};ProviderType.Value=0;ProviderType.Class=1;ProviderType.Factory=2;ProviderType.UseExisting=3;ProviderType[ProviderType.Value]="Value";ProviderType[ProviderType.Class]="Class";ProviderType[ProviderType.Factory]="Factory";ProviderType[ProviderType.UseExisting]="UseExisting";var DepFlags={};DepFlags.None=0;DepFlags.SkipSelf=1;DepFlags.Optional=2;DepFlags.Value=8;DepFlags[DepFlags.None]="None";DepFlags[DepFlags.SkipSelf]="SkipSelf";DepFlags[DepFlags.Optional]="Optional";DepFlags[DepFlags.Value]="Value";var PureExpressionType={};PureExpressionType.Array=0;PureExpressionType.Object=1;PureExpressionType.Pipe=2;PureExpressionType[PureExpressionType.Array]="Array";PureExpressionType[PureExpressionType.Object]="Object";PureExpressionType[PureExpressionType.Pipe]="Pipe";var QueryBindingType={};QueryBindingType.First=0;QueryBindingType.All=1;QueryBindingType[QueryBindingType.First]="First";QueryBindingType[QueryBindingType.All]="All";var ViewState={};ViewState.FirstCheck=1;ViewState.ChecksEnabled=2;ViewState.Errored=4;ViewState.Destroyed=8;ViewState[ViewState.FirstCheck]="FirstCheck";ViewState[ViewState.ChecksEnabled]="ChecksEnabled";ViewState[ViewState.Errored]="Errored";ViewState[ViewState.Destroyed]="Destroyed";/**
+ */var ArgumentType={};ArgumentType.Inline=0;ArgumentType.Dynamic=1;ArgumentType[ArgumentType.Inline]="Inline";ArgumentType[ArgumentType.Dynamic]="Dynamic";var ViewFlags={};ViewFlags.None=0;ViewFlags.OnPush=2;ViewFlags[ViewFlags.None]="None";ViewFlags[ViewFlags.OnPush]="OnPush";var NodeType={};NodeType.Element=0;NodeType.Text=1;NodeType.Directive=2;NodeType.Provider=3;NodeType.Pipe=4;NodeType.PureExpression=5;NodeType.Query=6;NodeType.NgContent=7;NodeType[NodeType.Element]="Element";NodeType[NodeType.Text]="Text";NodeType[NodeType.Directive]="Directive";NodeType[NodeType.Provider]="Provider";NodeType[NodeType.Pipe]="Pipe";NodeType[NodeType.PureExpression]="PureExpression";NodeType[NodeType.Query]="Query";NodeType[NodeType.NgContent]="NgContent";var NodeFlags={};NodeFlags.None=0;NodeFlags.OnInit=1;NodeFlags.OnDestroy=2;NodeFlags.DoCheck=4;NodeFlags.OnChanges=8;NodeFlags.AfterContentInit=16;NodeFlags.AfterContentChecked=32;NodeFlags.AfterViewInit=64;NodeFlags.AfterViewChecked=128;NodeFlags.HasEmbeddedViews=256;NodeFlags.HasComponent=512;NodeFlags.IsComponent=1024;NodeFlags.HasContentQuery=2048;NodeFlags.HasStaticQuery=4096;NodeFlags.HasDynamicQuery=8192;NodeFlags.HasViewQuery=16384;NodeFlags.LazyProvider=32768;NodeFlags.PrivateProvider=65536;NodeFlags[NodeFlags.None]="None";NodeFlags[NodeFlags.OnInit]="OnInit";NodeFlags[NodeFlags.OnDestroy]="OnDestroy";NodeFlags[NodeFlags.DoCheck]="DoCheck";NodeFlags[NodeFlags.OnChanges]="OnChanges";NodeFlags[NodeFlags.AfterContentInit]="AfterContentInit";NodeFlags[NodeFlags.AfterContentChecked]="AfterContentChecked";NodeFlags[NodeFlags.AfterViewInit]="AfterViewInit";NodeFlags[NodeFlags.AfterViewChecked]="AfterViewChecked";NodeFlags[NodeFlags.HasEmbeddedViews]="HasEmbeddedViews";NodeFlags[NodeFlags.HasComponent]="HasComponent";NodeFlags[NodeFlags.IsComponent]="IsComponent";NodeFlags[NodeFlags.HasContentQuery]="HasContentQuery";NodeFlags[NodeFlags.HasStaticQuery]="HasStaticQuery";NodeFlags[NodeFlags.HasDynamicQuery]="HasDynamicQuery";NodeFlags[NodeFlags.HasViewQuery]="HasViewQuery";NodeFlags[NodeFlags.LazyProvider]="LazyProvider";NodeFlags[NodeFlags.PrivateProvider]="PrivateProvider";var BindingType={};BindingType.ElementAttribute=0;BindingType.ElementClass=1;BindingType.ElementStyle=2;BindingType.ElementProperty=3;BindingType.ComponentHostProperty=4;BindingType.DirectiveProperty=5;BindingType.TextInterpolation=6;BindingType.PureExpressionProperty=7;BindingType[BindingType.ElementAttribute]="ElementAttribute";BindingType[BindingType.ElementClass]="ElementClass";BindingType[BindingType.ElementStyle]="ElementStyle";BindingType[BindingType.ElementProperty]="ElementProperty";BindingType[BindingType.ComponentHostProperty]="ComponentHostProperty";BindingType[BindingType.DirectiveProperty]="DirectiveProperty";BindingType[BindingType.TextInterpolation]="TextInterpolation";BindingType[BindingType.PureExpressionProperty]="PureExpressionProperty";var OutputType={};OutputType.ElementOutput=0;OutputType.DirectiveOutput=1;OutputType[OutputType.ElementOutput]="ElementOutput";OutputType[OutputType.DirectiveOutput]="DirectiveOutput";var QueryValueType={};QueryValueType.ElementRef=0;QueryValueType.RenderElement=1;QueryValueType.TemplateRef=2;QueryValueType.ViewContainerRef=3;QueryValueType.Provider=4;QueryValueType[QueryValueType.ElementRef]="ElementRef";QueryValueType[QueryValueType.RenderElement]="RenderElement";QueryValueType[QueryValueType.TemplateRef]="TemplateRef";QueryValueType[QueryValueType.ViewContainerRef]="ViewContainerRef";QueryValueType[QueryValueType.Provider]="Provider";var ProviderType={};ProviderType.Value=0;ProviderType.Class=1;ProviderType.Factory=2;ProviderType.UseExisting=3;ProviderType[ProviderType.Value]="Value";ProviderType[ProviderType.Class]="Class";ProviderType[ProviderType.Factory]="Factory";ProviderType[ProviderType.UseExisting]="UseExisting";var DepFlags={};DepFlags.None=0;DepFlags.SkipSelf=1;DepFlags.Optional=2;DepFlags.Value=8;DepFlags[DepFlags.None]="None";DepFlags[DepFlags.SkipSelf]="SkipSelf";DepFlags[DepFlags.Optional]="Optional";DepFlags[DepFlags.Value]="Value";var PureExpressionType={};PureExpressionType.Array=0;PureExpressionType.Object=1;PureExpressionType.Pipe=2;PureExpressionType[PureExpressionType.Array]="Array";PureExpressionType[PureExpressionType.Object]="Object";PureExpressionType[PureExpressionType.Pipe]="Pipe";var QueryBindingType={};QueryBindingType.First=0;QueryBindingType.All=1;QueryBindingType[QueryBindingType.First]="First";QueryBindingType[QueryBindingType.All]="All";var ViewState={};ViewState.FirstCheck=1;ViewState.ChecksEnabled=2;ViewState.Errored=4;ViewState.Destroyed=8;ViewState[ViewState.FirstCheck]="FirstCheck";ViewState[ViewState.ChecksEnabled]="ChecksEnabled";ViewState[ViewState.Errored]="Errored";ViewState[ViewState.Destroyed]="Destroyed";/**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
  * @param {?} index
@@ -4257,10 +4257,10 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  * @param {?} view
  * @param {?} index
  * @return {?}
- */function asQueryList(view,index){return view.nodes[index];}/**
+ */function asQueryList(view,index){return view.nodes[index];}var CheckType={};CheckType.CheckAndUpdate=0;CheckType.CheckNoChanges=1;CheckType[CheckType.CheckAndUpdate]="CheckAndUpdate";CheckType[CheckType.CheckNoChanges]="CheckNoChanges";/**
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
- */var/** @type {?} */Services={setCurrentNode:undefined,createRootView:undefined,createEmbeddedView:undefined,checkAndUpdateView:undefined,checkNoChangesView:undefined,destroyView:undefined,attachEmbeddedView:undefined,detachEmbeddedView:undefined,moveEmbeddedView:undefined,resolveDep:undefined,createDebugContext:undefined,handleEvent:undefined,updateDirectives:undefined,updateRenderer:undefined};/**
+ */var/** @type {?} */Services={setCurrentNode:undefined,createRootView:undefined,createEmbeddedView:undefined,checkAndUpdateView:undefined,checkNoChangesView:undefined,destroyView:undefined,resolveDep:undefined,createDebugContext:undefined,handleEvent:undefined,updateDirectives:undefined,updateRenderer:undefined,dirtyParentQueries:undefined};/**
  * @param {?} context
  * @param {?} oldValue
  * @param {?} currValue
@@ -4295,7 +4295,13 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  * @param {?} bindingIdx
  * @param {?} value
  * @return {?}
- */function checkBinding$1(view,def,bindingIdx,value){var/** @type {?} */oldValue=view.oldValues[def.bindingIndex+bindingIdx];return unwrapCounter>0||!!(view.state&ViewState.FirstCheck)||!devModeEqual(oldValue,value);}/**
+ */function checkBinding$1(view,def,bindingIdx,value){var/** @type {?} */oldValues=view.oldValues;if(unwrapCounter>0||!!(view.state&ViewState.FirstCheck)||!looseIdentical(oldValues[def.bindingIndex+bindingIdx],value)){unwrapCounter=0;return true;}return false;}/**
+ * @param {?} view
+ * @param {?} def
+ * @param {?} bindingIdx
+ * @param {?} value
+ * @return {?}
+ */function checkAndUpdateBinding(view,def,bindingIdx,value){if(checkBinding$1(view,def,bindingIdx,value)){view.oldValues[def.bindingIndex+bindingIdx]=value;return true;}return false;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} bindingIdx
@@ -4303,17 +4309,14 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  * @return {?}
  */function checkBindingNoChanges(view,def,bindingIdx,value){var/** @type {?} */oldValue=view.oldValues[def.bindingIndex+bindingIdx];if(unwrapCounter||view.state&ViewState.FirstCheck||!devModeEqual(oldValue,value)){unwrapCounter=0;throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view,def.index),oldValue,value,(view.state&ViewState.FirstCheck)!==0);}}/**
  * @param {?} view
- * @param {?} def
- * @param {?} bindingIdx
- * @param {?} value
  * @return {?}
- */function checkAndUpdateBinding(view,def,bindingIdx,value){var/** @type {?} */oldValues=view.oldValues;if(unwrapCounter||view.state&ViewState.FirstCheck||!looseIdentical(oldValues[def.bindingIndex+bindingIdx],value)){unwrapCounter=0;oldValues[def.bindingIndex+bindingIdx]=value;return true;}return false;}/**
+ */function markParentViewsForCheck(view){var/** @type {?} */currView=view;while(currView){if(currView.def.flags&ViewFlags.OnPush){currView.state|=ViewState.ChecksEnabled;}currView=currView.viewContainerParent||currView.parent;}}/**
  * @param {?} view
  * @param {?} nodeIndex
  * @param {?} eventName
  * @param {?} event
  * @return {?}
- */function dispatchEvent(view,nodeIndex,eventName,event){var/** @type {?} */currView=view;while(currView){if(currView.def.flags&ViewFlags.OnPush){currView.state|=ViewState.ChecksEnabled;}currView=currView.parent;}return Services.handleEvent(view,nodeIndex,eventName,event);}/**
+ */function dispatchEvent(view,nodeIndex,eventName,event){markParentViewsForCheck(view);return Services.handleEvent(view,nodeIndex,eventName,event);}/**
  * @param {?} view
  * @return {?}
  */function declaredViewContainer(view){if(view.parent){var/** @type {?} */parentView=view.parent;return asElementData(parentView,view.parentNodeDef.index);}return undefined;}/**
@@ -4347,7 +4350,7 @@ var/** @type {?} */_nativeNodeToDebugNode=new Map();/**
  * @param {?} renderHost
  * @param {?} def
  * @return {?}
- */function getParentRenderElement(view,renderHost,def){var/** @type {?} */renderParent=def.renderParent;if(renderParent){var/** @type {?} */parent=def.parent;if(parent&&(parent.type!==NodeType.Element||!parent.element.component||parent.element.component.provider.rendererType&&parent.element.component.provider.rendererType.encapsulation===ViewEncapsulation.Native)){// only children of non components, or children of components with native encapsulation should
+ */function getParentRenderElement(view,renderHost,def){var/** @type {?} */renderParent=def.renderParent;if(renderParent){var/** @type {?} */parent=def.parent;if(parent&&(parent.type!==NodeType.Element||(parent.flags&NodeFlags.HasComponent)===0||parent.element.componentRendererType&&parent.element.componentRendererType.encapsulation===ViewEncapsulation.Native)){// only children of non components, or children of components with native encapsulation should
 // be attached.
 return asElementData(view,def.renderParent.index).renderElement;}}else{return renderHost;}}var/** @type {?} */VIEW_DEFINITION_CACHE=new WeakMap();/**
  * @param {?} factory
@@ -4417,9 +4420,8 @@ var/** @type {?} */projectedNodes=view.root.projectableNodes[ngContentIndex];if(
  * @return {?}
  */function anchorDef(flags,matchedQueriesDsl,ngContentIndex,childCount,handleEvent,templateFactory){if(!handleEvent){handleEvent=NOOP;}var _splitMatchedQueriesD=splitMatchedQueriesDsl(matchedQueriesDsl),matchedQueries=_splitMatchedQueriesD.matchedQueries,references=_splitMatchedQueriesD.references,matchedQueryIds=_splitMatchedQueriesD.matchedQueryIds;// skip the call to sliceErrorStack itself + the call to this function.
 var/** @type {?} */source=isDevMode()?sliceErrorStack(2,3):'';var/** @type {?} */template=templateFactory?resolveViewDefinition(templateFactory):null;return{type:NodeType.Element,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:ngContentIndex,childCount:childCount,bindings:[],disposableCount:0,element:{ns:undefined,name:undefined,attrs:undefined,outputs:[],template:template,source:source,// will bet set by the view definition
-component:undefined,publicProviders:undefined,allProviders:undefined,handleEvent:handleEvent},provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:ngContentIndex,childCount:childCount,bindings:[],outputs:[],element:{ns:undefined,name:undefined,attrs:undefined,template:template,source:source,componentProvider:undefined,componentView:undefined,componentRendererType:undefined,publicProviders:undefined,allProviders:undefined,handleEvent:handleEvent},provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
  * @param {?} flags
  * @param {?} matchedQueriesDsl
  * @param {?} ngContentIndex
@@ -4429,17 +4431,27 @@ component:undefined,publicProviders:undefined,allProviders:undefined,handleEvent
  * @param {?=} bindings
  * @param {?=} outputs
  * @param {?=} handleEvent
+ * @param {?=} componentView
+ * @param {?=} componentRendererType
  * @return {?}
- */function elementDef(flags,matchedQueriesDsl,ngContentIndex,childCount,namespaceAndName){var fixedAttrs=arguments.length>5&&arguments[5]!==undefined?arguments[5]:[];var bindings=arguments[6];var outputs=arguments[7];var handleEvent=arguments[8];if(!handleEvent){handleEvent=NOOP;}// skip the call to sliceErrorStack itself + the call to this function.
-var/** @type {?} */source=isDevMode()?sliceErrorStack(2,3):'';var _splitMatchedQueriesD2=splitMatchedQueriesDsl(matchedQueriesDsl),matchedQueries=_splitMatchedQueriesD2.matchedQueries,references=_splitMatchedQueriesD2.references,matchedQueryIds=_splitMatchedQueriesD2.matchedQueryIds;var/** @type {?} */ns=void 0;var/** @type {?} */name=void 0;if(namespaceAndName){var _splitNamespace=splitNamespace(namespaceAndName);var _splitNamespace2=_slicedToArray(_splitNamespace,2);ns=_splitNamespace2[0];name=_splitNamespace2[1];}bindings=bindings||[];var/** @type {?} */bindingDefs=new Array(bindings.length);for(var/** @type {?} */i=0;i<bindings.length;i++){var/** @type {?} */entry=bindings[i];var/** @type {?} */bindingDef=void 0;var/** @type {?} */bindingType=entry[0];var _splitNamespace3=splitNamespace(entry[1]),_splitNamespace4=_slicedToArray(_splitNamespace3,2),_ns=_splitNamespace4[0],_name=_splitNamespace4[1];var/** @type {?} */securityContext=void 0;var/** @type {?} */suffix=void 0;switch(bindingType){case BindingType.ElementStyle:suffix=entry[2];break;case BindingType.ElementAttribute:case BindingType.ElementProperty:securityContext=entry[2];break;}bindingDefs[i]={type:bindingType,ns:_ns,name:_name,nonMinifiedName:_name,securityContext:securityContext,suffix:suffix};}outputs=outputs||[];var/** @type {?} */outputDefs=new Array(outputs.length);for(var/** @type {?} */_i2=0;_i2<outputs.length;_i2++){var/** @type {?} */output=outputs[_i2];var/** @type {?} */target=void 0;var/** @type {?} */eventName=void 0;if(Array.isArray(output)){var _output=_slicedToArray(output,2);target=_output[0];eventName=_output[1];}else{eventName=output;}outputDefs[_i2]={eventName:eventName,target:target};}fixedAttrs=fixedAttrs||[];var/** @type {?} */attrs=fixedAttrs.map(function(_ref5){var _ref6=_slicedToArray(_ref5,2),namespaceAndName=_ref6[0],value=_ref6[1];var _splitNamespace5=splitNamespace(namespaceAndName),_splitNamespace6=_slicedToArray(_splitNamespace5,2),ns=_splitNamespace6[0],name=_splitNamespace6[1];return[ns,name,value];});return{type:NodeType.Element,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:ngContentIndex,childCount:childCount,bindings:bindingDefs,disposableCount:outputDefs.length,element:{ns:ns,name:name,attrs:attrs,outputs:outputDefs,source:source,template:undefined,// will bet set by the view definition
-component:undefined,publicProviders:undefined,allProviders:undefined,handleEvent:handleEvent},provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
+ */function elementDef(flags,matchedQueriesDsl,ngContentIndex,childCount,namespaceAndName){var fixedAttrs=arguments.length>5&&arguments[5]!==undefined?arguments[5]:[];var bindings=arguments[6];var outputs=arguments[7];var handleEvent=arguments[8];var componentView=arguments[9];var componentRendererType=arguments[10];if(!handleEvent){handleEvent=NOOP;}// skip the call to sliceErrorStack itself + the call to this function.
+var/** @type {?} */source=isDevMode()?sliceErrorStack(2,3):'';var _splitMatchedQueriesD2=splitMatchedQueriesDsl(matchedQueriesDsl),matchedQueries=_splitMatchedQueriesD2.matchedQueries,references=_splitMatchedQueriesD2.references,matchedQueryIds=_splitMatchedQueriesD2.matchedQueryIds;var/** @type {?} */ns=void 0;var/** @type {?} */name=void 0;if(namespaceAndName){var _splitNamespace=splitNamespace(namespaceAndName);var _splitNamespace2=_slicedToArray(_splitNamespace,2);ns=_splitNamespace2[0];name=_splitNamespace2[1];}bindings=bindings||[];var/** @type {?} */bindingDefs=new Array(bindings.length);for(var/** @type {?} */i=0;i<bindings.length;i++){var/** @type {?} */entry=bindings[i];var/** @type {?} */bindingDef=void 0;var/** @type {?} */bindingType=entry[0];var _splitNamespace3=splitNamespace(entry[1]),_splitNamespace4=_slicedToArray(_splitNamespace3,2),_ns=_splitNamespace4[0],_name=_splitNamespace4[1];var/** @type {?} */securityContext=void 0;var/** @type {?} */suffix=void 0;switch(bindingType){case BindingType.ElementStyle:suffix=entry[2];break;case BindingType.ElementAttribute:case BindingType.ElementProperty:case BindingType.ComponentHostProperty:securityContext=entry[2];break;}bindingDefs[i]={type:bindingType,ns:_ns,name:_name,nonMinifiedName:_name,securityContext:securityContext,suffix:suffix};}outputs=outputs||[];var/** @type {?} */outputDefs=new Array(outputs.length);for(var/** @type {?} */_i2=0;_i2<outputs.length;_i2++){var _outputs$_i=_slicedToArray(outputs[_i2],2),target=_outputs$_i[0],eventName=_outputs$_i[1];outputDefs[_i2]={type:OutputType.ElementOutput,target:/** @type {?} */target,eventName:eventName,propName:undefined};}fixedAttrs=fixedAttrs||[];var/** @type {?} */attrs=fixedAttrs.map(function(_ref5){var _ref6=_slicedToArray(_ref5,2),namespaceAndName=_ref6[0],value=_ref6[1];var _splitNamespace5=splitNamespace(namespaceAndName),_splitNamespace6=_slicedToArray(_splitNamespace5,2),ns=_splitNamespace6[0],name=_splitNamespace6[1];return[ns,name,value];});// This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
+// which is not filled for host views.
+if(componentRendererType&&componentRendererType.encapsulation==null){componentRendererType=null;}if(componentView){flags|=NodeFlags.HasComponent;}return{type:NodeType.Element,// will bet set by the view definition
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:ngContentIndex,childCount:childCount,bindings:bindingDefs,outputs:outputDefs,element:{ns:ns,name:name,attrs:attrs,source:source,template:undefined,// will bet set by the view definition
+componentProvider:undefined,componentView:componentView,componentRendererType:componentRendererType,publicProviders:undefined,allProviders:undefined,handleEvent:handleEvent},provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
  * @param {?} view
  * @param {?} renderHost
  * @param {?} def
  * @return {?}
- */function createElement(view,renderHost,def){var/** @type {?} */elDef=def.element;var/** @type {?} */rootSelectorOrNode=view.root.selectorOrNode;var/** @type {?} */renderer=view.renderer;var/** @type {?} */el=void 0;if(view.parent||!rootSelectorOrNode){if(elDef.name){el=renderer.createElement(elDef.name,elDef.ns);}else{el=renderer.createComment('');}var/** @type {?} */parentEl=getParentRenderElement(view,renderHost,def);if(parentEl){renderer.appendChild(parentEl,el);}}else{el=renderer.selectRootElement(rootSelectorOrNode);}if(elDef.attrs){for(var/** @type {?} */i=0;i<elDef.attrs.length;i++){var _elDef$attrs$i=_slicedToArray(elDef.attrs[i],3),ns=_elDef$attrs$i[0],name=_elDef$attrs$i[1],value=_elDef$attrs$i[2];renderer.setAttribute(el,name,value,ns);}}if(elDef.outputs.length){for(var/** @type {?} */_i3=0;_i3<elDef.outputs.length;_i3++){var/** @type {?} */output=elDef.outputs[_i3];var/** @type {?} */handleEventClosure=renderEventHandlerClosure(view,def.index,elementEventFullName(output.target,output.eventName));var/** @type {?} */disposable=renderer.listen(output.target||el,output.eventName,handleEventClosure);view.disposables[def.disposableIndex+_i3]=disposable;}}return{renderElement:el,embeddedViews:def.flags&NodeFlags.HasEmbeddedViews?[]:undefined,projectedViews:undefined};}/**
+ */function createElement(view,renderHost,def){var/** @type {?} */elDef=def.element;var/** @type {?} */rootSelectorOrNode=view.root.selectorOrNode;var/** @type {?} */renderer=view.renderer;var/** @type {?} */el=void 0;if(view.parent||!rootSelectorOrNode){if(elDef.name){el=renderer.createElement(elDef.name,elDef.ns);}else{el=renderer.createComment('');}var/** @type {?} */parentEl=getParentRenderElement(view,renderHost,def);if(parentEl){renderer.appendChild(parentEl,el);}}else{el=renderer.selectRootElement(rootSelectorOrNode);}if(elDef.attrs){for(var/** @type {?} */i=0;i<elDef.attrs.length;i++){var _elDef$attrs$i=_slicedToArray(elDef.attrs[i],3),ns=_elDef$attrs$i[0],name=_elDef$attrs$i[1],value=_elDef$attrs$i[2];renderer.setAttribute(el,name,value,ns);}}return el;}/**
+ * @param {?} view
+ * @param {?} compView
+ * @param {?} def
+ * @param {?} el
+ * @return {?}
+ */function listenToElementOutputs(view,compView,def,el){for(var/** @type {?} */i=0;i<def.outputs.length;i++){var/** @type {?} */output=def.outputs[i];var/** @type {?} */handleEventClosure=renderEventHandlerClosure(view,def.index,elementEventFullName(output.target,output.eventName));var/** @type {?} */listenTarget=output.target;var/** @type {?} */listenerView=view;if(output.target==='component'){listenTarget=null;listenerView=compView;}var/** @type {?} */disposable=listenerView.renderer.listen(listenTarget||el,output.eventName,handleEventClosure);view.disposables[def.outputIndex+i]=disposable;}}/**
  * @param {?} view
  * @param {?} index
  * @param {?} eventName
@@ -4458,18 +4470,18 @@ component:undefined,publicProviders:undefined,allProviders:undefined,handleEvent
  * @param {?} v8
  * @param {?} v9
  * @return {?}
- */function checkAndUpdateElementInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */bindLen=def.bindings.length;if(bindLen>0)checkAndUpdateElementValue(view,def,0,v0);if(bindLen>1)checkAndUpdateElementValue(view,def,1,v1);if(bindLen>2)checkAndUpdateElementValue(view,def,2,v2);if(bindLen>3)checkAndUpdateElementValue(view,def,3,v3);if(bindLen>4)checkAndUpdateElementValue(view,def,4,v4);if(bindLen>5)checkAndUpdateElementValue(view,def,5,v5);if(bindLen>6)checkAndUpdateElementValue(view,def,6,v6);if(bindLen>7)checkAndUpdateElementValue(view,def,7,v7);if(bindLen>8)checkAndUpdateElementValue(view,def,8,v8);if(bindLen>9)checkAndUpdateElementValue(view,def,9,v9);}/**
+ */function checkAndUpdateElementInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */bindLen=def.bindings.length;var/** @type {?} */changed=false;if(bindLen>0&&checkAndUpdateElementValue(view,def,0,v0))changed=true;if(bindLen>1&&checkAndUpdateElementValue(view,def,1,v1))changed=true;if(bindLen>2&&checkAndUpdateElementValue(view,def,2,v2))changed=true;if(bindLen>3&&checkAndUpdateElementValue(view,def,3,v3))changed=true;if(bindLen>4&&checkAndUpdateElementValue(view,def,4,v4))changed=true;if(bindLen>5&&checkAndUpdateElementValue(view,def,5,v5))changed=true;if(bindLen>6&&checkAndUpdateElementValue(view,def,6,v6))changed=true;if(bindLen>7&&checkAndUpdateElementValue(view,def,7,v7))changed=true;if(bindLen>8&&checkAndUpdateElementValue(view,def,8,v8))changed=true;if(bindLen>9&&checkAndUpdateElementValue(view,def,9,v9))changed=true;return changed;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} values
  * @return {?}
- */function checkAndUpdateElementDynamic(view,def,values){for(var/** @type {?} */i=0;i<values.length;i++){checkAndUpdateElementValue(view,def,i,values[i]);}}/**
+ */function checkAndUpdateElementDynamic(view,def,values){var/** @type {?} */changed=false;for(var/** @type {?} */i=0;i<values.length;i++){if(checkAndUpdateElementValue(view,def,i,values[i]))changed=true;}return changed;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} bindingIdx
  * @param {?} value
  * @return {?}
- */function checkAndUpdateElementValue(view,def,bindingIdx,value){if(!checkAndUpdateBinding(view,def,bindingIdx,value)){return;}var/** @type {?} */binding=def.bindings[bindingIdx];var/** @type {?} */renderNode=asElementData(view,def.index).renderElement;var/** @type {?} */name=binding.name;switch(binding.type){case BindingType.ElementAttribute:setElementAttribute(view,binding,renderNode,binding.ns,name,value);break;case BindingType.ElementClass:setElementClass(view,renderNode,name,value);break;case BindingType.ElementStyle:setElementStyle(view,binding,renderNode,name,value);break;case BindingType.ElementProperty:setElementProperty(view,binding,renderNode,name,value);break;}}/**
+ */function checkAndUpdateElementValue(view,def,bindingIdx,value){if(!checkAndUpdateBinding(view,def,bindingIdx,value)){return false;}var/** @type {?} */binding=def.bindings[bindingIdx];var/** @type {?} */elData=asElementData(view,def.index);var/** @type {?} */renderNode=elData.renderElement;var/** @type {?} */name=binding.name;switch(binding.type){case BindingType.ElementAttribute:setElementAttribute(view,binding,renderNode,binding.ns,name,value);break;case BindingType.ElementClass:setElementClass(view,renderNode,name,value);break;case BindingType.ElementStyle:setElementStyle(view,binding,renderNode,name,value);break;case BindingType.ElementProperty:setElementProperty(view,binding,renderNode,name,value);break;case BindingType.ComponentHostProperty:setElementProperty(elData.componentView,binding,renderNode,name,value);break;}return true;}/**
  * @param {?} view
  * @param {?} binding
  * @param {?} renderNode
@@ -4502,8 +4514,8 @@ component:undefined,publicProviders:undefined,allProviders:undefined,handleEvent
  * @param {?} index
  * @return {?}
  */function ngContentDef(ngContentIndex,index){return{type:NodeType.NgContent,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:ngContentIndex,childCount:0,bindings:[],disposableCount:0,element:undefined,provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:{index:index}};}/**
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:ngContentIndex,childCount:0,bindings:[],outputs:[],element:undefined,provider:undefined,text:undefined,pureExpression:undefined,query:undefined,ngContent:{index:index}};}/**
  * @param {?} view
  * @param {?} renderHost
  * @param {?} def
@@ -4592,7 +4604,45 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @return {?}
      */},{key:'setPosition',value:function setPosition(p){}/**
      * @return {?}
-     */},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();var/** @type {?} */EMPTY_CONTEXT=new Object();/**
+     */},{key:'getPosition',value:function getPosition(){return 0;}}]);return NoOpAnimationPlayer;}();/**
+ * @param {?} parentView
+ * @param {?} elementData
+ * @param {?} viewIndex
+ * @param {?} view
+ * @return {?}
+ */function attachEmbeddedView(parentView,elementData,viewIndex,view){var/** @type {?} */embeddedViews=elementData.embeddedViews;if(viewIndex==null){viewIndex=embeddedViews.length;}view.viewContainerParent=parentView;addToArray$1(embeddedViews,viewIndex,view);var/** @type {?} */dvcElementData=declaredViewContainer(view);if(dvcElementData&&dvcElementData!==elementData){var/** @type {?} */projectedViews=dvcElementData.projectedViews;if(!projectedViews){projectedViews=dvcElementData.projectedViews=[];}projectedViews.push(view);}Services.dirtyParentQueries(view);var/** @type {?} */prevView=viewIndex>0?embeddedViews[viewIndex-1]:null;renderAttachEmbeddedView(elementData,prevView,view);}/**
+ * @param {?} elementData
+ * @param {?} viewIndex
+ * @return {?}
+ */function detachEmbeddedView(elementData,viewIndex){var/** @type {?} */embeddedViews=elementData.embeddedViews;if(viewIndex==null||viewIndex>=embeddedViews.length){viewIndex=embeddedViews.length-1;}if(viewIndex<0){return null;}var/** @type {?} */view=embeddedViews[viewIndex];view.viewContainerParent=undefined;removeFromArray(embeddedViews,viewIndex);var/** @type {?} */dvcElementData=declaredViewContainer(view);if(dvcElementData&&dvcElementData!==elementData){var/** @type {?} */projectedViews=dvcElementData.projectedViews;removeFromArray(projectedViews,projectedViews.indexOf(view));}Services.dirtyParentQueries(view);renderDetachView(view);return view;}/**
+ * @param {?} elementData
+ * @param {?} oldViewIndex
+ * @param {?} newViewIndex
+ * @return {?}
+ */function moveEmbeddedView(elementData,oldViewIndex,newViewIndex){var/** @type {?} */embeddedViews=elementData.embeddedViews;var/** @type {?} */view=embeddedViews[oldViewIndex];removeFromArray(embeddedViews,oldViewIndex);if(newViewIndex==null){newViewIndex=embeddedViews.length;}addToArray$1(embeddedViews,newViewIndex,view);// Note: Don't need to change projectedViews as the order in there
+// as always invalid...
+Services.dirtyParentQueries(view);renderDetachView(view);var/** @type {?} */prevView=newViewIndex>0?embeddedViews[newViewIndex-1]:null;renderAttachEmbeddedView(elementData,prevView,view);return view;}/**
+ * @param {?} elementData
+ * @param {?} prevView
+ * @param {?} view
+ * @return {?}
+ */function renderAttachEmbeddedView(elementData,prevView,view){var/** @type {?} */prevRenderNode=prevView?renderNode(prevView,prevView.def.lastRenderRootNode):elementData.renderElement;var/** @type {?} */parentNode=view.renderer.parentNode(prevRenderNode);var/** @type {?} */nextSibling=view.renderer.nextSibling(prevRenderNode);// Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
+// However, browsers automatically do `appendChild` when there is no `nextSibling`.
+visitRootRenderNodes(view,RenderNodeAction.InsertBefore,parentNode,nextSibling,undefined);}/**
+ * @param {?} view
+ * @return {?}
+ */function renderDetachView(view){visitRootRenderNodes(view,RenderNodeAction.RemoveChild,null,null,undefined);}/**
+ * @param {?} arr
+ * @param {?} index
+ * @param {?} value
+ * @return {?}
+ */function addToArray$1(arr,index,value){// perf: array.push is faster than array.splice!
+if(index>=arr.length){arr.push(value);}else{arr.splice(index,0,value);}}/**
+ * @param {?} arr
+ * @param {?} index
+ * @return {?}
+ */function removeFromArray(arr,index){// perf: array.pop is faster than array.splice!
+if(index>=arr.length-1){arr.pop();}else{arr.splice(index,1);}}var/** @type {?} */EMPTY_CONTEXT=new Object();/**
  * @param {?} selector
  * @param {?} componentType
  * @param {?} viewDefFactory
@@ -4607,7 +4657,7 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?=} projectableNodes
      * @param {?=} rootSelectorOrNode
      * @return {?}
-     */_createClass(ComponentFactory_,[{key:'create',value:function create(injector){var projectableNodes=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var rootSelectorOrNode=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */viewDef=resolveViewDefinition(this._viewClass);var/** @type {?} */componentNodeIndex=viewDef.nodes[0].element.component.index;var/** @type {?} */view=Services.createRootView(injector,projectableNodes||[],rootSelectorOrNode,viewDef,EMPTY_CONTEXT);var/** @type {?} */component=asProviderData(view,componentNodeIndex).instance;view.renderer.setAttribute(asElementData(view,0).renderElement,'ng-version',VERSION.full);return new ComponentRef_$1(view,new ViewRef_$1(view),component);}}]);return ComponentFactory_;}(ComponentFactory);var ComponentRef_$1=function(_ComponentRef2){_inherits(ComponentRef_$1,_ComponentRef2);/**
+     */_createClass(ComponentFactory_,[{key:'create',value:function create(injector){var projectableNodes=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;var rootSelectorOrNode=arguments.length>2&&arguments[2]!==undefined?arguments[2]:null;var/** @type {?} */viewDef=resolveViewDefinition(this._viewClass);var/** @type {?} */componentNodeIndex=viewDef.nodes[0].element.componentProvider.index;var/** @type {?} */view=Services.createRootView(injector,projectableNodes||[],rootSelectorOrNode,viewDef,EMPTY_CONTEXT);var/** @type {?} */component=asProviderData(view,componentNodeIndex).instance;view.renderer.setAttribute(asElementData(view,0).renderElement,'ng-version',VERSION.full);return new ComponentRef_$1(view,new ViewRef_$1(view),component);}}]);return ComponentFactory_;}(ComponentFactory);var ComponentRef_$1=function(_ComponentRef2){_inherits(ComponentRef_$1,_ComponentRef2);/**
      * @param {?} _view
      * @param {?} _viewRef
      * @param {?} _component
@@ -4639,13 +4689,10 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @return {?}
      */_createClass(ViewContainerRef_$1,[{key:'clear',/**
      * @return {?}
-     */value:function clear(){var/** @type {?} */len=this._data.embeddedViews.length;for(var/** @type {?} */i=len-1;i>=0;i--){var/** @type {?} */view=Services.detachEmbeddedView(this._data,i);Services.destroyView(view);}}/**
+     */value:function clear(){var/** @type {?} */len=this._data.embeddedViews.length;for(var/** @type {?} */i=len-1;i>=0;i--){var/** @type {?} */view=detachEmbeddedView(this._data,i);Services.destroyView(view);}}/**
      * @param {?} index
      * @return {?}
-     */},{key:'get',value:function get(index){return this._getViewRef(this._data.embeddedViews[index]);}/**
-     * @param {?} view
-     * @return {?}
-     */},{key:'_getViewRef',value:function _getViewRef(view){if(view){var/** @type {?} */ref=new ViewRef_$1(view);ref.attachToViewContainerRef(this);return ref;}return null;}/**
+     */},{key:'get',value:function get(index){var/** @type {?} */view=this._data.embeddedViews[index];if(view){var/** @type {?} */ref=new ViewRef_$1(view);ref.attachToViewContainerRef(this);return ref;}return null;}/**
      * @return {?}
      */},{key:'createEmbeddedView',/**
      * @param {?} templateRef
@@ -4662,20 +4709,20 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?} viewRef
      * @param {?=} index
      * @return {?}
-     */},{key:'insert',value:function insert(viewRef,index){var/** @type {?} */viewRef_=viewRef;var/** @type {?} */viewData=viewRef_._view;Services.attachEmbeddedView(this._data,index,viewData);viewRef_.attachToViewContainerRef(this);return viewRef;}/**
+     */},{key:'insert',value:function insert(viewRef,index){var/** @type {?} */viewRef_=viewRef;var/** @type {?} */viewData=viewRef_._view;attachEmbeddedView(this._view,this._data,index,viewData);viewRef_.attachToViewContainerRef(this);return viewRef;}/**
      * @param {?} viewRef
      * @param {?} currentIndex
      * @return {?}
-     */},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */previousIndex=this._data.embeddedViews.indexOf(viewRef._view);Services.moveEmbeddedView(this._data,previousIndex,currentIndex);return viewRef;}/**
+     */},{key:'move',value:function move(viewRef,currentIndex){var/** @type {?} */previousIndex=this._data.embeddedViews.indexOf(viewRef._view);moveEmbeddedView(this._data,previousIndex,currentIndex);return viewRef;}/**
      * @param {?} viewRef
      * @return {?}
      */},{key:'indexOf',value:function indexOf(viewRef){return this._data.embeddedViews.indexOf(viewRef._view);}/**
      * @param {?=} index
      * @return {?}
-     */},{key:'remove',value:function remove(index){var/** @type {?} */viewData=Services.detachEmbeddedView(this._data,index);if(viewData){Services.destroyView(viewData);}}/**
+     */},{key:'remove',value:function remove(index){var/** @type {?} */viewData=detachEmbeddedView(this._data,index);if(viewData){Services.destroyView(viewData);}}/**
      * @param {?=} index
      * @return {?}
-     */},{key:'detach',value:function detach(index){var/** @type {?} */view=Services.detachEmbeddedView(this._data,index);if(view){var/** @type {?} */viewRef=this._getViewRef(view);viewRef.detachFromContainer();return viewRef;}return null;}},{key:'element',get:function get(){return new ElementRef(this._data.renderElement);}/**
+     */},{key:'detach',value:function detach(index){var/** @type {?} */view=detachEmbeddedView(this._data,index);return view?new ViewRef_$1(view):null;}},{key:'element',get:function get(){return new ElementRef(this._data.renderElement);}/**
      * @return {?}
      */},{key:'injector',get:function get(){return new Injector_(this._view,this._elDef);}/**
      * @return {?}
@@ -4688,7 +4735,7 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @return {?}
      */_createClass(ViewRef_$1,[{key:'markForCheck',/**
      * @return {?}
-     */value:function markForCheck(){this.reattach();}/**
+     */value:function markForCheck(){markParentViewsForCheck(this._view);}/**
      * @return {?}
      */},{key:'detach',value:function detach(){this._view.state&=~ViewState.ChecksEnabled;}/**
      * @return {?}
@@ -4703,7 +4750,7 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @return {?}
      */},{key:'destroy',value:function destroy(){if(this._appRef){this._appRef.detachView(this);}else if(this._viewContainerRef){this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));}Services.destroyView(this._view);}/**
      * @return {?}
-     */},{key:'detachFromContainer',value:function detachFromContainer(){this._appRef=null;this._viewContainerRef=null;}/**
+     */},{key:'detachFromAppRef',value:function detachFromAppRef(){this._appRef=null;renderDetachView(this._view);Services.dirtyParentQueries(this._view);}/**
      * @param {?} appRef
      * @return {?}
      */},{key:'attachToAppRef',value:function attachToAppRef(appRef){if(this._viewContainerRef){throw new Error('This view is already attached to a ViewContainer!');}this._appRef=appRef;}/**
@@ -4736,7 +4783,7 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
-     */_createClass(Injector_,[{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:Injector.THROW_IF_NOT_FOUND;var/** @type {?} */allowPrivateServices=!!this.elDef.element.component;return Services.resolveDep(this.view,this.elDef,allowPrivateServices,{flags:DepFlags.None,token:token,tokenKey:tokenKey(token)},notFoundValue);}}]);return Injector_;}();/**
+     */_createClass(Injector_,[{key:'get',value:function get(token){var notFoundValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:Injector.THROW_IF_NOT_FOUND;var/** @type {?} */allowPrivateServices=(this.elDef.flags&NodeFlags.HasComponent)!==0;return Services.resolveDep(this.view,this.elDef,allowPrivateServices,{flags:DepFlags.None,token:token,tokenKey:tokenKey(token)},notFoundValue);}}]);return Injector_;}();/**
  * @param {?} view
  * @param {?} index
  * @return {?}
@@ -4831,10 +4878,8 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
  * @param {?} deps
  * @param {?=} props
  * @param {?=} outputs
- * @param {?=} component
- * @param {?=} rendererType
  * @return {?}
- */function directiveDef(flags,matchedQueries,childCount,ctor,deps,props,outputs,component,rendererType){var/** @type {?} */bindings=[];if(props){for(var/** @type {?} */prop in props){var _props$prop=_slicedToArray(props[prop],2),bindingIndex=_props$prop[0],nonMinifiedName=_props$prop[1];bindings[bindingIndex]={type:BindingType.DirectiveProperty,name:prop,nonMinifiedName:nonMinifiedName,ns:undefined,securityContext:undefined,suffix:undefined};}}var/** @type {?} */outputDefs=[];if(outputs){for(var/** @type {?} */propName in outputs){outputDefs.push({propName:propName,eventName:outputs[propName]});}}return _def(NodeType.Directive,flags,matchedQueries,childCount,ProviderType.Class,ctor,ctor,deps,bindings,outputDefs,component,rendererType);}/**
+ */function directiveDef(flags,matchedQueries,childCount,ctor,deps,props,outputs){var/** @type {?} */bindings=[];if(props){for(var/** @type {?} */prop in props){var _props$prop=_slicedToArray(props[prop],2),bindingIndex=_props$prop[0],nonMinifiedName=_props$prop[1];bindings[bindingIndex]={type:BindingType.DirectiveProperty,name:prop,nonMinifiedName:nonMinifiedName,ns:undefined,securityContext:undefined,suffix:undefined};}}var/** @type {?} */outputDefs=[];if(outputs){for(var/** @type {?} */propName in outputs){outputDefs.push({type:OutputType.DirectiveOutput,propName:propName,target:null,eventName:outputs[propName]});}}return _def(NodeType.Directive,flags,matchedQueries,childCount,ProviderType.Class,ctor,ctor,deps,bindings,outputDefs);}/**
  * @param {?} flags
  * @param {?} ctor
  * @param {?} deps
@@ -4858,14 +4903,10 @@ return;}var/** @type {?} */ngContentIndex=def.ngContent.index;visitProjectedRend
  * @param {?} deps
  * @param {?=} bindings
  * @param {?=} outputs
- * @param {?=} component
- * @param {?=} rendererType
  * @return {?}
- */function _def(type,flags,matchedQueriesDsl,childCount,providerType,token,value,deps,bindings,outputs,component,rendererType){var _splitMatchedQueriesD3=splitMatchedQueriesDsl(matchedQueriesDsl),matchedQueries=_splitMatchedQueriesD3.matchedQueries,references=_splitMatchedQueriesD3.references,matchedQueryIds=_splitMatchedQueriesD3.matchedQueryIds;// This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
-// which is not filled for host views.
-if(rendererType&&rendererType.encapsulation==null){rendererType=null;}if(!outputs){outputs=[];}if(!bindings){bindings=[];}var/** @type {?} */depDefs=deps.map(function(value){var/** @type {?} */token=void 0;var/** @type {?} */flags=void 0;if(Array.isArray(value)){var _value=_slicedToArray(value,2);flags=_value[0];token=_value[1];}else{flags=DepFlags.None;token=value;}return{flags:flags,token:token,tokenKey:tokenKey(token)};});if(component){flags=flags|NodeFlags.HasComponent;}return{type:type,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:undefined,childCount:childCount,bindings:bindings,disposableCount:outputs.length,element:undefined,provider:{type:providerType,token:token,tokenKey:tokenKey(token),value:value,deps:depDefs,outputs:outputs,component:component,rendererType:rendererType},text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
+ */function _def(type,flags,matchedQueriesDsl,childCount,providerType,token,value,deps,bindings,outputs){var _splitMatchedQueriesD3=splitMatchedQueriesDsl(matchedQueriesDsl),matchedQueries=_splitMatchedQueriesD3.matchedQueries,references=_splitMatchedQueriesD3.references,matchedQueryIds=_splitMatchedQueriesD3.matchedQueryIds;if(!outputs){outputs=[];}if(!bindings){bindings=[];}var/** @type {?} */depDefs=deps.map(function(value){var/** @type {?} */token=void 0;var/** @type {?} */flags=void 0;if(Array.isArray(value)){var _value=_slicedToArray(value,2);flags=_value[0];token=_value[1];}else{flags=DepFlags.None;token=value;}return{flags:flags,token:token,tokenKey:tokenKey(token)};});return{type:type,// will bet set by the view definition
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:flags,childFlags:0,childMatchedQueries:0,matchedQueries:matchedQueries,matchedQueryIds:matchedQueryIds,references:references,ngContentIndex:undefined,childCount:childCount,bindings:bindings,outputs:outputs,element:undefined,provider:{type:providerType,token:token,tokenKey:tokenKey(token),value:value,deps:depDefs},text:undefined,pureExpression:undefined,query:undefined,ngContent:undefined};}/**
  * @param {?} view
  * @param {?} def
  * @return {?}
@@ -4881,8 +4922,8 @@ return createClass(compView.parent,viewParentEl(compView),allowPrivateServices,d
  * @param {?} def
  * @return {?}
  */function createDirectiveInstance(view,def){// components can see other private services, other directives can't.
-var/** @type {?} */allowPrivateServices=(def.flags&NodeFlags.HasComponent)>0;var/** @type {?} */providerDef=def.provider;// directives are always eager and classes!
-var/** @type {?} */instance=createClass(view,def.parent,allowPrivateServices,def.provider.value,def.provider.deps);if(providerDef.outputs.length){for(var/** @type {?} */i=0;i<providerDef.outputs.length;i++){var/** @type {?} */output=providerDef.outputs[i];var/** @type {?} */subscription=instance[output.propName].subscribe(eventHandlerClosure(view,def.parent.index,output.eventName));view.disposables[def.disposableIndex+i]=subscription.unsubscribe.bind(subscription);}}return instance;}/**
+var/** @type {?} */allowPrivateServices=(def.flags&NodeFlags.IsComponent)>0;var/** @type {?} */providerDef=def.provider;// directives are always eager and classes!
+var/** @type {?} */instance=createClass(view,def.parent,allowPrivateServices,def.provider.value,def.provider.deps);if(def.outputs.length){for(var/** @type {?} */i=0;i<def.outputs.length;i++){var/** @type {?} */output=def.outputs[i];var/** @type {?} */subscription=instance[output.propName].subscribe(eventHandlerClosure(view,def.parent.index,output.eventName));view.disposables[def.outputIndex+i]=subscription.unsubscribe.bind(subscription);}}return instance;}/**
  * @param {?} view
  * @param {?} index
  * @param {?} eventName
@@ -4901,12 +4942,12 @@ var/** @type {?} */instance=createClass(view,def.parent,allowPrivateServices,def
  * @param {?} v8
  * @param {?} v9
  * @return {?}
- */function checkAndUpdateDirectiveInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */providerData=asProviderData(view,def.index);var/** @type {?} */directive=providerData.instance;var/** @type {?} */changes=void 0;var/** @type {?} */bindLen=def.bindings.length;if(bindLen>0)changes=checkAndUpdateProp(view,providerData,def,0,v0,changes);if(bindLen>1)changes=checkAndUpdateProp(view,providerData,def,1,v1,changes);if(bindLen>2)changes=checkAndUpdateProp(view,providerData,def,2,v2,changes);if(bindLen>3)changes=checkAndUpdateProp(view,providerData,def,3,v3,changes);if(bindLen>4)changes=checkAndUpdateProp(view,providerData,def,4,v4,changes);if(bindLen>5)changes=checkAndUpdateProp(view,providerData,def,5,v5,changes);if(bindLen>6)changes=checkAndUpdateProp(view,providerData,def,6,v6,changes);if(bindLen>7)changes=checkAndUpdateProp(view,providerData,def,7,v7,changes);if(bindLen>8)changes=checkAndUpdateProp(view,providerData,def,8,v8,changes);if(bindLen>9)changes=checkAndUpdateProp(view,providerData,def,9,v9,changes);if(changes){directive.ngOnChanges(changes);}if(view.state&ViewState.FirstCheck&&def.flags&NodeFlags.OnInit){directive.ngOnInit();}if(def.flags&NodeFlags.DoCheck){directive.ngDoCheck();}}/**
+ */function checkAndUpdateDirectiveInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */providerData=asProviderData(view,def.index);var/** @type {?} */directive=providerData.instance;var/** @type {?} */changed=false;var/** @type {?} */changes=void 0;var/** @type {?} */bindLen=def.bindings.length;if(bindLen>0&&checkBinding$1(view,def,0,v0)){changed=true;changes=updateProp(view,providerData,def,0,v0,changes);};if(bindLen>1&&checkBinding$1(view,def,1,v1)){changed=true;changes=updateProp(view,providerData,def,1,v1,changes);};if(bindLen>2&&checkBinding$1(view,def,2,v2)){changed=true;changes=updateProp(view,providerData,def,2,v2,changes);};if(bindLen>3&&checkBinding$1(view,def,3,v3)){changed=true;changes=updateProp(view,providerData,def,3,v3,changes);};if(bindLen>4&&checkBinding$1(view,def,4,v4)){changed=true;changes=updateProp(view,providerData,def,4,v4,changes);};if(bindLen>5&&checkBinding$1(view,def,5,v5)){changed=true;changes=updateProp(view,providerData,def,5,v5,changes);};if(bindLen>6&&checkBinding$1(view,def,6,v6)){changed=true;changes=updateProp(view,providerData,def,6,v6,changes);};if(bindLen>7&&checkBinding$1(view,def,7,v7)){changed=true;changes=updateProp(view,providerData,def,7,v7,changes);};if(bindLen>8&&checkBinding$1(view,def,8,v8)){changed=true;changes=updateProp(view,providerData,def,8,v8,changes);};if(bindLen>9&&checkBinding$1(view,def,9,v9)){changed=true;changes=updateProp(view,providerData,def,9,v9,changes);};if(changes){directive.ngOnChanges(changes);}if(view.state&ViewState.FirstCheck&&def.flags&NodeFlags.OnInit){directive.ngOnInit();}if(def.flags&NodeFlags.DoCheck){directive.ngDoCheck();}return changed;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} values
  * @return {?}
- */function checkAndUpdateDirectiveDynamic(view,def,values){var/** @type {?} */providerData=asProviderData(view,def.index);var/** @type {?} */directive=providerData.instance;var/** @type {?} */changes=void 0;for(var/** @type {?} */i=0;i<values.length;i++){changes=checkAndUpdateProp(view,providerData,def,i,values[i],changes);}if(changes){directive.ngOnChanges(changes);}if(view.state&ViewState.FirstCheck&&def.flags&NodeFlags.OnInit){directive.ngOnInit();}if(def.flags&NodeFlags.DoCheck){directive.ngDoCheck();}}/**
+ */function checkAndUpdateDirectiveDynamic(view,def,values){var/** @type {?} */providerData=asProviderData(view,def.index);var/** @type {?} */directive=providerData.instance;var/** @type {?} */changed=false;var/** @type {?} */changes=void 0;for(var/** @type {?} */i=0;i<values.length;i++){if(checkBinding$1(view,def,i,values[i])){changed=true;changes=updateProp(view,providerData,def,i,values[i],changes);}}if(changes){directive.ngOnChanges(changes);}if(view.state&ViewState.FirstCheck&&def.flags&NodeFlags.OnInit){directive.ngOnInit();}if(def.flags&NodeFlags.DoCheck){directive.ngDoCheck();}return changed;}/**
  * @param {?} view
  * @param {?} def
  * @return {?}
@@ -4937,7 +4978,7 @@ var/** @type {?} */allowPrivateServices=(def.flags&NodeFlags.PrivateProvider)>0;
  * @param {?} elDef
  * @param {?} allowPrivateServices
  * @return {?}
- */function findCompView(view,elDef,allowPrivateServices){var/** @type {?} */compView=void 0;if(allowPrivateServices){compView=asProviderData(view,elDef.element.component.index).componentView;}else{compView=view;while(compView.parent&&!isComponentView(compView)){compView=compView.parent;}}return compView;}/**
+ */function findCompView(view,elDef,allowPrivateServices){var/** @type {?} */compView=void 0;if(allowPrivateServices){compView=asElementData(view,elDef.index).componentView;}else{compView=view;while(compView.parent&&!isComponentView(compView)){compView=compView.parent;}}return compView;}/**
  * @param {?} view
  * @param {?} providerData
  * @param {?} def
@@ -4945,10 +4986,10 @@ var/** @type {?} */allowPrivateServices=(def.flags&NodeFlags.PrivateProvider)>0;
  * @param {?} value
  * @param {?} changes
  * @return {?}
- */function checkAndUpdateProp(view,providerData,def,bindingIdx,value,changes){var/** @type {?} */change=void 0;var/** @type {?} */changed=void 0;if(def.flags&NodeFlags.OnChanges){var/** @type {?} */oldValue=view.oldValues[def.bindingIndex+bindingIdx];changed=checkAndUpdateBinding(view,def,bindingIdx,value);change=changed?new SimpleChange(oldValue,value,(view.state&ViewState.FirstCheck)!==0):null;}else{changed=checkAndUpdateBinding(view,def,bindingIdx,value);}if(changed){if(def.flags&NodeFlags.HasComponent){var/** @type {?} */compView=providerData.componentView;if(compView.def.flags&ViewFlags.OnPush){compView.state|=ViewState.ChecksEnabled;}}var/** @type {?} */binding=def.bindings[bindingIdx];var/** @type {?} */propName=binding.name;// Note: This is still safe with Closure Compiler as
+ */function updateProp(view,providerData,def,bindingIdx,value,changes){if(def.flags&NodeFlags.IsComponent){var/** @type {?} */compView=asElementData(view,def.parent.index).componentView;if(compView.def.flags&ViewFlags.OnPush){compView.state|=ViewState.ChecksEnabled;}}var/** @type {?} */binding=def.bindings[bindingIdx];var/** @type {?} */propName=binding.name;// Note: This is still safe with Closure Compiler as
 // the user passed in the property name as an object has to `providerDef`,
 // so Closure Compiler will have renamed the property correctly already.
-providerData.instance[propName]=value;if(change){changes=changes||{};changes[binding.nonMinifiedName]=change;}}return changes;}/**
+providerData.instance[propName]=value;if(def.flags&NodeFlags.OnChanges){changes=changes||{};var/** @type {?} */oldValue=view.oldValues[def.bindingIndex+bindingIdx];var/** @type {?} */_binding=def.bindings[bindingIdx];changes[_binding.nonMinifiedName]=new SimpleChange(oldValue,value,(view.state&ViewState.FirstCheck)!==0);}view.oldValues[def.bindingIndex+bindingIdx]=value;return changes;}/**
  * @param {?} view
  * @param {?} lifecycles
  * @return {?}
@@ -4976,8 +5017,8 @@ return _pureExpressionDef(PureExpressionType.Pipe,new Array(argCount+1));}/**
  * @param {?} propertyNames
  * @return {?}
  */function _pureExpressionDef(type,propertyNames){var/** @type {?} */bindings=new Array(propertyNames.length);for(var/** @type {?} */i=0;i<propertyNames.length;i++){var/** @type {?} */prop=propertyNames[i];bindings[i]={type:BindingType.PureExpressionProperty,name:prop,ns:undefined,nonMinifiedName:prop,securityContext:undefined,suffix:undefined};}return{type:NodeType.PureExpression,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:undefined,childCount:0,bindings:bindings,disposableCount:0,element:undefined,provider:undefined,text:undefined,pureExpression:{type:type},query:undefined,ngContent:undefined};}/**
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:undefined,childCount:0,bindings:bindings,outputs:[],element:undefined,provider:undefined,text:undefined,pureExpression:{type:type},query:undefined,ngContent:undefined};}/**
  * @param {?} view
  * @param {?} def
  * @return {?}
@@ -4995,21 +5036,21 @@ flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,r
  * @param {?} v8
  * @param {?} v9
  * @return {?}
- */function checkAndUpdatePureExpressionInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */bindings=def.bindings;var/** @type {?} */changed=false;var/** @type {?} */bindLen=bindings.length;if(bindLen>0&&checkAndUpdateBinding(view,def,0,v0))changed=true;if(bindLen>1&&checkAndUpdateBinding(view,def,1,v1))changed=true;if(bindLen>2&&checkAndUpdateBinding(view,def,2,v2))changed=true;if(bindLen>3&&checkAndUpdateBinding(view,def,3,v3))changed=true;if(bindLen>4&&checkAndUpdateBinding(view,def,4,v4))changed=true;if(bindLen>5&&checkAndUpdateBinding(view,def,5,v5))changed=true;if(bindLen>6&&checkAndUpdateBinding(view,def,6,v6))changed=true;if(bindLen>7&&checkAndUpdateBinding(view,def,7,v7))changed=true;if(bindLen>8&&checkAndUpdateBinding(view,def,8,v8))changed=true;if(bindLen>9&&checkAndUpdateBinding(view,def,9,v9))changed=true;var/** @type {?} */data=asPureExpressionData(view,def.index);if(changed){var/** @type {?} */value=void 0;switch(def.pureExpression.type){case PureExpressionType.Array:value=new Array(bindings.length);if(bindLen>0)value[0]=v0;if(bindLen>1)value[1]=v1;if(bindLen>2)value[2]=v2;if(bindLen>3)value[3]=v3;if(bindLen>4)value[4]=v4;if(bindLen>5)value[5]=v5;if(bindLen>6)value[6]=v6;if(bindLen>7)value[7]=v7;if(bindLen>8)value[8]=v8;if(bindLen>9)value[9]=v9;break;case PureExpressionType.Object:value={};if(bindLen>0)value[bindings[0].name]=v0;if(bindLen>1)value[bindings[1].name]=v1;if(bindLen>2)value[bindings[2].name]=v2;if(bindLen>3)value[bindings[3].name]=v3;if(bindLen>4)value[bindings[4].name]=v4;if(bindLen>5)value[bindings[5].name]=v5;if(bindLen>6)value[bindings[6].name]=v6;if(bindLen>7)value[bindings[7].name]=v7;if(bindLen>8)value[bindings[8].name]=v8;if(bindLen>9)value[bindings[9].name]=v9;break;case PureExpressionType.Pipe:var/** @type {?} */pipe=v0;switch(bindLen){case 1:value=pipe.transform(v0);break;case 2:value=pipe.transform(v1);break;case 3:value=pipe.transform(v1,v2);break;case 4:value=pipe.transform(v1,v2,v3);break;case 5:value=pipe.transform(v1,v2,v3,v4);break;case 6:value=pipe.transform(v1,v2,v3,v4,v5);break;case 7:value=pipe.transform(v1,v2,v3,v4,v5,v6);break;case 8:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7);break;case 9:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7,v8);break;case 10:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7,v8,v9);break;}break;}data.value=value;}return data.value;}/**
+ */function checkAndUpdatePureExpressionInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */bindings=def.bindings;var/** @type {?} */changed=false;var/** @type {?} */bindLen=bindings.length;if(bindLen>0&&checkAndUpdateBinding(view,def,0,v0))changed=true;if(bindLen>1&&checkAndUpdateBinding(view,def,1,v1))changed=true;if(bindLen>2&&checkAndUpdateBinding(view,def,2,v2))changed=true;if(bindLen>3&&checkAndUpdateBinding(view,def,3,v3))changed=true;if(bindLen>4&&checkAndUpdateBinding(view,def,4,v4))changed=true;if(bindLen>5&&checkAndUpdateBinding(view,def,5,v5))changed=true;if(bindLen>6&&checkAndUpdateBinding(view,def,6,v6))changed=true;if(bindLen>7&&checkAndUpdateBinding(view,def,7,v7))changed=true;if(bindLen>8&&checkAndUpdateBinding(view,def,8,v8))changed=true;if(bindLen>9&&checkAndUpdateBinding(view,def,9,v9))changed=true;if(changed){var/** @type {?} */data=asPureExpressionData(view,def.index);var/** @type {?} */value=void 0;switch(def.pureExpression.type){case PureExpressionType.Array:value=new Array(bindings.length);if(bindLen>0)value[0]=v0;if(bindLen>1)value[1]=v1;if(bindLen>2)value[2]=v2;if(bindLen>3)value[3]=v3;if(bindLen>4)value[4]=v4;if(bindLen>5)value[5]=v5;if(bindLen>6)value[6]=v6;if(bindLen>7)value[7]=v7;if(bindLen>8)value[8]=v8;if(bindLen>9)value[9]=v9;break;case PureExpressionType.Object:value={};if(bindLen>0)value[bindings[0].name]=v0;if(bindLen>1)value[bindings[1].name]=v1;if(bindLen>2)value[bindings[2].name]=v2;if(bindLen>3)value[bindings[3].name]=v3;if(bindLen>4)value[bindings[4].name]=v4;if(bindLen>5)value[bindings[5].name]=v5;if(bindLen>6)value[bindings[6].name]=v6;if(bindLen>7)value[bindings[7].name]=v7;if(bindLen>8)value[bindings[8].name]=v8;if(bindLen>9)value[bindings[9].name]=v9;break;case PureExpressionType.Pipe:var/** @type {?} */pipe=v0;switch(bindLen){case 1:value=pipe.transform(v0);break;case 2:value=pipe.transform(v1);break;case 3:value=pipe.transform(v1,v2);break;case 4:value=pipe.transform(v1,v2,v3);break;case 5:value=pipe.transform(v1,v2,v3,v4);break;case 6:value=pipe.transform(v1,v2,v3,v4,v5);break;case 7:value=pipe.transform(v1,v2,v3,v4,v5,v6);break;case 8:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7);break;case 9:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7,v8);break;case 10:value=pipe.transform(v1,v2,v3,v4,v5,v6,v7,v8,v9);break;}break;}data.value=value;}return changed;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} values
  * @return {?}
  */function checkAndUpdatePureExpressionDynamic(view,def,values){var/** @type {?} */bindings=def.bindings;var/** @type {?} */changed=false;for(var/** @type {?} */i=0;i<values.length;i++){// Note: We need to loop over all values, so that
 // the old values are updates as well!
-if(checkAndUpdateBinding(view,def,i,values[i])){changed=true;}}var/** @type {?} */data=asPureExpressionData(view,def.index);if(changed){var/** @type {?} */value=void 0;switch(def.pureExpression.type){case PureExpressionType.Array:value=values;break;case PureExpressionType.Object:value={};for(var/** @type {?} */_i4=0;_i4<values.length;_i4++){value[bindings[_i4].name]=values[_i4];}break;case PureExpressionType.Pipe:var/** @type {?} */pipe=values[0];var/** @type {?} */params=values.slice(1);value=pipe.transform.apply(pipe,_toConsumableArray(params));break;}data.value=value;}return data.value;}/**
+if(checkAndUpdateBinding(view,def,i,values[i])){changed=true;}}if(changed){var/** @type {?} */data=asPureExpressionData(view,def.index);var/** @type {?} */value=void 0;switch(def.pureExpression.type){case PureExpressionType.Array:value=values;break;case PureExpressionType.Object:value={};for(var/** @type {?} */_i3=0;_i3<values.length;_i3++){value[bindings[_i3].name]=values[_i3];}break;case PureExpressionType.Pipe:var/** @type {?} */pipe=values[0];var/** @type {?} */params=values.slice(1);value=pipe.transform.apply(pipe,_toConsumableArray(params));break;}data.value=value;}return changed;}/**
  * @param {?} flags
  * @param {?} id
  * @param {?} bindings
  * @return {?}
  */function queryDef(flags,id,bindings){var/** @type {?} */bindingDefs=[];for(var/** @type {?} */propName in bindings){var/** @type {?} */bindingType=bindings[propName];bindingDefs.push({propName:propName,bindingType:bindingType});}return{type:NodeType.Query,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:flags,childFlags:0,childMatchedQueries:0,ngContentIndex:undefined,matchedQueries:{},matchedQueryIds:0,references:{},childCount:0,bindings:[],disposableCount:0,element:undefined,provider:undefined,text:undefined,pureExpression:undefined,query:{id:id,filterId:filterQueryId(id),bindings:bindingDefs},ngContent:undefined};}/**
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:flags,childFlags:0,childMatchedQueries:0,ngContentIndex:undefined,matchedQueries:{},matchedQueryIds:0,references:{},childCount:0,bindings:[],outputs:[],element:undefined,provider:undefined,text:undefined,pureExpression:undefined,query:{id:id,filterId:filterQueryId(id),bindings:bindingDefs},ngContent:undefined};}/**
  * @return {?}
  */function createQuery(){return new QueryList();}/**
  * @param {?} view
@@ -5017,8 +5058,8 @@ flags:flags,childFlags:0,childMatchedQueries:0,ngContentIndex:undefined,matchedQ
  */function dirtyParentQueries(view){var/** @type {?} */queryIds=view.def.nodeMatchedQueries;while(view.parent&&isEmbeddedView(view)){var/** @type {?} */tplDef=view.parentNodeDef;view=view.parent;// content queries
 var/** @type {?} */end=tplDef.index+tplDef.childCount;for(var/** @type {?} */i=0;i<=end;i++){var/** @type {?} */nodeDef=view.def.nodes[i];if(nodeDef.flags&NodeFlags.HasContentQuery&&nodeDef.flags&NodeFlags.HasDynamicQuery&&(nodeDef.query.filterId&queryIds)===nodeDef.query.filterId){asQueryList(view,i).setDirty();}if(nodeDef.type===NodeType.Element&&i+nodeDef.childCount<tplDef.index||!(nodeDef.childFlags&NodeFlags.HasContentQuery)||!(nodeDef.childFlags&NodeFlags.HasDynamicQuery)){// skip elements that don't contain the template element or no query.
 i+=nodeDef.childCount;}}}// view queries
-if(view.def.nodeFlags&NodeFlags.HasViewQuery){for(var/** @type {?} */_i5=0;_i5<view.def.nodes.length;_i5++){var/** @type {?} */_nodeDef=view.def.nodes[_i5];if(_nodeDef.flags&NodeFlags.HasViewQuery&&_nodeDef.flags&NodeFlags.HasDynamicQuery){asQueryList(view,_i5).setDirty();}// only visit the root nodes
-_i5+=_nodeDef.childCount;}}}/**
+if(view.def.nodeFlags&NodeFlags.HasViewQuery){for(var/** @type {?} */_i4=0;_i4<view.def.nodes.length;_i4++){var/** @type {?} */_nodeDef=view.def.nodes[_i4];if(_nodeDef.flags&NodeFlags.HasViewQuery&&_nodeDef.flags&NodeFlags.HasDynamicQuery){asQueryList(view,_i4).setDirty();}// only visit the root nodes
+_i4+=_nodeDef.childCount;}}}/**
  * @param {?} view
  * @param {?} nodeDef
  * @return {?}
@@ -5043,8 +5084,8 @@ var/** @type {?} */value=void 0;switch(queryValueType){case QueryValueType.Rende
  * @return {?}
  */function textDef(ngContentIndex,constants){// skip the call to sliceErrorStack itself + the call to this function.
 var/** @type {?} */source=isDevMode()?sliceErrorStack(2,3):'';var/** @type {?} */bindings=new Array(constants.length-1);for(var/** @type {?} */i=1;i<constants.length;i++){bindings[i-1]={type:BindingType.TextInterpolation,name:undefined,ns:undefined,nonMinifiedName:undefined,securityContext:undefined,suffix:constants[i]};}return{type:NodeType.Text,// will bet set by the view definition
-index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,disposableIndex:undefined,// regular values
-flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:ngContentIndex,childCount:0,bindings:bindings,disposableCount:0,element:undefined,provider:undefined,text:{prefix:constants[0],source:source},pureExpression:undefined,query:undefined,ngContent:undefined};}/**
+index:undefined,reverseChildIndex:undefined,parent:undefined,renderParent:undefined,bindingIndex:undefined,outputIndex:undefined,// regular values
+flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,references:{},ngContentIndex:ngContentIndex,childCount:0,bindings:bindings,outputs:[],element:undefined,provider:undefined,text:{prefix:constants[0],source:source},pureExpression:undefined,query:undefined,ngContent:undefined};}/**
  * @param {?} view
  * @param {?} renderHost
  * @param {?} def
@@ -5063,14 +5104,14 @@ flags:0,childFlags:0,childMatchedQueries:0,matchedQueries:{},matchedQueryIds:0,r
  * @param {?} v8
  * @param {?} v9
  * @return {?}
- */function checkAndUpdateTextInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */changed=false;var/** @type {?} */bindings=def.bindings;var/** @type {?} */bindLen=bindings.length;if(bindLen>0&&checkAndUpdateBinding(view,def,0,v0))changed=true;if(bindLen>1&&checkAndUpdateBinding(view,def,1,v1))changed=true;if(bindLen>2&&checkAndUpdateBinding(view,def,2,v2))changed=true;if(bindLen>3&&checkAndUpdateBinding(view,def,3,v3))changed=true;if(bindLen>4&&checkAndUpdateBinding(view,def,4,v4))changed=true;if(bindLen>5&&checkAndUpdateBinding(view,def,5,v5))changed=true;if(bindLen>6&&checkAndUpdateBinding(view,def,6,v6))changed=true;if(bindLen>7&&checkAndUpdateBinding(view,def,7,v7))changed=true;if(bindLen>8&&checkAndUpdateBinding(view,def,8,v8))changed=true;if(bindLen>9&&checkAndUpdateBinding(view,def,9,v9))changed=true;if(changed){var/** @type {?} */value=def.text.prefix;if(bindLen>0)value+=_addInterpolationPart(v0,bindings[0]);if(bindLen>1)value+=_addInterpolationPart(v1,bindings[1]);if(bindLen>2)value+=_addInterpolationPart(v2,bindings[2]);if(bindLen>3)value+=_addInterpolationPart(v3,bindings[3]);if(bindLen>4)value+=_addInterpolationPart(v4,bindings[4]);if(bindLen>5)value+=_addInterpolationPart(v5,bindings[5]);if(bindLen>6)value+=_addInterpolationPart(v6,bindings[6]);if(bindLen>7)value+=_addInterpolationPart(v7,bindings[7]);if(bindLen>8)value+=_addInterpolationPart(v8,bindings[8]);if(bindLen>9)value+=_addInterpolationPart(v9,bindings[9]);var/** @type {?} */_renderNode=asTextData(view,def.index).renderText;view.renderer.setValue(_renderNode,value);}}/**
+ */function checkAndUpdateTextInline(view,def,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */changed=false;var/** @type {?} */bindings=def.bindings;var/** @type {?} */bindLen=bindings.length;if(bindLen>0&&checkAndUpdateBinding(view,def,0,v0))changed=true;if(bindLen>1&&checkAndUpdateBinding(view,def,1,v1))changed=true;if(bindLen>2&&checkAndUpdateBinding(view,def,2,v2))changed=true;if(bindLen>3&&checkAndUpdateBinding(view,def,3,v3))changed=true;if(bindLen>4&&checkAndUpdateBinding(view,def,4,v4))changed=true;if(bindLen>5&&checkAndUpdateBinding(view,def,5,v5))changed=true;if(bindLen>6&&checkAndUpdateBinding(view,def,6,v6))changed=true;if(bindLen>7&&checkAndUpdateBinding(view,def,7,v7))changed=true;if(bindLen>8&&checkAndUpdateBinding(view,def,8,v8))changed=true;if(bindLen>9&&checkAndUpdateBinding(view,def,9,v9))changed=true;if(changed){var/** @type {?} */value=def.text.prefix;if(bindLen>0)value+=_addInterpolationPart(v0,bindings[0]);if(bindLen>1)value+=_addInterpolationPart(v1,bindings[1]);if(bindLen>2)value+=_addInterpolationPart(v2,bindings[2]);if(bindLen>3)value+=_addInterpolationPart(v3,bindings[3]);if(bindLen>4)value+=_addInterpolationPart(v4,bindings[4]);if(bindLen>5)value+=_addInterpolationPart(v5,bindings[5]);if(bindLen>6)value+=_addInterpolationPart(v6,bindings[6]);if(bindLen>7)value+=_addInterpolationPart(v7,bindings[7]);if(bindLen>8)value+=_addInterpolationPart(v8,bindings[8]);if(bindLen>9)value+=_addInterpolationPart(v9,bindings[9]);var/** @type {?} */_renderNode=asTextData(view,def.index).renderText;view.renderer.setValue(_renderNode,value);}return changed;}/**
  * @param {?} view
  * @param {?} def
  * @param {?} values
  * @return {?}
  */function checkAndUpdateTextDynamic(view,def,values){var/** @type {?} */bindings=def.bindings;var/** @type {?} */changed=false;for(var/** @type {?} */i=0;i<values.length;i++){// Note: We need to loop over all values, so that
 // the old values are updates as well!
-if(checkAndUpdateBinding(view,def,i,values[i])){changed=true;}}if(changed){var/** @type {?} */value='';for(var/** @type {?} */_i6=0;_i6<values.length;_i6++){value=value+_addInterpolationPart(values[_i6],bindings[_i6]);}value=def.text.prefix+value;var/** @type {?} */_renderNode2=asTextData(view,def.index).renderText;view.renderer.setValue(_renderNode2,value);}}/**
+if(checkAndUpdateBinding(view,def,i,values[i])){changed=true;}}if(changed){var/** @type {?} */value='';for(var/** @type {?} */_i5=0;_i5<values.length;_i5++){value=value+_addInterpolationPart(values[_i5],bindings[_i5]);}value=def.text.prefix+value;var/** @type {?} */_renderNode2=asTextData(view,def.index).renderText;view.renderer.setValue(_renderNode2,value);}return changed;}/**
  * @param {?} value
  * @param {?} binding
  * @return {?}
@@ -5081,11 +5122,11 @@ if(checkAndUpdateBinding(view,def,i,values[i])){changed=true;}}if(changed){var/*
  * @param {?=} updateRenderer
  * @return {?}
  */function viewDef(flags,nodes,updateDirectives,updateRenderer){// clone nodes and set auto calculated values
-if(nodes.length===0){throw new Error('Illegal State: Views without nodes are not allowed!');}var/** @type {?} */reverseChildNodes=new Array(nodes.length);var/** @type {?} */viewBindingCount=0;var/** @type {?} */viewDisposableCount=0;var/** @type {?} */viewNodeFlags=0;var/** @type {?} */viewMatchedQueries=0;var/** @type {?} */currentParent=null;var/** @type {?} */currentElementHasPublicProviders=false;var/** @type {?} */currentElementHasPrivateProviders=false;var/** @type {?} */lastRenderRootNode=null;for(var/** @type {?} */i=0;i<nodes.length;i++){while(currentParent&&i>currentParent.index+currentParent.childCount){var/** @type {?} */newParent=currentParent.parent;if(newParent){newParent.childFlags|=currentParent.childFlags;newParent.childMatchedQueries|=currentParent.childMatchedQueries;}currentParent=newParent;}var/** @type {?} */node=nodes[i];node.index=i;node.parent=currentParent;node.bindingIndex=viewBindingCount;node.disposableIndex=viewDisposableCount;node.reverseChildIndex=calculateReverseChildIndex(currentParent,i,node.childCount,nodes.length);// renderParent needs to account for ng-container!
+if(nodes.length===0){throw new Error('Illegal State: Views without nodes are not allowed!');}var/** @type {?} */reverseChildNodes=new Array(nodes.length);var/** @type {?} */viewBindingCount=0;var/** @type {?} */viewDisposableCount=0;var/** @type {?} */viewNodeFlags=0;var/** @type {?} */viewMatchedQueries=0;var/** @type {?} */currentParent=null;var/** @type {?} */currentElementHasPublicProviders=false;var/** @type {?} */currentElementHasPrivateProviders=false;var/** @type {?} */lastRenderRootNode=null;for(var/** @type {?} */i=0;i<nodes.length;i++){while(currentParent&&i>currentParent.index+currentParent.childCount){var/** @type {?} */newParent=currentParent.parent;if(newParent){newParent.childFlags|=currentParent.childFlags;newParent.childMatchedQueries|=currentParent.childMatchedQueries;}currentParent=newParent;}var/** @type {?} */node=nodes[i];node.index=i;node.parent=currentParent;node.bindingIndex=viewBindingCount;node.outputIndex=viewDisposableCount;node.reverseChildIndex=calculateReverseChildIndex(currentParent,i,node.childCount,nodes.length);// renderParent needs to account for ng-container!
 var/** @type {?} */currentRenderParent=void 0;if(currentParent&&currentParent.type===NodeType.Element&&!currentParent.element.name){currentRenderParent=currentParent.renderParent;}else{currentRenderParent=currentParent;}node.renderParent=currentRenderParent;if(node.element){var/** @type {?} */elDef=node.element;elDef.publicProviders=currentParent?currentParent.element.publicProviders:Object.create(null);elDef.allProviders=elDef.publicProviders;// Note: We assume that all providers of an element are before any child element!
-currentElementHasPublicProviders=false;currentElementHasPrivateProviders=false;}reverseChildNodes[node.reverseChildIndex]=node;validateNode(currentParent,node,nodes.length);viewNodeFlags|=node.flags;viewMatchedQueries|=node.matchedQueryIds;if(node.element&&node.element.template){viewMatchedQueries|=node.element.template.nodeMatchedQueries;}if(currentParent){currentParent.childFlags|=node.flags;currentParent.childMatchedQueries|=node.matchedQueryIds;if(node.element&&node.element.template){currentParent.childMatchedQueries|=node.element.template.nodeMatchedQueries;}}viewBindingCount+=node.bindings.length;viewDisposableCount+=node.disposableCount;if(!currentRenderParent&&(node.type===NodeType.Element||node.type===NodeType.Text)){lastRenderRootNode=node;}if(node.type===NodeType.Provider||node.type===NodeType.Directive){if(!currentElementHasPublicProviders){currentElementHasPublicProviders=true;// Use protoypical inheritance to not get O(n^2) complexity...
-currentParent.element.publicProviders=Object.create(currentParent.element.publicProviders);currentParent.element.allProviders=currentParent.element.publicProviders;}var/** @type {?} */isPrivateService=(node.flags&NodeFlags.PrivateProvider)!==0;var/** @type {?} */isComponent=(node.flags&NodeFlags.HasComponent)!==0;if(!isPrivateService||isComponent){currentParent.element.publicProviders[node.provider.tokenKey]=node;}else{if(!currentElementHasPrivateProviders){currentElementHasPrivateProviders=true;// Use protoypical inheritance to not get O(n^2) complexity...
-currentParent.element.allProviders=Object.create(currentParent.element.publicProviders);}currentParent.element.allProviders[node.provider.tokenKey]=node;}if(isComponent){currentParent.element.component=node;}}if(node.childCount){currentParent=node;}}while(currentParent){var/** @type {?} */_newParent=currentParent.parent;if(_newParent){_newParent.childFlags|=currentParent.childFlags;_newParent.childMatchedQueries|=currentParent.childMatchedQueries;}currentParent=_newParent;}var/** @type {?} */handleEvent=function handleEvent(view,nodeIndex,eventName,event){return nodes[nodeIndex].element.handleEvent(view,eventName,event);};return{nodeFlags:viewNodeFlags,nodeMatchedQueries:viewMatchedQueries,flags:flags,nodes:nodes,reverseChildNodes:reverseChildNodes,updateDirectives:updateDirectives||NOOP$1,updateRenderer:updateRenderer||NOOP$1,handleEvent:handleEvent||NOOP$1,bindingCount:viewBindingCount,disposableCount:viewDisposableCount,lastRenderRootNode:lastRenderRootNode};}/**
+currentElementHasPublicProviders=false;currentElementHasPrivateProviders=false;}reverseChildNodes[node.reverseChildIndex]=node;validateNode(currentParent,node,nodes.length);viewNodeFlags|=node.flags;viewMatchedQueries|=node.matchedQueryIds;if(node.element&&node.element.template){viewMatchedQueries|=node.element.template.nodeMatchedQueries;}if(currentParent){currentParent.childFlags|=node.flags;currentParent.childMatchedQueries|=node.matchedQueryIds;if(node.element&&node.element.template){currentParent.childMatchedQueries|=node.element.template.nodeMatchedQueries;}}viewBindingCount+=node.bindings.length;viewDisposableCount+=node.outputs.length;if(!currentRenderParent&&(node.type===NodeType.Element||node.type===NodeType.Text)){lastRenderRootNode=node;}if(node.type===NodeType.Provider||node.type===NodeType.Directive){if(!currentElementHasPublicProviders){currentElementHasPublicProviders=true;// Use protoypical inheritance to not get O(n^2) complexity...
+currentParent.element.publicProviders=Object.create(currentParent.element.publicProviders);currentParent.element.allProviders=currentParent.element.publicProviders;}var/** @type {?} */isPrivateService=(node.flags&NodeFlags.PrivateProvider)!==0;var/** @type {?} */isComponent=(node.flags&NodeFlags.IsComponent)!==0;if(!isPrivateService||isComponent){currentParent.element.publicProviders[node.provider.tokenKey]=node;}else{if(!currentElementHasPrivateProviders){currentElementHasPrivateProviders=true;// Use protoypical inheritance to not get O(n^2) complexity...
+currentParent.element.allProviders=Object.create(currentParent.element.publicProviders);}currentParent.element.allProviders[node.provider.tokenKey]=node;}if(isComponent){currentParent.element.componentProvider=node;}}if(node.childCount){currentParent=node;}}while(currentParent){var/** @type {?} */_newParent=currentParent.parent;if(_newParent){_newParent.childFlags|=currentParent.childFlags;_newParent.childMatchedQueries|=currentParent.childMatchedQueries;}currentParent=_newParent;}var/** @type {?} */handleEvent=function handleEvent(view,nodeIndex,eventName,event){return nodes[nodeIndex].element.handleEvent(view,eventName,event);};return{nodeFlags:viewNodeFlags,nodeMatchedQueries:viewMatchedQueries,flags:flags,nodes:nodes,reverseChildNodes:reverseChildNodes,updateDirectives:updateDirectives||NOOP$1,updateRenderer:updateRenderer||NOOP$1,handleEvent:handleEvent||NOOP$1,bindingCount:viewBindingCount,outputCount:viewDisposableCount,lastRenderRootNode:lastRenderRootNode};}/**
  * @param {?} currentParent
  * @param {?} i
  * @param {?} childCount
@@ -5137,7 +5178,7 @@ var/** @type {?} */view=createView(parent.root,parent.renderer,parent,anchorDef,
  * @param {?} parentNodeDef
  * @param {?} def
  * @return {?}
- */function createView(root,renderer,parent,parentNodeDef,def){var/** @type {?} */nodes=new Array(def.nodes.length);var/** @type {?} */disposables=def.disposableCount?new Array(def.disposableCount):undefined;var/** @type {?} */view={def:def,parent:parent,parentNodeDef:parentNodeDef,context:undefined,component:undefined,nodes:nodes,state:ViewState.FirstCheck|ViewState.ChecksEnabled,root:root,renderer:renderer,oldValues:new Array(def.bindingCount),disposables:disposables};return view;}/**
+ */function createView(root,renderer,parent,parentNodeDef,def){var/** @type {?} */nodes=new Array(def.nodes.length);var/** @type {?} */disposables=def.outputCount?new Array(def.outputCount):undefined;var/** @type {?} */view={def:def,parent:parent,viewContainerParent:undefined,parentNodeDef:parentNodeDef,context:undefined,component:undefined,nodes:nodes,state:ViewState.FirstCheck|ViewState.ChecksEnabled,root:root,renderer:renderer,oldValues:new Array(def.bindingCount),disposables:disposables};return view;}/**
  * @param {?} view
  * @param {?} component
  * @param {?} context
@@ -5145,22 +5186,19 @@ var/** @type {?} */view=createView(parent.root,parent.renderer,parent,anchorDef,
  */function initView(view,component,context){view.component=component;view.context=context;}/**
  * @param {?} view
  * @return {?}
- */function createViewNodes(view){var/** @type {?} */renderHost=void 0;if(isComponentView(view)){var/** @type {?} */hostDef=view.parentNodeDef;renderHost=asElementData(view.parent,hostDef.parent.index).renderElement;}var/** @type {?} */def=view.def;var/** @type {?} */nodes=view.nodes;for(var/** @type {?} */i=0;i<def.nodes.length;i++){var/** @type {?} */nodeDef=def.nodes[i];Services.setCurrentNode(view,i);switch(nodeDef.type){case NodeType.Element:nodes[i]=createElement(view,renderHost,nodeDef);break;case NodeType.Text:nodes[i]=createText(view,renderHost,nodeDef);break;case NodeType.Provider:{var/** @type {?} */instance=createProviderInstance(view,nodeDef);var/** @type {?} */providerData={componentView:undefined,instance:instance};nodes[i]=providerData;break;}case NodeType.Pipe:{var/** @type {?} */_instance=createPipeInstance(view,nodeDef);var/** @type {?} */_providerData={componentView:undefined,instance:_instance};nodes[i]=_providerData;break;}case NodeType.Directive:{if(nodeDef.flags&NodeFlags.HasComponent){// Components can inject a ChangeDetectorRef that needs a references to
-// the component view. Therefore, we create the component view first
-// and set the ProviderData in ViewData, and then instantiate the provider.
-var/** @type {?} */compViewDef=resolveViewDefinition(nodeDef.provider.component);var/** @type {?} */rendererType=nodeDef.provider.rendererType;var/** @type {?} */compRenderer=void 0;if(!rendererType){compRenderer=view.root.renderer;}else{var/** @type {?} */hostEl=asElementData(view,nodeDef.parent.index).renderElement;compRenderer=view.root.rendererFactory.createRenderer(hostEl,rendererType);}var/** @type {?} */componentView=createView(view.root,compRenderer,view,nodeDef,compViewDef);var/** @type {?} */_providerData2={componentView:componentView,instance:undefined};nodes[i]=_providerData2;var/** @type {?} */_instance2=_providerData2.instance=createDirectiveInstance(view,nodeDef);initView(componentView,_instance2,_instance2);}else{var/** @type {?} */_instance3=createDirectiveInstance(view,nodeDef);var/** @type {?} */_providerData3={componentView:undefined,instance:_instance3};nodes[i]=_providerData3;}break;}case NodeType.PureExpression:nodes[i]=createPureExpression(view,nodeDef);break;case NodeType.Query:nodes[i]=createQuery();break;case NodeType.NgContent:appendNgContent(view,renderHost,nodeDef);// no runtime data needed for NgContent...
-nodes[i]=undefined;break;}}// Create the ViewData.nodes of component views after we created everything else,
+ */function createViewNodes(view){var/** @type {?} */renderHost=void 0;if(isComponentView(view)){var/** @type {?} */hostDef=view.parentNodeDef;renderHost=asElementData(view.parent,hostDef.parent.index).renderElement;}var/** @type {?} */def=view.def;var/** @type {?} */nodes=view.nodes;for(var/** @type {?} */i=0;i<def.nodes.length;i++){var/** @type {?} */nodeDef=def.nodes[i];Services.setCurrentNode(view,i);var/** @type {?} */nodeData=void 0;switch(nodeDef.type){case NodeType.Element:var/** @type {?} */el=createElement(view,renderHost,nodeDef);var/** @type {?} */componentView=void 0;if(nodeDef.flags&NodeFlags.HasComponent){var/** @type {?} */compViewDef=resolveViewDefinition(nodeDef.element.componentView);var/** @type {?} */rendererType=nodeDef.element.componentRendererType;var/** @type {?} */compRenderer=void 0;if(!rendererType){compRenderer=view.root.renderer;}else{compRenderer=view.root.rendererFactory.createRenderer(el,rendererType);}componentView=createView(view.root,compRenderer,view,nodeDef.element.componentProvider,compViewDef);}listenToElementOutputs(view,componentView,nodeDef,el);nodeData={renderElement:el,componentView:componentView,embeddedViews:nodeDef.flags&NodeFlags.HasEmbeddedViews?[]:undefined,projectedViews:undefined};break;case NodeType.Text:nodeData=createText(view,renderHost,nodeDef);break;case NodeType.Provider:{var/** @type {?} */instance=createProviderInstance(view,nodeDef);nodeData={instance:instance};break;}case NodeType.Pipe:{var/** @type {?} */_instance=createPipeInstance(view,nodeDef);nodeData={instance:_instance};break;}case NodeType.Directive:{var/** @type {?} */_instance2=createDirectiveInstance(view,nodeDef);nodeData={instance:_instance2};if(nodeDef.flags&NodeFlags.IsComponent){var/** @type {?} */compView=asElementData(view,nodeDef.parent.index).componentView;initView(componentView,_instance2,_instance2);}break;}case NodeType.PureExpression:nodeData=createPureExpression(view,nodeDef);break;case NodeType.Query:nodeData=createQuery();break;case NodeType.NgContent:appendNgContent(view,renderHost,nodeDef);// no runtime data needed for NgContent...
+nodeData=undefined;break;}nodes[i]=nodeData;}// Create the ViewData.nodes of component views after we created everything else,
 // so that e.g. ng-content works
 execComponentViewsAction(view,ViewAction.CreateViewNodes);// fill static content and view queries
-execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlags.HasStaticQuery,QueryAction.CheckAndUpdate);}/**
+execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlags.HasStaticQuery,CheckType.CheckAndUpdate);}/**
  * @param {?} view
  * @return {?}
- */function checkNoChangesView(view){Services.updateDirectives(checkNoChangesNode,view);execEmbeddedViewsAction(view,ViewAction.CheckNoChanges);execQueriesAction(view,NodeFlags.HasContentQuery,NodeFlags.HasDynamicQuery,QueryAction.CheckNoChanges);Services.updateRenderer(checkNoChangesNode,view);execComponentViewsAction(view,ViewAction.CheckNoChanges);execQueriesAction(view,NodeFlags.HasViewQuery,NodeFlags.HasDynamicQuery,QueryAction.CheckNoChanges);}/**
+ */function checkNoChangesView(view){Services.updateDirectives(view,CheckType.CheckNoChanges);execEmbeddedViewsAction(view,ViewAction.CheckNoChanges);execQueriesAction(view,NodeFlags.HasContentQuery,NodeFlags.HasDynamicQuery,CheckType.CheckNoChanges);Services.updateRenderer(view,CheckType.CheckNoChanges);execComponentViewsAction(view,ViewAction.CheckNoChanges);execQueriesAction(view,NodeFlags.HasViewQuery,NodeFlags.HasDynamicQuery,CheckType.CheckNoChanges);}/**
  * @param {?} view
  * @return {?}
- */function checkAndUpdateView(view){Services.updateDirectives(checkAndUpdateNode,view);execEmbeddedViewsAction(view,ViewAction.CheckAndUpdate);execQueriesAction(view,NodeFlags.HasContentQuery,NodeFlags.HasDynamicQuery,QueryAction.CheckAndUpdate);callLifecycleHooksChildrenFirst(view,NodeFlags.AfterContentChecked|(view.state&ViewState.FirstCheck?NodeFlags.AfterContentInit:0));Services.updateRenderer(checkAndUpdateNode,view);execComponentViewsAction(view,ViewAction.CheckAndUpdate);execQueriesAction(view,NodeFlags.HasViewQuery,NodeFlags.HasDynamicQuery,QueryAction.CheckAndUpdate);callLifecycleHooksChildrenFirst(view,NodeFlags.AfterViewChecked|(view.state&ViewState.FirstCheck?NodeFlags.AfterViewInit:0));if(view.def.flags&ViewFlags.OnPush){view.state&=~ViewState.ChecksEnabled;}view.state&=~ViewState.FirstCheck;}/**
+ */function checkAndUpdateView(view){Services.updateDirectives(view,CheckType.CheckAndUpdate);execEmbeddedViewsAction(view,ViewAction.CheckAndUpdate);execQueriesAction(view,NodeFlags.HasContentQuery,NodeFlags.HasDynamicQuery,CheckType.CheckAndUpdate);callLifecycleHooksChildrenFirst(view,NodeFlags.AfterContentChecked|(view.state&ViewState.FirstCheck?NodeFlags.AfterContentInit:0));Services.updateRenderer(view,CheckType.CheckAndUpdate);execComponentViewsAction(view,ViewAction.CheckAndUpdate);execQueriesAction(view,NodeFlags.HasViewQuery,NodeFlags.HasDynamicQuery,CheckType.CheckAndUpdate);callLifecycleHooksChildrenFirst(view,NodeFlags.AfterViewChecked|(view.state&ViewState.FirstCheck?NodeFlags.AfterViewInit:0));if(view.def.flags&ViewFlags.OnPush){view.state&=~ViewState.ChecksEnabled;}view.state&=~ViewState.FirstCheck;}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?=} v0
  * @param {?=} v1
@@ -5173,9 +5211,9 @@ execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlag
  * @param {?=} v8
  * @param {?=} v9
  * @return {?}
- */function checkAndUpdateNode(view,nodeIndex,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){if(argStyle===ArgumentType.Inline){return checkAndUpdateNodeInline(view,nodeIndex,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);}else{return checkAndUpdateNodeDynamic(view,nodeIndex,v0);}}/**
+ */function checkAndUpdateNode(view,nodeDef,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){if(argStyle===ArgumentType.Inline){return checkAndUpdateNodeInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);}else{return checkAndUpdateNodeDynamic(view,nodeDef,v0);}}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?=} v0
  * @param {?=} v1
  * @param {?=} v2
@@ -5187,14 +5225,16 @@ execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlag
  * @param {?=} v8
  * @param {?=} v9
  * @return {?}
- */function checkAndUpdateNodeInline(view,nodeIndex,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];switch(nodeDef.type){case NodeType.Element:return checkAndUpdateElementInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);case NodeType.Text:return checkAndUpdateTextInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);case NodeType.Directive:return checkAndUpdateDirectiveInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);case NodeType.PureExpression:return checkAndUpdatePureExpressionInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);}}/**
+ */function checkAndUpdateNodeInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */changed=false;switch(nodeDef.type){case NodeType.Element:changed=checkAndUpdateElementInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);break;case NodeType.Text:changed=checkAndUpdateTextInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);break;case NodeType.Directive:changed=checkAndUpdateDirectiveInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);break;case NodeType.PureExpression:changed=checkAndUpdatePureExpressionInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);break;}return changed;}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} values
  * @return {?}
- */function checkAndUpdateNodeDynamic(view,nodeIndex,values){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];switch(nodeDef.type){case NodeType.Element:return checkAndUpdateElementDynamic(view,nodeDef,values);case NodeType.Text:return checkAndUpdateTextDynamic(view,nodeDef,values);case NodeType.Directive:return checkAndUpdateDirectiveDynamic(view,nodeDef,values);case NodeType.PureExpression:return checkAndUpdatePureExpressionDynamic(view,nodeDef,values);}}/**
+ */function checkAndUpdateNodeDynamic(view,nodeDef,values){var/** @type {?} */changed=false;switch(nodeDef.type){case NodeType.Element:changed=checkAndUpdateElementDynamic(view,nodeDef,values);break;case NodeType.Text:changed=checkAndUpdateTextDynamic(view,nodeDef,values);break;case NodeType.Directive:changed=checkAndUpdateDirectiveDynamic(view,nodeDef,values);break;case NodeType.PureExpression:changed=checkAndUpdatePureExpressionDynamic(view,nodeDef,values);break;}if(changed){// Update oldValues after all bindings have been updated,
+// as a setter for a property might update other properties.
+var/** @type {?} */bindLen=nodeDef.bindings.length;var/** @type {?} */bindingStart=nodeDef.bindingIndex;var/** @type {?} */oldValues=view.oldValues;for(var/** @type {?} */i=0;i<bindLen;i++){oldValues[bindingStart+i]=values[i];}}return changed;}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?=} v0
  * @param {?=} v1
@@ -5207,9 +5247,10 @@ execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlag
  * @param {?=} v8
  * @param {?=} v9
  * @return {?}
- */function checkNoChangesNode(view,nodeIndex,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){if(argStyle===ArgumentType.Inline){return checkNoChangesNodeInline(view,nodeIndex,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);}else{return checkNoChangesNodeDynamic(view,nodeIndex,v0);}}/**
+ */function checkNoChangesNode(view,nodeDef,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){if(argStyle===ArgumentType.Inline){checkNoChangesNodeInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);}else{checkNoChangesNodeDynamic(view,nodeDef,v0);}// Returning false is ok here as we would have thrown in case of a change.
+return false;}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} v0
  * @param {?} v1
  * @param {?} v2
@@ -5221,19 +5262,19 @@ execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlag
  * @param {?} v8
  * @param {?} v9
  * @return {?}
- */function checkNoChangesNodeInline(view,nodeIndex,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];var/** @type {?} */bindLen=nodeDef.bindings.length;if(bindLen>0)checkBindingNoChanges(view,nodeDef,0,v0);if(bindLen>1)checkBindingNoChanges(view,nodeDef,1,v1);if(bindLen>2)checkBindingNoChanges(view,nodeDef,2,v2);if(bindLen>3)checkBindingNoChanges(view,nodeDef,3,v3);if(bindLen>4)checkBindingNoChanges(view,nodeDef,4,v4);if(bindLen>5)checkBindingNoChanges(view,nodeDef,5,v5);if(bindLen>6)checkBindingNoChanges(view,nodeDef,6,v6);if(bindLen>7)checkBindingNoChanges(view,nodeDef,7,v7);if(bindLen>8)checkBindingNoChanges(view,nodeDef,8,v8);if(bindLen>9)checkBindingNoChanges(view,nodeDef,9,v9);return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeIndex).value:undefined;}/**
+ */function checkNoChangesNodeInline(view,nodeDef,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */bindLen=nodeDef.bindings.length;if(bindLen>0)checkBindingNoChanges(view,nodeDef,0,v0);if(bindLen>1)checkBindingNoChanges(view,nodeDef,1,v1);if(bindLen>2)checkBindingNoChanges(view,nodeDef,2,v2);if(bindLen>3)checkBindingNoChanges(view,nodeDef,3,v3);if(bindLen>4)checkBindingNoChanges(view,nodeDef,4,v4);if(bindLen>5)checkBindingNoChanges(view,nodeDef,5,v5);if(bindLen>6)checkBindingNoChanges(view,nodeDef,6,v6);if(bindLen>7)checkBindingNoChanges(view,nodeDef,7,v7);if(bindLen>8)checkBindingNoChanges(view,nodeDef,8,v8);if(bindLen>9)checkBindingNoChanges(view,nodeDef,9,v9);}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} values
  * @return {?}
- */function checkNoChangesNodeDynamic(view,nodeIndex,values){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];for(var/** @type {?} */i=0;i<values.length;i++){checkBindingNoChanges(view,nodeDef,i,values[i]);}return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeIndex).value:undefined;}/**
+ */function checkNoChangesNodeDynamic(view,nodeDef,values){for(var/** @type {?} */i=0;i<values.length;i++){checkBindingNoChanges(view,nodeDef,i,values[i]);}}/**
  * @param {?} view
  * @param {?} nodeDef
  * @return {?}
  */function checkNoChangesQuery(view,nodeDef){var/** @type {?} */queryList=asQueryList(view,nodeDef.index);if(queryList.dirty){throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view,nodeDef.index),'Query '+nodeDef.query.id+' not dirty','Query '+nodeDef.query.id+' dirty',(view.state&ViewState.FirstCheck)!==0);}}/**
  * @param {?} view
  * @return {?}
- */function destroyView(view){if(view.state&ViewState.Destroyed){return;}execEmbeddedViewsAction(view,ViewAction.Destroy);execComponentViewsAction(view,ViewAction.Destroy);callLifecycleHooksChildrenFirst(view,NodeFlags.OnDestroy);if(view.disposables){for(var/** @type {?} */i=0;i<view.disposables.length;i++){view.disposables[i]();}}if(view.renderer.destroyNode){destroyViewNodes(view);}if(view.parentNodeDef&&view.parentNodeDef.flags&NodeFlags.HasComponent){view.renderer.destroy();}view.state|=ViewState.Destroyed;}/**
+ */function destroyView(view){if(view.state&ViewState.Destroyed){return;}execEmbeddedViewsAction(view,ViewAction.Destroy);execComponentViewsAction(view,ViewAction.Destroy);callLifecycleHooksChildrenFirst(view,NodeFlags.OnDestroy);if(view.disposables){for(var/** @type {?} */i=0;i<view.disposables.length;i++){view.disposables[i]();}}if(view.renderer.destroyNode){destroyViewNodes(view);}if(isComponentView(view)){view.renderer.destroy();}view.state|=ViewState.Destroyed;}/**
  * @param {?} view
  * @return {?}
  */function destroyViewNodes(view){var/** @type {?} */len=view.def.nodes.length;for(var/** @type {?} */i=0;i<len;i++){var/** @type {?} */def=view.def.nodes[i];if(def.type===NodeType.Element){view.renderer.destroyNode(asElementData(view,i).renderElement);}else if(def.type===NodeType.Text){view.renderer.destroyNode(asTextData(view,i).renderText);}}}var ViewAction={};ViewAction.CreateViewNodes=0;ViewAction.CheckNoChanges=1;ViewAction.CheckAndUpdate=2;ViewAction.Destroy=3;ViewAction[ViewAction.CreateViewNodes]="CreateViewNodes";ViewAction[ViewAction.CheckNoChanges]="CheckNoChanges";ViewAction[ViewAction.CheckAndUpdate]="CheckAndUpdate";ViewAction[ViewAction.Destroy]="Destroy";/**
@@ -5241,7 +5282,7 @@ execQueriesAction(view,NodeFlags.HasContentQuery|NodeFlags.HasViewQuery,NodeFlag
  * @param {?} action
  * @return {?}
  */function execComponentViewsAction(view,action){var/** @type {?} */def=view.def;if(!(def.nodeFlags&NodeFlags.HasComponent)){return;}for(var/** @type {?} */i=0;i<def.nodes.length;i++){var/** @type {?} */nodeDef=def.nodes[i];if(nodeDef.flags&NodeFlags.HasComponent){// a leaf
-var/** @type {?} */providerData=asProviderData(view,i);callViewAction(providerData.componentView,action);}else if((nodeDef.childFlags&NodeFlags.HasComponent)===0){// a parent with leafs
+callViewAction(asElementData(view,i).componentView,action);}else if((nodeDef.childFlags&NodeFlags.HasComponent)===0){// a parent with leafs
 // no child is a component,
 // then skip the children
 i+=nodeDef.childCount;}}}/**
@@ -5256,59 +5297,21 @@ i+=nodeDef.childCount;}}}/**
  * @param {?} view
  * @param {?} action
  * @return {?}
- */function callViewAction(view,action){var/** @type {?} */viewState=view.state;switch(action){case ViewAction.CheckNoChanges:if(viewState&ViewState.ChecksEnabled&&(viewState&(ViewState.Errored|ViewState.Destroyed))===0){checkNoChangesView(view);}break;case ViewAction.CheckAndUpdate:if(viewState&ViewState.ChecksEnabled&&(viewState&(ViewState.Errored|ViewState.Destroyed))===0){checkAndUpdateView(view);}break;case ViewAction.Destroy:destroyView(view);break;case ViewAction.CreateViewNodes:createViewNodes(view);break;}}var QueryAction={};QueryAction.CheckAndUpdate=0;QueryAction.CheckNoChanges=1;QueryAction[QueryAction.CheckAndUpdate]="CheckAndUpdate";QueryAction[QueryAction.CheckNoChanges]="CheckNoChanges";/**
+ */function callViewAction(view,action){var/** @type {?} */viewState=view.state;switch(action){case ViewAction.CheckNoChanges:if(viewState&ViewState.ChecksEnabled&&(viewState&(ViewState.Errored|ViewState.Destroyed))===0){checkNoChangesView(view);}break;case ViewAction.CheckAndUpdate:if(viewState&ViewState.ChecksEnabled&&(viewState&(ViewState.Errored|ViewState.Destroyed))===0){checkAndUpdateView(view);}break;case ViewAction.Destroy:destroyView(view);break;case ViewAction.CreateViewNodes:createViewNodes(view);break;}}/**
  * @param {?} view
  * @param {?} queryFlags
  * @param {?} staticDynamicQueryFlag
- * @param {?} action
+ * @param {?} checkType
  * @return {?}
- */function execQueriesAction(view,queryFlags,staticDynamicQueryFlag,action){if(!(view.def.nodeFlags&queryFlags)||!(view.def.nodeFlags&staticDynamicQueryFlag)){return;}var/** @type {?} */nodeCount=view.def.nodes.length;for(var/** @type {?} */i=0;i<nodeCount;i++){var/** @type {?} */nodeDef=view.def.nodes[i];if(nodeDef.flags&queryFlags&&nodeDef.flags&staticDynamicQueryFlag){Services.setCurrentNode(view,nodeDef.index);switch(action){case QueryAction.CheckAndUpdate:checkAndUpdateQuery(view,nodeDef);break;case QueryAction.CheckNoChanges:checkNoChangesQuery(view,nodeDef);break;}}if(!(nodeDef.childFlags&queryFlags)||!(nodeDef.childFlags&staticDynamicQueryFlag)){// no child has a matching query
+ */function execQueriesAction(view,queryFlags,staticDynamicQueryFlag,checkType){if(!(view.def.nodeFlags&queryFlags)||!(view.def.nodeFlags&staticDynamicQueryFlag)){return;}var/** @type {?} */nodeCount=view.def.nodes.length;for(var/** @type {?} */i=0;i<nodeCount;i++){var/** @type {?} */nodeDef=view.def.nodes[i];if(nodeDef.flags&queryFlags&&nodeDef.flags&staticDynamicQueryFlag){Services.setCurrentNode(view,nodeDef.index);switch(checkType){case CheckType.CheckAndUpdate:checkAndUpdateQuery(view,nodeDef);break;case CheckType.CheckNoChanges:checkNoChangesQuery(view,nodeDef);break;}}if(!(nodeDef.childFlags&queryFlags)||!(nodeDef.childFlags&staticDynamicQueryFlag)){// no child has a matching query
 // then skip the children
-i+=nodeDef.childCount;}}}/**
- * @param {?} elementData
- * @param {?} viewIndex
- * @param {?} view
+i+=nodeDef.childCount;}}}var/** @type {?} */initialized=false;/**
  * @return {?}
- */function attachEmbeddedView(elementData,viewIndex,view){var/** @type {?} */embeddedViews=elementData.embeddedViews;if(viewIndex==null){viewIndex=embeddedViews.length;}addToArray$1(embeddedViews,viewIndex,view);var/** @type {?} */dvcElementData=declaredViewContainer(view);if(dvcElementData&&dvcElementData!==elementData){var/** @type {?} */projectedViews=dvcElementData.projectedViews;if(!projectedViews){projectedViews=dvcElementData.projectedViews=[];}projectedViews.push(view);}dirtyParentQueries(view);var/** @type {?} */prevView=viewIndex>0?embeddedViews[viewIndex-1]:null;renderAttachEmbeddedView(elementData,prevView,view);}/**
- * @param {?} elementData
- * @param {?} viewIndex
+ */function initServicesIfNeeded(){if(initialized){return;}initialized=true;var/** @type {?} */services=isDevMode()?createDebugServices():createProdServices();Services.setCurrentNode=services.setCurrentNode;Services.createRootView=services.createRootView;Services.createEmbeddedView=services.createEmbeddedView;Services.checkAndUpdateView=services.checkAndUpdateView;Services.checkNoChangesView=services.checkNoChangesView;Services.destroyView=services.destroyView;Services.resolveDep=resolveDep;Services.createDebugContext=services.createDebugContext;Services.handleEvent=services.handleEvent;Services.updateDirectives=services.updateDirectives;Services.updateRenderer=services.updateRenderer;Services.dirtyParentQueries=dirtyParentQueries;}/**
  * @return {?}
- */function detachEmbeddedView(elementData,viewIndex){var/** @type {?} */embeddedViews=elementData.embeddedViews;if(viewIndex==null||viewIndex>=embeddedViews.length){viewIndex=embeddedViews.length-1;}if(viewIndex<0){return null;}var/** @type {?} */view=embeddedViews[viewIndex];removeFromArray(embeddedViews,viewIndex);var/** @type {?} */dvcElementData=declaredViewContainer(view);if(dvcElementData&&dvcElementData!==elementData){var/** @type {?} */projectedViews=dvcElementData.projectedViews;removeFromArray(projectedViews,projectedViews.indexOf(view));}dirtyParentQueries(view);renderDetachEmbeddedView(elementData,view);return view;}/**
- * @param {?} elementData
- * @param {?} oldViewIndex
- * @param {?} newViewIndex
+ */function createProdServices(){return{setCurrentNode:function setCurrentNode(){},createRootView:createProdRootView,createEmbeddedView:createEmbeddedView,checkAndUpdateView:checkAndUpdateView,checkNoChangesView:checkNoChangesView,destroyView:destroyView,createDebugContext:function createDebugContext(view,nodeIndex){return new DebugContext_(view,nodeIndex);},handleEvent:function handleEvent(view,nodeIndex,eventName,event){return view.def.handleEvent(view,nodeIndex,eventName,event);},updateDirectives:function updateDirectives(view,checkType){return view.def.updateDirectives(checkType===CheckType.CheckAndUpdate?prodCheckAndUpdateNode:prodCheckNoChangesNode,view);},updateRenderer:function updateRenderer(view,checkType){return view.def.updateRenderer(checkType===CheckType.CheckAndUpdate?prodCheckAndUpdateNode:prodCheckNoChangesNode,view);}};}/**
  * @return {?}
- */function moveEmbeddedView(elementData,oldViewIndex,newViewIndex){var/** @type {?} */embeddedViews=elementData.embeddedViews;var/** @type {?} */view=embeddedViews[oldViewIndex];removeFromArray(embeddedViews,oldViewIndex);if(newViewIndex==null){newViewIndex=embeddedViews.length;}addToArray$1(embeddedViews,newViewIndex,view);// Note: Don't need to change projectedViews as the order in there
-// as always invalid...
-dirtyParentQueries(view);renderDetachEmbeddedView(elementData,view);var/** @type {?} */prevView=newViewIndex>0?embeddedViews[newViewIndex-1]:null;renderAttachEmbeddedView(elementData,prevView,view);return view;}/**
- * @param {?} elementData
- * @param {?} prevView
- * @param {?} view
- * @return {?}
- */function renderAttachEmbeddedView(elementData,prevView,view){var/** @type {?} */prevRenderNode=prevView?renderNode(prevView,prevView.def.lastRenderRootNode):elementData.renderElement;var/** @type {?} */parentNode=view.renderer.parentNode(prevRenderNode);var/** @type {?} */nextSibling=view.renderer.nextSibling(prevRenderNode);// Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
-// However, browsers automatically do `appendChild` when there is no `nextSibling`.
-visitRootRenderNodes(view,RenderNodeAction.InsertBefore,parentNode,nextSibling,undefined);}/**
- * @param {?} elementData
- * @param {?} view
- * @return {?}
- */function renderDetachEmbeddedView(elementData,view){var/** @type {?} */parentNode=view.renderer.parentNode(elementData.renderElement);visitRootRenderNodes(view,RenderNodeAction.RemoveChild,parentNode,null,undefined);}/**
- * @param {?} arr
- * @param {?} index
- * @param {?} value
- * @return {?}
- */function addToArray$1(arr,index,value){// perf: array.push is faster than array.splice!
-if(index>=arr.length){arr.push(value);}else{arr.splice(index,0,value);}}/**
- * @param {?} arr
- * @param {?} index
- * @return {?}
- */function removeFromArray(arr,index){// perf: array.pop is faster than array.splice!
-if(index>=arr.length-1){arr.pop();}else{arr.splice(index,1);}}var/** @type {?} */initialized=false;/**
- * @return {?}
- */function initServicesIfNeeded(){if(initialized){return;}initialized=true;var/** @type {?} */services=isDevMode()?createDebugServices():createProdServices();Services.setCurrentNode=services.setCurrentNode;Services.createRootView=services.createRootView;Services.createEmbeddedView=services.createEmbeddedView;Services.checkAndUpdateView=services.checkAndUpdateView;Services.checkNoChangesView=services.checkNoChangesView;Services.destroyView=services.destroyView;Services.attachEmbeddedView=services.attachEmbeddedView,Services.detachEmbeddedView=services.detachEmbeddedView,Services.moveEmbeddedView=services.moveEmbeddedView;Services.resolveDep=services.resolveDep;Services.createDebugContext=services.createDebugContext;Services.handleEvent=services.handleEvent;Services.updateDirectives=services.updateDirectives;Services.updateRenderer=services.updateRenderer;}/**
- * @return {?}
- */function createProdServices(){return{setCurrentNode:function setCurrentNode(){},createRootView:createProdRootView,createEmbeddedView:createEmbeddedView,checkAndUpdateView:checkAndUpdateView,checkNoChangesView:checkNoChangesView,destroyView:destroyView,attachEmbeddedView:attachEmbeddedView,detachEmbeddedView:detachEmbeddedView,moveEmbeddedView:moveEmbeddedView,resolveDep:resolveDep,createDebugContext:function createDebugContext(view,nodeIndex){return new DebugContext_(view,nodeIndex);},handleEvent:function handleEvent(view,nodeIndex,eventName,event){return view.def.handleEvent(view,nodeIndex,eventName,event);},updateDirectives:function updateDirectives(check,view){return view.def.updateDirectives(check,view);},updateRenderer:function updateRenderer(check,view){return view.def.updateRenderer(check,view);}};}/**
- * @return {?}
- */function createDebugServices(){return{setCurrentNode:debugSetCurrentNode,createRootView:debugCreateRootView,createEmbeddedView:debugCreateEmbeddedView,checkAndUpdateView:debugCheckAndUpdateView,checkNoChangesView:debugCheckNoChangesView,destroyView:debugDestroyView,attachEmbeddedView:attachEmbeddedView,detachEmbeddedView:detachEmbeddedView,moveEmbeddedView:moveEmbeddedView,resolveDep:resolveDep,createDebugContext:function createDebugContext(view,nodeIndex){return new DebugContext_(view,nodeIndex);},handleEvent:debugHandleEvent,updateDirectives:debugUpdateDirectives,updateRenderer:debugUpdateRenderer};}/**
+ */function createDebugServices(){return{setCurrentNode:debugSetCurrentNode,createRootView:debugCreateRootView,createEmbeddedView:debugCreateEmbeddedView,checkAndUpdateView:debugCheckAndUpdateView,checkNoChangesView:debugCheckNoChangesView,destroyView:debugDestroyView,createDebugContext:function createDebugContext(view,nodeIndex){return new DebugContext_(view,nodeIndex);},handleEvent:debugHandleEvent,updateDirectives:debugUpdateDirectives,updateRenderer:debugUpdateRenderer};}/**
  * @param {?} injector
  * @param {?} projectableNodes
  * @param {?} rootSelectorOrNode
@@ -5329,6 +5332,36 @@ if(index>=arr.length-1){arr.pop();}else{arr.splice(index,1);}}var/** @type {?} *
  * @param {?} rootSelectorOrNode
  * @return {?}
  */function createRootData(injector,rendererFactory,projectableNodes,rootSelectorOrNode){var/** @type {?} */sanitizer=injector.get(Sanitizer);var/** @type {?} */renderer=rendererFactory.createRenderer(null,null);return{injector:injector,projectableNodes:projectableNodes,selectorOrNode:rootSelectorOrNode,sanitizer:sanitizer,rendererFactory:rendererFactory,renderer:renderer};}/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */function prodCheckAndUpdateNode(view,nodeIndex,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];checkAndUpdateNode(view,nodeDef,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeIndex).value:undefined;}/**
+ * @param {?} view
+ * @param {?} nodeIndex
+ * @param {?} argStyle
+ * @param {?=} v0
+ * @param {?=} v1
+ * @param {?=} v2
+ * @param {?=} v3
+ * @param {?=} v4
+ * @param {?=} v5
+ * @param {?=} v6
+ * @param {?=} v7
+ * @param {?=} v8
+ * @param {?=} v9
+ * @return {?}
+ */function prodCheckNoChangesNode(view,nodeIndex,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];checkNoChangesNode(view,nodeDef,argStyle,v0,v1,v2,v3,v4,v5,v6,v7,v8,v9);return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeIndex).value:undefined;}/**
  * @param {?} parent
  * @param {?} anchorDef
  * @param {?=} context
@@ -5353,35 +5386,40 @@ if(index>=arr.length-1){arr.pop();}else{arr.splice(index,1);}}var/** @type {?} *
  * @param {?} event
  * @return {?}
  */function debugHandleEvent(view,nodeIndex,eventName,event){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nodeIndex);return callWithDebugContext(DebugAction.handleEvent,view.def.handleEvent,null,[view,nodeIndex,eventName,event]);}/**
- * @param {?} check
  * @param {?} view
+ * @param {?} checkType
  * @return {?}
- */function debugUpdateDirectives(check,view){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nextDirectiveWithBinding(view,0));return view.def.updateDirectives(debugCheckDirectivesFn,view);/**
+ */function debugUpdateDirectives(view,checkType){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nextDirectiveWithBinding(view,0));return view.def.updateDirectives(debugCheckDirectivesFn,view);/**
      * @param {?} view
      * @param {?} nodeIndex
      * @param {?} argStyle
      * @param {...?} values
      * @return {?}
-     */function debugCheckDirectivesFn(view,nodeIndex,argStyle){for(var _len7=arguments.length,values=Array(_len7>3?_len7-3:0),_key7=3;_key7<_len7;_key7++){values[_key7-3]=arguments[_key7];}var/** @type {?} */result=debugCheckFn(check,view,nodeIndex,argStyle,values);if(view.def.nodes[nodeIndex].type===NodeType.Directive){debugSetCurrentNode(view,nextDirectiveWithBinding(view,nodeIndex));}return result;};}/**
- * @param {?} check
+     */function debugCheckDirectivesFn(view,nodeIndex,argStyle){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];for(var _len7=arguments.length,values=Array(_len7>3?_len7-3:0),_key7=3;_key7<_len7;_key7++){values[_key7-3]=arguments[_key7];}if(checkType===CheckType.CheckAndUpdate){debugCheckAndUpdateNode(view,nodeDef,argStyle,values);}else{debugCheckNoChangesNode(view,nodeDef,argStyle,values);}if(nodeDef.type===NodeType.Directive){debugSetCurrentNode(view,nextDirectiveWithBinding(view,nodeIndex));}return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeDef.index).value:undefined;};}/**
  * @param {?} view
+ * @param {?} checkType
  * @return {?}
- */function debugUpdateRenderer(check,view){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nextRenderNodeWithBinding(view,0));return view.def.updateRenderer(debugCheckRenderNodeFn,view);/**
+ */function debugUpdateRenderer(view,checkType){if(view.state&ViewState.Destroyed){throw viewDestroyedError$1(DebugAction[_currentAction]);}debugSetCurrentNode(view,nextRenderNodeWithBinding(view,0));return view.def.updateRenderer(debugCheckRenderNodeFn,view);/**
      * @param {?} view
      * @param {?} nodeIndex
      * @param {?} argStyle
      * @param {...?} values
      * @return {?}
-     */function debugCheckRenderNodeFn(view,nodeIndex,argStyle){for(var _len8=arguments.length,values=Array(_len8>3?_len8-3:0),_key8=3;_key8<_len8;_key8++){values[_key8-3]=arguments[_key8];}var/** @type {?} */result=debugCheckFn(check,view,nodeIndex,argStyle,values);var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];if(nodeDef.type===NodeType.Element||nodeDef.type===NodeType.Text){debugSetCurrentNode(view,nextRenderNodeWithBinding(view,nodeIndex));}return result;}}/**
- * @param {?} delegate
+     */function debugCheckRenderNodeFn(view,nodeIndex,argStyle){var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];for(var _len8=arguments.length,values=Array(_len8>3?_len8-3:0),_key8=3;_key8<_len8;_key8++){values[_key8-3]=arguments[_key8];}if(checkType===CheckType.CheckAndUpdate){debugCheckAndUpdateNode(view,nodeDef,argStyle,values);}else{debugCheckNoChangesNode(view,nodeDef,argStyle,values);}if(nodeDef.type===NodeType.Element||nodeDef.type===NodeType.Text){debugSetCurrentNode(view,nextRenderNodeWithBinding(view,nodeIndex));}return nodeDef.type===NodeType.PureExpression?asPureExpressionData(view,nodeDef.index).value:undefined;}}/**
  * @param {?} view
- * @param {?} nodeIndex
+ * @param {?} nodeDef
  * @param {?} argStyle
  * @param {?} givenValues
  * @return {?}
- */function debugCheckFn(delegate,view,nodeIndex,argStyle,givenValues){if(_currentAction===DebugAction.detectChanges){var/** @type {?} */values=argStyle===ArgumentType.Dynamic?givenValues[0]:givenValues;var/** @type {?} */nodeDef=view.def.nodes[nodeIndex];if(nodeDef.type===NodeType.Directive||nodeDef.type===NodeType.Element){var/** @type {?} */bindingValues={};for(var/** @type {?} */i=0;i<nodeDef.bindings.length;i++){var/** @type {?} */binding=nodeDef.bindings[i];var/** @type {?} */value=values[i];if((binding.type===BindingType.ElementProperty||binding.type===BindingType.DirectiveProperty)&&checkBinding$1(view,nodeDef,i,value)){bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)]=normalizeDebugBindingValue(value);}}var/** @type {?} */elDef=nodeDef.type===NodeType.Directive?nodeDef.parent:nodeDef;var/** @type {?} */el=asElementData(view,elDef.index).renderElement;if(!elDef.element.name){// a comment.
+ */function debugCheckAndUpdateNode(view,nodeDef,argStyle,givenValues){var/** @type {?} */changed=checkAndUpdateNode.apply(undefined,[view,nodeDef,argStyle].concat(_toConsumableArray(givenValues)));if(changed){var/** @type {?} */values=argStyle===ArgumentType.Dynamic?givenValues[0]:givenValues;if(nodeDef.type===NodeType.Directive||nodeDef.type===NodeType.Element){var/** @type {?} */bindingValues={};for(var/** @type {?} */i=0;i<nodeDef.bindings.length;i++){var/** @type {?} */binding=nodeDef.bindings[i];var/** @type {?} */value=values[i];if(binding.type===BindingType.ElementProperty||binding.type===BindingType.ComponentHostProperty||binding.type===BindingType.DirectiveProperty){bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)]=normalizeDebugBindingValue(value);}}var/** @type {?} */elDef=nodeDef.type===NodeType.Directive?nodeDef.parent:nodeDef;var/** @type {?} */el=asElementData(view,elDef.index).renderElement;if(!elDef.element.name){// a comment.
 view.renderer.setValue(el,'bindings='+JSON.stringify(bindingValues,null,2));}else{// a regular element.
-for(var/** @type {?} */attr in bindingValues){view.renderer.setAttribute(el,attr,bindingValues[attr]);}}}}return delegate.apply(undefined,[view,nodeIndex,argStyle].concat(_toConsumableArray(givenValues)));};/**
+for(var/** @type {?} */attr in bindingValues){view.renderer.setAttribute(el,attr,bindingValues[attr]);}}}}}/**
+ * @param {?} view
+ * @param {?} nodeDef
+ * @param {?} argStyle
+ * @param {?} values
+ * @return {?}
+ */function debugCheckNoChangesNode(view,nodeDef,argStyle,values){checkNoChangesNode.apply(undefined,[view,nodeDef,argStyle].concat(_toConsumableArray(values)));}/**
  * @param {?} name
  * @return {?}
  */function normalizeDebugBindingName(name){// Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
@@ -5403,13 +5441,16 @@ return value?value.toString().slice(0,20):value;}catch(e){return'[ERROR] Excepti
  */function nextRenderNodeWithBinding(view,nodeIndex){for(var/** @type {?} */i=nodeIndex;i<view.def.nodes.length;i++){var/** @type {?} */nodeDef=view.def.nodes[i];if((nodeDef.type===NodeType.Element||nodeDef.type===NodeType.Text)&&nodeDef.bindings&&nodeDef.bindings.length){return i;}}return undefined;}var DebugContext_=function(){/**
      * @param {?} view
      * @param {?} nodeIndex
-     */function DebugContext_(view,nodeIndex){_classCallCheck(this,DebugContext_);this.view=view;this.nodeIndex=nodeIndex;if(nodeIndex==null){this.nodeIndex=nodeIndex=0;}this.nodeDef=view.def.nodes[nodeIndex];var elDef=this.nodeDef;var elView=view;while(elDef&&elDef.type!==NodeType.Element){elDef=elDef.parent;}if(!elDef){while(!elDef&&elView){elDef=viewParentEl(elView);elView=elView.parent;}}this.elDef=elDef;this.elView=elView;this.compProviderDef=elView?this.elDef.element.component:null;}/**
+     */function DebugContext_(view,nodeIndex){_classCallCheck(this,DebugContext_);this.view=view;this.nodeIndex=nodeIndex;if(nodeIndex==null){this.nodeIndex=nodeIndex=0;}this.nodeDef=view.def.nodes[nodeIndex];var elDef=this.nodeDef;var elView=view;while(elDef&&elDef.type!==NodeType.Element){elDef=elDef.parent;}if(!elDef){while(!elDef&&elView){elDef=viewParentEl(elView);elView=elView.parent;}}this.elDef=elDef;this.elView=elView;}/**
      * @return {?}
-     */_createClass(DebugContext_,[{key:'injector',get:function get(){return createInjector(this.elView,this.elDef);}/**
+     */_createClass(DebugContext_,[{key:'elOrCompView',get:function get(){// Has to be done lazily as we use the DebugContext also during creation of elements...
+return asElementData(this.elView,this.elDef.index).componentView||this.view;}/**
      * @return {?}
-     */},{key:'component',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.component;}/**
+     */},{key:'injector',get:function get(){return createInjector(this.elView,this.elDef);}/**
      * @return {?}
-     */},{key:'context',get:function get(){if(this.compProviderDef){return asProviderData(this.elView,this.compProviderDef.index).instance;}return this.view.context;}/**
+     */},{key:'component',get:function get(){return this.elOrCompView.component;}/**
+     * @return {?}
+     */},{key:'context',get:function get(){return this.elOrCompView.context;}/**
      * @return {?}
      */},{key:'providerTokens',get:function get(){var/** @type {?} */tokens=[];if(this.elDef){for(var/** @type {?} */i=this.elDef.index+1;i<=this.elDef.index+this.elDef.childCount;i++){var/** @type {?} */childDef=this.elView.def.nodes[i];if(childDef.type===NodeType.Provider||childDef.type===NodeType.Directive){tokens.push(childDef.provider.token);}i+=childDef.childCount;}}return tokens;}/**
      * @return {?}
@@ -5417,7 +5458,7 @@ return value?value.toString().slice(0,20):value;}catch(e){return'[ERROR] Excepti
      * @return {?}
      */},{key:'source',get:function get(){if(this.nodeDef.type===NodeType.Text){return this.nodeDef.text.source;}else{return this.elDef.element.source;}}/**
      * @return {?}
-     */},{key:'componentRenderElement',get:function get(){var/** @type {?} */view=this.compProviderDef?asProviderData(this.elView,this.compProviderDef.index).componentView:this.view;var/** @type {?} */elData=findHostElement(view);return elData?elData.renderElement:undefined;}/**
+     */},{key:'componentRenderElement',get:function get(){var/** @type {?} */elData=findHostElement(this.elOrCompView);return elData?elData.renderElement:undefined;}/**
      * @return {?}
      */},{key:'renderNode',get:function get(){return this.nodeDef.type===NodeType.Text?renderNode(this.view,this.nodeDef):renderNode(this.elView,this.elDef);}}]);return DebugContext_;}();/**
  * @param {?} view
@@ -6656,7 +6697,7 @@ if(index>=projectedViews.length-1){projectedViews.pop();}else{projectedViews.spl
      * @param {?} nestedViewClass
      * @param {?} callback
      * @return {?}
-     */},{key:'mapNestedViews',value:function mapNestedViews(nestedViewClass,callback){var/** @type {?} */result=[];if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){var/** @type {?} */nestedView=this.nestedViews[i];if(nestedView.clazz===nestedViewClass){result.push(callback(nestedView));}}}if(this.projectedViews){for(var/** @type {?} */_i7=0;_i7<this.projectedViews.length;_i7++){var/** @type {?} */projectedView=this.projectedViews[_i7];if(projectedView.clazz===nestedViewClass){result.push(callback(projectedView));}}}return result;}/**
+     */},{key:'mapNestedViews',value:function mapNestedViews(nestedViewClass,callback){var/** @type {?} */result=[];if(this.nestedViews){for(var/** @type {?} */i=0;i<this.nestedViews.length;i++){var/** @type {?} */nestedView=this.nestedViews[i];if(nestedView.clazz===nestedViewClass){result.push(callback(nestedView));}}}if(this.projectedViews){for(var/** @type {?} */_i6=0;_i6<this.projectedViews.length;_i6++){var/** @type {?} */projectedView=this.projectedViews[_i6];if(projectedView.clazz===nestedViewClass){result.push(callback(projectedView));}}}return result;}/**
      * @param {?} view
      * @param {?} toIndex
      * @return {?}
