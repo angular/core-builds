@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-436a179
+ * @license Angular v4.0.0-beta.8-3c9a46c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -864,7 +864,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-436a179');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-3c9a46c');
 
 /**
  * Inject decorator and metadata.
@@ -12598,7 +12598,7 @@ function createViewNodes(view) {
                 nodeData = ({ instance });
                 if (nodeDef.flags & NodeFlags.IsComponent) {
                     const /** @type {?} */ compView = asElementData(view, nodeDef.parent.index).componentView;
-                    initView(componentView, instance, instance);
+                    initView(compView, instance, instance);
                 }
                 break;
             }

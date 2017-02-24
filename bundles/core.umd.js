@@ -1011,7 +1011,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-436a179');
+    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-3c9a46c');
 
     /**
      * Inject decorator and metadata.
@@ -11966,7 +11966,7 @@
                         nodeData = { instance: _instance2 };
                         if (nodeDef.flags & NodeFlags.IsComponent) {
                             var /** @type {?} */compView = asElementData(view, nodeDef.parent.index).componentView;
-                            initView(componentView, _instance2, _instance2);
+                            initView(compView, _instance2, _instance2);
                         }
                         break;
                     }
