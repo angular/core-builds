@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-5094aef
+ * @license Angular v4.0.0-beta.8-436a179
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -864,7 +864,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-5094aef');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-436a179');
 
 /**
  * Inject decorator and metadata.
@@ -5501,6 +5501,13 @@ class RendererFactoryV2 {
  * @abstract
  */
 class RendererV2 {
+    /**
+     * This field can be used to store arbitrary data on this renderer instance.
+     * This is useful for renderers that delegate to other renderers.
+     * @abstract
+     * @return {?}
+     */
+    data() { }
     /**
      * @abstract
      * @return {?}
@@ -13563,6 +13570,10 @@ class DebugRendererV2 {
     constructor(delegate) {
         this.delegate = delegate;
     }
+    /**
+     * @return {?}
+     */
+    get data() { return this.delegate.data; }
     /**
      * @param {?} node
      * @return {?}

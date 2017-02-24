@@ -1011,7 +1011,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-5094aef');
+    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-436a179');
 
     /**
      * Inject decorator and metadata.
@@ -4989,6 +4989,9 @@
         }
 
         _createClass(RendererV2, [{
+            key: 'data',
+            value: function data() {}
+        }, {
             key: 'destroy',
             value: function destroy() {}
         }, {
@@ -12943,7 +12946,6 @@
             this.delegate = delegate;
         }
         /**
-         * @param {?} node
          * @return {?}
          */
 
@@ -13115,6 +13117,11 @@
             key: 'setValue',
             value: function setValue(node, value) {
                 return this.delegate.setValue(node, value);
+            }
+        }, {
+            key: 'data',
+            get: function get() {
+                return this.delegate.data;
             }
         }]);
 

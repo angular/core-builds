@@ -98,7 +98,7 @@ export interface RendererTypeV2 {
     encapsulation: ViewEncapsulation;
     styles: (string | any[])[];
     data: {
-        [kind: string]: any[];
+        [kind: string]: any;
     };
 }
 /**
@@ -111,6 +111,13 @@ export declare abstract class RendererFactoryV2 {
  * @experimental
  */
 export declare abstract class RendererV2 {
+    /**
+     * This field can be used to store arbitrary data on this renderer instance.
+     * This is useful for renderers that delegate to other renderers.
+     */
+    readonly abstract data: {
+        [key: string]: any;
+    };
     abstract destroy(): void;
     abstract createElement(name: string, namespace?: string): any;
     abstract createComment(value: string): any;
