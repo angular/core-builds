@@ -76,6 +76,7 @@ export declare type CompilerOptions = {
     defaultEncapsulation?: ViewEncapsulation;
     providers?: any[];
     missingTranslation?: MissingTranslationStrategy;
+    enableLegacyTemplate?: boolean;
 };
 /**
  * Token to provide CompilerOptions in the platform injector.

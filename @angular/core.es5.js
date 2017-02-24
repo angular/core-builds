@@ -1,5 +1,5 @@
 var _slicedToArray=function(){function sliceIterator(arr,i){var _arr=[];var _n=true;var _d=false;var _e=undefined;try{for(var _i=arr[Symbol.iterator](),_s;!(_n=(_s=_i.next()).done);_n=true){_arr.push(_s.value);if(i&&_arr.length===i)break;}}catch(err){_d=true;_e=err;}finally{try{if(!_n&&_i["return"])_i["return"]();}finally{if(_d)throw _e;}}return _arr;}return function(arr,i){if(Array.isArray(arr)){return arr;}else if(Symbol.iterator in Object(arr)){return sliceIterator(arr,i);}else{throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var _get=function get(object,property,receiver){if(object===null)object=Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc===undefined){var parent=Object.getPrototypeOf(object);if(parent===null){return undefined;}else{return get(parent,property,receiver);}}else if("value"in desc){return desc.value;}else{var getter=desc.get;if(getter===undefined){return undefined;}return getter.call(receiver);}};var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||false;descriptor.configurable=true;if("value"in descriptor)descriptor.writable=true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};}();function _toConsumableArray(arr){if(Array.isArray(arr)){for(var i=0,arr2=Array(arr.length);i<arr.length;i++){arr2[i]=arr[i];}return arr2;}else{return Array.from(arr);}}function _possibleConstructorReturn(self,call){if(!self){throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return call&&(typeof call==="object"||typeof call==="function")?call:self;}function _inherits(subClass,superClass){if(typeof superClass!=="function"&&superClass!==null){throw new TypeError("Super expression must either be null or a function, not "+typeof superClass);}subClass.prototype=Object.create(superClass&&superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__=superClass;}function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}/**
- * @license Angular v4.0.0-beta.8-ee747f7
+ * @license Angular v4.0.0-beta.8-e99d721
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */import{Observable}from'rxjs/Observable';import{merge}from'rxjs/observable/merge';import{share}from'rxjs/operator/share';import{$$observable}from'rxjs/symbol/observable';import{Subject}from'rxjs/Subject';/**
@@ -396,7 +396,7 @@ while(parameters.length<=index){parameters.push(null);}parameters[index]=paramet
      * @return {?}
      */},{key:'patch',get:function get(){return this.full.split('.').slice(2).join('.');}}]);return Version;}();/**
  * @stable
- */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-ee747f7');/**
+ */var/** @type {?} */VERSION=new Version('4.0.0-beta.8-e99d721');/**
  * Inject decorator and metadata.
  *
  * @stable
@@ -3705,10 +3705,10 @@ this._views.slice().forEach(function(view){return view.destroy();});}/**
  */function checkNotEmpty(value,modulePath,exportName){if(!value){throw new Error('Cannot find \''+exportName+'\' in \''+modulePath+'\'');}return value;}/**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.
  *
- * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<template>` element (or
- * directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into the
- * constructor of the directive using the `TemplateRef` Token. Alternatively you can query for the
- * `TemplateRef` from a Component or a Directive via {\@link Query}.
+ * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
+ * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
+ * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
+ * the `TemplateRef` from a Component or a Directive via {\@link Query}.
  *
  * To instantiate Embedded Views based on a Template, use
  * {\@link ViewContainerRef#createEmbeddedView}, which will create the View and attach it to the
@@ -3931,7 +3931,7 @@ wtfLeave(s);}/**
  * ```
  * Count: {{items.length}}
  * <ul>
- *   <template ngFor let-item [ngForOf]="items"></template>
+ *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
  * </ul>
  * ```
  *
@@ -3948,7 +3948,7 @@ wtfLeave(s);}/**
  * <!-- ViewRef: outer-0 -->
  * Count: 2
  * <ul>
- *   <template view-container-ref></template>
+ *   <ng-template view-container-ref></ng-template>
  *   <!-- ViewRef: inner-1 --><li>first</li><!-- /ViewRef: inner-1 -->
  *   <!-- ViewRef: inner-2 --><li>second</li><!-- /ViewRef: inner-2 -->
  * </ul>

@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-beta.8-ee747f7
+ * @license Angular v4.0.0-beta.8-e99d721
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -864,7 +864,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-ee747f7');
+const /** @type {?} */ VERSION = new Version('4.0.0-beta.8-e99d721');
 
 /**
  * Inject decorator and metadata.
@@ -8315,10 +8315,10 @@ function checkNotEmpty(value, modulePath, exportName) {
 /**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.
  *
- * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<template>` element (or
- * directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into the
- * constructor of the directive using the `TemplateRef` Token. Alternatively you can query for the
- * `TemplateRef` from a Component or a Directive via {\@link Query}.
+ * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
+ * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
+ * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
+ * the `TemplateRef` from a Component or a Directive via {\@link Query}.
  *
  * To instantiate Embedded Views based on a Template, use
  * {\@link ViewContainerRef#createEmbeddedView}, which will create the View and attach it to the
@@ -8693,7 +8693,7 @@ class ViewRef extends ChangeDetectorRef {
  * ```
  * Count: {{items.length}}
  * <ul>
- *   <template ngFor let-item [ngForOf]="items"></template>
+ *   <ng-template ngFor let-item [ngForOf]="items"></ng-template>
  * </ul>
  * ```
  *
@@ -8710,7 +8710,7 @@ class ViewRef extends ChangeDetectorRef {
  * <!-- ViewRef: outer-0 -->
  * Count: 2
  * <ul>
- *   <template view-container-ref></template>
+ *   <ng-template view-container-ref></ng-template>
  *   <!-- ViewRef: inner-1 --><li>first</li><!-- /ViewRef: inner-1 -->
  *   <!-- ViewRef: inner-2 --><li>second</li><!-- /ViewRef: inner-2 -->
  * </ul>

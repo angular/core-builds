@@ -1011,7 +1011,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-ee747f7');
+    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-e99d721');
 
     /**
      * Inject decorator and metadata.
@@ -7814,10 +7814,10 @@
     /**
      * Represents an Embedded Template that can be used to instantiate Embedded Views.
      *
-     * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<template>` element (or
-     * directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into the
-     * constructor of the directive using the `TemplateRef` Token. Alternatively you can query for the
-     * `TemplateRef` from a Component or a Directive via {\@link Query}.
+     * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
+     * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
+     * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
+     * the `TemplateRef` from a Component or a Directive via {\@link Query}.
      *
      * To instantiate Embedded Views based on a Template, use
      * {\@link ViewContainerRef#createEmbeddedView}, which will create the View and attach it to the
