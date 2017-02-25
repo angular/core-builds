@@ -1011,7 +1011,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-932a02f');
+    var /** @type {?} */VERSION = new Version('4.0.0-beta.8-9186068');
 
     /**
      * Inject decorator and metadata.
