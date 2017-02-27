@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.1-f356041
+ * @license Angular v4.0.0-rc.1-5caab71
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -864,7 +864,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-f356041');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-5caab71');
 
 /**
  * Inject decorator and metadata.
@@ -9111,149 +9111,6 @@ MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
 MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
 
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-let ArgumentType = {};
-ArgumentType.Inline = 0;
-ArgumentType.Dynamic = 1;
-ArgumentType[ArgumentType.Inline] = "Inline";
-ArgumentType[ArgumentType.Dynamic] = "Dynamic";
-let ViewFlags = {};
-ViewFlags.None = 0;
-ViewFlags.OnPush = 2;
-ViewFlags[ViewFlags.None] = "None";
-ViewFlags[ViewFlags.OnPush] = "OnPush";
-let NodeType = {};
-NodeType.Element = 0;
-NodeType.Text = 1;
-NodeType.Directive = 2;
-NodeType.Provider = 3;
-NodeType.Pipe = 4;
-NodeType.PureExpression = 5;
-NodeType.Query = 6;
-NodeType.NgContent = 7;
-NodeType[NodeType.Element] = "Element";
-NodeType[NodeType.Text] = "Text";
-NodeType[NodeType.Directive] = "Directive";
-NodeType[NodeType.Provider] = "Provider";
-NodeType[NodeType.Pipe] = "Pipe";
-NodeType[NodeType.PureExpression] = "PureExpression";
-NodeType[NodeType.Query] = "Query";
-NodeType[NodeType.NgContent] = "NgContent";
-let NodeFlags = {};
-NodeFlags.None = 0;
-NodeFlags.OnInit = 1;
-NodeFlags.OnDestroy = 2;
-NodeFlags.DoCheck = 4;
-NodeFlags.OnChanges = 8;
-NodeFlags.AfterContentInit = 16;
-NodeFlags.AfterContentChecked = 32;
-NodeFlags.AfterViewInit = 64;
-NodeFlags.AfterViewChecked = 128;
-NodeFlags.HasEmbeddedViews = 256;
-NodeFlags.HasComponent = 512;
-NodeFlags.IsComponent = 1024;
-NodeFlags.HasContentQuery = 2048;
-NodeFlags.HasStaticQuery = 4096;
-NodeFlags.HasDynamicQuery = 8192;
-NodeFlags.HasViewQuery = 16384;
-NodeFlags.LazyProvider = 32768;
-NodeFlags.PrivateProvider = 65536;
-NodeFlags[NodeFlags.None] = "None";
-NodeFlags[NodeFlags.OnInit] = "OnInit";
-NodeFlags[NodeFlags.OnDestroy] = "OnDestroy";
-NodeFlags[NodeFlags.DoCheck] = "DoCheck";
-NodeFlags[NodeFlags.OnChanges] = "OnChanges";
-NodeFlags[NodeFlags.AfterContentInit] = "AfterContentInit";
-NodeFlags[NodeFlags.AfterContentChecked] = "AfterContentChecked";
-NodeFlags[NodeFlags.AfterViewInit] = "AfterViewInit";
-NodeFlags[NodeFlags.AfterViewChecked] = "AfterViewChecked";
-NodeFlags[NodeFlags.HasEmbeddedViews] = "HasEmbeddedViews";
-NodeFlags[NodeFlags.HasComponent] = "HasComponent";
-NodeFlags[NodeFlags.IsComponent] = "IsComponent";
-NodeFlags[NodeFlags.HasContentQuery] = "HasContentQuery";
-NodeFlags[NodeFlags.HasStaticQuery] = "HasStaticQuery";
-NodeFlags[NodeFlags.HasDynamicQuery] = "HasDynamicQuery";
-NodeFlags[NodeFlags.HasViewQuery] = "HasViewQuery";
-NodeFlags[NodeFlags.LazyProvider] = "LazyProvider";
-NodeFlags[NodeFlags.PrivateProvider] = "PrivateProvider";
-let BindingType = {};
-BindingType.ElementAttribute = 0;
-BindingType.ElementClass = 1;
-BindingType.ElementStyle = 2;
-BindingType.ElementProperty = 3;
-BindingType.ComponentHostProperty = 4;
-BindingType.DirectiveProperty = 5;
-BindingType.TextInterpolation = 6;
-BindingType.PureExpressionProperty = 7;
-BindingType[BindingType.ElementAttribute] = "ElementAttribute";
-BindingType[BindingType.ElementClass] = "ElementClass";
-BindingType[BindingType.ElementStyle] = "ElementStyle";
-BindingType[BindingType.ElementProperty] = "ElementProperty";
-BindingType[BindingType.ComponentHostProperty] = "ComponentHostProperty";
-BindingType[BindingType.DirectiveProperty] = "DirectiveProperty";
-BindingType[BindingType.TextInterpolation] = "TextInterpolation";
-BindingType[BindingType.PureExpressionProperty] = "PureExpressionProperty";
-let OutputType = {};
-OutputType.ElementOutput = 0;
-OutputType.DirectiveOutput = 1;
-OutputType[OutputType.ElementOutput] = "ElementOutput";
-OutputType[OutputType.DirectiveOutput] = "DirectiveOutput";
-let QueryValueType = {};
-QueryValueType.ElementRef = 0;
-QueryValueType.RenderElement = 1;
-QueryValueType.TemplateRef = 2;
-QueryValueType.ViewContainerRef = 3;
-QueryValueType.Provider = 4;
-QueryValueType[QueryValueType.ElementRef] = "ElementRef";
-QueryValueType[QueryValueType.RenderElement] = "RenderElement";
-QueryValueType[QueryValueType.TemplateRef] = "TemplateRef";
-QueryValueType[QueryValueType.ViewContainerRef] = "ViewContainerRef";
-QueryValueType[QueryValueType.Provider] = "Provider";
-let ProviderType = {};
-ProviderType.Value = 0;
-ProviderType.Class = 1;
-ProviderType.Factory = 2;
-ProviderType.UseExisting = 3;
-ProviderType[ProviderType.Value] = "Value";
-ProviderType[ProviderType.Class] = "Class";
-ProviderType[ProviderType.Factory] = "Factory";
-ProviderType[ProviderType.UseExisting] = "UseExisting";
-let DepFlags = {};
-DepFlags.None = 0;
-DepFlags.SkipSelf = 1;
-DepFlags.Optional = 2;
-DepFlags.Value = 8;
-DepFlags[DepFlags.None] = "None";
-DepFlags[DepFlags.SkipSelf] = "SkipSelf";
-DepFlags[DepFlags.Optional] = "Optional";
-DepFlags[DepFlags.Value] = "Value";
-let PureExpressionType = {};
-PureExpressionType.Array = 0;
-PureExpressionType.Object = 1;
-PureExpressionType.Pipe = 2;
-PureExpressionType[PureExpressionType.Array] = "Array";
-PureExpressionType[PureExpressionType.Object] = "Object";
-PureExpressionType[PureExpressionType.Pipe] = "Pipe";
-let QueryBindingType = {};
-QueryBindingType.First = 0;
-QueryBindingType.All = 1;
-QueryBindingType[QueryBindingType.First] = "First";
-QueryBindingType[QueryBindingType.All] = "All";
-let ViewState = {};
-ViewState.FirstCheck = 1;
-ViewState.ChecksEnabled = 2;
-ViewState.Errored = 4;
-ViewState.Destroyed = 8;
-ViewState[ViewState.FirstCheck] = "FirstCheck";
-ViewState[ViewState.ChecksEnabled] = "ChecksEnabled";
-ViewState[ViewState.Errored] = "Errored";
-ViewState[ViewState.Destroyed] = "Destroyed";
-/**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
  * @param {?} index
@@ -9298,11 +9155,6 @@ function asPureExpressionData(view, index) {
 function asQueryList(view, index) {
     return (view.nodes[index]);
 }
-let CheckType = {};
-CheckType.CheckAndUpdate = 0;
-CheckType.CheckNoChanges = 1;
-CheckType[CheckType.CheckAndUpdate] = "CheckAndUpdate";
-CheckType[CheckType.CheckNoChanges] = "CheckNoChanges";
 /**
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
@@ -9424,7 +9276,7 @@ function createRendererTypeV2(values) {
  */
 function checkBinding$1(view, def, bindingIdx, value) {
     const /** @type {?} */ oldValues = view.oldValues;
-    if (unwrapCounter > 0 || !!(view.state & ViewState.FirstCheck) ||
+    if (unwrapCounter > 0 || !!(view.state & 1 /* FirstCheck */) ||
         !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
         unwrapCounter = 0;
         return true;
@@ -9454,9 +9306,9 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
  */
 function checkBindingNoChanges(view, def, bindingIdx, value) {
     const /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if (unwrapCounter || (view.state & ViewState.FirstCheck) || !devModeEqual(oldValue, value)) {
+    if (unwrapCounter || (view.state & 1 /* FirstCheck */) || !devModeEqual(oldValue, value)) {
         unwrapCounter = 0;
-        throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
     }
 }
 /**
@@ -9466,8 +9318,8 @@ function checkBindingNoChanges(view, def, bindingIdx, value) {
 function markParentViewsForCheck(view) {
     let /** @type {?} */ currView = view;
     while (currView) {
-        if (currView.def.flags & ViewFlags.OnPush) {
-            currView.state |= ViewState.ChecksEnabled;
+        if (currView.def.flags & 2 /* OnPush */) {
+            currView.state |= 2 /* ChecksEnabled */;
         }
         currView = currView.viewContainerParent || currView.parent;
     }
@@ -9516,10 +9368,10 @@ function viewParentEl(view) {
  * @return {?}
  */
 function renderNode(view, def) {
-    switch (def.type) {
-        case NodeType.Element:
+    switch (def.flags & 100673535 /* Types */) {
+        case 1 /* TypeElement */:
             return asElementData(view, def.index).renderElement;
-        case NodeType.Text:
+        case 2 /* TypeText */:
             return asTextData(view, def.index).renderText;
     }
 }
@@ -9582,8 +9434,8 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
 function getParentRenderElement(view, renderHost, def) {
     let /** @type {?} */ renderParent = def.renderParent;
     if (renderParent) {
-        if (renderParent.type !== NodeType.Element ||
-            (renderParent.flags & NodeFlags.HasComponent) === 0 ||
+        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
+            (renderParent.flags & 16777216 /* ComponentView */) === 0 ||
             (renderParent.element.componentRendererType &&
                 renderParent.element.componentRendererType.encapsulation === ViewEncapsulation.Native)) {
             // only children of non components, or children of components with native encapsulation should
@@ -9676,8 +9528,7 @@ function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
 function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
     for (let /** @type {?} */ i = startIndex; i <= endIndex; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text ||
-            nodeDef.type === NodeType.NgContent) {
+        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 4 /* TypeNgContent */)) {
             visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
         }
         // jump to next sibling
@@ -9730,13 +9581,13 @@ function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nex
  * @return {?}
  */
 function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-    if (nodeDef.type === NodeType.NgContent) {
+    if (nodeDef.flags & 4 /* TypeNgContent */) {
         visitProjectedRenderNodes(view, nodeDef.ngContent.index, action, parentNode, nextSibling, target);
     }
     else {
         const /** @type {?} */ rn = renderNode(view, nodeDef);
         execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
-        if (nodeDef.flags & NodeFlags.HasEmbeddedViews) {
+        if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
             const /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).embeddedViews;
             if (embeddedViews) {
                 for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
@@ -9744,7 +9595,7 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
                 }
             }
         }
-        if (nodeDef.type === NodeType.Element && !nodeDef.element.name) {
+        if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
             visitSiblingRenderNodes(view, action, nodeDef.index + 1, nodeDef.index + nodeDef.childCount, parentNode, nextSibling, target);
         }
     }
@@ -9802,15 +9653,14 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
     if (!handleEvent) {
         handleEvent = NOOP;
     }
+    flags |= 1 /* TypeElement */;
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
     // skip the call to sliceErrorStack itself + the call to this function.
     const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     const /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
     return {
-        type: NodeType.Element,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
@@ -9818,6 +9668,7 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
         // regular values
         flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: [],
         outputs: [],
@@ -9833,7 +9684,6 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
         },
         provider: undefined,
         text: undefined,
-        pureExpression: undefined,
         query: undefined,
         ngContent: undefined
     };
@@ -9874,12 +9724,12 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         let /** @type {?} */ securityContext;
         let /** @type {?} */ suffix;
         switch (bindingType) {
-            case BindingType.ElementStyle:
+            case 2 /* ElementStyle */:
                 suffix = (entry[2]);
                 break;
-            case BindingType.ElementAttribute:
-            case BindingType.ElementProperty:
-            case BindingType.ComponentHostProperty:
+            case 0 /* ElementAttribute */:
+            case 3 /* ElementProperty */:
+            case 4 /* ComponentHostProperty */:
                 securityContext = (entry[2]);
                 break;
         }
@@ -9890,7 +9740,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     for (let /** @type {?} */ i = 0; i < outputs.length; i++) {
         const [target, eventName] = outputs[i];
         outputDefs[i] = {
-            type: OutputType.ElementOutput,
+            type: 0 /* ElementOutput */,
             target: /** @type {?} */ (target), eventName,
             propName: undefined
         };
@@ -9906,13 +9756,12 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         componentRendererType = null;
     }
     if (componentView) {
-        flags |= NodeFlags.HasComponent;
+        flags |= 16777216 /* ComponentView */;
     }
+    flags |= 1 /* TypeElement */;
     return {
-        type: NodeType.Element,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
@@ -9920,6 +9769,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         // regular values
         flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: bindingDefs,
         outputs: outputDefs,
@@ -9936,7 +9786,6 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         },
         provider: undefined,
         text: undefined,
-        pureExpression: undefined,
         query: undefined,
         ngContent: undefined
     };
@@ -10075,19 +9924,19 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     const /** @type {?} */ renderNode = elData.renderElement;
     const /** @type {?} */ name = binding.name;
     switch (binding.type) {
-        case BindingType.ElementAttribute:
+        case 0 /* ElementAttribute */:
             setElementAttribute(view, binding, renderNode, binding.ns, name, value);
             break;
-        case BindingType.ElementClass:
+        case 1 /* ElementClass */:
             setElementClass(view, renderNode, name, value);
             break;
-        case BindingType.ElementStyle:
+        case 2 /* ElementStyle */:
             setElementStyle(view, binding, renderNode, name, value);
             break;
-        case BindingType.ElementProperty:
+        case 3 /* ElementProperty */:
             setElementProperty(view, binding, renderNode, name, value);
             break;
-        case BindingType.ComponentHostProperty:
+        case 4 /* ComponentHostProperty */:
             setElementProperty(elData.componentView, binding, renderNode, name, value);
             break;
     }
@@ -10179,17 +10028,16 @@ function setElementProperty(view, binding, renderNode, name, value) {
  */
 function ngContentDef(ngContentIndex, index) {
     return {
-        type: NodeType.NgContent,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
         outputIndex: undefined,
         // regular values
-        flags: 0,
+        flags: 4 /* TypeNgContent */,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0,
         matchedQueries: {},
         matchedQueryIds: 0,
@@ -10200,7 +10048,6 @@ function ngContentDef(ngContentIndex, index) {
         element: undefined,
         provider: undefined,
         text: undefined,
-        pureExpression: undefined,
         query: undefined,
         ngContent: { index }
     };
@@ -10773,7 +10620,7 @@ class ViewRef_$1 {
     /**
      * @return {?}
      */
-    get destroyed() { return (this._view.state & ViewState.Destroyed) !== 0; }
+    get destroyed() { return (this._view.state & 8 /* Destroyed */) !== 0; }
     /**
      * @return {?}
      */
@@ -10781,7 +10628,7 @@ class ViewRef_$1 {
     /**
      * @return {?}
      */
-    detach() { this._view.state &= ~ViewState.ChecksEnabled; }
+    detach() { this._view.state &= ~2 /* ChecksEnabled */; }
     /**
      * @return {?}
      */
@@ -10793,7 +10640,7 @@ class ViewRef_$1 {
     /**
      * @return {?}
      */
-    reattach() { this._view.state |= ViewState.ChecksEnabled; }
+    reattach() { this._view.state |= 2 /* ChecksEnabled */; }
     /**
      * @param {?} callback
      * @return {?}
@@ -10900,8 +10747,8 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        const /** @type {?} */ allowPrivateServices = (this.elDef.flags & NodeFlags.HasComponent) !== 0;
-        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token, tokenKey: tokenKey(token) }, notFoundValue);
+        const /** @type {?} */ allowPrivateServices = (this.elDef.flags & 16777216 /* ComponentView */) !== 0;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
 /**
@@ -10911,22 +10758,21 @@ class Injector_ {
  */
 function nodeValue(view, index) {
     const /** @type {?} */ def = view.def.nodes[index];
-    switch (def.type) {
-        case NodeType.Element:
-            if (def.element.template) {
-                return createTemplateRef(view, def);
-            }
-            else {
-                return asElementData(view, def.index).renderElement;
-            }
-        case NodeType.Text:
-            return asTextData(view, def.index).renderText;
-        case NodeType.Directive:
-        case NodeType.Pipe:
-        case NodeType.Provider:
-            return asProviderData(view, def.index).instance;
+    if (def.flags & 1 /* TypeElement */) {
+        if (def.element.template) {
+            return createTemplateRef(view, def);
+        }
+        else {
+            return asElementData(view, def.index).renderElement;
+        }
     }
-    return undefined;
+    else if (def.flags & 2 /* TypeText */) {
+        return asTextData(view, def.index).renderText;
+    }
+    else if (def.flags & (10112 /* CatProvider */ | 8 /* TypePipe */)) {
+        return asProviderData(view, def.index).instance;
+    }
+    throw new Error(`Illegal state: read nodeValue for node index ${index}`);
 }
 /**
  * @param {?} view
@@ -11155,7 +11001,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
         for (let /** @type {?} */ prop in props) {
             const [bindingIndex, nonMinifiedName] = props[prop];
             bindings[bindingIndex] = {
-                type: BindingType.DirectiveProperty,
+                type: 5 /* DirectiveProperty */,
                 name: prop, nonMinifiedName,
                 ns: undefined,
                 securityContext: undefined,
@@ -11166,10 +11012,11 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
     const /** @type {?} */ outputDefs = [];
     if (outputs) {
         for (let /** @type {?} */ propName in outputs) {
-            outputDefs.push({ type: OutputType.DirectiveOutput, propName, target: null, eventName: outputs[propName] });
+            outputDefs.push({ type: 1 /* DirectiveOutput */, propName, target: null, eventName: outputs[propName] });
         }
     }
-    return _def(NodeType.Directive, flags, matchedQueries, childCount, ProviderType.Class, ctor, ctor, deps, bindings, outputDefs);
+    flags |= 8192 /* TypeDirective */;
+    return _def(flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
 }
 /**
  * @param {?} flags
@@ -11178,26 +11025,24 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
  * @return {?}
  */
 function pipeDef(flags, ctor, deps) {
-    return _def(NodeType.Pipe, flags, null, 0, ProviderType.Class, ctor, ctor, deps);
+    flags |= 8 /* TypePipe */;
+    return _def(flags, null, 0, ctor, ctor, deps);
 }
 /**
  * @param {?} flags
  * @param {?} matchedQueries
- * @param {?} type
  * @param {?} token
  * @param {?} value
  * @param {?} deps
  * @return {?}
  */
-function providerDef(flags, matchedQueries, type, token, value, deps) {
-    return _def(NodeType.Provider, flags, matchedQueries, 0, type, token, value, deps);
+function providerDef(flags, matchedQueries, token, value, deps) {
+    return _def(flags, matchedQueries, 0, token, value, deps);
 }
 /**
- * @param {?} type
  * @param {?} flags
  * @param {?} matchedQueriesDsl
  * @param {?} childCount
- * @param {?} providerType
  * @param {?} token
  * @param {?} value
  * @param {?} deps
@@ -11205,7 +11050,7 @@ function providerDef(flags, matchedQueries, type, token, value, deps) {
  * @param {?=} outputs
  * @return {?}
  */
-function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, value, deps, bindings, outputs) {
+function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings, outputs) {
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
     if (!outputs) {
         outputs = [];
@@ -11220,16 +11065,14 @@ function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, v
             [flags, token] = value;
         }
         else {
-            flags = DepFlags.None;
+            flags = 0 /* None */;
             token = value;
         }
         return { flags, token, tokenKey: tokenKey(token) };
     });
     return {
-        type,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
@@ -11237,12 +11080,12 @@ function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, v
         // regular values
         flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
         ngContentIndex: undefined, childCount, bindings, outputs,
         element: undefined,
-        provider: { type: providerType, token, tokenKey: tokenKey(token), value, deps: depDefs },
+        provider: { token, tokenKey: tokenKey(token), value, deps: depDefs },
         text: undefined,
-        pureExpression: undefined,
         query: undefined,
         ngContent: undefined
     };
@@ -11253,7 +11096,7 @@ function _def(type, flags, matchedQueriesDsl, childCount, providerType, token, v
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & NodeFlags.LazyProvider ? NOT_CREATED : _createProviderInstance(view, def);
+    return def.flags & 2048 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -11278,7 +11121,7 @@ function createPipeInstance(view, def) {
  */
 function createDirectiveInstance(view, def) {
     // components can see other private services, other directives can't.
-    const /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.IsComponent) > 0;
+    const /** @type {?} */ allowPrivateServices = (def.flags & 16384 /* Component */) > 0;
     const /** @type {?} */ providerDef = def.provider;
     // directives are always eager and classes!
     const /** @type {?} */ instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
@@ -11374,10 +11217,10 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+    if ((view.state & 1 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
         directive.ngOnInit();
     }
-    if (def.flags & NodeFlags.DoCheck) {
+    if (def.flags & 131072 /* DoCheck */) {
         directive.ngDoCheck();
     }
     return changed;
@@ -11402,10 +11245,10 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+    if ((view.state & 1 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
         directive.ngOnInit();
     }
-    if (def.flags & NodeFlags.DoCheck) {
+    if (def.flags & 131072 /* DoCheck */) {
         directive.ngDoCheck();
     }
     return changed;
@@ -11417,22 +11260,22 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
  */
 function _createProviderInstance(view, def) {
     // private services can see other private services
-    const /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.PrivateProvider) > 0;
+    const /** @type {?} */ allowPrivateServices = (def.flags & 4096 /* PrivateProvider */) > 0;
     const /** @type {?} */ providerDef = def.provider;
     let /** @type {?} */ injectable;
-    switch (providerDef.type) {
-        case ProviderType.Class:
+    switch (def.flags & 100673535 /* Types */) {
+        case 256 /* TypeClassProvider */:
             injectable =
                 createClass(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
             break;
-        case ProviderType.Factory:
+        case 512 /* TypeFactoryProvider */:
             injectable =
                 callFactory(view, def.parent, allowPrivateServices, providerDef.value, providerDef.deps);
             break;
-        case ProviderType.UseExisting:
+        case 1024 /* TypeUseExistingProvider */:
             injectable = resolveDep(view, def.parent, allowPrivateServices, providerDef.deps[0]);
             break;
-        case ProviderType.Value:
+        case 128 /* TypeValueProvider */:
             injectable = providerDef.value;
             break;
     }
@@ -11513,15 +11356,15 @@ function callFactory(view, elDef, allowPrivateServices, factory, deps) {
  * @return {?}
  */
 function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-    if (depDef.flags & DepFlags.Value) {
+    if (depDef.flags & 8 /* Value */) {
         return depDef.token;
     }
     const /** @type {?} */ startView = view;
-    if (depDef.flags & DepFlags.Optional) {
+    if (depDef.flags & 2 /* Optional */) {
         notFoundValue = null;
     }
     const /** @type {?} */ tokenKey = depDef.tokenKey;
-    if (depDef.flags & DepFlags.SkipSelf) {
+    if (depDef.flags & 1 /* SkipSelf */) {
         allowPrivateServices = false;
         elDef = elDef.parent;
     }
@@ -11599,10 +11442,10 @@ function findCompView(view, elDef, allowPrivateServices) {
  * @return {?}
  */
 function updateProp(view, providerData, def, bindingIdx, value, changes) {
-    if (def.flags & NodeFlags.IsComponent) {
+    if (def.flags & 16384 /* Component */) {
         const /** @type {?} */ compView = asElementData(view, def.parent.index).componentView;
-        if (compView.def.flags & ViewFlags.OnPush) {
-            compView.state |= ViewState.ChecksEnabled;
+        if (compView.def.flags & 2 /* OnPush */) {
+            compView.state |= 2 /* ChecksEnabled */;
         }
     }
     const /** @type {?} */ binding = def.bindings[bindingIdx];
@@ -11611,12 +11454,12 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
     // the user passed in the property name as an object has to `providerDef`,
     // so Closure Compiler will have renamed the property correctly already.
     providerData.instance[propName] = value;
-    if (def.flags & NodeFlags.OnChanges) {
+    if (def.flags & 262144 /* OnChanges */) {
         changes = changes || {};
         const /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
         const /** @type {?} */ binding = def.bindings[bindingIdx];
         changes[binding.nonMinifiedName] =
-            new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
+            new SimpleChange(oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
     }
     view.oldValues[def.bindingIndex + bindingIdx] = value;
     return changes;
@@ -11630,43 +11473,66 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
     if (!(view.def.nodeFlags & lifecycles)) {
         return;
     }
-    const /** @type {?} */ len = view.def.nodes.length;
-    for (let /** @type {?} */ i = 0; i < len; i++) {
-        // We use the reverse child oreder to call providers of children first.
-        const /** @type {?} */ nodeDef = view.def.reverseChildNodes[i];
-        const /** @type {?} */ nodeIndex = nodeDef.index;
-        if (nodeDef.flags & lifecycles) {
-            // a leaf
-            Services.setCurrentNode(view, nodeIndex);
-            callProviderLifecycles(asProviderData(view, nodeIndex).instance, nodeDef.flags & lifecycles);
+    const /** @type {?} */ nodes = view.def.nodes;
+    for (let /** @type {?} */ i = 0; i < nodes.length; i++) {
+        const /** @type {?} */ nodeDef = nodes[i];
+        let /** @type {?} */ parent = nodeDef.parent;
+        if (!parent && nodeDef.flags & lifecycles) {
+            // matching root node (e.g. a pipe)
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
         }
-        else if ((nodeDef.childFlags & lifecycles) === 0) {
-            // a parent with leafs
-            // no child matches one of the lifecycles,
-            // then skip the children
+        if ((nodeDef.childFlags & lifecycles) === 0) {
+            // no child matches one of the lifecycles
             i += nodeDef.childCount;
+        }
+        while (parent && (parent.flags & 1 /* TypeElement */) &&
+            i === parent.index + parent.childCount) {
+            // last child of an element
+            if (parent.directChildFlags & lifecycles) {
+                callElementProvidersLifecycles(view, parent, lifecycles);
+            }
+            parent = parent.parent;
         }
     }
 }
 /**
- * @param {?} provider
+ * @param {?} view
+ * @param {?} elDef
  * @param {?} lifecycles
  * @return {?}
  */
-function callProviderLifecycles(provider, lifecycles) {
-    if (lifecycles & NodeFlags.AfterContentInit) {
+function callElementProvidersLifecycles(view, elDef, lifecycles) {
+    for (let /** @type {?} */ i = elDef.index + 1; i <= elDef.index + elDef.childCount; i++) {
+        const /** @type {?} */ nodeDef = view.def.nodes[i];
+        if (nodeDef.flags & lifecycles) {
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
+        }
+        // only visit direct children
+        i += nodeDef.childCount;
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} index
+ * @param {?} lifecycles
+ * @return {?}
+ */
+function callProviderLifecycles(view, index, lifecycles) {
+    const /** @type {?} */ provider = asProviderData(view, index).instance;
+    Services.setCurrentNode(view, index);
+    if (lifecycles & 524288 /* AfterContentInit */) {
         provider.ngAfterContentInit();
     }
-    if (lifecycles & NodeFlags.AfterContentChecked) {
+    if (lifecycles & 1048576 /* AfterContentChecked */) {
         provider.ngAfterContentChecked();
     }
-    if (lifecycles & NodeFlags.AfterViewInit) {
+    if (lifecycles & 2097152 /* AfterViewInit */) {
         provider.ngAfterViewInit();
     }
-    if (lifecycles & NodeFlags.AfterViewChecked) {
+    if (lifecycles & 4194304 /* AfterViewChecked */) {
         provider.ngAfterViewChecked();
     }
-    if (lifecycles & NodeFlags.OnDestroy) {
+    if (lifecycles & 65536 /* OnDestroy */) {
         provider.ngOnDestroy();
     }
 }
@@ -11677,33 +11543,33 @@ function callProviderLifecycles(provider, lifecycles) {
  */
 function purePipeDef(argCount) {
     // argCount + 1 to include the pipe as first arg
-    return _pureExpressionDef(PureExpressionType.Pipe, new Array(argCount + 1));
+    return _pureExpressionDef(64 /* TypePurePipe */, new Array(argCount + 1));
 }
 /**
  * @param {?} argCount
  * @return {?}
  */
 function pureArrayDef(argCount) {
-    return _pureExpressionDef(PureExpressionType.Array, new Array(argCount));
+    return _pureExpressionDef(16 /* TypePureArray */, new Array(argCount));
 }
 /**
  * @param {?} propertyNames
  * @return {?}
  */
 function pureObjectDef(propertyNames) {
-    return _pureExpressionDef(PureExpressionType.Object, propertyNames);
+    return _pureExpressionDef(32 /* TypePureObject */, propertyNames);
 }
 /**
- * @param {?} type
+ * @param {?} flags
  * @param {?} propertyNames
  * @return {?}
  */
-function _pureExpressionDef(type, propertyNames) {
+function _pureExpressionDef(flags, propertyNames) {
     const /** @type {?} */ bindings = new Array(propertyNames.length);
     for (let /** @type {?} */ i = 0; i < propertyNames.length; i++) {
         const /** @type {?} */ prop = propertyNames[i];
         bindings[i] = {
-            type: BindingType.PureExpressionProperty,
+            type: 7 /* PureExpressionProperty */,
             name: prop,
             ns: undefined,
             nonMinifiedName: prop,
@@ -11712,17 +11578,16 @@ function _pureExpressionDef(type, propertyNames) {
         };
     }
     return {
-        type: NodeType.PureExpression,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
         outputIndex: undefined,
         // regular values
-        flags: 0,
+        flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0,
         matchedQueries: {},
         matchedQueryIds: 0,
@@ -11733,7 +11598,6 @@ function _pureExpressionDef(type, propertyNames) {
         element: undefined,
         provider: undefined,
         text: undefined,
-        pureExpression: { type },
         query: undefined,
         ngContent: undefined
     };
@@ -11788,8 +11652,8 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
     if (changed) {
         const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
-        switch (def.pureExpression.type) {
-            case PureExpressionType.Array:
+        switch (def.flags & 100673535 /* Types */) {
+            case 16 /* TypePureArray */:
                 value = new Array(bindings.length);
                 if (bindLen > 0)
                     value[0] = v0;
@@ -11812,7 +11676,7 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
                 if (bindLen > 9)
                     value[9] = v9;
                 break;
-            case PureExpressionType.Object:
+            case 32 /* TypePureObject */:
                 value = {};
                 if (bindLen > 0)
                     value[bindings[0].name] = v0;
@@ -11835,7 +11699,7 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
                 if (bindLen > 9)
                     value[bindings[9].name] = v9;
                 break;
-            case PureExpressionType.Pipe:
+            case 64 /* TypePurePipe */:
                 const /** @type {?} */ pipe = v0;
                 switch (bindLen) {
                     case 1:
@@ -11894,17 +11758,17 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
     if (changed) {
         const /** @type {?} */ data = asPureExpressionData(view, def.index);
         let /** @type {?} */ value;
-        switch (def.pureExpression.type) {
-            case PureExpressionType.Array:
+        switch (def.flags & 100673535 /* Types */) {
+            case 16 /* TypePureArray */:
                 value = values;
                 break;
-            case PureExpressionType.Object:
+            case 32 /* TypePureObject */:
                 value = {};
                 for (let /** @type {?} */ i = 0; i < values.length; i++) {
                     value[bindings[i].name] = values[i];
                 }
                 break;
-            case PureExpressionType.Pipe:
+            case 64 /* TypePurePipe */:
                 const /** @type {?} */ pipe = values[0];
                 const /** @type {?} */ params = values.slice(1);
                 value = ((pipe.transform))(...params);
@@ -11928,10 +11792,8 @@ function queryDef(flags, id, bindings) {
         bindingDefs.push({ propName, bindingType });
     }
     return {
-        type: NodeType.Query,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
@@ -11939,6 +11801,7 @@ function queryDef(flags, id, bindings) {
         // regular values
         flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0,
         ngContentIndex: undefined,
         matchedQueries: {},
@@ -11950,7 +11813,6 @@ function queryDef(flags, id, bindings) {
         element: undefined,
         provider: undefined,
         text: undefined,
-        pureExpression: undefined,
         query: { id, filterId: filterQueryId(id), bindings: bindingDefs },
         ngContent: undefined
     };
@@ -11974,24 +11836,24 @@ function dirtyParentQueries(view) {
         const /** @type {?} */ end = tplDef.index + tplDef.childCount;
         for (let /** @type {?} */ i = 0; i <= end; i++) {
             const /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & NodeFlags.HasContentQuery) &&
-                (nodeDef.flags & NodeFlags.HasDynamicQuery) &&
+            if ((nodeDef.flags & 33554432 /* TypeContentQuery */) &&
+                (nodeDef.flags & 268435456 /* DynamicQuery */) &&
                 (nodeDef.query.filterId & queryIds) === nodeDef.query.filterId) {
                 asQueryList(view, i).setDirty();
             }
-            if ((nodeDef.type === NodeType.Element && i + nodeDef.childCount < tplDef.index) ||
-                !(nodeDef.childFlags & NodeFlags.HasContentQuery) ||
-                !(nodeDef.childFlags & NodeFlags.HasDynamicQuery)) {
+            if ((nodeDef.flags & 1 /* TypeElement */ && i + nodeDef.childCount < tplDef.index) ||
+                !(nodeDef.childFlags & 33554432 /* TypeContentQuery */) ||
+                !(nodeDef.childFlags & 268435456 /* DynamicQuery */)) {
                 // skip elements that don't contain the template element or no query.
                 i += nodeDef.childCount;
             }
         }
     }
     // view queries
-    if (view.def.nodeFlags & NodeFlags.HasViewQuery) {
+    if (view.def.nodeFlags & 67108864 /* TypeViewQuery */) {
         for (let /** @type {?} */ i = 0; i < view.def.nodes.length; i++) {
             const /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & NodeFlags.HasViewQuery) && (nodeDef.flags & NodeFlags.HasDynamicQuery)) {
+            if ((nodeDef.flags & 67108864 /* TypeViewQuery */) && (nodeDef.flags & 268435456 /* DynamicQuery */)) {
                 asQueryList(view, i).setDirty();
             }
             // only visit the root nodes
@@ -12011,12 +11873,12 @@ function checkAndUpdateQuery(view, nodeDef) {
     }
     let /** @type {?} */ directiveInstance;
     let /** @type {?} */ newValues;
-    if (nodeDef.flags & NodeFlags.HasContentQuery) {
+    if (nodeDef.flags & 33554432 /* TypeContentQuery */) {
         const /** @type {?} */ elementDef = nodeDef.parent.parent;
         newValues = calcQueryValues(view, elementDef.index, elementDef.index + elementDef.childCount, nodeDef.query, []);
         directiveInstance = asProviderData(view, nodeDef.parent.index).instance;
     }
-    else if (nodeDef.flags & NodeFlags.HasViewQuery) {
+    else if (nodeDef.flags & 67108864 /* TypeViewQuery */) {
         newValues = calcQueryValues(view, 0, view.def.nodes.length - 1, nodeDef.query, []);
         directiveInstance = view.component;
     }
@@ -12027,10 +11889,10 @@ function checkAndUpdateQuery(view, nodeDef) {
         const /** @type {?} */ binding = bindings[i];
         let /** @type {?} */ boundValue;
         switch (binding.bindingType) {
-            case QueryBindingType.First:
+            case 0 /* First */:
                 boundValue = queryList.first;
                 break;
-            case QueryBindingType.All:
+            case 1 /* All */:
                 boundValue = queryList;
                 notify = true;
                 break;
@@ -12056,7 +11918,7 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
         if (valueType != null) {
             values.push(getQueryValue(view, nodeDef, valueType));
         }
-        if (nodeDef.type === NodeType.Element && nodeDef.element.template &&
+        if (nodeDef.flags & 1 /* TypeElement */ && nodeDef.element.template &&
             (nodeDef.element.template.nodeMatchedQueries & queryDef.filterId) === queryDef.filterId) {
             // check embedded views that were attached at the place of their template.
             const /** @type {?} */ elementData = asElementData(view, i);
@@ -12096,19 +11958,19 @@ function getQueryValue(view, nodeDef, queryValueType) {
         // a match
         let /** @type {?} */ value;
         switch (queryValueType) {
-            case QueryValueType.RenderElement:
+            case 1 /* RenderElement */:
                 value = asElementData(view, nodeDef.index).renderElement;
                 break;
-            case QueryValueType.ElementRef:
+            case 0 /* ElementRef */:
                 value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
                 break;
-            case QueryValueType.TemplateRef:
+            case 2 /* TemplateRef */:
                 value = createTemplateRef(view, nodeDef);
                 break;
-            case QueryValueType.ViewContainerRef:
+            case 3 /* ViewContainerRef */:
                 value = createViewContainerRef(view, nodeDef);
                 break;
-            case QueryValueType.Provider:
+            case 4 /* Provider */:
                 value = asProviderData(view, nodeDef.index).instance;
                 break;
         }
@@ -12127,7 +11989,7 @@ function textDef(ngContentIndex, constants) {
     const /** @type {?} */ bindings = new Array(constants.length - 1);
     for (let /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
-            type: BindingType.TextInterpolation,
+            type: 6 /* TextInterpolation */,
             name: undefined,
             ns: undefined,
             nonMinifiedName: undefined,
@@ -12135,18 +11997,18 @@ function textDef(ngContentIndex, constants) {
             suffix: constants[i]
         };
     }
+    const /** @type {?} */ flags = 2 /* TypeText */;
     return {
-        type: NodeType.Text,
         // will bet set by the view definition
         index: undefined,
-        reverseChildIndex: undefined,
         parent: undefined,
         renderParent: undefined,
         bindingIndex: undefined,
         outputIndex: undefined,
         // regular values
-        flags: 0,
+        flags,
         childFlags: 0,
+        directChildFlags: 0,
         childMatchedQueries: 0,
         matchedQueries: {},
         matchedQueryIds: 0,
@@ -12156,7 +12018,6 @@ function textDef(ngContentIndex, constants) {
         element: undefined,
         provider: undefined,
         text: { prefix: constants[0], source },
-        pureExpression: undefined,
         query: undefined,
         ngContent: undefined
     };
@@ -12297,6 +12158,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     let /** @type {?} */ viewBindingCount = 0;
     let /** @type {?} */ viewDisposableCount = 0;
     let /** @type {?} */ viewNodeFlags = 0;
+    let /** @type {?} */ viewRootNodeFlags = 0;
     let /** @type {?} */ viewMatchedQueries = 0;
     let /** @type {?} */ currentParent = null;
     let /** @type {?} */ currentElementHasPublicProviders = false;
@@ -12316,11 +12178,10 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         node.parent = currentParent;
         node.bindingIndex = viewBindingCount;
         node.outputIndex = viewDisposableCount;
-        node.reverseChildIndex =
-            calculateReverseChildIndex(currentParent, i, node.childCount, nodes.length);
         // renderParent needs to account for ng-container!
         let /** @type {?} */ currentRenderParent;
-        if (currentParent && currentParent.type === NodeType.Element && !currentParent.element.name) {
+        if (currentParent && currentParent.flags & 1 /* TypeElement */ &&
+            !currentParent.element.name) {
             currentRenderParent = currentParent.renderParent;
         }
         else {
@@ -12336,7 +12197,6 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
             currentElementHasPublicProviders = false;
             currentElementHasPrivateProviders = false;
         }
-        reverseChildNodes[node.reverseChildIndex] = node;
         validateNode(currentParent, node, nodes.length);
         viewNodeFlags |= node.flags;
         viewMatchedQueries |= node.matchedQueryIds;
@@ -12345,17 +12205,21 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
         if (currentParent) {
             currentParent.childFlags |= node.flags;
+            currentParent.directChildFlags |= node.flags;
             currentParent.childMatchedQueries |= node.matchedQueryIds;
             if (node.element && node.element.template) {
                 currentParent.childMatchedQueries |= node.element.template.nodeMatchedQueries;
             }
         }
+        else {
+            viewRootNodeFlags |= node.flags;
+        }
         viewBindingCount += node.bindings.length;
         viewDisposableCount += node.outputs.length;
-        if (!currentRenderParent && (node.type === NodeType.Element || node.type === NodeType.Text)) {
+        if (!currentRenderParent && (node.flags & 3 /* CatRenderNode */)) {
             lastRenderRootNode = node;
         }
-        if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
+        if (node.flags & 10112 /* CatProvider */) {
             if (!currentElementHasPublicProviders) {
                 currentElementHasPublicProviders = true;
                 // Use protoypical inheritance to not get O(n^2) complexity...
@@ -12363,8 +12227,8 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
                     Object.create(currentParent.element.publicProviders);
                 currentParent.element.allProviders = currentParent.element.publicProviders;
             }
-            const /** @type {?} */ isPrivateService = (node.flags & NodeFlags.PrivateProvider) !== 0;
-            const /** @type {?} */ isComponent = (node.flags & NodeFlags.IsComponent) !== 0;
+            const /** @type {?} */ isPrivateService = (node.flags & 4096 /* PrivateProvider */) !== 0;
+            const /** @type {?} */ isComponent = (node.flags & 16384 /* Component */) !== 0;
             if (!isPrivateService || isComponent) {
                 currentParent.element.publicProviders[node.provider.tokenKey] = node;
             }
@@ -12395,57 +12259,15 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     const /** @type {?} */ handleEvent = (view, nodeIndex, eventName, event) => nodes[nodeIndex].element.handleEvent(view, eventName, event);
     return {
         nodeFlags: viewNodeFlags,
+        rootNodeFlags: viewRootNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags,
-        nodes: nodes, reverseChildNodes,
+        nodes: nodes,
         updateDirectives: updateDirectives || NOOP$1,
         updateRenderer: updateRenderer || NOOP$1,
         handleEvent: handleEvent || NOOP$1,
         bindingCount: viewBindingCount,
         outputCount: viewDisposableCount, lastRenderRootNode
     };
-}
-/**
- * @param {?} currentParent
- * @param {?} i
- * @param {?} childCount
- * @param {?} nodeCount
- * @return {?}
- */
-function calculateReverseChildIndex(currentParent, i, childCount, nodeCount) {
-    // Notes about reverse child order:
-    // - Every node is directly before its children, in dfs and reverse child order.
-    // - node.childCount contains all children, in dfs and reverse child order.
-    // - In dfs order, every node is before its first child
-    // - In reverse child order, every node is before its last child
-    // Algorithm, main idea:
-    // - In reverse child order, the ranges for each child + its transitive children are mirrored
-    //   regarding their position inside of their parent
-    // Visualization:
-    // Given the following tree:
-    // Nodes: n0
-    //             n1         n2
-    //                n11 n12    n21 n22
-    // dfs:    0   1   2   3  4   5   6
-    // result: 0   4   6   5  1   3   2
-    //
-    // Example:
-    // Current node = 1
-    // 1) lastChildIndex = 3
-    // 2) lastChildOffsetRelativeToParentInDfsOrder = 2
-    // 3) parentEndIndexInReverseChildOrder = 6
-    // 4) result = 4
-    let /** @type {?} */ lastChildOffsetRelativeToParentInDfsOrder;
-    let /** @type {?} */ parentEndIndexInReverseChildOrder;
-    if (currentParent) {
-        const /** @type {?} */ lastChildIndex = i + childCount;
-        lastChildOffsetRelativeToParentInDfsOrder = lastChildIndex - currentParent.index - 1;
-        parentEndIndexInReverseChildOrder = currentParent.reverseChildIndex + currentParent.childCount;
-    }
-    else {
-        lastChildOffsetRelativeToParentInDfsOrder = i + childCount;
-        parentEndIndexInReverseChildOrder = nodeCount - 1;
-    }
-    return parentEndIndexInReverseChildOrder - lastChildOffsetRelativeToParentInDfsOrder;
 }
 /**
  * @param {?} parent
@@ -12457,21 +12279,22 @@ function validateNode(parent, node, nodeCount) {
     const /** @type {?} */ template = node.element && node.element.template;
     if (template) {
         if (template.lastRenderRootNode &&
-            template.lastRenderRootNode.flags & NodeFlags.HasEmbeddedViews) {
+            template.lastRenderRootNode.flags & 8388608 /* EmbeddedViews */) {
             throw new Error(`Illegal State: Last root node of a template can't have embedded views, at index ${node.index}!`);
         }
     }
-    if (node.type === NodeType.Provider || node.type === NodeType.Directive) {
-        const /** @type {?} */ parentType = parent ? parent.type : null;
-        if (parentType !== NodeType.Element) {
+    if (node.flags & 10112 /* CatProvider */) {
+        const /** @type {?} */ parentFlags = parent ? parent.flags : null;
+        if ((parentFlags & 1 /* TypeElement */) === 0) {
             throw new Error(`Illegal State: Provider/Directive nodes need to be children of elements or anchors, at index ${node.index}!`);
         }
     }
     if (node.query) {
-        if (node.flags & NodeFlags.HasContentQuery && (!parent || parent.type !== NodeType.Directive)) {
+        if (node.flags & 33554432 /* TypeContentQuery */ &&
+            (!parent || (parent.flags & 8192 /* TypeDirective */) === 0)) {
             throw new Error(`Illegal State: Content Query nodes need to be children of directives, at index ${node.index}!`);
         }
-        if (node.flags & NodeFlags.HasViewQuery && parent) {
+        if (node.flags & 67108864 /* TypeViewQuery */ && parent) {
             throw new Error(`Illegal State: View Query nodes have to be top level nodes, at index ${node.index}!`);
         }
     }
@@ -12525,7 +12348,7 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         viewContainerParent: undefined, parentNodeDef,
         context: undefined,
         component: undefined, nodes,
-        state: ViewState.FirstCheck | ViewState.ChecksEnabled, root, renderer,
+        state: 1 /* FirstCheck */ | 2 /* ChecksEnabled */, root, renderer,
         oldValues: new Array(def.bindingCount), disposables
     };
     return view;
@@ -12556,11 +12379,11 @@ function createViewNodes(view) {
         const /** @type {?} */ nodeDef = def.nodes[i];
         Services.setCurrentNode(view, i);
         let /** @type {?} */ nodeData;
-        switch (nodeDef.type) {
-            case NodeType.Element:
+        switch (nodeDef.flags & 100673535 /* Types */) {
+            case 1 /* TypeElement */:
                 const /** @type {?} */ el = (createElement(view, renderHost, nodeDef));
                 let /** @type {?} */ componentView;
-                if (nodeDef.flags & NodeFlags.HasComponent) {
+                if (nodeDef.flags & 16777216 /* ComponentView */) {
                     const /** @type {?} */ compViewDef = resolveViewDefinition(nodeDef.element.componentView);
                     const /** @type {?} */ rendererType = nodeDef.element.componentRendererType;
                     let /** @type {?} */ compRenderer;
@@ -12576,39 +12399,45 @@ function createViewNodes(view) {
                 nodeData = ({
                     renderElement: el,
                     componentView,
-                    embeddedViews: (nodeDef.flags & NodeFlags.HasEmbeddedViews) ? [] : undefined,
+                    embeddedViews: (nodeDef.flags & 8388608 /* EmbeddedViews */) ? [] : undefined,
                     projectedViews: undefined
                 });
                 break;
-            case NodeType.Text:
+            case 2 /* TypeText */:
                 nodeData = (createText(view, renderHost, nodeDef));
                 break;
-            case NodeType.Provider: {
+            case 256 /* TypeClassProvider */:
+            case 512 /* TypeFactoryProvider */:
+            case 1024 /* TypeUseExistingProvider */:
+            case 128 /* TypeValueProvider */: {
                 const /** @type {?} */ instance = createProviderInstance(view, nodeDef);
                 nodeData = ({ instance });
                 break;
             }
-            case NodeType.Pipe: {
+            case 8 /* TypePipe */: {
                 const /** @type {?} */ instance = createPipeInstance(view, nodeDef);
                 nodeData = ({ instance });
                 break;
             }
-            case NodeType.Directive: {
+            case 8192 /* TypeDirective */: {
                 const /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
                 nodeData = ({ instance });
-                if (nodeDef.flags & NodeFlags.IsComponent) {
+                if (nodeDef.flags & 16384 /* Component */) {
                     const /** @type {?} */ compView = asElementData(view, nodeDef.parent.index).componentView;
                     initView(compView, instance, instance);
                 }
                 break;
             }
-            case NodeType.PureExpression:
+            case 16 /* TypePureArray */:
+            case 32 /* TypePureObject */:
+            case 64 /* TypePurePipe */:
                 nodeData = (createPureExpression(view, nodeDef));
                 break;
-            case NodeType.Query:
+            case 33554432 /* TypeContentQuery */:
+            case 67108864 /* TypeViewQuery */:
                 nodeData = (createQuery());
                 break;
-            case NodeType.NgContent:
+            case 4 /* TypeNgContent */:
                 appendNgContent(view, renderHost, nodeDef);
                 // no runtime data needed for NgContent...
                 nodeData = undefined;
@@ -12620,39 +12449,39 @@ function createViewNodes(view) {
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
     // fill static content and view queries
-    execQueriesAction(view, NodeFlags.HasContentQuery | NodeFlags.HasViewQuery, NodeFlags.HasStaticQuery, CheckType.CheckAndUpdate);
+    execQueriesAction(view, 33554432 /* TypeContentQuery */ | 67108864 /* TypeViewQuery */, 134217728 /* StaticQuery */, 0 /* CheckAndUpdate */);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkNoChangesView(view) {
-    Services.updateDirectives(view, CheckType.CheckNoChanges);
+    Services.updateDirectives(view, 1 /* CheckNoChanges */);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, CheckType.CheckNoChanges);
-    Services.updateRenderer(view, CheckType.CheckNoChanges);
+    execQueriesAction(view, 33554432 /* TypeContentQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
+    Services.updateRenderer(view, 1 /* CheckNoChanges */);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, CheckType.CheckNoChanges);
+    execQueriesAction(view, 67108864 /* TypeViewQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkAndUpdateView(view) {
-    Services.updateDirectives(view, CheckType.CheckAndUpdate);
+    Services.updateDirectives(view, 0 /* CheckAndUpdate */);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasContentQuery, NodeFlags.HasDynamicQuery, CheckType.CheckAndUpdate);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
-        (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
-    Services.updateRenderer(view, CheckType.CheckAndUpdate);
+    execQueriesAction(view, 33554432 /* TypeContentQuery */, 268435456 /* DynamicQuery */, 0 /* CheckAndUpdate */);
+    callLifecycleHooksChildrenFirst(view, 1048576 /* AfterContentChecked */ |
+        (view.state & 1 /* FirstCheck */ ? 524288 /* AfterContentInit */ : 0));
+    Services.updateRenderer(view, 0 /* CheckAndUpdate */);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.HasViewQuery, NodeFlags.HasDynamicQuery, CheckType.CheckAndUpdate);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
-        (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
-    if (view.def.flags & ViewFlags.OnPush) {
-        view.state &= ~ViewState.ChecksEnabled;
+    execQueriesAction(view, 67108864 /* TypeViewQuery */, 268435456 /* DynamicQuery */, 0 /* CheckAndUpdate */);
+    callLifecycleHooksChildrenFirst(view, 4194304 /* AfterViewChecked */ |
+        (view.state & 1 /* FirstCheck */ ? 2097152 /* AfterViewInit */ : 0));
+    if (view.def.flags & 2 /* OnPush */) {
+        view.state &= ~2 /* ChecksEnabled */;
     }
-    view.state &= ~ViewState.FirstCheck;
+    view.state &= ~1 /* FirstCheck */;
 }
 /**
  * @param {?} view
@@ -12671,7 +12500,7 @@ function checkAndUpdateView(view) {
  * @return {?}
  */
 function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === ArgumentType.Inline) {
+    if (argStyle === 0 /* Inline */) {
         return checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12695,18 +12524,20 @@ function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6,
  */
 function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     let /** @type {?} */ changed = false;
-    switch (nodeDef.type) {
-        case NodeType.Element:
+    switch (nodeDef.flags & 100673535 /* Types */) {
+        case 1 /* TypeElement */:
             changed = checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeType.Text:
+        case 2 /* TypeText */:
             changed = checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeType.Directive:
+        case 8192 /* TypeDirective */:
             changed =
                 checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeType.PureExpression:
+        case 16 /* TypePureArray */:
+        case 32 /* TypePureObject */:
+        case 64 /* TypePurePipe */:
             changed =
                 checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
@@ -12721,17 +12552,19 @@ function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7,
  */
 function checkAndUpdateNodeDynamic(view, nodeDef, values) {
     let /** @type {?} */ changed = false;
-    switch (nodeDef.type) {
-        case NodeType.Element:
+    switch (nodeDef.flags & 100673535 /* Types */) {
+        case 1 /* TypeElement */:
             changed = checkAndUpdateElementDynamic(view, nodeDef, values);
             break;
-        case NodeType.Text:
+        case 2 /* TypeText */:
             changed = checkAndUpdateTextDynamic(view, nodeDef, values);
             break;
-        case NodeType.Directive:
+        case 8192 /* TypeDirective */:
             changed = checkAndUpdateDirectiveDynamic(view, nodeDef, values);
             break;
-        case NodeType.PureExpression:
+        case 16 /* TypePureArray */:
+        case 32 /* TypePureObject */:
+        case 64 /* TypePurePipe */:
             changed = checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
             break;
     }
@@ -12764,7 +12597,7 @@ function checkAndUpdateNodeDynamic(view, nodeDef, values) {
  * @return {?}
  */
 function checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === ArgumentType.Inline) {
+    if (argStyle === 0 /* Inline */) {
         checkNoChangesNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12830,7 +12663,7 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
 function checkNoChangesQuery(view, nodeDef) {
     const /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
     if (queryList.dirty) {
-        throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, nodeDef.index), `Query ${nodeDef.query.id} not dirty`, `Query ${nodeDef.query.id} dirty`, (view.state & ViewState.FirstCheck) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, nodeDef.index), `Query ${nodeDef.query.id} not dirty`, `Query ${nodeDef.query.id} dirty`, (view.state & 1 /* FirstCheck */) !== 0);
     }
 }
 /**
@@ -12838,12 +12671,12 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 function destroyView(view) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 8 /* Destroyed */) {
         return;
     }
     execEmbeddedViewsAction(view, ViewAction.Destroy);
     execComponentViewsAction(view, ViewAction.Destroy);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
+    callLifecycleHooksChildrenFirst(view, 65536 /* OnDestroy */);
     if (view.disposables) {
         for (let /** @type {?} */ i = 0; i < view.disposables.length; i++) {
             view.disposables[i]();
@@ -12855,7 +12688,7 @@ function destroyView(view) {
     if (isComponentView(view)) {
         view.renderer.destroy();
     }
-    view.state |= ViewState.Destroyed;
+    view.state |= 8 /* Destroyed */;
 }
 /**
  * @param {?} view
@@ -12865,10 +12698,10 @@ function destroyViewNodes(view) {
     const /** @type {?} */ len = view.def.nodes.length;
     for (let /** @type {?} */ i = 0; i < len; i++) {
         const /** @type {?} */ def = view.def.nodes[i];
-        if (def.type === NodeType.Element) {
+        if (def.flags & 1 /* TypeElement */) {
             view.renderer.destroyNode(asElementData(view, i).renderElement);
         }
-        else if (def.type === NodeType.Text) {
+        else if (def.flags & 2 /* TypeText */) {
             view.renderer.destroyNode(asTextData(view, i).renderText);
         }
     }
@@ -12889,16 +12722,16 @@ ViewAction[ViewAction.Destroy] = "Destroy";
  */
 function execComponentViewsAction(view, action) {
     const /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & NodeFlags.HasComponent)) {
+    if (!(def.nodeFlags & 16777216 /* ComponentView */)) {
         return;
     }
     for (let /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & NodeFlags.HasComponent) {
+        if (nodeDef.flags & 16777216 /* ComponentView */) {
             // a leaf
             callViewAction(asElementData(view, i).componentView, action);
         }
-        else if ((nodeDef.childFlags & NodeFlags.HasComponent) === 0) {
+        else if ((nodeDef.childFlags & 16777216 /* ComponentView */) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12913,12 +12746,12 @@ function execComponentViewsAction(view, action) {
  */
 function execEmbeddedViewsAction(view, action) {
     const /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & NodeFlags.HasEmbeddedViews)) {
+    if (!(def.nodeFlags & 8388608 /* EmbeddedViews */)) {
         return;
     }
     for (let /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & NodeFlags.HasEmbeddedViews) {
+        if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
             // a leaf
             const /** @type {?} */ embeddedViews = asElementData(view, i).embeddedViews;
             if (embeddedViews) {
@@ -12927,7 +12760,7 @@ function execEmbeddedViewsAction(view, action) {
                 }
             }
         }
-        else if ((nodeDef.childFlags & NodeFlags.HasEmbeddedViews) === 0) {
+        else if ((nodeDef.childFlags & 8388608 /* EmbeddedViews */) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12944,14 +12777,14 @@ function callViewAction(view, action) {
     const /** @type {?} */ viewState = view.state;
     switch (action) {
         case ViewAction.CheckNoChanges:
-            if ((viewState & ViewState.ChecksEnabled) &&
-                (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
+            if ((viewState & 2 /* ChecksEnabled */) &&
+                (viewState & (4 /* Errored */ | 8 /* Destroyed */)) === 0) {
                 checkNoChangesView(view);
             }
             break;
         case ViewAction.CheckAndUpdate:
-            if ((viewState & ViewState.ChecksEnabled) &&
-                (viewState & (ViewState.Errored | ViewState.Destroyed)) === 0) {
+            if ((viewState & 2 /* ChecksEnabled */) &&
+                (viewState & (4 /* Errored */ | 8 /* Destroyed */)) === 0) {
                 checkAndUpdateView(view);
             }
             break;
@@ -12980,10 +12813,10 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
         if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
             Services.setCurrentNode(view, nodeDef.index);
             switch (checkType) {
-                case CheckType.CheckAndUpdate:
+                case 0 /* CheckAndUpdate */:
                     checkAndUpdateQuery(view, nodeDef);
                     break;
-                case CheckType.CheckNoChanges:
+                case 1 /* CheckNoChanges */:
                     checkNoChangesQuery(view, nodeDef);
                     break;
             }
@@ -13032,9 +12865,9 @@ function createProdServices() {
         destroyView: destroyView,
         createDebugContext: (view, nodeIndex) => new DebugContext_(view, nodeIndex),
         handleEvent: (view, nodeIndex, eventName, event) => view.def.handleEvent(view, nodeIndex, eventName, event),
-        updateDirectives: (view, checkType) => view.def.updateDirectives(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
+        updateDirectives: (view, checkType) => view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
             prodCheckNoChangesNode, view),
-        updateRenderer: (view, checkType) => view.def.updateRenderer(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
+        updateRenderer: (view, checkType) => view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
             prodCheckNoChangesNode, view),
     };
 }
@@ -13115,7 +12948,8 @@ function createRootData(injector, rendererFactory, projectableNodes, rootSelecto
 function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.type === NodeType.PureExpression) ? asPureExpressionData(view, nodeIndex).value :
+    return (nodeDef.flags & 112 /* CatPureExpression */) ?
+        asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
 /**
@@ -13137,7 +12971,8 @@ function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v
 function prodCheckNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.type === NodeType.PureExpression) ? asPureExpressionData(view, nodeIndex).value :
+    return (nodeDef.flags & 112 /* CatPureExpression */) ?
+        asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
 /**
@@ -13210,7 +13045,7 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  * @return {?}
  */
 function debugUpdateDirectives(view, checkType) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 8 /* Destroyed */) {
         throw viewDestroyedError$1(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
@@ -13224,16 +13059,16 @@ function debugUpdateDirectives(view, checkType) {
      */
     function debugCheckDirectivesFn(view, nodeIndex, argStyle, ...values) {
         const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === CheckType.CheckAndUpdate) {
+        if (checkType === 0 /* CheckAndUpdate */) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.type === NodeType.Directive) {
+        if (nodeDef.flags & 8192 /* TypeDirective */) {
             debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
         }
-        return (nodeDef.type === NodeType.PureExpression) ?
+        return (nodeDef.flags & 112 /* CatPureExpression */) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -13245,7 +13080,7 @@ function debugUpdateDirectives(view, checkType) {
  * @return {?}
  */
 function debugUpdateRenderer(view, checkType) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 8 /* Destroyed */) {
         throw viewDestroyedError$1(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
@@ -13259,16 +13094,16 @@ function debugUpdateRenderer(view, checkType) {
      */
     function debugCheckRenderNodeFn(view, nodeIndex, argStyle, ...values) {
         const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === CheckType.CheckAndUpdate) {
+        if (checkType === 0 /* CheckAndUpdate */) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text) {
+        if (nodeDef.flags & 3 /* CatRenderNode */) {
             debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         }
-        return (nodeDef.type === NodeType.PureExpression) ?
+        return (nodeDef.flags & 112 /* CatPureExpression */) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -13283,20 +13118,19 @@ function debugUpdateRenderer(view, checkType) {
 function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
     const /** @type {?} */ changed = ((checkAndUpdateNode))(view, nodeDef, argStyle, ...givenValues);
     if (changed) {
-        const /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
-        if (nodeDef.type === NodeType.Directive || nodeDef.type === NodeType.Element) {
+        const /** @type {?} */ values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
+        if (nodeDef.flags & (8192 /* TypeDirective */ | 1 /* TypeElement */)) {
             const /** @type {?} */ bindingValues = {};
             for (let /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
                 const /** @type {?} */ binding = nodeDef.bindings[i];
                 const /** @type {?} */ value = values[i];
-                if ((binding.type === BindingType.ElementProperty ||
-                    binding.type === BindingType.ComponentHostProperty ||
-                    binding.type === BindingType.DirectiveProperty)) {
+                if ((binding.type === 4 /* ComponentHostProperty */ ||
+                    binding.type === 5 /* DirectiveProperty */)) {
                     bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)] =
                         normalizeDebugBindingValue(value);
                 }
             }
-            const /** @type {?} */ elDef = nodeDef.type === NodeType.Directive ? nodeDef.parent : nodeDef;
+            const /** @type {?} */ elDef = nodeDef.flags & 8192 /* TypeDirective */ ? nodeDef.parent : nodeDef;
             const /** @type {?} */ el = asElementData(view, elDef.index).renderElement;
             if (!elDef.element.name) {
                 // a comment.
@@ -13365,7 +13199,7 @@ function normalizeDebugBindingValue(value) {
 function nextDirectiveWithBinding(view, nodeIndex) {
     for (let /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.type === NodeType.Directive && nodeDef.bindings && nodeDef.bindings.length) {
+        if (nodeDef.flags & 8192 /* TypeDirective */ && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
@@ -13379,8 +13213,7 @@ function nextDirectiveWithBinding(view, nodeIndex) {
 function nextRenderNodeWithBinding(view, nodeIndex) {
     for (let /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         const /** @type {?} */ nodeDef = view.def.nodes[i];
-        if ((nodeDef.type === NodeType.Element || nodeDef.type === NodeType.Text) && nodeDef.bindings &&
-            nodeDef.bindings.length) {
+        if ((nodeDef.flags & 3 /* CatRenderNode */) && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
@@ -13400,7 +13233,7 @@ class DebugContext_ {
         this.nodeDef = view.def.nodes[nodeIndex];
         let elDef = this.nodeDef;
         let elView = view;
-        while (elDef && elDef.type !== NodeType.Element) {
+        while (elDef && (elDef.flags & 1 /* TypeElement */) === 0) {
             elDef = elDef.parent;
         }
         if (!elDef) {
@@ -13439,7 +13272,7 @@ class DebugContext_ {
         if (this.elDef) {
             for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                 const /** @type {?} */ childDef = this.elView.def.nodes[i];
-                if (childDef.type === NodeType.Provider || childDef.type === NodeType.Directive) {
+                if (childDef.flags & 10112 /* CatProvider */) {
                     tokens.push(childDef.provider.token);
                 }
                 i += childDef.childCount;
@@ -13456,7 +13289,7 @@ class DebugContext_ {
             collectReferences(this.elView, this.elDef, references);
             for (let /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                 const /** @type {?} */ childDef = this.elView.def.nodes[i];
-                if (childDef.type === NodeType.Provider || childDef.type === NodeType.Directive) {
+                if (childDef.flags & 10112 /* CatProvider */) {
                     collectReferences(this.elView, childDef, references);
                 }
                 i += childDef.childCount;
@@ -13468,7 +13301,7 @@ class DebugContext_ {
      * @return {?}
      */
     get source() {
-        if (this.nodeDef.type === NodeType.Text) {
+        if (this.nodeDef.flags & 2 /* TypeText */) {
             return this.nodeDef.text.source;
         }
         else {
@@ -13486,7 +13319,7 @@ class DebugContext_ {
      * @return {?}
      */
     get renderNode() {
-        return this.nodeDef.type === NodeType.Text ? renderNode(this.view, this.nodeDef) :
+        return this.nodeDef.flags & 2 /* TypeText */ ? renderNode(this.view, this.nodeDef) :
             renderNode(this.elView, this.elDef);
     }
 }
@@ -13537,7 +13370,7 @@ function callWithDebugContext(action, fn, self, args) {
         if (isViewDebugError(e) || !_currentView) {
             throw e;
         }
-        _currentView.state |= ViewState.Errored;
+        _currentView.state |= 4 /* Errored */;
         throw viewWrappedDebugError(e, getCurrentDebugContext());
     }
 }
@@ -16253,4 +16086,4 @@ function transition$1(stateChangeExpr, steps) {
     return transition$2(stateChangeExpr, steps);
 }
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, AnimationPlayer, AnimationStyles, AnimationKeyframe, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, Class, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ANY_STATE as ɵANY_STATE, DEFAULT_STATE as ɵDEFAULT_STATE, EMPTY_STATE as ɵEMPTY_STATE, FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG, AnimationGroupPlayer as ɵAnimationGroupPlayer, AnimationKeyframe as ɵAnimationKeyframe, AnimationPlayer as ɵAnimationPlayer, NoOpAnimationPlayer as ɵNoOpAnimationPlayer, AnimationSequencePlayer as ɵAnimationSequencePlayer, balanceAnimationKeyframes as ɵbalanceAnimationKeyframes, clearStyles as ɵclearStyles, collectAndResolveStyles as ɵcollectAndResolveStyles, flattenStyles as ɵflattenStyles, prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles, renderStyles as ɵrenderStyles, AnimationStyles as ɵAnimationStyles, AnimationTransition as ɵAnimationTransition, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, DebugDomRootRenderer as ɵDebugDomRootRenderer, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, DebugContext$1 as ɵDebugContext, StaticNodeDebugInfo as ɵStaticNodeDebugInfo, AppView as ɵAppView, DebugAppView as ɵDebugAppView, ViewContainer as ɵViewContainer, ViewType as ɵViewType, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, ComponentRef_ as ɵComponentRef_, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, TemplateRef_ as ɵTemplateRef_, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, InlineArray16 as ɵInlineArray16, InlineArray2 as ɵInlineArray2, InlineArray4 as ɵInlineArray4, InlineArray8 as ɵInlineArray8, InlineArrayDynamic as ɵInlineArrayDynamic, ViewUtils as ɵViewUtils, castByValue as ɵcastByValue, checkBinding as ɵcheckBinding, checkBindingChange as ɵcheckBindingChange, checkRenderAttribute as ɵcheckRenderAttribute, checkRenderClass as ɵcheckRenderClass, checkRenderProperty as ɵcheckRenderProperty, checkRenderStyle as ɵcheckRenderStyle, checkRenderText as ɵcheckRenderText, createRenderComponentType as ɵcreateRenderComponentType, createRenderElement as ɵcreateRenderElement, getComponentFactoryViewClass as ɵgetComponentFactoryViewClass, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, noop as ɵnoop, pureProxy1 as ɵpureProxy1, pureProxy10 as ɵpureProxy10, pureProxy2 as ɵpureProxy2, pureProxy3 as ɵpureProxy3, pureProxy4 as ɵpureProxy4, pureProxy5 as ɵpureProxy5, pureProxy6 as ɵpureProxy6, pureProxy7 as ɵpureProxy7, pureProxy8 as ɵpureProxy8, pureProxy9 as ɵpureProxy9, selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement, setBindingDebugInfo as ɵsetBindingDebugInfo, setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges, subscribeToRenderElement as ɵsubscribeToRenderElement, ArgumentType as ɵArgumentType, BindingType as ɵBindingType, DepFlags as ɵDepFlags, NodeFlags as ɵNodeFlags, ProviderType as ɵProviderType, QueryBindingType as ɵQueryBindingType, QueryValueType as ɵQueryValueType, ViewFlags as ɵViewFlags, anchorDef as ɵanchorDef, createComponentFactory as ɵcreateComponentFactory, createRendererTypeV2 as ɵcreateRendererTypeV2, directiveDef as ɵdirectiveDef, elementDef as ɵelementDef, elementEventFullName as ɵelementEventFullName, ngContentDef as ɵngContentDef, nodeValue as ɵnodeValue, pipeDef as ɵpipeDef, providerDef as ɵproviderDef, pureArrayDef as ɵpureArrayDef, pureObjectDef as ɵpureObjectDef, purePipeDef as ɵpurePipeDef, queryDef as ɵqueryDef, textDef as ɵtextDef, unwrapValue as ɵunwrapValue, viewDef as ɵviewDef, AUTO_STYLE$1 as AUTO_STYLE, trigger$1 as trigger, animate$1 as animate, group$1 as group, sequence$1 as sequence, style$1 as style, state$1 as state, keyframes$1 as keyframes, transition$1 as transition, AnimationQueue as ɵz, animate$2 as ɵbc, group$2 as ɵbd, keyframes$2 as ɵbh, sequence$2 as ɵbe, state$2 as ɵbg, style$2 as ɵbf, transition$2 as ɵbi, trigger$2 as ɵbb, _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, isBlank as ɵj, wtfEnabled as ɵq, createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt, startTimeRange as ɵu, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵx, NodeType as ɵy };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, AnimationPlayer, AnimationStyles, AnimationKeyframe, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, Class, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ANY_STATE as ɵANY_STATE, DEFAULT_STATE as ɵDEFAULT_STATE, EMPTY_STATE as ɵEMPTY_STATE, FILL_STYLE_FLAG as ɵFILL_STYLE_FLAG, AnimationGroupPlayer as ɵAnimationGroupPlayer, AnimationKeyframe as ɵAnimationKeyframe, AnimationPlayer as ɵAnimationPlayer, NoOpAnimationPlayer as ɵNoOpAnimationPlayer, AnimationSequencePlayer as ɵAnimationSequencePlayer, balanceAnimationKeyframes as ɵbalanceAnimationKeyframes, clearStyles as ɵclearStyles, collectAndResolveStyles as ɵcollectAndResolveStyles, flattenStyles as ɵflattenStyles, prepareFinalAnimationStyles as ɵprepareFinalAnimationStyles, renderStyles as ɵrenderStyles, AnimationStyles as ɵAnimationStyles, AnimationTransition as ɵAnimationTransition, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, DebugDomRootRenderer as ɵDebugDomRootRenderer, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, DebugContext$1 as ɵDebugContext, StaticNodeDebugInfo as ɵStaticNodeDebugInfo, AppView as ɵAppView, DebugAppView as ɵDebugAppView, ViewContainer as ɵViewContainer, ViewType as ɵViewType, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, ComponentRef_ as ɵComponentRef_, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, TemplateRef_ as ɵTemplateRef_, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_INLINE_ARRAY as ɵEMPTY_INLINE_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, InlineArray16 as ɵInlineArray16, InlineArray2 as ɵInlineArray2, InlineArray4 as ɵInlineArray4, InlineArray8 as ɵInlineArray8, InlineArrayDynamic as ɵInlineArrayDynamic, ViewUtils as ɵViewUtils, castByValue as ɵcastByValue, checkBinding as ɵcheckBinding, checkBindingChange as ɵcheckBindingChange, checkRenderAttribute as ɵcheckRenderAttribute, checkRenderClass as ɵcheckRenderClass, checkRenderProperty as ɵcheckRenderProperty, checkRenderStyle as ɵcheckRenderStyle, checkRenderText as ɵcheckRenderText, createRenderComponentType as ɵcreateRenderComponentType, createRenderElement as ɵcreateRenderElement, getComponentFactoryViewClass as ɵgetComponentFactoryViewClass, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, noop as ɵnoop, pureProxy1 as ɵpureProxy1, pureProxy10 as ɵpureProxy10, pureProxy2 as ɵpureProxy2, pureProxy3 as ɵpureProxy3, pureProxy4 as ɵpureProxy4, pureProxy5 as ɵpureProxy5, pureProxy6 as ɵpureProxy6, pureProxy7 as ɵpureProxy7, pureProxy8 as ɵpureProxy8, pureProxy9 as ɵpureProxy9, selectOrCreateRenderHostElement as ɵselectOrCreateRenderHostElement, setBindingDebugInfo as ɵsetBindingDebugInfo, setBindingDebugInfoForChanges as ɵsetBindingDebugInfoForChanges, subscribeToRenderElement as ɵsubscribeToRenderElement, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererTypeV2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$1 as AUTO_STYLE, trigger$1 as trigger, animate$1 as animate, group$1 as group, sequence$1 as sequence, style$1 as style, state$1 as state, keyframes$1 as keyframes, transition$1 as transition, AnimationQueue as ɵy, animate$2 as ɵbb, group$2 as ɵbc, keyframes$2 as ɵbg, sequence$2 as ɵbd, state$2 as ɵbf, style$2 as ɵbe, transition$2 as ɵbh, trigger$2 as ɵba, _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, isBlank as ɵj, wtfEnabled as ɵq, createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt, startTimeRange as ɵu, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵx };

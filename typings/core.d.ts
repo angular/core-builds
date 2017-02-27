@@ -2,8 +2,8 @@
  * Generated bundle index. Do not edit.
  */
 export * from './public_api';
-export { AnimationQueue as ɵz } from './src/animation/animation_queue';
-export { AnimationMetadataType as ɵba, animate as ɵbc, group as ɵbd, keyframes as ɵbh, sequence as ɵbe, state as ɵbg, style as ɵbf, transition as ɵbi, trigger as ɵbb } from './src/animation_next/dsl';
+export { AnimationQueue as ɵy } from './src/animation/animation_queue';
+export { AnimationMetadataType as ɵz, animate as ɵbb, group as ɵbc, keyframes as ɵbg, sequence as ɵbd, state as ɵbf, style as ɵbe, transition as ɵbh, trigger as ɵba } from './src/animation_next/dsl';
 export { _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo } from './src/application_module';
 export { ApplicationRef_ as ɵf } from './src/application_ref';
 export { _appIdRandomProviderFactory as ɵg } from './src/application_tokens';
@@ -18,4 +18,3 @@ export { createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt
 export { PlatformReflectionCapabilities as ɵw } from './src/reflection/platform_reflection_capabilities';
 export { makeParamDecorator as ɵa, makePropDecorator as ɵb } from './src/util/decorators';
 export { _def as ɵx } from './src/view/provider';
-export { NodeType as ɵy } from './src/view/types';

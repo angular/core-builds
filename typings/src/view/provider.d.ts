@@ -1,12 +1,12 @@
-import { BindingDef, DepDef, DepFlags, NodeDef, NodeFlags, NodeType, OutputDef, ProviderType, QueryValueType, ViewData } from './types';
+import { BindingDef, DepDef, DepFlags, NodeDef, NodeFlags, OutputDef, QueryValueType, ViewData } from './types';
 export declare function directiveDef(flags: NodeFlags, matchedQueries: [string | number, QueryValueType][], childCount: number, ctor: any, deps: ([DepFlags, any] | any)[], props?: {
     [name: string]: [number, string];
 }, outputs?: {
     [name: string]: string;
 }): NodeDef;
 export declare function pipeDef(flags: NodeFlags, ctor: any, deps: ([DepFlags, any] | any)[]): NodeDef;
-export declare function providerDef(flags: NodeFlags, matchedQueries: [string | number, QueryValueType][], type: ProviderType, token: any, value: any, deps: ([DepFlags, any] | any)[]): NodeDef;
-export declare function _def(type: NodeType, flags: NodeFlags, matchedQueriesDsl: [string | number, QueryValueType][], childCount: number, providerType: ProviderType, token: any, value: any, deps: ([DepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
+export declare function providerDef(flags: NodeFlags, matchedQueries: [string | number, QueryValueType][], token: any, value: any, deps: ([DepFlags, any] | any)[]): NodeDef;
+export declare function _def(flags: NodeFlags, matchedQueriesDsl: [string | number, QueryValueType][], childCount: number, token: any, value: any, deps: ([DepFlags, any] | any)[], bindings?: BindingDef[], outputs?: OutputDef[]): NodeDef;
 export declare function createProviderInstance(view: ViewData, def: NodeDef): any;
 export declare function createPipeInstance(view: ViewData, def: NodeDef): any;
 export declare function createDirectiveInstance(view: ViewData, def: NodeDef): any;

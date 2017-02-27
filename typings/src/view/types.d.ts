@@ -14,11 +14,7 @@ export interface ViewDefinition {
     nodes: NodeDef[];
     /** aggregated NodeFlags for all nodes **/
     nodeFlags: NodeFlags;
-    /**
-     * Order: parents before children, but children in reverse order.
-     * Especially providers are after elements / anchors.
-     */
-    reverseChildNodes: NodeDef[];
+    rootNodeFlags: NodeFlags;
     lastRenderRootNode: NodeDef;
     bindingCount: number;
     outputCount: number;
@@ -36,14 +32,14 @@ export interface NodeCheckFn {
     (view: ViewData, nodeIndex: number, argStyle: ArgumentType.Inline, v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any;
 }
 export declare type ViewHandleEventFn = (view: ViewData, nodeIndex: number, eventName: string, event: any) => boolean;
-export declare enum ArgumentType {
+export declare const enum ArgumentType {
     Inline = 0,
     Dynamic = 1,
 }
 /**
  * Bitmask for ViewDefintion.flags.
  */
-export declare enum ViewFlags {
+export declare const enum ViewFlags {
     None = 0,
     OnPush = 2,
 }
@@ -54,18 +50,18 @@ export declare enum ViewFlags {
  * of a ViewDefinition stay monomorphic!
  */
 export interface NodeDef {
-    type: NodeType;
-    index: number;
-    reverseChildIndex: number;
     flags: NodeFlags;
+    index: number;
     parent: NodeDef;
     renderParent: NodeDef;
     /** this is checked against NgContentDef.index to find matched nodes */
     ngContentIndex: number;
     /** number of transitive children */
     childCount: number;
-    /** aggregated NodeFlags for all children (does not include self) **/
+    /** aggregated NodeFlags for all transitive children (does not include self) **/
     childFlags: NodeFlags;
+    /** aggregated NodeFlags for all direct children (does not include self) **/
+    directChildFlags: NodeFlags;
     bindingIndex: number;
     bindings: BindingDef[];
     outputIndex: number;
@@ -93,42 +89,51 @@ export interface NodeDef {
     element: ElementDef;
     provider: ProviderDef;
     text: TextDef;
-    pureExpression: PureExpressionDef;
     query: QueryDef;
     ngContent: NgContentDef;
 }
-export declare enum NodeType {
-    Element = 0,
-    Text = 1,
-    Directive = 2,
-    Provider = 3,
-    Pipe = 4,
-    PureExpression = 5,
-    Query = 6,
-    NgContent = 7,
-}
 /**
  * Bitmask for NodeDef.flags.
+ * Naming convention:
+ * - `Type...`: flags that are mutually exclusive
+ * - `Cat...`: union of multiple `Type...` (short for category).
  */
-export declare enum NodeFlags {
+export declare const enum NodeFlags {
     None = 0,
-    OnInit = 1,
-    OnDestroy = 2,
-    DoCheck = 4,
-    OnChanges = 8,
-    AfterContentInit = 16,
-    AfterContentChecked = 32,
-    AfterViewInit = 64,
-    AfterViewChecked = 128,
-    HasEmbeddedViews = 256,
-    HasComponent = 512,
-    IsComponent = 1024,
-    HasContentQuery = 2048,
-    HasStaticQuery = 4096,
-    HasDynamicQuery = 8192,
-    HasViewQuery = 16384,
-    LazyProvider = 32768,
-    PrivateProvider = 65536,
+    TypeElement = 1,
+    TypeText = 2,
+    CatRenderNode = 3,
+    TypeNgContent = 4,
+    TypePipe = 8,
+    TypePureArray = 16,
+    TypePureObject = 32,
+    TypePurePipe = 64,
+    CatPureExpression = 112,
+    TypeValueProvider = 128,
+    TypeClassProvider = 256,
+    TypeFactoryProvider = 512,
+    TypeUseExistingProvider = 1024,
+    LazyProvider = 2048,
+    PrivateProvider = 4096,
+    TypeDirective = 8192,
+    Component = 16384,
+    CatProvider = 10112,
+    OnInit = 32768,
+    OnDestroy = 65536,
+    DoCheck = 131072,
+    OnChanges = 262144,
+    AfterContentInit = 524288,
+    AfterContentChecked = 1048576,
+    AfterViewInit = 2097152,
+    AfterViewChecked = 4194304,
+    EmbeddedViews = 8388608,
+    ComponentView = 16777216,
+    TypeContentQuery = 33554432,
+    TypeViewQuery = 67108864,
+    StaticQuery = 134217728,
+    DynamicQuery = 268435456,
+    CatQuery = 100663296,
+    Types = 100673535,
 }
 export interface BindingDef {
     type: BindingType;
@@ -138,7 +143,7 @@ export interface BindingDef {
     securityContext: SecurityContext;
     suffix: string;
 }
-export declare enum BindingType {
+export declare const enum BindingType {
     ElementAttribute = 0,
     ElementClass = 1,
     ElementStyle = 2,
@@ -154,11 +159,11 @@ export interface OutputDef {
     eventName: string;
     propName: string;
 }
-export declare enum OutputType {
+export declare const enum OutputType {
     ElementOutput = 0,
     DirectiveOutput = 1,
 }
-export declare enum QueryValueType {
+export declare const enum QueryValueType {
     ElementRef = 0,
     RenderElement = 1,
     TemplateRef = 2,
@@ -193,17 +198,10 @@ export interface ElementDef {
 }
 export declare type ElementHandleEventFn = (view: ViewData, eventName: string, event: any) => boolean;
 export interface ProviderDef {
-    type: ProviderType;
     token: any;
     tokenKey: string;
     value: any;
     deps: DepDef[];
-}
-export declare enum ProviderType {
-    Value = 0,
-    Class = 1,
-    Factory = 2,
-    UseExisting = 3,
 }
 export interface DepDef {
     flags: DepFlags;
@@ -213,7 +211,7 @@ export interface DepDef {
 /**
  * Bitmask for DI flags
  */
-export declare enum DepFlags {
+export declare const enum DepFlags {
     None = 0,
     SkipSelf = 1,
     Optional = 2,
@@ -222,14 +220,6 @@ export declare enum DepFlags {
 export interface TextDef {
     prefix: string;
     source: string;
-}
-export interface PureExpressionDef {
-    type: PureExpressionType;
-}
-export declare enum PureExpressionType {
-    Array = 0,
-    Object = 1,
-    Pipe = 2,
 }
 export interface QueryDef {
     id: number;
@@ -240,7 +230,7 @@ export interface QueryBindingDef {
     propName: string;
     bindingType: QueryBindingType;
 }
-export declare enum QueryBindingType {
+export declare const enum QueryBindingType {
     First = 0,
     All = 1,
 }
@@ -276,7 +266,7 @@ export interface ViewData {
 /**
  * Bitmask of states
  */
-export declare enum ViewState {
+export declare const enum ViewState {
     FirstCheck = 1,
     ChecksEnabled = 2,
     Errored = 4,
@@ -374,7 +364,7 @@ export declare abstract class DebugContext {
     readonly abstract componentRenderElement: any;
     readonly abstract renderNode: any;
 }
-export declare enum CheckType {
+export declare const enum CheckType {
     CheckAndUpdate = 0,
     CheckNoChanges = 1,
 }
