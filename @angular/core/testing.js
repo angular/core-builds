@@ -1,4 +1,4 @@
-import { getDebugNode, InjectionToken, NgZone, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler, AUTO_STYLE } from '@angular/core';
+import { getDebugNode, InjectionToken, NgZone, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
 
 /**
  * @license
@@ -848,87 +848,4 @@ if (_global$2.beforeEach) {
 // work.
 const __core_private_testing_placeholder__ = '';
 
-class MockAnimationPlayer {
-    constructor(startingStyles = {}, keyframes = [], previousPlayers = []) {
-        this.startingStyles = startingStyles;
-        this.keyframes = keyframes;
-        this._onDoneFns = [];
-        this._onStartFns = [];
-        this._onDestroyFns = [];
-        this._finished = false;
-        this._destroyed = false;
-        this._started = false;
-        this.parentPlayer = null;
-        this.previousStyles = {};
-        this.log = [];
-        previousPlayers.forEach(player => {
-            if (player instanceof MockAnimationPlayer) {
-                const styles = player._captureStyles();
-                Object.keys(styles).forEach(prop => this.previousStyles[prop] = styles[prop]);
-            }
-        });
-    }
-    _onFinish() {
-        if (!this._finished) {
-            this._finished = true;
-            this.log.push('finish');
-            this._onDoneFns.forEach(fn => fn());
-            this._onDoneFns = [];
-        }
-    }
-    init() { this.log.push('init'); }
-    onDone(fn) { this._onDoneFns.push(fn); }
-    onStart(fn) { this._onStartFns.push(fn); }
-    onDestroy(fn) { this._onDestroyFns.push(fn); }
-    hasStarted() { return this._started; }
-    play() {
-        if (!this.hasStarted()) {
-            this._onStartFns.forEach(fn => fn());
-            this._onStartFns = [];
-            this._started = true;
-        }
-        this.log.push('play');
-    }
-    pause() { this.log.push('pause'); }
-    restart() { this.log.push('restart'); }
-    finish() { this._onFinish(); }
-    reset() {
-        this.log.push('reset');
-        this._destroyed = false;
-        this._finished = false;
-        this._started = false;
-    }
-    destroy() {
-        if (!this._destroyed) {
-            this._destroyed = true;
-            this.finish();
-            this.log.push('destroy');
-            this._onDestroyFns.forEach(fn => fn());
-            this._onDestroyFns = [];
-        }
-    }
-    setPosition(p) { }
-    getPosition() { return 0; }
-    _captureStyles() {
-        const captures = {};
-        if (this.hasStarted()) {
-            // when assembling the captured styles, it's important that
-            // we build the keyframe styles in the following order:
-            // {startingStyles, ... other styles within keyframes, ... previousStyles }
-            Object.keys(this.startingStyles).forEach(prop => {
-                captures[prop] = this.startingStyles[prop];
-            });
-            this.keyframes.forEach(kf => {
-                const [offset, styles] = kf;
-                const newStyles = {};
-                Object.keys(styles).forEach(prop => { captures[prop] = this._finished ? styles[prop] : AUTO_STYLE; });
-            });
-        }
-        Object.keys(this.previousStyles).forEach(prop => {
-            captures[prop] = this.previousStyles[prop];
-        });
-        return captures;
-    }
-}
-
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, MockAnimationPlayer as ɵMockAnimationPlayer, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };

@@ -9,7 +9,6 @@ import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
 import { Type } from '../type';
 import { ElementRef } from './element_ref';
-import { AppView } from './view';
 import { ViewRef } from './view_ref';
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
@@ -54,33 +53,13 @@ export declare abstract class ComponentRef<C> {
     abstract onDestroy(callback: Function): void;
 }
 /**
- * workaround https://github.com/angular/tsickle/issues/350
- * @suppress {checkTypes}
- */
-export declare class ComponentRef_<C> extends ComponentRef<C> {
-    private _index;
-    private _parentView;
-    private _nativeElement;
-    private _component;
-    constructor(_index: number, _parentView: AppView<any>, _nativeElement: any, _component: C);
-    readonly location: ElementRef;
-    readonly injector: Injector;
-    readonly instance: C;
-    readonly hostView: ViewRef;
-    readonly changeDetectorRef: ChangeDetectorRef;
-    readonly componentType: Type<any>;
-    destroy(): void;
-    onDestroy(callback: Function): void;
-}
-/**
  * @stable
  */
-export declare class ComponentFactory<C> {
-    selector: string;
-    componentType: Type<any>;
-    constructor(selector: string, _viewClass: Type<AppView<any>>, componentType: Type<any>);
+export declare abstract class ComponentFactory<C> {
+    readonly abstract selector: string;
+    readonly abstract componentType: Type<any>;
     /**
      * Creates a new component.
      */
-    create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any): ComponentRef<C>;
+    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any): ComponentRef<C>;
 }

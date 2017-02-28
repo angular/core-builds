@@ -17,9 +17,8 @@
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-    exports.ɵx = exports.ɵb = exports.ɵa = exports.ɵu = exports.ɵt = exports.ɵv = exports.ɵr = exports.ɵs = exports.ɵq = exports.ɵj = exports.ɵe = exports.ɵd = exports.ɵc = exports.ɵl = exports.ɵk = exports.ɵi = exports.ɵh = exports.ɵg = exports.ɵf = exports.ɵo = exports.ɵn = exports.ɵm = exports.ɵp = exports.ɵba = exports.ɵbh = exports.ɵbe = exports.ɵbf = exports.ɵbd = exports.ɵbg = exports.ɵbc = exports.ɵbb = exports.ɵy = exports.transition = exports.keyframes = exports.state = exports.style = exports.sequence = exports.group = exports.animate = exports.trigger = exports.AUTO_STYLE = exports.ɵvid = exports.ɵunv = exports.ɵted = exports.ɵqud = exports.ɵppd = exports.ɵpod = exports.ɵpad = exports.ɵprd = exports.ɵpid = exports.ɵnov = exports.ɵncd = exports.ɵelementEventFullName = undefined;
-    exports.ɵeld = exports.ɵdid = exports.ɵcrt = exports.ɵccf = exports.ɵand = exports.ɵsubscribeToRenderElement = exports.ɵsetBindingDebugInfoForChanges = exports.ɵsetBindingDebugInfo = exports.ɵselectOrCreateRenderHostElement = exports.ɵpureProxy9 = exports.ɵpureProxy8 = exports.ɵpureProxy7 = exports.ɵpureProxy6 = exports.ɵpureProxy5 = exports.ɵpureProxy4 = exports.ɵpureProxy3 = exports.ɵpureProxy2 = exports.ɵpureProxy10 = exports.ɵpureProxy1 = exports.ɵnoop = exports.ɵinterpolate = exports.ɵinlineInterpolate = exports.ɵgetComponentFactoryViewClass = exports.ɵcreateRenderElement = exports.ɵcreateRenderComponentType = exports.ɵcheckRenderText = exports.ɵcheckRenderStyle = exports.ɵcheckRenderProperty = exports.ɵcheckRenderClass = exports.ɵcheckRenderAttribute = exports.ɵcheckBindingChange = exports.ɵcheckBinding = exports.ɵcastByValue = exports.ɵViewUtils = exports.ɵInlineArrayDynamic = exports.ɵInlineArray8 = exports.ɵInlineArray4 = exports.ɵInlineArray2 = exports.ɵInlineArray16 = exports.ɵEMPTY_MAP = exports.ɵEMPTY_INLINE_ARRAY = exports.ɵEMPTY_ARRAY = exports.ɵTemplateRef_ = exports.ɵregisterModuleFactory = exports.ɵNgModuleInjector = exports.ɵComponentRef_ = exports.ɵisPromise = exports.ɵisObservable = exports.ɵmakeDecorator = exports.ɵRenderDebugInfo = exports.ɵReflectorReader = exports.ɵReflectionCapabilities = exports.ɵreflector = exports.ɵReflector = exports.ɵViewMetadata = exports.ɵLifecycleHooks = exports.ɵLIFECYCLE_HOOKS_VALUES = exports.ɵViewType = exports.ɵViewContainer = exports.ɵDebugAppView = exports.ɵAppView = exports.ɵStaticNodeDebugInfo = exports.ɵDebugContext = exports.ɵCodegenComponentFactoryResolver = exports.ɵComponentFactory = exports.ɵERROR_COMPONENT_TYPE = exports.ɵDebugDomRootRenderer = exports.ɵConsole = exports.ɵisDefaultChangeDetectionStrategy = exports.ɵChangeDetectorStatus = exports.ɵdevModeEqual = exports.ɵValueUnwrapper = exports.ɵAPP_ID_RANDOM_PROVIDER = exports.ɵALLOW_MULTIPLE_PLATFORMS = exports.ɵAnimationTransition = exports.ɵAnimationStyles = exports.ɵrenderStyles = exports.ɵprepareFinalAnimationStyles = exports.ɵflattenStyles = exports.ɵcollectAndResolveStyles = exports.ɵclearStyles = exports.ɵbalanceAnimationKeyframes = exports.ɵAnimationSequencePlayer = exports.ɵNoOpAnimationPlayer = exports.ɵAnimationPlayer = exports.ɵAnimationKeyframe = exports.ɵAnimationGroupPlayer = exports.ɵFILL_STYLE_FLAG = exports.ɵEMPTY_STATE = exports.ɵDEFAULT_STATE = exports.ɵANY_STATE = exports.platformCore = exports.WrappedValue = exports.SimpleChange = exports.KeyValueDiffers = exports.IterableDiffers = exports.DefaultIterableDiffer = exports.ChangeDetectorRef = exports.ChangeDetectionStrategy = exports.ViewRef = undefined;
-    exports.EmbeddedViewRef = exports.ViewContainerRef = exports.TemplateRef = exports.SystemJsNgModuleLoaderConfig = exports.SystemJsNgModuleLoader = exports.QueryList = exports.getModuleFactory = exports.NgModuleFactoryLoader = exports.NgModuleRef = exports.NgModuleFactory = exports.ElementRef = exports.ComponentFactoryResolver = exports.ComponentRef = exports.ComponentFactory = exports.ModuleWithComponentFactories = exports.CompilerFactory = exports.Compiler = exports.COMPILER_OPTIONS = exports.RootRenderer = exports.RendererV2 = exports.RendererFactoryV2 = exports.Renderer = exports.RenderComponentType = exports.NgZone = exports.Host = exports.SkipSelf = exports.Self = exports.Injectable = exports.Optional = exports.Inject = exports.OpaqueToken = exports.InjectionToken = exports.ReflectiveKey = exports.ResolvedReflectiveFactory = exports.ReflectiveInjector = exports.Injector = exports.resolveForwardRef = exports.forwardRef = exports.Class = exports.VERSION = exports.Version = exports.ViewEncapsulation = exports.NgModule = exports.NO_ERRORS_SCHEMA = exports.CUSTOM_ELEMENTS_SCHEMA = exports.Pipe = exports.Output = exports.Input = exports.HostListener = exports.HostBinding = exports.Directive = exports.Component = exports.ViewChildren = exports.ViewChild = exports.Query = exports.ContentChildren = exports.ContentChild = exports.Attribute = exports.ANALYZE_FOR_ENTRY_COMPONENTS = exports.SecurityContext = exports.Sanitizer = exports.AnimationKeyframe = exports.AnimationStyles = exports.AnimationPlayer = exports.ErrorHandler = exports.EventEmitter = exports.Type = exports.wtfEndTimeRange = exports.wtfStartTimeRange = exports.wtfLeave = exports.wtfCreateScope = exports.ApplicationModule = exports.MissingTranslationStrategy = exports.LOCALE_ID = exports.TRANSLATIONS_FORMAT = exports.TRANSLATIONS = exports.setTestabilityGetter = exports.TestabilityRegistry = exports.Testability = exports.getDebugNode = exports.asNativeElements = exports.DebugNode = exports.DebugElement = exports.ApplicationInitStatus = exports.APP_INITIALIZER = exports.APP_BOOTSTRAP_LISTENER = exports.PLATFORM_ID = exports.PLATFORM_INITIALIZER = exports.PACKAGE_ROOT_URL = exports.APP_ID = exports.NgProbeToken = exports.createPlatformFactory = exports.isDevMode = exports.enableProdMode = exports.ApplicationRef = exports.PlatformRef = exports.getPlatform = exports.destroyPlatform = exports.assertPlatform = exports.createPlatform = undefined;
+    exports.ɵx = exports.ɵb = exports.ɵa = exports.ɵu = exports.ɵt = exports.ɵv = exports.ɵr = exports.ɵs = exports.ɵq = exports.ɵj = exports.ɵe = exports.ɵd = exports.ɵc = exports.ɵl = exports.ɵk = exports.ɵi = exports.ɵh = exports.ɵg = exports.ɵf = exports.ɵo = exports.ɵn = exports.ɵm = exports.ɵp = exports.ɵz = exports.ɵbg = exports.ɵbd = exports.ɵbe = exports.ɵbc = exports.ɵbf = exports.ɵbb = exports.ɵba = exports.transition = exports.keyframes = exports.state = exports.style = exports.sequence = exports.group = exports.animate = exports.trigger = exports.AUTO_STYLE = exports.ɵvid = exports.ɵunv = exports.ɵted = exports.ɵqud = exports.ɵppd = exports.ɵpod = exports.ɵpad = exports.ɵprd = exports.ɵpid = exports.ɵnov = exports.ɵncd = exports.ɵinterpolate = exports.ɵinlineInterpolate = exports.ɵgetComponentViewDefinitionFactory = exports.ɵelementEventFullName = exports.ɵeld = exports.ɵdid = exports.ɵcrt = exports.ɵccf = exports.ɵand = exports.ɵEMPTY_MAP = exports.ɵEMPTY_ARRAY = exports.ɵregisterModuleFactory = exports.ɵNgModuleInjector = exports.ɵisPromise = exports.ɵisObservable = exports.ɵmakeDecorator = exports.ɵRenderDebugInfo = exports.ɵReflectorReader = exports.ɵReflectionCapabilities = exports.ɵreflector = exports.ɵReflector = exports.ɵViewMetadata = exports.ɵLifecycleHooks = exports.ɵLIFECYCLE_HOOKS_VALUES = exports.ɵCodegenComponentFactoryResolver = exports.ɵComponentFactory = exports.ɵERROR_COMPONENT_TYPE = exports.ɵConsole = exports.ɵisDefaultChangeDetectionStrategy = exports.ɵChangeDetectorStatus = exports.ɵdevModeEqual = exports.ɵValueUnwrapper = exports.ɵAPP_ID_RANDOM_PROVIDER = exports.ɵALLOW_MULTIPLE_PLATFORMS = exports.platformCore = exports.WrappedValue = exports.SimpleChange = exports.KeyValueDiffers = exports.IterableDiffers = exports.DefaultIterableDiffer = undefined;
+    exports.ChangeDetectorRef = exports.ChangeDetectionStrategy = exports.ViewRef = exports.EmbeddedViewRef = exports.ViewContainerRef = exports.TemplateRef = exports.SystemJsNgModuleLoaderConfig = exports.SystemJsNgModuleLoader = exports.QueryList = exports.getModuleFactory = exports.NgModuleFactoryLoader = exports.NgModuleRef = exports.NgModuleFactory = exports.ElementRef = exports.ComponentFactoryResolver = exports.ComponentRef = exports.ComponentFactory = exports.ModuleWithComponentFactories = exports.CompilerFactory = exports.Compiler = exports.COMPILER_OPTIONS = exports.RootRenderer = exports.RendererV2 = exports.RendererFactoryV2 = exports.Renderer = exports.RenderComponentType = exports.NgZone = exports.Host = exports.SkipSelf = exports.Self = exports.Injectable = exports.Optional = exports.Inject = exports.OpaqueToken = exports.InjectionToken = exports.ReflectiveKey = exports.ResolvedReflectiveFactory = exports.ReflectiveInjector = exports.Injector = exports.resolveForwardRef = exports.forwardRef = exports.Class = exports.VERSION = exports.Version = exports.ViewEncapsulation = exports.NgModule = exports.NO_ERRORS_SCHEMA = exports.CUSTOM_ELEMENTS_SCHEMA = exports.Pipe = exports.Output = exports.Input = exports.HostListener = exports.HostBinding = exports.Directive = exports.Component = exports.ViewChildren = exports.ViewChild = exports.Query = exports.ContentChildren = exports.ContentChild = exports.Attribute = exports.ANALYZE_FOR_ENTRY_COMPONENTS = exports.SecurityContext = exports.Sanitizer = exports.ErrorHandler = exports.EventEmitter = exports.Type = exports.wtfEndTimeRange = exports.wtfStartTimeRange = exports.wtfLeave = exports.wtfCreateScope = exports.ApplicationModule = exports.MissingTranslationStrategy = exports.LOCALE_ID = exports.TRANSLATIONS_FORMAT = exports.TRANSLATIONS = exports.setTestabilityGetter = exports.TestabilityRegistry = exports.Testability = exports.getDebugNode = exports.asNativeElements = exports.DebugNode = exports.DebugElement = exports.ApplicationInitStatus = exports.APP_INITIALIZER = exports.APP_BOOTSTRAP_LISTENER = exports.PLATFORM_ID = exports.PLATFORM_INITIALIZER = exports.PACKAGE_ROOT_URL = exports.APP_ID = exports.NgProbeToken = exports.createPlatformFactory = exports.isDevMode = exports.enableProdMode = exports.ApplicationRef = exports.PlatformRef = exports.getPlatform = exports.destroyPlatform = exports.assertPlatform = exports.createPlatform = undefined;
 
     var _slicedToArray = function () {
         function sliceIterator(arr, i) {
@@ -909,13 +908,6 @@
         id: undefined
     });
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
     var ViewEncapsulation = {};
     ViewEncapsulation.Emulated = 0;
     ViewEncapsulation.Native = 1;
@@ -1011,7 +1003,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-e58cb7b');
+    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-126fda2');
 
     /**
      * Inject decorator and metadata.
@@ -1141,24 +1133,9 @@
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new _NullInjector();
 
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    var /** @type {?} */ERROR_TYPE = 'ngType';
     var /** @type {?} */ERROR_COMPONENT_TYPE = 'ngComponentType';
     var /** @type {?} */ERROR_DEBUG_CONTEXT = 'ngDebugContext';
     var /** @type {?} */ERROR_ORIGINAL_ERROR = 'ngOriginalError';
-    /**
-     * @param {?} error
-     * @return {?}
-     */
-    function getType(error) {
-        return error[ERROR_TYPE];
-    }
     /**
      * @param {?} error
      * @return {?}
@@ -2632,92 +2609,6 @@
         return res;
     }
 
-    /**
-     * Wraps Javascript Objects
-     */
-
-    var StringMapWrapper = function () {
-        function StringMapWrapper() {
-            _classCallCheck(this, StringMapWrapper);
-        }
-
-        _createClass(StringMapWrapper, null, [{
-            key: 'merge',
-            value: function merge(m1, m2) {
-                var /** @type {?} */m = {};
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = Object.keys(m1)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var k = _step.value;
-
-                        m[k] = m1[k];
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-
-                var _iteratorNormalCompletion2 = true;
-                var _didIteratorError2 = false;
-                var _iteratorError2 = undefined;
-
-                try {
-                    for (var _iterator2 = Object.keys(m2)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                        var _k = _step2.value;
-
-                        m[_k] = m2[_k];
-                    }
-                } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                            _iterator2.return();
-                        }
-                    } finally {
-                        if (_didIteratorError2) {
-                            throw _iteratorError2;
-                        }
-                    }
-                }
-
-                return m;
-            }
-        }, {
-            key: 'equals',
-            value: function equals(m1, m2) {
-                var /** @type {?} */k1 = Object.keys(m1);
-                var /** @type {?} */k2 = Object.keys(m2);
-                if (k1.length != k2.length) {
-                    return false;
-                }
-                for (var /** @type {?} */i = 0; i < k1.length; i++) {
-                    var /** @type {?} */key = k1[i];
-                    if (m1[key] !== m2[key]) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }]);
-
-        return StringMapWrapper;
-    }();
-
     var ListWrapper = function () {
         function ListWrapper() {
             _classCallCheck(this, ListWrapper);
@@ -3091,15 +2982,316 @@
         return CompilerFactory;
     }();
 
-    var ElementRef =
-    /**
-     * @param {?} nativeElement
-     */
-    function ElementRef(nativeElement) {
-        _classCallCheck(this, ElementRef);
+    var ComponentRef = function () {
+        function ComponentRef() {
+            _classCallCheck(this, ComponentRef);
+        }
 
-        this.nativeElement = nativeElement;
+        _createClass(ComponentRef, [{
+            key: 'location',
+            value: function location() {}
+        }, {
+            key: 'injector',
+            value: function injector() {}
+        }, {
+            key: 'instance',
+            value: function instance() {}
+        }, {
+            key: 'hostView',
+            value: function hostView() {}
+        }, {
+            key: 'changeDetectorRef',
+            value: function changeDetectorRef() {}
+        }, {
+            key: 'componentType',
+            value: function componentType() {}
+        }, {
+            key: 'destroy',
+            value: function destroy() {}
+        }, {
+            key: 'onDestroy',
+            value: function onDestroy(callback) {}
+        }]);
+
+        return ComponentRef;
+    }();
+
+    var ComponentFactory = function () {
+        function ComponentFactory() {
+            _classCallCheck(this, ComponentFactory);
+        }
+
+        _createClass(ComponentFactory, [{
+            key: 'selector',
+            value: function selector() {}
+        }, {
+            key: 'componentType',
+            value: function componentType() {}
+        }, {
+            key: 'create',
+            value: function create(injector, projectableNodes, rootSelectorOrNode) {}
+        }]);
+
+        return ComponentFactory;
+    }();
+
+    /**
+     * @param {?} component
+     * @return {?}
+     */
+    function noComponentFactoryError(component) {
+        var /** @type {?} */error = Error('No component factory found for ' + stringify(component) + '. Did you add it to @NgModule.entryComponents?');
+        error[ERROR_COMPONENT] = component;
+        return error;
+    }
+    var /** @type {?} */ERROR_COMPONENT = 'ngComponent';
+
+    var _NullComponentFactoryResolver = function () {
+        function _NullComponentFactoryResolver() {
+            _classCallCheck(this, _NullComponentFactoryResolver);
+        }
+
+        _createClass(_NullComponentFactoryResolver, [{
+            key: 'resolveComponentFactory',
+            value: function resolveComponentFactory(component) {
+                throw noComponentFactoryError(component);
+            }
+        }]);
+
+        return _NullComponentFactoryResolver;
+    }();
+
+    var ComponentFactoryResolver = function () {
+        function ComponentFactoryResolver() {
+            _classCallCheck(this, ComponentFactoryResolver);
+        }
+
+        _createClass(ComponentFactoryResolver, [{
+            key: 'resolveComponentFactory',
+            value: function resolveComponentFactory(component) {}
+        }]);
+
+        return ComponentFactoryResolver;
+    }();
+
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
+
+    var CodegenComponentFactoryResolver = function () {
+        /**
+         * @param {?} factories
+         * @param {?} _parent
+         */
+        function CodegenComponentFactoryResolver(factories, _parent) {
+            _classCallCheck(this, CodegenComponentFactoryResolver);
+
+            this._parent = _parent;
+            this._factories = new Map();
+            for (var i = 0; i < factories.length; i++) {
+                var factory = factories[i];
+                this._factories.set(factory.componentType, factory);
+            }
+        }
+        /**
+         * @param {?} component
+         * @return {?}
+         */
+
+
+        _createClass(CodegenComponentFactoryResolver, [{
+            key: 'resolveComponentFactory',
+            value: function resolveComponentFactory(component) {
+                var /** @type {?} */result = this._factories.get(component);
+                if (!result) {
+                    result = this._parent.resolveComponentFactory(component);
+                }
+                return result;
+            }
+        }]);
+
+        return CodegenComponentFactoryResolver;
+    }();
+
+    var /** @type {?} */trace = void 0;
+    var /** @type {?} */events = void 0;
+    /**
+     * @return {?}
+     */
+    function detectWTF() {
+        var /** @type {?} */wtf = global$1[/** TODO #9100 */'wtf'];
+        if (wtf) {
+            trace = wtf['trace'];
+            if (trace) {
+                events = trace['events'];
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * @param {?} signature
+     * @param {?=} flags
+     * @return {?}
+     */
+    function createScope(signature) {
+        var flags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        return events.createScope(signature, flags);
+    }
+    /**
+     * @param {?} scope
+     * @param {?=} returnValue
+     * @return {?}
+     */
+    function leave(scope, returnValue) {
+        trace.leaveScope(scope, returnValue);
+        return returnValue;
+    }
+    /**
+     * @param {?} rangeType
+     * @param {?} action
+     * @return {?}
+     */
+    function startTimeRange(rangeType, action) {
+        return trace.beginTimeRange(rangeType, action);
+    }
+    /**
+     * @param {?} range
+     * @return {?}
+     */
+    function endTimeRange(range) {
+        trace.endTimeRange(range);
+    }
+
+    /**
+     * True if WTF is enabled.
+     */
+    var /** @type {?} */wtfEnabled = detectWTF();
+    /**
+     * @param {?=} arg0
+     * @param {?=} arg1
+     * @return {?}
+     */
+    function noopScope(arg0, arg1) {
+        return null;
+    }
+    /**
+     * Create trace scope.
+     *
+     * Scopes must be strictly nested and are analogous to stack frames, but
+     * do not have to follow the stack frames. Instead it is recommended that they follow logical
+     * nesting. You may want to use
+     * [Event
+     * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
+     * as they are defined in WTF.
+     *
+     * Used to mark scope entry. The return value is used to leave the scope.
+     *
+     *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
+     *
+     *     someMethod() {
+     *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
+     *        // DO SOME WORK HERE
+     *        return wtfLeave(s, 123); // Return value 123
+     *     }
+     *
+     * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
+     * negatively impact the performance of your application. For this reason we recommend that
+     * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
+     * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
+     * exception, will produce incorrect trace, but presence of exception signifies logic error which
+     * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
+     * an exception is expected during normal execution while profiling.
+     *
+     * @experimental
+     */
+    var /** @type {?} */wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) {
+        return noopScope;
     };
+    /**
+     * Used to mark end of Scope.
+     *
+     * - `scope` to end.
+     * - `returnValue` (optional) to be passed to the WTF.
+     *
+     * Returns the `returnValue for easy chaining.
+     * @experimental
+     */
+    var /** @type {?} */wtfLeave = wtfEnabled ? leave : function (s, r) {
+        return r;
+    };
+    /**
+     * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
+     * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
+     * enabled.
+     *
+     *     someMethod() {
+     *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
+     *        var future = new Future.delay(5).then((_) {
+     *          wtfEndTimeRange(s);
+     *        });
+     *     }
+     * @experimental
+     */
+    var /** @type {?} */wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) {
+        return null;
+    };
+    /**
+     * Ends a async time range operation.
+     * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
+     * enabled.
+     * @experimental
+     */
+    var /** @type {?} */wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) {
+        return null;
+    };
+
+    /**
+     * Use by directives and components to emit custom Events.
+     *
+     * ### Examples
+     *
+     * In the following example, `Zippy` alternatively emits `open` and `close` events when its
+     * title gets clicked:
+     *
+     * ```
+     * \@Component({
+     *   selector: 'zippy',
+     *   template: `
+     *   <div class="zippy">
+     *     <div (click)="toggle()">Toggle</div>
+     *     <div [hidden]="!visible">
+     *       <ng-content></ng-content>
+     *     </div>
+     *  </div>`})
+     * export class Zippy {
+     *   visible: boolean = true;
+     *   \@Output() open: EventEmitter<any> = new EventEmitter();
+     *   \@Output() close: EventEmitter<any> = new EventEmitter();
+     *
+     *   toggle() {
+     *     this.visible = !this.visible;
+     *     if (this.visible) {
+     *       this.open.emit(null);
+     *     } else {
+     *       this.close.emit(null);
+     *     }
+     *   }
+     * }
+     * ```
+     *
+     * The events payload can be accessed by the parameter `$event` on the components output event
+     * handler:
+     *
+     * ```
+     * <zippy (open)="onOpen($event)" (close)="onClose($event)"></zippy>
+     * ```
+     *
+     * Uses Rx.Observable but provides an adapter to make it work as specified here:
+     * https://github.com/jhusain/observable-spec
+     *
+     * Once a reference implementation of the spec is available, switch to it.
+     * \@stable
+     */
 
     var EventEmitter = function (_Subject) {
         _inherits(EventEmitter, _Subject);
@@ -3407,74 +3599,1883 @@
         return NgZone;
     }();
 
-    var AnimationQueue = function () {
+    var Testability = function () {
         /**
-         * @param {?} _zone
+         * @param {?} _ngZone
          */
-        function AnimationQueue(_zone) {
-            _classCallCheck(this, AnimationQueue);
+        function Testability(_ngZone) {
+            _classCallCheck(this, Testability);
 
-            this._zone = _zone;
-            this.entries = [];
+            this._ngZone = _ngZone;
+            /** @internal */
+            this._pendingCount = 0;
+            /** @internal */
+            this._isZoneStable = true;
+            /**
+             * Whether any work was done since the last 'whenStable' callback. This is
+             * useful to detect if this could have potentially destabilized another
+             * component while it is stabilizing.
+             * @internal
+             */
+            this._didWork = false;
+            /** @internal */
+            this._callbacks = [];
+            this._watchAngularEvents();
         }
         /**
-         * @param {?} player
+         * \@internal
          * @return {?}
          */
 
 
-        _createClass(AnimationQueue, [{
-            key: 'enqueue',
-            value: function enqueue(player) {
-                this.entries.push(player);
-            }
-        }, {
-            key: 'flush',
-            value: function flush() {
+        _createClass(Testability, [{
+            key: '_watchAngularEvents',
+            value: function _watchAngularEvents() {
                 var _this9 = this;
 
-                // given that each animation player may set aside
-                // microtasks and rely on DOM-based events, this
-                // will cause Angular to run change detection after
-                // each request. This sidesteps the issue. If a user
-                // hooks into an animation via (@anim.start) or (@anim.done)
-                // then those methods will automatically trigger change
-                // detection by wrapping themselves inside of a zone
-                if (this.entries.length) {
-                    this._zone.runOutsideAngular(function () {
-                        // this code is wrapped into a single promise such that the
-                        // onStart and onDone player callbacks are triggered outside
-                        // of the digest cycle of animations
-                        Promise.resolve(null).then(function () {
-                            return _this9._triggerAnimations();
+                this._ngZone.onUnstable.subscribe({
+                    next: function next() {
+                        _this9._didWork = true;
+                        _this9._isZoneStable = false;
+                    }
+                });
+                this._ngZone.runOutsideAngular(function () {
+                    _this9._ngZone.onStable.subscribe({
+                        next: function next() {
+                            NgZone.assertNotInAngularZone();
+                            scheduleMicroTask(function () {
+                                _this9._isZoneStable = true;
+                                _this9._runCallbacksIfReady();
+                            });
+                        }
+                    });
+                });
+            }
+        }, {
+            key: 'increasePendingRequestCount',
+            value: function increasePendingRequestCount() {
+                this._pendingCount += 1;
+                this._didWork = true;
+                return this._pendingCount;
+            }
+        }, {
+            key: 'decreasePendingRequestCount',
+            value: function decreasePendingRequestCount() {
+                this._pendingCount -= 1;
+                if (this._pendingCount < 0) {
+                    throw new Error('pending async requests below zero');
+                }
+                this._runCallbacksIfReady();
+                return this._pendingCount;
+            }
+        }, {
+            key: 'isStable',
+            value: function isStable() {
+                return this._isZoneStable && this._pendingCount == 0 && !this._ngZone.hasPendingMacrotasks;
+            }
+        }, {
+            key: '_runCallbacksIfReady',
+            value: function _runCallbacksIfReady() {
+                var _this10 = this;
+
+                if (this.isStable()) {
+                    // Schedules the call backs in a new frame so that it is always async.
+                    scheduleMicroTask(function () {
+                        while (_this10._callbacks.length !== 0) {
+                            _this10._callbacks.pop()(_this10._didWork);
+                        }
+                        _this10._didWork = false;
+                    });
+                } else {
+                    // Not Ready
+                    this._didWork = true;
+                }
+            }
+        }, {
+            key: 'whenStable',
+            value: function whenStable(callback) {
+                this._callbacks.push(callback);
+                this._runCallbacksIfReady();
+            }
+        }, {
+            key: 'getPendingRequestCount',
+            value: function getPendingRequestCount() {
+                return this._pendingCount;
+            }
+        }, {
+            key: 'findBindings',
+            value: function findBindings(using, provider, exactMatch) {
+                // TODO(juliemr): implement.
+                return [];
+            }
+        }, {
+            key: 'findProviders',
+            value: function findProviders(using, provider, exactMatch) {
+                // TODO(juliemr): implement.
+                return [];
+            }
+        }]);
+
+        return Testability;
+    }();
+
+    Testability.decorators = [{ type: Injectable }];
+    /** @nocollapse */
+    Testability.ctorParameters = function () {
+        return [{ type: NgZone }];
+    };
+    /**
+     * A global registry of {\@link Testability} instances for specific elements.
+     * \@experimental
+     */
+
+    var TestabilityRegistry = function () {
+        function TestabilityRegistry() {
+            _classCallCheck(this, TestabilityRegistry);
+
+            /** @internal */
+            this._applications = new Map();
+            _testabilityGetter.addToWindow(this);
+        }
+        /**
+         * @param {?} token
+         * @param {?} testability
+         * @return {?}
+         */
+
+
+        _createClass(TestabilityRegistry, [{
+            key: 'registerApplication',
+            value: function registerApplication(token, testability) {
+                this._applications.set(token, testability);
+            }
+        }, {
+            key: 'getTestability',
+            value: function getTestability(elem) {
+                return this._applications.get(elem);
+            }
+        }, {
+            key: 'getAllTestabilities',
+            value: function getAllTestabilities() {
+                return Array.from(this._applications.values());
+            }
+        }, {
+            key: 'getAllRootElements',
+            value: function getAllRootElements() {
+                return Array.from(this._applications.keys());
+            }
+        }, {
+            key: 'findTestabilityInTree',
+            value: function findTestabilityInTree(elem) {
+                var findInAncestors = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+                return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
+            }
+        }]);
+
+        return TestabilityRegistry;
+    }();
+
+    TestabilityRegistry.decorators = [{ type: Injectable }];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = function () {
+        return [];
+    };
+
+    var _NoopGetTestability = function () {
+        function _NoopGetTestability() {
+            _classCallCheck(this, _NoopGetTestability);
+        }
+
+        _createClass(_NoopGetTestability, [{
+            key: 'addToWindow',
+            value: function addToWindow(registry) {}
+        }, {
+            key: 'findTestabilityInTree',
+            value: function findTestabilityInTree(registry, elem, findInAncestors) {
+                return null;
+            }
+        }]);
+
+        return _NoopGetTestability;
+    }();
+
+    /**
+     * Set the {\@link GetTestability} implementation used by the Angular testing framework.
+     * \@experimental
+     * @param {?} getter
+     * @return {?}
+     */
+    function setTestabilityGetter(getter) {
+        _testabilityGetter = getter;
+    }
+    var /** @type {?} */_testabilityGetter = new _NoopGetTestability();
+
+    var /** @type {?} */_devMode = true;
+    var /** @type {?} */_runModeLocked = false;
+    var /** @type {?} */_platform = void 0;
+    var /** @type {?} */ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
+    /**
+     * Disable Angular's development mode, which turns off assertions and other
+     * checks within the framework.
+     *
+     * One important assertion this disables verifies that a change detection pass
+     * does not result in additional changes to any bindings (also known as
+     * unidirectional data flow).
+     *
+     * \@stable
+     * @return {?}
+     */
+    function enableProdMode() {
+        if (_runModeLocked) {
+            throw new Error('Cannot enable prod mode after platform setup.');
+        }
+        _devMode = false;
+    }
+    /**
+     * Returns whether Angular is in development mode. After called once,
+     * the value is locked and won't change any more.
+     *
+     * By default, this is true, unless a user calls `enableProdMode` before calling this.
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @return {?}
+     */
+    function isDevMode() {
+        _runModeLocked = true;
+        return _devMode;
+    }
+    /**
+     * A token for third-party components that can register themselves with NgProbe.
+     *
+     * \@experimental
+     */
+
+    var NgProbeToken =
+    /**
+     * @param {?} name
+     * @param {?} token
+     */
+    function NgProbeToken(name, token) {
+        _classCallCheck(this, NgProbeToken);
+
+        this.name = name;
+        this.token = token;
+    };
+
+    /**
+     * Creates a platform.
+     * Platforms have to be eagerly created via this function.
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @param {?} injector
+     * @return {?}
+     */
+    function createPlatform(injector) {
+        if (_platform && !_platform.destroyed && !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+            throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
+        }
+        _platform = injector.get(PlatformRef);
+        var /** @type {?} */inits = injector.get(PLATFORM_INITIALIZER, null);
+        if (inits) inits.forEach(function (init) {
+            return init();
+        });
+        return _platform;
+    }
+    /**
+     * Creates a factory for a platform
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @param {?} parentPlatformFactory
+     * @param {?} name
+     * @param {?=} providers
+     * @return {?}
+     */
+    function createPlatformFactory(parentPlatformFactory, name) {
+        var providers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+        var /** @type {?} */marker = new InjectionToken('Platform: ' + name);
+        return function () {
+            var extraProviders = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+            var /** @type {?} */platform = getPlatform();
+            if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
+                if (parentPlatformFactory) {
+                    parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
+                } else {
+                    createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                }
+            }
+            return assertPlatform(marker);
+        };
+    }
+    /**
+     * Checks that there currently is a platform which contains the given token as a provider.
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @param {?} requiredToken
+     * @return {?}
+     */
+    function assertPlatform(requiredToken) {
+        var /** @type {?} */platform = getPlatform();
+        if (!platform) {
+            throw new Error('No platform exists!');
+        }
+        if (!platform.injector.get(requiredToken, null)) {
+            throw new Error('A platform with a different configuration has been created. Please destroy it first.');
+        }
+        return platform;
+    }
+    /**
+     * Destroy the existing platform.
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @return {?}
+     */
+    function destroyPlatform() {
+        if (_platform && !_platform.destroyed) {
+            _platform.destroy();
+        }
+    }
+    /**
+     * Returns the current platform.
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
+     * @return {?}
+     */
+    function getPlatform() {
+        return _platform && !_platform.destroyed ? _platform : null;
+    }
+    /**
+     * The Angular platform is the entry point for Angular on a web page. Each page
+     * has exactly one platform, and services (such as reflection) which are common
+     * to every Angular application running on the page are bound in its scope.
+     *
+     * A page's platform is initialized implicitly when {\@link bootstrap}() is called, or
+     * explicitly by calling {\@link createPlatform}().
+     *
+     * \@stable
+     * @abstract
+     */
+
+    var PlatformRef = function () {
+        function PlatformRef() {
+            _classCallCheck(this, PlatformRef);
+        }
+
+        _createClass(PlatformRef, [{
+            key: 'bootstrapModuleFactory',
+            value: function bootstrapModuleFactory(moduleFactory) {}
+        }, {
+            key: 'bootstrapModule',
+            value: function bootstrapModule(moduleType, compilerOptions) {}
+        }, {
+            key: 'onDestroy',
+            value: function onDestroy(callback) {}
+        }, {
+            key: 'injector',
+            value: function injector() {}
+        }, {
+            key: 'destroy',
+            value: function destroy() {}
+        }, {
+            key: 'destroyed',
+            value: function destroyed() {}
+        }]);
+
+        return PlatformRef;
+    }();
+
+    /**
+     * @param {?} errorHandler
+     * @param {?} callback
+     * @return {?}
+     */
+    function _callAndReportToErrorHandler(errorHandler, callback) {
+        try {
+            var /** @type {?} */result = callback();
+            if (isPromise(result)) {
+                return result.catch(function (e) {
+                    errorHandler.handleError(e);
+                    // rethrow as the exception handler might not do it
+                    throw e;
+                });
+            }
+            return result;
+        } catch (e) {
+            errorHandler.handleError(e);
+            // rethrow as the exception handler might not do it
+            throw e;
+        }
+    }
+    /**
+     * workaround https://github.com/angular/tsickle/issues/350
+     * @suppress {checkTypes}
+     */
+
+    var PlatformRef_ = function (_PlatformRef) {
+        _inherits(PlatformRef_, _PlatformRef);
+
+        /**
+         * @param {?} _injector
+         */
+        function PlatformRef_(_injector) {
+            _classCallCheck(this, PlatformRef_);
+
+            var _this11 = _possibleConstructorReturn(this, (PlatformRef_.__proto__ || Object.getPrototypeOf(PlatformRef_)).call(this));
+
+            _this11._injector = _injector;
+            _this11._modules = [];
+            _this11._destroyListeners = [];
+            _this11._destroyed = false;
+            return _this11;
+        }
+        /**
+         * @param {?} callback
+         * @return {?}
+         */
+
+
+        _createClass(PlatformRef_, [{
+            key: 'onDestroy',
+            value: function onDestroy(callback) {
+                this._destroyListeners.push(callback);
+            }
+        }, {
+            key: 'destroy',
+            value: function destroy() {
+                if (this._destroyed) {
+                    throw new Error('The platform has already been destroyed!');
+                }
+                this._modules.slice().forEach(function (module) {
+                    return module.destroy();
+                });
+                this._destroyListeners.forEach(function (listener) {
+                    return listener();
+                });
+                this._destroyed = true;
+            }
+        }, {
+            key: 'bootstrapModuleFactory',
+            value: function bootstrapModuleFactory(moduleFactory) {
+                return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
+            }
+        }, {
+            key: '_bootstrapModuleFactoryWithZone',
+            value: function _bootstrapModuleFactoryWithZone(moduleFactory, ngZone) {
+                var _this12 = this;
+
+                // Note: We need to create the NgZone _before_ we instantiate the module,
+                // as instantiating the module creates some providers eagerly.
+                // So we create a mini parent injector that just contains the new NgZone and
+                // pass that as parent to the NgModuleFactory.
+                if (!ngZone) ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+                // Attention: Don't use ApplicationRef.run here,
+                // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
+                return ngZone.run(function () {
+                    var /** @type {?} */ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this12.injector);
+                    var /** @type {?} */moduleRef = moduleFactory.create(ngZoneInjector);
+                    var /** @type {?} */exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
+                    if (!exceptionHandler) {
+                        throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
+                    }
+                    moduleRef.onDestroy(function () {
+                        return ListWrapper.remove(_this12._modules, moduleRef);
+                    });
+                    ngZone.onError.subscribe({ next: function next(error) {
+                            exceptionHandler.handleError(error);
+                        } });
+                    return _callAndReportToErrorHandler(exceptionHandler, function () {
+                        var /** @type {?} */initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                        return initStatus.donePromise.then(function () {
+                            _this12._moduleDoBootstrap(moduleRef);
+                            return moduleRef;
                         });
+                    });
+                });
+            }
+        }, {
+            key: 'bootstrapModule',
+            value: function bootstrapModule(moduleType) {
+                var compilerOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+                return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
+            }
+        }, {
+            key: '_bootstrapModuleWithZone',
+            value: function _bootstrapModuleWithZone(moduleType) {
+                var _this13 = this;
+
+                var compilerOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+                var ngZone = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+                var /** @type {?} */compilerFactory = this.injector.get(CompilerFactory);
+                var /** @type {?} */compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
+                return compiler.compileModuleAsync(moduleType).then(function (moduleFactory) {
+                    return _this13._bootstrapModuleFactoryWithZone(moduleFactory, ngZone);
+                });
+            }
+        }, {
+            key: '_moduleDoBootstrap',
+            value: function _moduleDoBootstrap(moduleRef) {
+                var /** @type {?} */appRef = moduleRef.injector.get(ApplicationRef);
+                if (moduleRef.bootstrapFactories.length > 0) {
+                    moduleRef.bootstrapFactories.forEach(function (compFactory) {
+                        return appRef.bootstrap(compFactory);
+                    });
+                } else if (moduleRef.instance.ngDoBootstrap) {
+                    moduleRef.instance.ngDoBootstrap(appRef);
+                } else {
+                    throw new Error('The module ' + stringify(moduleRef.instance.constructor) + ' was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ' + 'Please define one of these.');
+                }
+                this._modules.push(moduleRef);
+            }
+        }, {
+            key: 'injector',
+            get: function get() {
+                return this._injector;
+            }
+        }, {
+            key: 'destroyed',
+            get: function get() {
+                return this._destroyed;
+            }
+        }]);
+
+        return PlatformRef_;
+    }(PlatformRef);
+
+    PlatformRef_.decorators = [{ type: Injectable }];
+    /** @nocollapse */
+    PlatformRef_.ctorParameters = function () {
+        return [{ type: Injector }];
+    };
+    /**
+     * A reference to an Angular application running on a page.
+     *
+     * For more about Angular applications, see the documentation for {\@link bootstrap}.
+     *
+     * \@stable
+     * @abstract
+     */
+
+    var ApplicationRef = function () {
+        function ApplicationRef() {
+            _classCallCheck(this, ApplicationRef);
+        }
+
+        _createClass(ApplicationRef, [{
+            key: 'bootstrap',
+            value: function bootstrap(componentFactory) {}
+        }, {
+            key: 'tick',
+            value: function tick() {}
+        }, {
+            key: 'componentTypes',
+            value: function componentTypes() {}
+        }, {
+            key: 'components',
+            value: function components() {}
+        }, {
+            key: 'attachView',
+            value: function attachView(view) {}
+        }, {
+            key: 'detachView',
+            value: function detachView(view) {}
+        }, {
+            key: 'viewCount',
+            value: function viewCount() {}
+        }, {
+            key: 'isStable',
+            value: function isStable() {}
+        }]);
+
+        return ApplicationRef;
+    }();
+
+    var ApplicationRef_ = function (_ApplicationRef) {
+        _inherits(ApplicationRef_, _ApplicationRef);
+
+        /**
+         * @param {?} _zone
+         * @param {?} _console
+         * @param {?} _injector
+         * @param {?} _exceptionHandler
+         * @param {?} _componentFactoryResolver
+         * @param {?} _initStatus
+         * @param {?} _testabilityRegistry
+         * @param {?} _testability
+         */
+        function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
+            _classCallCheck(this, ApplicationRef_);
+
+            var _this14 = _possibleConstructorReturn(this, (ApplicationRef_.__proto__ || Object.getPrototypeOf(ApplicationRef_)).call(this));
+
+            _this14._zone = _zone;
+            _this14._console = _console;
+            _this14._injector = _injector;
+            _this14._exceptionHandler = _exceptionHandler;
+            _this14._componentFactoryResolver = _componentFactoryResolver;
+            _this14._initStatus = _initStatus;
+            _this14._testabilityRegistry = _testabilityRegistry;
+            _this14._testability = _testability;
+            _this14._bootstrapListeners = [];
+            _this14._rootComponents = [];
+            _this14._rootComponentTypes = [];
+            _this14._views = [];
+            _this14._runningTick = false;
+            _this14._enforceNoNewChanges = false;
+            _this14._stable = true;
+            _this14._enforceNoNewChanges = isDevMode();
+            _this14._zone.onMicrotaskEmpty.subscribe({ next: function next() {
+                    _this14._zone.run(function () {
+                        _this14.tick();
+                    });
+                } });
+            var isCurrentlyStable = new _Observable.Observable(function (observer) {
+                _this14._stable = _this14._zone.isStable && !_this14._zone.hasPendingMacrotasks && !_this14._zone.hasPendingMicrotasks;
+                _this14._zone.runOutsideAngular(function () {
+                    observer.next(_this14._stable);
+                    observer.complete();
+                });
+            });
+            var isStable = new _Observable.Observable(function (observer) {
+                var stableSub = _this14._zone.onStable.subscribe(function () {
+                    NgZone.assertNotInAngularZone();
+                    // Check whether there are no pending macro/micro tasks in the next tick
+                    // to allow for NgZone to update the state.
+                    scheduleMicroTask(function () {
+                        if (!_this14._stable && !_this14._zone.hasPendingMacrotasks && !_this14._zone.hasPendingMicrotasks) {
+                            _this14._stable = true;
+                            observer.next(true);
+                        }
+                    });
+                });
+                var unstableSub = _this14._zone.onUnstable.subscribe(function () {
+                    NgZone.assertInAngularZone();
+                    if (_this14._stable) {
+                        _this14._stable = false;
+                        _this14._zone.runOutsideAngular(function () {
+                            observer.next(false);
+                        });
+                    }
+                });
+                return function () {
+                    stableSub.unsubscribe();
+                    unstableSub.unsubscribe();
+                };
+            });
+            _this14._isStable = (0, _merge.merge)(isCurrentlyStable, _share.share.call(isStable));
+            return _this14;
+        }
+        /**
+         * @param {?} viewRef
+         * @return {?}
+         */
+
+
+        _createClass(ApplicationRef_, [{
+            key: 'attachView',
+            value: function attachView(viewRef) {
+                var /** @type {?} */view = viewRef;
+                this._views.push(view);
+                view.attachToAppRef(this);
+            }
+        }, {
+            key: 'detachView',
+            value: function detachView(viewRef) {
+                var /** @type {?} */view = viewRef;
+                ListWrapper.remove(this._views, view);
+                view.detachFromAppRef();
+            }
+        }, {
+            key: 'bootstrap',
+            value: function bootstrap(componentOrFactory) {
+                var _this15 = this;
+
+                if (!this._initStatus.done) {
+                    throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
+                }
+                var /** @type {?} */componentFactory = void 0;
+                if (componentOrFactory instanceof ComponentFactory) {
+                    componentFactory = componentOrFactory;
+                } else {
+                    componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
+                }
+                this._rootComponentTypes.push(componentFactory.componentType);
+                var /** @type {?} */compRef = componentFactory.create(this._injector, [], componentFactory.selector);
+                compRef.onDestroy(function () {
+                    _this15._unloadComponent(compRef);
+                });
+                var /** @type {?} */testability = compRef.injector.get(Testability, null);
+                if (testability) {
+                    compRef.injector.get(TestabilityRegistry).registerApplication(compRef.location.nativeElement, testability);
+                }
+                this._loadComponent(compRef);
+                if (isDevMode()) {
+                    this._console.log('Angular is running in the development mode. Call enableProdMode() to enable the production mode.');
+                }
+                return compRef;
+            }
+        }, {
+            key: '_loadComponent',
+            value: function _loadComponent(componentRef) {
+                this.attachView(componentRef.hostView);
+                this.tick();
+                this._rootComponents.push(componentRef);
+                // Get the listeners lazily to prevent DI cycles.
+                var /** @type {?} */listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
+                listeners.forEach(function (listener) {
+                    return listener(componentRef);
+                });
+            }
+        }, {
+            key: '_unloadComponent',
+            value: function _unloadComponent(componentRef) {
+                this.detachView(componentRef.hostView);
+                ListWrapper.remove(this._rootComponents, componentRef);
+            }
+        }, {
+            key: 'tick',
+            value: function tick() {
+                if (this._runningTick) {
+                    throw new Error('ApplicationRef.tick is called recursively');
+                }
+                var /** @type {?} */scope = ApplicationRef_._tickScope();
+                try {
+                    this._runningTick = true;
+                    this._views.forEach(function (view) {
+                        return view.detectChanges();
+                    });
+                    if (this._enforceNoNewChanges) {
+                        this._views.forEach(function (view) {
+                            return view.checkNoChanges();
+                        });
+                    }
+                } finally {
+                    this._runningTick = false;
+                    wtfLeave(scope);
+                }
+            }
+        }, {
+            key: 'ngOnDestroy',
+            value: function ngOnDestroy() {
+                // TODO(alxhub): Dispose of the NgZone.
+                this._views.slice().forEach(function (view) {
+                    return view.destroy();
+                });
+            }
+        }, {
+            key: 'viewCount',
+            get: function get() {
+                return this._views.length;
+            }
+        }, {
+            key: 'componentTypes',
+            get: function get() {
+                return this._rootComponentTypes;
+            }
+        }, {
+            key: 'components',
+            get: function get() {
+                return this._rootComponents;
+            }
+        }, {
+            key: 'isStable',
+            get: function get() {
+                return this._isStable;
+            }
+        }]);
+
+        return ApplicationRef_;
+    }(ApplicationRef);
+
+    /** @internal */
+    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+    ApplicationRef_.decorators = [{ type: Injectable }];
+    /** @nocollapse */
+    ApplicationRef_.ctorParameters = function () {
+        return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }, { type: TestabilityRegistry, decorators: [{ type: Optional }] }, { type: Testability, decorators: [{ type: Optional }] }];
+    };
+
+    /**
+     * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+     */
+
+    var RenderComponentType =
+    /**
+     * @param {?} id
+     * @param {?} templateUrl
+     * @param {?} slotCount
+     * @param {?} encapsulation
+     * @param {?} styles
+     * @param {?} animations
+     */
+    function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
+        _classCallCheck(this, RenderComponentType);
+
+        this.id = id;
+        this.templateUrl = templateUrl;
+        this.slotCount = slotCount;
+        this.encapsulation = encapsulation;
+        this.styles = styles;
+        this.animations = animations;
+    };
+
+    var RenderDebugInfo = function () {
+        function RenderDebugInfo() {
+            _classCallCheck(this, RenderDebugInfo);
+        }
+
+        _createClass(RenderDebugInfo, [{
+            key: 'injector',
+            value: function injector() {}
+        }, {
+            key: 'component',
+            value: function component() {}
+        }, {
+            key: 'providerTokens',
+            value: function providerTokens() {}
+        }, {
+            key: 'references',
+            value: function references() {}
+        }, {
+            key: 'context',
+            value: function context() {}
+        }, {
+            key: 'source',
+            value: function source() {}
+        }]);
+
+        return RenderDebugInfo;
+    }();
+
+    var RendererV1 = function () {
+        function RendererV1() {
+            _classCallCheck(this, RendererV1);
+        }
+
+        _createClass(RendererV1, [{
+            key: 'selectRootElement',
+            value: function selectRootElement(selectorOrNode, debugInfo) {}
+        }, {
+            key: 'createElement',
+            value: function createElement(parentElement, name, debugInfo) {}
+        }, {
+            key: 'createViewRoot',
+            value: function createViewRoot(hostElement) {}
+        }, {
+            key: 'createTemplateAnchor',
+            value: function createTemplateAnchor(parentElement, debugInfo) {}
+        }, {
+            key: 'createText',
+            value: function createText(parentElement, value, debugInfo) {}
+        }, {
+            key: 'projectNodes',
+            value: function projectNodes(parentElement, nodes) {}
+        }, {
+            key: 'attachViewAfter',
+            value: function attachViewAfter(node, viewRootNodes) {}
+        }, {
+            key: 'detachView',
+            value: function detachView(viewRootNodes) {}
+        }, {
+            key: 'destroyView',
+            value: function destroyView(hostElement, viewAllNodes) {}
+        }, {
+            key: 'listen',
+            value: function listen(renderElement, name, callback) {}
+        }, {
+            key: 'listenGlobal',
+            value: function listenGlobal(target, name, callback) {}
+        }, {
+            key: 'setElementProperty',
+            value: function setElementProperty(renderElement, propertyName, propertyValue) {}
+        }, {
+            key: 'setElementAttribute',
+            value: function setElementAttribute(renderElement, attributeName, attributeValue) {}
+        }, {
+            key: 'setBindingDebugInfo',
+            value: function setBindingDebugInfo(renderElement, propertyName, propertyValue) {}
+        }, {
+            key: 'setElementClass',
+            value: function setElementClass(renderElement, className, isAdd) {}
+        }, {
+            key: 'setElementStyle',
+            value: function setElementStyle(renderElement, styleName, styleValue) {}
+        }, {
+            key: 'invokeElementMethod',
+            value: function invokeElementMethod(renderElement, methodName, args) {}
+        }, {
+            key: 'setText',
+            value: function setText(renderNode, text) {}
+        }, {
+            key: 'animate',
+            value: function animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) {}
+        }]);
+
+        return RendererV1;
+    }();
+
+    var /** @type {?} */RendererV2Interceptor = new InjectionToken('RendererV2Interceptor');
+    /**
+     * Injectable service that provides a low-level interface for modifying the UI.
+     *
+     * Use this service to bypass Angular's templating and make custom UI changes that can't be
+     * expressed declaratively. For example if you need to set a property or an attribute whose name is
+     * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
+     * respectively.
+     *
+     * If you are implementing a custom renderer, you must implement this interface.
+     *
+     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
+     *
+     * @deprecated Use `RendererFactoryV2` instead.
+     * @abstract
+     */
+
+    var RootRenderer = function () {
+        function RootRenderer() {
+            _classCallCheck(this, RootRenderer);
+        }
+
+        _createClass(RootRenderer, [{
+            key: 'renderComponent',
+            value: function renderComponent(componentType) {}
+        }]);
+
+        return RootRenderer;
+    }();
+
+    var RendererFactoryV2 = function () {
+        function RendererFactoryV2() {
+            _classCallCheck(this, RendererFactoryV2);
+        }
+
+        _createClass(RendererFactoryV2, [{
+            key: 'createRenderer',
+            value: function createRenderer(hostElement, type) {}
+        }]);
+
+        return RendererFactoryV2;
+    }();
+
+    var RendererV2 = function () {
+        function RendererV2() {
+            _classCallCheck(this, RendererV2);
+        }
+
+        _createClass(RendererV2, [{
+            key: 'data',
+            value: function data() {}
+        }, {
+            key: 'destroy',
+            value: function destroy() {}
+        }, {
+            key: 'createElement',
+            value: function createElement(name, namespace) {}
+        }, {
+            key: 'createComment',
+            value: function createComment(value) {}
+        }, {
+            key: 'createText',
+            value: function createText(value) {}
+        }, {
+            key: 'appendChild',
+            value: function appendChild(parent, newChild) {}
+        }, {
+            key: 'insertBefore',
+            value: function insertBefore(parent, newChild, refChild) {}
+        }, {
+            key: 'removeChild',
+            value: function removeChild(parent, oldChild) {}
+        }, {
+            key: 'selectRootElement',
+            value: function selectRootElement(selectorOrNode) {}
+        }, {
+            key: 'parentNode',
+            value: function parentNode(node) {}
+        }, {
+            key: 'nextSibling',
+            value: function nextSibling(node) {}
+        }, {
+            key: 'setAttribute',
+            value: function setAttribute(el, name, value, namespace) {}
+        }, {
+            key: 'removeAttribute',
+            value: function removeAttribute(el, name, namespace) {}
+        }, {
+            key: 'addClass',
+            value: function addClass(el, name) {}
+        }, {
+            key: 'removeClass',
+            value: function removeClass(el, name) {}
+        }, {
+            key: 'setStyle',
+            value: function setStyle(el, style, value, hasVendorPrefix, hasImportant) {}
+        }, {
+            key: 'removeStyle',
+            value: function removeStyle(el, style, hasVendorPrefix) {}
+        }, {
+            key: 'setProperty',
+            value: function setProperty(el, name, value) {}
+        }, {
+            key: 'setValue',
+            value: function setValue(node, value) {}
+        }, {
+            key: 'listen',
+            value: function listen(target, eventName, callback) {}
+        }]);
+
+        return RendererV2;
+    }();
+
+    var ElementRef =
+    /**
+     * @param {?} nativeElement
+     */
+    function ElementRef(nativeElement) {
+        _classCallCheck(this, ElementRef);
+
+        this.nativeElement = nativeElement;
+    };
+
+    var NgModuleRef = function () {
+        function NgModuleRef() {
+            _classCallCheck(this, NgModuleRef);
+        }
+
+        _createClass(NgModuleRef, [{
+            key: 'injector',
+            value: function injector() {}
+        }, {
+            key: 'componentFactoryResolver',
+            value: function componentFactoryResolver() {}
+        }, {
+            key: 'instance',
+            value: function instance() {}
+        }, {
+            key: 'destroy',
+            value: function destroy() {}
+        }, {
+            key: 'onDestroy',
+            value: function onDestroy(callback) {}
+        }]);
+
+        return NgModuleRef;
+    }();
+
+    var NgModuleFactory = function () {
+        /**
+         * @param {?} _injectorClass
+         * @param {?} _moduleType
+         */
+        function NgModuleFactory(_injectorClass, _moduleType) {
+            _classCallCheck(this, NgModuleFactory);
+
+            this._injectorClass = _injectorClass;
+            this._moduleType = _moduleType;
+        }
+        /**
+         * @return {?}
+         */
+
+
+        _createClass(NgModuleFactory, [{
+            key: 'create',
+            value: function create(parentInjector) {
+                if (!parentInjector) {
+                    parentInjector = Injector.NULL;
+                }
+                var /** @type {?} */instance = new this._injectorClass(parentInjector);
+                instance.create();
+                return instance;
+            }
+        }, {
+            key: 'moduleType',
+            get: function get() {
+                return this._moduleType;
+            }
+        }]);
+
+        return NgModuleFactory;
+    }();
+
+    var /** @type {?} */_UNDEFINED = new Object();
+    /**
+     * @abstract
+     */
+
+    var NgModuleInjector = function (_CodegenComponentFact) {
+        _inherits(NgModuleInjector, _CodegenComponentFact);
+
+        /**
+         * @param {?} parent
+         * @param {?} factories
+         * @param {?} bootstrapFactories
+         */
+        function NgModuleInjector(parent, factories, bootstrapFactories) {
+            _classCallCheck(this, NgModuleInjector);
+
+            var _this16 = _possibleConstructorReturn(this, (NgModuleInjector.__proto__ || Object.getPrototypeOf(NgModuleInjector)).call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL)));
+
+            _this16.parent = parent;
+            _this16.bootstrapFactories = bootstrapFactories;
+            _this16._destroyListeners = [];
+            _this16._destroyed = false;
+            return _this16;
+        }
+        /**
+         * @return {?}
+         */
+
+
+        _createClass(NgModuleInjector, [{
+            key: 'create',
+            value: function create() {
+                this.instance = this.createInternal();
+            }
+        }, {
+            key: 'createInternal',
+            value: function createInternal() {}
+        }, {
+            key: 'get',
+            value: function get(token) {
+                var notFoundValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : THROW_IF_NOT_FOUND;
+
+                if (token === Injector || token === ComponentFactoryResolver) {
+                    return this;
+                }
+                var /** @type {?} */result = this.getInternal(token, _UNDEFINED);
+                return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
+            }
+        }, {
+            key: 'getInternal',
+            value: function getInternal(token, notFoundValue) {}
+        }, {
+            key: 'destroy',
+            value: function destroy() {
+                if (this._destroyed) {
+                    throw new Error('The ng module ' + stringify(this.instance.constructor) + ' has already been destroyed.');
+                }
+                this._destroyed = true;
+                this.destroyInternal();
+                this._destroyListeners.forEach(function (listener) {
+                    return listener();
+                });
+            }
+        }, {
+            key: 'onDestroy',
+            value: function onDestroy(callback) {
+                this._destroyListeners.push(callback);
+            }
+        }, {
+            key: 'destroyInternal',
+            value: function destroyInternal() {}
+        }, {
+            key: 'injector',
+            get: function get() {
+                return this;
+            }
+        }, {
+            key: 'componentFactoryResolver',
+            get: function get() {
+                return this;
+            }
+        }]);
+
+        return NgModuleInjector;
+    }(CodegenComponentFactoryResolver);
+
+    var NgModuleFactoryLoader = function () {
+        function NgModuleFactoryLoader() {
+            _classCallCheck(this, NgModuleFactoryLoader);
+        }
+
+        _createClass(NgModuleFactoryLoader, [{
+            key: 'load',
+            value: function load(path) {}
+        }]);
+
+        return NgModuleFactoryLoader;
+    }();
+
+    var /** @type {?} */moduleFactories = new Map();
+    /**
+     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
+     * \@experimental
+     * @param {?} id
+     * @param {?} factory
+     * @return {?}
+     */
+    function registerModuleFactory(id, factory) {
+        var /** @type {?} */existing = moduleFactories.get(id);
+        if (existing) {
+            throw new Error('Duplicate module registered for ' + id + ' - ' + existing.moduleType.name + ' vs ' + factory.moduleType.name);
+        }
+        moduleFactories.set(id, factory);
+    }
+    /**
+     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
+     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
+     * cannot be found.
+     * \@experimental
+     * @param {?} id
+     * @return {?}
+     */
+    function getModuleFactory(id) {
+        var /** @type {?} */factory = moduleFactories.get(id);
+        if (!factory) throw new Error('No module with ID ' + id + ' loaded');
+        return factory;
+    }
+
+    /**
+     * An unmodifiable list of items that Angular keeps up to date when the state
+     * of the application changes.
+     *
+     * The type of object that {\@link Query} and {\@link ViewQueryMetadata} provide.
+     *
+     * Implements an iterable interface, therefore it can be used in both ES6
+     * javascript `for (var i of items)` loops as well as in Angular templates with
+     * `*ngFor="let i of myList"`.
+     *
+     * Changes can be observed by subscribing to the changes `Observable`.
+     *
+     * NOTE: In the future this class will implement an `Observable` interface.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/RX8sJnQYl9FWuSCWme5z?p=preview))
+     * ```typescript
+     * \@Component({...})
+     * class Container {
+     *   \@ViewChildren(Item) items:QueryList<Item>;
+     * }
+     * ```
+     * \@stable
+     */
+
+    var QueryList = function () {
+        function QueryList() {
+            _classCallCheck(this, QueryList);
+
+            this._dirty = true;
+            this._results = [];
+            this._emitter = new EventEmitter();
+        }
+        /**
+         * @return {?}
+         */
+
+
+        _createClass(QueryList, [{
+            key: 'map',
+            value: function map(fn) {
+                return this._results.map(fn);
+            }
+        }, {
+            key: 'filter',
+            value: function filter(fn) {
+                return this._results.filter(fn);
+            }
+        }, {
+            key: 'find',
+            value: function find(fn) {
+                return this._results.find(fn);
+            }
+        }, {
+            key: 'reduce',
+            value: function reduce(fn, init) {
+                return this._results.reduce(fn, init);
+            }
+        }, {
+            key: 'forEach',
+            value: function forEach(fn) {
+                this._results.forEach(fn);
+            }
+        }, {
+            key: 'some',
+            value: function some(fn) {
+                return this._results.some(fn);
+            }
+        }, {
+            key: 'toArray',
+            value: function toArray() {
+                return this._results.slice();
+            }
+        }, {
+            key: getSymbolIterator(),
+            value: function value() {
+                return this._results[getSymbolIterator()]();
+            }
+        }, {
+            key: 'toString',
+            value: function toString() {
+                return this._results.toString();
+            }
+        }, {
+            key: 'reset',
+            value: function reset(res) {
+                this._results = ListWrapper.flatten(res);
+                this._dirty = false;
+            }
+        }, {
+            key: 'notifyOnChanges',
+            value: function notifyOnChanges() {
+                this._emitter.emit(this);
+            }
+        }, {
+            key: 'setDirty',
+            value: function setDirty() {
+                this._dirty = true;
+            }
+        }, {
+            key: 'changes',
+            get: function get() {
+                return this._emitter;
+            }
+        }, {
+            key: 'length',
+            get: function get() {
+                return this._results.length;
+            }
+        }, {
+            key: 'first',
+            get: function get() {
+                return this._results[0];
+            }
+        }, {
+            key: 'last',
+            get: function get() {
+                return this._results[this.length - 1];
+            }
+        }, {
+            key: 'dirty',
+            get: function get() {
+                return this._dirty;
+            }
+        }]);
+
+        return QueryList;
+    }();
+
+    var /** @type {?} */_SEPARATOR = '#';
+    var /** @type {?} */FACTORY_CLASS_SUFFIX = 'NgFactory';
+    /**
+     * Configuration for SystemJsNgModuleLoader.
+     * token.
+     *
+     * \@experimental
+     * @abstract
+     */
+
+    var SystemJsNgModuleLoaderConfig = function SystemJsNgModuleLoaderConfig() {
+        _classCallCheck(this, SystemJsNgModuleLoaderConfig);
+    };
+
+    var /** @type {?} */DEFAULT_CONFIG = {
+        factoryPathPrefix: '',
+        factoryPathSuffix: '.ngfactory'
+    };
+    /**
+     * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
+     * \@experimental
+     */
+
+    var SystemJsNgModuleLoader = function () {
+        /**
+         * @param {?} _compiler
+         * @param {?=} config
+         */
+        function SystemJsNgModuleLoader(_compiler, config) {
+            _classCallCheck(this, SystemJsNgModuleLoader);
+
+            this._compiler = _compiler;
+            this._config = config || DEFAULT_CONFIG;
+        }
+        /**
+         * @param {?} path
+         * @return {?}
+         */
+
+
+        _createClass(SystemJsNgModuleLoader, [{
+            key: 'load',
+            value: function load(path) {
+                var /** @type {?} */offlineMode = this._compiler instanceof Compiler;
+                return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
+            }
+        }, {
+            key: 'loadAndCompile',
+            value: function loadAndCompile(path) {
+                var _this17 = this;
+
+                var _path$split = path.split(_SEPARATOR),
+                    _path$split2 = _slicedToArray(_path$split, 2),
+                    module = _path$split2[0],
+                    exportName = _path$split2[1];
+
+                if (exportName === undefined) {
+                    exportName = 'default';
+                }
+                return System.import(module).then(function (module) {
+                    return module[exportName];
+                }).then(function (type) {
+                    return checkNotEmpty(type, module, exportName);
+                }).then(function (type) {
+                    return _this17._compiler.compileModuleAsync(type);
+                });
+            }
+        }, {
+            key: 'loadFactory',
+            value: function loadFactory(path) {
+                var _path$split3 = path.split(_SEPARATOR),
+                    _path$split4 = _slicedToArray(_path$split3, 2),
+                    module = _path$split4[0],
+                    exportName = _path$split4[1];
+
+                var /** @type {?} */factoryClassSuffix = FACTORY_CLASS_SUFFIX;
+                if (exportName === undefined) {
+                    exportName = 'default';
+                    factoryClassSuffix = '';
+                }
+                return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix).then(function (module) {
+                    return module[exportName + factoryClassSuffix];
+                }).then(function (factory) {
+                    return checkNotEmpty(factory, module, exportName);
+                });
+            }
+        }]);
+
+        return SystemJsNgModuleLoader;
+    }();
+
+    SystemJsNgModuleLoader.decorators = [{ type: Injectable }];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = function () {
+        return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }];
+    };
+    /**
+     * @param {?} value
+     * @param {?} modulePath
+     * @param {?} exportName
+     * @return {?}
+     */
+    function checkNotEmpty(value, modulePath, exportName) {
+        if (!value) {
+            throw new Error('Cannot find \'' + exportName + '\' in \'' + modulePath + '\'');
+        }
+        return value;
+    }
+
+    /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
+     * Represents an Embedded Template that can be used to instantiate Embedded Views.
+     *
+     * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
+     * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
+     * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
+     * the `TemplateRef` from a Component or a Directive via {\@link Query}.
+     *
+     * To instantiate Embedded Views based on a Template, use
+     * {\@link ViewContainerRef#createEmbeddedView}, which will create the View and attach it to the
+     * View Container.
+     * \@stable
+     * @abstract
+     */
+
+    var TemplateRef = function () {
+        function TemplateRef() {
+            _classCallCheck(this, TemplateRef);
+        }
+
+        _createClass(TemplateRef, [{
+            key: 'elementRef',
+            value: function elementRef() {}
+        }, {
+            key: 'createEmbeddedView',
+            value: function createEmbeddedView(context) {}
+        }]);
+
+        return TemplateRef;
+    }();
+
+    var ViewContainerRef = function () {
+        function ViewContainerRef() {
+            _classCallCheck(this, ViewContainerRef);
+        }
+
+        _createClass(ViewContainerRef, [{
+            key: 'element',
+            value: function element() {}
+        }, {
+            key: 'injector',
+            value: function injector() {}
+        }, {
+            key: 'parentInjector',
+            value: function parentInjector() {}
+        }, {
+            key: 'clear',
+            value: function clear() {}
+        }, {
+            key: 'get',
+            value: function get(index) {}
+        }, {
+            key: 'length',
+            value: function length() {}
+        }, {
+            key: 'createEmbeddedView',
+            value: function createEmbeddedView(templateRef, context, index) {}
+        }, {
+            key: 'createComponent',
+            value: function createComponent(componentFactory, index, injector, projectableNodes) {}
+        }, {
+            key: 'insert',
+            value: function insert(viewRef, index) {}
+        }, {
+            key: 'move',
+            value: function move(viewRef, currentIndex) {}
+        }, {
+            key: 'indexOf',
+            value: function indexOf(viewRef) {}
+        }, {
+            key: 'remove',
+            value: function remove(index) {}
+        }, {
+            key: 'detach',
+            value: function detach(index) {}
+        }]);
+
+        return ViewContainerRef;
+    }();
+
+    var ChangeDetectorRef = function () {
+        function ChangeDetectorRef() {
+            _classCallCheck(this, ChangeDetectorRef);
+        }
+
+        _createClass(ChangeDetectorRef, [{
+            key: 'markForCheck',
+            value: function markForCheck() {}
+        }, {
+            key: 'detach',
+            value: function detach() {}
+        }, {
+            key: 'detectChanges',
+            value: function detectChanges() {}
+        }, {
+            key: 'checkNoChanges',
+            value: function checkNoChanges() {}
+        }, {
+            key: 'reattach',
+            value: function reattach() {}
+        }]);
+
+        return ChangeDetectorRef;
+    }();
+
+    var ViewRef = function (_ChangeDetectorRef) {
+        _inherits(ViewRef, _ChangeDetectorRef);
+
+        function ViewRef() {
+            _classCallCheck(this, ViewRef);
+
+            return _possibleConstructorReturn(this, (ViewRef.__proto__ || Object.getPrototypeOf(ViewRef)).apply(this, arguments));
+        }
+
+        _createClass(ViewRef, [{
+            key: 'destroy',
+            value: function destroy() {}
+        }, {
+            key: 'destroyed',
+            value: function destroyed() {}
+        }, {
+            key: 'onDestroy',
+            value: function onDestroy(callback) {}
+        }]);
+
+        return ViewRef;
+    }(ChangeDetectorRef);
+
+    var EmbeddedViewRef = function (_ViewRef) {
+        _inherits(EmbeddedViewRef, _ViewRef);
+
+        function EmbeddedViewRef() {
+            _classCallCheck(this, EmbeddedViewRef);
+
+            return _possibleConstructorReturn(this, (EmbeddedViewRef.__proto__ || Object.getPrototypeOf(EmbeddedViewRef)).apply(this, arguments));
+        }
+
+        _createClass(EmbeddedViewRef, [{
+            key: 'context',
+            value: function context() {}
+        }, {
+            key: 'rootNodes',
+            value: function rootNodes() {}
+        }]);
+
+        return EmbeddedViewRef;
+    }(ViewRef);
+
+    var EventListener =
+    /**
+     * @param {?} name
+     * @param {?} callback
+     */
+    function EventListener(name, callback) {
+        _classCallCheck(this, EventListener);
+
+        this.name = name;
+        this.callback = callback;
+    };
+
+    var DebugNode = function () {
+        /**
+         * @param {?} nativeNode
+         * @param {?} parent
+         * @param {?} _debugInfo
+         */
+        function DebugNode(nativeNode, parent, _debugInfo) {
+            _classCallCheck(this, DebugNode);
+
+            this._debugInfo = _debugInfo;
+            this.nativeNode = nativeNode;
+            if (parent && parent instanceof DebugElement) {
+                parent.addChild(this);
+            } else {
+                this.parent = null;
+            }
+            this.listeners = [];
+        }
+        /**
+         * @return {?}
+         */
+
+
+        _createClass(DebugNode, [{
+            key: 'injector',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.injector : null;
+            }
+        }, {
+            key: 'componentInstance',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.component : null;
+            }
+        }, {
+            key: 'context',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.context : null;
+            }
+        }, {
+            key: 'references',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.references : null;
+            }
+        }, {
+            key: 'providerTokens',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.providerTokens : null;
+            }
+        }, {
+            key: 'source',
+            get: function get() {
+                return this._debugInfo ? this._debugInfo.source : null;
+            }
+        }]);
+
+        return DebugNode;
+    }();
+
+    var DebugElement = function (_DebugNode) {
+        _inherits(DebugElement, _DebugNode);
+
+        /**
+         * @param {?} nativeNode
+         * @param {?} parent
+         * @param {?} _debugInfo
+         */
+        function DebugElement(nativeNode, parent, _debugInfo) {
+            _classCallCheck(this, DebugElement);
+
+            var _this20 = _possibleConstructorReturn(this, (DebugElement.__proto__ || Object.getPrototypeOf(DebugElement)).call(this, nativeNode, parent, _debugInfo));
+
+            _this20.properties = {};
+            _this20.attributes = {};
+            _this20.classes = {};
+            _this20.styles = {};
+            _this20.childNodes = [];
+            _this20.nativeElement = nativeNode;
+            return _this20;
+        }
+        /**
+         * @param {?} child
+         * @return {?}
+         */
+
+
+        _createClass(DebugElement, [{
+            key: 'addChild',
+            value: function addChild(child) {
+                if (child) {
+                    this.childNodes.push(child);
+                    child.parent = this;
+                }
+            }
+        }, {
+            key: 'removeChild',
+            value: function removeChild(child) {
+                var /** @type {?} */childIndex = this.childNodes.indexOf(child);
+                if (childIndex !== -1) {
+                    child.parent = null;
+                    this.childNodes.splice(childIndex, 1);
+                }
+            }
+        }, {
+            key: 'insertChildrenAfter',
+            value: function insertChildrenAfter(child, newChildren) {
+                var _this21 = this;
+
+                var /** @type {?} */siblingIndex = this.childNodes.indexOf(child);
+                if (siblingIndex !== -1) {
+                    var _childNodes;
+
+                    (_childNodes = this.childNodes).splice.apply(_childNodes, [siblingIndex + 1, 0].concat(_toConsumableArray(newChildren)));
+                    newChildren.forEach(function (c) {
+                        if (c.parent) {
+                            c.parent.removeChild(c);
+                        }
+                        c.parent = _this21;
                     });
                 }
             }
         }, {
-            key: '_triggerAnimations',
-            value: function _triggerAnimations() {
-                NgZone.assertNotInAngularZone();
-                while (this.entries.length) {
-                    var /** @type {?} */player = this.entries.shift();
-                    // in the event that an animation throws an error then we do
-                    // not want to re-run animations on any previous animations
-                    // if they have already been kicked off beforehand
-                    if (!player.hasStarted()) {
-                        player.play();
+            key: 'insertBefore',
+            value: function insertBefore(refChild, newChild) {
+                var /** @type {?} */refIndex = this.childNodes.indexOf(refChild);
+                if (refIndex === -1) {
+                    this.addChild(newChild);
+                } else {
+                    if (newChild.parent) {
+                        newChild.parent.removeChild(newChild);
                     }
+                    newChild.parent = this;
+                    this.childNodes.splice(refIndex, 0, newChild);
                 }
+            }
+        }, {
+            key: 'query',
+            value: function query(predicate) {
+                var /** @type {?} */results = this.queryAll(predicate);
+                return results[0] || null;
+            }
+        }, {
+            key: 'queryAll',
+            value: function queryAll(predicate) {
+                var /** @type {?} */matches = [];
+                _queryElementChildren(this, predicate, matches);
+                return matches;
+            }
+        }, {
+            key: 'queryAllNodes',
+            value: function queryAllNodes(predicate) {
+                var /** @type {?} */matches = [];
+                _queryNodeChildren(this, predicate, matches);
+                return matches;
+            }
+        }, {
+            key: 'triggerEventHandler',
+            value: function triggerEventHandler(eventName, eventObj) {
+                this.listeners.forEach(function (listener) {
+                    if (listener.name == eventName) {
+                        listener.callback(eventObj);
+                    }
+                });
+            }
+        }, {
+            key: 'children',
+            get: function get() {
+                return this.childNodes.filter(function (node) {
+                    return node instanceof DebugElement;
+                });
             }
         }]);
 
-        return AnimationQueue;
-    }();
+        return DebugElement;
+    }(DebugNode);
 
-    AnimationQueue.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    AnimationQueue.ctorParameters = function () {
-        return [{ type: NgZone }];
-    };
+    /**
+     * \@experimental
+     * @param {?} debugEls
+     * @return {?}
+     */
+    function asNativeElements(debugEls) {
+        return debugEls.map(function (el) {
+            return el.nativeElement;
+        });
+    }
+    /**
+     * @param {?} element
+     * @param {?} predicate
+     * @param {?} matches
+     * @return {?}
+     */
+    function _queryElementChildren(element, predicate, matches) {
+        element.childNodes.forEach(function (node) {
+            if (node instanceof DebugElement) {
+                if (predicate(node)) {
+                    matches.push(node);
+                }
+                _queryElementChildren(node, predicate, matches);
+            }
+        });
+    }
+    /**
+     * @param {?} parentNode
+     * @param {?} predicate
+     * @param {?} matches
+     * @return {?}
+     */
+    function _queryNodeChildren(parentNode, predicate, matches) {
+        if (parentNode instanceof DebugElement) {
+            parentNode.childNodes.forEach(function (node) {
+                if (predicate(node)) {
+                    matches.push(node);
+                }
+                if (node instanceof DebugElement) {
+                    _queryNodeChildren(node, predicate, matches);
+                }
+            });
+        }
+    }
+    // Need to keep the nodes in a global Map so that multiple angular apps are supported.
+    var /** @type {?} */_nativeNodeToDebugNode = new Map();
+    /**
+     * \@experimental
+     * @param {?} nativeNode
+     * @return {?}
+     */
+    function getDebugNode(nativeNode) {
+        return _nativeNodeToDebugNode.get(nativeNode);
+    }
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    function indexDebugNode(node) {
+        _nativeNodeToDebugNode.set(node.nativeNode, node);
+    }
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    function removeDebugNodeFromIndex(node) {
+        _nativeNodeToDebugNode.delete(node.nativeNode);
+    }
 
     var DefaultIterableDifferFactory = function () {
         function DefaultIterableDifferFactory() {
@@ -3649,7 +5650,7 @@
         }, {
             key: 'check',
             value: function check(collection) {
-                var _this10 = this;
+                var _this22 = this;
 
                 this._reset();
                 var /** @type {?} */record = this._itHead;
@@ -3659,16 +5660,16 @@
                 var /** @type {?} */itemTrackBy = void 0;
                 if (Array.isArray(collection)) {
                     this._length = collection.length;
-                    for (var /** @type {?} */_index2 = 0; _index2 < this._length; _index2++) {
-                        item = collection[_index2];
-                        itemTrackBy = this._trackByFn(_index2, item);
+                    for (var /** @type {?} */_index = 0; _index < this._length; _index++) {
+                        item = collection[_index];
+                        itemTrackBy = this._trackByFn(_index, item);
                         if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                            record = this._mismatch(record, item, itemTrackBy, _index2);
+                            record = this._mismatch(record, item, itemTrackBy, _index);
                             mayBeDirty = true;
                         } else {
                             if (mayBeDirty) {
                                 // TODO(misko): can we limit this to duplicates only?
-                                record = this._verifyReinsertion(record, item, itemTrackBy, _index2);
+                                record = this._verifyReinsertion(record, item, itemTrackBy, _index);
                             }
                             if (!looseIdentical(record.item, item)) this._addIdentityChange(record, item);
                         }
@@ -3677,16 +5678,16 @@
                 } else {
                     index = 0;
                     iterateListLike(collection, function (item) {
-                        itemTrackBy = _this10._trackByFn(index, item);
+                        itemTrackBy = _this22._trackByFn(index, item);
                         if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
-                            record = _this10._mismatch(record, item, itemTrackBy, index);
+                            record = _this22._mismatch(record, item, itemTrackBy, index);
                             mayBeDirty = true;
                         } else {
                             if (mayBeDirty) {
                                 // TODO(misko): can we limit this to duplicates only?
-                                record = _this10._verifyReinsertion(record, item, itemTrackBy, index);
+                                record = _this22._verifyReinsertion(record, item, itemTrackBy, index);
                             }
-                            if (!looseIdentical(record.item, item)) _this10._addIdentityChange(record, item);
+                            if (!looseIdentical(record.item, item)) _this22._addIdentityChange(record, item);
                         }
                         record = record._next;
                         index++;
@@ -4302,7 +6303,7 @@
         }, {
             key: 'check',
             value: function check(map) {
-                var _this11 = this;
+                var _this23 = this;
 
                 this._reset();
                 var /** @type {?} */records = this._records;
@@ -4314,29 +6315,29 @@
                     var /** @type {?} */newSeqRecord = void 0;
                     if (oldSeqRecord && key === oldSeqRecord.key) {
                         newSeqRecord = oldSeqRecord;
-                        _this11._maybeAddToChanges(newSeqRecord, value);
+                        _this23._maybeAddToChanges(newSeqRecord, value);
                     } else {
                         seqChanged = true;
                         if (oldSeqRecord !== null) {
-                            _this11._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
-                            _this11._addToRemovals(oldSeqRecord);
+                            _this23._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
+                            _this23._addToRemovals(oldSeqRecord);
                         }
                         if (records.has(key)) {
                             newSeqRecord = records.get(key);
-                            _this11._maybeAddToChanges(newSeqRecord, value);
+                            _this23._maybeAddToChanges(newSeqRecord, value);
                         } else {
                             newSeqRecord = new KeyValueChangeRecord_(key);
                             records.set(key, newSeqRecord);
                             newSeqRecord.currentValue = value;
-                            _this11._addToAdditions(newSeqRecord);
+                            _this23._addToAdditions(newSeqRecord);
                         }
                     }
                     if (seqChanged) {
-                        if (_this11._isInRemovals(newSeqRecord)) {
-                            _this11._removeFromRemovals(newSeqRecord);
+                        if (_this23._isInRemovals(newSeqRecord)) {
+                            _this23._removeFromRemovals(newSeqRecord);
                         }
                         if (lastNewSeqRecord == null) {
-                            _this11._mapHead = newSeqRecord;
+                            _this23._mapHead = newSeqRecord;
                         } else {
                             lastNewSeqRecord._next = newSeqRecord;
                         }
@@ -4785,31 +6786,6 @@
         return SimpleChange;
     }();
 
-    var ChangeDetectorRef = function () {
-        function ChangeDetectorRef() {
-            _classCallCheck(this, ChangeDetectorRef);
-        }
-
-        _createClass(ChangeDetectorRef, [{
-            key: 'markForCheck',
-            value: function markForCheck() {}
-        }, {
-            key: 'detach',
-            value: function detach() {}
-        }, {
-            key: 'detectChanges',
-            value: function detectChanges() {}
-        }, {
-            key: 'checkNoChanges',
-            value: function checkNoChanges() {}
-        }, {
-            key: 'reattach',
-            value: function reattach() {}
-        }]);
-
-        return ChangeDetectorRef;
-    }();
-
     /**
      * Structural diffing for `Object`s and `Map`s.
      */
@@ -4820,3643 +6796,6 @@
     var /** @type {?} */iterableDiff = [new DefaultIterableDifferFactory()];
     var /** @type {?} */defaultIterableDiffers = new IterableDiffers(iterableDiff);
     var /** @type {?} */defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
-
-    /**
-     * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
-     */
-
-    var RenderComponentType =
-    /**
-     * @param {?} id
-     * @param {?} templateUrl
-     * @param {?} slotCount
-     * @param {?} encapsulation
-     * @param {?} styles
-     * @param {?} animations
-     */
-    function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
-        _classCallCheck(this, RenderComponentType);
-
-        this.id = id;
-        this.templateUrl = templateUrl;
-        this.slotCount = slotCount;
-        this.encapsulation = encapsulation;
-        this.styles = styles;
-        this.animations = animations;
-    };
-
-    var RenderDebugInfo = function () {
-        function RenderDebugInfo() {
-            _classCallCheck(this, RenderDebugInfo);
-        }
-
-        _createClass(RenderDebugInfo, [{
-            key: 'injector',
-            value: function injector() {}
-        }, {
-            key: 'component',
-            value: function component() {}
-        }, {
-            key: 'providerTokens',
-            value: function providerTokens() {}
-        }, {
-            key: 'references',
-            value: function references() {}
-        }, {
-            key: 'context',
-            value: function context() {}
-        }, {
-            key: 'source',
-            value: function source() {}
-        }]);
-
-        return RenderDebugInfo;
-    }();
-
-    var RendererV1 = function () {
-        function RendererV1() {
-            _classCallCheck(this, RendererV1);
-        }
-
-        _createClass(RendererV1, [{
-            key: 'selectRootElement',
-            value: function selectRootElement(selectorOrNode, debugInfo) {}
-        }, {
-            key: 'createElement',
-            value: function createElement(parentElement, name, debugInfo) {}
-        }, {
-            key: 'createViewRoot',
-            value: function createViewRoot(hostElement) {}
-        }, {
-            key: 'createTemplateAnchor',
-            value: function createTemplateAnchor(parentElement, debugInfo) {}
-        }, {
-            key: 'createText',
-            value: function createText(parentElement, value, debugInfo) {}
-        }, {
-            key: 'projectNodes',
-            value: function projectNodes(parentElement, nodes) {}
-        }, {
-            key: 'attachViewAfter',
-            value: function attachViewAfter(node, viewRootNodes) {}
-        }, {
-            key: 'detachView',
-            value: function detachView(viewRootNodes) {}
-        }, {
-            key: 'destroyView',
-            value: function destroyView(hostElement, viewAllNodes) {}
-        }, {
-            key: 'listen',
-            value: function listen(renderElement, name, callback) {}
-        }, {
-            key: 'listenGlobal',
-            value: function listenGlobal(target, name, callback) {}
-        }, {
-            key: 'setElementProperty',
-            value: function setElementProperty(renderElement, propertyName, propertyValue) {}
-        }, {
-            key: 'setElementAttribute',
-            value: function setElementAttribute(renderElement, attributeName, attributeValue) {}
-        }, {
-            key: 'setBindingDebugInfo',
-            value: function setBindingDebugInfo(renderElement, propertyName, propertyValue) {}
-        }, {
-            key: 'setElementClass',
-            value: function setElementClass(renderElement, className, isAdd) {}
-        }, {
-            key: 'setElementStyle',
-            value: function setElementStyle(renderElement, styleName, styleValue) {}
-        }, {
-            key: 'invokeElementMethod',
-            value: function invokeElementMethod(renderElement, methodName, args) {}
-        }, {
-            key: 'setText',
-            value: function setText(renderNode, text) {}
-        }, {
-            key: 'animate',
-            value: function animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers) {}
-        }]);
-
-        return RendererV1;
-    }();
-
-    var /** @type {?} */RendererV2Interceptor = new InjectionToken('RendererV2Interceptor');
-    /**
-     * Injectable service that provides a low-level interface for modifying the UI.
-     *
-     * Use this service to bypass Angular's templating and make custom UI changes that can't be
-     * expressed declaratively. For example if you need to set a property or an attribute whose name is
-     * not statically known, use {\@link #setElementProperty} or {\@link #setElementAttribute}
-     * respectively.
-     *
-     * If you are implementing a custom renderer, you must implement this interface.
-     *
-     * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
-     *
-     * @deprecated Use `RendererFactoryV2` instead.
-     * @abstract
-     */
-
-    var RootRenderer = function () {
-        function RootRenderer() {
-            _classCallCheck(this, RootRenderer);
-        }
-
-        _createClass(RootRenderer, [{
-            key: 'renderComponent',
-            value: function renderComponent(componentType) {}
-        }]);
-
-        return RootRenderer;
-    }();
-
-    var RendererFactoryV2 = function () {
-        function RendererFactoryV2() {
-            _classCallCheck(this, RendererFactoryV2);
-        }
-
-        _createClass(RendererFactoryV2, [{
-            key: 'createRenderer',
-            value: function createRenderer(hostElement, type) {}
-        }]);
-
-        return RendererFactoryV2;
-    }();
-
-    var RendererV2 = function () {
-        function RendererV2() {
-            _classCallCheck(this, RendererV2);
-        }
-
-        _createClass(RendererV2, [{
-            key: 'data',
-            value: function data() {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'createElement',
-            value: function createElement(name, namespace) {}
-        }, {
-            key: 'createComment',
-            value: function createComment(value) {}
-        }, {
-            key: 'createText',
-            value: function createText(value) {}
-        }, {
-            key: 'appendChild',
-            value: function appendChild(parent, newChild) {}
-        }, {
-            key: 'insertBefore',
-            value: function insertBefore(parent, newChild, refChild) {}
-        }, {
-            key: 'removeChild',
-            value: function removeChild(parent, oldChild) {}
-        }, {
-            key: 'selectRootElement',
-            value: function selectRootElement(selectorOrNode) {}
-        }, {
-            key: 'parentNode',
-            value: function parentNode(node) {}
-        }, {
-            key: 'nextSibling',
-            value: function nextSibling(node) {}
-        }, {
-            key: 'setAttribute',
-            value: function setAttribute(el, name, value, namespace) {}
-        }, {
-            key: 'removeAttribute',
-            value: function removeAttribute(el, name, namespace) {}
-        }, {
-            key: 'addClass',
-            value: function addClass(el, name) {}
-        }, {
-            key: 'removeClass',
-            value: function removeClass(el, name) {}
-        }, {
-            key: 'setStyle',
-            value: function setStyle(el, style, value, hasVendorPrefix, hasImportant) {}
-        }, {
-            key: 'removeStyle',
-            value: function removeStyle(el, style, hasVendorPrefix) {}
-        }, {
-            key: 'setProperty',
-            value: function setProperty(el, name, value) {}
-        }, {
-            key: 'setValue',
-            value: function setValue(node, value) {}
-        }, {
-            key: 'listen',
-            value: function listen(target, eventName, callback) {}
-        }]);
-
-        return RendererV2;
-    }();
-
-    var SecurityContext = {};
-    SecurityContext.NONE = 0;
-    SecurityContext.HTML = 1;
-    SecurityContext.STYLE = 2;
-    SecurityContext.SCRIPT = 3;
-    SecurityContext.URL = 4;
-    SecurityContext.RESOURCE_URL = 5;
-    SecurityContext[SecurityContext.NONE] = "NONE";
-    SecurityContext[SecurityContext.HTML] = "HTML";
-    SecurityContext[SecurityContext.STYLE] = "STYLE";
-    SecurityContext[SecurityContext.SCRIPT] = "SCRIPT";
-    SecurityContext[SecurityContext.URL] = "URL";
-    SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
-    /**
-     * Sanitizer is used by the views to sanitize potentially dangerous values.
-     *
-     * \@stable
-     * @abstract
-     */
-
-    var Sanitizer = function () {
-        function Sanitizer() {
-            _classCallCheck(this, Sanitizer);
-        }
-
-        _createClass(Sanitizer, [{
-            key: 'sanitize',
-            value: function sanitize(context, value) {}
-        }]);
-
-        return Sanitizer;
-    }();
-
-    /**
-     * An error thrown if application changes model breaking the top-down data flow.
-     *
-     * This exception is only thrown in dev mode.
-     *
-     * <!-- TODO: Add a link once the dev mode option is configurable -->
-     *
-     * ### Example
-     *
-     * ```typescript
-     * \@Component({
-     *   selector: 'parent',
-     *   template: '<child [prop]="parentProp"></child>',
-     * })
-     * class Parent {
-     *   parentProp = 'init';
-     * }
-     *
-     * \@Directive({selector: 'child', inputs: ['prop']})
-     * class Child {
-     *   constructor(public parent: Parent) {}
-     *
-     *   set prop(v) {
-     *     // this updates the parent property, which is disallowed during change detection
-     *     // this will result in ExpressionChangedAfterItHasBeenCheckedError
-     *     this.parent.parentProp = 'updated';
-     *   }
-     * }
-     * ```
-     * @param {?} oldValue
-     * @param {?} currValue
-     * @param {?} isFirstCheck
-     * @return {?}
-     */
-    function expressionChangedAfterItHasBeenCheckedError(oldValue, currValue, isFirstCheck) {
-        var /** @type {?} */msg = 'Expression has changed after it was checked. Previous value: \'' + oldValue + '\'. Current value: \'' + currValue + '\'.';
-        if (isFirstCheck) {
-            msg += ' It seems like the view has been created after its parent and its children have been dirty checked.' + ' Has it been created in a change detection hook ?';
-        }
-        var /** @type {?} */error = Error(msg);
-        error[ERROR_TYPE] = expressionChangedAfterItHasBeenCheckedError;
-        return error;
-    }
-    /**
-     * Thrown when an exception was raised during view creation, change detection or destruction.
-     *
-     * This error wraps the original exception to attach additional contextual information that can
-     * be useful for debugging.
-     * @param {?} originalError
-     * @param {?} context
-     * @return {?}
-     */
-    function viewWrappedError(originalError, context) {
-        var /** @type {?} */error = wrappedError('Error in ' + context.source, originalError);
-        error[ERROR_DEBUG_CONTEXT] = context;
-        error[ERROR_TYPE] = viewWrappedError;
-        return error;
-    }
-    /**
-     * Thrown when a destroyed view is used.
-     *
-     * This error indicates a bug in the framework.
-     *
-     * This is an internal Angular error.
-     * @param {?} details
-     * @return {?}
-     */
-    function viewDestroyedError(details) {
-        return Error('Attempt to use a destroyed view: ' + details);
-    }
-
-    var ViewUtils = function () {
-        /**
-         * @param {?} _renderer
-         * @param {?} sanitizer
-         * @param {?} animationQueue
-         */
-        function ViewUtils(_renderer, sanitizer, animationQueue) {
-            _classCallCheck(this, ViewUtils);
-
-            this._renderer = _renderer;
-            this.animationQueue = animationQueue;
-            this.sanitizer = sanitizer;
-        }
-        /**
-         * \@internal
-         * @param {?} renderComponentType
-         * @return {?}
-         */
-
-
-        _createClass(ViewUtils, [{
-            key: 'renderComponent',
-            value: function renderComponent(renderComponentType) {
-                return this._renderer.renderComponent(renderComponentType);
-            }
-        }]);
-
-        return ViewUtils;
-    }();
-
-    ViewUtils.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    ViewUtils.ctorParameters = function () {
-        return [{ type: RootRenderer }, { type: Sanitizer }, { type: AnimationQueue }];
-    };
-    var /** @type {?} */nextRenderComponentTypeId = 0;
-    /**
-     * @param {?} templateUrl
-     * @param {?} slotCount
-     * @param {?} encapsulation
-     * @param {?} styles
-     * @param {?} animations
-     * @return {?}
-     */
-    function createRenderComponentType(templateUrl, slotCount, encapsulation, styles, animations) {
-        return new RenderComponentType('' + nextRenderComponentTypeId++, templateUrl, slotCount, encapsulation, styles, animations);
-    }
-    /**
-     * @param {?} e
-     * @param {?} array
-     * @return {?}
-     */
-    function addToArray(e, array) {
-        array.push(e);
-    }
-    /**
-     * @param {?} valueCount
-     * @param {?} constAndInterp
-     * @return {?}
-     */
-    function interpolate(valueCount, constAndInterp) {
-        var /** @type {?} */result = '';
-        for (var /** @type {?} */i = 0; i < valueCount * 2; i = i + 2) {
-            result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
-        }
-        return result + constAndInterp[valueCount * 2];
-    }
-    /**
-     * @param {?} valueCount
-     * @param {?} c0
-     * @param {?} a1
-     * @param {?} c1
-     * @param {?=} a2
-     * @param {?=} c2
-     * @param {?=} a3
-     * @param {?=} c3
-     * @param {?=} a4
-     * @param {?=} c4
-     * @param {?=} a5
-     * @param {?=} c5
-     * @param {?=} a6
-     * @param {?=} c6
-     * @param {?=} a7
-     * @param {?=} c7
-     * @param {?=} a8
-     * @param {?=} c8
-     * @param {?=} a9
-     * @param {?=} c9
-     * @return {?}
-     */
-    function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
-        switch (valueCount) {
-            case 1:
-                return c0 + _toStringWithNull(a1) + c1;
-            case 2:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
-            case 3:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3;
-            case 4:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4;
-            case 5:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
-            case 6:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
-            case 7:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7;
-            case 8:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
-            case 9:
-                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
-            default:
-                throw new Error('Does not support more than 9 expressions');
-        }
-    }
-    /**
-     * @param {?} v
-     * @return {?}
-     */
-    function _toStringWithNull(v) {
-        return v != null ? v.toString() : '';
-    }
-    /**
-     * @param {?} view
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkBinding(view, oldValue, newValue, forceUpdate) {
-        var /** @type {?} */isFirstCheck = view.numberOfChecks === 0;
-        if (view.throwOnChange) {
-            if (isFirstCheck || !devModeEqual(oldValue, newValue)) {
-                throw expressionChangedAfterItHasBeenCheckedError(oldValue, newValue, isFirstCheck);
-            }
-            return false;
-        } else {
-            return isFirstCheck || forceUpdate || !looseIdentical(oldValue, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkBindingChange(view, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            return new SimpleChange(oldValue, newValue, view.numberOfChecks === 0);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkRenderText(view, renderElement, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            view.renderer.setText(renderElement, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} propName
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderProperty(view, renderElement, propName, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            view.renderer.setElementProperty(renderElement, propName, renderValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} attrName
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderAttribute(view, renderElement, attrName, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            renderValue = renderValue != null ? renderValue.toString() : null;
-            view.renderer.setElementAttribute(renderElement, attrName, renderValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} className
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @return {?}
-     */
-    function checkRenderClass(view, renderElement, className, oldValue, newValue, forceUpdate) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            view.renderer.setElementClass(renderElement, className, newValue);
-        }
-    }
-    /**
-     * @param {?} view
-     * @param {?} renderElement
-     * @param {?} styleName
-     * @param {?} unit
-     * @param {?} oldValue
-     * @param {?} newValue
-     * @param {?} forceUpdate
-     * @param {?} securityContext
-     * @return {?}
-     */
-    function checkRenderStyle(view, renderElement, styleName, unit, oldValue, newValue, forceUpdate, securityContext) {
-        if (checkBinding(view, oldValue, newValue, forceUpdate)) {
-            var /** @type {?} */renderValue = securityContext ? view.viewUtils.sanitizer.sanitize(securityContext, newValue) : newValue;
-            if (renderValue != null) {
-                renderValue = renderValue.toString();
-                if (unit != null) {
-                    renderValue = renderValue + unit;
-                }
-            } else {
-                renderValue = null;
-            }
-            view.renderer.setElementStyle(renderElement, styleName, renderValue);
-        }
-    }
-    /**
-     * @param {?} input
-     * @param {?} value
-     * @return {?}
-     */
-    function castByValue(input, value) {
-        return input;
-    }
-    var /** @type {?} */EMPTY_ARRAY = [];
-    var /** @type {?} */EMPTY_MAP = {};
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy1(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0;
-        return function (p0) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0)) {
-                v0 = p0;
-                result = fn(p0);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy2(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0;
-        var /** @type {?} */v1 = void 0;
-        return function (p0, p1) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1)) {
-                v0 = p0;
-                v1 = p1;
-                result = fn(p0, p1);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy3(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0;
-        var /** @type {?} */v1 = void 0;
-        var /** @type {?} */v2 = void 0;
-        return function (p0, p1, p2) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                result = fn(p0, p1, p2);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy4(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0;
-        v0 = v1 = v2 = v3;
-        return function (p0, p1, p2, p3) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                result = fn(p0, p1, p2, p3);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy5(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0;
-        v0 = v1 = v2 = v3 = v4;
-        return function (p0, p1, p2, p3, p4) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                result = fn(p0, p1, p2, p3, p4);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy6(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0,
-            /** @type {?} */v5 = void 0;
-        v0 = v1 = v2 = v3 = v4 = v5;
-        return function (p0, p1, p2, p3, p4, p5) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                v5 = p5;
-                result = fn(p0, p1, p2, p3, p4, p5);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy7(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0,
-            /** @type {?} */v5 = void 0,
-            /** @type {?} */v6 = void 0;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6;
-        return function (p0, p1, p2, p3, p4, p5, p6) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) || !looseIdentical(v6, p6)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                v5 = p5;
-                v6 = p6;
-                result = fn(p0, p1, p2, p3, p4, p5, p6);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy8(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0,
-            /** @type {?} */v5 = void 0,
-            /** @type {?} */v6 = void 0,
-            /** @type {?} */v7 = void 0;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7;
-        return function (p0, p1, p2, p3, p4, p5, p6, p7) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                v5 = p5;
-                v6 = p6;
-                v7 = p7;
-                result = fn(p0, p1, p2, p3, p4, p5, p6, p7);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy9(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0,
-            /** @type {?} */v5 = void 0,
-            /** @type {?} */v6 = void 0,
-            /** @type {?} */v7 = void 0,
-            /** @type {?} */v8 = void 0;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8;
-        return function (p0, p1, p2, p3, p4, p5, p6, p7, p8) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                v5 = p5;
-                v6 = p6;
-                v7 = p7;
-                v8 = p8;
-                result = fn(p0, p1, p2, p3, p4, p5, p6, p7, p8);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} fn
-     * @return {?}
-     */
-    function pureProxy10(fn) {
-        var /** @type {?} */numberOfChecks = 0;
-        var /** @type {?} */result = void 0;
-        var /** @type {?} */v0 = void 0,
-            /** @type {?} */v1 = void 0,
-            /** @type {?} */v2 = void 0,
-            /** @type {?} */v3 = void 0,
-            /** @type {?} */v4 = void 0,
-            /** @type {?} */v5 = void 0,
-            /** @type {?} */v6 = void 0,
-            /** @type {?} */v7 = void 0,
-            /** @type {?} */v8 = void 0,
-            /** @type {?} */v9 = void 0;
-        v0 = v1 = v2 = v3 = v4 = v5 = v6 = v7 = v8 = v9;
-        return function (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9) {
-            if (!numberOfChecks++ || !looseIdentical(v0, p0) || !looseIdentical(v1, p1) || !looseIdentical(v2, p2) || !looseIdentical(v3, p3) || !looseIdentical(v4, p4) || !looseIdentical(v5, p5) || !looseIdentical(v6, p6) || !looseIdentical(v7, p7) || !looseIdentical(v8, p8) || !looseIdentical(v9, p9)) {
-                v0 = p0;
-                v1 = p1;
-                v2 = p2;
-                v3 = p3;
-                v4 = p4;
-                v5 = p5;
-                v6 = p6;
-                v7 = p7;
-                v8 = p8;
-                v9 = p9;
-                result = fn(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
-            }
-            return result;
-        };
-    }
-    /**
-     * @param {?} renderer
-     * @param {?} el
-     * @param {?} changes
-     * @return {?}
-     */
-    function setBindingDebugInfoForChanges(renderer, el, changes) {
-        Object.keys(changes).forEach(function (propName) {
-            setBindingDebugInfo(renderer, el, propName, changes[propName].currentValue);
-        });
-    }
-    /**
-     * @param {?} renderer
-     * @param {?} el
-     * @param {?} propName
-     * @param {?} value
-     * @return {?}
-     */
-    function setBindingDebugInfo(renderer, el, propName, value) {
-        try {
-            renderer.setBindingDebugInfo(el, 'ng-reflect-' + camelCaseToDashCase(propName), value ? value.toString() : null);
-        } catch (e) {
-            renderer.setBindingDebugInfo(el, 'ng-reflect-' + camelCaseToDashCase(propName), '[ERROR] Exception while trying to serialize the value');
-        }
-    }
-    var /** @type {?} */CAMEL_CASE_REGEXP = /([A-Z])/g;
-    /**
-     * @param {?} input
-     * @return {?}
-     */
-    function camelCaseToDashCase(input) {
-        return input.replace(CAMEL_CASE_REGEXP, function () {
-            for (var _len5 = arguments.length, m = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-                m[_key5] = arguments[_key5];
-            }
-
-            return '-' + m[1].toLowerCase();
-        });
-    }
-    /**
-     * @param {?} renderer
-     * @param {?} parentElement
-     * @param {?} name
-     * @param {?} attrs
-     * @param {?=} debugInfo
-     * @return {?}
-     */
-    function createRenderElement(renderer, parentElement, name, attrs, debugInfo) {
-        var /** @type {?} */el = renderer.createElement(parentElement, name, debugInfo);
-        for (var /** @type {?} */i = 0; i < attrs.length; i += 2) {
-            renderer.setElementAttribute(el, attrs.get(i), attrs.get(i + 1));
-        }
-        return el;
-    }
-    /**
-     * @param {?} renderer
-     * @param {?} elementName
-     * @param {?} attrs
-     * @param {?} rootSelectorOrNode
-     * @param {?=} debugInfo
-     * @return {?}
-     */
-    function selectOrCreateRenderHostElement(renderer, elementName, attrs, rootSelectorOrNode, debugInfo) {
-        var /** @type {?} */hostElement = void 0;
-        if (isPresent(rootSelectorOrNode)) {
-            hostElement = renderer.selectRootElement(rootSelectorOrNode, debugInfo);
-            for (var /** @type {?} */i = 0; i < attrs.length; i += 2) {
-                renderer.setElementAttribute(hostElement, attrs.get(i), attrs.get(i + 1));
-            }
-            renderer.setElementAttribute(hostElement, 'ng-version', VERSION.full);
-        } else {
-            hostElement = createRenderElement(renderer, null, elementName, attrs, debugInfo);
-        }
-        return hostElement;
-    }
-    /**
-     * @param {?} view
-     * @param {?} element
-     * @param {?} eventNamesAndTargets
-     * @param {?} listener
-     * @return {?}
-     */
-    function subscribeToRenderElement(view, element, eventNamesAndTargets, listener) {
-        var /** @type {?} */disposables = createEmptyInlineArray(eventNamesAndTargets.length / 2);
-        for (var /** @type {?} */i = 0; i < eventNamesAndTargets.length; i += 2) {
-            var /** @type {?} */eventName = eventNamesAndTargets.get(i);
-            var /** @type {?} */eventTarget = eventNamesAndTargets.get(i + 1);
-            var /** @type {?} */disposable = void 0;
-            if (eventTarget) {
-                disposable = view.renderer.listenGlobal(eventTarget, eventName, listener.bind(view, eventTarget + ':' + eventName));
-            } else {
-                disposable = view.renderer.listen(element, eventName, listener.bind(view, eventName));
-            }
-            disposables.set(i / 2, disposable);
-        }
-        return disposeInlineArray.bind(null, disposables);
-    }
-    /**
-     * @param {?} disposables
-     * @return {?}
-     */
-    function disposeInlineArray(disposables) {
-        for (var /** @type {?} */i = 0; i < disposables.length; i++) {
-            disposables.get(i)();
-        }
-    }
-    /**
-     * @return {?}
-     */
-    function noop() {}
-    /**
-     * @param {?} length
-     * @return {?}
-     */
-    function createEmptyInlineArray(length) {
-        var /** @type {?} */ctor = void 0;
-        if (length <= 2) {
-            ctor = InlineArray2;
-        } else if (length <= 4) {
-            ctor = InlineArray4;
-        } else if (length <= 8) {
-            ctor = InlineArray8;
-        } else if (length <= 16) {
-            ctor = InlineArray16;
-        } else {
-            ctor = InlineArrayDynamic;
-        }
-        return new ctor(length);
-    }
-
-    var InlineArray0 = function () {
-        function InlineArray0() {
-            _classCallCheck(this, InlineArray0);
-
-            this.length = 0;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArray0, [{
-            key: 'get',
-            value: function get(index) {
-                return undefined;
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {}
-        }]);
-
-        return InlineArray0;
-    }();
-
-    var InlineArray2 = function () {
-        /**
-         * @param {?} length
-         * @param {?=} _v0
-         * @param {?=} _v1
-         */
-        function InlineArray2(length, _v0, _v1) {
-            _classCallCheck(this, InlineArray2);
-
-            this.length = length;
-            this._v0 = _v0;
-            this._v1 = _v1;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArray2, [{
-            key: 'get',
-            value: function get(index) {
-                switch (index) {
-                    case 0:
-                        return this._v0;
-                    case 1:
-                        return this._v1;
-                    default:
-                        return undefined;
-                }
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {
-                switch (index) {
-                    case 0:
-                        this._v0 = value;
-                        break;
-                    case 1:
-                        this._v1 = value;
-                        break;
-                }
-            }
-        }]);
-
-        return InlineArray2;
-    }();
-
-    var InlineArray4 = function () {
-        /**
-         * @param {?} length
-         * @param {?=} _v0
-         * @param {?=} _v1
-         * @param {?=} _v2
-         * @param {?=} _v3
-         */
-        function InlineArray4(length, _v0, _v1, _v2, _v3) {
-            _classCallCheck(this, InlineArray4);
-
-            this.length = length;
-            this._v0 = _v0;
-            this._v1 = _v1;
-            this._v2 = _v2;
-            this._v3 = _v3;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArray4, [{
-            key: 'get',
-            value: function get(index) {
-                switch (index) {
-                    case 0:
-                        return this._v0;
-                    case 1:
-                        return this._v1;
-                    case 2:
-                        return this._v2;
-                    case 3:
-                        return this._v3;
-                    default:
-                        return undefined;
-                }
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {
-                switch (index) {
-                    case 0:
-                        this._v0 = value;
-                        break;
-                    case 1:
-                        this._v1 = value;
-                        break;
-                    case 2:
-                        this._v2 = value;
-                        break;
-                    case 3:
-                        this._v3 = value;
-                        break;
-                }
-            }
-        }]);
-
-        return InlineArray4;
-    }();
-
-    var InlineArray8 = function () {
-        /**
-         * @param {?} length
-         * @param {?=} _v0
-         * @param {?=} _v1
-         * @param {?=} _v2
-         * @param {?=} _v3
-         * @param {?=} _v4
-         * @param {?=} _v5
-         * @param {?=} _v6
-         * @param {?=} _v7
-         */
-        function InlineArray8(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) {
-            _classCallCheck(this, InlineArray8);
-
-            this.length = length;
-            this._v0 = _v0;
-            this._v1 = _v1;
-            this._v2 = _v2;
-            this._v3 = _v3;
-            this._v4 = _v4;
-            this._v5 = _v5;
-            this._v6 = _v6;
-            this._v7 = _v7;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArray8, [{
-            key: 'get',
-            value: function get(index) {
-                switch (index) {
-                    case 0:
-                        return this._v0;
-                    case 1:
-                        return this._v1;
-                    case 2:
-                        return this._v2;
-                    case 3:
-                        return this._v3;
-                    case 4:
-                        return this._v4;
-                    case 5:
-                        return this._v5;
-                    case 6:
-                        return this._v6;
-                    case 7:
-                        return this._v7;
-                    default:
-                        return undefined;
-                }
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {
-                switch (index) {
-                    case 0:
-                        this._v0 = value;
-                        break;
-                    case 1:
-                        this._v1 = value;
-                        break;
-                    case 2:
-                        this._v2 = value;
-                        break;
-                    case 3:
-                        this._v3 = value;
-                        break;
-                    case 4:
-                        this._v4 = value;
-                        break;
-                    case 5:
-                        this._v5 = value;
-                        break;
-                    case 6:
-                        this._v6 = value;
-                        break;
-                    case 7:
-                        this._v7 = value;
-                        break;
-                }
-            }
-        }]);
-
-        return InlineArray8;
-    }();
-
-    var InlineArray16 = function () {
-        /**
-         * @param {?} length
-         * @param {?=} _v0
-         * @param {?=} _v1
-         * @param {?=} _v2
-         * @param {?=} _v3
-         * @param {?=} _v4
-         * @param {?=} _v5
-         * @param {?=} _v6
-         * @param {?=} _v7
-         * @param {?=} _v8
-         * @param {?=} _v9
-         * @param {?=} _v10
-         * @param {?=} _v11
-         * @param {?=} _v12
-         * @param {?=} _v13
-         * @param {?=} _v14
-         * @param {?=} _v15
-         */
-        function InlineArray16(length, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13, _v14, _v15) {
-            _classCallCheck(this, InlineArray16);
-
-            this.length = length;
-            this._v0 = _v0;
-            this._v1 = _v1;
-            this._v2 = _v2;
-            this._v3 = _v3;
-            this._v4 = _v4;
-            this._v5 = _v5;
-            this._v6 = _v6;
-            this._v7 = _v7;
-            this._v8 = _v8;
-            this._v9 = _v9;
-            this._v10 = _v10;
-            this._v11 = _v11;
-            this._v12 = _v12;
-            this._v13 = _v13;
-            this._v14 = _v14;
-            this._v15 = _v15;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArray16, [{
-            key: 'get',
-            value: function get(index) {
-                switch (index) {
-                    case 0:
-                        return this._v0;
-                    case 1:
-                        return this._v1;
-                    case 2:
-                        return this._v2;
-                    case 3:
-                        return this._v3;
-                    case 4:
-                        return this._v4;
-                    case 5:
-                        return this._v5;
-                    case 6:
-                        return this._v6;
-                    case 7:
-                        return this._v7;
-                    case 8:
-                        return this._v8;
-                    case 9:
-                        return this._v9;
-                    case 10:
-                        return this._v10;
-                    case 11:
-                        return this._v11;
-                    case 12:
-                        return this._v12;
-                    case 13:
-                        return this._v13;
-                    case 14:
-                        return this._v14;
-                    case 15:
-                        return this._v15;
-                    default:
-                        return undefined;
-                }
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {
-                switch (index) {
-                    case 0:
-                        this._v0 = value;
-                        break;
-                    case 1:
-                        this._v1 = value;
-                        break;
-                    case 2:
-                        this._v2 = value;
-                        break;
-                    case 3:
-                        this._v3 = value;
-                        break;
-                    case 4:
-                        this._v4 = value;
-                        break;
-                    case 5:
-                        this._v5 = value;
-                        break;
-                    case 6:
-                        this._v6 = value;
-                        break;
-                    case 7:
-                        this._v7 = value;
-                        break;
-                    case 8:
-                        this._v8 = value;
-                        break;
-                    case 9:
-                        this._v9 = value;
-                        break;
-                    case 10:
-                        this._v10 = value;
-                        break;
-                    case 11:
-                        this._v11 = value;
-                        break;
-                    case 12:
-                        this._v12 = value;
-                        break;
-                    case 13:
-                        this._v13 = value;
-                        break;
-                    case 14:
-                        this._v14 = value;
-                        break;
-                    case 15:
-                        this._v15 = value;
-                        break;
-                }
-            }
-        }]);
-
-        return InlineArray16;
-    }();
-
-    var InlineArrayDynamic = function () {
-        /**
-         * @param {?} length
-         * @param {...?} values
-         */
-        function InlineArrayDynamic(length) {
-            _classCallCheck(this, InlineArrayDynamic);
-
-            this.length = length;
-
-            for (var _len6 = arguments.length, values = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-                values[_key6 - 1] = arguments[_key6];
-            }
-
-            this._values = values;
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(InlineArrayDynamic, [{
-            key: 'get',
-            value: function get(index) {
-                return this._values[index];
-            }
-        }, {
-            key: 'set',
-            value: function set(index, value) {
-                this._values[index] = value;
-            }
-        }]);
-
-        return InlineArrayDynamic;
-    }();
-
-    var /** @type {?} */EMPTY_INLINE_ARRAY = new InlineArray0();
-    /**
-     * This is a private API only used by the compiler to read the view class.
-     * @param {?} componentFactory
-     * @return {?}
-     */
-    function getComponentFactoryViewClass(componentFactory) {
-        return componentFactory._viewClass;
-    }
-
-    /**
-     * Represents an instance of a Component created via a {\@link ComponentFactory}.
-     *
-     * `ComponentRef` provides access to the Component Instance as well other objects related to this
-     * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
-     * method.
-     * \@stable
-     * @abstract
-     */
-
-    var ComponentRef = function () {
-        function ComponentRef() {
-            _classCallCheck(this, ComponentRef);
-        }
-
-        _createClass(ComponentRef, [{
-            key: 'location',
-            value: function location() {}
-        }, {
-            key: 'injector',
-            value: function injector() {}
-        }, {
-            key: 'instance',
-            value: function instance() {}
-        }, {
-            key: 'hostView',
-            value: function hostView() {}
-        }, {
-            key: 'changeDetectorRef',
-            value: function changeDetectorRef() {}
-        }, {
-            key: 'componentType',
-            value: function componentType() {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {}
-        }]);
-
-        return ComponentRef;
-    }();
-
-    var ComponentRef_ = function (_ComponentRef) {
-        _inherits(ComponentRef_, _ComponentRef);
-
-        /**
-         * @param {?} _index
-         * @param {?} _parentView
-         * @param {?} _nativeElement
-         * @param {?} _component
-         */
-        function ComponentRef_(_index, _parentView, _nativeElement, _component) {
-            _classCallCheck(this, ComponentRef_);
-
-            var _this12 = _possibleConstructorReturn(this, (ComponentRef_.__proto__ || Object.getPrototypeOf(ComponentRef_)).call(this));
-
-            _this12._index = _index;
-            _this12._parentView = _parentView;
-            _this12._nativeElement = _nativeElement;
-            _this12._component = _component;
-            return _this12;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(ComponentRef_, [{
-            key: 'destroy',
-            value: function destroy() {
-                this._parentView.detachAndDestroy();
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {
-                this.hostView.onDestroy(callback);
-            }
-        }, {
-            key: 'location',
-            get: function get() {
-                return new ElementRef(this._nativeElement);
-            }
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this._parentView.injector(this._index);
-            }
-        }, {
-            key: 'instance',
-            get: function get() {
-                return this._component;
-            }
-        }, {
-            key: 'hostView',
-            get: function get() {
-                return this._parentView.ref;
-            }
-        }, {
-            key: 'changeDetectorRef',
-            get: function get() {
-                return this._parentView.ref;
-            }
-        }, {
-            key: 'componentType',
-            get: function get() {
-                return this._component.constructor;
-            }
-        }]);
-
-        return ComponentRef_;
-    }(ComponentRef);
-
-    var ComponentFactory = function () {
-        /**
-         * @param {?} selector
-         * @param {?} _viewClass
-         * @param {?} componentType
-         */
-        function ComponentFactory(selector, _viewClass, componentType) {
-            _classCallCheck(this, ComponentFactory);
-
-            this.selector = selector;
-            this.componentType = componentType;
-            this._viewClass = _viewClass;
-        }
-        /**
-         * Creates a new component.
-         * @param {?} injector
-         * @param {?=} projectableNodes
-         * @param {?=} rootSelectorOrNode
-         * @return {?}
-         */
-
-
-        _createClass(ComponentFactory, [{
-            key: 'create',
-            value: function create(injector) {
-                var projectableNodes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-                var rootSelectorOrNode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-                var /** @type {?} */vu = injector.get(ViewUtils);
-                if (!projectableNodes) {
-                    projectableNodes = [];
-                }
-                var /** @type {?} */hostView = new this._viewClass(vu, null, null, null);
-                return hostView.createHostView(rootSelectorOrNode, injector, projectableNodes);
-            }
-        }]);
-
-        return ComponentFactory;
-    }();
-
-    /**
-     * @param {?} component
-     * @return {?}
-     */
-    function noComponentFactoryError(component) {
-        var /** @type {?} */error = Error('No component factory found for ' + stringify(component) + '. Did you add it to @NgModule.entryComponents?');
-        error[ERROR_COMPONENT] = component;
-        return error;
-    }
-    var /** @type {?} */ERROR_COMPONENT = 'ngComponent';
-
-    var _NullComponentFactoryResolver = function () {
-        function _NullComponentFactoryResolver() {
-            _classCallCheck(this, _NullComponentFactoryResolver);
-        }
-
-        _createClass(_NullComponentFactoryResolver, [{
-            key: 'resolveComponentFactory',
-            value: function resolveComponentFactory(component) {
-                throw noComponentFactoryError(component);
-            }
-        }]);
-
-        return _NullComponentFactoryResolver;
-    }();
-
-    var ComponentFactoryResolver = function () {
-        function ComponentFactoryResolver() {
-            _classCallCheck(this, ComponentFactoryResolver);
-        }
-
-        _createClass(ComponentFactoryResolver, [{
-            key: 'resolveComponentFactory',
-            value: function resolveComponentFactory(component) {}
-        }]);
-
-        return ComponentFactoryResolver;
-    }();
-
-    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
-
-    var CodegenComponentFactoryResolver = function () {
-        /**
-         * @param {?} factories
-         * @param {?} _parent
-         */
-        function CodegenComponentFactoryResolver(factories, _parent) {
-            _classCallCheck(this, CodegenComponentFactoryResolver);
-
-            this._parent = _parent;
-            this._factories = new Map();
-            for (var i = 0; i < factories.length; i++) {
-                var factory = factories[i];
-                this._factories.set(factory.componentType, factory);
-            }
-        }
-        /**
-         * @param {?} component
-         * @return {?}
-         */
-
-
-        _createClass(CodegenComponentFactoryResolver, [{
-            key: 'resolveComponentFactory',
-            value: function resolveComponentFactory(component) {
-                var /** @type {?} */result = this._factories.get(component);
-                if (!result) {
-                    result = this._parent.resolveComponentFactory(component);
-                }
-                return result;
-            }
-        }]);
-
-        return CodegenComponentFactoryResolver;
-    }();
-
-    var /** @type {?} */trace = void 0;
-    var /** @type {?} */events = void 0;
-    /**
-     * @return {?}
-     */
-    function detectWTF() {
-        var /** @type {?} */wtf = global$1[/** TODO #9100 */'wtf'];
-        if (wtf) {
-            trace = wtf['trace'];
-            if (trace) {
-                events = trace['events'];
-                return true;
-            }
-        }
-        return false;
-    }
-    /**
-     * @param {?} signature
-     * @param {?=} flags
-     * @return {?}
-     */
-    function createScope(signature) {
-        var flags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-        return events.createScope(signature, flags);
-    }
-    /**
-     * @param {?} scope
-     * @param {?=} returnValue
-     * @return {?}
-     */
-    function leave(scope, returnValue) {
-        trace.leaveScope(scope, returnValue);
-        return returnValue;
-    }
-    /**
-     * @param {?} rangeType
-     * @param {?} action
-     * @return {?}
-     */
-    function startTimeRange(rangeType, action) {
-        return trace.beginTimeRange(rangeType, action);
-    }
-    /**
-     * @param {?} range
-     * @return {?}
-     */
-    function endTimeRange(range) {
-        trace.endTimeRange(range);
-    }
-
-    /**
-     * True if WTF is enabled.
-     */
-    var /** @type {?} */wtfEnabled = detectWTF();
-    /**
-     * @param {?=} arg0
-     * @param {?=} arg1
-     * @return {?}
-     */
-    function noopScope(arg0, arg1) {
-        return null;
-    }
-    /**
-     * Create trace scope.
-     *
-     * Scopes must be strictly nested and are analogous to stack frames, but
-     * do not have to follow the stack frames. Instead it is recommended that they follow logical
-     * nesting. You may want to use
-     * [Event
-     * Signatures](http://google.github.io/tracing-framework/instrumenting-code.html#custom-events)
-     * as they are defined in WTF.
-     *
-     * Used to mark scope entry. The return value is used to leave the scope.
-     *
-     *     var myScope = wtfCreateScope('MyClass#myMethod(ascii someVal)');
-     *
-     *     someMethod() {
-     *        var s = myScope('Foo'); // 'Foo' gets stored in tracing UI
-     *        // DO SOME WORK HERE
-     *        return wtfLeave(s, 123); // Return value 123
-     *     }
-     *
-     * Note, adding try-finally block around the work to ensure that `wtfLeave` gets called can
-     * negatively impact the performance of your application. For this reason we recommend that
-     * you don't add them to ensure that `wtfLeave` gets called. In production `wtfLeave` is a noop and
-     * so try-finally block has no value. When debugging perf issues, skipping `wtfLeave`, do to
-     * exception, will produce incorrect trace, but presence of exception signifies logic error which
-     * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
-     * an exception is expected during normal execution while profiling.
-     *
-     * @experimental
-     */
-    var /** @type {?} */wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) {
-        return noopScope;
-    };
-    /**
-     * Used to mark end of Scope.
-     *
-     * - `scope` to end.
-     * - `returnValue` (optional) to be passed to the WTF.
-     *
-     * Returns the `returnValue for easy chaining.
-     * @experimental
-     */
-    var /** @type {?} */wtfLeave = wtfEnabled ? leave : function (s, r) {
-        return r;
-    };
-    /**
-     * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
-     * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
-     * enabled.
-     *
-     *     someMethod() {
-     *        var s = wtfStartTimeRange('HTTP:GET', 'some.url');
-     *        var future = new Future.delay(5).then((_) {
-     *          wtfEndTimeRange(s);
-     *        });
-     *     }
-     * @experimental
-     */
-    var /** @type {?} */wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) {
-        return null;
-    };
-    /**
-     * Ends a async time range operation.
-     * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
-     * enabled.
-     * @experimental
-     */
-    var /** @type {?} */wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) {
-        return null;
-    };
-
-    /**
-     * The Testability service provides testing hooks that can be accessed from
-     * the browser and by services such as Protractor. Each bootstrapped Angular
-     * application on the page will have an instance of Testability.
-     * \@experimental
-     */
-
-    var Testability = function () {
-        /**
-         * @param {?} _ngZone
-         */
-        function Testability(_ngZone) {
-            _classCallCheck(this, Testability);
-
-            this._ngZone = _ngZone;
-            /** @internal */
-            this._pendingCount = 0;
-            /** @internal */
-            this._isZoneStable = true;
-            /**
-             * Whether any work was done since the last 'whenStable' callback. This is
-             * useful to detect if this could have potentially destabilized another
-             * component while it is stabilizing.
-             * @internal
-             */
-            this._didWork = false;
-            /** @internal */
-            this._callbacks = [];
-            this._watchAngularEvents();
-        }
-        /**
-         * \@internal
-         * @return {?}
-         */
-
-
-        _createClass(Testability, [{
-            key: '_watchAngularEvents',
-            value: function _watchAngularEvents() {
-                var _this13 = this;
-
-                this._ngZone.onUnstable.subscribe({
-                    next: function next() {
-                        _this13._didWork = true;
-                        _this13._isZoneStable = false;
-                    }
-                });
-                this._ngZone.runOutsideAngular(function () {
-                    _this13._ngZone.onStable.subscribe({
-                        next: function next() {
-                            NgZone.assertNotInAngularZone();
-                            scheduleMicroTask(function () {
-                                _this13._isZoneStable = true;
-                                _this13._runCallbacksIfReady();
-                            });
-                        }
-                    });
-                });
-            }
-        }, {
-            key: 'increasePendingRequestCount',
-            value: function increasePendingRequestCount() {
-                this._pendingCount += 1;
-                this._didWork = true;
-                return this._pendingCount;
-            }
-        }, {
-            key: 'decreasePendingRequestCount',
-            value: function decreasePendingRequestCount() {
-                this._pendingCount -= 1;
-                if (this._pendingCount < 0) {
-                    throw new Error('pending async requests below zero');
-                }
-                this._runCallbacksIfReady();
-                return this._pendingCount;
-            }
-        }, {
-            key: 'isStable',
-            value: function isStable() {
-                return this._isZoneStable && this._pendingCount == 0 && !this._ngZone.hasPendingMacrotasks;
-            }
-        }, {
-            key: '_runCallbacksIfReady',
-            value: function _runCallbacksIfReady() {
-                var _this14 = this;
-
-                if (this.isStable()) {
-                    // Schedules the call backs in a new frame so that it is always async.
-                    scheduleMicroTask(function () {
-                        while (_this14._callbacks.length !== 0) {
-                            _this14._callbacks.pop()(_this14._didWork);
-                        }
-                        _this14._didWork = false;
-                    });
-                } else {
-                    // Not Ready
-                    this._didWork = true;
-                }
-            }
-        }, {
-            key: 'whenStable',
-            value: function whenStable(callback) {
-                this._callbacks.push(callback);
-                this._runCallbacksIfReady();
-            }
-        }, {
-            key: 'getPendingRequestCount',
-            value: function getPendingRequestCount() {
-                return this._pendingCount;
-            }
-        }, {
-            key: 'findBindings',
-            value: function findBindings(using, provider, exactMatch) {
-                // TODO(juliemr): implement.
-                return [];
-            }
-        }, {
-            key: 'findProviders',
-            value: function findProviders(using, provider, exactMatch) {
-                // TODO(juliemr): implement.
-                return [];
-            }
-        }]);
-
-        return Testability;
-    }();
-
-    Testability.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    Testability.ctorParameters = function () {
-        return [{ type: NgZone }];
-    };
-    /**
-     * A global registry of {\@link Testability} instances for specific elements.
-     * \@experimental
-     */
-
-    var TestabilityRegistry = function () {
-        function TestabilityRegistry() {
-            _classCallCheck(this, TestabilityRegistry);
-
-            /** @internal */
-            this._applications = new Map();
-            _testabilityGetter.addToWindow(this);
-        }
-        /**
-         * @param {?} token
-         * @param {?} testability
-         * @return {?}
-         */
-
-
-        _createClass(TestabilityRegistry, [{
-            key: 'registerApplication',
-            value: function registerApplication(token, testability) {
-                this._applications.set(token, testability);
-            }
-        }, {
-            key: 'getTestability',
-            value: function getTestability(elem) {
-                return this._applications.get(elem);
-            }
-        }, {
-            key: 'getAllTestabilities',
-            value: function getAllTestabilities() {
-                return Array.from(this._applications.values());
-            }
-        }, {
-            key: 'getAllRootElements',
-            value: function getAllRootElements() {
-                return Array.from(this._applications.keys());
-            }
-        }, {
-            key: 'findTestabilityInTree',
-            value: function findTestabilityInTree(elem) {
-                var findInAncestors = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-
-                return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
-            }
-        }]);
-
-        return TestabilityRegistry;
-    }();
-
-    TestabilityRegistry.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    TestabilityRegistry.ctorParameters = function () {
-        return [];
-    };
-
-    var _NoopGetTestability = function () {
-        function _NoopGetTestability() {
-            _classCallCheck(this, _NoopGetTestability);
-        }
-
-        _createClass(_NoopGetTestability, [{
-            key: 'addToWindow',
-            value: function addToWindow(registry) {}
-        }, {
-            key: 'findTestabilityInTree',
-            value: function findTestabilityInTree(registry, elem, findInAncestors) {
-                return null;
-            }
-        }]);
-
-        return _NoopGetTestability;
-    }();
-
-    /**
-     * Set the {\@link GetTestability} implementation used by the Angular testing framework.
-     * \@experimental
-     * @param {?} getter
-     * @return {?}
-     */
-    function setTestabilityGetter(getter) {
-        _testabilityGetter = getter;
-    }
-    var /** @type {?} */_testabilityGetter = new _NoopGetTestability();
-
-    var /** @type {?} */_devMode = true;
-    var /** @type {?} */_runModeLocked = false;
-    var /** @type {?} */_platform = void 0;
-    var /** @type {?} */ALLOW_MULTIPLE_PLATFORMS = new InjectionToken('AllowMultipleToken');
-    /**
-     * Disable Angular's development mode, which turns off assertions and other
-     * checks within the framework.
-     *
-     * One important assertion this disables verifies that a change detection pass
-     * does not result in additional changes to any bindings (also known as
-     * unidirectional data flow).
-     *
-     * \@stable
-     * @return {?}
-     */
-    function enableProdMode() {
-        if (_runModeLocked) {
-            throw new Error('Cannot enable prod mode after platform setup.');
-        }
-        _devMode = false;
-    }
-    /**
-     * Returns whether Angular is in development mode. After called once,
-     * the value is locked and won't change any more.
-     *
-     * By default, this is true, unless a user calls `enableProdMode` before calling this.
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @return {?}
-     */
-    function isDevMode() {
-        _runModeLocked = true;
-        return _devMode;
-    }
-    /**
-     * A token for third-party components that can register themselves with NgProbe.
-     *
-     * \@experimental
-     */
-
-    var NgProbeToken =
-    /**
-     * @param {?} name
-     * @param {?} token
-     */
-    function NgProbeToken(name, token) {
-        _classCallCheck(this, NgProbeToken);
-
-        this.name = name;
-        this.token = token;
-    };
-
-    /**
-     * Creates a platform.
-     * Platforms have to be eagerly created via this function.
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @param {?} injector
-     * @return {?}
-     */
-    function createPlatform(injector) {
-        if (_platform && !_platform.destroyed && !_platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
-            throw new Error('There can be only one platform. Destroy the previous one to create a new one.');
-        }
-        _platform = injector.get(PlatformRef);
-        var /** @type {?} */inits = injector.get(PLATFORM_INITIALIZER, null);
-        if (inits) inits.forEach(function (init) {
-            return init();
-        });
-        return _platform;
-    }
-    /**
-     * Creates a factory for a platform
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @param {?} parentPlatformFactory
-     * @param {?} name
-     * @param {?=} providers
-     * @return {?}
-     */
-    function createPlatformFactory(parentPlatformFactory, name) {
-        var providers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-        var /** @type {?} */marker = new InjectionToken('Platform: ' + name);
-        return function () {
-            var extraProviders = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-            var /** @type {?} */platform = getPlatform();
-            if (!platform || platform.injector.get(ALLOW_MULTIPLE_PLATFORMS, false)) {
-                if (parentPlatformFactory) {
-                    parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
-                } else {
-                    createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
-                }
-            }
-            return assertPlatform(marker);
-        };
-    }
-    /**
-     * Checks that there currently is a platform which contains the given token as a provider.
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @param {?} requiredToken
-     * @return {?}
-     */
-    function assertPlatform(requiredToken) {
-        var /** @type {?} */platform = getPlatform();
-        if (!platform) {
-            throw new Error('No platform exists!');
-        }
-        if (!platform.injector.get(requiredToken, null)) {
-            throw new Error('A platform with a different configuration has been created. Please destroy it first.');
-        }
-        return platform;
-    }
-    /**
-     * Destroy the existing platform.
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @return {?}
-     */
-    function destroyPlatform() {
-        if (_platform && !_platform.destroyed) {
-            _platform.destroy();
-        }
-    }
-    /**
-     * Returns the current platform.
-     *
-     * \@experimental APIs related to application bootstrap are currently under review.
-     * @return {?}
-     */
-    function getPlatform() {
-        return _platform && !_platform.destroyed ? _platform : null;
-    }
-    /**
-     * The Angular platform is the entry point for Angular on a web page. Each page
-     * has exactly one platform, and services (such as reflection) which are common
-     * to every Angular application running on the page are bound in its scope.
-     *
-     * A page's platform is initialized implicitly when {\@link bootstrap}() is called, or
-     * explicitly by calling {\@link createPlatform}().
-     *
-     * \@stable
-     * @abstract
-     */
-
-    var PlatformRef = function () {
-        function PlatformRef() {
-            _classCallCheck(this, PlatformRef);
-        }
-
-        _createClass(PlatformRef, [{
-            key: 'bootstrapModuleFactory',
-            value: function bootstrapModuleFactory(moduleFactory) {}
-        }, {
-            key: 'bootstrapModule',
-            value: function bootstrapModule(moduleType, compilerOptions) {}
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {}
-        }, {
-            key: 'injector',
-            value: function injector() {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'destroyed',
-            value: function destroyed() {}
-        }]);
-
-        return PlatformRef;
-    }();
-
-    /**
-     * @param {?} errorHandler
-     * @param {?} callback
-     * @return {?}
-     */
-    function _callAndReportToErrorHandler(errorHandler, callback) {
-        try {
-            var /** @type {?} */result = callback();
-            if (isPromise(result)) {
-                return result.catch(function (e) {
-                    errorHandler.handleError(e);
-                    // rethrow as the exception handler might not do it
-                    throw e;
-                });
-            }
-            return result;
-        } catch (e) {
-            errorHandler.handleError(e);
-            // rethrow as the exception handler might not do it
-            throw e;
-        }
-    }
-    /**
-     * workaround https://github.com/angular/tsickle/issues/350
-     * @suppress {checkTypes}
-     */
-
-    var PlatformRef_ = function (_PlatformRef) {
-        _inherits(PlatformRef_, _PlatformRef);
-
-        /**
-         * @param {?} _injector
-         */
-        function PlatformRef_(_injector) {
-            _classCallCheck(this, PlatformRef_);
-
-            var _this15 = _possibleConstructorReturn(this, (PlatformRef_.__proto__ || Object.getPrototypeOf(PlatformRef_)).call(this));
-
-            _this15._injector = _injector;
-            _this15._modules = [];
-            _this15._destroyListeners = [];
-            _this15._destroyed = false;
-            return _this15;
-        }
-        /**
-         * @param {?} callback
-         * @return {?}
-         */
-
-
-        _createClass(PlatformRef_, [{
-            key: 'onDestroy',
-            value: function onDestroy(callback) {
-                this._destroyListeners.push(callback);
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (this._destroyed) {
-                    throw new Error('The platform has already been destroyed!');
-                }
-                this._modules.slice().forEach(function (module) {
-                    return module.destroy();
-                });
-                this._destroyListeners.forEach(function (listener) {
-                    return listener();
-                });
-                this._destroyed = true;
-            }
-        }, {
-            key: 'bootstrapModuleFactory',
-            value: function bootstrapModuleFactory(moduleFactory) {
-                return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
-            }
-        }, {
-            key: '_bootstrapModuleFactoryWithZone',
-            value: function _bootstrapModuleFactoryWithZone(moduleFactory, ngZone) {
-                var _this16 = this;
-
-                // Note: We need to create the NgZone _before_ we instantiate the module,
-                // as instantiating the module creates some providers eagerly.
-                // So we create a mini parent injector that just contains the new NgZone and
-                // pass that as parent to the NgModuleFactory.
-                if (!ngZone) ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
-                // Attention: Don't use ApplicationRef.run here,
-                // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
-                return ngZone.run(function () {
-                    var /** @type {?} */ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this16.injector);
-                    var /** @type {?} */moduleRef = moduleFactory.create(ngZoneInjector);
-                    var /** @type {?} */exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
-                    if (!exceptionHandler) {
-                        throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
-                    }
-                    moduleRef.onDestroy(function () {
-                        return ListWrapper.remove(_this16._modules, moduleRef);
-                    });
-                    ngZone.onError.subscribe({ next: function next(error) {
-                            exceptionHandler.handleError(error);
-                        } });
-                    return _callAndReportToErrorHandler(exceptionHandler, function () {
-                        var /** @type {?} */initStatus = moduleRef.injector.get(ApplicationInitStatus);
-                        return initStatus.donePromise.then(function () {
-                            _this16._moduleDoBootstrap(moduleRef);
-                            return moduleRef;
-                        });
-                    });
-                });
-            }
-        }, {
-            key: 'bootstrapModule',
-            value: function bootstrapModule(moduleType) {
-                var compilerOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-                return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
-            }
-        }, {
-            key: '_bootstrapModuleWithZone',
-            value: function _bootstrapModuleWithZone(moduleType) {
-                var _this17 = this;
-
-                var compilerOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-                var ngZone = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-                var /** @type {?} */compilerFactory = this.injector.get(CompilerFactory);
-                var /** @type {?} */compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
-                return compiler.compileModuleAsync(moduleType).then(function (moduleFactory) {
-                    return _this17._bootstrapModuleFactoryWithZone(moduleFactory, ngZone);
-                });
-            }
-        }, {
-            key: '_moduleDoBootstrap',
-            value: function _moduleDoBootstrap(moduleRef) {
-                var /** @type {?} */appRef = moduleRef.injector.get(ApplicationRef);
-                if (moduleRef.bootstrapFactories.length > 0) {
-                    moduleRef.bootstrapFactories.forEach(function (compFactory) {
-                        return appRef.bootstrap(compFactory);
-                    });
-                } else if (moduleRef.instance.ngDoBootstrap) {
-                    moduleRef.instance.ngDoBootstrap(appRef);
-                } else {
-                    throw new Error('The module ' + stringify(moduleRef.instance.constructor) + ' was bootstrapped, but it does not declare "@NgModule.bootstrap" components nor a "ngDoBootstrap" method. ' + 'Please define one of these.');
-                }
-                this._modules.push(moduleRef);
-            }
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this._injector;
-            }
-        }, {
-            key: 'destroyed',
-            get: function get() {
-                return this._destroyed;
-            }
-        }]);
-
-        return PlatformRef_;
-    }(PlatformRef);
-
-    PlatformRef_.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    PlatformRef_.ctorParameters = function () {
-        return [{ type: Injector }];
-    };
-    /**
-     * A reference to an Angular application running on a page.
-     *
-     * For more about Angular applications, see the documentation for {\@link bootstrap}.
-     *
-     * \@stable
-     * @abstract
-     */
-
-    var ApplicationRef = function () {
-        function ApplicationRef() {
-            _classCallCheck(this, ApplicationRef);
-        }
-
-        _createClass(ApplicationRef, [{
-            key: 'bootstrap',
-            value: function bootstrap(componentFactory) {}
-        }, {
-            key: 'tick',
-            value: function tick() {}
-        }, {
-            key: 'componentTypes',
-            value: function componentTypes() {}
-        }, {
-            key: 'components',
-            value: function components() {}
-        }, {
-            key: 'attachView',
-            value: function attachView(view) {}
-        }, {
-            key: 'detachView',
-            value: function detachView(view) {}
-        }, {
-            key: 'viewCount',
-            value: function viewCount() {}
-        }, {
-            key: 'isStable',
-            value: function isStable() {}
-        }]);
-
-        return ApplicationRef;
-    }();
-
-    var ApplicationRef_ = function (_ApplicationRef) {
-        _inherits(ApplicationRef_, _ApplicationRef);
-
-        /**
-         * @param {?} _zone
-         * @param {?} _console
-         * @param {?} _injector
-         * @param {?} _exceptionHandler
-         * @param {?} _componentFactoryResolver
-         * @param {?} _initStatus
-         * @param {?} _testabilityRegistry
-         * @param {?} _testability
-         */
-        function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
-            _classCallCheck(this, ApplicationRef_);
-
-            var _this18 = _possibleConstructorReturn(this, (ApplicationRef_.__proto__ || Object.getPrototypeOf(ApplicationRef_)).call(this));
-
-            _this18._zone = _zone;
-            _this18._console = _console;
-            _this18._injector = _injector;
-            _this18._exceptionHandler = _exceptionHandler;
-            _this18._componentFactoryResolver = _componentFactoryResolver;
-            _this18._initStatus = _initStatus;
-            _this18._testabilityRegistry = _testabilityRegistry;
-            _this18._testability = _testability;
-            _this18._bootstrapListeners = [];
-            _this18._rootComponents = [];
-            _this18._rootComponentTypes = [];
-            _this18._views = [];
-            _this18._runningTick = false;
-            _this18._enforceNoNewChanges = false;
-            _this18._stable = true;
-            _this18._enforceNoNewChanges = isDevMode();
-            _this18._zone.onMicrotaskEmpty.subscribe({ next: function next() {
-                    _this18._zone.run(function () {
-                        _this18.tick();
-                    });
-                } });
-            var isCurrentlyStable = new _Observable.Observable(function (observer) {
-                _this18._stable = _this18._zone.isStable && !_this18._zone.hasPendingMacrotasks && !_this18._zone.hasPendingMicrotasks;
-                _this18._zone.runOutsideAngular(function () {
-                    observer.next(_this18._stable);
-                    observer.complete();
-                });
-            });
-            var isStable = new _Observable.Observable(function (observer) {
-                var stableSub = _this18._zone.onStable.subscribe(function () {
-                    NgZone.assertNotInAngularZone();
-                    // Check whether there are no pending macro/micro tasks in the next tick
-                    // to allow for NgZone to update the state.
-                    scheduleMicroTask(function () {
-                        if (!_this18._stable && !_this18._zone.hasPendingMacrotasks && !_this18._zone.hasPendingMicrotasks) {
-                            _this18._stable = true;
-                            observer.next(true);
-                        }
-                    });
-                });
-                var unstableSub = _this18._zone.onUnstable.subscribe(function () {
-                    NgZone.assertInAngularZone();
-                    if (_this18._stable) {
-                        _this18._stable = false;
-                        _this18._zone.runOutsideAngular(function () {
-                            observer.next(false);
-                        });
-                    }
-                });
-                return function () {
-                    stableSub.unsubscribe();
-                    unstableSub.unsubscribe();
-                };
-            });
-            _this18._isStable = (0, _merge.merge)(isCurrentlyStable, _share.share.call(isStable));
-            return _this18;
-        }
-        /**
-         * @param {?} viewRef
-         * @return {?}
-         */
-
-
-        _createClass(ApplicationRef_, [{
-            key: 'attachView',
-            value: function attachView(viewRef) {
-                var /** @type {?} */view = viewRef;
-                this._views.push(view);
-                view.attachToAppRef(this);
-            }
-        }, {
-            key: 'detachView',
-            value: function detachView(viewRef) {
-                var /** @type {?} */view = viewRef;
-                ListWrapper.remove(this._views, view);
-                view.detachFromAppRef();
-            }
-        }, {
-            key: 'bootstrap',
-            value: function bootstrap(componentOrFactory) {
-                var _this19 = this;
-
-                if (!this._initStatus.done) {
-                    throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
-                }
-                var /** @type {?} */componentFactory = void 0;
-                if (componentOrFactory instanceof ComponentFactory) {
-                    componentFactory = componentOrFactory;
-                } else {
-                    componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
-                }
-                this._rootComponentTypes.push(componentFactory.componentType);
-                var /** @type {?} */compRef = componentFactory.create(this._injector, [], componentFactory.selector);
-                compRef.onDestroy(function () {
-                    _this19._unloadComponent(compRef);
-                });
-                var /** @type {?} */testability = compRef.injector.get(Testability, null);
-                if (testability) {
-                    compRef.injector.get(TestabilityRegistry).registerApplication(compRef.location.nativeElement, testability);
-                }
-                this._loadComponent(compRef);
-                if (isDevMode()) {
-                    this._console.log('Angular is running in the development mode. Call enableProdMode() to enable the production mode.');
-                }
-                return compRef;
-            }
-        }, {
-            key: '_loadComponent',
-            value: function _loadComponent(componentRef) {
-                this.attachView(componentRef.hostView);
-                this.tick();
-                this._rootComponents.push(componentRef);
-                // Get the listeners lazily to prevent DI cycles.
-                var /** @type {?} */listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
-                listeners.forEach(function (listener) {
-                    return listener(componentRef);
-                });
-            }
-        }, {
-            key: '_unloadComponent',
-            value: function _unloadComponent(componentRef) {
-                this.detachView(componentRef.hostView);
-                ListWrapper.remove(this._rootComponents, componentRef);
-            }
-        }, {
-            key: 'tick',
-            value: function tick() {
-                if (this._runningTick) {
-                    throw new Error('ApplicationRef.tick is called recursively');
-                }
-                var /** @type {?} */scope = ApplicationRef_._tickScope();
-                try {
-                    this._runningTick = true;
-                    this._views.forEach(function (view) {
-                        return view.detectChanges();
-                    });
-                    if (this._enforceNoNewChanges) {
-                        this._views.forEach(function (view) {
-                            return view.checkNoChanges();
-                        });
-                    }
-                } finally {
-                    this._runningTick = false;
-                    wtfLeave(scope);
-                }
-            }
-        }, {
-            key: 'ngOnDestroy',
-            value: function ngOnDestroy() {
-                // TODO(alxhub): Dispose of the NgZone.
-                this._views.slice().forEach(function (view) {
-                    return view.destroy();
-                });
-            }
-        }, {
-            key: 'viewCount',
-            get: function get() {
-                return this._views.length;
-            }
-        }, {
-            key: 'componentTypes',
-            get: function get() {
-                return this._rootComponentTypes;
-            }
-        }, {
-            key: 'components',
-            get: function get() {
-                return this._rootComponents;
-            }
-        }, {
-            key: 'isStable',
-            get: function get() {
-                return this._isStable;
-            }
-        }]);
-
-        return ApplicationRef_;
-    }(ApplicationRef);
-
-    /** @internal */
-    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef_.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    ApplicationRef_.ctorParameters = function () {
-        return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }, { type: TestabilityRegistry, decorators: [{ type: Optional }] }, { type: Testability, decorators: [{ type: Optional }] }];
-    };
-
-    /**
-     * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
-     *
-     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
-     * NgModule Instance.
-     *
-     * \@stable
-     * @abstract
-     */
-
-    var NgModuleRef = function () {
-        function NgModuleRef() {
-            _classCallCheck(this, NgModuleRef);
-        }
-
-        _createClass(NgModuleRef, [{
-            key: 'injector',
-            value: function injector() {}
-        }, {
-            key: 'componentFactoryResolver',
-            value: function componentFactoryResolver() {}
-        }, {
-            key: 'instance',
-            value: function instance() {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {}
-        }]);
-
-        return NgModuleRef;
-    }();
-
-    var NgModuleFactory = function () {
-        /**
-         * @param {?} _injectorClass
-         * @param {?} _moduleType
-         */
-        function NgModuleFactory(_injectorClass, _moduleType) {
-            _classCallCheck(this, NgModuleFactory);
-
-            this._injectorClass = _injectorClass;
-            this._moduleType = _moduleType;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(NgModuleFactory, [{
-            key: 'create',
-            value: function create(parentInjector) {
-                if (!parentInjector) {
-                    parentInjector = Injector.NULL;
-                }
-                var /** @type {?} */instance = new this._injectorClass(parentInjector);
-                instance.create();
-                return instance;
-            }
-        }, {
-            key: 'moduleType',
-            get: function get() {
-                return this._moduleType;
-            }
-        }]);
-
-        return NgModuleFactory;
-    }();
-
-    var /** @type {?} */_UNDEFINED = new Object();
-    /**
-     * @abstract
-     */
-
-    var NgModuleInjector = function (_CodegenComponentFact) {
-        _inherits(NgModuleInjector, _CodegenComponentFact);
-
-        /**
-         * @param {?} parent
-         * @param {?} factories
-         * @param {?} bootstrapFactories
-         */
-        function NgModuleInjector(parent, factories, bootstrapFactories) {
-            _classCallCheck(this, NgModuleInjector);
-
-            var _this20 = _possibleConstructorReturn(this, (NgModuleInjector.__proto__ || Object.getPrototypeOf(NgModuleInjector)).call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL)));
-
-            _this20.parent = parent;
-            _this20.bootstrapFactories = bootstrapFactories;
-            _this20._destroyListeners = [];
-            _this20._destroyed = false;
-            return _this20;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(NgModuleInjector, [{
-            key: 'create',
-            value: function create() {
-                this.instance = this.createInternal();
-            }
-        }, {
-            key: 'createInternal',
-            value: function createInternal() {}
-        }, {
-            key: 'get',
-            value: function get(token) {
-                var notFoundValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : THROW_IF_NOT_FOUND;
-
-                if (token === Injector || token === ComponentFactoryResolver) {
-                    return this;
-                }
-                var /** @type {?} */result = this.getInternal(token, _UNDEFINED);
-                return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
-            }
-        }, {
-            key: 'getInternal',
-            value: function getInternal(token, notFoundValue) {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (this._destroyed) {
-                    throw new Error('The ng module ' + stringify(this.instance.constructor) + ' has already been destroyed.');
-                }
-                this._destroyed = true;
-                this.destroyInternal();
-                this._destroyListeners.forEach(function (listener) {
-                    return listener();
-                });
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {
-                this._destroyListeners.push(callback);
-            }
-        }, {
-            key: 'destroyInternal',
-            value: function destroyInternal() {}
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this;
-            }
-        }, {
-            key: 'componentFactoryResolver',
-            get: function get() {
-                return this;
-            }
-        }]);
-
-        return NgModuleInjector;
-    }(CodegenComponentFactoryResolver);
-
-    var NgModuleFactoryLoader = function () {
-        function NgModuleFactoryLoader() {
-            _classCallCheck(this, NgModuleFactoryLoader);
-        }
-
-        _createClass(NgModuleFactoryLoader, [{
-            key: 'load',
-            value: function load(path) {}
-        }]);
-
-        return NgModuleFactoryLoader;
-    }();
-
-    var /** @type {?} */moduleFactories = new Map();
-    /**
-     * Registers a loaded module. Should only be called from generated NgModuleFactory code.
-     * \@experimental
-     * @param {?} id
-     * @param {?} factory
-     * @return {?}
-     */
-    function registerModuleFactory(id, factory) {
-        var /** @type {?} */existing = moduleFactories.get(id);
-        if (existing) {
-            throw new Error('Duplicate module registered for ' + id + ' - ' + existing.moduleType.name + ' vs ' + factory.moduleType.name);
-        }
-        moduleFactories.set(id, factory);
-    }
-    /**
-     * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
-     * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
-     * cannot be found.
-     * \@experimental
-     * @param {?} id
-     * @return {?}
-     */
-    function getModuleFactory(id) {
-        var /** @type {?} */factory = moduleFactories.get(id);
-        if (!factory) throw new Error('No module with ID ' + id + ' loaded');
-        return factory;
-    }
-
-    /**
-     * An unmodifiable list of items that Angular keeps up to date when the state
-     * of the application changes.
-     *
-     * The type of object that {\@link Query} and {\@link ViewQueryMetadata} provide.
-     *
-     * Implements an iterable interface, therefore it can be used in both ES6
-     * javascript `for (var i of items)` loops as well as in Angular templates with
-     * `*ngFor="let i of myList"`.
-     *
-     * Changes can be observed by subscribing to the changes `Observable`.
-     *
-     * NOTE: In the future this class will implement an `Observable` interface.
-     *
-     * ### Example ([live demo](http://plnkr.co/edit/RX8sJnQYl9FWuSCWme5z?p=preview))
-     * ```typescript
-     * \@Component({...})
-     * class Container {
-     *   \@ViewChildren(Item) items:QueryList<Item>;
-     * }
-     * ```
-     * \@stable
-     */
-
-    var QueryList = function () {
-        function QueryList() {
-            _classCallCheck(this, QueryList);
-
-            this._dirty = true;
-            this._results = [];
-            this._emitter = new EventEmitter();
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(QueryList, [{
-            key: 'map',
-            value: function map(fn) {
-                return this._results.map(fn);
-            }
-        }, {
-            key: 'filter',
-            value: function filter(fn) {
-                return this._results.filter(fn);
-            }
-        }, {
-            key: 'find',
-            value: function find(fn) {
-                return this._results.find(fn);
-            }
-        }, {
-            key: 'reduce',
-            value: function reduce(fn, init) {
-                return this._results.reduce(fn, init);
-            }
-        }, {
-            key: 'forEach',
-            value: function forEach(fn) {
-                this._results.forEach(fn);
-            }
-        }, {
-            key: 'some',
-            value: function some(fn) {
-                return this._results.some(fn);
-            }
-        }, {
-            key: 'toArray',
-            value: function toArray() {
-                return this._results.slice();
-            }
-        }, {
-            key: getSymbolIterator(),
-            value: function value() {
-                return this._results[getSymbolIterator()]();
-            }
-        }, {
-            key: 'toString',
-            value: function toString() {
-                return this._results.toString();
-            }
-        }, {
-            key: 'reset',
-            value: function reset(res) {
-                this._results = ListWrapper.flatten(res);
-                this._dirty = false;
-            }
-        }, {
-            key: 'notifyOnChanges',
-            value: function notifyOnChanges() {
-                this._emitter.emit(this);
-            }
-        }, {
-            key: 'setDirty',
-            value: function setDirty() {
-                this._dirty = true;
-            }
-        }, {
-            key: 'changes',
-            get: function get() {
-                return this._emitter;
-            }
-        }, {
-            key: 'length',
-            get: function get() {
-                return this._results.length;
-            }
-        }, {
-            key: 'first',
-            get: function get() {
-                return this._results[0];
-            }
-        }, {
-            key: 'last',
-            get: function get() {
-                return this._results[this.length - 1];
-            }
-        }, {
-            key: 'dirty',
-            get: function get() {
-                return this._dirty;
-            }
-        }]);
-
-        return QueryList;
-    }();
-
-    var /** @type {?} */_SEPARATOR = '#';
-    var /** @type {?} */FACTORY_CLASS_SUFFIX = 'NgFactory';
-    /**
-     * Configuration for SystemJsNgModuleLoader.
-     * token.
-     *
-     * \@experimental
-     * @abstract
-     */
-
-    var SystemJsNgModuleLoaderConfig = function SystemJsNgModuleLoaderConfig() {
-        _classCallCheck(this, SystemJsNgModuleLoaderConfig);
-    };
-
-    var /** @type {?} */DEFAULT_CONFIG = {
-        factoryPathPrefix: '',
-        factoryPathSuffix: '.ngfactory'
-    };
-    /**
-     * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
-     * \@experimental
-     */
-
-    var SystemJsNgModuleLoader = function () {
-        /**
-         * @param {?} _compiler
-         * @param {?=} config
-         */
-        function SystemJsNgModuleLoader(_compiler, config) {
-            _classCallCheck(this, SystemJsNgModuleLoader);
-
-            this._compiler = _compiler;
-            this._config = config || DEFAULT_CONFIG;
-        }
-        /**
-         * @param {?} path
-         * @return {?}
-         */
-
-
-        _createClass(SystemJsNgModuleLoader, [{
-            key: 'load',
-            value: function load(path) {
-                var /** @type {?} */offlineMode = this._compiler instanceof Compiler;
-                return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
-            }
-        }, {
-            key: 'loadAndCompile',
-            value: function loadAndCompile(path) {
-                var _this21 = this;
-
-                var _path$split = path.split(_SEPARATOR),
-                    _path$split2 = _slicedToArray(_path$split, 2),
-                    module = _path$split2[0],
-                    exportName = _path$split2[1];
-
-                if (exportName === undefined) {
-                    exportName = 'default';
-                }
-                return System.import(module).then(function (module) {
-                    return module[exportName];
-                }).then(function (type) {
-                    return checkNotEmpty(type, module, exportName);
-                }).then(function (type) {
-                    return _this21._compiler.compileModuleAsync(type);
-                });
-            }
-        }, {
-            key: 'loadFactory',
-            value: function loadFactory(path) {
-                var _path$split3 = path.split(_SEPARATOR),
-                    _path$split4 = _slicedToArray(_path$split3, 2),
-                    module = _path$split4[0],
-                    exportName = _path$split4[1];
-
-                var /** @type {?} */factoryClassSuffix = FACTORY_CLASS_SUFFIX;
-                if (exportName === undefined) {
-                    exportName = 'default';
-                    factoryClassSuffix = '';
-                }
-                return System.import(this._config.factoryPathPrefix + module + this._config.factoryPathSuffix).then(function (module) {
-                    return module[exportName + factoryClassSuffix];
-                }).then(function (factory) {
-                    return checkNotEmpty(factory, module, exportName);
-                });
-            }
-        }]);
-
-        return SystemJsNgModuleLoader;
-    }();
-
-    SystemJsNgModuleLoader.decorators = [{ type: Injectable }];
-    /** @nocollapse */
-    SystemJsNgModuleLoader.ctorParameters = function () {
-        return [{ type: Compiler }, { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }];
-    };
-    /**
-     * @param {?} value
-     * @param {?} modulePath
-     * @param {?} exportName
-     * @return {?}
-     */
-    function checkNotEmpty(value, modulePath, exportName) {
-        if (!value) {
-            throw new Error('Cannot find \'' + exportName + '\' in \'' + modulePath + '\'');
-        }
-        return value;
-    }
-
-    /**
-     * Represents an Embedded Template that can be used to instantiate Embedded Views.
-     *
-     * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
-     * (or directive prefixed with `*`) and have the `TemplateRef` for this Embedded View injected into
-     * the constructor of the directive using the `TemplateRef` Token. Alternatively you can query for
-     * the `TemplateRef` from a Component or a Directive via {\@link Query}.
-     *
-     * To instantiate Embedded Views based on a Template, use
-     * {\@link ViewContainerRef#createEmbeddedView}, which will create the View and attach it to the
-     * View Container.
-     * \@stable
-     * @abstract
-     */
-
-    var TemplateRef = function () {
-        function TemplateRef() {
-            _classCallCheck(this, TemplateRef);
-        }
-
-        _createClass(TemplateRef, [{
-            key: 'elementRef',
-            value: function elementRef() {}
-        }, {
-            key: 'createEmbeddedView',
-            value: function createEmbeddedView(context) {}
-        }]);
-
-        return TemplateRef;
-    }();
-
-    var TemplateRef_ = function (_TemplateRef) {
-        _inherits(TemplateRef_, _TemplateRef);
-
-        /**
-         * @param {?} _parentView
-         * @param {?} _nodeIndex
-         * @param {?} _nativeElement
-         */
-        function TemplateRef_(_parentView, _nodeIndex, _nativeElement) {
-            _classCallCheck(this, TemplateRef_);
-
-            var _this22 = _possibleConstructorReturn(this, (TemplateRef_.__proto__ || Object.getPrototypeOf(TemplateRef_)).call(this));
-
-            _this22._parentView = _parentView;
-            _this22._nodeIndex = _nodeIndex;
-            _this22._nativeElement = _nativeElement;
-            return _this22;
-        }
-        /**
-         * @param {?} context
-         * @return {?}
-         */
-
-
-        _createClass(TemplateRef_, [{
-            key: 'createEmbeddedView',
-            value: function createEmbeddedView(context) {
-                var /** @type {?} */view = this._parentView.createEmbeddedViewInternal(this._nodeIndex);
-                view.create(context || {});
-                return view.ref;
-            }
-        }, {
-            key: 'elementRef',
-            get: function get() {
-                return new ElementRef(this._nativeElement);
-            }
-        }]);
-
-        return TemplateRef_;
-    }(TemplateRef);
-
-    var ViewContainerRef = function () {
-        function ViewContainerRef() {
-            _classCallCheck(this, ViewContainerRef);
-        }
-
-        _createClass(ViewContainerRef, [{
-            key: 'element',
-            value: function element() {}
-        }, {
-            key: 'injector',
-            value: function injector() {}
-        }, {
-            key: 'parentInjector',
-            value: function parentInjector() {}
-        }, {
-            key: 'clear',
-            value: function clear() {}
-        }, {
-            key: 'get',
-            value: function get(index) {}
-        }, {
-            key: 'length',
-            value: function length() {}
-        }, {
-            key: 'createEmbeddedView',
-            value: function createEmbeddedView(templateRef, context, index) {}
-        }, {
-            key: 'createComponent',
-            value: function createComponent(componentFactory, index, injector, projectableNodes) {}
-        }, {
-            key: 'insert',
-            value: function insert(viewRef, index) {}
-        }, {
-            key: 'move',
-            value: function move(viewRef, currentIndex) {}
-        }, {
-            key: 'indexOf',
-            value: function indexOf(viewRef) {}
-        }, {
-            key: 'remove',
-            value: function remove(index) {}
-        }, {
-            key: 'detach',
-            value: function detach(index) {}
-        }]);
-
-        return ViewContainerRef;
-    }();
-
-    var ViewContainerRef_ = function () {
-        /**
-         * @param {?} _element
-         */
-        function ViewContainerRef_(_element) {
-            _classCallCheck(this, ViewContainerRef_);
-
-            this._element = _element;
-            /** @internal */
-            this._createComponentInContainerScope = wtfCreateScope('ViewContainerRef#createComponent()');
-            /** @internal */
-            this._insertScope = wtfCreateScope('ViewContainerRef#insert()');
-            /** @internal */
-            this._removeScope = wtfCreateScope('ViewContainerRef#remove()');
-            /** @internal */
-            this._detachScope = wtfCreateScope('ViewContainerRef#detach()');
-        }
-        /**
-         * @param {?} index
-         * @return {?}
-         */
-
-
-        _createClass(ViewContainerRef_, [{
-            key: 'get',
-            value: function get(index) {
-                return this._element.nestedViews[index].ref;
-            }
-        }, {
-            key: 'createEmbeddedView',
-            value: function createEmbeddedView(templateRef) {
-                var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-                var index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
-
-                var /** @type {?} */viewRef = templateRef.createEmbeddedView(context);
-                this.insert(viewRef, index);
-                return viewRef;
-            }
-        }, {
-            key: 'createComponent',
-            value: function createComponent(componentFactory) {
-                var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-                var injector = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-                var projectableNodes = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-                var /** @type {?} */s = this._createComponentInContainerScope();
-                var /** @type {?} */contextInjector = injector || this._element.parentInjector;
-                var /** @type {?} */componentRef = componentFactory.create(contextInjector, projectableNodes);
-                this.insert(componentRef.hostView, index);
-                return wtfLeave(s, componentRef);
-            }
-        }, {
-            key: 'insert',
-            value: function insert(viewRef) {
-                var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-
-                var /** @type {?} */s = this._insertScope();
-                if (index == -1) index = this.length;
-                var /** @type {?} */viewRef_ = viewRef;
-                this._element.attachView(viewRef_.internalView, index);
-                return wtfLeave(s, viewRef_);
-            }
-        }, {
-            key: 'move',
-            value: function move(viewRef, currentIndex) {
-                var /** @type {?} */s = this._insertScope();
-                if (currentIndex == -1) return;
-                var /** @type {?} */viewRef_ = viewRef;
-                this._element.moveView(viewRef_.internalView, currentIndex);
-                return wtfLeave(s, viewRef_);
-            }
-        }, {
-            key: 'indexOf',
-            value: function indexOf(viewRef) {
-                return this.length ? this._element.nestedViews.indexOf(viewRef.internalView) : -1;
-            }
-        }, {
-            key: 'remove',
-            value: function remove() {
-                var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
-
-                var /** @type {?} */s = this._removeScope();
-                if (index == -1) index = this.length - 1;
-                var /** @type {?} */view = this._element.detachView(index);
-                view.destroy();
-                // view is intentionally not returned to the client.
-                wtfLeave(s);
-            }
-        }, {
-            key: 'detach',
-            value: function detach() {
-                var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
-
-                var /** @type {?} */s = this._detachScope();
-                if (index == -1) index = this.length - 1;
-                var /** @type {?} */view = this._element.detachView(index);
-                return wtfLeave(s, view.ref);
-            }
-        }, {
-            key: 'clear',
-            value: function clear() {
-                for (var /** @type {?} */i = this.length - 1; i >= 0; i--) {
-                    this.remove(i);
-                }
-            }
-        }, {
-            key: 'length',
-            get: function get() {
-                var /** @type {?} */views = this._element.nestedViews;
-                return views ? views.length : 0;
-            }
-        }, {
-            key: 'element',
-            get: function get() {
-                return this._element.elementRef;
-            }
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this._element.injector;
-            }
-        }, {
-            key: 'parentInjector',
-            get: function get() {
-                return this._element.parentInjector;
-            }
-        }]);
-
-        return ViewContainerRef_;
-    }();
-
-    var ViewRef = function (_ChangeDetectorRef) {
-        _inherits(ViewRef, _ChangeDetectorRef);
-
-        function ViewRef() {
-            _classCallCheck(this, ViewRef);
-
-            return _possibleConstructorReturn(this, (ViewRef.__proto__ || Object.getPrototypeOf(ViewRef)).apply(this, arguments));
-        }
-
-        _createClass(ViewRef, [{
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'destroyed',
-            value: function destroyed() {}
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {}
-        }]);
-
-        return ViewRef;
-    }(ChangeDetectorRef);
-
-    var EmbeddedViewRef = function (_ViewRef) {
-        _inherits(EmbeddedViewRef, _ViewRef);
-
-        function EmbeddedViewRef() {
-            _classCallCheck(this, EmbeddedViewRef);
-
-            return _possibleConstructorReturn(this, (EmbeddedViewRef.__proto__ || Object.getPrototypeOf(EmbeddedViewRef)).apply(this, arguments));
-        }
-
-        _createClass(EmbeddedViewRef, [{
-            key: 'context',
-            value: function context() {}
-        }, {
-            key: 'rootNodes',
-            value: function rootNodes() {}
-        }]);
-
-        return EmbeddedViewRef;
-    }(ViewRef);
-
-    var ViewRef_ = function () {
-        /**
-         * @param {?} _view
-         * @param {?} animationQueue
-         */
-        function ViewRef_(_view, animationQueue) {
-            _classCallCheck(this, ViewRef_);
-
-            this._view = _view;
-            this.animationQueue = animationQueue;
-            this._view = _view;
-            this._originalMode = this._view.cdMode;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(ViewRef_, [{
-            key: 'markForCheck',
-            value: function markForCheck() {
-                this._view.markPathToRootAsCheckOnce();
-            }
-        }, {
-            key: 'detach',
-            value: function detach() {
-                this._view.cdMode = ChangeDetectorStatus.Detached;
-            }
-        }, {
-            key: 'detectChanges',
-            value: function detectChanges() {
-                this._view.detectChanges(false);
-                this.animationQueue.flush();
-            }
-        }, {
-            key: 'checkNoChanges',
-            value: function checkNoChanges() {
-                this._view.detectChanges(true);
-            }
-        }, {
-            key: 'reattach',
-            value: function reattach() {
-                this._view.cdMode = this._originalMode;
-                this.markForCheck();
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(callback) {
-                if (!this._view.disposables) {
-                    this._view.disposables = [];
-                }
-                this._view.disposables.push(callback);
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                this._view.detachAndDestroy();
-            }
-        }, {
-            key: 'detachFromAppRef',
-            value: function detachFromAppRef() {
-                this._view.detach();
-            }
-        }, {
-            key: 'attachToAppRef',
-            value: function attachToAppRef(appRef) {
-                this._view.attachToAppRef(appRef);
-            }
-        }, {
-            key: 'internalView',
-            get: function get() {
-                return this._view;
-            }
-        }, {
-            key: 'rootNodes',
-            get: function get() {
-                return this._view.flatRootNodes;
-            }
-        }, {
-            key: 'context',
-            get: function get() {
-                return this._view.context;
-            }
-        }, {
-            key: 'destroyed',
-            get: function get() {
-                return this._view.destroyed;
-            }
-        }]);
-
-        return ViewRef_;
-    }();
-
-    var EventListener =
-    /**
-     * @param {?} name
-     * @param {?} callback
-     */
-    function EventListener(name, callback) {
-        _classCallCheck(this, EventListener);
-
-        this.name = name;
-        this.callback = callback;
-    };
-
-    var DebugNode = function () {
-        /**
-         * @param {?} nativeNode
-         * @param {?} parent
-         * @param {?} _debugInfo
-         */
-        function DebugNode(nativeNode, parent, _debugInfo) {
-            _classCallCheck(this, DebugNode);
-
-            this._debugInfo = _debugInfo;
-            this.nativeNode = nativeNode;
-            if (parent && parent instanceof DebugElement) {
-                parent.addChild(this);
-            } else {
-                this.parent = null;
-            }
-            this.listeners = [];
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(DebugNode, [{
-            key: 'injector',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.injector : null;
-            }
-        }, {
-            key: 'componentInstance',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.component : null;
-            }
-        }, {
-            key: 'context',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.context : null;
-            }
-        }, {
-            key: 'references',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.references : null;
-            }
-        }, {
-            key: 'providerTokens',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.providerTokens : null;
-            }
-        }, {
-            key: 'source',
-            get: function get() {
-                return this._debugInfo ? this._debugInfo.source : null;
-            }
-        }]);
-
-        return DebugNode;
-    }();
-
-    var DebugElement = function (_DebugNode) {
-        _inherits(DebugElement, _DebugNode);
-
-        /**
-         * @param {?} nativeNode
-         * @param {?} parent
-         * @param {?} _debugInfo
-         */
-        function DebugElement(nativeNode, parent, _debugInfo) {
-            _classCallCheck(this, DebugElement);
-
-            var _this25 = _possibleConstructorReturn(this, (DebugElement.__proto__ || Object.getPrototypeOf(DebugElement)).call(this, nativeNode, parent, _debugInfo));
-
-            _this25.properties = {};
-            _this25.attributes = {};
-            _this25.classes = {};
-            _this25.styles = {};
-            _this25.childNodes = [];
-            _this25.nativeElement = nativeNode;
-            return _this25;
-        }
-        /**
-         * @param {?} child
-         * @return {?}
-         */
-
-
-        _createClass(DebugElement, [{
-            key: 'addChild',
-            value: function addChild(child) {
-                if (child) {
-                    this.childNodes.push(child);
-                    child.parent = this;
-                }
-            }
-        }, {
-            key: 'removeChild',
-            value: function removeChild(child) {
-                var /** @type {?} */childIndex = this.childNodes.indexOf(child);
-                if (childIndex !== -1) {
-                    child.parent = null;
-                    this.childNodes.splice(childIndex, 1);
-                }
-            }
-        }, {
-            key: 'insertChildrenAfter',
-            value: function insertChildrenAfter(child, newChildren) {
-                var _this26 = this;
-
-                var /** @type {?} */siblingIndex = this.childNodes.indexOf(child);
-                if (siblingIndex !== -1) {
-                    var _childNodes;
-
-                    (_childNodes = this.childNodes).splice.apply(_childNodes, [siblingIndex + 1, 0].concat(_toConsumableArray(newChildren)));
-                    newChildren.forEach(function (c) {
-                        if (c.parent) {
-                            c.parent.removeChild(c);
-                        }
-                        c.parent = _this26;
-                    });
-                }
-            }
-        }, {
-            key: 'insertBefore',
-            value: function insertBefore(refChild, newChild) {
-                var /** @type {?} */refIndex = this.childNodes.indexOf(refChild);
-                if (refIndex === -1) {
-                    this.addChild(newChild);
-                } else {
-                    if (newChild.parent) {
-                        newChild.parent.removeChild(newChild);
-                    }
-                    newChild.parent = this;
-                    this.childNodes.splice(refIndex, 0, newChild);
-                }
-            }
-        }, {
-            key: 'query',
-            value: function query(predicate) {
-                var /** @type {?} */results = this.queryAll(predicate);
-                return results[0] || null;
-            }
-        }, {
-            key: 'queryAll',
-            value: function queryAll(predicate) {
-                var /** @type {?} */matches = [];
-                _queryElementChildren(this, predicate, matches);
-                return matches;
-            }
-        }, {
-            key: 'queryAllNodes',
-            value: function queryAllNodes(predicate) {
-                var /** @type {?} */matches = [];
-                _queryNodeChildren(this, predicate, matches);
-                return matches;
-            }
-        }, {
-            key: 'triggerEventHandler',
-            value: function triggerEventHandler(eventName, eventObj) {
-                this.listeners.forEach(function (listener) {
-                    if (listener.name == eventName) {
-                        listener.callback(eventObj);
-                    }
-                });
-            }
-        }, {
-            key: 'children',
-            get: function get() {
-                return this.childNodes.filter(function (node) {
-                    return node instanceof DebugElement;
-                });
-            }
-        }]);
-
-        return DebugElement;
-    }(DebugNode);
-
-    /**
-     * \@experimental
-     * @param {?} debugEls
-     * @return {?}
-     */
-    function asNativeElements(debugEls) {
-        return debugEls.map(function (el) {
-            return el.nativeElement;
-        });
-    }
-    /**
-     * @param {?} element
-     * @param {?} predicate
-     * @param {?} matches
-     * @return {?}
-     */
-    function _queryElementChildren(element, predicate, matches) {
-        element.childNodes.forEach(function (node) {
-            if (node instanceof DebugElement) {
-                if (predicate(node)) {
-                    matches.push(node);
-                }
-                _queryElementChildren(node, predicate, matches);
-            }
-        });
-    }
-    /**
-     * @param {?} parentNode
-     * @param {?} predicate
-     * @param {?} matches
-     * @return {?}
-     */
-    function _queryNodeChildren(parentNode, predicate, matches) {
-        if (parentNode instanceof DebugElement) {
-            parentNode.childNodes.forEach(function (node) {
-                if (predicate(node)) {
-                    matches.push(node);
-                }
-                if (node instanceof DebugElement) {
-                    _queryNodeChildren(node, predicate, matches);
-                }
-            });
-        }
-    }
-    // Need to keep the nodes in a global Map so that multiple angular apps are supported.
-    var /** @type {?} */_nativeNodeToDebugNode = new Map();
-    /**
-     * \@experimental
-     * @param {?} nativeNode
-     * @return {?}
-     */
-    function getDebugNode(nativeNode) {
-        return _nativeNodeToDebugNode.get(nativeNode);
-    }
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    function indexDebugNode(node) {
-        _nativeNodeToDebugNode.set(node.nativeNode, node);
-    }
-    /**
-     * @param {?} node
-     * @return {?}
-     */
-    function removeDebugNodeFromIndex(node) {
-        _nativeNodeToDebugNode.delete(node.nativeNode);
-    }
 
     /**
      * @return {?}
@@ -8493,6 +6832,39 @@
     MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
     MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
     MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
+
+    var SecurityContext = {};
+    SecurityContext.NONE = 0;
+    SecurityContext.HTML = 1;
+    SecurityContext.STYLE = 2;
+    SecurityContext.SCRIPT = 3;
+    SecurityContext.URL = 4;
+    SecurityContext.RESOURCE_URL = 5;
+    SecurityContext[SecurityContext.NONE] = "NONE";
+    SecurityContext[SecurityContext.HTML] = "HTML";
+    SecurityContext[SecurityContext.STYLE] = "STYLE";
+    SecurityContext[SecurityContext.SCRIPT] = "SCRIPT";
+    SecurityContext[SecurityContext.URL] = "URL";
+    SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
+    /**
+     * Sanitizer is used by the views to sanitize potentially dangerous values.
+     *
+     * \@stable
+     * @abstract
+     */
+
+    var Sanitizer = function () {
+        function Sanitizer() {
+            _classCallCheck(this, Sanitizer);
+        }
+
+        _createClass(Sanitizer, [{
+            key: 'sanitize',
+            value: function sanitize(context, value) {}
+        }]);
+
+        return Sanitizer;
+    }();
 
     /**
      * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -8565,7 +6937,7 @@
      * @param {?} isFirstCheck
      * @return {?}
      */
-    function expressionChangedAfterItHasBeenCheckedError$1(context, oldValue, currValue, isFirstCheck) {
+    function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValue, isFirstCheck) {
         var /** @type {?} */msg = 'ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: \'' + oldValue + '\'. Current value: \'' + currValue + '\'.';
         if (isFirstCheck) {
             msg += ' It seems like the view has been created after its parent and its children have been dirty checked.' + ' Has it been created in a change detection hook ?';
@@ -8604,7 +6976,7 @@
      * @param {?} action
      * @return {?}
      */
-    function viewDestroyedError$1(action) {
+    function viewDestroyedError(action) {
         return new Error('ViewDestroyedError: Attempt to use a destroyed view: ' + action);
     }
 
@@ -8654,7 +7026,7 @@
      * @param {?} value
      * @return {?}
      */
-    function checkBinding$1(view, def, bindingIdx, value) {
+    function checkBinding(view, def, bindingIdx, value) {
         var /** @type {?} */oldValues = view.oldValues;
         if (unwrapCounter > 0 || !!(view.state & 1 /* FirstCheck */) || !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
             unwrapCounter = 0;
@@ -8670,7 +7042,7 @@
      * @return {?}
      */
     function checkAndUpdateBinding(view, def, bindingIdx, value) {
-        if (checkBinding$1(view, def, bindingIdx, value)) {
+        if (checkBinding(view, def, bindingIdx, value)) {
             view.oldValues[def.bindingIndex + bindingIdx] = value;
             return true;
         }
@@ -8687,7 +7059,7 @@
         var /** @type {?} */oldValue = view.oldValues[def.bindingIndex + bindingIdx];
         if (unwrapCounter || view.state & 1 /* FirstCheck */ || !devModeEqual(oldValue, value)) {
             unwrapCounter = 0;
-            throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
+            throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
         }
     }
     /**
@@ -9012,6 +7384,74 @@
         }
         return ['', name];
     }
+    /**
+     * @param {?} valueCount
+     * @param {?} constAndInterp
+     * @return {?}
+     */
+    function interpolate(valueCount, constAndInterp) {
+        var /** @type {?} */result = '';
+        for (var /** @type {?} */i = 0; i < valueCount * 2; i = i + 2) {
+            result = result + constAndInterp[i] + _toStringWithNull(constAndInterp[i + 1]);
+        }
+        return result + constAndInterp[valueCount * 2];
+    }
+    /**
+     * @param {?} valueCount
+     * @param {?} c0
+     * @param {?} a1
+     * @param {?} c1
+     * @param {?=} a2
+     * @param {?=} c2
+     * @param {?=} a3
+     * @param {?=} c3
+     * @param {?=} a4
+     * @param {?=} c4
+     * @param {?=} a5
+     * @param {?=} c5
+     * @param {?=} a6
+     * @param {?=} c6
+     * @param {?=} a7
+     * @param {?=} c7
+     * @param {?=} a8
+     * @param {?=} c8
+     * @param {?=} a9
+     * @param {?=} c9
+     * @return {?}
+     */
+    function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c5, a6, c6, a7, c7, a8, c8, a9, c9) {
+        switch (valueCount) {
+            case 1:
+                return c0 + _toStringWithNull(a1) + c1;
+            case 2:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2;
+            case 3:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3;
+            case 4:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4;
+            case 5:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5;
+            case 6:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6;
+            case 7:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7;
+            case 8:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8;
+            case 9:
+                return c0 + _toStringWithNull(a1) + c1 + _toStringWithNull(a2) + c2 + _toStringWithNull(a3) + c3 + _toStringWithNull(a4) + c4 + _toStringWithNull(a5) + c5 + _toStringWithNull(a6) + c6 + _toStringWithNull(a7) + c7 + _toStringWithNull(a8) + c8 + _toStringWithNull(a9) + c9;
+            default:
+                throw new Error('Does not support more than 9 expressions');
+        }
+    }
+    /**
+     * @param {?} v
+     * @return {?}
+     */
+    function _toStringWithNull(v) {
+        return v != null ? v.toString() : '';
+    }
+    var /** @type {?} */EMPTY_ARRAY = [];
+    var /** @type {?} */EMPTY_MAP = {};
 
     var /** @type {?} */NOOP = function NOOP() {};
     /**
@@ -9470,174 +7910,6 @@
     }
 
     /**
-     * \@experimental Animation support is experimental.
-     * @abstract
-     */
-
-    var AnimationPlayer = function () {
-        function AnimationPlayer() {
-            _classCallCheck(this, AnimationPlayer);
-        }
-
-        _createClass(AnimationPlayer, [{
-            key: 'onDone',
-            value: function onDone(fn) {}
-        }, {
-            key: 'onStart',
-            value: function onStart(fn) {}
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(fn) {}
-        }, {
-            key: 'init',
-            value: function init() {}
-        }, {
-            key: 'hasStarted',
-            value: function hasStarted() {}
-        }, {
-            key: 'play',
-            value: function play() {}
-        }, {
-            key: 'pause',
-            value: function pause() {}
-        }, {
-            key: 'restart',
-            value: function restart() {}
-        }, {
-            key: 'finish',
-            value: function finish() {}
-        }, {
-            key: 'destroy',
-            value: function destroy() {}
-        }, {
-            key: 'reset',
-            value: function reset() {}
-        }, {
-            key: 'setPosition',
-            value: function setPosition(p) {}
-        }, {
-            key: 'getPosition',
-            value: function getPosition() {}
-        }, {
-            key: 'parentPlayer',
-            get: function get() {
-                throw new Error('NOT IMPLEMENTED: Base Class');
-            },
-            set: function set(player) {
-                throw new Error('NOT IMPLEMENTED: Base Class');
-            }
-        }]);
-
-        return AnimationPlayer;
-    }();
-
-    var NoOpAnimationPlayer = function () {
-        function NoOpAnimationPlayer() {
-            var _this27 = this;
-
-            _classCallCheck(this, NoOpAnimationPlayer);
-
-            this._onDoneFns = [];
-            this._onStartFns = [];
-            this._onDestroyFns = [];
-            this._started = false;
-            this._destroyed = false;
-            this._finished = false;
-            this.parentPlayer = null;
-            scheduleMicroTask(function () {
-                return _this27._onFinish();
-            });
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(NoOpAnimationPlayer, [{
-            key: '_onFinish',
-            value: function _onFinish() {
-                if (!this._finished) {
-                    this._finished = true;
-                    this._onDoneFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDoneFns = [];
-                }
-            }
-        }, {
-            key: 'onStart',
-            value: function onStart(fn) {
-                this._onStartFns.push(fn);
-            }
-        }, {
-            key: 'onDone',
-            value: function onDone(fn) {
-                this._onDoneFns.push(fn);
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(fn) {
-                this._onDestroyFns.push(fn);
-            }
-        }, {
-            key: 'hasStarted',
-            value: function hasStarted() {
-                return this._started;
-            }
-        }, {
-            key: 'init',
-            value: function init() {}
-        }, {
-            key: 'play',
-            value: function play() {
-                if (!this.hasStarted()) {
-                    this._onStartFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onStartFns = [];
-                }
-                this._started = true;
-            }
-        }, {
-            key: 'pause',
-            value: function pause() {}
-        }, {
-            key: 'restart',
-            value: function restart() {}
-        }, {
-            key: 'finish',
-            value: function finish() {
-                this._onFinish();
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (!this._destroyed) {
-                    this._destroyed = true;
-                    this.finish();
-                    this._onDestroyFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDestroyFns = [];
-                }
-            }
-        }, {
-            key: 'reset',
-            value: function reset() {}
-        }, {
-            key: 'setPosition',
-            value: function setPosition(p) {}
-        }, {
-            key: 'getPosition',
-            value: function getPosition() {
-                return 0;
-            }
-        }]);
-
-        return NoOpAnimationPlayer;
-    }();
-
-    /**
      * @param {?} parentView
      * @param {?} elementData
      * @param {?} viewIndex
@@ -9650,7 +7922,7 @@
             viewIndex = embeddedViews.length;
         }
         view.viewContainerParent = parentView;
-        addToArray$1(embeddedViews, viewIndex, view);
+        addToArray(embeddedViews, viewIndex, view);
         var /** @type {?} */dvcElementData = declaredViewContainer(view);
         if (dvcElementData && dvcElementData !== elementData) {
             var /** @type {?} */projectedViews = dvcElementData.projectedViews;
@@ -9701,7 +7973,7 @@
         if (newViewIndex == null) {
             newViewIndex = embeddedViews.length;
         }
-        addToArray$1(embeddedViews, newViewIndex, view);
+        addToArray(embeddedViews, newViewIndex, view);
         // Note: Don't need to change projectedViews as the order in there
         // as always invalid...
         Services.dirtyParentQueries(view);
@@ -9737,7 +8009,7 @@
      * @param {?} value
      * @return {?}
      */
-    function addToArray$1(arr, index, value) {
+    function addToArray(arr, index, value) {
         // perf: array.push is faster than array.splice!
         if (index >= arr.length) {
             arr.push(value);
@@ -9769,6 +8041,13 @@
     function createComponentFactory(selector, componentType, viewDefFactory) {
         return new ComponentFactory_(selector, componentType, viewDefFactory);
     }
+    /**
+     * @param {?} componentFactory
+     * @return {?}
+     */
+    function getComponentViewDefinitionFactory(componentFactory) {
+        return componentFactory.viewDefFactory;
+    }
 
     var ComponentFactory_ = function (_ComponentFactory) {
         _inherits(ComponentFactory_, _ComponentFactory);
@@ -9781,7 +8060,12 @@
         function ComponentFactory_(selector, componentType, viewDefFactory) {
             _classCallCheck(this, ComponentFactory_);
 
-            return _possibleConstructorReturn(this, (ComponentFactory_.__proto__ || Object.getPrototypeOf(ComponentFactory_)).call(this, selector, viewDefFactory, componentType));
+            var _this24 = _possibleConstructorReturn(this, (ComponentFactory_.__proto__ || Object.getPrototypeOf(ComponentFactory_)).call(this));
+
+            _this24.selector = selector;
+            _this24.componentType = componentType;
+            _this24.viewDefFactory = viewDefFactory;
+            return _this24;
         }
         /**
          * Creates a new component.
@@ -9798,43 +8082,43 @@
                 var projectableNodes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
                 var rootSelectorOrNode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
-                var /** @type {?} */viewDef = resolveViewDefinition(this._viewClass);
+                var /** @type {?} */viewDef = resolveViewDefinition(this.viewDefFactory);
                 var /** @type {?} */componentNodeIndex = viewDef.nodes[0].element.componentProvider.index;
                 var /** @type {?} */view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
                 var /** @type {?} */component = asProviderData(view, componentNodeIndex).instance;
                 view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
-                return new ComponentRef_$1(view, new ViewRef_$1(view), component);
+                return new ComponentRef_(view, new ViewRef_(view), component);
             }
         }]);
 
         return ComponentFactory_;
     }(ComponentFactory);
 
-    var ComponentRef_$1 = function (_ComponentRef2) {
-        _inherits(ComponentRef_$1, _ComponentRef2);
+    var ComponentRef_ = function (_ComponentRef) {
+        _inherits(ComponentRef_, _ComponentRef);
 
         /**
          * @param {?} _view
          * @param {?} _viewRef
          * @param {?} _component
          */
-        function ComponentRef_$1(_view, _viewRef, _component) {
-            _classCallCheck(this, ComponentRef_$1);
+        function ComponentRef_(_view, _viewRef, _component) {
+            _classCallCheck(this, ComponentRef_);
 
-            var _this29 = _possibleConstructorReturn(this, (ComponentRef_$1.__proto__ || Object.getPrototypeOf(ComponentRef_$1)).call(this));
+            var _this25 = _possibleConstructorReturn(this, (ComponentRef_.__proto__ || Object.getPrototypeOf(ComponentRef_)).call(this));
 
-            _this29._view = _view;
-            _this29._viewRef = _viewRef;
-            _this29._component = _component;
-            _this29._elDef = _this29._view.def.nodes[0];
-            return _this29;
+            _this25._view = _view;
+            _this25._viewRef = _viewRef;
+            _this25._component = _component;
+            _this25._elDef = _this25._view.def.nodes[0];
+            return _this25;
         }
         /**
          * @return {?}
          */
 
 
-        _createClass(ComponentRef_$1, [{
+        _createClass(ComponentRef_, [{
             key: 'destroy',
             value: function destroy() {
                 this._viewRef.destroy();
@@ -9876,7 +8160,7 @@
             }
         }]);
 
-        return ComponentRef_$1;
+        return ComponentRef_;
     }(ComponentRef);
 
     /**
@@ -9885,16 +8169,16 @@
      * @return {?}
      */
     function createViewContainerRef(view, elDef) {
-        return new ViewContainerRef_$1(view, elDef);
+        return new ViewContainerRef_(view, elDef);
     }
 
-    var ViewContainerRef_$1 = function () {
+    var ViewContainerRef_ = function () {
         /**
          * @param {?} _view
          * @param {?} _elDef
          */
-        function ViewContainerRef_$1(_view, _elDef) {
-            _classCallCheck(this, ViewContainerRef_$1);
+        function ViewContainerRef_(_view, _elDef) {
+            _classCallCheck(this, ViewContainerRef_);
 
             this._view = _view;
             this._elDef = _elDef;
@@ -9905,7 +8189,7 @@
          */
 
 
-        _createClass(ViewContainerRef_$1, [{
+        _createClass(ViewContainerRef_, [{
             key: 'clear',
             value: function clear() {
                 var /** @type {?} */len = this._data.embeddedViews.length;
@@ -9919,7 +8203,7 @@
             value: function get(index) {
                 var /** @type {?} */view = this._data.embeddedViews[index];
                 if (view) {
-                    var /** @type {?} */ref = new ViewRef_$1(view);
+                    var /** @type {?} */ref = new ViewRef_(view);
                     ref.attachToViewContainerRef(this);
                     return ref;
                 }
@@ -9973,7 +8257,7 @@
             key: 'detach',
             value: function detach(index) {
                 var /** @type {?} */view = detachEmbeddedView(this._data, index);
-                return view ? new ViewRef_$1(view) : null;
+                return view ? new ViewRef_(view) : null;
             }
         }, {
             key: 'element',
@@ -10003,7 +8287,7 @@
             }
         }]);
 
-        return ViewContainerRef_$1;
+        return ViewContainerRef_;
     }();
 
     /**
@@ -10011,15 +8295,15 @@
      * @return {?}
      */
     function createChangeDetectorRef(view) {
-        return new ViewRef_$1(view);
+        return new ViewRef_(view);
     }
 
-    var ViewRef_$1 = function () {
+    var ViewRef_ = function () {
         /**
          * @param {?} _view
          */
-        function ViewRef_$1(_view) {
-            _classCallCheck(this, ViewRef_$1);
+        function ViewRef_(_view) {
+            _classCallCheck(this, ViewRef_);
 
             this._view = _view;
             this._viewContainerRef = null;
@@ -10030,7 +8314,7 @@
          */
 
 
-        _createClass(ViewRef_$1, [{
+        _createClass(ViewRef_, [{
             key: 'markForCheck',
             value: function markForCheck() {
                 markParentViewsForCheck(this._view);
@@ -10113,7 +8397,7 @@
             }
         }]);
 
-        return ViewRef_$1;
+        return ViewRef_;
     }();
 
     /**
@@ -10122,24 +8406,24 @@
      * @return {?}
      */
     function createTemplateRef(view, def) {
-        return new TemplateRef_$1(view, def);
+        return new TemplateRef_(view, def);
     }
 
-    var TemplateRef_$1 = function (_TemplateRef2) {
-        _inherits(TemplateRef_$1, _TemplateRef2);
+    var TemplateRef_ = function (_TemplateRef) {
+        _inherits(TemplateRef_, _TemplateRef);
 
         /**
          * @param {?} _parentView
          * @param {?} _def
          */
-        function TemplateRef_$1(_parentView, _def) {
-            _classCallCheck(this, TemplateRef_$1);
+        function TemplateRef_(_parentView, _def) {
+            _classCallCheck(this, TemplateRef_);
 
-            var _this30 = _possibleConstructorReturn(this, (TemplateRef_$1.__proto__ || Object.getPrototypeOf(TemplateRef_$1)).call(this));
+            var _this26 = _possibleConstructorReturn(this, (TemplateRef_.__proto__ || Object.getPrototypeOf(TemplateRef_)).call(this));
 
-            _this30._parentView = _parentView;
-            _this30._def = _def;
-            return _this30;
+            _this26._parentView = _parentView;
+            _this26._def = _def;
+            return _this26;
         }
         /**
          * @param {?} context
@@ -10147,10 +8431,10 @@
          */
 
 
-        _createClass(TemplateRef_$1, [{
+        _createClass(TemplateRef_, [{
             key: 'createEmbeddedView',
             value: function createEmbeddedView(context) {
-                return new ViewRef_$1(Services.createEmbeddedView(this._parentView, this._def, context));
+                return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, context));
             }
         }, {
             key: 'elementRef',
@@ -10159,7 +8443,7 @@
             }
         }]);
 
-        return TemplateRef_$1;
+        return TemplateRef_;
     }(TemplateRef);
 
     /**
@@ -10382,7 +8666,7 @@
         }, {
             key: 'animate',
             value: function animate() {
-                return new NoOpAnimationPlayer();
+                throw new Error('Renderer.animate is no longer supported!');
             }
         }]);
 
@@ -10587,52 +8871,52 @@
         var /** @type {?} */changed = false;
         var /** @type {?} */changes = void 0;
         var /** @type {?} */bindLen = def.bindings.length;
-        if (bindLen > 0 && checkBinding$1(view, def, 0, v0)) {
+        if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
             changed = true;
             changes = updateProp(view, providerData, def, 0, v0, changes);
         }
         ;
-        if (bindLen > 1 && checkBinding$1(view, def, 1, v1)) {
+        if (bindLen > 1 && checkBinding(view, def, 1, v1)) {
             changed = true;
             changes = updateProp(view, providerData, def, 1, v1, changes);
         }
         ;
-        if (bindLen > 2 && checkBinding$1(view, def, 2, v2)) {
+        if (bindLen > 2 && checkBinding(view, def, 2, v2)) {
             changed = true;
             changes = updateProp(view, providerData, def, 2, v2, changes);
         }
         ;
-        if (bindLen > 3 && checkBinding$1(view, def, 3, v3)) {
+        if (bindLen > 3 && checkBinding(view, def, 3, v3)) {
             changed = true;
             changes = updateProp(view, providerData, def, 3, v3, changes);
         }
         ;
-        if (bindLen > 4 && checkBinding$1(view, def, 4, v4)) {
+        if (bindLen > 4 && checkBinding(view, def, 4, v4)) {
             changed = true;
             changes = updateProp(view, providerData, def, 4, v4, changes);
         }
         ;
-        if (bindLen > 5 && checkBinding$1(view, def, 5, v5)) {
+        if (bindLen > 5 && checkBinding(view, def, 5, v5)) {
             changed = true;
             changes = updateProp(view, providerData, def, 5, v5, changes);
         }
         ;
-        if (bindLen > 6 && checkBinding$1(view, def, 6, v6)) {
+        if (bindLen > 6 && checkBinding(view, def, 6, v6)) {
             changed = true;
             changes = updateProp(view, providerData, def, 6, v6, changes);
         }
         ;
-        if (bindLen > 7 && checkBinding$1(view, def, 7, v7)) {
+        if (bindLen > 7 && checkBinding(view, def, 7, v7)) {
             changed = true;
             changes = updateProp(view, providerData, def, 7, v7, changes);
         }
         ;
-        if (bindLen > 8 && checkBinding$1(view, def, 8, v8)) {
+        if (bindLen > 8 && checkBinding(view, def, 8, v8)) {
             changed = true;
             changes = updateProp(view, providerData, def, 8, v8, changes);
         }
         ;
-        if (bindLen > 9 && checkBinding$1(view, def, 9, v9)) {
+        if (bindLen > 9 && checkBinding(view, def, 9, v9)) {
             changed = true;
             changes = updateProp(view, providerData, def, 9, v9, changes);
         }
@@ -10660,7 +8944,7 @@
         var /** @type {?} */changed = false;
         var /** @type {?} */changes = void 0;
         for (var /** @type {?} */i = 0; i < values.length; i++) {
-            if (checkBinding$1(view, def, i, values[i])) {
+            if (checkBinding(view, def, i, values[i])) {
                 changed = true;
                 changes = updateProp(view, providerData, def, i, values[i], changes);
             }
@@ -11318,8 +9602,8 @@
                 }
                 var /** @type {?} */projectedViews = elementData.projectedViews;
                 if (projectedViews) {
-                    for (var /** @type {?} */_k2 = 0; _k2 < projectedViews.length; _k2++) {
-                        var /** @type {?} */projectedView = projectedViews[_k2];
+                    for (var /** @type {?} */_k = 0; _k < projectedViews.length; _k++) {
+                        var /** @type {?} */projectedView = projectedViews[_k];
                         calcQueryValues(projectedView, 0, projectedView.def.nodes.length - 1, queryDef, values);
                     }
                 }
@@ -12006,7 +10290,7 @@
     function checkNoChangesQuery(view, nodeDef) {
         var /** @type {?} */queryList = asQueryList(view, nodeDef.index);
         if (queryList.dirty) {
-            throw expressionChangedAfterItHasBeenCheckedError$1(Services.createDebugContext(view, nodeDef.index), 'Query ' + nodeDef.query.id + ' not dirty', 'Query ' + nodeDef.query.id + ' dirty', (view.state & 1 /* FirstCheck */) !== 0);
+            throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), 'Query ' + nodeDef.query.id + ' not dirty', 'Query ' + nodeDef.query.id + ' dirty', (view.state & 1 /* FirstCheck */) !== 0);
         }
     }
     /**
@@ -12388,7 +10672,7 @@
      */
     function debugUpdateDirectives(view, checkType) {
         if (view.state & 8 /* Destroyed */) {
-                throw viewDestroyedError$1(DebugAction[_currentAction]);
+                throw viewDestroyedError(DebugAction[_currentAction]);
             }
         debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
         return view.def.updateDirectives(debugCheckDirectivesFn, view);
@@ -12402,8 +10686,8 @@
         function debugCheckDirectivesFn(view, nodeIndex, argStyle) {
             var /** @type {?} */nodeDef = view.def.nodes[nodeIndex];
 
-            for (var _len7 = arguments.length, values = Array(_len7 > 3 ? _len7 - 3 : 0), _key7 = 3; _key7 < _len7; _key7++) {
-                values[_key7 - 3] = arguments[_key7];
+            for (var _len5 = arguments.length, values = Array(_len5 > 3 ? _len5 - 3 : 0), _key5 = 3; _key5 < _len5; _key5++) {
+                values[_key5 - 3] = arguments[_key5];
             }
 
             if (checkType === 0 /* CheckAndUpdate */) {
@@ -12425,7 +10709,7 @@
      */
     function debugUpdateRenderer(view, checkType) {
         if (view.state & 8 /* Destroyed */) {
-                throw viewDestroyedError$1(DebugAction[_currentAction]);
+                throw viewDestroyedError(DebugAction[_currentAction]);
             }
         debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
         return view.def.updateRenderer(debugCheckRenderNodeFn, view);
@@ -12439,8 +10723,8 @@
         function debugCheckRenderNodeFn(view, nodeIndex, argStyle) {
             var /** @type {?} */nodeDef = view.def.nodes[nodeIndex];
 
-            for (var _len8 = arguments.length, values = Array(_len8 > 3 ? _len8 - 3 : 0), _key8 = 3; _key8 < _len8; _key8++) {
-                values[_key8 - 3] = arguments[_key8];
+            for (var _len6 = arguments.length, values = Array(_len6 > 3 ? _len6 - 3 : 0), _key6 = 3; _key6 < _len6; _key6++) {
+                values[_key6 - 3] = arguments[_key6];
             }
 
             if (checkType === 0 /* CheckAndUpdate */) {
@@ -12509,18 +10793,18 @@
      */
     function normalizeDebugBindingName(name) {
         // Attribute names with `$` (eg `x-y$`) are valid per spec, but unsupported by some browsers
-        name = camelCaseToDashCase$1(name.replace(/[$@]/g, '_'));
+        name = camelCaseToDashCase(name.replace(/[$@]/g, '_'));
         return 'ng-reflect-' + name;
     }
-    var /** @type {?} */CAMEL_CASE_REGEXP$1 = /([A-Z])/g;
+    var /** @type {?} */CAMEL_CASE_REGEXP = /([A-Z])/g;
     /**
      * @param {?} input
      * @return {?}
      */
-    function camelCaseToDashCase$1(input) {
-        return input.replace(CAMEL_CASE_REGEXP$1, function () {
-            for (var _len9 = arguments.length, m = Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
-                m[_key9] = arguments[_key9];
+    function camelCaseToDashCase(input) {
+        return input.replace(CAMEL_CASE_REGEXP, function () {
+            for (var _len7 = arguments.length, m = Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+                m[_key7] = arguments[_key7];
             }
 
             return '-' + m[1].toLowerCase();
@@ -12989,7 +11273,7 @@
     };
 
     ApplicationModule.decorators = [{ type: NgModule, args: [{
-            providers: [ApplicationRef_, { provide: ApplicationRef, useExisting: ApplicationRef_ }, ApplicationInitStatus, Compiler, APP_ID_RANDOM_PROVIDER, ViewUtils, AnimationQueue, { provide: IterableDiffers, useFactory: _iterableDiffersFactory }, { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory }, {
+            providers: [ApplicationRef_, { provide: ApplicationRef, useExisting: ApplicationRef_ }, ApplicationInitStatus, Compiler, APP_ID_RANDOM_PROVIDER, { provide: IterableDiffers, useFactory: _iterableDiffersFactory }, { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory }, {
                 provide: LOCALE_ID,
                 useFactory: _localeFactory,
                 deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
@@ -12999,1798 +11283,6 @@
     ApplicationModule.ctorParameters = function () {
         return [];
     };
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */var /** @type {?} */FILL_STYLE_FLAG = 'true'; // TODO (matsko): change to boolean
-    // TODO (matsko): change to boolean
-    var /** @type {?} */ANY_STATE = '*';
-    var /** @type {?} */DEFAULT_STATE = '*';
-    var /** @type {?} */EMPTY_STATE = 'void';
-
-    var AnimationGroupPlayer = function () {
-        /**
-         * @param {?} _players
-         */
-        function AnimationGroupPlayer(_players) {
-            var _this31 = this;
-
-            _classCallCheck(this, AnimationGroupPlayer);
-
-            this._players = _players;
-            this._onDoneFns = [];
-            this._onStartFns = [];
-            this._finished = false;
-            this._started = false;
-            this._destroyed = false;
-            this._onDestroyFns = [];
-            this.parentPlayer = null;
-            var count = 0;
-            var total = this._players.length;
-            if (total == 0) {
-                scheduleMicroTask(function () {
-                    return _this31._onFinish();
-                });
-            } else {
-                this._players.forEach(function (player) {
-                    player.parentPlayer = _this31;
-                    player.onDone(function () {
-                        if (++count >= total) {
-                            _this31._onFinish();
-                        }
-                    });
-                });
-            }
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(AnimationGroupPlayer, [{
-            key: '_onFinish',
-            value: function _onFinish() {
-                if (!this._finished) {
-                    this._finished = true;
-                    this._onDoneFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDoneFns = [];
-                }
-            }
-        }, {
-            key: 'init',
-            value: function init() {
-                this._players.forEach(function (player) {
-                    return player.init();
-                });
-            }
-        }, {
-            key: 'onStart',
-            value: function onStart(fn) {
-                this._onStartFns.push(fn);
-            }
-        }, {
-            key: 'onDone',
-            value: function onDone(fn) {
-                this._onDoneFns.push(fn);
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(fn) {
-                this._onDestroyFns.push(fn);
-            }
-        }, {
-            key: 'hasStarted',
-            value: function hasStarted() {
-                return this._started;
-            }
-        }, {
-            key: 'play',
-            value: function play() {
-                if (!isPresent(this.parentPlayer)) {
-                    this.init();
-                }
-                if (!this.hasStarted()) {
-                    this._onStartFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onStartFns = [];
-                    this._started = true;
-                }
-                this._players.forEach(function (player) {
-                    return player.play();
-                });
-            }
-        }, {
-            key: 'pause',
-            value: function pause() {
-                this._players.forEach(function (player) {
-                    return player.pause();
-                });
-            }
-        }, {
-            key: 'restart',
-            value: function restart() {
-                this._players.forEach(function (player) {
-                    return player.restart();
-                });
-            }
-        }, {
-            key: 'finish',
-            value: function finish() {
-                this._onFinish();
-                this._players.forEach(function (player) {
-                    return player.finish();
-                });
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (!this._destroyed) {
-                    this._onFinish();
-                    this._players.forEach(function (player) {
-                        return player.destroy();
-                    });
-                    this._destroyed = true;
-                    this._onDestroyFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDestroyFns = [];
-                }
-            }
-        }, {
-            key: 'reset',
-            value: function reset() {
-                this._players.forEach(function (player) {
-                    return player.reset();
-                });
-                this._destroyed = false;
-                this._finished = false;
-                this._started = false;
-            }
-        }, {
-            key: 'setPosition',
-            value: function setPosition(p) {
-                this._players.forEach(function (player) {
-                    player.setPosition(p);
-                });
-            }
-        }, {
-            key: 'getPosition',
-            value: function getPosition() {
-                var /** @type {?} */min = 0;
-                this._players.forEach(function (player) {
-                    var /** @type {?} */p = player.getPosition();
-                    min = Math.min(p, min);
-                });
-                return min;
-            }
-        }, {
-            key: 'players',
-            get: function get() {
-                return this._players;
-            }
-        }]);
-
-        return AnimationGroupPlayer;
-    }();
-
-    var AnimationKeyframe =
-    /**
-     * @param {?} offset
-     * @param {?} styles
-     */
-    function AnimationKeyframe(offset, styles) {
-        _classCallCheck(this, AnimationKeyframe);
-
-        this.offset = offset;
-        this.styles = styles;
-    };
-
-    var AnimationSequencePlayer = function () {
-        /**
-         * @param {?} _players
-         */
-        function AnimationSequencePlayer(_players) {
-            var _this32 = this;
-
-            _classCallCheck(this, AnimationSequencePlayer);
-
-            this._players = _players;
-            this._currentIndex = 0;
-            this._onDoneFns = [];
-            this._onStartFns = [];
-            this._onDestroyFns = [];
-            this._finished = false;
-            this._started = false;
-            this._destroyed = false;
-            this.parentPlayer = null;
-            this._players.forEach(function (player) {
-                player.parentPlayer = _this32;
-            });
-            this._onNext(false);
-        }
-        /**
-         * @param {?} start
-         * @return {?}
-         */
-
-
-        _createClass(AnimationSequencePlayer, [{
-            key: '_onNext',
-            value: function _onNext(start) {
-                var _this33 = this;
-
-                if (this._finished) return;
-                if (this._players.length == 0) {
-                    this._activePlayer = new NoOpAnimationPlayer();
-                    scheduleMicroTask(function () {
-                        return _this33._onFinish();
-                    });
-                } else if (this._currentIndex >= this._players.length) {
-                    this._activePlayer = new NoOpAnimationPlayer();
-                    this._onFinish();
-                } else {
-                    var /** @type {?} */player = this._players[this._currentIndex++];
-                    player.onDone(function () {
-                        return _this33._onNext(true);
-                    });
-                    this._activePlayer = player;
-                    if (start) {
-                        player.play();
-                    }
-                }
-            }
-        }, {
-            key: '_onFinish',
-            value: function _onFinish() {
-                if (!this._finished) {
-                    this._finished = true;
-                    this._onDoneFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDoneFns = [];
-                }
-            }
-        }, {
-            key: 'init',
-            value: function init() {
-                this._players.forEach(function (player) {
-                    return player.init();
-                });
-            }
-        }, {
-            key: 'onStart',
-            value: function onStart(fn) {
-                this._onStartFns.push(fn);
-            }
-        }, {
-            key: 'onDone',
-            value: function onDone(fn) {
-                this._onDoneFns.push(fn);
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(fn) {
-                this._onDestroyFns.push(fn);
-            }
-        }, {
-            key: 'hasStarted',
-            value: function hasStarted() {
-                return this._started;
-            }
-        }, {
-            key: 'play',
-            value: function play() {
-                if (!isPresent(this.parentPlayer)) {
-                    this.init();
-                }
-                if (!this.hasStarted()) {
-                    this._onStartFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onStartFns = [];
-                    this._started = true;
-                }
-                this._activePlayer.play();
-            }
-        }, {
-            key: 'pause',
-            value: function pause() {
-                this._activePlayer.pause();
-            }
-        }, {
-            key: 'restart',
-            value: function restart() {
-                this.reset();
-                if (this._players.length > 0) {
-                    this._players[0].restart();
-                }
-            }
-        }, {
-            key: 'reset',
-            value: function reset() {
-                this._players.forEach(function (player) {
-                    return player.reset();
-                });
-                this._destroyed = false;
-                this._finished = false;
-                this._started = false;
-            }
-        }, {
-            key: 'finish',
-            value: function finish() {
-                this._onFinish();
-                this._players.forEach(function (player) {
-                    return player.finish();
-                });
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (!this._destroyed) {
-                    this._onFinish();
-                    this._players.forEach(function (player) {
-                        return player.destroy();
-                    });
-                    this._destroyed = true;
-                    this._activePlayer = new NoOpAnimationPlayer();
-                    this._onDestroyFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDestroyFns = [];
-                }
-            }
-        }, {
-            key: 'setPosition',
-            value: function setPosition(p) {
-                this._players[0].setPosition(p);
-            }
-        }, {
-            key: 'getPosition',
-            value: function getPosition() {
-                return this._players[0].getPosition();
-            }
-        }, {
-            key: 'players',
-            get: function get() {
-                return this._players;
-            }
-        }]);
-
-        return AnimationSequencePlayer;
-    }();
-
-    /**
-     * @experimental Animation support is experimental.
-     */
-    var /** @type {?} */AUTO_STYLE = '*';
-
-    /**
-     * @param {?} previousStyles
-     * @param {?} newStyles
-     * @param {?=} nullValue
-     * @return {?}
-     */
-    function prepareFinalAnimationStyles(previousStyles, newStyles) {
-        var nullValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-        var /** @type {?} */finalStyles = {};
-        Object.keys(newStyles).forEach(function (prop) {
-            var /** @type {?} */value = newStyles[prop];
-            finalStyles[prop] = value == AUTO_STYLE ? nullValue : value.toString();
-        });
-        Object.keys(previousStyles).forEach(function (prop) {
-            if (!isPresent(finalStyles[prop])) {
-                finalStyles[prop] = nullValue;
-            }
-        });
-        return finalStyles;
-    }
-    /**
-     * @param {?} collectedStyles
-     * @param {?} finalStateStyles
-     * @param {?} keyframes
-     * @return {?}
-     */
-    function balanceAnimationKeyframes(collectedStyles, finalStateStyles, keyframes) {
-        var /** @type {?} */limit = keyframes.length - 1;
-        var /** @type {?} */firstKeyframe = keyframes[0];
-        // phase 1: copy all the styles from the first keyframe into the lookup map
-        var /** @type {?} */flatenedFirstKeyframeStyles = flattenStyles(firstKeyframe.styles.styles);
-        var /** @type {?} */extraFirstKeyframeStyles = {};
-        var /** @type {?} */hasExtraFirstStyles = false;
-        Object.keys(collectedStyles).forEach(function (prop) {
-            var /** @type {?} */value = collectedStyles[prop];
-            // if the style is already defined in the first keyframe then
-            // we do not replace it.
-            if (!flatenedFirstKeyframeStyles[prop]) {
-                flatenedFirstKeyframeStyles[prop] = value;
-                extraFirstKeyframeStyles[prop] = value;
-                hasExtraFirstStyles = true;
-            }
-        });
-        var /** @type {?} */keyframeCollectedStyles = StringMapWrapper.merge({}, flatenedFirstKeyframeStyles);
-        // phase 2: normalize the final keyframe
-        var /** @type {?} */finalKeyframe = keyframes[limit];
-        finalKeyframe.styles.styles.unshift(finalStateStyles);
-        var /** @type {?} */flatenedFinalKeyframeStyles = flattenStyles(finalKeyframe.styles.styles);
-        var /** @type {?} */extraFinalKeyframeStyles = {};
-        var /** @type {?} */hasExtraFinalStyles = false;
-        Object.keys(keyframeCollectedStyles).forEach(function (prop) {
-            if (!isPresent(flatenedFinalKeyframeStyles[prop])) {
-                extraFinalKeyframeStyles[prop] = AUTO_STYLE;
-                hasExtraFinalStyles = true;
-            }
-        });
-        if (hasExtraFinalStyles) {
-            finalKeyframe.styles.styles.push(extraFinalKeyframeStyles);
-        }
-        Object.keys(flatenedFinalKeyframeStyles).forEach(function (prop) {
-            if (!isPresent(flatenedFirstKeyframeStyles[prop])) {
-                extraFirstKeyframeStyles[prop] = AUTO_STYLE;
-                hasExtraFirstStyles = true;
-            }
-        });
-        if (hasExtraFirstStyles) {
-            firstKeyframe.styles.styles.push(extraFirstKeyframeStyles);
-        }
-        collectAndResolveStyles(collectedStyles, [finalStateStyles]);
-        return keyframes;
-    }
-    /**
-     * @param {?} styles
-     * @return {?}
-     */
-    function clearStyles(styles) {
-        var /** @type {?} */finalStyles = {};
-        Object.keys(styles).forEach(function (key) {
-            finalStyles[key] = null;
-        });
-        return finalStyles;
-    }
-    /**
-     * @param {?} collection
-     * @param {?} styles
-     * @return {?}
-     */
-    function collectAndResolveStyles(collection, styles) {
-        return styles.map(function (entry) {
-            var /** @type {?} */stylesObj = {};
-            Object.keys(entry).forEach(function (prop) {
-                var /** @type {?} */value = entry[prop];
-                if (value == FILL_STYLE_FLAG) {
-                    value = collection[prop];
-                    if (!isPresent(value)) {
-                        value = AUTO_STYLE;
-                    }
-                }
-                collection[prop] = value;
-                stylesObj[prop] = value;
-            });
-            return stylesObj;
-        });
-    }
-    /**
-     * @param {?} element
-     * @param {?} renderer
-     * @param {?} styles
-     * @return {?}
-     */
-    function renderStyles(element, renderer, styles) {
-        Object.keys(styles).forEach(function (prop) {
-            renderer.setElementStyle(element, prop, styles[prop]);
-        });
-    }
-    /**
-     * @param {?} styles
-     * @return {?}
-     */
-    function flattenStyles(styles) {
-        var /** @type {?} */finalStyles = {};
-        styles.forEach(function (entry) {
-            Object.keys(entry).forEach(function (prop) {
-                finalStyles[prop] = entry[prop];
-            });
-        });
-        return finalStyles;
-    }
-
-    /**
-     * @license
-     * Copyright Google Inc. All Rights Reserved.
-     *
-     * Use of this source code is governed by an MIT-style license that can be
-     * found in the LICENSE file at https://angular.io/license
-     */
-    /**
-     * `AnimationStyles` consists of a collection of key/value maps containing CSS-based style data
-     * that can either be used as initial styling data or apart of a series of keyframes within an
-     * animation.
-     * This class is mostly internal, and it is designed to be used alongside
-     * {\@link AnimationKeyframe `AnimationKeyframe`} and {\@link Renderer#animate-anchor
-     * `Renderer.animate`}.
-     *
-     * \@experimental Animation support is experimental
-     */
-
-    var AnimationStyles =
-    /**
-     * @param {?} styles
-     */
-    function AnimationStyles(styles) {
-        _classCallCheck(this, AnimationStyles);
-
-        this.styles = styles;
-    };
-
-    var AnimationTransitionEvent =
-    /**
-     * @param {?} __0
-     */
-    function AnimationTransitionEvent(_ref7) {
-        var fromState = _ref7.fromState,
-            toState = _ref7.toState,
-            totalTime = _ref7.totalTime,
-            phaseName = _ref7.phaseName,
-            element = _ref7.element,
-            triggerName = _ref7.triggerName;
-
-        _classCallCheck(this, AnimationTransitionEvent);
-
-        this.fromState = fromState;
-        this.toState = toState;
-        this.totalTime = totalTime;
-        this.phaseName = phaseName;
-        this.element = new ElementRef(element);
-        this.triggerName = triggerName;
-    };
-
-    var AnimationTransition = function () {
-        /**
-         * @param {?} _player
-         * @param {?} _element
-         * @param {?} _triggerName
-         * @param {?} _fromState
-         * @param {?} _toState
-         * @param {?} _totalTime
-         */
-        function AnimationTransition(_player, _element, _triggerName, _fromState, _toState, _totalTime) {
-            _classCallCheck(this, AnimationTransition);
-
-            this._player = _player;
-            this._element = _element;
-            this._triggerName = _triggerName;
-            this._fromState = _fromState;
-            this._toState = _toState;
-            this._totalTime = _totalTime;
-        }
-        /**
-         * @param {?} phaseName
-         * @return {?}
-         */
-
-
-        _createClass(AnimationTransition, [{
-            key: '_createEvent',
-            value: function _createEvent(phaseName) {
-                return new AnimationTransitionEvent({
-                    fromState: this._fromState,
-                    toState: this._toState,
-                    totalTime: this._totalTime,
-                    phaseName: phaseName,
-                    element: this._element,
-                    triggerName: this._triggerName
-                });
-            }
-        }, {
-            key: 'onStart',
-            value: function onStart(callback) {
-                var _this34 = this;
-
-                var /** @type {?} */fn = Zone.current.wrap(function () {
-                    return callback(_this34._createEvent('start'));
-                }, 'player.onStart');
-                this._player.onStart(fn);
-            }
-        }, {
-            key: 'onDone',
-            value: function onDone(callback) {
-                var _this35 = this;
-
-                var /** @type {?} */fn = Zone.current.wrap(function () {
-                    return callback(_this35._createEvent('done'));
-                }, 'player.onDone');
-                this._player.onDone(fn);
-            }
-        }]);
-
-        return AnimationTransition;
-    }();
-
-    var DebugDomRootRenderer = function () {
-        /**
-         * @param {?} _delegate
-         */
-        function DebugDomRootRenderer(_delegate) {
-            _classCallCheck(this, DebugDomRootRenderer);
-
-            this._delegate = _delegate;
-            throw new Error('RootRenderer is no longer supported. Please use the `RendererFactoryV2` instead!');
-        }
-        /**
-         * @param {?} componentProto
-         * @return {?}
-         */
-
-
-        _createClass(DebugDomRootRenderer, [{
-            key: 'renderComponent',
-            value: function renderComponent(componentProto) {
-                return new DebugDomRenderer(this._delegate.renderComponent(componentProto));
-            }
-        }]);
-
-        return DebugDomRootRenderer;
-    }();
-
-    var DebugDomRenderer = function () {
-        /**
-         * @param {?} _delegate
-         */
-        function DebugDomRenderer(_delegate) {
-            _classCallCheck(this, DebugDomRenderer);
-
-            this._delegate = _delegate;
-        }
-        /**
-         * @param {?} selectorOrNode
-         * @param {?=} debugInfo
-         * @return {?}
-         */
-
-
-        _createClass(DebugDomRenderer, [{
-            key: 'selectRootElement',
-            value: function selectRootElement(selectorOrNode, debugInfo) {
-                var /** @type {?} */nativeEl = this._delegate.selectRootElement(selectorOrNode, debugInfo);
-                var /** @type {?} */debugEl = new DebugElement(nativeEl, null, debugInfo);
-                indexDebugNode(debugEl);
-                return nativeEl;
-            }
-        }, {
-            key: 'createElement',
-            value: function createElement(parentElement, name, debugInfo) {
-                var /** @type {?} */nativeEl = this._delegate.createElement(parentElement, name, debugInfo);
-                var /** @type {?} */debugEl = new DebugElement(nativeEl, getDebugNode(parentElement), debugInfo);
-                debugEl.name = name;
-                indexDebugNode(debugEl);
-                return nativeEl;
-            }
-        }, {
-            key: 'createViewRoot',
-            value: function createViewRoot(hostElement) {
-                return this._delegate.createViewRoot(hostElement);
-            }
-        }, {
-            key: 'createTemplateAnchor',
-            value: function createTemplateAnchor(parentElement, debugInfo) {
-                var /** @type {?} */comment = this._delegate.createTemplateAnchor(parentElement, debugInfo);
-                var /** @type {?} */debugEl = new DebugNode(comment, getDebugNode(parentElement), debugInfo);
-                indexDebugNode(debugEl);
-                return comment;
-            }
-        }, {
-            key: 'createText',
-            value: function createText(parentElement, value, debugInfo) {
-                var /** @type {?} */text = this._delegate.createText(parentElement, value, debugInfo);
-                var /** @type {?} */debugEl = new DebugNode(text, getDebugNode(parentElement), debugInfo);
-                indexDebugNode(debugEl);
-                return text;
-            }
-        }, {
-            key: 'projectNodes',
-            value: function projectNodes(parentElement, nodes) {
-                var /** @type {?} */debugParent = getDebugNode(parentElement);
-                if (isPresent(debugParent) && debugParent instanceof DebugElement) {
-                    var /** @type {?} */debugElement = debugParent;
-                    nodes.forEach(function (node) {
-                        debugElement.addChild(getDebugNode(node));
-                    });
-                }
-                this._delegate.projectNodes(parentElement, nodes);
-            }
-        }, {
-            key: 'attachViewAfter',
-            value: function attachViewAfter(node, viewRootNodes) {
-                var /** @type {?} */debugNode = getDebugNode(node);
-                if (isPresent(debugNode)) {
-                    var /** @type {?} */debugParent = debugNode.parent;
-                    if (viewRootNodes.length > 0 && isPresent(debugParent)) {
-                        var /** @type {?} */debugViewRootNodes = [];
-                        viewRootNodes.forEach(function (rootNode) {
-                            return debugViewRootNodes.push(getDebugNode(rootNode));
-                        });
-                        debugParent.insertChildrenAfter(debugNode, debugViewRootNodes);
-                    }
-                }
-                this._delegate.attachViewAfter(node, viewRootNodes);
-            }
-        }, {
-            key: 'detachView',
-            value: function detachView(viewRootNodes) {
-                viewRootNodes.forEach(function (node) {
-                    var /** @type {?} */debugNode = getDebugNode(node);
-                    if (debugNode && debugNode.parent) {
-                        debugNode.parent.removeChild(debugNode);
-                    }
-                });
-                this._delegate.detachView(viewRootNodes);
-            }
-        }, {
-            key: 'destroyView',
-            value: function destroyView(hostElement, viewAllNodes) {
-                viewAllNodes = viewAllNodes || [];
-                viewAllNodes.forEach(function (node) {
-                    removeDebugNodeFromIndex(getDebugNode(node));
-                });
-                this._delegate.destroyView(hostElement, viewAllNodes);
-            }
-        }, {
-            key: 'listen',
-            value: function listen(renderElement, name, callback) {
-                var /** @type {?} */debugEl = getDebugNode(renderElement);
-                if (isPresent(debugEl)) {
-                    debugEl.listeners.push(new EventListener(name, callback));
-                }
-                return this._delegate.listen(renderElement, name, callback);
-            }
-        }, {
-            key: 'listenGlobal',
-            value: function listenGlobal(target, name, callback) {
-                return this._delegate.listenGlobal(target, name, callback);
-            }
-        }, {
-            key: 'setElementProperty',
-            value: function setElementProperty(renderElement, propertyName, propertyValue) {
-                var /** @type {?} */debugEl = getDebugNode(renderElement);
-                if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-                    debugEl.properties[propertyName] = propertyValue;
-                }
-                this._delegate.setElementProperty(renderElement, propertyName, propertyValue);
-            }
-        }, {
-            key: 'setElementAttribute',
-            value: function setElementAttribute(renderElement, attributeName, attributeValue) {
-                var /** @type {?} */debugEl = getDebugNode(renderElement);
-                if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-                    debugEl.attributes[attributeName] = attributeValue;
-                }
-                this._delegate.setElementAttribute(renderElement, attributeName, attributeValue);
-            }
-        }, {
-            key: 'setBindingDebugInfo',
-            value: function setBindingDebugInfo(renderElement, propertyName, propertyValue) {
-                this._delegate.setBindingDebugInfo(renderElement, propertyName, propertyValue);
-            }
-        }, {
-            key: 'setElementClass',
-            value: function setElementClass(renderElement, className, isAdd) {
-                var /** @type {?} */debugEl = getDebugNode(renderElement);
-                if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-                    debugEl.classes[className] = isAdd;
-                }
-                this._delegate.setElementClass(renderElement, className, isAdd);
-            }
-        }, {
-            key: 'setElementStyle',
-            value: function setElementStyle(renderElement, styleName, styleValue) {
-                var /** @type {?} */debugEl = getDebugNode(renderElement);
-                if (isPresent(debugEl) && debugEl instanceof DebugElement) {
-                    debugEl.styles[styleName] = styleValue;
-                }
-                this._delegate.setElementStyle(renderElement, styleName, styleValue);
-            }
-        }, {
-            key: 'invokeElementMethod',
-            value: function invokeElementMethod(renderElement, methodName, args) {
-                this._delegate.invokeElementMethod(renderElement, methodName, args);
-            }
-        }, {
-            key: 'setText',
-            value: function setText(renderNode, text) {
-                this._delegate.setText(renderNode, text);
-            }
-        }, {
-            key: 'animate',
-            value: function animate(element, startingStyles, keyframes, duration, delay, easing) {
-                var previousPlayers = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : [];
-
-                return this._delegate.animate(element, startingStyles, keyframes, duration, delay, easing, previousPlayers);
-            }
-        }]);
-
-        return DebugDomRenderer;
-    }();
-
-    var ViewType = {};
-    ViewType.HOST = 0;
-    ViewType.COMPONENT = 1;
-    ViewType.EMBEDDED = 2;
-    ViewType[ViewType.HOST] = "HOST";
-    ViewType[ViewType.COMPONENT] = "COMPONENT";
-    ViewType[ViewType.EMBEDDED] = "EMBEDDED";
-
-    var StaticNodeDebugInfo =
-    /**
-     * @param {?} providerTokens
-     * @param {?} componentToken
-     * @param {?} refTokens
-     */
-    function StaticNodeDebugInfo(providerTokens, componentToken, refTokens) {
-        _classCallCheck(this, StaticNodeDebugInfo);
-
-        this.providerTokens = providerTokens;
-        this.componentToken = componentToken;
-        this.refTokens = refTokens;
-    };
-
-    var DebugContext$1 = function () {
-        /**
-         * @param {?} _view
-         * @param {?} _nodeIndex
-         * @param {?} _tplRow
-         * @param {?} _tplCol
-         */
-        function DebugContext$1(_view, _nodeIndex, _tplRow, _tplCol) {
-            _classCallCheck(this, DebugContext$1);
-
-            this._view = _view;
-            this._nodeIndex = _nodeIndex;
-            this._tplRow = _tplRow;
-            this._tplCol = _tplCol;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(DebugContext$1, [{
-            key: '_staticNodeInfo',
-            get: function get() {
-                return isPresent(this._nodeIndex) ? this._view.staticNodeDebugInfos[this._nodeIndex] : null;
-            }
-        }, {
-            key: 'context',
-            get: function get() {
-                return this._view.context;
-            }
-        }, {
-            key: 'component',
-            get: function get() {
-                var /** @type {?} */staticNodeInfo = this._staticNodeInfo;
-                if (isPresent(staticNodeInfo) && isPresent(staticNodeInfo.componentToken)) {
-                    return this.injector.get(staticNodeInfo.componentToken);
-                }
-                return null;
-            }
-        }, {
-            key: 'componentRenderElement',
-            get: function get() {
-                var /** @type {?} */componentView = this._view;
-                while (isPresent(componentView.parentView) && componentView.type !== ViewType.COMPONENT) {
-                    componentView = componentView.parentView;
-                }
-                return componentView.parentElement;
-            }
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this._view.injector(this._nodeIndex);
-            }
-        }, {
-            key: 'renderNode',
-            get: function get() {
-                if (isPresent(this._nodeIndex) && this._view.allNodes) {
-                    return this._view.allNodes[this._nodeIndex];
-                } else {
-                    return null;
-                }
-            }
-        }, {
-            key: 'providerTokens',
-            get: function get() {
-                var /** @type {?} */staticNodeInfo = this._staticNodeInfo;
-                return isPresent(staticNodeInfo) ? staticNodeInfo.providerTokens : null;
-            }
-        }, {
-            key: 'source',
-            get: function get() {
-                return this._view.componentType.templateUrl + ':' + this._tplRow + ':' + this._tplCol;
-            }
-        }, {
-            key: 'references',
-            get: function get() {
-                var _this36 = this;
-
-                var /** @type {?} */varValues = {};
-                var /** @type {?} */staticNodeInfo = this._staticNodeInfo;
-                if (isPresent(staticNodeInfo)) {
-                    var /** @type {?} */refs = staticNodeInfo.refTokens;
-                    Object.keys(refs).forEach(function (refName) {
-                        var /** @type {?} */refToken = refs[refName];
-                        var /** @type {?} */varValue = void 0;
-                        if (isBlank(refToken)) {
-                            varValue = _this36._view.allNodes ? _this36._view.allNodes[_this36._nodeIndex] : null;
-                        } else {
-                            varValue = _this36._view.injectorGet(refToken, _this36._nodeIndex, null);
-                        }
-                        varValues[refName] = varValue;
-                    });
-                }
-                return varValues;
-            }
-        }]);
-
-        return DebugContext$1;
-    }();
-
-    var ViewAnimationMap = function () {
-        function ViewAnimationMap() {
-            _classCallCheck(this, ViewAnimationMap);
-
-            this._map = new Map();
-            this._allPlayers = [];
-        }
-        /**
-         * @param {?} element
-         * @param {?} animationName
-         * @return {?}
-         */
-
-
-        _createClass(ViewAnimationMap, [{
-            key: 'find',
-            value: function find(element, animationName) {
-                var /** @type {?} */playersByAnimation = this._map.get(element);
-                if (isPresent(playersByAnimation)) {
-                    return playersByAnimation[animationName];
-                }
-            }
-        }, {
-            key: 'findAllPlayersByElement',
-            value: function findAllPlayersByElement(element) {
-                var /** @type {?} */el = this._map.get(element);
-                return el ? Object.keys(el).map(function (k) {
-                    return el[k];
-                }) : [];
-            }
-        }, {
-            key: 'set',
-            value: function set(element, animationName, player) {
-                var /** @type {?} */playersByAnimation = this._map.get(element);
-                if (!isPresent(playersByAnimation)) {
-                    playersByAnimation = {};
-                }
-                var /** @type {?} */existingEntry = playersByAnimation[animationName];
-                if (isPresent(existingEntry)) {
-                    this.remove(element, animationName);
-                }
-                playersByAnimation[animationName] = player;
-                this._allPlayers.push(player);
-                this._map.set(element, playersByAnimation);
-            }
-        }, {
-            key: 'getAllPlayers',
-            value: function getAllPlayers() {
-                return this._allPlayers;
-            }
-        }, {
-            key: 'remove',
-            value: function remove(element, animationName) {
-                var targetPlayer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-                var /** @type {?} */playersByAnimation = this._map.get(element);
-                if (playersByAnimation) {
-                    var /** @type {?} */player = playersByAnimation[animationName];
-                    if (!targetPlayer || player === targetPlayer) {
-                        delete playersByAnimation[animationName];
-                        var /** @type {?} */index = this._allPlayers.indexOf(player);
-                        this._allPlayers.splice(index, 1);
-                        if (Object.keys(playersByAnimation).length === 0) {
-                            this._map.delete(element);
-                        }
-                    }
-                }
-            }
-        }]);
-
-        return ViewAnimationMap;
-    }();
-
-    var AnimationViewContext = function () {
-        /**
-         * @param {?} _animationQueue
-         */
-        function AnimationViewContext(_animationQueue) {
-            _classCallCheck(this, AnimationViewContext);
-
-            this._animationQueue = _animationQueue;
-            this._players = new ViewAnimationMap();
-        }
-        /**
-         * @param {?} callback
-         * @return {?}
-         */
-
-
-        _createClass(AnimationViewContext, [{
-            key: 'onAllActiveAnimationsDone',
-            value: function onAllActiveAnimationsDone(callback) {
-                var /** @type {?} */activeAnimationPlayers = this._players.getAllPlayers();
-                // we check for the length to avoid having GroupAnimationPlayer
-                // issue an unnecessary microtask when zero players are passed in
-                if (activeAnimationPlayers.length) {
-                    new AnimationGroupPlayer(activeAnimationPlayers).onDone(function () {
-                        return callback();
-                    });
-                } else {
-                    callback();
-                }
-            }
-        }, {
-            key: 'queueAnimation',
-            value: function queueAnimation(element, animationName, player) {
-                var _this37 = this;
-
-                this._animationQueue.enqueue(player);
-                this._players.set(element, animationName, player);
-                player.onDone(function () {
-                    return _this37._players.remove(element, animationName, player);
-                });
-            }
-        }, {
-            key: 'getAnimationPlayers',
-            value: function getAnimationPlayers(element) {
-                var animationName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-                var /** @type {?} */players = [];
-                if (animationName) {
-                    var /** @type {?} */currentPlayer = this._players.find(element, animationName);
-                    if (currentPlayer) {
-                        _recursePlayers(currentPlayer, players);
-                    }
-                } else {
-                    this._players.findAllPlayersByElement(element).forEach(function (player) {
-                        return _recursePlayers(player, players);
-                    });
-                }
-                return players;
-            }
-        }]);
-
-        return AnimationViewContext;
-    }();
-
-    /**
-     * @param {?} player
-     * @param {?} collectedPlayers
-     * @return {?}
-     */
-    function _recursePlayers(player, collectedPlayers) {
-        if (player instanceof AnimationGroupPlayer || player instanceof AnimationSequencePlayer) {
-            player.players.forEach(function (player) {
-                return _recursePlayers(player, collectedPlayers);
-            });
-        } else {
-            collectedPlayers.push(player);
-        }
-    }
-
-    var ElementInjector = function (_Injector) {
-        _inherits(ElementInjector, _Injector);
-
-        /**
-         * @param {?} _view
-         * @param {?} _nodeIndex
-         */
-        function ElementInjector(_view, _nodeIndex) {
-            _classCallCheck(this, ElementInjector);
-
-            var _this38 = _possibleConstructorReturn(this, (ElementInjector.__proto__ || Object.getPrototypeOf(ElementInjector)).call(this));
-
-            _this38._view = _view;
-            _this38._nodeIndex = _nodeIndex;
-            return _this38;
-        }
-        /**
-         * @param {?} token
-         * @param {?=} notFoundValue
-         * @return {?}
-         */
-
-
-        _createClass(ElementInjector, [{
-            key: 'get',
-            value: function get(token) {
-                var notFoundValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : THROW_IF_NOT_FOUND;
-
-                return this._view.injectorGet(token, this._nodeIndex, notFoundValue);
-            }
-        }]);
-
-        return ElementInjector;
-    }(Injector);
-
-    var /** @type {?} */_scope_check = wtfCreateScope('AppView#check(ascii id)');
-    /**
-     * @experimental
-     */
-    var /** @type {?} */EMPTY_CONTEXT$1 = new Object();
-    var /** @type {?} */UNDEFINED$1 = new Object();
-    /**
-     * Cost of making objects: http://jsperf.com/instantiate-size-of-object
-     *
-     * @abstract
-     */
-
-    var AppView = function () {
-        /**
-         * @param {?} clazz
-         * @param {?} componentType
-         * @param {?} type
-         * @param {?} viewUtils
-         * @param {?} parentView
-         * @param {?} parentIndex
-         * @param {?} parentElement
-         * @param {?} cdMode
-         * @param {?=} declaredViewContainer
-         */
-        function AppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentElement, cdMode) {
-            var declaredViewContainer = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
-
-            _classCallCheck(this, AppView);
-
-            this.clazz = clazz;
-            this.componentType = componentType;
-            this.type = type;
-            this.viewUtils = viewUtils;
-            this.parentView = parentView;
-            this.parentIndex = parentIndex;
-            this.parentElement = parentElement;
-            this.cdMode = cdMode;
-            this.declaredViewContainer = declaredViewContainer;
-            this.numberOfChecks = 0;
-            this.throwOnChange = false;
-            this.ref = new ViewRef_(this, viewUtils.animationQueue);
-            if (type === ViewType.COMPONENT || type === ViewType.HOST) {
-                this.renderer = viewUtils.renderComponent(componentType);
-            } else {
-                this.renderer = parentView.renderer;
-            }
-            this._directRenderer = this.renderer.directRenderer;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(AppView, [{
-            key: 'create',
-            value: function create(context) {
-                this.context = context;
-                return this.createInternal(null);
-            }
-        }, {
-            key: 'createHostView',
-            value: function createHostView(rootSelectorOrNode, hostInjector, projectableNodes) {
-                this.context = EMPTY_CONTEXT$1;
-                this._hasExternalHostElement = isPresent(rootSelectorOrNode);
-                this._hostInjector = hostInjector;
-                this._hostProjectableNodes = projectableNodes;
-                return this.createInternal(rootSelectorOrNode);
-            }
-        }, {
-            key: 'createInternal',
-            value: function createInternal(rootSelectorOrNode) {
-                return null;
-            }
-        }, {
-            key: 'createEmbeddedViewInternal',
-            value: function createEmbeddedViewInternal(templateNodeIndex) {
-                return null;
-            }
-        }, {
-            key: 'init',
-            value: function init(lastRootNode, allNodes, disposables) {
-                this.lastRootNode = lastRootNode;
-                this.allNodes = allNodes;
-                this.disposables = disposables;
-                if (this.type === ViewType.COMPONENT) {
-                    this.dirtyParentQueriesInternal();
-                }
-            }
-        }, {
-            key: 'injectorGet',
-            value: function injectorGet(token, nodeIndex) {
-                var notFoundValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : THROW_IF_NOT_FOUND;
-
-                var /** @type {?} */result = UNDEFINED$1;
-                var /** @type {?} */view = this;
-                while (result === UNDEFINED$1) {
-                    if (isPresent(nodeIndex)) {
-                        result = view.injectorGetInternal(token, nodeIndex, UNDEFINED$1);
-                    }
-                    if (result === UNDEFINED$1 && view.type === ViewType.HOST) {
-                        result = view._hostInjector.get(token, notFoundValue);
-                    }
-                    nodeIndex = view.parentIndex;
-                    view = view.parentView;
-                }
-                return result;
-            }
-        }, {
-            key: 'injectorGetInternal',
-            value: function injectorGetInternal(token, nodeIndex, notFoundResult) {
-                return notFoundResult;
-            }
-        }, {
-            key: 'injector',
-            value: function injector(nodeIndex) {
-                return new ElementInjector(this, nodeIndex);
-            }
-        }, {
-            key: 'detachAndDestroy',
-            value: function detachAndDestroy() {
-                if (this.viewContainer) {
-                    this.viewContainer.detachView(this.viewContainer.nestedViews.indexOf(this));
-                } else if (this.appRef) {
-                    this.appRef.detachView(this.ref);
-                } else if (this._hasExternalHostElement) {
-                    this.detach();
-                }
-                this.destroy();
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                var _this39 = this;
-
-                if (this.cdMode === ChangeDetectorStatus.Destroyed) {
-                    return;
-                }
-                var /** @type {?} */hostElement = this.type === ViewType.COMPONENT ? this.parentElement : null;
-                if (this.disposables) {
-                    for (var /** @type {?} */i = 0; i < this.disposables.length; i++) {
-                        this.disposables[i]();
-                    }
-                }
-                this.destroyInternal();
-                this.dirtyParentQueriesInternal();
-                if (this._animationContext) {
-                    this._animationContext.onAllActiveAnimationsDone(function () {
-                        return _this39.renderer.destroyView(hostElement, _this39.allNodes);
-                    });
-                } else {
-                    this.renderer.destroyView(hostElement, this.allNodes);
-                }
-                this.cdMode = ChangeDetectorStatus.Destroyed;
-            }
-        }, {
-            key: 'destroyInternal',
-            value: function destroyInternal() {}
-        }, {
-            key: 'detachInternal',
-            value: function detachInternal() {}
-        }, {
-            key: 'detach',
-            value: function detach() {
-                var _this40 = this;
-
-                this.detachInternal();
-                if (this._animationContext) {
-                    this._animationContext.onAllActiveAnimationsDone(function () {
-                        return _this40._renderDetach();
-                    });
-                } else {
-                    this._renderDetach();
-                }
-                if (this.declaredViewContainer && this.declaredViewContainer !== this.viewContainer && this.declaredViewContainer.projectedViews) {
-                    var /** @type {?} */projectedViews = this.declaredViewContainer.projectedViews;
-                    var /** @type {?} */index = projectedViews.indexOf(this);
-                    // perf: pop is faster than splice!
-                    if (index >= projectedViews.length - 1) {
-                        projectedViews.pop();
-                    } else {
-                        projectedViews.splice(index, 1);
-                    }
-                }
-                this.appRef = null;
-                this.viewContainer = null;
-                this.dirtyParentQueriesInternal();
-            }
-        }, {
-            key: '_renderDetach',
-            value: function _renderDetach() {
-                if (this._directRenderer) {
-                    this.visitRootNodesInternal(this._directRenderer.remove, null);
-                } else {
-                    this.renderer.detachView(this.flatRootNodes);
-                }
-            }
-        }, {
-            key: 'attachToAppRef',
-            value: function attachToAppRef(appRef) {
-                if (this.viewContainer) {
-                    throw new Error('This view is already attached to a ViewContainer!');
-                }
-                this.appRef = appRef;
-                this.dirtyParentQueriesInternal();
-            }
-        }, {
-            key: 'attachAfter',
-            value: function attachAfter(viewContainer, prevView) {
-                if (this.appRef) {
-                    throw new Error('This view is already attached directly to the ApplicationRef!');
-                }
-                this._renderAttach(viewContainer, prevView);
-                this.viewContainer = viewContainer;
-                if (this.declaredViewContainer && this.declaredViewContainer !== viewContainer) {
-                    if (!this.declaredViewContainer.projectedViews) {
-                        this.declaredViewContainer.projectedViews = [];
-                    }
-                    this.declaredViewContainer.projectedViews.push(this);
-                }
-                this.dirtyParentQueriesInternal();
-            }
-        }, {
-            key: 'moveAfter',
-            value: function moveAfter(viewContainer, prevView) {
-                this._renderAttach(viewContainer, prevView);
-                this.dirtyParentQueriesInternal();
-            }
-        }, {
-            key: '_renderAttach',
-            value: function _renderAttach(viewContainer, prevView) {
-                var /** @type {?} */prevNode = prevView ? prevView.lastRootNode : viewContainer.nativeElement;
-                if (this._directRenderer) {
-                    var /** @type {?} */nextSibling = this._directRenderer.nextSibling(prevNode);
-                    if (nextSibling) {
-                        this.visitRootNodesInternal(this._directRenderer.insertBefore, nextSibling);
-                    } else {
-                        var /** @type {?} */parentElement = this._directRenderer.parentElement(prevNode);
-                        if (parentElement) {
-                            this.visitRootNodesInternal(this._directRenderer.appendChild, parentElement);
-                        }
-                    }
-                } else {
-                    this.renderer.attachViewAfter(prevNode, this.flatRootNodes);
-                }
-            }
-        }, {
-            key: 'projectNodes',
-            value: function projectNodes(parentElement, ngContentIndex) {
-                if (this._directRenderer) {
-                    this.visitProjectedNodes(ngContentIndex, this._directRenderer.appendChild, parentElement);
-                } else {
-                    var /** @type {?} */nodes = [];
-                    this.visitProjectedNodes(ngContentIndex, addToArray, nodes);
-                    this.renderer.projectNodes(parentElement, nodes);
-                }
-            }
-        }, {
-            key: 'visitProjectedNodes',
-            value: function visitProjectedNodes(ngContentIndex, cb, c) {
-                switch (this.type) {
-                    case ViewType.EMBEDDED:
-                        this.parentView.visitProjectedNodes(ngContentIndex, cb, c);
-                        break;
-                    case ViewType.COMPONENT:
-                        if (this.parentView.type === ViewType.HOST) {
-                            var /** @type {?} */nodes = this.parentView._hostProjectableNodes[ngContentIndex] || [];
-                            for (var /** @type {?} */i = 0; i < nodes.length; i++) {
-                                cb(nodes[i], c);
-                            }
-                        } else {
-                            this.parentView.visitProjectableNodesInternal(this.parentIndex, ngContentIndex, cb, c);
-                        }
-                        break;
-                }
-            }
-        }, {
-            key: 'visitRootNodesInternal',
-            value: function visitRootNodesInternal(cb, c) {}
-        }, {
-            key: 'visitProjectableNodesInternal',
-            value: function visitProjectableNodesInternal(nodeIndex, ngContentIndex, cb, c) {}
-        }, {
-            key: 'dirtyParentQueriesInternal',
-            value: function dirtyParentQueriesInternal() {}
-        }, {
-            key: 'internalDetectChanges',
-            value: function internalDetectChanges(throwOnChange) {
-                if (this.cdMode !== ChangeDetectorStatus.Detached) {
-                    this.detectChanges(throwOnChange);
-                }
-            }
-        }, {
-            key: 'detectChanges',
-            value: function detectChanges(throwOnChange) {
-                var /** @type {?} */s = _scope_check(this.clazz);
-                if (this.cdMode === ChangeDetectorStatus.Checked || this.cdMode === ChangeDetectorStatus.Errored) return;
-                if (this.cdMode === ChangeDetectorStatus.Destroyed) {
-                    this.throwDestroyedError('detectChanges');
-                }
-                this.throwOnChange = throwOnChange;
-                this.detectChangesInternal();
-                if (this.cdMode === ChangeDetectorStatus.CheckOnce) this.cdMode = ChangeDetectorStatus.Checked;
-                this.numberOfChecks++;
-                wtfLeave(s);
-            }
-        }, {
-            key: 'detectChangesInternal',
-            value: function detectChangesInternal() {}
-        }, {
-            key: 'markAsCheckOnce',
-            value: function markAsCheckOnce() {
-                this.cdMode = ChangeDetectorStatus.CheckOnce;
-            }
-        }, {
-            key: 'markPathToRootAsCheckOnce',
-            value: function markPathToRootAsCheckOnce() {
-                var /** @type {?} */c = this;
-                while (isPresent(c) && c.cdMode !== ChangeDetectorStatus.Detached) {
-                    if (c.cdMode === ChangeDetectorStatus.Checked) {
-                        c.cdMode = ChangeDetectorStatus.CheckOnce;
-                    }
-                    if (c.type === ViewType.COMPONENT) {
-                        c = c.parentView;
-                    } else {
-                        c = c.viewContainer ? c.viewContainer.parentView : null;
-                    }
-                }
-            }
-        }, {
-            key: 'eventHandler',
-            value: function eventHandler(cb) {
-                return cb;
-            }
-        }, {
-            key: 'throwDestroyedError',
-            value: function throwDestroyedError(details) {
-                throw viewDestroyedError(details);
-            }
-        }, {
-            key: 'animationContext',
-            get: function get() {
-                if (!this._animationContext) {
-                    this._animationContext = new AnimationViewContext(this.viewUtils.animationQueue);
-                }
-                return this._animationContext;
-            }
-        }, {
-            key: 'destroyed',
-            get: function get() {
-                return this.cdMode === ChangeDetectorStatus.Destroyed;
-            }
-        }, {
-            key: 'changeDetectorRef',
-            get: function get() {
-                return this.ref;
-            }
-        }, {
-            key: 'flatRootNodes',
-            get: function get() {
-                var /** @type {?} */nodes = [];
-                this.visitRootNodesInternal(addToArray, nodes);
-                return nodes;
-            }
-        }]);
-
-        return AppView;
-    }();
-
-    var DebugAppView = function (_AppView) {
-        _inherits(DebugAppView, _AppView);
-
-        /**
-         * @param {?} clazz
-         * @param {?} componentType
-         * @param {?} type
-         * @param {?} viewUtils
-         * @param {?} parentView
-         * @param {?} parentIndex
-         * @param {?} parentNode
-         * @param {?} cdMode
-         * @param {?} staticNodeDebugInfos
-         * @param {?=} declaredViewContainer
-         */
-        function DebugAppView(clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, staticNodeDebugInfos) {
-            var declaredViewContainer = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
-
-            _classCallCheck(this, DebugAppView);
-
-            var _this41 = _possibleConstructorReturn(this, (DebugAppView.__proto__ || Object.getPrototypeOf(DebugAppView)).call(this, clazz, componentType, type, viewUtils, parentView, parentIndex, parentNode, cdMode, declaredViewContainer));
-
-            _this41.staticNodeDebugInfos = staticNodeDebugInfos;
-            _this41._currentDebugContext = null;
-            return _this41;
-        }
-        /**
-         * @param {?} context
-         * @return {?}
-         */
-
-
-        _createClass(DebugAppView, [{
-            key: 'create',
-            value: function create(context) {
-                this._resetDebug();
-                try {
-                    return _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'create', this).call(this, context);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: 'createHostView',
-            value: function createHostView(rootSelectorOrNode, injector) {
-                var projectableNodes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-                this._resetDebug();
-                try {
-                    return _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'createHostView', this).call(this, rootSelectorOrNode, injector, projectableNodes);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: 'injectorGet',
-            value: function injectorGet(token, nodeIndex, notFoundResult) {
-                this._resetDebug();
-                try {
-                    return _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'injectorGet', this).call(this, token, nodeIndex, notFoundResult);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: 'detach',
-            value: function detach() {
-                this._resetDebug();
-                try {
-                    _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'detach', this).call(this);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                this._resetDebug();
-                try {
-                    _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'destroy', this).call(this);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: 'detectChanges',
-            value: function detectChanges(throwOnChange) {
-                this._resetDebug();
-                try {
-                    _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'detectChanges', this).call(this, throwOnChange);
-                } catch (e) {
-                    this._rethrowWithContext(e);
-                    throw e;
-                }
-            }
-        }, {
-            key: '_resetDebug',
-            value: function _resetDebug() {
-                this._currentDebugContext = null;
-            }
-        }, {
-            key: 'debug',
-            value: function debug(nodeIndex, rowNum, colNum) {
-                return this._currentDebugContext = new DebugContext$1(this, nodeIndex, rowNum, colNum);
-            }
-        }, {
-            key: '_rethrowWithContext',
-            value: function _rethrowWithContext(e) {
-                if (!(getType(e) == viewWrappedError)) {
-                    if (!(getType(e) == expressionChangedAfterItHasBeenCheckedError)) {
-                        this.cdMode = ChangeDetectorStatus.Errored;
-                    }
-                    if (isPresent(this._currentDebugContext)) {
-                        throw viewWrappedError(e, this._currentDebugContext);
-                    }
-                }
-            }
-        }, {
-            key: 'eventHandler',
-            value: function eventHandler(cb) {
-                var _this42 = this;
-
-                var /** @type {?} */superHandler = _get(DebugAppView.prototype.__proto__ || Object.getPrototypeOf(DebugAppView.prototype), 'eventHandler', this).call(this, cb);
-                return function (eventName, event) {
-                    _this42._resetDebug();
-                    try {
-                        return superHandler.call(_this42, eventName, event);
-                    } catch (e) {
-                        _this42._rethrowWithContext(e);
-                        throw e;
-                    }
-                };
-            }
-        }]);
-
-        return DebugAppView;
-    }(AppView);
-
-    var ViewContainer = function () {
-        /**
-         * @param {?} index
-         * @param {?} parentIndex
-         * @param {?} parentView
-         * @param {?} nativeElement
-         */
-        function ViewContainer(index, parentIndex, parentView, nativeElement) {
-            _classCallCheck(this, ViewContainer);
-
-            this.index = index;
-            this.parentIndex = parentIndex;
-            this.parentView = parentView;
-            this.nativeElement = nativeElement;
-        }
-        /**
-         * @return {?}
-         */
-
-
-        _createClass(ViewContainer, [{
-            key: 'detectChangesInNestedViews',
-            value: function detectChangesInNestedViews(throwOnChange) {
-                if (this.nestedViews) {
-                    for (var /** @type {?} */i = 0; i < this.nestedViews.length; i++) {
-                        this.nestedViews[i].detectChanges(throwOnChange);
-                    }
-                }
-            }
-        }, {
-            key: 'destroyNestedViews',
-            value: function destroyNestedViews() {
-                if (this.nestedViews) {
-                    for (var /** @type {?} */i = 0; i < this.nestedViews.length; i++) {
-                        this.nestedViews[i].destroy();
-                    }
-                }
-            }
-        }, {
-            key: 'visitNestedViewRootNodes',
-            value: function visitNestedViewRootNodes(cb, c) {
-                if (this.nestedViews) {
-                    for (var /** @type {?} */i = 0; i < this.nestedViews.length; i++) {
-                        this.nestedViews[i].visitRootNodesInternal(cb, c);
-                    }
-                }
-            }
-        }, {
-            key: 'mapNestedViews',
-            value: function mapNestedViews(nestedViewClass, callback) {
-                var /** @type {?} */result = [];
-                if (this.nestedViews) {
-                    for (var /** @type {?} */i = 0; i < this.nestedViews.length; i++) {
-                        var /** @type {?} */nestedView = this.nestedViews[i];
-                        if (nestedView.clazz === nestedViewClass) {
-                            result.push(callback(nestedView));
-                        }
-                    }
-                }
-                if (this.projectedViews) {
-                    for (var /** @type {?} */_i6 = 0; _i6 < this.projectedViews.length; _i6++) {
-                        var /** @type {?} */projectedView = this.projectedViews[_i6];
-                        if (projectedView.clazz === nestedViewClass) {
-                            result.push(callback(projectedView));
-                        }
-                    }
-                }
-                return result;
-            }
-        }, {
-            key: 'moveView',
-            value: function moveView(view, toIndex) {
-                var /** @type {?} */fromIndex = this.nestedViews.indexOf(view);
-                if (view.type === ViewType.COMPONENT) {
-                    throw new Error('Component views can\'t be moved!');
-                }
-                var /** @type {?} */nestedViews = this.nestedViews;
-                if (nestedViews == null) {
-                    nestedViews = [];
-                    this.nestedViews = nestedViews;
-                }
-                nestedViews.splice(fromIndex, 1);
-                nestedViews.splice(toIndex, 0, view);
-                var /** @type {?} */prevView = toIndex > 0 ? nestedViews[toIndex - 1] : null;
-                view.moveAfter(this, prevView);
-            }
-        }, {
-            key: 'attachView',
-            value: function attachView(view, viewIndex) {
-                if (view.type === ViewType.COMPONENT) {
-                    throw new Error('Component views can\'t be moved!');
-                }
-                var /** @type {?} */nestedViews = this.nestedViews;
-                if (nestedViews == null) {
-                    nestedViews = [];
-                    this.nestedViews = nestedViews;
-                }
-                // perf: array.push is faster than array.splice!
-                if (viewIndex >= nestedViews.length) {
-                    nestedViews.push(view);
-                } else {
-                    nestedViews.splice(viewIndex, 0, view);
-                }
-                var /** @type {?} */prevView = viewIndex > 0 ? nestedViews[viewIndex - 1] : null;
-                view.attachAfter(this, prevView);
-            }
-        }, {
-            key: 'detachView',
-            value: function detachView(viewIndex) {
-                var /** @type {?} */view = this.nestedViews[viewIndex];
-                // perf: array.pop is faster than array.splice!
-                if (viewIndex >= this.nestedViews.length - 1) {
-                    this.nestedViews.pop();
-                } else {
-                    this.nestedViews.splice(viewIndex, 1);
-                }
-                if (view.type === ViewType.COMPONENT) {
-                    throw new Error('Component views can\'t be moved!');
-                }
-                view.detach();
-                return view;
-            }
-        }, {
-            key: 'elementRef',
-            get: function get() {
-                return new ElementRef(this.nativeElement);
-            }
-        }, {
-            key: 'vcRef',
-            get: function get() {
-                return new ViewContainerRef_(this);
-            }
-        }, {
-            key: 'parentInjector',
-            get: function get() {
-                return this.parentView.injector(this.parentIndex);
-            }
-        }, {
-            key: 'injector',
-            get: function get() {
-                return this.parentView.injector(this.index);
-            }
-        }]);
-
-        return ViewContainer;
-    }();
 
     /**
      * @license
@@ -14872,7 +11364,7 @@
      * @param {?} definitions
      * @return {?}
      */
-    function trigger$2(name, definitions) {
+    function trigger$1(name, definitions) {
         return { name: name, definitions: definitions };
     }
     /**
@@ -14923,7 +11415,7 @@
      * @param {?=} styles
      * @return {?}
      */
-    function animate$2(timings) {
+    function animate$1(timings) {
         var styles = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
         return { type: 4 /* Animate */, styles: styles, timings: timings };
@@ -14961,7 +11453,7 @@
      * @param {?} steps
      * @return {?}
      */
-    function group$2(steps) {
+    function group$1(steps) {
         return { type: 3 /* Group */, steps: steps };
     }
     /**
@@ -15000,7 +11492,7 @@
      * @param {?} steps
      * @return {?}
      */
-    function sequence$2(steps) {
+    function sequence$1(steps) {
         return { type: 2 /* Sequence */, steps: steps };
     }
     /**
@@ -15047,7 +11539,7 @@
      * @param {?} tokens
      * @return {?}
      */
-    function style$2(tokens) {
+    function style$1(tokens) {
         var /** @type {?} */input = void 0;
         var /** @type {?} */offset = null;
         if (Array.isArray(tokens)) {
@@ -15122,7 +11614,7 @@
      * @param {?} styles
      * @return {?}
      */
-    function state$2(name, styles) {
+    function state$1(name, styles) {
         return { type: 0 /* State */, name: name, styles: styles };
     }
     /**
@@ -15172,7 +11664,7 @@
      * @param {?} steps
      * @return {?}
      */
-    function keyframes$2(steps) {
+    function keyframes$1(steps) {
         return { type: 5 /* KeyframeSequence */, steps: steps };
     }
     /**
@@ -15285,26 +11777,26 @@
      * @param {?} steps
      * @return {?}
      */
-    function transition$2(stateChangeExpr, steps) {
+    function transition$1(stateChangeExpr, steps) {
         return {
             type: 1 /* Transition */
             , expr: stateChangeExpr,
-            animation: Array.isArray(steps) ? sequence$2(steps) : steps
+            animation: Array.isArray(steps) ? sequence$1(steps) : steps
         };
     }
 
     /**
      * @deprecated This symbol has moved. Please Import from @angular/animations instead!
      */
-    var /** @type {?} */AUTO_STYLE$1 = '*';
+    var /** @type {?} */AUTO_STYLE = '*';
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
      * @param {?} name
      * @param {?} definitions
      * @return {?}
      */
-    function trigger$1(name, definitions) {
-        return trigger$2(name, definitions);
+    function trigger(name, definitions) {
+        return trigger$1(name, definitions);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
@@ -15312,34 +11804,34 @@
      * @param {?=} styles
      * @return {?}
      */
-    function animate$1(timings) {
+    function animate(timings) {
         var styles = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-        return animate$2(timings, styles);
+        return animate$1(timings, styles);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
      * @param {?} steps
      * @return {?}
      */
-    function group$1(steps) {
-        return group$2(steps);
+    function group(steps) {
+        return group$1(steps);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
      * @param {?} steps
      * @return {?}
      */
-    function sequence$1(steps) {
-        return sequence$2(steps);
+    function sequence(steps) {
+        return sequence$1(steps);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
      * @param {?} tokens
      * @return {?}
      */
-    function style$1(tokens) {
-        return style$2(tokens);
+    function style(tokens) {
+        return style$1(tokens);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
@@ -15347,16 +11839,16 @@
      * @param {?} styles
      * @return {?}
      */
-    function state$1(name, styles) {
-        return state$2(name, styles);
+    function state(name, styles) {
+        return state$1(name, styles);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
      * @param {?} steps
      * @return {?}
      */
-    function keyframes$1(steps) {
-        return keyframes$2(steps);
+    function keyframes(steps) {
+        return keyframes$1(steps);
     }
     /**
      * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
@@ -15364,8 +11856,8 @@
      * @param {?} steps
      * @return {?}
      */
-    function transition$1(stateChangeExpr, steps) {
-        return transition$2(stateChangeExpr, steps);
+    function transition(stateChangeExpr, steps) {
+        return transition$1(stateChangeExpr, steps);
     }
 
     exports.createPlatform = createPlatform;
@@ -15404,9 +11896,6 @@
     exports.Type = Type;
     exports.EventEmitter = EventEmitter;
     exports.ErrorHandler = ErrorHandler;
-    exports.AnimationPlayer = AnimationPlayer;
-    exports.AnimationStyles = AnimationStyles;
-    exports.AnimationKeyframe = AnimationKeyframe;
     exports.Sanitizer = Sanitizer;
     exports.SecurityContext = SecurityContext;
     exports.ANALYZE_FOR_ENTRY_COMPONENTS = ANALYZE_FOR_ENTRY_COMPONENTS;
@@ -15477,23 +11966,6 @@
     exports.SimpleChange = SimpleChange;
     exports.WrappedValue = WrappedValue;
     exports.platformCore = platformCore;
-    exports.ɵANY_STATE = ANY_STATE;
-    exports.ɵDEFAULT_STATE = DEFAULT_STATE;
-    exports.ɵEMPTY_STATE = EMPTY_STATE;
-    exports.ɵFILL_STYLE_FLAG = FILL_STYLE_FLAG;
-    exports.ɵAnimationGroupPlayer = AnimationGroupPlayer;
-    exports.ɵAnimationKeyframe = AnimationKeyframe;
-    exports.ɵAnimationPlayer = AnimationPlayer;
-    exports.ɵNoOpAnimationPlayer = NoOpAnimationPlayer;
-    exports.ɵAnimationSequencePlayer = AnimationSequencePlayer;
-    exports.ɵbalanceAnimationKeyframes = balanceAnimationKeyframes;
-    exports.ɵclearStyles = clearStyles;
-    exports.ɵcollectAndResolveStyles = collectAndResolveStyles;
-    exports.ɵflattenStyles = flattenStyles;
-    exports.ɵprepareFinalAnimationStyles = prepareFinalAnimationStyles;
-    exports.ɵrenderStyles = renderStyles;
-    exports.ɵAnimationStyles = AnimationStyles;
-    exports.ɵAnimationTransition = AnimationTransition;
     exports.ɵALLOW_MULTIPLE_PLATFORMS = ALLOW_MULTIPLE_PLATFORMS;
     exports.ɵAPP_ID_RANDOM_PROVIDER = APP_ID_RANDOM_PROVIDER;
     exports.ɵValueUnwrapper = ValueUnwrapper;
@@ -15501,16 +11973,9 @@
     exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
     exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
     exports.ɵConsole = Console;
-    exports.ɵDebugDomRootRenderer = DebugDomRootRenderer;
     exports.ɵERROR_COMPONENT_TYPE = ERROR_COMPONENT_TYPE;
     exports.ɵComponentFactory = ComponentFactory;
     exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
-    exports.ɵDebugContext = DebugContext$1;
-    exports.ɵStaticNodeDebugInfo = StaticNodeDebugInfo;
-    exports.ɵAppView = AppView;
-    exports.ɵDebugAppView = DebugAppView;
-    exports.ɵViewContainer = ViewContainer;
-    exports.ɵViewType = ViewType;
     exports.ɵLIFECYCLE_HOOKS_VALUES = LIFECYCLE_HOOKS_VALUES;
     exports.ɵLifecycleHooks = LifecycleHooks;
     exports.ɵViewMetadata = ViewMetadata;
@@ -15522,53 +11987,19 @@
     exports.ɵmakeDecorator = makeDecorator;
     exports.ɵisObservable = isObservable;
     exports.ɵisPromise = isPromise;
-    exports.ɵComponentRef_ = ComponentRef_;
     exports.ɵNgModuleInjector = NgModuleInjector;
     exports.ɵregisterModuleFactory = registerModuleFactory;
-    exports.ɵTemplateRef_ = TemplateRef_;
     exports.ɵEMPTY_ARRAY = EMPTY_ARRAY;
-    exports.ɵEMPTY_INLINE_ARRAY = EMPTY_INLINE_ARRAY;
     exports.ɵEMPTY_MAP = EMPTY_MAP;
-    exports.ɵInlineArray16 = InlineArray16;
-    exports.ɵInlineArray2 = InlineArray2;
-    exports.ɵInlineArray4 = InlineArray4;
-    exports.ɵInlineArray8 = InlineArray8;
-    exports.ɵInlineArrayDynamic = InlineArrayDynamic;
-    exports.ɵViewUtils = ViewUtils;
-    exports.ɵcastByValue = castByValue;
-    exports.ɵcheckBinding = checkBinding;
-    exports.ɵcheckBindingChange = checkBindingChange;
-    exports.ɵcheckRenderAttribute = checkRenderAttribute;
-    exports.ɵcheckRenderClass = checkRenderClass;
-    exports.ɵcheckRenderProperty = checkRenderProperty;
-    exports.ɵcheckRenderStyle = checkRenderStyle;
-    exports.ɵcheckRenderText = checkRenderText;
-    exports.ɵcreateRenderComponentType = createRenderComponentType;
-    exports.ɵcreateRenderElement = createRenderElement;
-    exports.ɵgetComponentFactoryViewClass = getComponentFactoryViewClass;
-    exports.ɵinlineInterpolate = inlineInterpolate;
-    exports.ɵinterpolate = interpolate;
-    exports.ɵnoop = noop;
-    exports.ɵpureProxy1 = pureProxy1;
-    exports.ɵpureProxy10 = pureProxy10;
-    exports.ɵpureProxy2 = pureProxy2;
-    exports.ɵpureProxy3 = pureProxy3;
-    exports.ɵpureProxy4 = pureProxy4;
-    exports.ɵpureProxy5 = pureProxy5;
-    exports.ɵpureProxy6 = pureProxy6;
-    exports.ɵpureProxy7 = pureProxy7;
-    exports.ɵpureProxy8 = pureProxy8;
-    exports.ɵpureProxy9 = pureProxy9;
-    exports.ɵselectOrCreateRenderHostElement = selectOrCreateRenderHostElement;
-    exports.ɵsetBindingDebugInfo = setBindingDebugInfo;
-    exports.ɵsetBindingDebugInfoForChanges = setBindingDebugInfoForChanges;
-    exports.ɵsubscribeToRenderElement = subscribeToRenderElement;
     exports.ɵand = anchorDef;
     exports.ɵccf = createComponentFactory;
     exports.ɵcrt = createRendererTypeV2;
     exports.ɵdid = directiveDef;
     exports.ɵeld = elementDef;
     exports.ɵelementEventFullName = elementEventFullName;
+    exports.ɵgetComponentViewDefinitionFactory = getComponentViewDefinitionFactory;
+    exports.ɵinlineInterpolate = inlineInterpolate;
+    exports.ɵinterpolate = interpolate;
     exports.ɵncd = ngContentDef;
     exports.ɵnov = nodeValue;
     exports.ɵpid = pipeDef;
@@ -15580,24 +12011,23 @@
     exports.ɵted = textDef;
     exports.ɵunv = unwrapValue;
     exports.ɵvid = viewDef;
-    exports.AUTO_STYLE = AUTO_STYLE$1;
-    exports.trigger = trigger$1;
-    exports.animate = animate$1;
-    exports.group = group$1;
-    exports.sequence = sequence$1;
-    exports.style = style$1;
-    exports.state = state$1;
-    exports.keyframes = keyframes$1;
-    exports.transition = transition$1;
-    exports.ɵy = AnimationQueue;
-    exports.ɵbb = animate$2;
-    exports.ɵbc = group$2;
-    exports.ɵbg = keyframes$2;
-    exports.ɵbd = sequence$2;
-    exports.ɵbf = state$2;
-    exports.ɵbe = style$2;
-    exports.ɵbh = transition$2;
-    exports.ɵba = trigger$2;
+    exports.AUTO_STYLE = AUTO_STYLE;
+    exports.trigger = trigger;
+    exports.animate = animate;
+    exports.group = group;
+    exports.sequence = sequence;
+    exports.style = style;
+    exports.state = state;
+    exports.keyframes = keyframes;
+    exports.transition = transition;
+    exports.ɵba = animate$1;
+    exports.ɵbb = group$1;
+    exports.ɵbf = keyframes$1;
+    exports.ɵbc = sequence$1;
+    exports.ɵbe = state$1;
+    exports.ɵbd = style$1;
+    exports.ɵbg = transition$1;
+    exports.ɵz = trigger$1;
     exports.ɵp = _initViewEngine;
     exports.ɵm = _iterableDiffersFactory;
     exports.ɵn = _keyValueDiffersFactory;

@@ -31,17 +31,26 @@ export { Type } from './type';
 export { EventEmitter } from './facade/async';
 export { ErrorHandler } from './error_handler';
 export * from './core_private_export';
-export { AnimationPlayer } from './animation/animation_player';
-export { AnimationStyles } from './animation/animation_styles';
-export { AnimationKeyframe } from './animation/animation_keyframe';
 export { Sanitizer, SecurityContext } from './security';
 export * from './codegen_private_exports';
-export * from './animation_next/animation_metadata_wrapped';
+export * from './animation/animation_metadata_wrapped';
 /**
- * @deprecated
+ * @deprecated from v4
  */
 export declare type AnimationEntryMetadata = any;
 /**
- * @deprecated
+ * @deprecated from v4
  */
 export declare type AnimationStateTransitionMetadata = any;
+/**
+ * @deprecated from v4
+ */
+export declare type AnimationPlayer = any;
+/**
+ * @deprecated from v4
+ */
+export declare type AnimationStyles = any;
+/**
+ * @deprecated from v4
+ */
+export declare type AnimationKeyframe = any;

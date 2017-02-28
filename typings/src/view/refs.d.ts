@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di';
@@ -9,6 +16,7 @@ import { Renderer as RendererV1 } from '../render/api';
 import { Type } from '../type';
 import { NodeDef, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory): ComponentFactory<any>;
+export declare function getComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
 export declare function createViewContainerRef(view: ViewData, elDef: NodeDef): ViewContainerRef;
 export declare function createChangeDetectorRef(view: ViewData): ChangeDetectorRef;
 export declare class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {

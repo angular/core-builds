@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AnimationEntryMetadata } from '../animation/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../di';
 import { Type } from '../type';
@@ -625,7 +624,7 @@ export interface Component extends Directive {
      * - {@link animate animate()}
      * - {@link keyframes keyframes()}
      */
-    animations?: AnimationEntryMetadata[];
+    animations?: any[];
     /**
      * Specifies how the template and the styles should be encapsulated:
      * - {@link ViewEncapsulation#Native `ViewEncapsulation.Native`} to use shadow roots - only works

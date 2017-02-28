@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ElementRef } from './element_ref';
-import { AppView } from './view';
 import { EmbeddedViewRef } from './view_ref';
 /**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.
@@ -35,16 +34,4 @@ export declare abstract class TemplateRef<C> {
      */
     readonly abstract elementRef: ElementRef;
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
-}
-/**
- * workaround https://github.com/angular/tsickle/issues/350
- * @suppress {checkTypes}
- */
-export declare class TemplateRef_<C> extends TemplateRef<C> {
-    private _parentView;
-    private _nodeIndex;
-    private _nativeElement;
-    constructor(_parentView: AppView<any>, _nodeIndex: number, _nativeElement: any);
-    createEmbeddedView(context: C): EmbeddedViewRef<C>;
-    readonly elementRef: ElementRef;
 }

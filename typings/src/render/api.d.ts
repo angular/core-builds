@@ -5,9 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { AnimationKeyframe } from '../../src/animation/animation_keyframe';
-import { AnimationPlayer } from '../../src/animation/animation_player';
-import { AnimationStyles } from '../../src/animation/animation_styles';
 import { InjectionToken, Injector } from '../di';
 import { ViewEncapsulation } from '../metadata/view';
 /**
@@ -70,7 +67,7 @@ export declare abstract class Renderer {
     abstract setElementStyle(renderElement: any, styleName: string, styleValue: string): void;
     abstract invokeElementMethod(renderElement: any, methodName: string, args?: any[]): void;
     abstract setText(renderNode: any, text: string): void;
-    abstract animate(element: any, startingStyles: AnimationStyles, keyframes: AnimationKeyframe[], duration: number, delay: number, easing: string, previousPlayers?: AnimationPlayer[]): AnimationPlayer;
+    abstract animate(element: any, startingStyles: any, keyframes: any[], duration: number, delay: number, easing: string, previousPlayers?: any[]): any;
 }
 export declare const RendererV2Interceptor: InjectionToken<RendererV2[]>;
 /**

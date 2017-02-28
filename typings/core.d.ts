@@ -2,8 +2,7 @@
  * Generated bundle index. Do not edit.
  */
 export * from './public_api';
-export { AnimationQueue as ɵy } from './src/animation/animation_queue';
-export { AnimationMetadataType as ɵz, animate as ɵbb, group as ɵbc, keyframes as ɵbg, sequence as ɵbd, state as ɵbf, style as ɵbe, transition as ɵbh, trigger as ɵba } from './src/animation_next/dsl';
+export { AnimationMetadataType as ɵy, animate as ɵba, group as ɵbb, keyframes as ɵbf, sequence as ɵbc, state as ɵbe, style as ɵbd, transition as ɵbg, trigger as ɵz } from './src/animation/dsl';
 export { _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo } from './src/application_module';
 export { ApplicationRef_ as ɵf } from './src/application_ref';
 export { _appIdRandomProviderFactory as ɵg } from './src/application_tokens';

@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.1-e58cb7b
+ * @license Angular v4.0.0-rc.1-126fda2
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -23,45 +23,7 @@
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-    exports.ɵTestingCompilerFactory = exports.ɵTestingCompiler = exports.ɵMockAnimationPlayer = exports.__core_private_testing_placeholder__ = exports.withModule = exports.InjectSetupWrapper = exports.inject = exports.getTestBed = exports.TestBed = exports.ComponentFixtureNoNgZone = exports.ComponentFixtureAutoDetect = exports.TestComponentRenderer = exports.flushMicrotasks = exports.discardPeriodicTasks = exports.tick = exports.fakeAsync = exports.resetFakeAsyncZone = exports.ComponentFixture = exports.async = undefined;
-
-    var _slicedToArray = function () {
-        function sliceIterator(arr, i) {
-            var _arr = [];
-            var _n = true;
-            var _d = false;
-            var _e = undefined;
-
-            try {
-                for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-                    _arr.push(_s.value);
-
-                    if (i && _arr.length === i) break;
-                }
-            } catch (err) {
-                _d = true;
-                _e = err;
-            } finally {
-                try {
-                    if (!_n && _i["return"]) _i["return"]();
-                } finally {
-                    if (_d) throw _e;
-                }
-            }
-
-            return _arr;
-        }
-
-        return function (arr, i) {
-            if (Array.isArray(arr)) {
-                return arr;
-            } else if (Symbol.iterator in Object(arr)) {
-                return sliceIterator(arr, i);
-            } else {
-                throw new TypeError("Invalid attempt to destructure non-iterable instance");
-            }
-        };
-    }();
+    exports.ɵTestingCompilerFactory = exports.ɵTestingCompiler = exports.__core_private_testing_placeholder__ = exports.withModule = exports.InjectSetupWrapper = exports.inject = exports.getTestBed = exports.TestBed = exports.ComponentFixtureNoNgZone = exports.ComponentFixtureAutoDetect = exports.TestComponentRenderer = exports.flushMicrotasks = exports.discardPeriodicTasks = exports.tick = exports.fakeAsync = exports.resetFakeAsyncZone = exports.ComponentFixture = exports.async = undefined;
 
     function _toConsumableArray(arr) {
         if (Array.isArray(arr)) {
@@ -1124,165 +1086,6 @@
     // work.
     var __core_private_testing_placeholder__ = '';
 
-    var MockAnimationPlayer = function () {
-        function MockAnimationPlayer() {
-            var startingStyles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            var _this12 = this;
-
-            var keyframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-            var previousPlayers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-            _classCallCheck(this, MockAnimationPlayer);
-
-            this.startingStyles = startingStyles;
-            this.keyframes = keyframes;
-            this._onDoneFns = [];
-            this._onStartFns = [];
-            this._onDestroyFns = [];
-            this._finished = false;
-            this._destroyed = false;
-            this._started = false;
-            this.parentPlayer = null;
-            this.previousStyles = {};
-            this.log = [];
-            previousPlayers.forEach(function (player) {
-                if (player instanceof MockAnimationPlayer) {
-                    var styles = player._captureStyles();
-                    Object.keys(styles).forEach(function (prop) {
-                        return _this12.previousStyles[prop] = styles[prop];
-                    });
-                }
-            });
-        }
-
-        _createClass(MockAnimationPlayer, [{
-            key: '_onFinish',
-            value: function _onFinish() {
-                if (!this._finished) {
-                    this._finished = true;
-                    this.log.push('finish');
-                    this._onDoneFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDoneFns = [];
-                }
-            }
-        }, {
-            key: 'init',
-            value: function init() {
-                this.log.push('init');
-            }
-        }, {
-            key: 'onDone',
-            value: function onDone(fn) {
-                this._onDoneFns.push(fn);
-            }
-        }, {
-            key: 'onStart',
-            value: function onStart(fn) {
-                this._onStartFns.push(fn);
-            }
-        }, {
-            key: 'onDestroy',
-            value: function onDestroy(fn) {
-                this._onDestroyFns.push(fn);
-            }
-        }, {
-            key: 'hasStarted',
-            value: function hasStarted() {
-                return this._started;
-            }
-        }, {
-            key: 'play',
-            value: function play() {
-                if (!this.hasStarted()) {
-                    this._onStartFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onStartFns = [];
-                    this._started = true;
-                }
-                this.log.push('play');
-            }
-        }, {
-            key: 'pause',
-            value: function pause() {
-                this.log.push('pause');
-            }
-        }, {
-            key: 'restart',
-            value: function restart() {
-                this.log.push('restart');
-            }
-        }, {
-            key: 'finish',
-            value: function finish() {
-                this._onFinish();
-            }
-        }, {
-            key: 'reset',
-            value: function reset() {
-                this.log.push('reset');
-                this._destroyed = false;
-                this._finished = false;
-                this._started = false;
-            }
-        }, {
-            key: 'destroy',
-            value: function destroy() {
-                if (!this._destroyed) {
-                    this._destroyed = true;
-                    this.finish();
-                    this.log.push('destroy');
-                    this._onDestroyFns.forEach(function (fn) {
-                        return fn();
-                    });
-                    this._onDestroyFns = [];
-                }
-            }
-        }, {
-            key: 'setPosition',
-            value: function setPosition(p) {}
-        }, {
-            key: 'getPosition',
-            value: function getPosition() {
-                return 0;
-            }
-        }, {
-            key: '_captureStyles',
-            value: function _captureStyles() {
-                var _this13 = this;
-
-                var captures = {};
-                if (this.hasStarted()) {
-                    // when assembling the captured styles, it's important that
-                    // we build the keyframe styles in the following order:
-                    // {startingStyles, ... other styles within keyframes, ... previousStyles }
-                    Object.keys(this.startingStyles).forEach(function (prop) {
-                        captures[prop] = _this13.startingStyles[prop];
-                    });
-                    this.keyframes.forEach(function (kf) {
-                        var _kf = _slicedToArray(kf, 2),
-                            offset = _kf[0],
-                            styles = _kf[1];
-
-                        var newStyles = {};
-                        Object.keys(styles).forEach(function (prop) {
-                            captures[prop] = _this13._finished ? styles[prop] : _core.AUTO_STYLE;
-                        });
-                    });
-                }
-                Object.keys(this.previousStyles).forEach(function (prop) {
-                    captures[prop] = _this13.previousStyles[prop];
-                });
-                return captures;
-            }
-        }]);
-
-        return MockAnimationPlayer;
-    }();
-
     exports.async = async;
     exports.ComponentFixture = ComponentFixture;
     exports.resetFakeAsyncZone = resetFakeAsyncZone;
@@ -1299,7 +1102,6 @@
     exports.InjectSetupWrapper = InjectSetupWrapper;
     exports.withModule = withModule;
     exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
-    exports.ɵMockAnimationPlayer = MockAnimationPlayer;
     exports.ɵTestingCompiler = TestingCompiler;
     exports.ɵTestingCompilerFactory = TestingCompilerFactory;
 });

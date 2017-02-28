@@ -9,7 +9,6 @@ import { Injector } from '../di/injector';
 import { ComponentFactory, ComponentRef } from './component_factory';
 import { ElementRef } from './element_ref';
 import { TemplateRef } from './template_ref';
-import { ViewContainer } from './view_container';
 import { EmbeddedViewRef, ViewRef } from './view_ref';
 /**
  * Represents a container where one or more Views can be attached.
@@ -103,21 +102,4 @@ export declare abstract class ViewContainerRef {
      * If the `index` param is omitted, the last {@link ViewRef} is detached.
      */
     abstract detach(index?: number): ViewRef;
-}
-export declare class ViewContainerRef_ implements ViewContainerRef {
-    private _element;
-    constructor(_element: ViewContainer);
-    get(index: number): ViewRef;
-    readonly length: number;
-    readonly element: ElementRef;
-    readonly injector: Injector;
-    readonly parentInjector: Injector;
-    createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, index?: number): EmbeddedViewRef<C>;
-    createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][]): ComponentRef<C>;
-    insert(viewRef: ViewRef, index?: number): ViewRef;
-    move(viewRef: ViewRef, currentIndex: number): ViewRef;
-    indexOf(viewRef: ViewRef): number;
-    remove(index?: number): void;
-    detach(index?: number): ViewRef;
-    clear(): void;
 }
