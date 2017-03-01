@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.1-bc9e1de
+ * @license Angular v4.0.0-rc.1-5753de5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -857,7 +857,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-bc9e1de');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-5753de5');
 
 /**
  * Inject decorator and metadata.
@@ -7943,14 +7943,14 @@ function elementEventFullName(target, name) {
  * @return {?}
  */
 function isComponentView(view) {
-    return view.component === view.context && !!view.parent;
+    return !!view.parent && !!(view.parentNodeDef.flags & 16384 /* Component */);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function isEmbeddedView(view) {
-    return view.component !== view.context && !!view.parent;
+    return !!view.parent && !(view.parentNodeDef.flags & 16384 /* Component */);
 }
 /**
  * @param {?} queryId
