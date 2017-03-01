@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.1-49b462e
+ * @license Angular v4.0.0-rc.1-47bdc2b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -857,7 +857,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-49b462e');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.1-47bdc2b');
 
 /**
  * Inject decorator and metadata.
@@ -4404,10 +4404,8 @@ class ApplicationRef_ extends ApplicationRef {
      * @param {?} _exceptionHandler
      * @param {?} _componentFactoryResolver
      * @param {?} _initStatus
-     * @param {?} _testabilityRegistry
-     * @param {?} _testability
      */
-    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
+    constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
         super();
         this._zone = _zone;
         this._console = _console;
@@ -4415,8 +4413,6 @@ class ApplicationRef_ extends ApplicationRef {
         this._exceptionHandler = _exceptionHandler;
         this._componentFactoryResolver = _componentFactoryResolver;
         this._initStatus = _initStatus;
-        this._testabilityRegistry = _testabilityRegistry;
-        this._testability = _testability;
         this._bootstrapListeners = [];
         this._rootComponents = [];
         this._rootComponentTypes = [];
@@ -4585,8 +4581,6 @@ ApplicationRef_.ctorParameters = () => [
     { type: ErrorHandler, },
     { type: ComponentFactoryResolver, },
     { type: ApplicationInitStatus, },
-    { type: TestabilityRegistry, decorators: [{ type: Optional },] },
-    { type: Testability, decorators: [{ type: Optional },] },
 ];
 
 /**

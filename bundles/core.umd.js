@@ -1003,7 +1003,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-49b462e');
+    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-47bdc2b');
 
     /**
      * Inject decorator and metadata.
@@ -4203,10 +4203,8 @@
          * @param {?} _exceptionHandler
          * @param {?} _componentFactoryResolver
          * @param {?} _initStatus
-         * @param {?} _testabilityRegistry
-         * @param {?} _testability
          */
-        function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus, _testabilityRegistry, _testability) {
+        function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
             _classCallCheck(this, ApplicationRef_);
 
             var _this14 = _possibleConstructorReturn(this, (ApplicationRef_.__proto__ || Object.getPrototypeOf(ApplicationRef_)).call(this));
@@ -4217,8 +4215,6 @@
             _this14._exceptionHandler = _exceptionHandler;
             _this14._componentFactoryResolver = _componentFactoryResolver;
             _this14._initStatus = _initStatus;
-            _this14._testabilityRegistry = _testabilityRegistry;
-            _this14._testability = _testability;
             _this14._bootstrapListeners = [];
             _this14._rootComponents = [];
             _this14._rootComponentTypes = [];
@@ -4395,7 +4391,7 @@
     ApplicationRef_.decorators = [{ type: Injectable }];
     /** @nocollapse */
     ApplicationRef_.ctorParameters = function () {
-        return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }, { type: TestabilityRegistry, decorators: [{ type: Optional }] }, { type: Testability, decorators: [{ type: Optional }] }];
+        return [{ type: NgZone }, { type: Console }, { type: Injector }, { type: ErrorHandler }, { type: ComponentFactoryResolver }, { type: ApplicationInitStatus }];
     };
 
     /**

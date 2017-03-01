@@ -15,7 +15,6 @@ import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
 import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { ViewRef } from './linker/view_ref';
-import { Testability, TestabilityRegistry } from './testability/testability';
 import { Type } from './type';
 import { NgZone } from './zone/ng_zone';
 export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
@@ -237,8 +236,6 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _exceptionHandler;
     private _componentFactoryResolver;
     private _initStatus;
-    private _testabilityRegistry;
-    private _testability;
     private _bootstrapListeners;
     private _rootComponents;
     private _rootComponentTypes;
@@ -247,7 +244,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     private _enforceNoNewChanges;
     private _isStable;
     private _stable;
-    constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus, _testabilityRegistry: TestabilityRegistry, _testability: Testability);
+    constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus);
     attachView(viewRef: ViewRef): void;
     detachView(viewRef: ViewRef): void;
     bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
