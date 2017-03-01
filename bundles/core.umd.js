@@ -1003,7 +1003,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-5753de5');
+    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-d1182af');
 
     /**
      * Inject decorator and metadata.
@@ -7137,14 +7137,14 @@
      * @return {?}
      */
     function isComponentView(view) {
-        return !!view.parent && !!(view.parentNodeDef.flags & 16384 /* Component */);
+        return view.component === view.context && !!view.parent;
     }
     /**
      * @param {?} view
      * @return {?}
      */
     function isEmbeddedView(view) {
-        return !!view.parent && !(view.parentNodeDef.flags & 16384 /* Component */);
+        return view.component !== view.context && !!view.parent;
     }
     /**
      * @param {?} queryId
