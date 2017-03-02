@@ -35,7 +35,7 @@ export interface AnimationStateMetadata extends AnimationMetadata {
  */
 export interface AnimationTransitionMetadata extends AnimationMetadata {
     expr: string | ((fromState: string, toState: string) => boolean);
-    animation: AnimationMetadata;
+    animation: AnimationMetadata | AnimationMetadata[];
 }
 /**
  * @deprecated This symbol has moved. Please Import from @angular/animations instead!
@@ -49,8 +49,10 @@ export interface AnimationKeyframesSequenceMetadata extends AnimationMetadata {
 export interface AnimationStyleMetadata extends AnimationMetadata {
     styles: {
         [key: string]: string | number;
+    } | {
+        [key: string]: string | number;
     }[];
-    offset: number;
+    offset?: number;
 }
 /**
  * @deprecated This symbol has moved. Please Import from @angular/animations instead!

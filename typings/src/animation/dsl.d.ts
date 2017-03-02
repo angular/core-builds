@@ -63,7 +63,7 @@ export interface AnimationStateMetadata extends AnimationMetadata {
  */
 export interface AnimationTransitionMetadata extends AnimationMetadata {
     expr: string | ((fromState: string, toState: string) => boolean);
-    animation: AnimationMetadata;
+    animation: AnimationMetadata | AnimationMetadata[];
 }
 /**
  * Metadata representing the entry of animations. Instances of this class are provided via the
@@ -83,8 +83,10 @@ export interface AnimationKeyframesSequenceMetadata extends AnimationMetadata {
 export interface AnimationStyleMetadata extends AnimationMetadata {
     styles: {
         [key: string]: string | number;
+    } | {
+        [key: string]: string | number;
     }[];
-    offset: number;
+    offset?: number;
 }
 /**
  * Metadata representing the entry of animations. Instances of this class are provided via the
