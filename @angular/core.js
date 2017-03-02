@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.2-49aa508
+ * @license Angular v4.0.0-rc.2-e6e8123
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -857,7 +857,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.2-49aa508');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.2-e6e8123');
 
 /**
  * Inject decorator and metadata.
