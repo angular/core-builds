@@ -7,7 +7,7 @@
         var mod = {
             exports: {}
         };
-        factory(mod.exports, global.rxjsObservable, global.rxjsObservableMerge, global.rxjsOperatorShare, global.rxjsSymbolObservable, global.Rx);
+        factory(mod.exports, global.Rx, global.Rx.Observable, global.Rx.Observable.prototype, global.Rx.Symbol.observable, global.Rx);
         global.ng = global.ng || {};
         global.ng.core = mod.exports;
     }
@@ -1003,7 +1003,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-b6e6fc1');
+    var /** @type {?} */VERSION = new Version('4.0.0-rc.1-3168ef7');
 
     /**
      * Inject decorator and metadata.
