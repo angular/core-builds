@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.2-207298c
+ * @license Angular v4.0.0-rc.2-b7e76cc
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -84,18 +84,34 @@ class InjectionToken extends OpaqueToken {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let /** @type {?} */ globalScope;
-if (typeof window === 'undefined') {
-    if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-        // TODO: Replace any with WorkerGlobalScope from lib.webworker.d.ts #3492
-        globalScope = (self);
+const /** @type {?} */ __window = typeof window !== 'undefined' && window;
+const /** @type {?} */ __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope && self;
+const /** @type {?} */ __global = typeof global !== 'undefined' && global;
+const /** @type {?} */ global$1 = __window || __global || __self;
+let /** @type {?} */ _symbolIterator = null;
+/**
+ * @return {?}
+ */
+function getSymbolIterator() {
+    if (!_symbolIterator) {
+        const /** @type {?} */ Symbol = global$1['Symbol'];
+        if (Symbol && Symbol.iterator) {
+            _symbolIterator = Symbol.iterator;
+        }
+        else {
+            // es6-shim specific logic
+            const /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
+            for (let /** @type {?} */ i = 0; i < keys.length; ++i) {
+                const /** @type {?} */ key = keys[i];
+                if (key !== 'entries' && key !== 'size' &&
+                    ((Map)).prototype[key] === Map.prototype['entries']) {
+                    _symbolIterator = key;
+                }
+            }
+        }
     }
-    else {
-        globalScope = (global);
-    }
-}
-else {
-    globalScope = (window);
+    return _symbolIterator;
 }
 /**
  * @param {?} fn
@@ -104,35 +120,13 @@ else {
 function scheduleMicroTask(fn) {
     Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
-// Need to declare a new variable for global here since TypeScript
-// exports the original value of the symbol.
-const /** @type {?} */ global$1 = globalScope;
 /**
- * @param {?} type
+ * @param {?} a
+ * @param {?} b
  * @return {?}
  */
-function getTypeNameForDebugging(type) {
-    return type['name'] || typeof type;
-}
-// TODO: remove calls to assert in production environment
-// Note: Can't just export this and import in in other files
-// as `assert` is a reserved keyword in Dart
-global$1.assert = function assert(condition) {
-    // TODO: to be fixed properly via #2830, noop for now
-};
-/**
- * @param {?} obj
- * @return {?}
- */
-function isPresent(obj) {
-    return obj != null;
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function isBlank(obj) {
-    return obj == null;
+function looseIdentical(a, b) {
+    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
 }
 /**
  * @param {?} token
@@ -155,69 +149,9 @@ function stringify(token) {
     const /** @type {?} */ newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function looseIdentical(a, b) {
-    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-}
-/**
- * @param {?} o
- * @return {?}
- */
-function isJsObject(o) {
-    return o !== null && (typeof o === 'function' || typeof o === 'object');
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function print(obj) {
-    // tslint:disable-next-line:no-console
-    console.log(obj);
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function warn(obj) {
-    console.warn(obj);
-}
-let /** @type {?} */ _symbolIterator = null;
-/**
- * @return {?}
- */
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        if (((globalScope)).Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            const /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
-            for (let /** @type {?} */ i = 0; i < keys.length; ++i) {
-                const /** @type {?} */ key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    ((Map)).prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function isPrimitive(obj) {
-    return !isJsObject(obj);
-}
 
 let /** @type {?} */ _nextClassId = 0;
-const /** @type {?} */ Reflect = global$1.Reflect;
+const /** @type {?} */ Reflect = global$1['Reflect'];
 /**
  * @param {?} annotation
  * @return {?}
@@ -662,7 +596,7 @@ ChangeDetectorStatus[ChangeDetectorStatus.Destroyed] = "Destroyed";
  * @return {?}
  */
 function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
-    return isBlank(changeDetectionStrategy) ||
+    return changeDetectionStrategy == null ||
         changeDetectionStrategy === ChangeDetectionStrategy.Default;
 }
 
@@ -857,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.2-207298c');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.2-b7e76cc');
 
 /**
  * Inject decorator and metadata.
@@ -1504,7 +1438,7 @@ class ReflectionCapabilities {
     /**
      * @param {?=} reflect
      */
-    constructor(reflect) { this._reflect = reflect || global$1.Reflect; }
+    constructor(reflect) { this._reflect = reflect || global$1['Reflect']; }
     /**
      * @return {?}
      */
@@ -1541,7 +1475,7 @@ class ReflectionCapabilities {
             else {
                 result[i] = [];
             }
-            if (paramAnnotations && isPresent(paramAnnotations[i])) {
+            if (paramAnnotations && paramAnnotations[i] != null) {
                 result[i] = result[i].concat(paramAnnotations[i]);
             }
         }
@@ -1578,7 +1512,7 @@ class ReflectionCapabilities {
             return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
         }
         // API for metadata created by invoking the decorators.
-        if (isPresent(this._reflect) && isPresent(this._reflect.getOwnMetadata)) {
+        if (this._reflect != null && this._reflect.getOwnMetadata != null) {
             const /** @type {?} */ paramAnnotations = this._reflect.getOwnMetadata('parameters', type);
             const /** @type {?} */ paramTypes = this._reflect.getOwnMetadata('design:paramtypes', type);
             if (paramTypes || paramAnnotations) {
@@ -2707,122 +2641,6 @@ function _mapProviders(injector, fn) {
     return res;
 }
 
-class ListWrapper {
-    /**
-     * @param {?} arr
-     * @param {?} condition
-     * @return {?}
-     */
-    static findLast(arr, condition) {
-        for (let /** @type {?} */ i = arr.length - 1; i >= 0; i--) {
-            if (condition(arr[i])) {
-                return arr[i];
-            }
-        }
-        return null;
-    }
-    /**
-     * @param {?} list
-     * @param {?} items
-     * @return {?}
-     */
-    static removeAll(list, items) {
-        for (let /** @type {?} */ i = 0; i < items.length; ++i) {
-            const /** @type {?} */ index = list.indexOf(items[i]);
-            if (index > -1) {
-                list.splice(index, 1);
-            }
-        }
-    }
-    /**
-     * @param {?} list
-     * @param {?} el
-     * @return {?}
-     */
-    static remove(list, el) {
-        const /** @type {?} */ index = list.indexOf(el);
-        if (index > -1) {
-            list.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-    /**
-     * @param {?} a
-     * @param {?} b
-     * @return {?}
-     */
-    static equals(a, b) {
-        if (a.length != b.length)
-            return false;
-        for (let /** @type {?} */ i = 0; i < a.length; ++i) {
-            if (a[i] !== b[i])
-                return false;
-        }
-        return true;
-    }
-    /**
-     * @param {?} list
-     * @return {?}
-     */
-    static flatten(list) {
-        return list.reduce((flat, item) => {
-            const /** @type {?} */ flatItem = Array.isArray(item) ? ListWrapper.flatten(item) : item;
-            return ((flat)).concat(flatItem);
-        }, []);
-    }
-}
-/**
- * @param {?} obj
- * @return {?}
- */
-function isListLikeIterable(obj) {
-    if (!isJsObject(obj))
-        return false;
-    return Array.isArray(obj) ||
-        (!(obj instanceof Map) &&
-            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
-}
-/**
- * @param {?} a
- * @param {?} b
- * @param {?} comparator
- * @return {?}
- */
-function areIterablesEqual(a, b, comparator) {
-    const /** @type {?} */ iterator1 = a[getSymbolIterator()]();
-    const /** @type {?} */ iterator2 = b[getSymbolIterator()]();
-    while (true) {
-        const /** @type {?} */ item1 = iterator1.next();
-        const /** @type {?} */ item2 = iterator2.next();
-        if (item1.done && item2.done)
-            return true;
-        if (item1.done || item2.done)
-            return false;
-        if (!comparator(item1.value, item2.value))
-            return false;
-    }
-}
-/**
- * @param {?} obj
- * @param {?} fn
- * @return {?}
- */
-function iterateListLike(obj, fn) {
-    if (Array.isArray(obj)) {
-        for (let /** @type {?} */ i = 0; i < obj.length; i++) {
-            fn(obj[i]);
-        }
-    }
-    else {
-        const /** @type {?} */ iterator = obj[getSymbolIterator()]();
-        let /** @type {?} */ item;
-        while (!((item = iterator.next()).done)) {
-            fn(item.value);
-        }
-    }
-}
-
 /**
  * Determine if the argument is shaped like a Promise
  * @param {?} obj
@@ -2840,6 +2658,21 @@ function isPromise(obj) {
  */
 function isObservable(obj) {
     return !!(obj && obj[$$observable]);
+}
+/**
+ * @param {?} m1
+ * @param {?} m2
+ * @return {?}
+ */
+function merge$1(m1, m2) {
+    const /** @type {?} */ m = {};
+    for (const /** @type {?} */ k of Object.keys(m1)) {
+        m[k] = m1[k];
+    }
+    for (const /** @type {?} */ k of Object.keys(m2)) {
+        m[k] = m2[k];
+    }
+    return m;
 }
 
 /**
@@ -2951,12 +2784,18 @@ class Console {
      * @param {?} message
      * @return {?}
      */
-    log(message) { print(message); }
+    log(message) {
+        // tslint:disable-next-line:no-console
+        console.log(message);
+    }
     /**
      * @param {?} message
      * @return {?}
      */
-    warn(message) { warn(message); }
+    warn(message) {
+        // tslint:disable-next-line:no-console
+        console.warn(message);
+    }
 }
 Console.decorators = [
     { type: Injectable },
@@ -4255,7 +4094,7 @@ class PlatformRef_ extends PlatformRef {
             if (!exceptionHandler) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
-            moduleRef.onDestroy(() => ListWrapper.remove(this._modules, moduleRef));
+            moduleRef.onDestroy(() => remove(this._modules, moduleRef));
             ngZone.onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } });
             return _callAndReportToErrorHandler(exceptionHandler, () => {
                 const /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
@@ -4472,7 +4311,7 @@ class ApplicationRef_ extends ApplicationRef {
      */
     detachView(viewRef) {
         const /** @type {?} */ view = ((viewRef));
-        ListWrapper.remove(this._views, view);
+        remove(this._views, view);
         view.detachFromAppRef();
     }
     /**
@@ -4522,7 +4361,7 @@ class ApplicationRef_ extends ApplicationRef {
      */
     _unloadComponent(componentRef) {
         this.detachView(componentRef.hostView);
-        ListWrapper.remove(this._rootComponents, componentRef);
+        remove(this._rootComponents, componentRef);
     }
     /**
      * @return {?}
@@ -4582,6 +4421,17 @@ ApplicationRef_.ctorParameters = () => [
     { type: ComponentFactoryResolver, },
     { type: ApplicationInitStatus, },
 ];
+/**
+ * @param {?} list
+ * @param {?} el
+ * @return {?}
+ */
+function remove(list, el) {
+    const /** @type {?} */ index = list.indexOf(el);
+    if (index > -1) {
+        list.splice(index, 1);
+    }
+}
 
 /**
  * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
@@ -5302,7 +5152,7 @@ class QueryList {
      * @return {?}
      */
     reset(res) {
-        this._results = ListWrapper.flatten(res);
+        this._results = flatten(res);
         this._dirty = false;
     }
     /**
@@ -5319,6 +5169,16 @@ class QueryList {
      * @return {?}
      */
     get dirty() { return this._dirty; }
+}
+/**
+ * @param {?} list
+ * @return {?}
+ */
+function flatten(list) {
+    return list.reduce((flat, item) => {
+        const /** @type {?} */ flatItem = Array.isArray(item) ? flatten(item) : item;
+        return ((flat)).concat(flatItem);
+    }, []);
 }
 
 const /** @type {?} */ _SEPARATOR = '#';
@@ -6125,6 +5985,162 @@ function removeDebugNodeFromIndex(node) {
     _nativeNodeToDebugNode.delete(node.nativeNode);
 }
 
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function devModeEqual(a, b) {
+    const /** @type {?} */ isListLikeIterableA = isListLikeIterable(a);
+    const /** @type {?} */ isListLikeIterableB = isListLikeIterable(b);
+    if (isListLikeIterableA && isListLikeIterableB) {
+        return areIterablesEqual(a, b, devModeEqual);
+    }
+    else {
+        const /** @type {?} */ isAObject = a && (typeof a === 'object' || typeof a === 'function');
+        const /** @type {?} */ isBObject = b && (typeof b === 'object' || typeof b === 'function');
+        if (!isListLikeIterableA && isAObject && !isListLikeIterableB && isBObject) {
+            return true;
+        }
+        else {
+            return looseIdentical(a, b);
+        }
+    }
+}
+/**
+ * Indicates that the result of a {\@link Pipe} transformation has changed even though the
+ * reference
+ * has not changed.
+ *
+ * The wrapped value will be unwrapped by change detection, and the unwrapped value will be stored.
+ *
+ * Example:
+ *
+ * ```
+ * if (this._latestValue === this._latestReturnedValue) {
+ *    return this._latestReturnedValue;
+ *  } else {
+ *    this._latestReturnedValue = this._latestValue;
+ *    return WrappedValue.wrap(this._latestValue); // this will force update
+ *  }
+ * ```
+ * \@stable
+ */
+class WrappedValue {
+    /**
+     * @param {?} wrapped
+     */
+    constructor(wrapped) {
+        this.wrapped = wrapped;
+    }
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    static wrap(value) { return new WrappedValue(value); }
+}
+/**
+ * Helper class for unwrapping WrappedValue s
+ */
+class ValueUnwrapper {
+    constructor() {
+        this.hasWrappedValue = false;
+    }
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    unwrap(value) {
+        if (value instanceof WrappedValue) {
+            this.hasWrappedValue = true;
+            return value.wrapped;
+        }
+        return value;
+    }
+    /**
+     * @return {?}
+     */
+    reset() { this.hasWrappedValue = false; }
+}
+/**
+ * Represents a basic change from a previous to a new value.
+ * \@stable
+ */
+class SimpleChange {
+    /**
+     * @param {?} previousValue
+     * @param {?} currentValue
+     * @param {?} firstChange
+     */
+    constructor(previousValue, currentValue, firstChange) {
+        this.previousValue = previousValue;
+        this.currentValue = currentValue;
+        this.firstChange = firstChange;
+    }
+    /**
+     * Check whether the new value is the first value assigned.
+     * @return {?}
+     */
+    isFirstChange() { return this.firstChange; }
+}
+/**
+ * @param {?} obj
+ * @return {?}
+ */
+function isListLikeIterable(obj) {
+    if (!isJsObject(obj))
+        return false;
+    return Array.isArray(obj) ||
+        (!(obj instanceof Map) &&
+            getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @param {?} comparator
+ * @return {?}
+ */
+function areIterablesEqual(a, b, comparator) {
+    const /** @type {?} */ iterator1 = a[getSymbolIterator()]();
+    const /** @type {?} */ iterator2 = b[getSymbolIterator()]();
+    while (true) {
+        const /** @type {?} */ item1 = iterator1.next();
+        const /** @type {?} */ item2 = iterator2.next();
+        if (item1.done && item2.done)
+            return true;
+        if (item1.done || item2.done)
+            return false;
+        if (!comparator(item1.value, item2.value))
+            return false;
+    }
+}
+/**
+ * @param {?} obj
+ * @param {?} fn
+ * @return {?}
+ */
+function iterateListLike(obj, fn) {
+    if (Array.isArray(obj)) {
+        for (let /** @type {?} */ i = 0; i < obj.length; i++) {
+            fn(obj[i]);
+        }
+    }
+    else {
+        const /** @type {?} */ iterator = obj[getSymbolIterator()]();
+        let /** @type {?} */ item;
+        while (!((item = iterator.next()).done)) {
+            fn(item.value);
+        }
+    }
+}
+/**
+ * @param {?} o
+ * @return {?}
+ */
+function isJsObject(o) {
+    return o !== null && (typeof o === 'function' || typeof o === 'object');
+}
+
 class DefaultIterableDifferFactory {
     constructor() { }
     /**
@@ -6295,7 +6311,7 @@ class DefaultIterableDiffer {
      * @return {?}
      */
     diff(collection) {
-        if (isBlank(collection))
+        if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
             throw new Error(`Error trying to diff '${collection}'`);
@@ -7352,7 +7368,7 @@ class IterableDiffers {
      * @return {?}
      */
     static create(factories, parent) {
-        if (isPresent(parent)) {
+        if (parent != null) {
             const /** @type {?} */ copied = parent.factories.slice();
             factories = factories.concat(copied);
             return new IterableDiffers(factories);
@@ -7404,13 +7420,20 @@ class IterableDiffers {
      */
     find(iterable) {
         const /** @type {?} */ factory = this.factories.find(f => f.supports(iterable));
-        if (isPresent(factory)) {
+        if (factory != null) {
             return factory;
         }
         else {
             throw new Error(`Cannot find a differ supporting object '${iterable}' of type '${getTypeNameForDebugging(iterable)}'`);
         }
     }
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function getTypeNameForDebugging(type) {
+    return type['name'] || typeof type;
 }
 
 /**
@@ -7481,99 +7504,6 @@ class KeyValueDiffers {
         }
         throw new Error(`Cannot find a differ supporting object '${kv}'`);
     }
-}
-
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function devModeEqual(a, b) {
-    if (isListLikeIterable(a) && isListLikeIterable(b)) {
-        return areIterablesEqual(a, b, devModeEqual);
-    }
-    else if (!isListLikeIterable(a) && !isPrimitive(a) && !isListLikeIterable(b) && !isPrimitive(b)) {
-        return true;
-    }
-    else {
-        return looseIdentical(a, b);
-    }
-}
-/**
- * Indicates that the result of a {\@link Pipe} transformation has changed even though the
- * reference
- * has not changed.
- *
- * The wrapped value will be unwrapped by change detection, and the unwrapped value will be stored.
- *
- * Example:
- *
- * ```
- * if (this._latestValue === this._latestReturnedValue) {
- *    return this._latestReturnedValue;
- *  } else {
- *    this._latestReturnedValue = this._latestValue;
- *    return WrappedValue.wrap(this._latestValue); // this will force update
- *  }
- * ```
- * \@stable
- */
-class WrappedValue {
-    /**
-     * @param {?} wrapped
-     */
-    constructor(wrapped) {
-        this.wrapped = wrapped;
-    }
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    static wrap(value) { return new WrappedValue(value); }
-}
-/**
- * Helper class for unwrapping WrappedValue s
- */
-class ValueUnwrapper {
-    constructor() {
-        this.hasWrappedValue = false;
-    }
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    unwrap(value) {
-        if (value instanceof WrappedValue) {
-            this.hasWrappedValue = true;
-            return value.wrapped;
-        }
-        return value;
-    }
-    /**
-     * @return {?}
-     */
-    reset() { this.hasWrappedValue = false; }
-}
-/**
- * Represents a basic change from a previous to a new value.
- * \@stable
- */
-class SimpleChange {
-    /**
-     * @param {?} previousValue
-     * @param {?} currentValue
-     * @param {?} firstChange
-     */
-    constructor(previousValue, currentValue, firstChange) {
-        this.previousValue = previousValue;
-        this.currentValue = currentValue;
-        this.firstChange = firstChange;
-    }
-    /**
-     * Check whether the new value is the first value assigned.
-     * @return {?}
-     */
-    isFirstChange() { return this.firstChange; }
 }
 
 /**
@@ -11839,7 +11769,7 @@ function callWithDebugContext(action, fn, self, args) {
  * @return {?}
  */
 function getCurrentDebugContext() {
-    return new DebugContext_(_currentView, _currentNodeIndex);
+    return _currentView ? new DebugContext_(_currentView, _currentNodeIndex) : null;
 }
 class DebugRendererFactoryV2 {
     /**
@@ -11889,9 +11819,12 @@ class DebugRendererV2 {
      */
     createElement(name, namespace) {
         const /** @type {?} */ el = this.delegate.createElement(name, namespace);
-        const /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
-        debugEl.name = name;
-        indexDebugNode(debugEl);
+        const /** @type {?} */ debugCtx = getCurrentDebugContext();
+        if (debugCtx) {
+            const /** @type {?} */ debugEl = new DebugElement(el, null, debugCtx);
+            debugEl.name = name;
+            indexDebugNode(debugEl);
+        }
         return el;
     }
     /**
@@ -11900,8 +11833,10 @@ class DebugRendererV2 {
      */
     createComment(value) {
         const /** @type {?} */ comment = this.delegate.createComment(value);
-        const /** @type {?} */ debugEl = new DebugNode(comment, null, getCurrentDebugContext());
-        indexDebugNode(debugEl);
+        const /** @type {?} */ debugCtx = getCurrentDebugContext();
+        if (debugCtx) {
+            indexDebugNode(new DebugNode(comment, null, debugCtx));
+        }
         return comment;
     }
     /**
@@ -11910,8 +11845,10 @@ class DebugRendererV2 {
      */
     createText(value) {
         const /** @type {?} */ text = this.delegate.createText(value);
-        const /** @type {?} */ debugEl = new DebugNode(text, null, getCurrentDebugContext());
-        indexDebugNode(debugEl);
+        const /** @type {?} */ debugCtx = getCurrentDebugContext();
+        if (debugCtx) {
+            indexDebugNode(new DebugNode(text, null, debugCtx));
+        }
         return text;
     }
     /**
@@ -11961,8 +11898,10 @@ class DebugRendererV2 {
      */
     selectRootElement(selectorOrNode) {
         const /** @type {?} */ el = this.delegate.selectRootElement(selectorOrNode);
-        const /** @type {?} */ debugEl = new DebugElement(el, null, getCurrentDebugContext());
-        indexDebugNode(debugEl);
+        const /** @type {?} */ debugCtx = getCurrentDebugContext();
+        if (debugCtx) {
+            indexDebugNode(new DebugElement(el, null, debugCtx));
+        }
         return el;
     }
     /**
@@ -12698,4 +12637,4 @@ function transition(stateChangeExpr, steps) {
     return transition$1(stateChangeExpr, steps);
 }
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, Class, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererTypeV2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵba, group$1 as ɵbb, keyframes$1 as ɵbf, sequence$1 as ɵbc, state$1 as ɵbe, style$1 as ɵbd, transition$1 as ɵbg, trigger$1 as ɵz, _initViewEngine as ɵp, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, isBlank as ɵj, wtfEnabled as ɵq, createScope as ɵs, detectWTF as ɵr, endTimeRange as ɵv, leave as ɵt, startTimeRange as ɵu, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵx };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererTypeV2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };

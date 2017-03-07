@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { EventEmitter } from '../facade/async';
+import { EventEmitter } from '../event_emitter';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
  *

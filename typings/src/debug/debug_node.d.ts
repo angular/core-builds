@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di';
-import { Predicate } from '../facade/collection';
 import { RenderDebugInfo } from '../render/api';
 export declare class EventListener {
     name: string;
@@ -72,3 +71,12 @@ export declare function getDebugNode(nativeNode: any): DebugNode;
 export declare function getAllDebugNodes(): DebugNode[];
 export declare function indexDebugNode(node: DebugNode): void;
 export declare function removeDebugNodeFromIndex(node: DebugNode): void;
+/**
+ * A boolean-valued function over a value, possibly including context information
+ * regarding that value's position in an array.
+ *
+ * @experimental All debugging apis are currently experimental.
+ */
+export interface Predicate<T> {
+    (value: T, index?: number, array?: T[]): boolean;
+}

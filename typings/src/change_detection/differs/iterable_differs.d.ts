@@ -155,3 +155,4 @@ export declare class IterableDiffers {
     static extend(factories: IterableDifferFactory[]): Provider;
     find(iterable: any): IterableDifferFactory;
 }
+export declare function getTypeNameForDebugging(type: any): string;

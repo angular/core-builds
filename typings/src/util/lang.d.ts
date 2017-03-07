@@ -14,3 +14,10 @@ export declare function isPromise(obj: any): obj is Promise<any>;
  * Determine if the argument is an Observable
  */
 export declare function isObservable(obj: any | Observable<any>): obj is Observable<any>;
+export declare function merge<V>(m1: {
+    [key: string]: V;
+}, m2: {
+    [key: string]: V;
+}): {
+    [key: string]: V;
+};

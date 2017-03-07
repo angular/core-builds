@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import { getDebugNode, InjectionToken, NgZone, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
+import { getDebugNode, InjectionToken, NgZone, ɵstringify, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
 
 /**
  * @license
@@ -109,27 +109,6 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
         proxyZoneSpec.setDelegate(testZoneSpec);
     });
     return Zone.current.runGuarded(fn, context);
-}
-
-function scheduleMicroTask(fn) {
-    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-}
-function stringify(token) {
-    if (typeof token === 'string') {
-        return token;
-    }
-    if (token == null) {
-        return '' + token;
-    }
-    if (token.overriddenName) {
-        return '' + token.overriddenName;
-    }
-    if (token.name) {
-        return '' + token.name;
-    }
-    var res = token.toString();
-    var newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
 
 /**
@@ -322,6 +301,10 @@ var ComponentFixture = function () {
     return ComponentFixture;
 }();
 
+function scheduleMicroTask(fn) {
+    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+}
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -329,8 +312,6 @@ var ComponentFixture = function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
-
 var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
 var ProxyZoneSpec = Zone['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
@@ -741,7 +722,7 @@ var TestBed = function () {
                     this._moduleWithComponentFactories = this._compiler.compileModuleAndAllComponentsSync(moduleType);
                 } catch (e) {
                     if (getComponentType(e)) {
-                        throw new Error('This test module uses the component ' + stringify(getComponentType(e)) + ' which is using a "templateUrl" or "styleUrls", but they were never compiled. ' + 'Please call "TestBed.compileComponents" before your test.');
+                        throw new Error('This test module uses the component ' + ɵstringify(getComponentType(e)) + ' which is using a "templateUrl" or "styleUrls", but they were never compiled. ' + 'Please call "TestBed.compileComponents" before your test.');
                     } else {
                         throw e;
                     }
@@ -853,7 +834,7 @@ var TestBed = function () {
                 return compFactory.componentType === component;
             });
             if (!componentFactory) {
-                throw new Error('Cannot create the component ' + stringify(component) + ' as it was not imported into the testing module!');
+                throw new Error('Cannot create the component ' + ɵstringify(component) + ' as it was not imported into the testing module!');
             }
             var noNgZone = this.get(ComponentFixtureNoNgZone, false);
             var autoDetect = this.get(ComponentFixtureAutoDetect, false);
@@ -1081,10 +1062,10 @@ function getComponentType(error) {
     return error[ɵERROR_COMPONENT_TYPE];
 }
 
-var _global$2 = typeof window === 'undefined' ? global : window;
+var _global$1 = typeof window === 'undefined' ? global : window;
 // Reset the test providers and the fake async zone before each test.
-if (_global$2.beforeEach) {
-    _global$2.beforeEach(function () {
+if (_global$1.beforeEach) {
+    _global$1.beforeEach(function () {
         TestBed.resetTestingModule();
         resetFakeAsyncZone();
     });

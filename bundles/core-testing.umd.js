@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.2-207298c
+ * @license Angular v4.0.0-rc.2-b7e76cc
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -184,27 +184,6 @@
         return Zone.current.runGuarded(fn, context);
     }
 
-    function scheduleMicroTask(fn) {
-        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-    }
-    function stringify(token) {
-        if (typeof token === 'string') {
-            return token;
-        }
-        if (token == null) {
-            return '' + token;
-        }
-        if (token.overriddenName) {
-            return '' + token.overriddenName;
-        }
-        if (token.name) {
-            return '' + token.name;
-        }
-        var res = token.toString();
-        var newLineIndex = res.indexOf('\n');
-        return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
-    }
-
     /**
      * Fixture for debugging and testing a component.
      *
@@ -364,6 +343,10 @@
 
         return ComponentFixture;
     }();
+
+    function scheduleMicroTask(fn) {
+        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+    }
 
     /**
      * @license
@@ -756,7 +739,7 @@
                         this._moduleWithComponentFactories = this._compiler.compileModuleAndAllComponentsSync(moduleType);
                     } catch (e) {
                         if (getComponentType(e)) {
-                            throw new Error('This test module uses the component ' + stringify(getComponentType(e)) + ' which is using a "templateUrl" or "styleUrls", but they were never compiled. ' + 'Please call "TestBed.compileComponents" before your test.');
+                            throw new Error('This test module uses the component ' + (0, _core.ɵstringify)(getComponentType(e)) + ' which is using a "templateUrl" or "styleUrls", but they were never compiled. ' + 'Please call "TestBed.compileComponents" before your test.');
                         } else {
                             throw e;
                         }
@@ -868,7 +851,7 @@
                     return compFactory.componentType === component;
                 });
                 if (!componentFactory) {
-                    throw new Error('Cannot create the component ' + stringify(component) + ' as it was not imported into the testing module!');
+                    throw new Error('Cannot create the component ' + (0, _core.ɵstringify)(component) + ' as it was not imported into the testing module!');
                 }
                 var noNgZone = this.get(ComponentFixtureNoNgZone, false);
                 var autoDetect = this.get(ComponentFixtureAutoDetect, false);
@@ -1074,10 +1057,10 @@
         return error[_core.ɵERROR_COMPONENT_TYPE];
     }
 
-    var _global$2 = typeof window === 'undefined' ? global : window;
+    var _global$1 = typeof window === 'undefined' ? global : window;
     // Reset the test providers and the fake async zone before each test.
-    if (_global$2.beforeEach) {
-        _global$2.beforeEach(function () {
+    if (_global$1.beforeEach) {
+        _global$1.beforeEach(function () {
             TestBed.resetTestingModule();
             resetFakeAsyncZone();
         });

@@ -1,4 +1,4 @@
-import { getDebugNode, InjectionToken, NgZone, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
+import { getDebugNode, InjectionToken, NgZone, ɵstringify, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
 
 /**
  * @license
@@ -98,27 +98,6 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
         proxyZoneSpec.setDelegate(testZoneSpec);
     });
     return Zone.current.runGuarded(fn, context);
-}
-
-function scheduleMicroTask(fn) {
-    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-}
-function stringify(token) {
-    if (typeof token === 'string') {
-        return token;
-    }
-    if (token == null) {
-        return '' + token;
-    }
-    if (token.overriddenName) {
-        return `${token.overriddenName}`;
-    }
-    if (token.name) {
-        return `${token.name}`;
-    }
-    const res = token.toString();
-    const newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
 
 /**
@@ -265,6 +244,9 @@ class ComponentFixture {
             this._isDestroyed = true;
         }
     }
+}
+function scheduleMicroTask(fn) {
+    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
 
 /**
@@ -655,7 +637,7 @@ class TestBed {
             }
             catch (e) {
                 if (getComponentType(e)) {
-                    throw new Error(`This test module uses the component ${stringify(getComponentType(e))} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
+                    throw new Error(`This test module uses the component ${ɵstringify(getComponentType(e))} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
                         `Please call "TestBed.compileComponents" before your test.`);
                 }
                 else {
@@ -730,7 +712,7 @@ class TestBed {
         this._initIfNeeded();
         const componentFactory = this._moduleWithComponentFactories.componentFactories.find((compFactory) => compFactory.componentType === component);
         if (!componentFactory) {
-            throw new Error(`Cannot create the component ${stringify(component)} as it was not imported into the testing module!`);
+            throw new Error(`Cannot create the component ${ɵstringify(component)} as it was not imported into the testing module!`);
         }
         const noNgZone = this.get(ComponentFixtureNoNgZone, false);
         const autoDetect = this.get(ComponentFixtureAutoDetect, false);
@@ -836,10 +818,10 @@ function getComponentType(error) {
     return error[ɵERROR_COMPONENT_TYPE];
 }
 
-const _global$2 = (typeof window === 'undefined' ? global : window);
+const _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
-if (_global$2.beforeEach) {
-    _global$2.beforeEach(() => {
+if (_global$1.beforeEach) {
+    _global$1.beforeEach(() => {
         TestBed.resetTestingModule();
         resetFakeAsyncZone();
     });
