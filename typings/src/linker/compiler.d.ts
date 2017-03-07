@@ -71,6 +71,9 @@ export declare class Compiler {
  * @experimental
  */
 export declare type CompilerOptions = {
+    /**
+     * @deprecated since v4 this option has no effect anymore.
+     */
     useDebug?: boolean;
     useJit?: boolean;
     defaultEncapsulation?: ViewEncapsulation;
