@@ -8,7 +8,7 @@
 import { InjectionToken, Injector } from '../di';
 import { ViewEncapsulation } from '../metadata/view';
 /**
- * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+ * @deprecated Use `RendererType2` (and `Renderer2`) instead.
  */
 export declare class RenderComponentType {
     id: string;
@@ -33,7 +33,7 @@ export declare abstract class RenderDebugInfo {
     readonly abstract source: string;
 }
 /**
- * @deprecated Use the `RendererV2` instead.
+ * @deprecated Use the `Renderer2` instead.
  */
 export interface DirectRenderer {
     remove(node: any): void;
@@ -43,7 +43,7 @@ export interface DirectRenderer {
     parentElement(node: any): any;
 }
 /**
- * @deprecated Use the `RendererV2` instead.
+ * @deprecated Use the `Renderer2` instead.
  */
 export declare abstract class Renderer {
     abstract selectRootElement(selectorOrNode: string | any, debugInfo?: RenderDebugInfo): any;
@@ -69,7 +69,7 @@ export declare abstract class Renderer {
     abstract setText(renderNode: any, text: string): void;
     abstract animate(element: any, startingStyles: any, keyframes: any[], duration: number, delay: number, easing: string, previousPlayers?: any[]): any;
 }
-export declare const RendererV2Interceptor: InjectionToken<RendererV2[]>;
+export declare const Renderer2Interceptor: InjectionToken<Renderer2[]>;
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -82,7 +82,7 @@ export declare const RendererV2Interceptor: InjectionToken<RendererV2[]>;
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
  *
- * @deprecated Use `RendererFactoryV2` instead.
+ * @deprecated Use `RendererFactory2` instead.
  */
 export declare abstract class RootRenderer {
     abstract renderComponent(componentType: RenderComponentType): Renderer;
@@ -90,7 +90,7 @@ export declare abstract class RootRenderer {
 /**
  * @experimental
  */
-export interface RendererTypeV2 {
+export interface RendererType2 {
     id: string;
     encapsulation: ViewEncapsulation;
     styles: (string | any[])[];
@@ -101,13 +101,13 @@ export interface RendererTypeV2 {
 /**
  * @experimental
  */
-export declare abstract class RendererFactoryV2 {
-    abstract createRenderer(hostElement: any, type: RendererTypeV2): RendererV2;
+export declare abstract class RendererFactory2 {
+    abstract createRenderer(hostElement: any, type: RendererType2): Renderer2;
 }
 /**
  * @experimental
  */
-export declare abstract class RendererV2 {
+export declare abstract class Renderer2 {
     /**
      * This field can be used to store arbitrary data on this renderer instance.
      * This is useful for renderers that delegate to other renderers.
@@ -149,5 +149,5 @@ export declare abstract class RendererV2 {
     abstract removeStyle(el: any, style: string, hasVendorPrefix: boolean): void;
     abstract setProperty(el: any, name: string, value: any): void;
     abstract setValue(node: any, value: string): void;
-    abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean): () => void;
+    abstract listen(target: 'window' | 'document' | 'body' | any, eventName: string, callback: (event: any) => boolean | void): () => void;
 }

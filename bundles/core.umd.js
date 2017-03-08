@@ -18,7 +18,7 @@
         value: true
     });
     exports.ɵw = exports.ɵb = exports.ɵa = exports.ɵt = exports.ɵs = exports.ɵu = exports.ɵq = exports.ɵr = exports.ɵp = exports.ɵe = exports.ɵd = exports.ɵc = exports.ɵk = exports.ɵj = exports.ɵi = exports.ɵh = exports.ɵg = exports.ɵf = exports.ɵn = exports.ɵm = exports.ɵl = exports.ɵo = exports.ɵy = exports.ɵbf = exports.ɵbc = exports.ɵbd = exports.ɵbb = exports.ɵbe = exports.ɵba = exports.ɵz = exports.transition = exports.keyframes = exports.state = exports.style = exports.sequence = exports.group = exports.animate = exports.trigger = exports.AUTO_STYLE = exports.ɵvid = exports.ɵunv = exports.ɵted = exports.ɵqud = exports.ɵppd = exports.ɵpod = exports.ɵpad = exports.ɵprd = exports.ɵpid = exports.ɵnov = exports.ɵncd = exports.ɵinterpolate = exports.ɵinlineInterpolate = exports.ɵgetComponentViewDefinitionFactory = exports.ɵelementEventFullName = exports.ɵeld = exports.ɵdid = exports.ɵcrt = exports.ɵccf = exports.ɵand = exports.ɵEMPTY_MAP = exports.ɵEMPTY_ARRAY = exports.ɵregisterModuleFactory = exports.ɵNgModuleInjector = exports.ɵmerge = exports.ɵisPromise = exports.ɵisObservable = exports.ɵmakeDecorator = exports.ɵstringify = exports.ɵlooseIdentical = exports.ɵglobal = exports.ɵRenderDebugInfo = exports.ɵReflectorReader = exports.ɵReflectionCapabilities = exports.ɵreflector = exports.ɵReflector = exports.ɵViewMetadata = exports.ɵLifecycleHooks = exports.ɵLIFECYCLE_HOOKS_VALUES = exports.ɵCodegenComponentFactoryResolver = exports.ɵComponentFactory = exports.ɵERROR_COMPONENT_TYPE = exports.ɵConsole = exports.ɵisDefaultChangeDetectionStrategy = exports.ɵChangeDetectorStatus = exports.ɵisListLikeIterable = exports.ɵdevModeEqual = exports.ɵValueUnwrapper = exports.ɵAPP_ID_RANDOM_PROVIDER = exports.ɵALLOW_MULTIPLE_PLATFORMS = exports.platformCore = exports.WrappedValue = exports.SimpleChange = exports.KeyValueDiffers = exports.IterableDiffers = exports.DefaultIterableDiffer = undefined;
-    exports.ChangeDetectorRef = exports.ChangeDetectionStrategy = exports.ViewRef = exports.EmbeddedViewRef = exports.ViewContainerRef = exports.TemplateRef = exports.SystemJsNgModuleLoaderConfig = exports.SystemJsNgModuleLoader = exports.QueryList = exports.getModuleFactory = exports.NgModuleFactoryLoader = exports.NgModuleRef = exports.NgModuleFactory = exports.ElementRef = exports.ComponentFactoryResolver = exports.ComponentRef = exports.ComponentFactory = exports.ModuleWithComponentFactories = exports.CompilerFactory = exports.Compiler = exports.COMPILER_OPTIONS = exports.RootRenderer = exports.RendererV2 = exports.RendererFactoryV2 = exports.Renderer = exports.RenderComponentType = exports.NgZone = exports.Host = exports.SkipSelf = exports.Self = exports.Injectable = exports.Optional = exports.Inject = exports.OpaqueToken = exports.InjectionToken = exports.ReflectiveKey = exports.ResolvedReflectiveFactory = exports.ReflectiveInjector = exports.Injector = exports.resolveForwardRef = exports.forwardRef = exports.VERSION = exports.Version = exports.ViewEncapsulation = exports.NgModule = exports.NO_ERRORS_SCHEMA = exports.CUSTOM_ELEMENTS_SCHEMA = exports.Pipe = exports.Output = exports.Input = exports.HostListener = exports.HostBinding = exports.Directive = exports.Component = exports.ViewChildren = exports.ViewChild = exports.Query = exports.ContentChildren = exports.ContentChild = exports.Attribute = exports.ANALYZE_FOR_ENTRY_COMPONENTS = exports.SecurityContext = exports.Sanitizer = exports.ErrorHandler = exports.EventEmitter = exports.Type = exports.wtfEndTimeRange = exports.wtfStartTimeRange = exports.wtfLeave = exports.wtfCreateScope = exports.ApplicationModule = exports.MissingTranslationStrategy = exports.LOCALE_ID = exports.TRANSLATIONS_FORMAT = exports.TRANSLATIONS = exports.setTestabilityGetter = exports.TestabilityRegistry = exports.Testability = exports.getDebugNode = exports.asNativeElements = exports.DebugNode = exports.DebugElement = exports.ApplicationInitStatus = exports.APP_INITIALIZER = exports.APP_BOOTSTRAP_LISTENER = exports.PLATFORM_ID = exports.PLATFORM_INITIALIZER = exports.PACKAGE_ROOT_URL = exports.APP_ID = exports.NgProbeToken = exports.createPlatformFactory = exports.isDevMode = exports.enableProdMode = exports.ApplicationRef = exports.PlatformRef = exports.getPlatform = exports.destroyPlatform = exports.assertPlatform = exports.createPlatform = exports.Class = undefined;
+    exports.ChangeDetectorRef = exports.ChangeDetectionStrategy = exports.ViewRef = exports.EmbeddedViewRef = exports.ViewContainerRef = exports.TemplateRef = exports.SystemJsNgModuleLoaderConfig = exports.SystemJsNgModuleLoader = exports.QueryList = exports.getModuleFactory = exports.NgModuleFactoryLoader = exports.NgModuleRef = exports.NgModuleFactory = exports.ElementRef = exports.ComponentFactoryResolver = exports.ComponentRef = exports.ComponentFactory = exports.ModuleWithComponentFactories = exports.CompilerFactory = exports.Compiler = exports.COMPILER_OPTIONS = exports.RootRenderer = exports.RendererFactory2 = exports.Renderer2 = exports.Renderer = exports.RenderComponentType = exports.NgZone = exports.Host = exports.SkipSelf = exports.Self = exports.Injectable = exports.Optional = exports.Inject = exports.OpaqueToken = exports.InjectionToken = exports.ReflectiveKey = exports.ResolvedReflectiveFactory = exports.ReflectiveInjector = exports.Injector = exports.resolveForwardRef = exports.forwardRef = exports.VERSION = exports.Version = exports.ViewEncapsulation = exports.NgModule = exports.NO_ERRORS_SCHEMA = exports.CUSTOM_ELEMENTS_SCHEMA = exports.Pipe = exports.Output = exports.Input = exports.HostListener = exports.HostBinding = exports.Directive = exports.Component = exports.ViewChildren = exports.ViewChild = exports.Query = exports.ContentChildren = exports.ContentChild = exports.Attribute = exports.ANALYZE_FOR_ENTRY_COMPONENTS = exports.SecurityContext = exports.Sanitizer = exports.ErrorHandler = exports.EventEmitter = exports.Type = exports.wtfEndTimeRange = exports.wtfStartTimeRange = exports.wtfLeave = exports.wtfCreateScope = exports.ApplicationModule = exports.MissingTranslationStrategy = exports.LOCALE_ID = exports.TRANSLATIONS_FORMAT = exports.TRANSLATIONS = exports.setTestabilityGetter = exports.TestabilityRegistry = exports.Testability = exports.getDebugNode = exports.asNativeElements = exports.DebugNode = exports.DebugElement = exports.ApplicationInitStatus = exports.APP_INITIALIZER = exports.APP_BOOTSTRAP_LISTENER = exports.PLATFORM_ID = exports.PLATFORM_INITIALIZER = exports.PACKAGE_ROOT_URL = exports.APP_ID = exports.NgProbeToken = exports.createPlatformFactory = exports.isDevMode = exports.enableProdMode = exports.ApplicationRef = exports.PlatformRef = exports.getPlatform = exports.destroyPlatform = exports.assertPlatform = exports.createPlatform = exports.Class = undefined;
 
     var _slicedToArray = function () {
         function sliceIterator(arr, i) {
@@ -936,7 +936,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */VERSION = new Version('4.0.0-rc.2-5df998d');
+    var /** @type {?} */VERSION = new Version('4.0.0-rc.2-ad3b44a');
 
     /**
      * Inject decorator and metadata.
@@ -4299,7 +4299,7 @@
     }
 
     /**
-     * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+     * @deprecated Use `RendererType2` (and `Renderer2`) instead.
      */
 
     var RenderComponentType =
@@ -4417,7 +4417,7 @@
         return RendererV1;
     }();
 
-    var /** @type {?} */RendererV2Interceptor = new InjectionToken('RendererV2Interceptor');
+    var /** @type {?} */Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
     /**
      * Injectable service that provides a low-level interface for modifying the UI.
      *
@@ -4430,7 +4430,7 @@
      *
      * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
      *
-     * @deprecated Use `RendererFactoryV2` instead.
+     * @deprecated Use `RendererFactory2` instead.
      * @abstract
      */
 
@@ -4447,25 +4447,25 @@
         return RootRenderer;
     }();
 
-    var RendererFactoryV2 = function () {
-        function RendererFactoryV2() {
-            _classCallCheck(this, RendererFactoryV2);
+    var RendererFactory2 = function () {
+        function RendererFactory2() {
+            _classCallCheck(this, RendererFactory2);
         }
 
-        _createClass(RendererFactoryV2, [{
+        _createClass(RendererFactory2, [{
             key: 'createRenderer',
             value: function createRenderer(hostElement, type) {}
         }]);
 
-        return RendererFactoryV2;
+        return RendererFactory2;
     }();
 
-    var RendererV2 = function () {
-        function RendererV2() {
-            _classCallCheck(this, RendererV2);
+    var Renderer2 = function () {
+        function Renderer2() {
+            _classCallCheck(this, Renderer2);
         }
 
-        _createClass(RendererV2, [{
+        _createClass(Renderer2, [{
             key: 'data',
             value: function data() {}
         }, {
@@ -4527,7 +4527,7 @@
             value: function listen(target, eventName, callback) {}
         }]);
 
-        return RendererV2;
+        return Renderer2;
     }();
 
     var ElementRef =
@@ -6991,7 +6991,7 @@
      * @param {?} values
      * @return {?}
      */
-    function createRendererTypeV2(values) {
+    function createRendererType2(values) {
         var /** @type {?} */isFilled = values && (values.encapsulation !== ViewEncapsulation.None || values.styles.length || Object.keys(values.data).length);
         if (isFilled) {
             var /** @type {?} */id = 'c' + _renderCompCount++;
@@ -7583,7 +7583,7 @@
 
             return [ns, name, value];
         });
-        // This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
+        // This is needed as the jit compiler always uses an empty hash as default RendererType2,
         // which is not filled for host views.
         if (componentRendererType && componentRendererType.encapsulation == null) {
             componentRendererType = null;
@@ -8655,7 +8655,7 @@
     }();
 
     var /** @type {?} */RendererV1TokenKey = tokenKey(RendererV1);
-    var /** @type {?} */RendererV2TokenKey = tokenKey(RendererV2);
+    var /** @type {?} */Renderer2TokenKey = tokenKey(Renderer2);
     var /** @type {?} */ElementRefTokenKey = tokenKey(ElementRef);
     var /** @type {?} */ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
     var /** @type {?} */TemplateRefTokenKey = tokenKey(TemplateRef);
@@ -9063,7 +9063,7 @@
                             var /** @type {?} */compView = findCompView(view, elDef, allowPrivateServices);
                             return createRendererV1(compView);
                         }
-                    case RendererV2TokenKey:
+                    case Renderer2TokenKey:
                         {
                             var /** @type {?} */_compView = findCompView(view, elDef, allowPrivateServices);
                             return _compView.renderer;
@@ -10508,7 +10508,7 @@
      * @return {?}
      */
     function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        var /** @type {?} */rendererFactory = injector.get(RendererFactoryV2);
+        var /** @type {?} */rendererFactory = injector.get(RendererFactory2);
         return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
     }
     /**
@@ -10520,8 +10520,8 @@
      * @return {?}
      */
     function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        var /** @type {?} */rendererFactory = injector.get(RendererFactoryV2);
-        var /** @type {?} */root = createRootData(injector, new DebugRendererFactoryV2(rendererFactory), projectableNodes, rootSelectorOrNode);
+        var /** @type {?} */rendererFactory = injector.get(RendererFactory2);
+        var /** @type {?} */root = createRootData(injector, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
         return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
     }
     /**
@@ -10999,12 +10999,12 @@
         return _currentView ? new DebugContext_(_currentView, _currentNodeIndex) : null;
     }
 
-    var DebugRendererFactoryV2 = function () {
+    var DebugRendererFactory2 = function () {
         /**
          * @param {?} delegate
          */
-        function DebugRendererFactoryV2(delegate) {
-            _classCallCheck(this, DebugRendererFactoryV2);
+        function DebugRendererFactory2(delegate) {
+            _classCallCheck(this, DebugRendererFactory2);
 
             this.delegate = delegate;
         }
@@ -11015,22 +11015,22 @@
          */
 
 
-        _createClass(DebugRendererFactoryV2, [{
+        _createClass(DebugRendererFactory2, [{
             key: 'createRenderer',
             value: function createRenderer(element, renderData) {
-                return new DebugRendererV2(this.delegate.createRenderer(element, renderData));
+                return new DebugRenderer2(this.delegate.createRenderer(element, renderData));
             }
         }]);
 
-        return DebugRendererFactoryV2;
+        return DebugRendererFactory2;
     }();
 
-    var DebugRendererV2 = function () {
+    var DebugRenderer2 = function () {
         /**
          * @param {?} delegate
          */
-        function DebugRendererV2(delegate) {
-            _classCallCheck(this, DebugRendererV2);
+        function DebugRenderer2(delegate) {
+            _classCallCheck(this, DebugRenderer2);
 
             this.delegate = delegate;
         }
@@ -11039,7 +11039,7 @@
          */
 
 
-        _createClass(DebugRendererV2, [{
+        _createClass(DebugRenderer2, [{
             key: 'destroyNode',
             value: function destroyNode(node) {
                 removeDebugNodeFromIndex(getDebugNode(node));
@@ -11223,7 +11223,7 @@
             }
         }]);
 
-        return DebugRendererV2;
+        return DebugRenderer2;
     }();
 
     /**
@@ -11901,8 +11901,8 @@
     exports.NgZone = NgZone;
     exports.RenderComponentType = RenderComponentType;
     exports.Renderer = RendererV1;
-    exports.RendererFactoryV2 = RendererFactoryV2;
-    exports.RendererV2 = RendererV2;
+    exports.Renderer2 = Renderer2;
+    exports.RendererFactory2 = RendererFactory2;
     exports.RootRenderer = RootRenderer;
     exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;
@@ -11963,7 +11963,7 @@
     exports.ɵEMPTY_MAP = EMPTY_MAP;
     exports.ɵand = anchorDef;
     exports.ɵccf = createComponentFactory;
-    exports.ɵcrt = createRendererTypeV2;
+    exports.ɵcrt = createRendererType2;
     exports.ɵdid = directiveDef;
     exports.ɵeld = elementDef;
     exports.ɵelementEventFullName = elementEventFullName;

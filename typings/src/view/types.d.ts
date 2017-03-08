@@ -1,6 +1,6 @@
 import { Injector } from '../di';
 import { QueryList } from '../linker/query_list';
-import { RendererFactoryV2, RendererTypeV2, RendererV2 } from '../render/api';
+import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
     flags: ViewFlags;
@@ -177,7 +177,7 @@ export interface ElementDef {
     attrs: [string, string, string][];
     template: ViewDefinition;
     componentProvider: NodeDef;
-    componentRendererType: RendererTypeV2;
+    componentRendererType: RendererType2;
     componentView: ViewDefinitionFactory;
     /**
      * visible public providers for DI in the view,
@@ -250,7 +250,7 @@ export interface NgContentDef {
 export interface ViewData {
     def: ViewDefinition;
     root: RootData;
-    renderer: RendererV2;
+    renderer: Renderer2;
     parentNodeDef: NodeDef;
     parent: ViewData;
     viewContainerParent: ViewData;
@@ -346,8 +346,8 @@ export interface RootData {
     injector: Injector;
     projectableNodes: any[][];
     selectorOrNode: any;
-    renderer: RendererV2;
-    rendererFactory: RendererFactoryV2;
+    renderer: Renderer2;
+    rendererFactory: RendererFactory2;
     sanitizer: Sanitizer;
 }
 export declare abstract class DebugContext {

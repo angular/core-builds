@@ -15,7 +15,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
- * @license Angular v4.0.0-rc.2-5df998d
+ * @license Angular v4.0.0-rc.2-ad3b44a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -880,7 +880,7 @@ var Version = function () {
  */
 
 
-var /** @type {?} */VERSION = new Version('4.0.0-rc.2-5df998d');
+var /** @type {?} */VERSION = new Version('4.0.0-rc.2-ad3b44a');
 
 /**
  * Inject decorator and metadata.
@@ -5551,7 +5551,7 @@ function remove(list, el) {
 }
 
 /**
- * @deprecated Use `RendererTypeV2` (and `RendererV2`) instead.
+ * @deprecated Use `RendererType2` (and `Renderer2`) instead.
  */
 
 var RenderComponentType =
@@ -5637,7 +5637,7 @@ var RenderDebugInfo = function () {
     return RenderDebugInfo;
 }();
 /**
- * @deprecated Use the `RendererV2` instead.
+ * @deprecated Use the `Renderer2` instead.
  * @abstract
  */
 
@@ -5856,7 +5856,7 @@ var RendererV1 = function () {
     return RendererV1;
 }();
 
-var /** @type {?} */RendererV2Interceptor = new InjectionToken('RendererV2Interceptor');
+var /** @type {?} */Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
 /**
  * Injectable service that provides a low-level interface for modifying the UI.
  *
@@ -5869,7 +5869,7 @@ var /** @type {?} */RendererV2Interceptor = new InjectionToken('RendererV2Interc
  *
  * The default Renderer implementation is `DomRenderer`. Also available is `WebWorkerRenderer`.
  *
- * @deprecated Use `RendererFactoryV2` instead.
+ * @deprecated Use `RendererFactory2` instead.
  * @abstract
  */
 
@@ -5897,12 +5897,12 @@ var RootRenderer = function () {
  */
 
 
-var RendererFactoryV2 = function () {
-    function RendererFactoryV2() {
-        _classCallCheck(this, RendererFactoryV2);
+var RendererFactory2 = function () {
+    function RendererFactory2() {
+        _classCallCheck(this, RendererFactory2);
     }
 
-    _createClass(RendererFactoryV2, [{
+    _createClass(RendererFactory2, [{
         key: 'createRenderer',
 
         /**
@@ -5914,7 +5914,7 @@ var RendererFactoryV2 = function () {
         value: function createRenderer(hostElement, type) {}
     }]);
 
-    return RendererFactoryV2;
+    return RendererFactory2;
 }();
 /**
  * \@experimental
@@ -5922,12 +5922,12 @@ var RendererFactoryV2 = function () {
  */
 
 
-var RendererV2 = function () {
-    function RendererV2() {
-        _classCallCheck(this, RendererV2);
+var Renderer2 = function () {
+    function Renderer2() {
+        _classCallCheck(this, Renderer2);
     }
 
-    _createClass(RendererV2, [{
+    _createClass(Renderer2, [{
         key: 'data',
 
         /**
@@ -6138,7 +6138,7 @@ var RendererV2 = function () {
         value: function listen(target, eventName, callback) {}
     }]);
 
-    return RendererV2;
+    return Renderer2;
 }();
 
 var ElementRef =
@@ -9773,7 +9773,7 @@ var /** @type {?} */_renderCompCount = 0;
  * @param {?} values
  * @return {?}
  */
-function createRendererTypeV2(values) {
+function createRendererType2(values) {
     var /** @type {?} */isFilled = values && (values.encapsulation !== ViewEncapsulation.None || values.styles.length || Object.keys(values.data).length);
     if (isFilled) {
         var /** @type {?} */id = 'c' + _renderCompCount++;
@@ -10366,7 +10366,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
 
         return [ns, name, value];
     });
-    // This is needed as the jit compiler always uses an empty hash as default RendererTypeV2,
+    // This is needed as the jit compiler always uses an empty hash as default RendererType2,
     // which is not filled for host views.
     if (componentRendererType && componentRendererType.encapsulation == null) {
         componentRendererType = null;
@@ -11701,7 +11701,7 @@ var RendererAdapter = function () {
 }();
 
 var /** @type {?} */RendererV1TokenKey = tokenKey(RendererV1);
-var /** @type {?} */RendererV2TokenKey = tokenKey(RendererV2);
+var /** @type {?} */Renderer2TokenKey = tokenKey(Renderer2);
 var /** @type {?} */ElementRefTokenKey = tokenKey(ElementRef);
 var /** @type {?} */ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 var /** @type {?} */TemplateRefTokenKey = tokenKey(TemplateRef);
@@ -12109,7 +12109,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef) {
                         var /** @type {?} */compView = findCompView(view, elDef, allowPrivateServices);
                         return createRendererV1(compView);
                     }
-                case RendererV2TokenKey:
+                case Renderer2TokenKey:
                     {
                         var /** @type {?} */_compView = findCompView(view, elDef, allowPrivateServices);
                         return _compView.renderer;
@@ -13554,7 +13554,7 @@ function createDebugServices() {
  * @return {?}
  */
 function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    var /** @type {?} */rendererFactory = injector.get(RendererFactoryV2);
+    var /** @type {?} */rendererFactory = injector.get(RendererFactory2);
     return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
 }
 /**
@@ -13566,8 +13566,8 @@ function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def,
  * @return {?}
  */
 function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    var /** @type {?} */rendererFactory = injector.get(RendererFactoryV2);
-    var /** @type {?} */root = createRootData(injector, new DebugRendererFactoryV2(rendererFactory), projectableNodes, rootSelectorOrNode);
+    var /** @type {?} */rendererFactory = injector.get(RendererFactory2);
+    var /** @type {?} */root = createRootData(injector, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
     return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
 }
 /**
@@ -14078,12 +14078,12 @@ function getCurrentDebugContext() {
     return _currentView ? new DebugContext_(_currentView, _currentNodeIndex) : null;
 }
 
-var DebugRendererFactoryV2 = function () {
+var DebugRendererFactory2 = function () {
     /**
      * @param {?} delegate
      */
-    function DebugRendererFactoryV2(delegate) {
-        _classCallCheck(this, DebugRendererFactoryV2);
+    function DebugRendererFactory2(delegate) {
+        _classCallCheck(this, DebugRendererFactory2);
 
         this.delegate = delegate;
     }
@@ -14094,22 +14094,22 @@ var DebugRendererFactoryV2 = function () {
      */
 
 
-    _createClass(DebugRendererFactoryV2, [{
+    _createClass(DebugRendererFactory2, [{
         key: 'createRenderer',
         value: function createRenderer(element, renderData) {
-            return new DebugRendererV2(this.delegate.createRenderer(element, renderData));
+            return new DebugRenderer2(this.delegate.createRenderer(element, renderData));
         }
     }]);
 
-    return DebugRendererFactoryV2;
+    return DebugRendererFactory2;
 }();
 
-var DebugRendererV2 = function () {
+var DebugRenderer2 = function () {
     /**
      * @param {?} delegate
      */
-    function DebugRendererV2(delegate) {
-        _classCallCheck(this, DebugRendererV2);
+    function DebugRenderer2(delegate) {
+        _classCallCheck(this, DebugRenderer2);
 
         this.delegate = delegate;
     }
@@ -14118,7 +14118,7 @@ var DebugRendererV2 = function () {
      */
 
 
-    _createClass(DebugRendererV2, [{
+    _createClass(DebugRenderer2, [{
         key: 'destroyNode',
 
         /**
@@ -14424,7 +14424,7 @@ var DebugRendererV2 = function () {
         }
     }]);
 
-    return DebugRendererV2;
+    return DebugRenderer2;
 }();
 
 /**
@@ -15028,4 +15028,4 @@ function transition(stateChangeExpr, steps) {
     return transition$1(stateChangeExpr, steps);
 }
 
-export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, RendererFactoryV2, RendererV2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererTypeV2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, Renderer2, RendererFactory2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };

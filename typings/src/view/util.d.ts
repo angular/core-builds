@@ -1,15 +1,15 @@
 import { ViewEncapsulation } from '../metadata/view';
-import { RendererTypeV2 } from '../render/api';
+import { RendererType2 } from '../render/api';
 import { ElementData, NodeDef, QueryValueType, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
 export declare function tokenKey(token: any): string;
 export declare function unwrapValue(value: any): any;
-export declare function createRendererTypeV2(values: {
+export declare function createRendererType2(values: {
     styles: (string | any[])[];
     encapsulation: ViewEncapsulation;
     data: {
         [kind: string]: any[];
     };
-}): RendererTypeV2;
+}): RendererType2;
 export declare function checkBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
