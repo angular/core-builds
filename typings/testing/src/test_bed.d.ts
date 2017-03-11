@@ -56,7 +56,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    static initTestEnvironment(ngModule: Type<any>, platform: PlatformRef): TestBed;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -117,7 +117,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    initTestEnvironment(ngModule: Type<any>, platform: PlatformRef): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef): void;
     /**
      * Reset the providers for the test injector.
      *
@@ -126,7 +126,7 @@ export declare class TestBed implements Injector {
     resetTestEnvironment(): void;
     resetTestingModule(): void;
     platform: PlatformRef;
-    ngModule: Type<any>;
+    ngModule: Type<any> | Type<any>[];
     configureCompiler(config: {
         providers?: any[];
         useJit?: boolean;
