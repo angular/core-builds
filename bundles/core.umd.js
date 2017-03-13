@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-fa1920a
+ * @license Angular v4.0.0-rc.3-ff71eff
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-fa1920a');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-ff71eff');
     /**
      * Inject decorator and metadata.
      *
@@ -4885,6 +4885,11 @@
         RendererFactory2.prototype.createRenderer = function (hostElement, type) { };
         return RendererFactory2;
     }());
+    var RendererStyleFlags2 = {};
+    RendererStyleFlags2.Important = 1;
+    RendererStyleFlags2.DashCase = 2;
+    RendererStyleFlags2[RendererStyleFlags2.Important] = "Important";
+    RendererStyleFlags2[RendererStyleFlags2.DashCase] = "DashCase";
     /**
      * \@experimental
      * @abstract
@@ -5005,19 +5010,18 @@
          * @param {?} el
          * @param {?} style
          * @param {?} value
-         * @param {?} hasVendorPrefix
-         * @param {?} hasImportant
+         * @param {?=} flags
          * @return {?}
          */
-        Renderer2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) { };
+        Renderer2.prototype.setStyle = function (el, style, value, flags) { };
         /**
          * @abstract
          * @param {?} el
          * @param {?} style
-         * @param {?} hasVendorPrefix
+         * @param {?=} flags
          * @return {?}
          */
-        Renderer2.prototype.removeStyle = function (el, style, hasVendorPrefix) { };
+        Renderer2.prototype.removeStyle = function (el, style, flags) { };
         /**
          * @abstract
          * @param {?} el
@@ -8898,10 +8902,10 @@
         }
         var /** @type {?} */ renderer = view.renderer;
         if (renderValue != null) {
-            renderer.setStyle(renderNode, name, renderValue, false, false);
+            renderer.setStyle(renderNode, name, renderValue);
         }
         else {
-            renderer.removeStyle(renderNode, name, false);
+            renderer.removeStyle(renderNode, name);
         }
     }
     /**
@@ -9749,10 +9753,10 @@
          */
         RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
             if (styleValue != null) {
-                this.delegate.setStyle(renderElement, styleName, styleValue, false, false);
+                this.delegate.setStyle(renderElement, styleName, styleValue);
             }
             else {
-                this.delegate.removeStyle(renderElement, styleName, false);
+                this.delegate.removeStyle(renderElement, styleName);
             }
         };
         /**
@@ -12421,29 +12425,28 @@
          * @param {?} el
          * @param {?} style
          * @param {?} value
-         * @param {?} hasVendorPrefix
-         * @param {?} hasImportant
+         * @param {?} flags
          * @return {?}
          */
-        DebugRenderer2.prototype.setStyle = function (el, style, value, hasVendorPrefix, hasImportant) {
+        DebugRenderer2.prototype.setStyle = function (el, style, value, flags) {
             var /** @type {?} */ debugEl = getDebugNode(el);
             if (debugEl && debugEl instanceof DebugElement) {
                 debugEl.styles[style] = value;
             }
-            this.delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
+            this.delegate.setStyle(el, style, value, flags);
         };
         /**
          * @param {?} el
          * @param {?} style
-         * @param {?} hasVendorPrefix
+         * @param {?} flags
          * @return {?}
          */
-        DebugRenderer2.prototype.removeStyle = function (el, style, hasVendorPrefix) {
+        DebugRenderer2.prototype.removeStyle = function (el, style, flags) {
             var /** @type {?} */ debugEl = getDebugNode(el);
             if (debugEl && debugEl instanceof DebugElement) {
                 debugEl.styles[style] = null;
             }
-            this.delegate.removeStyle(el, style, hasVendorPrefix);
+            this.delegate.removeStyle(el, style, flags);
         };
         /**
          * @param {?} el
@@ -13177,6 +13180,7 @@
     exports.Renderer = RendererV1;
     exports.Renderer2 = Renderer2;
     exports.RendererFactory2 = RendererFactory2;
+    exports.RendererStyleFlags2 = RendererStyleFlags2;
     exports.RootRenderer = RootRenderer;
     exports.COMPILER_OPTIONS = COMPILER_OPTIONS;
     exports.Compiler = Compiler;

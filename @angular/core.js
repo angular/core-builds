@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-fa1920a
+ * @license Angular v4.0.0-rc.3-ff71eff
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-fa1920a');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-ff71eff');
 
 /**
  * Inject decorator and metadata.
@@ -4680,6 +4680,11 @@ class RendererFactory2 {
      */
     createRenderer(hostElement, type) { }
 }
+let RendererStyleFlags2 = {};
+RendererStyleFlags2.Important = 1;
+RendererStyleFlags2.DashCase = 2;
+RendererStyleFlags2[RendererStyleFlags2.Important] = "Important";
+RendererStyleFlags2[RendererStyleFlags2.DashCase] = "DashCase";
 /**
  * \@experimental
  * @abstract
@@ -4798,19 +4803,18 @@ class Renderer2 {
      * @param {?} el
      * @param {?} style
      * @param {?} value
-     * @param {?} hasVendorPrefix
-     * @param {?} hasImportant
+     * @param {?=} flags
      * @return {?}
      */
-    setStyle(el, style, value, hasVendorPrefix, hasImportant) { }
+    setStyle(el, style, value, flags) { }
     /**
      * @abstract
      * @param {?} el
      * @param {?} style
-     * @param {?} hasVendorPrefix
+     * @param {?=} flags
      * @return {?}
      */
-    removeStyle(el, style, hasVendorPrefix) { }
+    removeStyle(el, style, flags) { }
     /**
      * @abstract
      * @param {?} el
@@ -8558,10 +8562,10 @@ function setElementStyle(view, binding, renderNode, name, value) {
     }
     const /** @type {?} */ renderer = view.renderer;
     if (renderValue != null) {
-        renderer.setStyle(renderNode, name, renderValue, false, false);
+        renderer.setStyle(renderNode, name, renderValue);
     }
     else {
-        renderer.removeStyle(renderNode, name, false);
+        renderer.removeStyle(renderNode, name);
     }
 }
 /**
@@ -9341,10 +9345,10 @@ class RendererAdapter {
      */
     setElementStyle(renderElement, styleName, styleValue) {
         if (styleValue != null) {
-            this.delegate.setStyle(renderElement, styleName, styleValue, false, false);
+            this.delegate.setStyle(renderElement, styleName, styleValue);
         }
         else {
-            this.delegate.removeStyle(renderElement, styleName, false);
+            this.delegate.removeStyle(renderElement, styleName);
         }
     }
     /**
@@ -11961,29 +11965,28 @@ class DebugRenderer2 {
      * @param {?} el
      * @param {?} style
      * @param {?} value
-     * @param {?} hasVendorPrefix
-     * @param {?} hasImportant
+     * @param {?} flags
      * @return {?}
      */
-    setStyle(el, style, value, hasVendorPrefix, hasImportant) {
+    setStyle(el, style, value, flags) {
         const /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.styles[style] = value;
         }
-        this.delegate.setStyle(el, style, value, hasVendorPrefix, hasImportant);
+        this.delegate.setStyle(el, style, value, flags);
     }
     /**
      * @param {?} el
      * @param {?} style
-     * @param {?} hasVendorPrefix
+     * @param {?} flags
      * @return {?}
      */
-    removeStyle(el, style, hasVendorPrefix) {
+    removeStyle(el, style, flags) {
         const /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.styles[style] = null;
         }
-        this.delegate.removeStyle(el, style, hasVendorPrefix);
+        this.delegate.removeStyle(el, style, flags);
     }
     /**
      * @param {?} el
@@ -12637,4 +12640,4 @@ function transition(stateChangeExpr, steps) {
     return transition$1(stateChangeExpr, steps);
 }
 
-export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, Renderer2, RendererFactory2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };
