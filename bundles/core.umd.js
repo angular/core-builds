@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-df914ef
+ * @license Angular v4.0.0-rc.3-6559425
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-df914ef');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6559425');
     /**
      * Inject decorator and metadata.
      *
@@ -1026,7 +1026,7 @@
          * @param {?=} rethrowError
          */
         function ErrorHandler(rethrowError) {
-            if (rethrowError === void 0) { rethrowError = true; }
+            if (rethrowError === void 0) { rethrowError = false; }
             /**
              * @internal
              */
@@ -1055,8 +1055,6 @@
                     this._console.error(context);
                 }
             }
-            // We rethrow exceptions, so operations like 'bootstrap' will result in an error
-            // when an error happens. If we do not rethrow, bootstrap will always succeed.
             if (this.rethrowError)
                 throw error;
         };
