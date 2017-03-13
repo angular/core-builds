@@ -1,5 +1,7 @@
 import { Injector } from '../di';
 import { QueryList } from '../linker/query_list';
+import { TemplateRef } from '../linker/template_ref';
+import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
@@ -307,8 +309,14 @@ export declare function asTextData(view: ViewData, index: number): TextData;
 export interface ElementData {
     renderElement: any;
     componentView: ViewData;
-    embeddedViews: ViewData[];
-    projectedViews: ViewData[];
+    viewContainer: ViewContainerData;
+    template: TemplateData;
+}
+export interface ViewContainerData extends ViewContainerRef {
+    _embeddedViews: ViewData[];
+}
+export interface TemplateData extends TemplateRef<any> {
+    _projectedViews: ViewData[];
 }
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.

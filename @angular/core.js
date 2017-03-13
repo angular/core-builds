@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-4e1cf5b
+ * @license Angular v4.0.0-rc.3-df914ef
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-4e1cf5b');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-df914ef');
 
 /**
  * Inject decorator and metadata.
@@ -8071,11 +8071,9 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
         const /** @type {?} */ rn = renderNode(view, nodeDef);
         execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
         if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
-            const /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).embeddedViews;
-            if (embeddedViews) {
-                for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
-                    visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
-                }
+            const /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).viewContainer._embeddedViews;
+            for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
             }
         }
         if (nodeDef.flags & 1 /* TypeElement */ && !nodeDef.element.name) {
@@ -8637,7 +8635,7 @@ function appendNgContent(view, renderHost, def) {
  * @return {?}
  */
 function attachEmbeddedView(parentView, elementData, viewIndex, view) {
-    let /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    let /** @type {?} */ embeddedViews = elementData.viewContainer._embeddedViews;
     if (viewIndex == null) {
         viewIndex = embeddedViews.length;
     }
@@ -8645,9 +8643,9 @@ function attachEmbeddedView(parentView, elementData, viewIndex, view) {
     addToArray(embeddedViews, viewIndex, view);
     const /** @type {?} */ dvcElementData = declaredViewContainer(view);
     if (dvcElementData && dvcElementData !== elementData) {
-        let /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+        let /** @type {?} */ projectedViews = dvcElementData.template._projectedViews;
         if (!projectedViews) {
-            projectedViews = dvcElementData.projectedViews = [];
+            projectedViews = dvcElementData.template._projectedViews = [];
         }
         projectedViews.push(view);
     }
@@ -8661,7 +8659,7 @@ function attachEmbeddedView(parentView, elementData, viewIndex, view) {
  * @return {?}
  */
 function detachEmbeddedView(elementData, viewIndex) {
-    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    const /** @type {?} */ embeddedViews = elementData.viewContainer._embeddedViews;
     if (viewIndex == null || viewIndex >= embeddedViews.length) {
         viewIndex = embeddedViews.length - 1;
     }
@@ -8673,7 +8671,7 @@ function detachEmbeddedView(elementData, viewIndex) {
     removeFromArray(embeddedViews, viewIndex);
     const /** @type {?} */ dvcElementData = declaredViewContainer(view);
     if (dvcElementData && dvcElementData !== elementData) {
-        const /** @type {?} */ projectedViews = dvcElementData.projectedViews;
+        const /** @type {?} */ projectedViews = dvcElementData.template._projectedViews;
         removeFromArray(projectedViews, projectedViews.indexOf(view));
     }
     Services.dirtyParentQueries(view);
@@ -8687,7 +8685,7 @@ function detachEmbeddedView(elementData, viewIndex) {
  * @return {?}
  */
 function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
-    const /** @type {?} */ embeddedViews = elementData.embeddedViews;
+    const /** @type {?} */ embeddedViews = elementData.viewContainer._embeddedViews;
     const /** @type {?} */ view = embeddedViews[oldViewIndex];
     removeFromArray(embeddedViews, oldViewIndex);
     if (newViewIndex == null) {
@@ -8853,20 +8851,26 @@ class ComponentRef_ extends ComponentRef {
 /**
  * @param {?} view
  * @param {?} elDef
+ * @param {?} elData
  * @return {?}
  */
-function createViewContainerRef(view, elDef) {
-    return new ViewContainerRef_(view, elDef);
+function createViewContainerData(view, elDef, elData) {
+    return new ViewContainerRef_(view, elDef, elData);
 }
 class ViewContainerRef_ {
     /**
      * @param {?} _view
      * @param {?} _elDef
+     * @param {?} _data
      */
-    constructor(_view, _elDef) {
+    constructor(_view, _elDef, _data) {
         this._view = _view;
         this._elDef = _elDef;
-        this._data = asElementData(_view, _elDef.index);
+        this._data = _data;
+        /**
+         * @internal
+         */
+        this._embeddedViews = [];
     }
     /**
      * @return {?}
@@ -8892,7 +8896,7 @@ class ViewContainerRef_ {
      * @return {?}
      */
     clear() {
-        const /** @type {?} */ len = this._data.embeddedViews.length;
+        const /** @type {?} */ len = this._embeddedViews.length;
         for (let /** @type {?} */ i = len - 1; i >= 0; i--) {
             const /** @type {?} */ view = detachEmbeddedView(this._data, i);
             Services.destroyView(view);
@@ -8903,7 +8907,7 @@ class ViewContainerRef_ {
      * @return {?}
      */
     get(index) {
-        const /** @type {?} */ view = this._data.embeddedViews[index];
+        const /** @type {?} */ view = this._embeddedViews[index];
         if (view) {
             const /** @type {?} */ ref = new ViewRef_(view);
             ref.attachToViewContainerRef(this);
@@ -8914,7 +8918,7 @@ class ViewContainerRef_ {
     /**
      * @return {?}
      */
-    get length() { return this._data.embeddedViews.length; }
+    get length() { return this._embeddedViews.length; }
     ;
     /**
      * @param {?} templateRef
@@ -8958,7 +8962,7 @@ class ViewContainerRef_ {
      * @return {?}
      */
     move(viewRef, currentIndex) {
-        const /** @type {?} */ previousIndex = this._data.embeddedViews.indexOf(viewRef._view);
+        const /** @type {?} */ previousIndex = this._embeddedViews.indexOf(viewRef._view);
         moveEmbeddedView(this._data, previousIndex, currentIndex);
         return viewRef;
     }
@@ -8967,7 +8971,7 @@ class ViewContainerRef_ {
      * @return {?}
      */
     indexOf(viewRef) {
-        return this._data.embeddedViews.indexOf(((viewRef))._view);
+        return this._embeddedViews.indexOf(((viewRef))._view);
     }
     /**
      * @param {?=} index
@@ -9092,7 +9096,7 @@ class ViewRef_ {
  * @param {?} def
  * @return {?}
  */
-function createTemplateRef(view, def) {
+function createTemplateData(view, def) {
     return new TemplateRef_(view, def);
 }
 class TemplateRef_ extends TemplateRef {
@@ -9154,12 +9158,8 @@ class Injector_ {
 function nodeValue(view, index) {
     const /** @type {?} */ def = view.def.nodes[index];
     if (def.flags & 1 /* TypeElement */) {
-        if (def.element.template) {
-            return createTemplateRef(view, def);
-        }
-        else {
-            return asElementData(view, def.index).renderElement;
-        }
+        const /** @type {?} */ elData = asElementData(view, def.index);
+        return def.element.template ? elData.template : elData.renderElement;
     }
     else if (def.flags & 2 /* TypeText */) {
         return asTextData(view, def.index).renderText;
@@ -9777,10 +9777,10 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
                 case ElementRefTokenKey:
                     return new ElementRef(asElementData(view, elDef.index).renderElement);
                 case ViewContainerRefTokenKey:
-                    return createViewContainerRef(view, elDef);
+                    return asElementData(view, elDef.index).viewContainer;
                 case TemplateRefTokenKey: {
                     if (elDef.element.template) {
-                        return createTemplateRef(view, elDef);
+                        return asElementData(view, elDef.index).template;
                     }
                     break;
                 }
@@ -10317,8 +10317,8 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
             (nodeDef.element.template.nodeMatchedQueries & queryDef.filterId) === queryDef.filterId) {
             // check embedded views that were attached at the place of their template.
             const /** @type {?} */ elementData = asElementData(view, i);
-            const /** @type {?} */ embeddedViews = elementData.embeddedViews;
-            if (embeddedViews) {
+            if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
+                const /** @type {?} */ embeddedViews = elementData.viewContainer._embeddedViews;
                 for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                     const /** @type {?} */ embeddedView = embeddedViews[k];
                     const /** @type {?} */ dvc = declaredViewContainer(embeddedView);
@@ -10327,7 +10327,7 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
                     }
                 }
             }
-            const /** @type {?} */ projectedViews = elementData.projectedViews;
+            const /** @type {?} */ projectedViews = elementData.template._projectedViews;
             if (projectedViews) {
                 for (let /** @type {?} */ k = 0; k < projectedViews.length; k++) {
                     const /** @type {?} */ projectedView = projectedViews[k];
@@ -10360,10 +10360,10 @@ function getQueryValue(view, nodeDef, queryValueType) {
                 value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
                 break;
             case 2 /* TemplateRef */:
-                value = createTemplateRef(view, nodeDef);
+                value = asElementData(view, nodeDef.index).template;
                 break;
             case 3 /* ViewContainerRef */:
-                value = createViewContainerRef(view, nodeDef);
+                value = asElementData(view, nodeDef.index).viewContainer;
                 break;
             case 4 /* Provider */:
                 value = asProviderData(view, nodeDef.index).instance;
@@ -10794,9 +10794,12 @@ function createViewNodes(view) {
                 nodeData = ({
                     renderElement: el,
                     componentView,
-                    embeddedViews: (nodeDef.flags & 8388608 /* EmbeddedViews */) ? [] : undefined,
-                    projectedViews: undefined
+                    viewContainer: undefined,
+                    template: nodeDef.element.template ? createTemplateData(view, nodeDef) : undefined
                 });
+                if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
+                    nodeData.viewContainer = createViewContainerData(view, nodeDef, nodeData);
+                }
                 break;
             case 2 /* TypeText */:
                 nodeData = (createText(view, renderHost, nodeDef));
@@ -11148,11 +11151,9 @@ function execEmbeddedViewsAction(view, action) {
         const /** @type {?} */ nodeDef = def.nodes[i];
         if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
             // a leaf
-            const /** @type {?} */ embeddedViews = asElementData(view, i).embeddedViews;
-            if (embeddedViews) {
-                for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
-                    callViewAction(embeddedViews[k], action);
-                }
+            const /** @type {?} */ embeddedViews = asElementData(view, i).viewContainer._embeddedViews;
+            for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                callViewAction(embeddedViews[k], action);
             }
         }
         else if ((nodeDef.childFlags & 8388608 /* EmbeddedViews */) === 0) {
