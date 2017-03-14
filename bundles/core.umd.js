@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-1c1085b
+ * @license Angular v4.0.0-rc.3-221899a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-1c1085b');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-221899a');
     /**
      * Inject decorator and metadata.
      *
@@ -981,6 +981,7 @@
     var /** @type {?} */ ERROR_COMPONENT_TYPE = 'ngComponentType';
     var /** @type {?} */ ERROR_DEBUG_CONTEXT = 'ngDebugContext';
     var /** @type {?} */ ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+    var /** @type {?} */ ERROR_LOGGER = 'ngErrorLogger';
     /**
      * @param {?} error
      * @return {?}
@@ -994,6 +995,25 @@
      */
     function getOriginalError(error) {
         return ((error))[ERROR_ORIGINAL_ERROR];
+    }
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    function getErrorLogger(error) {
+        return ((error))[ERROR_LOGGER] || defaultErrorLogger;
+    }
+    /**
+     * @param {?} console
+     * @param {...?} values
+     * @return {?}
+     */
+    function defaultErrorLogger(console) {
+        var values = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            values[_i - 1] = arguments[_i];
+        }
+        console.error.apply(console, values);
     }
     /**
      * \@whatItDoes Provides a hook for centralized exception handling.
@@ -1038,33 +1058,20 @@
          * @return {?}
          */
         ErrorHandler.prototype.handleError = function (error) {
-            this._console.error("EXCEPTION: " + this._extractMessage(error));
-            if (error instanceof Error) {
-                var /** @type {?} */ originalError = this._findOriginalError(error);
-                var /** @type {?} */ originalStack = this._findOriginalStack(error);
-                var /** @type {?} */ context = this._findContext(error);
-                if (originalError) {
-                    this._console.error("ORIGINAL EXCEPTION: " + this._extractMessage(originalError));
-                }
-                if (originalStack) {
-                    this._console.error('ORIGINAL STACKTRACE:');
-                    this._console.error(originalStack);
-                }
-                if (context) {
-                    this._console.error('ERROR CONTEXT:');
-                    this._console.error(context);
-                }
+            var /** @type {?} */ originalError = this._findOriginalError(error);
+            var /** @type {?} */ context = this._findContext(error);
+            // Note: Browser consoles show the place from where console.error was called.
+            // We can use this to give users additional information about the error.
+            var /** @type {?} */ errorLogger = getErrorLogger(error);
+            errorLogger(this._console, "ERROR", error);
+            if (originalError) {
+                errorLogger(this._console, "ORIGINAL ERROR", originalError);
+            }
+            if (context) {
+                errorLogger(this._console, 'ERROR CONTEXT', context);
             }
             if (this.rethrowError)
                 throw error;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._extractMessage = function (error) {
-            return error instanceof Error ? error.message : error.toString();
         };
         /**
          * \@internal
@@ -1089,22 +1096,6 @@
                 e = getOriginalError(e);
             }
             return e;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._findOriginalStack = function (error) {
-            var /** @type {?} */ e = error;
-            var /** @type {?} */ stack = e.stack;
-            while (e instanceof Error && getOriginalError(e)) {
-                e = getOriginalError(e);
-                if (e instanceof Error && e.stack) {
-                    stack = e.stack;
-                }
-            }
-            return stack;
         };
         return ErrorHandler;
     }());
@@ -6031,10 +6022,10 @@
         /**
          * @param {?} nativeNode
          * @param {?} parent
-         * @param {?} _debugInfo
+         * @param {?} _debugContext
          */
-        function DebugNode(nativeNode, parent, _debugInfo) {
-            this._debugInfo = _debugInfo;
+        function DebugNode(nativeNode, parent, _debugContext) {
+            this._debugContext = _debugContext;
             this.nativeNode = nativeNode;
             if (parent && parent instanceof DebugElement) {
                 parent.addChild(this);
@@ -6048,7 +6039,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.injector : null; },
+            get: function () { return this._debugContext ? this._debugContext.injector : null; },
             enumerable: true,
             configurable: true
         });
@@ -6056,7 +6047,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.component : null; },
+            get: function () { return this._debugContext ? this._debugContext.component : null; },
             enumerable: true,
             configurable: true
         });
@@ -6064,7 +6055,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.context : null; },
+            get: function () { return this._debugContext ? this._debugContext.context : null; },
             enumerable: true,
             configurable: true
         });
@@ -6073,7 +6064,7 @@
              * @return {?}
              */
             get: function () {
-                return this._debugInfo ? this._debugInfo.references : null;
+                return this._debugContext ? this._debugContext.references : null;
             },
             enumerable: true,
             configurable: true
@@ -6082,15 +6073,18 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.providerTokens : null; },
+            get: function () {
+                return this._debugContext ? this._debugContext.providerTokens : null;
+            },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "source", {
             /**
+             * @deprecated since v4
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.source : null; },
+            get: function () { return 'Deprecated since v4'; },
             enumerable: true,
             configurable: true
         });
@@ -6104,10 +6098,10 @@
         /**
          * @param {?} nativeNode
          * @param {?} parent
-         * @param {?} _debugInfo
+         * @param {?} _debugContext
          */
-        function DebugElement(nativeNode, parent, _debugInfo) {
-            var _this = _super.call(this, nativeNode, parent, _debugInfo) || this;
+        function DebugElement(nativeNode, parent, _debugContext) {
+            var _this = _super.call(this, nativeNode, parent, _debugContext) || this;
             _this.properties = {};
             _this.attributes = {};
             _this.classes = {};
@@ -7976,6 +7970,71 @@
         return (view.nodes[index]);
     }
     /**
+     * @abstract
+     */
+    var DebugContext = (function () {
+        function DebugContext() {
+        }
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.view = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.nodeIndex = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.injector = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.component = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.providerTokens = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.references = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.context = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.componentRenderElement = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.renderNode = function () { };
+        /**
+         * @abstract
+         * @param {?} console
+         * @param {...?} values
+         * @return {?}
+         */
+        DebugContext.prototype.logError = function (console) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+        };
+        return DebugContext;
+    }());
+    /**
      * This object is used to prevent cycles in the source files and to have a place where
      * debug mode can hook it. It is lazily filled when `isDevMode` is known.
      */
@@ -8010,13 +8069,17 @@
         return viewDebugError(msg, context);
     }
     /**
-     * @param {?} originalError
+     * @param {?} err
      * @param {?} context
      * @return {?}
      */
-    function viewWrappedDebugError(originalError, context) {
-        var /** @type {?} */ err = viewDebugError(originalError.message, context);
-        ((err))[ERROR_ORIGINAL_ERROR] = originalError;
+    function viewWrappedDebugError(err, context) {
+        if (!(err instanceof Error)) {
+            // errors that are not Error instances don't have a stack,
+            // so it is ok to wrap them into a new Error object...
+            err = new Error(err.toString());
+        }
+        _addDebugContext(err, context);
         return err;
     }
     /**
@@ -8026,9 +8089,17 @@
      */
     function viewDebugError(msg, context) {
         var /** @type {?} */ err = new Error(msg);
-        ((err))[ERROR_DEBUG_CONTEXT] = context;
-        err.stack = context.source;
+        _addDebugContext(err, context);
         return err;
+    }
+    /**
+     * @param {?} err
+     * @param {?} context
+     * @return {?}
+     */
+    function _addDebugContext(err, context) {
+        ((err))[ERROR_DEBUG_CONTEXT] = context;
+        ((err))[ERROR_LOGGER] = context.logError.bind(context);
     }
     /**
      * @param {?} err
@@ -8044,6 +8115,7 @@
     function viewDestroyedError(action) {
         return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
     }
+    var /** @type {?} */ NOOP = function () { };
     var /** @type {?} */ _tokenKeyCache = new Map();
     /**
      * @param {?} token
@@ -8274,32 +8346,11 @@
     function resolveViewDefinition(factory) {
         var /** @type {?} */ value = VIEW_DEFINITION_CACHE.get(factory);
         if (!value) {
-            value = factory();
+            value = factory(function () { return NOOP; });
+            value.factory = factory;
             VIEW_DEFINITION_CACHE.set(factory, value);
         }
         return value;
-    }
-    /**
-     * @param {?} start
-     * @param {?} end
-     * @return {?}
-     */
-    function sliceErrorStack(start, end) {
-        var /** @type {?} */ err;
-        try {
-            throw new Error();
-        }
-        catch (e) {
-            err = e;
-        }
-        var /** @type {?} */ stack = err.stack || '';
-        var /** @type {?} */ lines = stack.split('\n');
-        if (lines[0].startsWith('Error')) {
-            // Chrome always adds the message to the stack as well...
-            start++;
-            end++;
-        }
-        return lines.slice(start, end).join('\n');
     }
     /**
      * @param {?} view
@@ -8533,7 +8584,6 @@
     }
     var /** @type {?} */ EMPTY_ARRAY = [];
     var /** @type {?} */ EMPTY_MAP = {};
-    var /** @type {?} */ NOOP = function () { };
     /**
      * @param {?} flags
      * @param {?} matchedQueriesDsl
@@ -8549,8 +8599,6 @@
         }
         flags |= 1 /* TypeElement */;
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
         return {
             // will bet set by the view definition
@@ -8569,7 +8617,7 @@
             element: {
                 ns: undefined,
                 name: undefined,
-                attrs: undefined, template: template, source: source,
+                attrs: undefined, template: template,
                 componentProvider: undefined,
                 componentView: undefined,
                 componentRendererType: undefined,
@@ -8601,8 +8649,6 @@
         if (!handleEvent) {
             handleEvent = NOOP;
         }
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
         var /** @type {?} */ ns;
         var /** @type {?} */ name;
@@ -8673,7 +8719,6 @@
                 ns: ns,
                 name: name,
                 attrs: attrs,
-                source: source,
                 template: undefined,
                 // will bet set by the view definition
                 componentProvider: undefined, componentView: componentView, componentRendererType: componentRendererType,
@@ -10783,8 +10828,6 @@
      * @return {?}
      */
     function textDef(ngContentIndex, constants) {
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var /** @type {?} */ bindings = new Array(constants.length - 1);
         for (var /** @type {?} */ i = 1; i < constants.length; i++) {
             bindings[i - 1] = {
@@ -10816,7 +10859,7 @@
             outputs: [],
             element: undefined,
             provider: undefined,
-            text: { prefix: constants[0], source: source },
+            text: { prefix: constants[0] },
             query: undefined,
             ngContent: undefined
         };
@@ -10939,7 +10982,6 @@
         var /** @type {?} */ valueStr = value != null ? value.toString() : '';
         return valueStr + binding.suffix;
     }
-    var /** @type {?} */ NOOP$1 = function () { return undefined; };
     /**
      * @param {?} flags
      * @param {?} nodes
@@ -11056,13 +11098,15 @@
         }
         var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return nodes[nodeIndex].element.handleEvent(view, eventName, event); };
         return {
+            // Will be filled later...
+            factory: undefined,
             nodeFlags: viewNodeFlags,
             rootNodeFlags: viewRootNodeFlags,
             nodeMatchedQueries: viewMatchedQueries, flags: flags,
             nodes: nodes,
-            updateDirectives: updateDirectives || NOOP$1,
-            updateRenderer: updateRenderer || NOOP$1,
-            handleEvent: handleEvent || NOOP$1,
+            updateDirectives: updateDirectives || NOOP,
+            updateRenderer: updateRenderer || NOOP,
+            handleEvent: handleEvent || NOOP,
             bindingCount: viewBindingCount,
             outputCount: viewDisposableCount, lastRenderRootNode: lastRenderRootNode
         };
@@ -12133,21 +12177,6 @@
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DebugContext_.prototype, "source", {
-            /**
-             * @return {?}
-             */
-            get: function () {
-                if (this.nodeDef.flags & 2 /* TypeText */) {
-                    return this.nodeDef.text.source;
-                }
-                else {
-                    return this.elDef.element.source;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(DebugContext_.prototype, "componentRenderElement", {
             /**
              * @return {?}
@@ -12170,6 +12199,43 @@
             enumerable: true,
             configurable: true
         });
+        /**
+         * @param {?} console
+         * @param {...?} values
+         * @return {?}
+         */
+        DebugContext_.prototype.logError = function (console) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+            var /** @type {?} */ logViewFactory;
+            var /** @type {?} */ logNodeIndex;
+            if (this.nodeDef.flags & 2 /* TypeText */) {
+                logViewFactory = this.view.def.factory;
+                logNodeIndex = this.nodeDef.index;
+            }
+            else {
+                logViewFactory = this.elView.def.factory;
+                logNodeIndex = this.elDef.index;
+            }
+            var /** @type {?} */ currNodeIndex = -1;
+            var /** @type {?} */ nodeLogger = function () {
+                currNodeIndex++;
+                if (currNodeIndex === logNodeIndex) {
+                    return (_a = console.error).bind.apply(_a, [console].concat(values));
+                }
+                else {
+                    return NOOP;
+                }
+                var _a;
+            };
+            logViewFactory(nodeLogger);
+            if (currNodeIndex < logNodeIndex) {
+                console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
+                console.error.apply(console, values);
+            }
+        };
         return DebugContext_;
     }());
     /**
@@ -13267,14 +13333,14 @@
     exports.state = state;
     exports.keyframes = keyframes;
     exports.transition = transition;
-    exports.ɵz = animate$1;
-    exports.ɵba = group$1;
-    exports.ɵbe = keyframes$1;
-    exports.ɵbb = sequence$1;
-    exports.ɵbd = state$1;
-    exports.ɵbc = style$1;
-    exports.ɵbf = transition$1;
-    exports.ɵy = trigger$1;
+    exports.ɵba = animate$1;
+    exports.ɵbb = group$1;
+    exports.ɵbf = keyframes$1;
+    exports.ɵbc = sequence$1;
+    exports.ɵbe = state$1;
+    exports.ɵbd = style$1;
+    exports.ɵbg = transition$1;
+    exports.ɵz = trigger$1;
     exports.ɵo = _initViewEngine;
     exports.ɵl = _iterableDiffersFactory;
     exports.ɵm = _keyValueDiffersFactory;
@@ -13297,5 +13363,6 @@
     exports.ɵa = makeParamDecorator;
     exports.ɵb = makePropDecorator;
     exports.ɵw = _def;
+    exports.ɵx = DebugContext;
 
 }));

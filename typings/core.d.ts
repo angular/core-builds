@@ -2,7 +2,7 @@
  * Generated bundle index. Do not edit.
  */
 export * from './public_api';
-export { AnimationMetadataType as ɵx, animate as ɵz, group as ɵba, keyframes as ɵbe, sequence as ɵbb, state as ɵbd, style as ɵbc, transition as ɵbf, trigger as ɵy } from './src/animation/dsl';
+export { AnimationMetadataType as ɵy, animate as ɵba, group as ɵbb, keyframes as ɵbf, sequence as ɵbc, state as ɵbe, style as ɵbd, transition as ɵbg, trigger as ɵz } from './src/animation/dsl';
 export { _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn } from './src/application_module';
 export { ApplicationRef_ as ɵf } from './src/application_ref';
 export { _appIdRandomProviderFactory as ɵg } from './src/application_tokens';
@@ -16,3 +16,4 @@ export { createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs
 export { PlatformReflectionCapabilities as ɵv } from './src/reflection/platform_reflection_capabilities';
 export { makeParamDecorator as ɵa, makePropDecorator as ɵb } from './src/util/decorators';
 export { _def as ɵw } from './src/view/provider';
+export { DebugContext as ɵx } from './src/view/types';

@@ -5,6 +5,7 @@ import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
+    factory: ViewDefinitionFactory;
     flags: ViewFlags;
     updateDirectives: ViewUpdateFn;
     updateRenderer: ViewUpdateFn;
@@ -27,16 +28,36 @@ export interface ViewDefinition {
      */
     nodeMatchedQueries: number;
 }
-export declare type ViewDefinitionFactory = () => ViewDefinition;
-export declare type ViewUpdateFn = (check: NodeCheckFn, view: ViewData) => void;
+/**
+ * Factory for ViewDefinitions.
+ * We use a function so we can reexeute it in case an error happens and use the given logger
+ * function to log the error from the definition of the node, which is shown in all browser
+ * logs.
+ */
+export interface ViewDefinitionFactory {
+    (logger: NodeLogger): ViewDefinition;
+}
+/**
+ * Function to call console.error at the right source location. This is an indirection
+ * via another function as browser will log the location that actually called
+ * `console.error`.
+ */
+export interface NodeLogger {
+    (): () => void;
+}
+export interface ViewUpdateFn {
+    (check: NodeCheckFn, view: ViewData): void;
+}
 export interface NodeCheckFn {
     (view: ViewData, nodeIndex: number, argStyle: ArgumentType.Dynamic, values: any[]): any;
     (view: ViewData, nodeIndex: number, argStyle: ArgumentType.Inline, v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any;
 }
-export declare type ViewHandleEventFn = (view: ViewData, nodeIndex: number, eventName: string, event: any) => boolean;
 export declare const enum ArgumentType {
     Inline = 0,
     Dynamic = 1,
+}
+export interface ViewHandleEventFn {
+    (view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
 }
 /**
  * Bitmask for ViewDefintion.flags.
@@ -195,10 +216,11 @@ export interface ElementDef {
     allProviders: {
         [tokenKey: string]: NodeDef;
     };
-    source: string;
     handleEvent: ElementHandleEventFn;
 }
-export declare type ElementHandleEventFn = (view: ViewData, eventName: string, event: any) => boolean;
+export interface ElementHandleEventFn {
+    (view: ViewData, eventName: string, event: any): boolean;
+}
 export interface ProviderDef {
     token: any;
     tokenKey: string;
@@ -221,7 +243,6 @@ export declare const enum DepFlags {
 }
 export interface TextDef {
     prefix: string;
-    source: string;
 }
 export interface QueryDef {
     id: number;
@@ -274,7 +295,9 @@ export declare const enum ViewState {
     Errored = 4,
     Destroyed = 8,
 }
-export declare type DisposableFn = () => void;
+export interface DisposableFn {
+    (): void;
+}
 /**
  * Node instance data.
  *
@@ -368,9 +391,9 @@ export declare abstract class DebugContext {
         [key: string]: any;
     };
     readonly abstract context: any;
-    readonly abstract source: string;
     readonly abstract componentRenderElement: any;
     readonly abstract renderNode: any;
+    abstract logError(console: Console, ...values: any[]): void;
 }
 export declare const enum CheckType {
     CheckAndUpdate = 0,

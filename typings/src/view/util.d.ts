@@ -1,6 +1,7 @@
 import { ViewEncapsulation } from '../metadata/view';
 import { RendererType2 } from '../render/api';
 import { ElementData, NodeDef, QueryValueType, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
+export declare const NOOP: any;
 export declare function tokenKey(token: any): string;
 export declare function unwrapValue(value: any): any;
 export declare function createRendererType2(values: {
@@ -38,7 +39,6 @@ export declare function splitMatchedQueriesDsl(matchedQueriesDsl: [string | numb
 };
 export declare function getParentRenderElement(view: ViewData, renderHost: any, def: NodeDef): any;
 export declare function resolveViewDefinition(factory: ViewDefinitionFactory): ViewDefinition;
-export declare function sliceErrorStack(start: number, end: number): string;
 export declare function rootRenderNodes(view: ViewData): any[];
 export declare enum RenderNodeAction {
     Collect = 0,

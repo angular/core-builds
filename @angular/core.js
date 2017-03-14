@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-1c1085b
+ * @license Angular v4.0.0-rc.3-221899a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-1c1085b');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-221899a');
 
 /**
  * Inject decorator and metadata.
@@ -944,6 +944,7 @@ Injector.NULL = new _NullInjector();
 const /** @type {?} */ ERROR_COMPONENT_TYPE = 'ngComponentType';
 const /** @type {?} */ ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 const /** @type {?} */ ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+const /** @type {?} */ ERROR_LOGGER = 'ngErrorLogger';
 /**
  * @param {?} error
  * @return {?}
@@ -957,6 +958,21 @@ function getDebugContext(error) {
  */
 function getOriginalError(error) {
     return ((error))[ERROR_ORIGINAL_ERROR];
+}
+/**
+ * @param {?} error
+ * @return {?}
+ */
+function getErrorLogger(error) {
+    return ((error))[ERROR_LOGGER] || defaultErrorLogger;
+}
+/**
+ * @param {?} console
+ * @param {...?} values
+ * @return {?}
+ */
+function defaultErrorLogger(console, ...values) {
+    ((console.error))(...values);
 }
 
 /**
@@ -1001,33 +1017,20 @@ class ErrorHandler {
      * @return {?}
      */
     handleError(error) {
-        this._console.error(`EXCEPTION: ${this._extractMessage(error)}`);
-        if (error instanceof Error) {
-            const /** @type {?} */ originalError = this._findOriginalError(error);
-            const /** @type {?} */ originalStack = this._findOriginalStack(error);
-            const /** @type {?} */ context = this._findContext(error);
-            if (originalError) {
-                this._console.error(`ORIGINAL EXCEPTION: ${this._extractMessage(originalError)}`);
-            }
-            if (originalStack) {
-                this._console.error('ORIGINAL STACKTRACE:');
-                this._console.error(originalStack);
-            }
-            if (context) {
-                this._console.error('ERROR CONTEXT:');
-                this._console.error(context);
-            }
+        const /** @type {?} */ originalError = this._findOriginalError(error);
+        const /** @type {?} */ context = this._findContext(error);
+        // Note: Browser consoles show the place from where console.error was called.
+        // We can use this to give users additional information about the error.
+        const /** @type {?} */ errorLogger = getErrorLogger(error);
+        errorLogger(this._console, `ERROR`, error);
+        if (originalError) {
+            errorLogger(this._console, `ORIGINAL ERROR`, originalError);
+        }
+        if (context) {
+            errorLogger(this._console, 'ERROR CONTEXT', context);
         }
         if (this.rethrowError)
             throw error;
-    }
-    /**
-     * \@internal
-     * @param {?} error
-     * @return {?}
-     */
-    _extractMessage(error) {
-        return error instanceof Error ? error.message : error.toString();
     }
     /**
      * \@internal
@@ -1052,22 +1055,6 @@ class ErrorHandler {
             e = getOriginalError(e);
         }
         return e;
-    }
-    /**
-     * \@internal
-     * @param {?} error
-     * @return {?}
-     */
-    _findOriginalStack(error) {
-        let /** @type {?} */ e = error;
-        let /** @type {?} */ stack = e.stack;
-        while (e instanceof Error && getOriginalError(e)) {
-            e = getOriginalError(e);
-            if (e instanceof Error && e.stack) {
-                stack = e.stack;
-            }
-        }
-        return stack;
     }
 }
 /**
@@ -5761,10 +5748,10 @@ class DebugNode {
     /**
      * @param {?} nativeNode
      * @param {?} parent
-     * @param {?} _debugInfo
+     * @param {?} _debugContext
      */
-    constructor(nativeNode, parent, _debugInfo) {
-        this._debugInfo = _debugInfo;
+    constructor(nativeNode, parent, _debugContext) {
+        this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
         if (parent && parent instanceof DebugElement) {
             parent.addChild(this);
@@ -5777,29 +5764,32 @@ class DebugNode {
     /**
      * @return {?}
      */
-    get injector() { return this._debugInfo ? this._debugInfo.injector : null; }
+    get injector() { return this._debugContext ? this._debugContext.injector : null; }
     /**
      * @return {?}
      */
-    get componentInstance() { return this._debugInfo ? this._debugInfo.component : null; }
+    get componentInstance() { return this._debugContext ? this._debugContext.component : null; }
     /**
      * @return {?}
      */
-    get context() { return this._debugInfo ? this._debugInfo.context : null; }
+    get context() { return this._debugContext ? this._debugContext.context : null; }
     /**
      * @return {?}
      */
     get references() {
-        return this._debugInfo ? this._debugInfo.references : null;
+        return this._debugContext ? this._debugContext.references : null;
     }
     /**
      * @return {?}
      */
-    get providerTokens() { return this._debugInfo ? this._debugInfo.providerTokens : null; }
+    get providerTokens() {
+        return this._debugContext ? this._debugContext.providerTokens : null;
+    }
     /**
+     * @deprecated since v4
      * @return {?}
      */
-    get source() { return this._debugInfo ? this._debugInfo.source : null; }
+    get source() { return 'Deprecated since v4'; }
 }
 /**
  * \@experimental All debugging apis are currently experimental.
@@ -5808,10 +5798,10 @@ class DebugElement extends DebugNode {
     /**
      * @param {?} nativeNode
      * @param {?} parent
-     * @param {?} _debugInfo
+     * @param {?} _debugContext
      */
-    constructor(nativeNode, parent, _debugInfo) {
-        super(nativeNode, parent, _debugInfo);
+    constructor(nativeNode, parent, _debugContext) {
+        super(nativeNode, parent, _debugContext);
         this.properties = {};
         this.attributes = {};
         this.classes = {};
@@ -7637,6 +7627,63 @@ function asQueryList(view, index) {
     return (view.nodes[index]);
 }
 /**
+ * @abstract
+ */
+class DebugContext {
+    /**
+     * @abstract
+     * @return {?}
+     */
+    view() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    nodeIndex() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    injector() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    component() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    providerTokens() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    references() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    context() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    componentRenderElement() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    renderNode() { }
+    /**
+     * @abstract
+     * @param {?} console
+     * @param {...?} values
+     * @return {?}
+     */
+    logError(console, ...values) { }
+}
+/**
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
  */
@@ -7672,13 +7719,17 @@ function expressionChangedAfterItHasBeenCheckedError(context, oldValue, currValu
     return viewDebugError(msg, context);
 }
 /**
- * @param {?} originalError
+ * @param {?} err
  * @param {?} context
  * @return {?}
  */
-function viewWrappedDebugError(originalError, context) {
-    const /** @type {?} */ err = viewDebugError(originalError.message, context);
-    ((err))[ERROR_ORIGINAL_ERROR] = originalError;
+function viewWrappedDebugError(err, context) {
+    if (!(err instanceof Error)) {
+        // errors that are not Error instances don't have a stack,
+        // so it is ok to wrap them into a new Error object...
+        err = new Error(err.toString());
+    }
+    _addDebugContext(err, context);
     return err;
 }
 /**
@@ -7688,9 +7739,17 @@ function viewWrappedDebugError(originalError, context) {
  */
 function viewDebugError(msg, context) {
     const /** @type {?} */ err = new Error(msg);
-    ((err))[ERROR_DEBUG_CONTEXT] = context;
-    err.stack = context.source;
+    _addDebugContext(err, context);
     return err;
+}
+/**
+ * @param {?} err
+ * @param {?} context
+ * @return {?}
+ */
+function _addDebugContext(err, context) {
+    ((err))[ERROR_DEBUG_CONTEXT] = context;
+    ((err))[ERROR_LOGGER] = context.logError.bind(context);
 }
 /**
  * @param {?} err
@@ -7707,6 +7766,7 @@ function viewDestroyedError(action) {
     return new Error(`ViewDestroyedError: Attempt to use a destroyed view: ${action}`);
 }
 
+const /** @type {?} */ NOOP = () => { };
 const /** @type {?} */ _tokenKeyCache = new Map();
 /**
  * @param {?} token
@@ -7936,32 +7996,11 @@ const /** @type {?} */ VIEW_DEFINITION_CACHE = new WeakMap();
 function resolveViewDefinition(factory) {
     let /** @type {?} */ value = VIEW_DEFINITION_CACHE.get(factory);
     if (!value) {
-        value = factory();
+        value = factory(() => NOOP);
+        value.factory = factory;
         VIEW_DEFINITION_CACHE.set(factory, value);
     }
     return value;
-}
-/**
- * @param {?} start
- * @param {?} end
- * @return {?}
- */
-function sliceErrorStack(start, end) {
-    let /** @type {?} */ err;
-    try {
-        throw new Error();
-    }
-    catch (e) {
-        err = e;
-    }
-    const /** @type {?} */ stack = err.stack || '';
-    const /** @type {?} */ lines = stack.split('\n');
-    if (lines[0].startsWith('Error')) {
-        // Chrome always adds the message to the stack as well...
-        start++;
-        end++;
-    }
-    return lines.slice(start, end).join('\n');
 }
 /**
  * @param {?} view
@@ -8196,7 +8235,6 @@ function _toStringWithNull(v) {
 const /** @type {?} */ EMPTY_ARRAY = [];
 const /** @type {?} */ EMPTY_MAP = {};
 
-const /** @type {?} */ NOOP = () => { };
 /**
  * @param {?} flags
  * @param {?} matchedQueriesDsl
@@ -8212,8 +8250,6 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
     }
     flags |= 1 /* TypeElement */;
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
-    // skip the call to sliceErrorStack itself + the call to this function.
-    const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     const /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
     return {
         // will bet set by the view definition
@@ -8232,7 +8268,7 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
         element: {
             ns: undefined,
             name: undefined,
-            attrs: undefined, template, source,
+            attrs: undefined, template,
             componentProvider: undefined,
             componentView: undefined,
             componentRendererType: undefined,
@@ -8263,8 +8299,6 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     if (!handleEvent) {
         handleEvent = NOOP;
     }
-    // skip the call to sliceErrorStack itself + the call to this function.
-    const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     const { matchedQueries, references, matchedQueryIds } = splitMatchedQueriesDsl(matchedQueriesDsl);
     let /** @type {?} */ ns;
     let /** @type {?} */ name;
@@ -8334,7 +8368,6 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
             ns,
             name,
             attrs,
-            source,
             template: undefined,
             // will bet set by the view definition
             componentProvider: undefined, componentView, componentRendererType,
@@ -10377,8 +10410,6 @@ function getQueryValue(view, nodeDef, queryValueType) {
  * @return {?}
  */
 function textDef(ngContentIndex, constants) {
-    // skip the call to sliceErrorStack itself + the call to this function.
-    const /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
     const /** @type {?} */ bindings = new Array(constants.length - 1);
     for (let /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
@@ -10410,7 +10441,7 @@ function textDef(ngContentIndex, constants) {
         outputs: [],
         element: undefined,
         provider: undefined,
-        text: { prefix: constants[0], source },
+        text: { prefix: constants[0] },
         query: undefined,
         ngContent: undefined
     };
@@ -10534,7 +10565,6 @@ function _addInterpolationPart(value, binding) {
     return valueStr + binding.suffix;
 }
 
-const /** @type {?} */ NOOP$1 = () => undefined;
 /**
  * @param {?} flags
  * @param {?} nodes
@@ -10651,13 +10681,15 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     }
     const /** @type {?} */ handleEvent = (view, nodeIndex, eventName, event) => nodes[nodeIndex].element.handleEvent(view, eventName, event);
     return {
+        // Will be filled later...
+        factory: undefined,
         nodeFlags: viewNodeFlags,
         rootNodeFlags: viewRootNodeFlags,
         nodeMatchedQueries: viewMatchedQueries, flags,
         nodes: nodes,
-        updateDirectives: updateDirectives || NOOP$1,
-        updateRenderer: updateRenderer || NOOP$1,
-        handleEvent: handleEvent || NOOP$1,
+        updateDirectives: updateDirectives || NOOP,
+        updateRenderer: updateRenderer || NOOP,
+        handleEvent: handleEvent || NOOP,
         bindingCount: viewBindingCount,
         outputCount: viewDisposableCount, lastRenderRootNode
     };
@@ -11694,17 +11726,6 @@ class DebugContext_ {
     /**
      * @return {?}
      */
-    get source() {
-        if (this.nodeDef.flags & 2 /* TypeText */) {
-            return this.nodeDef.text.source;
-        }
-        else {
-            return this.elDef.element.source;
-        }
-    }
-    /**
-     * @return {?}
-     */
     get componentRenderElement() {
         const /** @type {?} */ elData = findHostElement(this.elOrCompView);
         return elData ? elData.renderElement : undefined;
@@ -11715,6 +11736,38 @@ class DebugContext_ {
     get renderNode() {
         return this.nodeDef.flags & 2 /* TypeText */ ? renderNode(this.view, this.nodeDef) :
             renderNode(this.elView, this.elDef);
+    }
+    /**
+     * @param {?} console
+     * @param {...?} values
+     * @return {?}
+     */
+    logError(console, ...values) {
+        let /** @type {?} */ logViewFactory;
+        let /** @type {?} */ logNodeIndex;
+        if (this.nodeDef.flags & 2 /* TypeText */) {
+            logViewFactory = this.view.def.factory;
+            logNodeIndex = this.nodeDef.index;
+        }
+        else {
+            logViewFactory = this.elView.def.factory;
+            logNodeIndex = this.elDef.index;
+        }
+        let /** @type {?} */ currNodeIndex = -1;
+        let /** @type {?} */ nodeLogger = () => {
+            currNodeIndex++;
+            if (currNodeIndex === logNodeIndex) {
+                return console.error.bind(console, ...values);
+            }
+            else {
+                return NOOP;
+            }
+        };
+        logViewFactory(nodeLogger);
+        if (currNodeIndex < logNodeIndex) {
+            console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
+            ((console.error))(...values);
+        }
     }
 }
 /**
@@ -12639,4 +12692,4 @@ function transition(stateChangeExpr, steps) {
     return transition$1(stateChangeExpr, steps);
 }
 
-export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, RendererV1 as Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, LIFECYCLE_HOOKS_VALUES as ɵLIFECYCLE_HOOKS_VALUES, LifecycleHooks as ɵLifecycleHooks, ViewMetadata as ɵViewMetadata, Reflector as ɵReflector, reflector as ɵreflector, ReflectionCapabilities as ɵReflectionCapabilities, ReflectorReader as ɵReflectorReader, RenderDebugInfo as ɵRenderDebugInfo, global$1 as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, merge$1 as ɵmerge, NgModuleInjector as ɵNgModuleInjector, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger, animate, group, sequence, style, state, keyframes, transition, animate$1 as ɵba, group$1 as ɵbb, keyframes$1 as ɵbf, sequence$1 as ɵbc, state$1 as ɵbe, style$1 as ɵbd, transition$1 as ɵbg, trigger$1 as ɵz, _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵw, DebugContext as ɵx };
