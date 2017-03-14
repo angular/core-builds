@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-0aad270
+ * @license Angular v4.0.0-rc.3-2c5a671
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -598,7 +598,14 @@ class TestBed {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
-        this._activeFixtures.forEach((fixture) => fixture.destroy());
+        this._activeFixtures.forEach((fixture) => {
+            try {
+                fixture.destroy();
+            }
+            catch (e) {
+                console.error('Error during cleanup of component', fixture.componentInstance);
+            }
+        });
         this._activeFixtures = [];
     }
     configureCompiler(config) {

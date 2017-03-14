@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-0aad270
+ * @license Angular v4.0.0-rc.3-2c5a671
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-0aad270');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-2c5a671');
 
 /**
  * Inject decorator and metadata.
@@ -9945,6 +9945,9 @@ function callElementProvidersLifecycles(view, elDef, lifecycles) {
  */
 function callProviderLifecycles(view, index, lifecycles) {
     const /** @type {?} */ provider = asProviderData(view, index).instance;
+    if (provider === NOT_CREATED) {
+        return;
+    }
     Services.setCurrentNode(view, index);
     if (lifecycles & 524288 /* AfterContentInit */) {
         provider.ngAfterContentInit();
@@ -12118,6 +12121,10 @@ function _initViewEngine() {
  * \@experimental
  */
 class ApplicationModule {
+    /**
+     * @param {?} appRef
+     */
+    constructor(appRef) { }
 }
 ApplicationModule.decorators = [
     { type: NgModule, args: [{
@@ -12139,7 +12146,9 @@ ApplicationModule.decorators = [
             },] },
 ];
 /** @nocollapse */
-ApplicationModule.ctorParameters = () => [];
+ApplicationModule.ctorParameters = () => [
+    { type: ApplicationRef, },
+];
 
 /**
  * @license

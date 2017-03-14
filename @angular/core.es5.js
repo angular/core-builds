@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-0aad270
+ * @license Angular v4.0.0-rc.3-2c5a671
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -824,7 +824,7 @@ var Version = (function () {
 /**
  * @stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-0aad270');
+var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-2c5a671');
 /**
  * Inject decorator and metadata.
  *
@@ -10365,6 +10365,9 @@ function callElementProvidersLifecycles(view, elDef, lifecycles) {
  */
 function callProviderLifecycles(view, index, lifecycles) {
     var /** @type {?} */ provider = asProviderData(view, index).instance;
+    if (provider === NOT_CREATED) {
+        return;
+    }
     Services.setCurrentNode(view, index);
     if (lifecycles & 524288 /* AfterContentInit */) {
         provider.ngAfterContentInit();
@@ -12590,7 +12593,10 @@ function _initViewEngine() {
  * \@experimental
  */
 var ApplicationModule = (function () {
-    function ApplicationModule() {
+    /**
+     * @param {?} appRef
+     */
+    function ApplicationModule(appRef) {
     }
     return ApplicationModule;
 }());
@@ -12614,7 +12620,9 @@ ApplicationModule.decorators = [
             },] },
 ];
 /** @nocollapse */
-ApplicationModule.ctorParameters = function () { return []; };
+ApplicationModule.ctorParameters = function () { return [
+    { type: ApplicationRef, },
+]; };
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
