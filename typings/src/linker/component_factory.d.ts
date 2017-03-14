@@ -9,6 +9,7 @@ import { ChangeDetectorRef } from '../change_detection/change_detection';
 import { Injector } from '../di/injector';
 import { Type } from '../type';
 import { ElementRef } from './element_ref';
+import { NgModuleRef } from './ng_module_factory';
 import { ViewRef } from './view_ref';
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
@@ -61,5 +62,5 @@ export declare abstract class ComponentFactory<C> {
     /**
      * Creates a new component.
      */
-    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any): ComponentRef<C>;
+    abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
 }

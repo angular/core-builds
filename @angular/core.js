@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-f093501
+ * @license Angular v4.0.0-rc.3-13686bb
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-f093501');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-13686bb');
 
 /**
  * Inject decorator and metadata.
@@ -2984,9 +2984,10 @@ class ComponentFactory {
      * @param {?} injector
      * @param {?=} projectableNodes
      * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
      * @return {?}
      */
-    create(injector, projectableNodes, rootSelectorOrNode) { }
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) { }
 }
 
 /**
@@ -3025,9 +3026,11 @@ class CodegenComponentFactoryResolver {
     /**
      * @param {?} factories
      * @param {?} _parent
+     * @param {?} _ngModule
      */
-    constructor(factories, _parent) {
+    constructor(factories, _parent, _ngModule) {
         this._parent = _parent;
+        this._ngModule = _ngModule;
         this._factories = new Map();
         for (let i = 0; i < factories.length; i++) {
             const factory = factories[i];
@@ -3039,12 +3042,187 @@ class CodegenComponentFactoryResolver {
      * @return {?}
      */
     resolveComponentFactory(component) {
-        let /** @type {?} */ result = this._factories.get(component);
-        if (!result) {
-            result = this._parent.resolveComponentFactory(component);
-        }
-        return result;
+        let /** @type {?} */ factory = this._factories.get(component) || this._parent.resolveComponentFactory(component);
+        return factory ? new ComponentFactoryBoundToModule(factory, this._ngModule) : null;
     }
+}
+class ComponentFactoryBoundToModule extends ComponentFactory {
+    /**
+     * @param {?} factory
+     * @param {?} ngModule
+     */
+    constructor(factory, ngModule) {
+        super();
+        this.factory = factory;
+        this.ngModule = ngModule;
+    }
+    /**
+     * @return {?}
+     */
+    get selector() { return this.factory.selector; }
+    /**
+     * @return {?}
+     */
+    get componentType() { return this.factory.componentType; }
+    /**
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
+     * @return {?}
+     */
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
+        return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
+    }
+}
+
+/**
+ * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
+ *
+ * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+ * NgModule Instance.
+ *
+ * \@stable
+ * @abstract
+ */
+class NgModuleRef {
+    /**
+     * The injector that contains all of the providers of the NgModule.
+     * @abstract
+     * @return {?}
+     */
+    injector() { }
+    /**
+     * The ComponentFactoryResolver to get hold of the ComponentFactories
+     * declared in the `entryComponents` property of the module.
+     * @abstract
+     * @return {?}
+     */
+    componentFactoryResolver() { }
+    /**
+     * The NgModule instance.
+     * @abstract
+     * @return {?}
+     */
+    instance() { }
+    /**
+     * Destroys the module instance and all of the data structures associated with it.
+     * @abstract
+     * @return {?}
+     */
+    destroy() { }
+    /**
+     * Allows to register a callback that will be called when the module is destroyed.
+     * @abstract
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) { }
+}
+/**
+ * \@experimental
+ */
+class NgModuleFactory {
+    /**
+     * @param {?} _injectorClass
+     * @param {?} _moduleType
+     */
+    constructor(_injectorClass, _moduleType) {
+        this._injectorClass = _injectorClass;
+        this._moduleType = _moduleType;
+    }
+    /**
+     * @return {?}
+     */
+    get moduleType() { return this._moduleType; }
+    /**
+     * @param {?} parentInjector
+     * @return {?}
+     */
+    create(parentInjector) {
+        const /** @type {?} */ instance = new this._injectorClass(parentInjector || Injector.NULL);
+        instance.create();
+        return instance;
+    }
+}
+const /** @type {?} */ _UNDEFINED = new Object();
+/**
+ * @abstract
+ */
+class NgModuleInjector {
+    /**
+     * @param {?} parent
+     * @param {?} factories
+     * @param {?} bootstrapFactories
+     */
+    constructor(parent, factories, bootstrapFactories) {
+        this.parent = parent;
+        this._destroyListeners = [];
+        this._destroyed = false;
+        this.bootstrapFactories =
+            bootstrapFactories.map(f => new ComponentFactoryBoundToModule(f, this));
+        this._cmpFactoryResolver = new CodegenComponentFactoryResolver(factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL), this);
+    }
+    /**
+     * @return {?}
+     */
+    create() { this.instance = this.createInternal(); }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    createInternal() { }
+    /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
+        if (token === Injector || token === NgModuleRef) {
+            return this;
+        }
+        if (token === ComponentFactoryResolver) {
+            return this._cmpFactoryResolver;
+        }
+        const /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
+        return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
+    }
+    /**
+     * @abstract
+     * @param {?} token
+     * @param {?} notFoundValue
+     * @return {?}
+     */
+    getInternal(token, notFoundValue) { }
+    /**
+     * @return {?}
+     */
+    get injector() { return this; }
+    /**
+     * @return {?}
+     */
+    get componentFactoryResolver() { return this._cmpFactoryResolver; }
+    /**
+     * @return {?}
+     */
+    destroy() {
+        if (this._destroyed) {
+            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
+        }
+        this._destroyed = true;
+        this.destroyInternal();
+        this._destroyListeners.forEach((listener) => listener());
+    }
+    /**
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) { this._destroyListeners.push(callback); }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    destroyInternal() { }
 }
 
 let /** @type {?} */ trace;
@@ -4117,7 +4295,7 @@ class PlatformRef_ extends PlatformRef {
     _moduleDoBootstrap(moduleRef) {
         const /** @type {?} */ appRef = moduleRef.injector.get(ApplicationRef);
         if (moduleRef.bootstrapFactories.length > 0) {
-            moduleRef.bootstrapFactories.forEach((compFactory) => appRef.bootstrap(compFactory));
+            moduleRef.bootstrapFactories.forEach(f => appRef.bootstrap(f));
         }
         else if (moduleRef.instance.ngDoBootstrap) {
             moduleRef.instance.ngDoBootstrap(appRef);
@@ -4315,7 +4493,11 @@ class ApplicationRef_ extends ApplicationRef {
             componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
         }
         this._rootComponentTypes.push(componentFactory.componentType);
-        const /** @type {?} */ compRef = componentFactory.create(this._injector, [], componentFactory.selector);
+        // Create a factory associated with the current module if it's not bound to some other
+        const /** @type {?} */ ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
+            null :
+            this._injector.get(NgModuleRef);
+        const /** @type {?} */ compRef = componentFactory.create(Injector.NULL, [], componentFactory.selector, ngModule);
         compRef.onDestroy(() => { this._unloadComponent(compRef); });
         const /** @type {?} */ testability = compRef.injector.get(Testability, null);
         if (testability) {
@@ -4830,154 +5012,6 @@ class ElementRef {
      * @param {?} nativeElement
      */
     constructor(nativeElement) { this.nativeElement = nativeElement; }
-}
-
-/**
- * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
- *
- * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
- * NgModule Instance.
- *
- * \@stable
- * @abstract
- */
-class NgModuleRef {
-    /**
-     * The injector that contains all of the providers of the NgModule.
-     * @abstract
-     * @return {?}
-     */
-    injector() { }
-    /**
-     * The ComponentFactoryResolver to get hold of the ComponentFactories
-     * declared in the `entryComponents` property of the module.
-     * @abstract
-     * @return {?}
-     */
-    componentFactoryResolver() { }
-    /**
-     * The NgModule instance.
-     * @abstract
-     * @return {?}
-     */
-    instance() { }
-    /**
-     * Destroys the module instance and all of the data structures associated with it.
-     * @abstract
-     * @return {?}
-     */
-    destroy() { }
-    /**
-     * Allows to register a callback that will be called when the module is destroyed.
-     * @abstract
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) { }
-}
-/**
- * \@experimental
- */
-class NgModuleFactory {
-    /**
-     * @param {?} _injectorClass
-     * @param {?} _moduleType
-     */
-    constructor(_injectorClass, _moduleType) {
-        this._injectorClass = _injectorClass;
-        this._moduleType = _moduleType;
-    }
-    /**
-     * @return {?}
-     */
-    get moduleType() { return this._moduleType; }
-    /**
-     * @param {?} parentInjector
-     * @return {?}
-     */
-    create(parentInjector) {
-        if (!parentInjector) {
-            parentInjector = Injector.NULL;
-        }
-        const /** @type {?} */ instance = new this._injectorClass(parentInjector);
-        instance.create();
-        return instance;
-    }
-}
-const /** @type {?} */ _UNDEFINED = new Object();
-/**
- * @abstract
- */
-class NgModuleInjector extends CodegenComponentFactoryResolver {
-    /**
-     * @param {?} parent
-     * @param {?} factories
-     * @param {?} bootstrapFactories
-     */
-    constructor(parent, factories, bootstrapFactories) {
-        super(factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL));
-        this.parent = parent;
-        this.bootstrapFactories = bootstrapFactories;
-        this._destroyListeners = [];
-        this._destroyed = false;
-    }
-    /**
-     * @return {?}
-     */
-    create() { this.instance = this.createInternal(); }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    createInternal() { }
-    /**
-     * @param {?} token
-     * @param {?=} notFoundValue
-     * @return {?}
-     */
-    get(token, notFoundValue = THROW_IF_NOT_FOUND) {
-        if (token === Injector || token === ComponentFactoryResolver) {
-            return this;
-        }
-        const /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
-        return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
-    }
-    /**
-     * @abstract
-     * @param {?} token
-     * @param {?} notFoundValue
-     * @return {?}
-     */
-    getInternal(token, notFoundValue) { }
-    /**
-     * @return {?}
-     */
-    get injector() { return this; }
-    /**
-     * @return {?}
-     */
-    get componentFactoryResolver() { return this; }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        if (this._destroyed) {
-            throw new Error(`The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
-        }
-        this._destroyed = true;
-        this.destroyInternal();
-        this._destroyListeners.forEach((listener) => listener());
-    }
-    /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) { this._destroyListeners.push(callback); }
-    /**
-     * @abstract
-     * @return {?}
-     */
-    destroyInternal() { }
 }
 
 /**
@@ -8816,12 +8850,16 @@ class ComponentFactory_ extends ComponentFactory {
      * @param {?} injector
      * @param {?=} projectableNodes
      * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
      * @return {?}
      */
-    create(injector, projectableNodes = null, rootSelectorOrNode = null) {
+    create(injector, projectableNodes, rootSelectorOrNode, ngModule) {
+        if (!ngModule) {
+            throw new Error('ngModule should be provided');
+        }
         const /** @type {?} */ viewDef = resolveViewDefinition(this.viewDefFactory);
         const /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.componentProvider.index;
-        const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
+        const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
         const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
         view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
         return new ComponentRef_(view, new ViewRef_(view), component);
@@ -9548,7 +9586,6 @@ function createPipeInstance(view, def) {
 function createDirectiveInstance(view, def) {
     // components can see other private services, other directives can't.
     const /** @type {?} */ allowPrivateServices = (def.flags & 16384 /* Component */) > 0;
-    const /** @type {?} */ providerDef = def.provider;
     // directives are always eager and classes!
     const /** @type {?} */ instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
     if (def.outputs.length) {
@@ -9773,6 +9810,24 @@ function callFactory(view, elDef, allowPrivateServices, factory, deps) {
     }
     return injectable;
 }
+// This default value is when checking the hierarchy for a token.
+//
+// It means both:
+// - the token is not provided by the current injector,
+// - only the element injectors should be checked (ie do not check module injectors
+//
+//          mod1
+//         /
+//       el1   mod2
+//         \  /
+//         el2
+//
+// When requesting el2.injector.get(token), we should check in the following order and return the
+// first found value:
+// - el2.injector.get(token, default)
+// - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+// - mod2.injector.get(token, default)
+const /** @type {?} */ NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 /**
  * @param {?} view
  * @param {?} elDef
@@ -9837,7 +9892,17 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
         elDef = viewParentEl(view);
         view = view.parent;
     }
-    return startView.root.injector.get(depDef.token, notFoundValue);
+    const /** @type {?} */ value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+    if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+        notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+        // Return the value from the root element injector when
+        // - it provides it
+        //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+        // - the module injector should not be checked
+        //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+        return value;
+    }
+    return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
 }
 /**
  * @param {?} view
@@ -11318,43 +11383,46 @@ function createDebugServices() {
     };
 }
 /**
- * @param {?} injector
+ * @param {?} elInjector
  * @param {?} projectableNodes
  * @param {?} rootSelectorOrNode
  * @param {?} def
+ * @param {?} ngModule
  * @param {?=} context
  * @return {?}
  */
-function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    const /** @type {?} */ rendererFactory = injector.get(RendererFactory2);
-    return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
+function createProdRootView(elInjector, projectableNodes, rootSelectorOrNode, def, ngModule, context) {
+    const /** @type {?} */ rendererFactory = ngModule.injector.get(RendererFactory2);
+    return createRootView(createRootData(elInjector, ngModule, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
 }
 /**
- * @param {?} injector
+ * @param {?} elInjector
  * @param {?} projectableNodes
  * @param {?} rootSelectorOrNode
  * @param {?} def
+ * @param {?} ngModule
  * @param {?=} context
  * @return {?}
  */
-function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-    const /** @type {?} */ rendererFactory = injector.get(RendererFactory2);
-    const /** @type {?} */ root = createRootData(injector, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
+function debugCreateRootView(elInjector, projectableNodes, rootSelectorOrNode, def, ngModule, context) {
+    const /** @type {?} */ rendererFactory = ngModule.injector.get(RendererFactory2);
+    const /** @type {?} */ root = createRootData(elInjector, ngModule, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
     return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
 }
 /**
- * @param {?} injector
+ * @param {?} elInjector
+ * @param {?} ngModule
  * @param {?} rendererFactory
  * @param {?} projectableNodes
  * @param {?} rootSelectorOrNode
  * @return {?}
  */
-function createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode) {
-    const /** @type {?} */ sanitizer = injector.get(Sanitizer);
+function createRootData(elInjector, ngModule, rendererFactory, projectableNodes, rootSelectorOrNode) {
+    const /** @type {?} */ sanitizer = ngModule.injector.get(Sanitizer);
     const /** @type {?} */ renderer = rendererFactory.createRenderer(null, null);
     return {
-        injector,
-        projectableNodes,
+        ngModule,
+        injector: elInjector, projectableNodes,
         selectorOrNode: rootSelectorOrNode, sanitizer, rendererFactory, renderer
     };
 }

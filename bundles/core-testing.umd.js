@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-f093501
+ * @license Angular v4.0.0-rc.3-13686bb
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -780,7 +780,7 @@
             var rootElId = "root" + _nextRootElementId++;
             testComponentRenderer.insertRootElement(rootElId);
             var initComponent = function () {
-                var componentRef = componentFactory.create(_this, [], "#" + rootElId);
+                var componentRef = componentFactory.create(_angular_core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
                 return new ComponentFixture(componentRef, ngZone, autoDetect);
             };
             var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
