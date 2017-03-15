@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-36ce0af
+ * @license Angular v4.0.0-rc.3-a3e32fb
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-36ce0af');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-a3e32fb');
     /**
      * Inject decorator and metadata.
      *
@@ -2958,6 +2958,8 @@
          * the template of the given component.
          * This is used by the `upgrade` library to compile the appropriate transclude content
          * in the AngularJS wrapper component.
+         *
+         * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
          * @param {?} component
          * @return {?}
          */
@@ -3093,6 +3095,24 @@
          */
         ComponentFactory.prototype.componentType = function () { };
         /**
+         * selector for all <ng-content> elements in the component.
+         * @abstract
+         * @return {?}
+         */
+        ComponentFactory.prototype.ngContentSelectors = function () { };
+        /**
+         * the inputs of the component.
+         * @abstract
+         * @return {?}
+         */
+        ComponentFactory.prototype.inputs = function () { };
+        /**
+         * the outputs of the component.
+         * @abstract
+         * @return {?}
+         */
+        ComponentFactory.prototype.outputs = function () { };
+        /**
          * Creates a new component.
          * @abstract
          * @param {?} injector
@@ -3192,6 +3212,30 @@
              * @return {?}
              */
             get: function () { return this.factory.componentType; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactoryBoundToModule.prototype, "ngContentSelectors", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.factory.ngContentSelectors; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactoryBoundToModule.prototype, "inputs", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.factory.inputs; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactoryBoundToModule.prototype, "outputs", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.factory.outputs; },
             enumerable: true,
             configurable: true
         });
@@ -9244,10 +9288,23 @@
      * @param {?} selector
      * @param {?} componentType
      * @param {?} viewDefFactory
+     * @param {?} inputs
+     * @param {?} outputs
+     * @param {?} ngContentSelectors
      * @return {?}
      */
-    function createComponentFactory(selector, componentType, viewDefFactory) {
-        return new ComponentFactory_(selector, componentType, viewDefFactory);
+    function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+        var /** @type {?} */ inputsArr = [];
+        for (var /** @type {?} */ propName in inputs) {
+            var /** @type {?} */ templateName = inputs[propName];
+            inputsArr.push({ propName: propName, templateName: templateName });
+        }
+        var /** @type {?} */ outputsArr = [];
+        for (var /** @type {?} */ propName in outputs) {
+            var /** @type {?} */ templateName = outputs[propName];
+            outputsArr.push({ propName: propName, templateName: templateName });
+        }
+        return new ComponentFactory_(selector, componentType, viewDefFactory, inputsArr, outputsArr, ngContentSelectors);
     }
     /**
      * @param {?} componentFactory
@@ -9262,11 +9319,17 @@
          * @param {?} selector
          * @param {?} componentType
          * @param {?} viewDefFactory
+         * @param {?} inputs
+         * @param {?} outputs
+         * @param {?} ngContentSelectors
          */
-        function ComponentFactory_(selector, componentType, viewDefFactory) {
+        function ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
             var _this = _super.call(this) || this;
             _this.selector = selector;
             _this.componentType = componentType;
+            _this.inputs = inputs;
+            _this.outputs = outputs;
+            _this.ngContentSelectors = ngContentSelectors;
             _this.viewDefFactory = viewDefFactory;
             return _this;
         }

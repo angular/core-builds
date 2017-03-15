@@ -14,7 +14,11 @@ import { EmbeddedViewRef, InternalViewRef } from '../linker/view_ref';
 import { Renderer as RendererV1 } from '../render/api';
 import { Type } from '../type';
 import { ElementData, NodeDef, TemplateData, ViewContainerData, ViewData, ViewDefinitionFactory } from './types';
-export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory): ComponentFactory<any>;
+export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
+    [propName: string]: string;
+}, outputs: {
+    [propName: string]: string;
+}, ngContentSelectors: string[]): ComponentFactory<any>;
 export declare function getComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
 export declare function createViewContainerData(view: ViewData, elDef: NodeDef, elData: ElementData): ViewContainerData;
 export declare function createChangeDetectorRef(view: ViewData): ChangeDetectorRef;

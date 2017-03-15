@@ -33,5 +33,14 @@ export declare class ComponentFactoryBoundToModule<C> extends ComponentFactory<C
     constructor(factory: ComponentFactory<C>, ngModule: NgModuleRef<any>);
     readonly selector: string;
     readonly componentType: Type<any>;
+    readonly ngContentSelectors: string[];
+    readonly inputs: {
+        propName: string;
+        templateName: string;
+    }[];
+    readonly outputs: {
+        propName: string;
+        templateName: string;
+    }[];
     create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
 }
