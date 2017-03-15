@@ -8,7 +8,7 @@
 import { Injector } from '../di/injector';
 import { Type } from '../type';
 import { ComponentFactory } from './component_factory';
-import { CodegenComponentFactoryResolver, ComponentFactoryResolver } from './component_factory_resolver';
+import { ComponentFactoryResolver } from './component_factory_resolver';
 /**
  * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
  *
@@ -52,12 +52,13 @@ export declare class NgModuleFactory<T> {
     readonly moduleType: Type<T>;
     create(parentInjector: Injector): NgModuleRef<T>;
 }
-export declare abstract class NgModuleInjector<T> extends CodegenComponentFactoryResolver implements Injector, NgModuleRef<T> {
+export declare abstract class NgModuleInjector<T> implements Injector, NgModuleRef<T> {
     parent: Injector;
     bootstrapFactories: ComponentFactory<any>[];
+    instance: T;
     private _destroyListeners;
     private _destroyed;
-    instance: T;
+    private _cmpFactoryResolver;
     constructor(parent: Injector, factories: ComponentFactory<any>[], bootstrapFactories: ComponentFactory<any>[]);
     create(): void;
     abstract createInternal(): T;

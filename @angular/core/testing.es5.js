@@ -4,11 +4,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-423bfb0
+ * @license Angular v4.0.0-rc.3-ec548ad
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { getDebugNode, InjectionToken, NgZone, ɵstringify, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
+import { getDebugNode, InjectionToken, Injector, NgZone, ɵstringify, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -631,7 +631,14 @@ var TestBed = (function () {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
-        this._activeFixtures.forEach(function (fixture) { return fixture.destroy(); });
+        this._activeFixtures.forEach(function (fixture) {
+            try {
+                fixture.destroy();
+            }
+            catch (e) {
+                console.error('Error during cleanup of component', fixture.componentInstance);
+            }
+        });
         this._activeFixtures = [];
     };
     TestBed.prototype.configureCompiler = function (config) {
@@ -768,7 +775,7 @@ var TestBed = (function () {
         var rootElId = "root" + _nextRootElementId++;
         testComponentRenderer.insertRootElement(rootElId);
         var initComponent = function () {
-            var componentRef = componentFactory.create(_this, [], "#" + rootElId);
+            var componentRef = componentFactory.create(Injector.NULL, [], "#" + rootElId, _this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);

@@ -1,9 +1,9 @@
 /**
- * @license Angular v4.0.0-rc.3-423bfb0
+ * @license Angular v4.0.0-rc.3-ec548ad
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { getDebugNode, InjectionToken, NgZone, ɵstringify, Injector, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
+import { getDebugNode, InjectionToken, Injector, NgZone, ɵstringify, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
 
 /**
  * @license
@@ -598,7 +598,14 @@ class TestBed {
         this._imports = [];
         this._schemas = [];
         this._instantiated = false;
-        this._activeFixtures.forEach((fixture) => fixture.destroy());
+        this._activeFixtures.forEach((fixture) => {
+            try {
+                fixture.destroy();
+            }
+            catch (e) {
+                console.error('Error during cleanup of component', fixture.componentInstance);
+            }
+        });
         this._activeFixtures = [];
     }
     configureCompiler(config) {
@@ -663,7 +670,7 @@ class TestBed {
         class DynamicTestModule {
         }
         DynamicTestModule.decorators = [
-            { type: NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+            { type: NgModule, args: [{ providers, declarations, imports, schemas },] },
         ];
         /** @nocollapse */
         DynamicTestModule.ctorParameters = () => [];
@@ -726,7 +733,7 @@ class TestBed {
         const rootElId = `root${_nextRootElementId++}`;
         testComponentRenderer.insertRootElement(rootElId);
         const initComponent = () => {
-            const componentRef = componentFactory.create(this, [], `#${rootElId}`);
+            const componentRef = componentFactory.create(Injector.NULL, [], `#${rootElId}`, this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         const fixture = !ngZone ? initComponent() : ngZone.run(initComponent);

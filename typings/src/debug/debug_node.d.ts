@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di';
-import { RenderDebugInfo } from '../render/api';
+import { DebugContext } from '../view/index';
 export declare class EventListener {
     name: string;
     callback: Function;
@@ -16,11 +16,11 @@ export declare class EventListener {
  * @experimental All debugging apis are currently experimental.
  */
 export declare class DebugNode {
-    private _debugInfo;
+    private _debugContext;
     nativeNode: any;
     listeners: EventListener[];
     parent: DebugElement;
-    constructor(nativeNode: any, parent: DebugNode, _debugInfo: RenderDebugInfo);
+    constructor(nativeNode: any, parent: DebugNode, _debugContext: DebugContext);
     readonly injector: Injector;
     readonly componentInstance: any;
     readonly context: any;
@@ -28,6 +28,9 @@ export declare class DebugNode {
         [key: string]: any;
     };
     readonly providerTokens: any[];
+    /**
+     * @deprecated since v4
+     */
     readonly source: string;
 }
 /**
@@ -49,7 +52,7 @@ export declare class DebugElement extends DebugNode {
     };
     childNodes: DebugNode[];
     nativeElement: any;
-    constructor(nativeNode: any, parent: any, _debugInfo: RenderDebugInfo);
+    constructor(nativeNode: any, parent: any, _debugContext: DebugContext);
     addChild(child: DebugNode): void;
     removeChild(child: DebugNode): void;
     insertChildrenAfter(child: DebugNode, newChildren: DebugNode[]): void;

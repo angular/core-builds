@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-423bfb0
+ * @license Angular v4.0.0-rc.3-ec548ad
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -636,7 +636,14 @@
             this._imports = [];
             this._schemas = [];
             this._instantiated = false;
-            this._activeFixtures.forEach(function (fixture) { return fixture.destroy(); });
+            this._activeFixtures.forEach(function (fixture) {
+                try {
+                    fixture.destroy();
+                }
+                catch (e) {
+                    console.error('Error during cleanup of component', fixture.componentInstance);
+                }
+            });
             this._activeFixtures = [];
         };
         TestBed.prototype.configureCompiler = function (config) {
@@ -773,7 +780,7 @@
             var rootElId = "root" + _nextRootElementId++;
             testComponentRenderer.insertRootElement(rootElId);
             var initComponent = function () {
-                var componentRef = componentFactory.create(_this, [], "#" + rootElId);
+                var componentRef = componentFactory.create(_angular_core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
                 return new ComponentFixture(componentRef, ngZone, autoDetect);
             };
             var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);

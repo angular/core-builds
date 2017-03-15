@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-423bfb0
+ * @license Angular v4.0.0-rc.3-ec548ad
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-423bfb0');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-ec548ad');
     /**
      * Inject decorator and metadata.
      *
@@ -981,6 +981,7 @@
     var /** @type {?} */ ERROR_COMPONENT_TYPE = 'ngComponentType';
     var /** @type {?} */ ERROR_DEBUG_CONTEXT = 'ngDebugContext';
     var /** @type {?} */ ERROR_ORIGINAL_ERROR = 'ngOriginalError';
+    var /** @type {?} */ ERROR_LOGGER = 'ngErrorLogger';
     /**
      * @param {?} error
      * @return {?}
@@ -994,6 +995,25 @@
      */
     function getOriginalError(error) {
         return ((error))[ERROR_ORIGINAL_ERROR];
+    }
+    /**
+     * @param {?} error
+     * @return {?}
+     */
+    function getErrorLogger(error) {
+        return ((error))[ERROR_LOGGER] || defaultErrorLogger;
+    }
+    /**
+     * @param {?} console
+     * @param {...?} values
+     * @return {?}
+     */
+    function defaultErrorLogger(console) {
+        var values = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            values[_i - 1] = arguments[_i];
+        }
+        console.error.apply(console, values);
     }
     /**
      * \@whatItDoes Provides a hook for centralized exception handling.
@@ -1038,33 +1058,20 @@
          * @return {?}
          */
         ErrorHandler.prototype.handleError = function (error) {
-            this._console.error("EXCEPTION: " + this._extractMessage(error));
-            if (error instanceof Error) {
-                var /** @type {?} */ originalError = this._findOriginalError(error);
-                var /** @type {?} */ originalStack = this._findOriginalStack(error);
-                var /** @type {?} */ context = this._findContext(error);
-                if (originalError) {
-                    this._console.error("ORIGINAL EXCEPTION: " + this._extractMessage(originalError));
-                }
-                if (originalStack) {
-                    this._console.error('ORIGINAL STACKTRACE:');
-                    this._console.error(originalStack);
-                }
-                if (context) {
-                    this._console.error('ERROR CONTEXT:');
-                    this._console.error(context);
-                }
+            var /** @type {?} */ originalError = this._findOriginalError(error);
+            var /** @type {?} */ context = this._findContext(error);
+            // Note: Browser consoles show the place from where console.error was called.
+            // We can use this to give users additional information about the error.
+            var /** @type {?} */ errorLogger = getErrorLogger(error);
+            errorLogger(this._console, "ERROR", error);
+            if (originalError) {
+                errorLogger(this._console, "ORIGINAL ERROR", originalError);
+            }
+            if (context) {
+                errorLogger(this._console, 'ERROR CONTEXT', context);
             }
             if (this.rethrowError)
                 throw error;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._extractMessage = function (error) {
-            return error instanceof Error ? error.message : error.toString();
         };
         /**
          * \@internal
@@ -1089,22 +1096,6 @@
                 e = getOriginalError(e);
             }
             return e;
-        };
-        /**
-         * \@internal
-         * @param {?} error
-         * @return {?}
-         */
-        ErrorHandler.prototype._findOriginalStack = function (error) {
-            var /** @type {?} */ e = error;
-            var /** @type {?} */ stack = e.stack;
-            while (e instanceof Error && getOriginalError(e)) {
-                e = getOriginalError(e);
-                if (e instanceof Error && e.stack) {
-                    stack = e.stack;
-                }
-            }
-            return stack;
         };
         return ErrorHandler;
     }());
@@ -3099,9 +3090,10 @@
          * @param {?} injector
          * @param {?=} projectableNodes
          * @param {?=} rootSelectorOrNode
+         * @param {?=} ngModule
          * @return {?}
          */
-        ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode) { };
+        ComponentFactory.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) { };
         return ComponentFactory;
     }());
     /**
@@ -3146,9 +3138,11 @@
         /**
          * @param {?} factories
          * @param {?} _parent
+         * @param {?} _ngModule
          */
-        function CodegenComponentFactoryResolver(factories, _parent) {
+        function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
             this._parent = _parent;
+            this._ngModule = _ngModule;
             this._factories = new Map();
             for (var i = 0; i < factories.length; i++) {
                 var factory = factories[i];
@@ -3160,13 +3154,217 @@
          * @return {?}
          */
         CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
-            var /** @type {?} */ result = this._factories.get(component);
-            if (!result) {
-                result = this._parent.resolveComponentFactory(component);
-            }
-            return result;
+            var /** @type {?} */ factory = this._factories.get(component) || this._parent.resolveComponentFactory(component);
+            return factory ? new ComponentFactoryBoundToModule(factory, this._ngModule) : null;
         };
         return CodegenComponentFactoryResolver;
+    }());
+    var ComponentFactoryBoundToModule = (function (_super) {
+        __extends(ComponentFactoryBoundToModule, _super);
+        /**
+         * @param {?} factory
+         * @param {?} ngModule
+         */
+        function ComponentFactoryBoundToModule(factory, ngModule) {
+            var _this = _super.call(this) || this;
+            _this.factory = factory;
+            _this.ngModule = ngModule;
+            return _this;
+        }
+        Object.defineProperty(ComponentFactoryBoundToModule.prototype, "selector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.factory.selector; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ComponentFactoryBoundToModule.prototype, "componentType", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this.factory.componentType; },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @param {?} injector
+         * @param {?=} projectableNodes
+         * @param {?=} rootSelectorOrNode
+         * @param {?=} ngModule
+         * @return {?}
+         */
+        ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
+        };
+        return ComponentFactoryBoundToModule;
+    }(ComponentFactory));
+    /**
+     * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
+     *
+     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
+     * NgModule Instance.
+     *
+     * \@stable
+     * @abstract
+     */
+    var NgModuleRef = (function () {
+        function NgModuleRef() {
+        }
+        /**
+         * The injector that contains all of the providers of the NgModule.
+         * @abstract
+         * @return {?}
+         */
+        NgModuleRef.prototype.injector = function () { };
+        /**
+         * The ComponentFactoryResolver to get hold of the ComponentFactories
+         * declared in the `entryComponents` property of the module.
+         * @abstract
+         * @return {?}
+         */
+        NgModuleRef.prototype.componentFactoryResolver = function () { };
+        /**
+         * The NgModule instance.
+         * @abstract
+         * @return {?}
+         */
+        NgModuleRef.prototype.instance = function () { };
+        /**
+         * Destroys the module instance and all of the data structures associated with it.
+         * @abstract
+         * @return {?}
+         */
+        NgModuleRef.prototype.destroy = function () { };
+        /**
+         * Allows to register a callback that will be called when the module is destroyed.
+         * @abstract
+         * @param {?} callback
+         * @return {?}
+         */
+        NgModuleRef.prototype.onDestroy = function (callback) { };
+        return NgModuleRef;
+    }());
+    /**
+     * \@experimental
+     */
+    var NgModuleFactory = (function () {
+        /**
+         * @param {?} _injectorClass
+         * @param {?} _moduleType
+         */
+        function NgModuleFactory(_injectorClass, _moduleType) {
+            this._injectorClass = _injectorClass;
+            this._moduleType = _moduleType;
+        }
+        Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._moduleType; },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @param {?} parentInjector
+         * @return {?}
+         */
+        NgModuleFactory.prototype.create = function (parentInjector) {
+            var /** @type {?} */ instance = new this._injectorClass(parentInjector || Injector.NULL);
+            instance.create();
+            return instance;
+        };
+        return NgModuleFactory;
+    }());
+    var /** @type {?} */ _UNDEFINED = new Object();
+    /**
+     * @abstract
+     */
+    var NgModuleInjector = (function () {
+        /**
+         * @param {?} parent
+         * @param {?} factories
+         * @param {?} bootstrapFactories
+         */
+        function NgModuleInjector(parent, factories, bootstrapFactories) {
+            var _this = this;
+            this.parent = parent;
+            this._destroyListeners = [];
+            this._destroyed = false;
+            this.bootstrapFactories =
+                bootstrapFactories.map(function (f) { return new ComponentFactoryBoundToModule(f, _this); });
+            this._cmpFactoryResolver = new CodegenComponentFactoryResolver(factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL), this);
+        }
+        /**
+         * @return {?}
+         */
+        NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        NgModuleInjector.prototype.createInternal = function () { };
+        /**
+         * @param {?} token
+         * @param {?=} notFoundValue
+         * @return {?}
+         */
+        NgModuleInjector.prototype.get = function (token, notFoundValue) {
+            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
+            if (token === Injector || token === NgModuleRef) {
+                return this;
+            }
+            if (token === ComponentFactoryResolver) {
+                return this._cmpFactoryResolver;
+            }
+            var /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
+            return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
+        };
+        /**
+         * @abstract
+         * @param {?} token
+         * @param {?} notFoundValue
+         * @return {?}
+         */
+        NgModuleInjector.prototype.getInternal = function (token, notFoundValue) { };
+        Object.defineProperty(NgModuleInjector.prototype, "injector", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(NgModuleInjector.prototype, "componentFactoryResolver", {
+            /**
+             * @return {?}
+             */
+            get: function () { return this._cmpFactoryResolver; },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * @return {?}
+         */
+        NgModuleInjector.prototype.destroy = function () {
+            if (this._destroyed) {
+                throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
+            }
+            this._destroyed = true;
+            this.destroyInternal();
+            this._destroyListeners.forEach(function (listener) { return listener(); });
+        };
+        /**
+         * @param {?} callback
+         * @return {?}
+         */
+        NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        NgModuleInjector.prototype.destroyInternal = function () { };
+        return NgModuleInjector;
     }());
     var /** @type {?} */ trace;
     var /** @type {?} */ events;
@@ -4299,7 +4497,7 @@
         PlatformRef_.prototype._moduleDoBootstrap = function (moduleRef) {
             var /** @type {?} */ appRef = moduleRef.injector.get(ApplicationRef);
             if (moduleRef.bootstrapFactories.length > 0) {
-                moduleRef.bootstrapFactories.forEach(function (compFactory) { return appRef.bootstrap(compFactory); });
+                moduleRef.bootstrapFactories.forEach(function (f) { return appRef.bootstrap(f); });
             }
             else if (moduleRef.instance.ngDoBootstrap) {
                 moduleRef.instance.ngDoBootstrap(appRef);
@@ -4504,7 +4702,11 @@
                 componentFactory = this._componentFactoryResolver.resolveComponentFactory(componentOrFactory);
             }
             this._rootComponentTypes.push(componentFactory.componentType);
-            var /** @type {?} */ compRef = componentFactory.create(this._injector, [], componentFactory.selector);
+            // Create a factory associated with the current module if it's not bound to some other
+            var /** @type {?} */ ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
+                null :
+                this._injector.get(NgModuleRef);
+            var /** @type {?} */ compRef = componentFactory.create(Injector.NULL, [], componentFactory.selector, ngModule);
             compRef.onDestroy(function () { _this._unloadComponent(compRef); });
             var /** @type {?} */ testability = compRef.injector.get(Testability, null);
             if (testability) {
@@ -5054,173 +5256,6 @@
         }
         return ElementRef;
     }());
-    /**
-     * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
-     *
-     * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
-     * NgModule Instance.
-     *
-     * \@stable
-     * @abstract
-     */
-    var NgModuleRef = (function () {
-        function NgModuleRef() {
-        }
-        /**
-         * The injector that contains all of the providers of the NgModule.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.injector = function () { };
-        /**
-         * The ComponentFactoryResolver to get hold of the ComponentFactories
-         * declared in the `entryComponents` property of the module.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.componentFactoryResolver = function () { };
-        /**
-         * The NgModule instance.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.instance = function () { };
-        /**
-         * Destroys the module instance and all of the data structures associated with it.
-         * @abstract
-         * @return {?}
-         */
-        NgModuleRef.prototype.destroy = function () { };
-        /**
-         * Allows to register a callback that will be called when the module is destroyed.
-         * @abstract
-         * @param {?} callback
-         * @return {?}
-         */
-        NgModuleRef.prototype.onDestroy = function (callback) { };
-        return NgModuleRef;
-    }());
-    /**
-     * \@experimental
-     */
-    var NgModuleFactory = (function () {
-        /**
-         * @param {?} _injectorClass
-         * @param {?} _moduleType
-         */
-        function NgModuleFactory(_injectorClass, _moduleType) {
-            this._injectorClass = _injectorClass;
-            this._moduleType = _moduleType;
-        }
-        Object.defineProperty(NgModuleFactory.prototype, "moduleType", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this._moduleType; },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * @param {?} parentInjector
-         * @return {?}
-         */
-        NgModuleFactory.prototype.create = function (parentInjector) {
-            if (!parentInjector) {
-                parentInjector = Injector.NULL;
-            }
-            var /** @type {?} */ instance = new this._injectorClass(parentInjector);
-            instance.create();
-            return instance;
-        };
-        return NgModuleFactory;
-    }());
-    var /** @type {?} */ _UNDEFINED = new Object();
-    /**
-     * @abstract
-     */
-    var NgModuleInjector = (function (_super) {
-        __extends(NgModuleInjector, _super);
-        /**
-         * @param {?} parent
-         * @param {?} factories
-         * @param {?} bootstrapFactories
-         */
-        function NgModuleInjector(parent, factories, bootstrapFactories) {
-            var _this = _super.call(this, factories, parent.get(ComponentFactoryResolver, ComponentFactoryResolver.NULL)) || this;
-            _this.parent = parent;
-            _this.bootstrapFactories = bootstrapFactories;
-            _this._destroyListeners = [];
-            _this._destroyed = false;
-            return _this;
-        }
-        /**
-         * @return {?}
-         */
-        NgModuleInjector.prototype.create = function () { this.instance = this.createInternal(); };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        NgModuleInjector.prototype.createInternal = function () { };
-        /**
-         * @param {?} token
-         * @param {?=} notFoundValue
-         * @return {?}
-         */
-        NgModuleInjector.prototype.get = function (token, notFoundValue) {
-            if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
-            if (token === Injector || token === ComponentFactoryResolver) {
-                return this;
-            }
-            var /** @type {?} */ result = this.getInternal(token, _UNDEFINED);
-            return result === _UNDEFINED ? this.parent.get(token, notFoundValue) : result;
-        };
-        /**
-         * @abstract
-         * @param {?} token
-         * @param {?} notFoundValue
-         * @return {?}
-         */
-        NgModuleInjector.prototype.getInternal = function (token, notFoundValue) { };
-        Object.defineProperty(NgModuleInjector.prototype, "injector", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(NgModuleInjector.prototype, "componentFactoryResolver", {
-            /**
-             * @return {?}
-             */
-            get: function () { return this; },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * @return {?}
-         */
-        NgModuleInjector.prototype.destroy = function () {
-            if (this._destroyed) {
-                throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
-            }
-            this._destroyed = true;
-            this.destroyInternal();
-            this._destroyListeners.forEach(function (listener) { return listener(); });
-        };
-        /**
-         * @param {?} callback
-         * @return {?}
-         */
-        NgModuleInjector.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
-        /**
-         * @abstract
-         * @return {?}
-         */
-        NgModuleInjector.prototype.destroyInternal = function () { };
-        return NgModuleInjector;
-    }(CodegenComponentFactoryResolver));
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -6031,10 +6066,10 @@
         /**
          * @param {?} nativeNode
          * @param {?} parent
-         * @param {?} _debugInfo
+         * @param {?} _debugContext
          */
-        function DebugNode(nativeNode, parent, _debugInfo) {
-            this._debugInfo = _debugInfo;
+        function DebugNode(nativeNode, parent, _debugContext) {
+            this._debugContext = _debugContext;
             this.nativeNode = nativeNode;
             if (parent && parent instanceof DebugElement) {
                 parent.addChild(this);
@@ -6048,7 +6083,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.injector : null; },
+            get: function () { return this._debugContext ? this._debugContext.injector : null; },
             enumerable: true,
             configurable: true
         });
@@ -6056,7 +6091,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.component : null; },
+            get: function () { return this._debugContext ? this._debugContext.component : null; },
             enumerable: true,
             configurable: true
         });
@@ -6064,7 +6099,7 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.context : null; },
+            get: function () { return this._debugContext ? this._debugContext.context : null; },
             enumerable: true,
             configurable: true
         });
@@ -6073,7 +6108,7 @@
              * @return {?}
              */
             get: function () {
-                return this._debugInfo ? this._debugInfo.references : null;
+                return this._debugContext ? this._debugContext.references : null;
             },
             enumerable: true,
             configurable: true
@@ -6082,15 +6117,18 @@
             /**
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.providerTokens : null; },
+            get: function () {
+                return this._debugContext ? this._debugContext.providerTokens : null;
+            },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(DebugNode.prototype, "source", {
             /**
+             * @deprecated since v4
              * @return {?}
              */
-            get: function () { return this._debugInfo ? this._debugInfo.source : null; },
+            get: function () { return 'Deprecated since v4'; },
             enumerable: true,
             configurable: true
         });
@@ -6104,10 +6142,10 @@
         /**
          * @param {?} nativeNode
          * @param {?} parent
-         * @param {?} _debugInfo
+         * @param {?} _debugContext
          */
-        function DebugElement(nativeNode, parent, _debugInfo) {
-            var _this = _super.call(this, nativeNode, parent, _debugInfo) || this;
+        function DebugElement(nativeNode, parent, _debugContext) {
+            var _this = _super.call(this, nativeNode, parent, _debugContext) || this;
             _this.properties = {};
             _this.attributes = {};
             _this.classes = {};
@@ -7976,6 +8014,71 @@
         return (view.nodes[index]);
     }
     /**
+     * @abstract
+     */
+    var DebugContext = (function () {
+        function DebugContext() {
+        }
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.view = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.nodeIndex = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.injector = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.component = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.providerTokens = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.references = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.context = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.componentRenderElement = function () { };
+        /**
+         * @abstract
+         * @return {?}
+         */
+        DebugContext.prototype.renderNode = function () { };
+        /**
+         * @abstract
+         * @param {?} console
+         * @param {...?} values
+         * @return {?}
+         */
+        DebugContext.prototype.logError = function (console) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+        };
+        return DebugContext;
+    }());
+    /**
      * This object is used to prevent cycles in the source files and to have a place where
      * debug mode can hook it. It is lazily filled when `isDevMode` is known.
      */
@@ -8010,13 +8113,17 @@
         return viewDebugError(msg, context);
     }
     /**
-     * @param {?} originalError
+     * @param {?} err
      * @param {?} context
      * @return {?}
      */
-    function viewWrappedDebugError(originalError, context) {
-        var /** @type {?} */ err = viewDebugError(originalError.message, context);
-        ((err))[ERROR_ORIGINAL_ERROR] = originalError;
+    function viewWrappedDebugError(err, context) {
+        if (!(err instanceof Error)) {
+            // errors that are not Error instances don't have a stack,
+            // so it is ok to wrap them into a new Error object...
+            err = new Error(err.toString());
+        }
+        _addDebugContext(err, context);
         return err;
     }
     /**
@@ -8026,9 +8133,17 @@
      */
     function viewDebugError(msg, context) {
         var /** @type {?} */ err = new Error(msg);
-        ((err))[ERROR_DEBUG_CONTEXT] = context;
-        err.stack = context.source;
+        _addDebugContext(err, context);
         return err;
+    }
+    /**
+     * @param {?} err
+     * @param {?} context
+     * @return {?}
+     */
+    function _addDebugContext(err, context) {
+        ((err))[ERROR_DEBUG_CONTEXT] = context;
+        ((err))[ERROR_LOGGER] = context.logError.bind(context);
     }
     /**
      * @param {?} err
@@ -8044,6 +8159,7 @@
     function viewDestroyedError(action) {
         return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
     }
+    var /** @type {?} */ NOOP = function () { };
     var /** @type {?} */ _tokenKeyCache = new Map();
     /**
      * @param {?} token
@@ -8274,32 +8390,11 @@
     function resolveViewDefinition(factory) {
         var /** @type {?} */ value = VIEW_DEFINITION_CACHE.get(factory);
         if (!value) {
-            value = factory();
+            value = factory(function () { return NOOP; });
+            value.factory = factory;
             VIEW_DEFINITION_CACHE.set(factory, value);
         }
         return value;
-    }
-    /**
-     * @param {?} start
-     * @param {?} end
-     * @return {?}
-     */
-    function sliceErrorStack(start, end) {
-        var /** @type {?} */ err;
-        try {
-            throw new Error();
-        }
-        catch (e) {
-            err = e;
-        }
-        var /** @type {?} */ stack = err.stack || '';
-        var /** @type {?} */ lines = stack.split('\n');
-        if (lines[0].startsWith('Error')) {
-            // Chrome always adds the message to the stack as well...
-            start++;
-            end++;
-        }
-        return lines.slice(start, end).join('\n');
     }
     /**
      * @param {?} view
@@ -8533,7 +8628,6 @@
     }
     var /** @type {?} */ EMPTY_ARRAY = [];
     var /** @type {?} */ EMPTY_MAP = {};
-    var /** @type {?} */ NOOP = function () { };
     /**
      * @param {?} flags
      * @param {?} matchedQueriesDsl
@@ -8549,8 +8643,6 @@
         }
         flags |= 1 /* TypeElement */;
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var /** @type {?} */ template = templateFactory ? resolveViewDefinition(templateFactory) : null;
         return {
             // will bet set by the view definition
@@ -8569,7 +8661,7 @@
             element: {
                 ns: undefined,
                 name: undefined,
-                attrs: undefined, template: template, source: source,
+                attrs: undefined, template: template,
                 componentProvider: undefined,
                 componentView: undefined,
                 componentRendererType: undefined,
@@ -8601,8 +8693,6 @@
         if (!handleEvent) {
             handleEvent = NOOP;
         }
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
         var /** @type {?} */ ns;
         var /** @type {?} */ name;
@@ -8673,7 +8763,6 @@
                 ns: ns,
                 name: name,
                 attrs: attrs,
-                source: source,
                 template: undefined,
                 // will bet set by the view definition
                 componentProvider: undefined, componentView: componentView, componentRendererType: componentRendererType,
@@ -9122,14 +9211,16 @@
          * @param {?} injector
          * @param {?=} projectableNodes
          * @param {?=} rootSelectorOrNode
+         * @param {?=} ngModule
          * @return {?}
          */
-        ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode) {
-            if (projectableNodes === void 0) { projectableNodes = null; }
-            if (rootSelectorOrNode === void 0) { rootSelectorOrNode = null; }
+        ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+            if (!ngModule) {
+                throw new Error('ngModule should be provided');
+            }
             var /** @type {?} */ viewDef = resolveViewDefinition(this.viewDefFactory);
             var /** @type {?} */ componentNodeIndex = viewDef.nodes[0].element.componentProvider.index;
-            var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, EMPTY_CONTEXT);
+            var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
             var /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
             view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
             return new ComponentRef_(view, new ViewRef_(view), component);
@@ -9923,7 +10014,6 @@
     function createDirectiveInstance(view, def) {
         // components can see other private services, other directives can't.
         var /** @type {?} */ allowPrivateServices = (def.flags & 16384 /* Component */) > 0;
-        var /** @type {?} */ providerDef = def.provider;
         // directives are always eager and classes!
         var /** @type {?} */ instance = createClass(view, def.parent, allowPrivateServices, def.provider.value, def.provider.deps);
         if (def.outputs.length) {
@@ -10148,6 +10238,24 @@
         }
         return injectable;
     }
+    // This default value is when checking the hierarchy for a token.
+    //
+    // It means both:
+    // - the token is not provided by the current injector,
+    // - only the element injectors should be checked (ie do not check module injectors
+    //
+    //          mod1
+    //         /
+    //       el1   mod2
+    //         \  /
+    //         el2
+    //
+    // When requesting el2.injector.get(token), we should check in the following order and return the
+    // first found value:
+    // - el2.injector.get(token, default)
+    // - el1.injector.get(token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) -> do not check the module
+    // - mod2.injector.get(token, default)
+    var /** @type {?} */ NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
     /**
      * @param {?} view
      * @param {?} elDef
@@ -10213,7 +10321,17 @@
             elDef = viewParentEl(view);
             view = view.parent;
         }
-        return startView.root.injector.get(depDef.token, notFoundValue);
+        var /** @type {?} */ value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
+        if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
+            notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
+            // Return the value from the root element injector when
+            // - it provides it
+            //   (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            // - the module injector should not be checked
+            //   (notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR)
+            return value;
+        }
+        return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
     }
     /**
      * @param {?} view
@@ -10321,6 +10439,9 @@
      */
     function callProviderLifecycles(view, index, lifecycles) {
         var /** @type {?} */ provider = asProviderData(view, index).instance;
+        if (provider === NOT_CREATED) {
+            return;
+        }
         Services.setCurrentNode(view, index);
         if (lifecycles & 524288 /* AfterContentInit */) {
             provider.ngAfterContentInit();
@@ -10783,8 +10904,6 @@
      * @return {?}
      */
     function textDef(ngContentIndex, constants) {
-        // skip the call to sliceErrorStack itself + the call to this function.
-        var /** @type {?} */ source = isDevMode() ? sliceErrorStack(2, 3) : '';
         var /** @type {?} */ bindings = new Array(constants.length - 1);
         for (var /** @type {?} */ i = 1; i < constants.length; i++) {
             bindings[i - 1] = {
@@ -10816,7 +10935,7 @@
             outputs: [],
             element: undefined,
             provider: undefined,
-            text: { prefix: constants[0], source: source },
+            text: { prefix: constants[0] },
             query: undefined,
             ngContent: undefined
         };
@@ -10939,7 +11058,6 @@
         var /** @type {?} */ valueStr = value != null ? value.toString() : '';
         return valueStr + binding.suffix;
     }
-    var /** @type {?} */ NOOP$1 = function () { return undefined; };
     /**
      * @param {?} flags
      * @param {?} nodes
@@ -11056,13 +11174,15 @@
         }
         var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return nodes[nodeIndex].element.handleEvent(view, eventName, event); };
         return {
+            // Will be filled later...
+            factory: undefined,
             nodeFlags: viewNodeFlags,
             rootNodeFlags: viewRootNodeFlags,
             nodeMatchedQueries: viewMatchedQueries, flags: flags,
             nodes: nodes,
-            updateDirectives: updateDirectives || NOOP$1,
-            updateRenderer: updateRenderer || NOOP$1,
-            handleEvent: handleEvent || NOOP$1,
+            updateDirectives: updateDirectives || NOOP,
+            updateRenderer: updateRenderer || NOOP,
+            handleEvent: handleEvent || NOOP,
             bindingCount: viewBindingCount,
             outputCount: viewDisposableCount, lastRenderRootNode: lastRenderRootNode
         };
@@ -11259,10 +11379,10 @@
     function checkNoChangesView(view) {
         Services.updateDirectives(view, 1 /* CheckNoChanges */);
         execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-        execQueriesAction(view, 33554432 /* TypeContentQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
         Services.updateRenderer(view, 1 /* CheckNoChanges */);
         execComponentViewsAction(view, ViewAction.CheckNoChanges);
-        execQueriesAction(view, 67108864 /* TypeViewQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
+        // Note: We don't check queries for changes as we didn't do this in v2.x.
+        // TODO(tbosch): investigate if we can enable the check again in v5.x with a nicer error message.
     }
     /**
      * @param {?} view
@@ -11687,43 +11807,46 @@
         };
     }
     /**
-     * @param {?} injector
+     * @param {?} elInjector
      * @param {?} projectableNodes
      * @param {?} rootSelectorOrNode
      * @param {?} def
+     * @param {?} ngModule
      * @param {?=} context
      * @return {?}
      */
-    function createProdRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        var /** @type {?} */ rendererFactory = injector.get(RendererFactory2);
-        return createRootView(createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
+    function createProdRootView(elInjector, projectableNodes, rootSelectorOrNode, def, ngModule, context) {
+        var /** @type {?} */ rendererFactory = ngModule.injector.get(RendererFactory2);
+        return createRootView(createRootData(elInjector, ngModule, rendererFactory, projectableNodes, rootSelectorOrNode), def, context);
     }
     /**
-     * @param {?} injector
+     * @param {?} elInjector
      * @param {?} projectableNodes
      * @param {?} rootSelectorOrNode
      * @param {?} def
+     * @param {?} ngModule
      * @param {?=} context
      * @return {?}
      */
-    function debugCreateRootView(injector, projectableNodes, rootSelectorOrNode, def, context) {
-        var /** @type {?} */ rendererFactory = injector.get(RendererFactory2);
-        var /** @type {?} */ root = createRootData(injector, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
+    function debugCreateRootView(elInjector, projectableNodes, rootSelectorOrNode, def, ngModule, context) {
+        var /** @type {?} */ rendererFactory = ngModule.injector.get(RendererFactory2);
+        var /** @type {?} */ root = createRootData(elInjector, ngModule, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
         return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
     }
     /**
-     * @param {?} injector
+     * @param {?} elInjector
+     * @param {?} ngModule
      * @param {?} rendererFactory
      * @param {?} projectableNodes
      * @param {?} rootSelectorOrNode
      * @return {?}
      */
-    function createRootData(injector, rendererFactory, projectableNodes, rootSelectorOrNode) {
-        var /** @type {?} */ sanitizer = injector.get(Sanitizer);
+    function createRootData(elInjector, ngModule, rendererFactory, projectableNodes, rootSelectorOrNode) {
+        var /** @type {?} */ sanitizer = ngModule.injector.get(Sanitizer);
         var /** @type {?} */ renderer = rendererFactory.createRenderer(null, null);
         return {
-            injector: injector,
-            projectableNodes: projectableNodes,
+            ngModule: ngModule,
+            injector: elInjector, projectableNodes: projectableNodes,
             selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, rendererFactory: rendererFactory, renderer: renderer
         };
     }
@@ -12133,21 +12256,6 @@
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(DebugContext_.prototype, "source", {
-            /**
-             * @return {?}
-             */
-            get: function () {
-                if (this.nodeDef.flags & 2 /* TypeText */) {
-                    return this.nodeDef.text.source;
-                }
-                else {
-                    return this.elDef.element.source;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(DebugContext_.prototype, "componentRenderElement", {
             /**
              * @return {?}
@@ -12170,6 +12278,43 @@
             enumerable: true,
             configurable: true
         });
+        /**
+         * @param {?} console
+         * @param {...?} values
+         * @return {?}
+         */
+        DebugContext_.prototype.logError = function (console) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+            var /** @type {?} */ logViewFactory;
+            var /** @type {?} */ logNodeIndex;
+            if (this.nodeDef.flags & 2 /* TypeText */) {
+                logViewFactory = this.view.def.factory;
+                logNodeIndex = this.nodeDef.index;
+            }
+            else {
+                logViewFactory = this.elView.def.factory;
+                logNodeIndex = this.elDef.index;
+            }
+            var /** @type {?} */ currNodeIndex = -1;
+            var /** @type {?} */ nodeLogger = function () {
+                currNodeIndex++;
+                if (currNodeIndex === logNodeIndex) {
+                    return (_a = console.error).bind.apply(_a, [console].concat(values));
+                }
+                else {
+                    return NOOP;
+                }
+                var _a;
+            };
+            logViewFactory(nodeLogger);
+            if (currNodeIndex < logNodeIndex) {
+                console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
+                console.error.apply(console, values);
+            }
+        };
         return DebugContext_;
     }());
     /**
@@ -12525,7 +12670,10 @@
      * \@experimental
      */
     var ApplicationModule = (function () {
-        function ApplicationModule() {
+        /**
+         * @param {?} appRef
+         */
+        function ApplicationModule(appRef) {
         }
         return ApplicationModule;
     }());
@@ -12549,7 +12697,9 @@
                 },] },
     ];
     /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return []; };
+    ApplicationModule.ctorParameters = function () { return [
+        { type: ApplicationRef, },
+    ]; };
     /**
      * @license
      * Copyright Google Inc. All Rights Reserved.
@@ -13267,14 +13417,14 @@
     exports.state = state;
     exports.keyframes = keyframes;
     exports.transition = transition;
-    exports.ɵz = animate$1;
-    exports.ɵba = group$1;
-    exports.ɵbe = keyframes$1;
-    exports.ɵbb = sequence$1;
-    exports.ɵbd = state$1;
-    exports.ɵbc = style$1;
-    exports.ɵbf = transition$1;
-    exports.ɵy = trigger$1;
+    exports.ɵba = animate$1;
+    exports.ɵbb = group$1;
+    exports.ɵbf = keyframes$1;
+    exports.ɵbc = sequence$1;
+    exports.ɵbe = state$1;
+    exports.ɵbd = style$1;
+    exports.ɵbg = transition$1;
+    exports.ɵz = trigger$1;
     exports.ɵo = _initViewEngine;
     exports.ɵl = _iterableDiffersFactory;
     exports.ɵm = _keyValueDiffersFactory;
@@ -13297,5 +13447,6 @@
     exports.ɵa = makeParamDecorator;
     exports.ɵb = makePropDecorator;
     exports.ɵw = _def;
+    exports.ɵx = DebugContext;
 
 }));
