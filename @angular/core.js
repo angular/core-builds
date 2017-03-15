@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-6772c91
+ * @license Angular v4.0.0-rc.3-3131581
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6772c91');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-3131581');
 
 /**
  * Inject decorator and metadata.
@@ -1005,7 +1005,7 @@ class ErrorHandler {
     /**
      * @param {?=} rethrowError
      */
-    constructor(rethrowError = false) {
+    constructor(rethrowError = true) {
         /**
          * \@internal
          */
@@ -1029,6 +1029,8 @@ class ErrorHandler {
         if (context) {
             errorLogger(this._console, 'ERROR CONTEXT', context);
         }
+        // We rethrow exceptions, so operations like 'bootstrap' will result in an error
+        // when an error happens. If we do not rethrow, bootstrap will always succeed.
         if (this.rethrowError)
             throw error;
     }

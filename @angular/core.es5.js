@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-6772c91
+ * @license Angular v4.0.0-rc.3-3131581
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -824,7 +824,7 @@ var Version = (function () {
 /**
  * @stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6772c91');
+var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-3131581');
 /**
  * Inject decorator and metadata.
  *
@@ -1045,7 +1045,7 @@ var ErrorHandler = (function () {
      * @param {?=} rethrowError
      */
     function ErrorHandler(rethrowError) {
-        if (rethrowError === void 0) { rethrowError = false; }
+        if (rethrowError === void 0) { rethrowError = true; }
         /**
          * \@internal
          */
@@ -1069,6 +1069,8 @@ var ErrorHandler = (function () {
         if (context) {
             errorLogger(this._console, 'ERROR CONTEXT', context);
         }
+        // We rethrow exceptions, so operations like 'bootstrap' will result in an error
+        // when an error happens. If we do not rethrow, bootstrap will always succeed.
         if (this.rethrowError)
             throw error;
     };
