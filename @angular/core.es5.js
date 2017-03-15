@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-bf98d9d
+ * @license Angular v4.0.0-rc.3-6772c91
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -824,7 +824,7 @@ var Version = (function () {
 /**
  * @stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-bf98d9d');
+var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6772c91');
 /**
  * Inject decorator and metadata.
  *
@@ -1047,7 +1047,7 @@ var ErrorHandler = (function () {
     function ErrorHandler(rethrowError) {
         if (rethrowError === void 0) { rethrowError = false; }
         /**
-         * @internal
+         * \@internal
          */
         this._console = console;
         this.rethrowError = rethrowError;
@@ -2457,7 +2457,9 @@ var ReflectiveInjector_ = (function () {
      */
     function ReflectiveInjector_(_providers, _parent) {
         if (_parent === void 0) { _parent = null; }
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._constructionCounter = 0;
         this._providers = _providers;
         this._parent = _parent;
@@ -2796,7 +2798,9 @@ var ApplicationInitStatus = (function () {
 ApplicationInitStatus.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationInitStatus.ctorParameters = function () { return [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
 ]; };
@@ -2880,7 +2884,9 @@ var Console = (function () {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Console.ctorParameters = function () { return []; };
 /**
  * Combination of NgModuleFactory and ComponentFactorys.
@@ -2971,7 +2977,9 @@ var Compiler = (function () {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Compiler.ctorParameters = function () { return []; };
 /**
  * Token to provide CompilerOptions in the platform injector.
@@ -3931,18 +3939,24 @@ var Testability = (function () {
      */
     function Testability(_ngZone) {
         this._ngZone = _ngZone;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._pendingCount = 0;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._isZoneStable = true;
         /**
          * Whether any work was done since the last 'whenStable' callback. This is
          * useful to detect if this could have potentially destabilized another
          * component while it is stabilizing.
-         * @internal
+         * \@internal
          */
         this._didWork = false;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._callbacks = [];
         this._watchAngularEvents();
     }
@@ -4053,7 +4067,9 @@ var Testability = (function () {
 Testability.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Testability.ctorParameters = function () { return [
     { type: NgZone, },
 ]; };
@@ -4063,7 +4079,9 @@ Testability.ctorParameters = function () { return [
  */
 var TestabilityRegistry = (function () {
     function TestabilityRegistry() {
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._applications = new Map();
         _testabilityGetter.addToWindow(this);
     }
@@ -4102,7 +4120,9 @@ var TestabilityRegistry = (function () {
 TestabilityRegistry.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 TestabilityRegistry.ctorParameters = function () { return []; };
 var _NoopGetTestability = (function () {
     function _NoopGetTestability() {
@@ -4512,7 +4532,9 @@ var PlatformRef_ = (function (_super) {
 PlatformRef_.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 PlatformRef_.ctorParameters = function () { return [
     { type: Injector, },
 ]; };
@@ -4799,12 +4821,16 @@ var ApplicationRef_ = (function (_super) {
     });
     return ApplicationRef_;
 }(ApplicationRef));
-/** @internal */
+/**
+ * \@internal
+ */
 ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
 ApplicationRef_.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationRef_.ctorParameters = function () { return [
     { type: NgZone, },
     { type: Console, },
@@ -5541,7 +5567,9 @@ var SystemJsNgModuleLoader = (function () {
 SystemJsNgModuleLoader.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 SystemJsNgModuleLoader.ctorParameters = function () { return [
     { type: Compiler, },
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
@@ -7150,25 +7178,45 @@ var IterableChangeRecord_ = (function () {
         this.trackById = trackById;
         this.currentIndex = null;
         this.previousIndex = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextPrevious = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prev = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._next = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevDup = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextDup = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextMoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextIdentityChange = null;
     }
     /**
@@ -7183,9 +7231,13 @@ var IterableChangeRecord_ = (function () {
 }());
 var _DuplicateItemRecordList = (function () {
     function _DuplicateItemRecordList() {
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._head = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._tail = null;
     }
     /**
@@ -7704,17 +7756,29 @@ var KeyValueChangeRecord_ = (function () {
         this.key = key;
         this.previousValue = null;
         this.currentValue = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextPrevious = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._next = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextChanged = null;
     }
     /**
@@ -9325,7 +9389,7 @@ var ViewContainerRef_ = (function () {
         this._elDef = _elDef;
         this._data = _data;
         /**
-         * @internal
+         * \@internal
          */
         this._embeddedViews = [];
     }
@@ -12695,7 +12759,9 @@ ApplicationModule.decorators = [
                 ]
             },] },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationModule.ctorParameters = function () { return [
     { type: ApplicationRef, },
 ]; };
