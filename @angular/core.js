@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-4f7d62a
+ * @license Angular v4.0.0-rc.3-5c0ea20
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-4f7d62a');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-5c0ea20');
 
 /**
  * Inject decorator and metadata.
@@ -1007,7 +1007,7 @@ class ErrorHandler {
      */
     constructor(rethrowError = false) {
         /**
-         * @internal
+         * \@internal
          */
         this._console = console;
         this.rethrowError = rethrowError;
@@ -2384,7 +2384,9 @@ class ReflectiveInjector_ {
      * @param {?=} _parent
      */
     constructor(_providers, _parent = null) {
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._constructionCounter = 0;
         this._providers = _providers;
         this._parent = _parent;
@@ -2702,7 +2704,9 @@ class ApplicationInitStatus {
 ApplicationInitStatus.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
 ];
@@ -2785,7 +2789,9 @@ class Console {
 Console.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Console.ctorParameters = () => [];
 
 /**
@@ -2873,7 +2879,9 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Compiler.ctorParameters = () => [];
 /**
  * Token to provide CompilerOptions in the platform injector.
@@ -3758,18 +3766,24 @@ class Testability {
      */
     constructor(_ngZone) {
         this._ngZone = _ngZone;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._pendingCount = 0;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._isZoneStable = true;
         /**
          * Whether any work was done since the last 'whenStable' callback. This is
          * useful to detect if this could have potentially destabilized another
          * component while it is stabilizing.
-         * @internal
+         * \@internal
          */
         this._didWork = false;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._callbacks = [];
         this._watchAngularEvents();
     }
@@ -3877,7 +3891,9 @@ class Testability {
 Testability.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 Testability.ctorParameters = () => [
     { type: NgZone, },
 ];
@@ -3887,7 +3903,9 @@ Testability.ctorParameters = () => [
  */
 class TestabilityRegistry {
     constructor() {
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._applications = new Map();
         _testabilityGetter.addToWindow(this);
     }
@@ -3924,7 +3942,9 @@ class TestabilityRegistry {
 TestabilityRegistry.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 TestabilityRegistry.ctorParameters = () => [];
 class _NoopGetTestability {
     /**
@@ -4310,7 +4330,9 @@ class PlatformRef_ extends PlatformRef {
 PlatformRef_.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 PlatformRef_.ctorParameters = () => [
     { type: Injector, },
 ];
@@ -4574,12 +4596,16 @@ class ApplicationRef_ extends ApplicationRef {
      */
     get isStable() { return this._isStable; }
 }
-/** @internal */
+/**
+ * \@internal
+ */
 ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
 ApplicationRef_.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationRef_.ctorParameters = () => [
     { type: NgZone, },
     { type: Console, },
@@ -5273,7 +5299,9 @@ class SystemJsNgModuleLoader {
 SystemJsNgModuleLoader.decorators = [
     { type: Injectable },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 SystemJsNgModuleLoader.ctorParameters = () => [
     { type: Compiler, },
     { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
@@ -6816,25 +6844,45 @@ class IterableChangeRecord_ {
         this.trackById = trackById;
         this.currentIndex = null;
         this.previousIndex = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextPrevious = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prev = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._next = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevDup = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextDup = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextMoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextIdentityChange = null;
     }
     /**
@@ -6848,9 +6896,13 @@ class IterableChangeRecord_ {
 }
 class _DuplicateItemRecordList {
     constructor() {
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._head = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._tail = null;
     }
     /**
@@ -7355,17 +7407,29 @@ class KeyValueChangeRecord_ {
         this.key = key;
         this.previousValue = null;
         this.currentValue = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextPrevious = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._next = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._prevRemoved = null;
-        /** @internal */
+        /**
+         * \@internal
+         */
         this._nextChanged = null;
     }
     /**
@@ -8937,7 +9001,7 @@ class ViewContainerRef_ {
         this._elDef = _elDef;
         this._data = _data;
         /**
-         * @internal
+         * \@internal
          */
         this._embeddedViews = [];
     }
@@ -12213,7 +12277,9 @@ ApplicationModule.decorators = [
                 ]
             },] },
 ];
-/** @nocollapse */
+/**
+ * @nocollapse
+ */
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef, },
 ];
