@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-3c15916
+ * @license Angular v4.0.0-rc.3-5c34066
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -824,7 +824,7 @@ var Version = (function () {
 /**
  * @stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-3c15916');
+var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-5c34066');
 /**
  * Inject decorator and metadata.
  *
@@ -11378,10 +11378,10 @@ function createViewNodes(view) {
 function checkNoChangesView(view) {
     Services.updateDirectives(view, 1 /* CheckNoChanges */);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, 33554432 /* TypeContentQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
     Services.updateRenderer(view, 1 /* CheckNoChanges */);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
-    execQueriesAction(view, 67108864 /* TypeViewQuery */, 268435456 /* DynamicQuery */, 1 /* CheckNoChanges */);
+    // Note: We don't check queries for changes as we didn't do this in v2.x.
+    // TODO(tbosch): investigate if we can enable the check again in v5.x with a nicer error message.
 }
 /**
  * @param {?} view
