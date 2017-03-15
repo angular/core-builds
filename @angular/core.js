@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-a3e32fb
+ * @license Angular v4.0.0-rc.3-322bf7a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -791,7 +791,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-a3e32fb');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-322bf7a');
 
 /**
  * Inject decorator and metadata.
@@ -2860,8 +2860,6 @@ class Compiler {
      * the template of the given component.
      * This is used by the `upgrade` library to compile the appropriate transclude content
      * in the AngularJS wrapper component.
-     *
-     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
      * @param {?} component
      * @return {?}
      */
@@ -2989,24 +2987,6 @@ class ComponentFactory {
      */
     componentType() { }
     /**
-     * selector for all <ng-content> elements in the component.
-     * @abstract
-     * @return {?}
-     */
-    ngContentSelectors() { }
-    /**
-     * the inputs of the component.
-     * @abstract
-     * @return {?}
-     */
-    inputs() { }
-    /**
-     * the outputs of the component.
-     * @abstract
-     * @return {?}
-     */
-    outputs() { }
-    /**
      * Creates a new component.
      * @abstract
      * @param {?} injector
@@ -3092,18 +3072,6 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
      * @return {?}
      */
     get componentType() { return this.factory.componentType; }
-    /**
-     * @return {?}
-     */
-    get ngContentSelectors() { return this.factory.ngContentSelectors; }
-    /**
-     * @return {?}
-     */
-    get inputs() { return this.factory.inputs; }
-    /**
-     * @return {?}
-     */
-    get outputs() { return this.factory.outputs; }
     /**
      * @param {?} injector
      * @param {?=} projectableNodes
@@ -8917,23 +8885,10 @@ const /** @type {?} */ EMPTY_CONTEXT = new Object();
  * @param {?} selector
  * @param {?} componentType
  * @param {?} viewDefFactory
- * @param {?} inputs
- * @param {?} outputs
- * @param {?} ngContentSelectors
  * @return {?}
  */
-function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
-    const /** @type {?} */ inputsArr = [];
-    for (let /** @type {?} */ propName in inputs) {
-        const /** @type {?} */ templateName = inputs[propName];
-        inputsArr.push({ propName, templateName });
-    }
-    const /** @type {?} */ outputsArr = [];
-    for (let /** @type {?} */ propName in outputs) {
-        const /** @type {?} */ templateName = outputs[propName];
-        outputsArr.push({ propName, templateName });
-    }
-    return new ComponentFactory_(selector, componentType, viewDefFactory, inputsArr, outputsArr, ngContentSelectors);
+function createComponentFactory(selector, componentType, viewDefFactory) {
+    return new ComponentFactory_(selector, componentType, viewDefFactory);
 }
 /**
  * @param {?} componentFactory
@@ -8947,17 +8902,11 @@ class ComponentFactory_ extends ComponentFactory {
      * @param {?} selector
      * @param {?} componentType
      * @param {?} viewDefFactory
-     * @param {?} inputs
-     * @param {?} outputs
-     * @param {?} ngContentSelectors
      */
-    constructor(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+    constructor(selector, componentType, viewDefFactory) {
         super();
         this.selector = selector;
         this.componentType = componentType;
-        this.inputs = inputs;
-        this.outputs = outputs;
-        this.ngContentSelectors = ngContentSelectors;
         this.viewDefFactory = viewDefFactory;
     }
     /**
