@@ -1,12 +1,11 @@
 /**
- * @license Angular v4.0.0-rc.3-6772c91
+ * @license Angular v4.0.0-rc.3-923d0c5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
 import { Observable } from 'rxjs/Observable';
 import { merge } from 'rxjs/observable/merge';
 import { share } from 'rxjs/operator/share';
-import { $$observable } from 'rxjs/symbol/observable';
 import { Subject } from 'rxjs/Subject';
 
 /**
@@ -791,7 +790,7 @@ class Version {
 /**
  * @stable
  */
-const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6772c91');
+const /** @type {?} */ VERSION = new Version('4.0.0-rc.3-923d0c5');
 
 /**
  * Inject decorator and metadata.
@@ -1005,7 +1004,7 @@ class ErrorHandler {
     /**
      * @param {?=} rethrowError
      */
-    constructor(rethrowError = false) {
+    constructor(rethrowError = true) {
         /**
          * \@internal
          */
@@ -1029,6 +1028,8 @@ class ErrorHandler {
         if (context) {
             errorLogger(this._console, 'ERROR CONTEXT', context);
         }
+        // We rethrow exceptions, so operations like 'bootstrap' will result in an error
+        // when an error happens. If we do not rethrow, bootstrap will always succeed.
         if (this.rethrowError)
             throw error;
     }
@@ -2629,6 +2630,13 @@ function _mapProviders(injector, fn) {
 }
 
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Determine if the argument is shaped like a Promise
  * @param {?} obj
  * @return {?}
@@ -2644,7 +2652,8 @@ function isPromise(obj) {
  * @return {?}
  */
 function isObservable(obj) {
-    return !!(obj && obj[$$observable]);
+    // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+    return !!obj && typeof obj.subscribe === 'function';
 }
 /**
  * @param {?} m1

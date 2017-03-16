@@ -1,13 +1,13 @@
 /**
- * @license Angular v4.0.0-rc.3-6772c91
+ * @license Angular v4.0.0-rc.3-923d0c5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/symbol/observable'), require('rxjs/Subject')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/symbol/observable', 'rxjs/Subject'], factory) :
-    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx.Symbol.observable,global.Rx));
-}(this, function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_symbol_observable,rxjs_Subject) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/Subject')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/Subject'], factory) :
+    (factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx));
+}(this, function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject) { 'use strict';
 
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -825,7 +825,7 @@
     /**
      * @stable
      */
-    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6772c91');
+    var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-923d0c5');
     /**
      * Inject decorator and metadata.
      *
@@ -1046,7 +1046,7 @@
          * @param {?=} rethrowError
          */
         function ErrorHandler(rethrowError) {
-            if (rethrowError === void 0) { rethrowError = false; }
+            if (rethrowError === void 0) { rethrowError = true; }
             /**
              * \@internal
              */
@@ -1070,6 +1070,8 @@
             if (context) {
                 errorLogger(this._console, 'ERROR CONTEXT', context);
             }
+            // We rethrow exceptions, so operations like 'bootstrap' will result in an error
+            // when an error happens. If we do not rethrow, bootstrap will always succeed.
             if (this.rethrowError)
                 throw error;
         };
@@ -2713,6 +2715,13 @@
         return res;
     }
     /**
+     * @license
+     * Copyright Google Inc. All Rights Reserved.
+     *
+     * Use of this source code is governed by an MIT-style license that can be
+     * found in the LICENSE file at https://angular.io/license
+     */
+    /**
      * Determine if the argument is shaped like a Promise
      * @param {?} obj
      * @return {?}
@@ -2728,7 +2737,8 @@
      * @return {?}
      */
     function isObservable(obj) {
-        return !!(obj && obj[rxjs_symbol_observable.$$observable]);
+        // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+        return !!obj && typeof obj.subscribe === 'function';
     }
     /**
      * @param {?} m1
