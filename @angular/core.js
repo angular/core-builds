@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.3-492153a
+ * @license Angular v4.0.0-rc.3-77fd91d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -790,7 +790,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.3-492153a');
+const VERSION = new Version('4.0.0-rc.3-77fd91d');
 
 /**
  * Inject decorator and metadata.
@@ -1003,14 +1003,18 @@ function defaultErrorLogger(console, ...values) {
  */
 class ErrorHandler {
     /**
-     * @param {?=} rethrowError
+     * @param {?=} deprecatedParameter
      */
-    constructor(rethrowError = true) {
+    constructor(
+        /**
+         * @deprecated since v4.0 parameter no longer has an effect, as ErrorHandler will never
+         * rethrow.
+         */
+        deprecatedParameter) {
         /**
          * \@internal
          */
         this._console = console;
-        this.rethrowError = rethrowError;
     }
     /**
      * @param {?} error
@@ -1029,10 +1033,6 @@ class ErrorHandler {
         if (context) {
             errorLogger(this._console, 'ERROR CONTEXT', context);
         }
-        // We rethrow exceptions, so operations like 'bootstrap' will result in an error
-        // when an error happens. If we do not rethrow, bootstrap will always succeed.
-        if (this.rethrowError)
-            throw error;
     }
     /**
      * \@internal
