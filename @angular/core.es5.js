@@ -4,14 +4,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-3131581
+ * @license Angular v4.0.0-rc.3-6e98757
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
 import { Observable } from 'rxjs/Observable';
 import { merge } from 'rxjs/observable/merge';
 import { share } from 'rxjs/operator/share';
-import { $$observable } from 'rxjs/symbol/observable';
 import { Subject } from 'rxjs/Subject';
 /**
  * Creates a token that can be used in a DI Provider.
@@ -824,7 +823,7 @@ var Version = (function () {
 /**
  * @stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-3131581');
+var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-6e98757');
 /**
  * Inject decorator and metadata.
  *
@@ -2714,6 +2713,13 @@ function _mapProviders(injector, fn) {
     return res;
 }
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Determine if the argument is shaped like a Promise
  * @param {?} obj
  * @return {?}
@@ -2729,7 +2735,8 @@ function isPromise(obj) {
  * @return {?}
  */
 function isObservable(obj) {
-    return !!(obj && obj[$$observable]);
+    // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+    return !!obj && typeof obj.subscribe === 'function';
 }
 /**
  * @param {?} m1
