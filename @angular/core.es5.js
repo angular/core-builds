@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.3-992aa17
+ * @license Angular v4.0.0-rc.3-492153a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -508,22 +508,22 @@ function makePropDecorator(name, props, parentClass) {
  *   {path: '/teams', component: TeamsComp}
  * ];
  *
- * @NgModule({
+ * \@NgModule({
  *   providers: [provideRoutes(routes)]
  * })
  * class ModuleWithRoutes {}
  * ```
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
+var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents');
 /**
  * Attribute decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
+var Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
 /**
  * Base class for query metadata.
  *
@@ -541,24 +541,24 @@ var Query = (function () {
 /**
  * ContentChildren decorator and metadata.
  *
- *  @stable
- *  @Annotation
+ *  \@stable
+ *  \@Annotation
  */
-var /** @type {?} */ ContentChildren = (makePropDecorator('ContentChildren', [
+var ContentChildren = makePropDecorator('ContentChildren', [
     ['selector', undefined], {
         first: false,
         isViewQuery: false,
         descendants: false,
         read: undefined,
     }
-], Query));
+], Query);
 /**
  * ContentChild decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', [
+var ContentChild = makePropDecorator('ContentChild', [
     ['selector', undefined], {
         first: true,
         isViewQuery: false,
@@ -569,10 +569,10 @@ var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', [
 /**
  * ViewChildren decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', [
+var ViewChildren = makePropDecorator('ViewChildren', [
     ['selector', undefined], {
         first: false,
         isViewQuery: true,
@@ -583,10 +583,10 @@ var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', [
 /**
  * ViewChild decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ ViewChild = makePropDecorator('ViewChild', [
+var ViewChild = makePropDecorator('ViewChild', [
     ['selector', undefined], {
         first: true,
         isViewQuery: true,
@@ -623,10 +623,10 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
 /**
  * Directive decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Directive = (makeDecorator('Directive', {
+var Directive = makeDecorator('Directive', {
     selector: undefined,
     inputs: undefined,
     outputs: undefined,
@@ -634,14 +634,14 @@ var /** @type {?} */ Directive = (makeDecorator('Directive', {
     providers: undefined,
     exportAs: undefined,
     queries: undefined
-}));
+});
 /**
  * Component decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Component = (makeDecorator('Component', {
+var Component = makeDecorator('Component', {
     selector: undefined,
     inputs: undefined,
     outputs: undefined,
@@ -660,71 +660,71 @@ var /** @type {?} */ Component = (makeDecorator('Component', {
     encapsulation: undefined,
     interpolation: undefined,
     entryComponents: undefined
-}, Directive));
+}, Directive);
 /**
  * Pipe decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Pipe = (makeDecorator('Pipe', {
+var Pipe = makeDecorator('Pipe', {
     name: undefined,
     pure: true,
-}));
+});
 /**
  * Input decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
+var Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
 /**
  * Output decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
+var Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
 /**
  * HostBinding decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
+var HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
 /**
  * HostListener decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
+var HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
 /**
  * Defines a schema that will allow:
  * - any non-Angular elements with a `-` in their name,
  * - any properties on elements with a `-` in their name which is the common rule for custom
  * elements.
  *
- * @stable
+ * \@stable
  */
-var /** @type {?} */ CUSTOM_ELEMENTS_SCHEMA = {
+var CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
 };
 /**
  * Defines a schema that will allow any property on any element.
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ NO_ERRORS_SCHEMA = {
+var NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
 /**
  * NgModule decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ NgModule = (makeDecorator('NgModule', {
+var NgModule = makeDecorator('NgModule', {
     providers: undefined,
     declarations: undefined,
     imports: undefined,
@@ -733,7 +733,7 @@ var /** @type {?} */ NgModule = (makeDecorator('NgModule', {
     bootstrap: undefined,
     schemas: undefined,
     id: undefined,
-}));
+});
 var ViewEncapsulation = {};
 ViewEncapsulation.Emulated = 0;
 ViewEncapsulation.Native = 1;
@@ -821,51 +821,51 @@ var Version = (function () {
     return Version;
 }());
 /**
- * @stable
+ * \@stable
  */
-var /** @type {?} */ VERSION = new Version('4.0.0-rc.3-992aa17');
+var VERSION = new Version('4.0.0-rc.3-492153a');
 /**
  * Inject decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Inject = makeParamDecorator('Inject', [['token', undefined]]);
+var Inject = makeParamDecorator('Inject', [['token', undefined]]);
 /**
  * Optional decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Optional = makeParamDecorator('Optional', []);
+var Optional = makeParamDecorator('Optional', []);
 /**
  * Injectable decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Injectable = (makeDecorator('Injectable', []));
+var Injectable = makeDecorator('Injectable', []);
 /**
  * Self decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Self = makeParamDecorator('Self', []);
+var Self = makeParamDecorator('Self', []);
 /**
  * SkipSelf decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf', []);
+var SkipSelf = makeParamDecorator('SkipSelf', []);
 /**
  * Host decorator and metadata.
  *
- * @stable
- * @Annotation
+ * \@stable
+ * \@Annotation
  */
-var /** @type {?} */ Host = makeParamDecorator('Host', []);
+var Host = makeParamDecorator('Host', []);
 /**
  * Allows to refer to references which are not yet defined.
  *
@@ -958,6 +958,7 @@ var Injector = (function () {
      * Injector.THROW_IF_NOT_FOUND is given
      * - Returns the `notFoundValue` otherwise
      * @abstract
+     * @template T
      * @param {?} token
      * @param {?=} notFoundValue
      * @return {?}
@@ -1437,29 +1438,16 @@ var KeyRegistry = (function () {
 }());
 var /** @type {?} */ _globalKeyRegistry = new KeyRegistry();
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
+ * \@whatItDoes Represents a type that a Component or other object is instances of.
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @whatItDoes Represents a type that a Component or other object is instances of.
- *
- * @description
+ * \@description
  *
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
  *
- * @stable
+ * \@stable
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */ var /** @type {?} */ Type = Function;
+var Type = Function;
 /**
  * @param {?} v
  * @return {?}
@@ -1483,6 +1471,7 @@ var ReflectionCapabilities = (function () {
      */
     ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
     /**
+     * @template T
      * @param {?} t
      * @return {?}
      */
@@ -2739,6 +2728,7 @@ function isObservable(obj) {
     return !!obj && typeof obj.subscribe === 'function';
 }
 /**
+ * @template V
  * @param {?} m1
  * @param {?} m2
  * @return {?}
@@ -2757,9 +2747,9 @@ function merge$1(m1, m2) {
 }
 /**
  * A function that will be executed when an application is initialized.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ APP_INITIALIZER = new InjectionToken('Application Initializer');
+var APP_INITIALIZER = new InjectionToken('Application Initializer');
 /**
  * A class that reflects the state of running {\@link APP_INITIALIZER}s.
  *
@@ -2816,14 +2806,14 @@ ApplicationInitStatus.ctorParameters = function () { return [
 /**
  * A DI Token representing a unique string id assigned to the application by Angular and used
  * primarily for prefixing application attributes and CSS styles when
- * {@link ViewEncapsulation#Emulated} is being used.
+ * {\@link ViewEncapsulation#Emulated} is being used.
  *
  * If you need to avoid randomly generated value to be used as an application id, you can provide
- * a custom value via a DI provider <!-- TODO: provider --> configuring the root {@link Injector}
+ * a custom value via a DI provider <!-- TODO: provider --> configuring the root {\@link Injector}
  * using this token.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ APP_ID = new InjectionToken('AppId');
+var APP_ID = new InjectionToken('AppId');
 /**
  * @return {?}
  */
@@ -2832,12 +2822,12 @@ function _appIdRandomProviderFactory() {
 }
 /**
  * Providers that will generate a random APP_ID_TOKEN.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ APP_ID_RANDOM_PROVIDER = {
+var APP_ID_RANDOM_PROVIDER = {
     provide: APP_ID,
     useFactory: _appIdRandomProviderFactory,
-    deps: /** @type {?} */ ([]),
+    deps: [],
 };
 /**
  * @return {?}
@@ -2847,28 +2837,28 @@ function _randomChar() {
 }
 /**
  * A function that will be executed when a platform is initialized.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
+var PLATFORM_INITIALIZER = new InjectionToken('Platform Initializer');
 /**
  * A token that indicates an opaque platform id.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ PLATFORM_ID = new InjectionToken('Platform ID');
+var PLATFORM_ID = new InjectionToken('Platform ID');
 /**
  * All callbacks provided via this token will be called for every component that is bootstrapped.
  * Signature of the callback:
  *
  * `(componentRef: ComponentRef) => void`.
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
+var APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
 /**
  * A token which indicates the root directory of the application
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
+var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
 var Console = (function () {
     function Console() {
     }
@@ -2935,18 +2925,21 @@ var Compiler = (function () {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents` have to be inlined.
+     * @template T
      * @param {?} moduleType
      * @return {?}
      */
     Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
     /**
      * Compiles the given NgModule and all of its components
+     * @template T
      * @param {?} moduleType
      * @return {?}
      */
     Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
     /**
      * Same as {\@link compileModuleSync} but also creates ComponentFactories for all components.
+     * @template T
      * @param {?} moduleType
      * @return {?}
      */
@@ -2955,6 +2948,7 @@ var Compiler = (function () {
     };
     /**
      * Same as {\@link compileModuleAsync} but also creates ComponentFactories for all components.
+     * @template T
      * @param {?} moduleType
      * @return {?}
      */
@@ -2993,9 +2987,9 @@ Compiler.ctorParameters = function () { return []; };
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ COMPILER_OPTIONS = new InjectionToken('compilerOptions');
+var COMPILER_OPTIONS = new InjectionToken('compilerOptions');
 /**
  * A factory for creating a Compiler
  *
@@ -3126,6 +3120,7 @@ var _NullComponentFactoryResolver = (function () {
     function _NullComponentFactoryResolver() {
     }
     /**
+     * @template T
      * @param {?} component
      * @return {?}
      */
@@ -3143,6 +3138,7 @@ var ComponentFactoryResolver = (function () {
     }
     /**
      * @abstract
+     * @template T
      * @param {?} component
      * @return {?}
      */
@@ -3166,6 +3162,7 @@ var CodegenComponentFactoryResolver = (function () {
         }
     }
     /**
+     * @template T
      * @param {?} component
      * @return {?}
      */
@@ -3408,6 +3405,7 @@ function createScope(signature, flags) {
     return events.createScope(signature, flags);
 }
 /**
+ * @template T
  * @param {?} scope
  * @param {?=} returnValue
  * @return {?}
@@ -3471,9 +3469,9 @@ function noopScope(arg0, arg1) {
  * needs to be fixed before the app should be profiled. Add try-finally only when you expect that
  * an exception is expected during normal execution while profiling.
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
+var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
 /**
  * Used to mark end of Scope.
  *
@@ -3481,9 +3479,9 @@ var /** @type {?} */ wtfCreateScope = wtfEnabled ? createScope : function (signa
  * - `returnValue` (optional) to be passed to the WTF.
  *
  * Returns the `returnValue for easy chaining.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
+var wtfLeave = wtfEnabled ? leave : function (s, r) { return r; };
 /**
  * Used to mark Async start. Async are similar to scope but they don't have to be strictly nested.
  * The return value is used in the call to [endAsync]. Async ranges only work if WTF has been
@@ -3495,16 +3493,16 @@ var /** @type {?} */ wtfLeave = wtfEnabled ? leave : function (s, r) { return r;
  *          wtfEndTimeRange(s);
  *        });
  *     }
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
+var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, action) { return null; };
 /**
  * Ends a async time range operation.
  * [range] is the return value from [wtfStartTimeRange] Async ranges only work if WTF has been
  * enabled.
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
+var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 /**
  * Use by directives and components to emit custom Events.
  *
@@ -4331,6 +4329,7 @@ var PlatformRef = (function () {
      *
      * \@experimental APIs related to application bootstrap are currently under review.
      * @abstract
+     * @template M
      * @param {?} moduleFactory
      * @return {?}
      */
@@ -4350,6 +4349,7 @@ var PlatformRef = (function () {
      * ```
      * \@stable
      * @abstract
+     * @template M
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @return {?}
@@ -4455,6 +4455,7 @@ var PlatformRef_ = (function (_super) {
         this._destroyed = true;
     };
     /**
+     * @template M
      * @param {?} moduleFactory
      * @return {?}
      */
@@ -4462,6 +4463,7 @@ var PlatformRef_ = (function (_super) {
         return this._bootstrapModuleFactoryWithZone(moduleFactory, null);
     };
     /**
+     * @template M
      * @param {?} moduleFactory
      * @param {?} ngZone
      * @return {?}
@@ -4495,6 +4497,7 @@ var PlatformRef_ = (function (_super) {
         });
     };
     /**
+     * @template M
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @return {?}
@@ -4504,6 +4507,7 @@ var PlatformRef_ = (function (_super) {
         return this._bootstrapModuleWithZone(moduleType, compilerOptions, null);
     };
     /**
+     * @template M
      * @param {?} moduleType
      * @param {?=} compilerOptions
      * @param {?=} ngZone
@@ -4570,6 +4574,7 @@ var ApplicationRef = (function () {
      * ### Example
      * {\@example core/ts/platform/platform.ts region='longform'}
      * @abstract
+     * @template C
      * @param {?} componentFactory
      * @return {?}
      */
@@ -4716,6 +4721,7 @@ var ApplicationRef_ = (function (_super) {
         view.detachFromAppRef();
     };
     /**
+     * @template C
      * @param {?} componentOrFactory
      * @return {?}
      */
@@ -4849,6 +4855,7 @@ ApplicationRef_.ctorParameters = function () { return [
     { type: ApplicationInitStatus, },
 ]; };
 /**
+ * @template T
  * @param {?} list
  * @param {?} el
  * @return {?}
@@ -5406,6 +5413,7 @@ var QueryList = (function () {
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     * @template U
      * @param {?} fn
      * @return {?}
      */
@@ -5429,6 +5437,7 @@ var QueryList = (function () {
     /**
      * See
      * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     * @template U
      * @param {?} fn
      * @param {?} init
      * @return {?}
@@ -5493,6 +5502,7 @@ var QueryList = (function () {
     return QueryList;
 }());
 /**
+ * @template T
  * @param {?} list
  * @return {?}
  */
@@ -5705,6 +5715,7 @@ var ViewContainerRef = (function () {
      *
      * Returns the {\@link ViewRef} for the newly created View.
      * @abstract
+     * @template C
      * @param {?} templateRef
      * @param {?=} context
      * @param {?=} index
@@ -5724,6 +5735,7 @@ var ViewContainerRef = (function () {
      *
      * Returns the {\@link ComponentRef} of the Host View created for the newly instantiated Component.
      * @abstract
+     * @template C
      * @param {?} componentFactory
      * @param {?=} index
      * @param {?=} injector
@@ -6532,6 +6544,7 @@ var DefaultIterableDifferFactory = (function () {
     DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
     /**
      * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @template V
      * @param {?=} cdRefOrTrackBy
      * @param {?=} trackByFn
      * @return {?}
@@ -7414,6 +7427,7 @@ var DefaultKeyValueDifferFactory = (function () {
     DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
     /**
      * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
+     * @template K, V
      * @param {?=} cd
      * @return {?}
      */
@@ -7740,6 +7754,7 @@ var DefaultKeyValueDiffer = (function () {
     };
     /**
      * \@internal
+     * @template K, V
      * @param {?} obj
      * @param {?} fn
      * @return {?}
@@ -7898,6 +7913,7 @@ var KeyValueDiffers = (function () {
         this.factories = factories;
     }
     /**
+     * @template S
      * @param {?} factories
      * @param {?=} parent
      * @return {?}
@@ -7927,6 +7943,7 @@ var KeyValueDiffers = (function () {
      *   ]
      * })
      * ```
+     * @template S
      * @param {?} factories
      * @return {?}
      */
@@ -7987,21 +8004,21 @@ var /** @type {?} */ _CORE_PLATFORM_PROVIDERS = [
 /**
  * This platform has to be included in any other platform
  *
- * @experimental
+ * \@experimental
  */
-var /** @type {?} */ platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
 /**
- * @experimental i18n support is experimental.
+ * \@experimental i18n support is experimental.
  */
-var /** @type {?} */ LOCALE_ID = new InjectionToken('LocaleId');
+var LOCALE_ID = new InjectionToken('LocaleId');
 /**
- * @experimental i18n support is experimental.
+ * \@experimental i18n support is experimental.
  */
-var /** @type {?} */ TRANSLATIONS = new InjectionToken('Translations');
+var TRANSLATIONS = new InjectionToken('Translations');
 /**
- * @experimental i18n support is experimental.
+ * \@experimental i18n support is experimental.
  */
-var /** @type {?} */ TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
+var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
 var MissingTranslationStrategy = {};
 MissingTranslationStrategy.Error = 0;
 MissingTranslationStrategy.Warning = 1;
@@ -9467,6 +9484,7 @@ var ViewContainerRef_ = (function () {
     });
     ;
     /**
+     * @template C
      * @param {?} templateRef
      * @param {?=} context
      * @param {?=} index
@@ -9478,6 +9496,7 @@ var ViewContainerRef_ = (function () {
         return viewRef;
     };
     /**
+     * @template C
      * @param {?} componentFactory
      * @param {?=} index
      * @param {?=} injector
@@ -13252,9 +13271,9 @@ function transition$1(stateChangeExpr, steps) {
     return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps };
 }
 /**
- * @deprecated This symbol has moved. Please Import from @angular/animations instead!
+ * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  */
-var /** @type {?} */ AUTO_STYLE = '*';
+var AUTO_STYLE = '*';
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @param {?} name
