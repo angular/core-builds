@@ -11,6 +11,7 @@ export declare function createRendererType2(values: {
         [kind: string]: any[];
     };
 }): RendererType2;
+export declare function resolveRendererType2(type: RendererType2): RendererType2;
 export declare function checkBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;

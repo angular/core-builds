@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.5-2d78c8c
+ * @license Angular v4.0.0-rc.5-f925910
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -823,7 +823,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-rc.5-2d78c8c');
+var VERSION = new Version('4.0.0-rc.5-f925910');
 /**
  * Inject decorator and metadata.
  *
@@ -2959,6 +2959,8 @@ var Compiler = (function () {
      * the template of the given component.
      * This is used by the `upgrade` library to compile the appropriate transclude content
      * in the AngularJS wrapper component.
+     *
+     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
      * @param {?} component
      * @return {?}
      */
@@ -3094,6 +3096,24 @@ var ComponentFactory = (function () {
      */
     ComponentFactory.prototype.componentType = function () { };
     /**
+     * selector for all <ng-content> elements in the component.
+     * @abstract
+     * @return {?}
+     */
+    ComponentFactory.prototype.ngContentSelectors = function () { };
+    /**
+     * the inputs of the component.
+     * @abstract
+     * @return {?}
+     */
+    ComponentFactory.prototype.inputs = function () { };
+    /**
+     * the outputs of the component.
+     * @abstract
+     * @return {?}
+     */
+    ComponentFactory.prototype.outputs = function () { };
+    /**
      * Creates a new component.
      * @abstract
      * @param {?} injector
@@ -3196,6 +3216,30 @@ var ComponentFactoryBoundToModule = (function (_super) {
          * @return {?}
          */
         get: function () { return this.factory.componentType; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ComponentFactoryBoundToModule.prototype, "ngContentSelectors", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this.factory.ngContentSelectors; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ComponentFactoryBoundToModule.prototype, "inputs", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this.factory.inputs; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ComponentFactoryBoundToModule.prototype, "outputs", {
+        /**
+         * @return {?}
+         */
+        get: function () { return this.factory.outputs; },
         enumerable: true,
         configurable: true
     });
@@ -8273,21 +8317,41 @@ function unwrapValue(value) {
     }
     return value;
 }
-var /** @type {?} */ _renderCompCount = 0;
+var /** @type {?} */ UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
+var /** @type {?} */ EMPTY_RENDERER_TYPE_ID = '$$empty';
 /**
  * @param {?} values
  * @return {?}
  */
 function createRendererType2(values) {
-    var /** @type {?} */ isFilled = values && (values.encapsulation !== ViewEncapsulation.None ||
-        values.styles.length || Object.keys(values.data).length);
-    if (isFilled) {
-        var /** @type {?} */ id = "c" + _renderCompCount++;
-        return { id: id, styles: values.styles, encapsulation: values.encapsulation, data: values.data };
+    return {
+        id: UNDEFINED_RENDERER_TYPE_ID,
+        styles: values.styles,
+        encapsulation: values.encapsulation,
+        data: values.data
+    };
+}
+var /** @type {?} */ _renderCompCount = 0;
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function resolveRendererType2(type) {
+    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
+        // first time we see this RendererType2. Initialize it...
+        var /** @type {?} */ isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
+            type.styles.length || Object.keys(type.data).length);
+        if (isFilled) {
+            type.id = "c" + _renderCompCount++;
+        }
+        else {
+            type.id = EMPTY_RENDERER_TYPE_ID;
+        }
     }
-    else {
-        return null;
+    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
+        type = null;
     }
+    return type;
 }
 /**
  * @param {?} view
@@ -8824,11 +8888,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         var _b = splitNamespace(namespaceAndName), ns = _b[0], name = _b[1];
         return [ns, name, value];
     }));
-    // This is needed as the jit compiler always uses an empty hash as default RendererType2,
-    // which is not filled for host views.
-    if (componentRendererType && componentRendererType.encapsulation == null) {
-        componentRendererType = null;
-    }
+    componentRendererType = resolveRendererType2(componentRendererType);
     if (componentView) {
         flags |= 16777216 /* ComponentView */;
     }
@@ -9268,10 +9328,13 @@ var /** @type {?} */ EMPTY_CONTEXT = new Object();
  * @param {?} selector
  * @param {?} componentType
  * @param {?} viewDefFactory
+ * @param {?} inputs
+ * @param {?} outputs
+ * @param {?} ngContentSelectors
  * @return {?}
  */
-function createComponentFactory(selector, componentType, viewDefFactory) {
-    return new ComponentFactory_(selector, componentType, viewDefFactory);
+function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+    return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
 }
 /**
  * @param {?} componentFactory
@@ -9286,14 +9349,53 @@ var ComponentFactory_ = (function (_super) {
      * @param {?} selector
      * @param {?} componentType
      * @param {?} viewDefFactory
+     * @param {?} _inputs
+     * @param {?} _outputs
+     * @param {?} ngContentSelectors
      */
-    function ComponentFactory_(selector, componentType, viewDefFactory) {
-        var _this = _super.call(this) || this;
+    function ComponentFactory_(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
+        var _this = 
+        // Attention: this ctor is called as top level function.
+        // Putting any logic in here will destroy closure tree shaking!
+        _super.call(this) || this;
         _this.selector = selector;
         _this.componentType = componentType;
+        _this._inputs = _inputs;
+        _this._outputs = _outputs;
+        _this.ngContentSelectors = ngContentSelectors;
         _this.viewDefFactory = viewDefFactory;
         return _this;
     }
+    Object.defineProperty(ComponentFactory_.prototype, "inputs", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            var /** @type {?} */ inputsArr = [];
+            for (var /** @type {?} */ propName in this._inputs) {
+                var /** @type {?} */ templateName = this._inputs[propName];
+                inputsArr.push({ propName: propName, templateName: templateName });
+            }
+            return inputsArr;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ComponentFactory_.prototype, "outputs", {
+        /**
+         * @return {?}
+         */
+        get: function () {
+            var /** @type {?} */ outputsArr = [];
+            for (var /** @type {?} */ propName in this._outputs) {
+                var /** @type {?} */ templateName = this._outputs[propName];
+                outputsArr.push({ propName: propName, templateName: templateName });
+            }
+            return outputsArr;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Creates a new component.
      * @param {?} injector
