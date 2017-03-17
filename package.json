@@ -1,16 +1,16 @@
 {
   "name": "@angular/core",
-  "version": "4.0.0-rc.3-480a407",
+  "version": "4.0.0-rc.4-fcaca45",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./@angular/core.es5.js",
   "es2015": "./@angular/core.js",
-  "typings": "./typings/core.d.ts",
+  "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
   "peerDependencies": {
     "rxjs": "^5.0.1",
-    "zone.js": "^0.7.2"
+    "zone.js": "^0.8.4"
   },
   "repository": {
     "type": "git",
