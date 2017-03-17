@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.4-fcaca45
+ * @license Angular v4.0.0-rc.5-d0bc83c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -790,7 +790,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.4-fcaca45');
+const VERSION = new Version('4.0.0-rc.5-d0bc83c');
 
 /**
  * Inject decorator and metadata.
@@ -2863,6 +2863,8 @@ class Compiler {
      * the template of the given component.
      * This is used by the `upgrade` library to compile the appropriate transclude content
      * in the AngularJS wrapper component.
+     *
+     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
      * @param {?} component
      * @return {?}
      */
@@ -2990,6 +2992,24 @@ class ComponentFactory {
      */
     componentType() { }
     /**
+     * selector for all <ng-content> elements in the component.
+     * @abstract
+     * @return {?}
+     */
+    ngContentSelectors() { }
+    /**
+     * the inputs of the component.
+     * @abstract
+     * @return {?}
+     */
+    inputs() { }
+    /**
+     * the outputs of the component.
+     * @abstract
+     * @return {?}
+     */
+    outputs() { }
+    /**
      * Creates a new component.
      * @abstract
      * @param {?} injector
@@ -3078,6 +3098,18 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
      * @return {?}
      */
     get componentType() { return this.factory.componentType; }
+    /**
+     * @return {?}
+     */
+    get ngContentSelectors() { return this.factory.ngContentSelectors; }
+    /**
+     * @return {?}
+     */
+    get inputs() { return this.factory.inputs; }
+    /**
+     * @return {?}
+     */
+    get outputs() { return this.factory.outputs; }
     /**
      * @param {?} injector
      * @param {?=} projectableNodes
@@ -7916,21 +7948,41 @@ function unwrapValue(value) {
     }
     return value;
 }
-let /** @type {?} */ _renderCompCount = 0;
+const /** @type {?} */ UNDEFINED_RENDERER_TYPE_ID = '$$undefined';
+const /** @type {?} */ EMPTY_RENDERER_TYPE_ID = '$$empty';
 /**
  * @param {?} values
  * @return {?}
  */
 function createRendererType2(values) {
-    const /** @type {?} */ isFilled = values && (values.encapsulation !== ViewEncapsulation.None ||
-        values.styles.length || Object.keys(values.data).length);
-    if (isFilled) {
-        const /** @type {?} */ id = `c${_renderCompCount++}`;
-        return { id: id, styles: values.styles, encapsulation: values.encapsulation, data: values.data };
+    return {
+        id: UNDEFINED_RENDERER_TYPE_ID,
+        styles: values.styles,
+        encapsulation: values.encapsulation,
+        data: values.data
+    };
+}
+let /** @type {?} */ _renderCompCount = 0;
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function resolveRendererType2(type) {
+    if (type && type.id === UNDEFINED_RENDERER_TYPE_ID) {
+        // first time we see this RendererType2. Initialize it...
+        const /** @type {?} */ isFilled = ((type.encapsulation != null && type.encapsulation !== ViewEncapsulation.None) ||
+            type.styles.length || Object.keys(type.data).length);
+        if (isFilled) {
+            type.id = `c${_renderCompCount++}`;
+        }
+        else {
+            type.id = EMPTY_RENDERER_TYPE_ID;
+        }
     }
-    else {
-        return null;
+    if (type && type.id === EMPTY_RENDERER_TYPE_ID) {
+        type = null;
     }
+    return type;
 }
 /**
  * @param {?} view
@@ -8465,11 +8517,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         const [ns, name] = splitNamespace(namespaceAndName);
         return [ns, name, value];
     }));
-    // This is needed as the jit compiler always uses an empty hash as default RendererType2,
-    // which is not filled for host views.
-    if (componentRendererType && componentRendererType.encapsulation == null) {
-        componentRendererType = null;
-    }
+    componentRendererType = resolveRendererType2(componentRendererType);
     if (componentView) {
         flags |= 16777216 /* ComponentView */;
     }
@@ -8911,10 +8959,13 @@ const /** @type {?} */ EMPTY_CONTEXT = new Object();
  * @param {?} selector
  * @param {?} componentType
  * @param {?} viewDefFactory
+ * @param {?} inputs
+ * @param {?} outputs
+ * @param {?} ngContentSelectors
  * @return {?}
  */
-function createComponentFactory(selector, componentType, viewDefFactory) {
-    return new ComponentFactory_(selector, componentType, viewDefFactory);
+function createComponentFactory(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors) {
+    return new ComponentFactory_(selector, componentType, viewDefFactory, inputs, outputs, ngContentSelectors);
 }
 /**
  * @param {?} componentFactory
@@ -8928,12 +8979,42 @@ class ComponentFactory_ extends ComponentFactory {
      * @param {?} selector
      * @param {?} componentType
      * @param {?} viewDefFactory
+     * @param {?} _inputs
+     * @param {?} _outputs
+     * @param {?} ngContentSelectors
      */
-    constructor(selector, componentType, viewDefFactory) {
+    constructor(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
+        // Attention: this ctor is called as top level function.
+        // Putting any logic in here will destroy closure tree shaking!
         super();
         this.selector = selector;
         this.componentType = componentType;
+        this._inputs = _inputs;
+        this._outputs = _outputs;
+        this.ngContentSelectors = ngContentSelectors;
         this.viewDefFactory = viewDefFactory;
+    }
+    /**
+     * @return {?}
+     */
+    get inputs() {
+        const /** @type {?} */ inputsArr = [];
+        for (let /** @type {?} */ propName in this._inputs) {
+            const /** @type {?} */ templateName = this._inputs[propName];
+            inputsArr.push({ propName, templateName });
+        }
+        return inputsArr;
+    }
+    /**
+     * @return {?}
+     */
+    get outputs() {
+        const /** @type {?} */ outputsArr = [];
+        for (let /** @type {?} */ propName in this._outputs) {
+            const /** @type {?} */ templateName = this._outputs[propName];
+            outputsArr.push({ propName, templateName });
+        }
+        return outputsArr;
     }
     /**
      * Creates a new component.

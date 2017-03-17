@@ -60,6 +60,24 @@ export declare abstract class ComponentFactory<C> {
     readonly abstract selector: string;
     readonly abstract componentType: Type<any>;
     /**
+     * selector for all <ng-content> elements in the component.
+     */
+    readonly abstract ngContentSelectors: string[];
+    /**
+     * the inputs of the component.
+     */
+    readonly abstract inputs: {
+        propName: string;
+        templateName: string;
+    }[];
+    /**
+     * the outputs of the component.
+     */
+    readonly abstract outputs: {
+        propName: string;
+        templateName: string;
+    }[];
+    /**
      * Creates a new component.
      */
     abstract create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
