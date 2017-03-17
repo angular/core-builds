@@ -1,11 +1,11 @@
 {
   "name": "@angular/core",
-  "version": "4.0.0-rc.3-994089d",
+  "version": "4.0.0-rc.3-410aa33",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./@angular/core.es5.js",
   "es2015": "./@angular/core.js",
-  "typings": "./typings/core.d.ts",
+  "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
   "peerDependencies": {
