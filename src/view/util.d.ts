@@ -3,7 +3,7 @@ import { RendererType2 } from '../render/api';
 import { ElementData, NodeDef, QueryValueType, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
 export declare const NOOP: any;
 export declare function tokenKey(token: any): string;
-export declare function unwrapValue(value: any): any;
+export declare function unwrapValue(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
 export declare function createRendererType2(values: {
     styles: (string | any[])[];
     encapsulation: ViewEncapsulation;

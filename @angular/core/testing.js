@@ -1,9 +1,9 @@
 /**
- * @license Angular v4.0.0-rc.5-5c5c2ae
+ * @license Angular v4.0.0-rc.5-bcc29ff
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { getDebugNode, InjectionToken, Injector, NgZone, ɵstringify, NgModule, ReflectiveInjector, ɵERROR_COMPONENT_TYPE, Compiler } from '@angular/core';
+import { Compiler, InjectionToken, Injector, NgModule, NgZone, ReflectiveInjector, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -105,6 +105,13 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
     return Zone.current.runGuarded(fn, context);
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Fixture for debugging and testing a component.
  *
@@ -401,6 +408,13 @@ function flushMicrotasks() {
     get promise() { return this._promise; }
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 function unimplemented() {
     throw Error('unimplemented');
 }
@@ -432,6 +446,13 @@ class TestingCompiler extends Compiler {
 class TestingCompilerFactory {
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const UNDEFINED = new Object();
 /**
  * An abstract class for inserting the root test component element in a platform independent way.
@@ -830,6 +851,18 @@ function getComponentType(error) {
     return error[ɵERROR_COMPONENT_TYPE];
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Public Test Library for unit testing Angular2 Applications. Assumes that you are running
+ * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
+ * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
+ */
 const _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
@@ -841,6 +874,40 @@ if (_global$1.beforeEach) {
 // TODO(juliemr): remove this, only used because we need to export something to have compilation
 // work.
 const __core_private_testing_placeholder__ = '';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of the core/testing package.
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of the core/testing package.
+ */
 
 export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
