@@ -1,6 +1,6 @@
 import { ViewEncapsulation } from '../metadata/view';
 import { RendererType2 } from '../render/api';
-import { ElementData, NodeDef, QueryValueType, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
+import { BindingDef, BindingFlags, ElementData, NodeDef, QueryValueType, ViewData, ViewDefinition, ViewDefinitionFactory } from './types';
 export declare const NOOP: any;
 export declare function tokenKey(token: any): string;
 export declare function unwrapValue(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
@@ -41,7 +41,7 @@ export declare function splitMatchedQueriesDsl(matchedQueriesDsl: [string | numb
 export declare function getParentRenderElement(view: ViewData, renderHost: any, def: NodeDef): any;
 export declare function resolveViewDefinition(factory: ViewDefinitionFactory): ViewDefinition;
 export declare function rootRenderNodes(view: ViewData): any[];
-export declare enum RenderNodeAction {
+export declare const enum RenderNodeAction {
     Collect = 0,
     AppendChild = 1,
     InsertBefore = 2,
@@ -51,6 +51,7 @@ export declare function visitRootRenderNodes(view: ViewData, action: RenderNodeA
 export declare function visitSiblingRenderNodes(view: ViewData, action: RenderNodeAction, startIndex: number, endIndex: number, parentNode: any, nextSibling: any, target: any[]): void;
 export declare function visitProjectedRenderNodes(view: ViewData, ngContentIndex: number, action: RenderNodeAction, parentNode: any, nextSibling: any, target: any[]): void;
 export declare function splitNamespace(name: string): string[];
+export declare function calcBindingFlags(bindings: BindingDef[]): BindingFlags;
 export declare function interpolate(valueCount: number, constAndInterp: string[]): string;
 export declare function inlineInterpolate(valueCount: number, c0: string, a1: any, c1: string, a2?: any, c2?: string, a3?: any, c3?: string, a4?: any, c4?: string, a5?: any, c5?: string, a6?: any, c6?: string, a7?: any, c7?: string, a8?: any, c8?: string, a9?: any, c9?: string): string;
 export declare const EMPTY_ARRAY: any[];

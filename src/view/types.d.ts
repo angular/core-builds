@@ -88,6 +88,7 @@ export interface NodeDef {
     directChildFlags: NodeFlags;
     bindingIndex: number;
     bindings: BindingDef[];
+    bindingFlags: BindingFlags;
     outputIndex: number;
     outputs: OutputDef[];
     /**
@@ -160,22 +161,22 @@ export declare const enum NodeFlags {
     Types = 100673535,
 }
 export interface BindingDef {
-    type: BindingType;
+    flags: BindingFlags;
     ns: string;
     name: string;
     nonMinifiedName: string;
     securityContext: SecurityContext;
     suffix: string;
 }
-export declare const enum BindingType {
-    ElementAttribute = 0,
-    ElementClass = 1,
-    ElementStyle = 2,
-    ElementProperty = 3,
-    ComponentHostProperty = 4,
-    DirectiveProperty = 5,
-    TextInterpolation = 6,
-    PureExpressionProperty = 7,
+export declare const enum BindingFlags {
+    TypeElementAttribute = 1,
+    TypeElementClass = 2,
+    TypeElementStyle = 4,
+    TypeProperty = 8,
+    SyntheticProperty = 16,
+    SyntheticHostProperty = 32,
+    CatSyntheticProperty = 48,
+    Types = 15,
 }
 export interface OutputDef {
     type: OutputType;

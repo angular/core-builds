@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-80075af
+ * @license Angular v4.0.0-rc.5-f634c62
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -826,7 +826,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.5-80075af');
+const VERSION = new Version('4.0.0-rc.5-f634c62');
 
 /**
  * @license
@@ -8582,18 +8582,9 @@ function resolveViewDefinition(factory) {
  */
 function rootRenderNodes(view) {
     const /** @type {?} */ renderNodes = [];
-    visitRootRenderNodes(view, RenderNodeAction.Collect, undefined, undefined, renderNodes);
+    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
     return renderNodes;
 }
-let RenderNodeAction = {};
-RenderNodeAction.Collect = 0;
-RenderNodeAction.AppendChild = 1;
-RenderNodeAction.InsertBefore = 2;
-RenderNodeAction.RemoveChild = 3;
-RenderNodeAction[RenderNodeAction.Collect] = "Collect";
-RenderNodeAction[RenderNodeAction.AppendChild] = "AppendChild";
-RenderNodeAction[RenderNodeAction.InsertBefore] = "InsertBefore";
-RenderNodeAction[RenderNodeAction.RemoveChild] = "RemoveChild";
 /**
  * @param {?} view
  * @param {?} action
@@ -8604,7 +8595,7 @@ RenderNodeAction[RenderNodeAction.RemoveChild] = "RemoveChild";
  */
 function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
     // We need to re-compute the parent node in case the nodes have been moved around manually
-    if (action === RenderNodeAction.RemoveChild) {
+    if (action === 3 /* RemoveChild */) {
         parentNode = view.renderer.parentNode(renderNode(view, view.def.lastRenderRootNode));
     }
     visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
@@ -8680,7 +8671,20 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
     }
     else {
         const /** @type {?} */ rn = renderNode(view, nodeDef);
-        execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 16777216 /* ComponentView */) &&
+            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
+            // Note: we might need to do both actions.
+            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
+                execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+            }
+            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
+                const /** @type {?} */ compView = asElementData(view, nodeDef.index).componentView;
+                execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
+            }
+        }
+        else {
+            execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
+        }
         if (nodeDef.flags & 8388608 /* EmbeddedViews */) {
             const /** @type {?} */ embeddedViews = asElementData(view, nodeDef.index).viewContainer._embeddedViews;
             for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
@@ -8704,16 +8708,16 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
 function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
     const /** @type {?} */ renderer = view.renderer;
     switch (action) {
-        case RenderNodeAction.AppendChild:
+        case 1 /* AppendChild */:
             renderer.appendChild(parentNode, renderNode);
             break;
-        case RenderNodeAction.InsertBefore:
+        case 2 /* InsertBefore */:
             renderer.insertBefore(parentNode, renderNode, nextSibling);
             break;
-        case RenderNodeAction.RemoveChild:
+        case 3 /* RemoveChild */:
             renderer.removeChild(parentNode, renderNode);
             break;
-        case RenderNodeAction.Collect:
+        case 0 /* Collect */:
             target.push(renderNode);
             break;
     }
@@ -8729,6 +8733,17 @@ function splitNamespace(name) {
         return [match[1], match[2]];
     }
     return ['', name];
+}
+/**
+ * @param {?} bindings
+ * @return {?}
+ */
+function calcBindingFlags(bindings) {
+    let /** @type {?} */ flags = 0;
+    for (let /** @type {?} */ i = 0; i < bindings.length; i++) {
+        flags |= bindings[i].flags;
+    }
+    return flags;
 }
 /**
  * @param {?} valueCount
@@ -8845,6 +8860,7 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
         directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: [],
+        bindingFlags: 0,
         outputs: [],
         element: {
             ns: undefined,
@@ -8889,23 +8905,22 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     bindings = bindings || [];
     const /** @type {?} */ bindingDefs = new Array(bindings.length);
     for (let /** @type {?} */ i = 0; i < bindings.length; i++) {
-        const /** @type {?} */ entry = bindings[i];
+        const [bindingFlags, namespaceAndName, suffixOrSecurityContext] = bindings[i];
         let /** @type {?} */ bindingDef;
-        const /** @type {?} */ bindingType = entry[0];
-        const [ns, name] = splitNamespace(entry[1]);
+        const [ns, name] = splitNamespace(namespaceAndName);
         let /** @type {?} */ securityContext;
         let /** @type {?} */ suffix;
-        switch (bindingType) {
-            case 2 /* ElementStyle */:
-                suffix = (entry[2]);
+        switch (bindingFlags & 15 /* Types */) {
+            case 4 /* TypeElementStyle */:
+                suffix = (suffixOrSecurityContext);
                 break;
-            case 0 /* ElementAttribute */:
-            case 3 /* ElementProperty */:
-            case 4 /* ComponentHostProperty */:
-                securityContext = (entry[2]);
+            case 1 /* TypeElementAttribute */:
+            case 8 /* TypeProperty */:
+                securityContext = (suffixOrSecurityContext);
                 break;
         }
-        bindingDefs[i] = { type: bindingType, ns, name, nonMinifiedName: name, securityContext, suffix };
+        bindingDefs[i] =
+            { flags: bindingFlags, ns, name, nonMinifiedName: name, securityContext, suffix };
     }
     outputs = outputs || [];
     const /** @type {?} */ outputDefs = new Array(outputs.length);
@@ -8940,6 +8955,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
         bindings: bindingDefs,
+        bindingFlags: calcBindingFlags(bindingDefs),
         outputs: outputDefs,
         element: {
             ns,
@@ -9090,21 +9106,22 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     const /** @type {?} */ elData = asElementData(view, def.index);
     const /** @type {?} */ renderNode$$1 = elData.renderElement;
     const /** @type {?} */ name = binding.name;
-    switch (binding.type) {
-        case 0 /* ElementAttribute */:
+    switch (binding.flags & 15 /* Types */) {
+        case 1 /* TypeElementAttribute */:
             setElementAttribute(view, binding, renderNode$$1, binding.ns, name, value);
             break;
-        case 1 /* ElementClass */:
+        case 2 /* TypeElementClass */:
             setElementClass(view, renderNode$$1, name, value);
             break;
-        case 2 /* ElementStyle */:
+        case 4 /* TypeElementStyle */:
             setElementStyle(view, binding, renderNode$$1, name, value);
             break;
-        case 3 /* ElementProperty */:
-            setElementProperty(view, binding, renderNode$$1, name, value);
-            break;
-        case 4 /* ComponentHostProperty */:
-            setElementProperty(elData.componentView, binding, renderNode$$1, name, value);
+        case 8 /* TypeProperty */:
+            const /** @type {?} */ bindView = (def.flags & 16777216 /* ComponentView */ &&
+                binding.flags & 32 /* SyntheticHostProperty */) ?
+                elData.componentView :
+                view;
+            setElementProperty(bindView, binding, renderNode$$1, name, value);
             break;
     }
     return true;
@@ -9218,6 +9235,7 @@ function ngContentDef(ngContentIndex, index) {
         references: {}, ngContentIndex,
         childCount: 0,
         bindings: [],
+        bindingFlags: 0,
         outputs: [],
         element: undefined,
         provider: undefined,
@@ -9239,7 +9257,7 @@ function appendNgContent(view, renderHost, def) {
         return;
     }
     const /** @type {?} */ ngContentIndex = def.ngContent.index;
-    visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, undefined, undefined);
+    visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, undefined, undefined);
 }
 
 /**
@@ -9334,14 +9352,14 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
     const /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
     // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
     // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
+    visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function renderDetachView(view) {
-    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, null, null, undefined);
+    visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
 }
 /**
  * @param {?} arr
@@ -10071,7 +10089,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
         for (let /** @type {?} */ prop in props) {
             const [bindingIndex, nonMinifiedName] = props[prop];
             bindings[bindingIndex] = {
-                type: 5 /* DirectiveProperty */,
+                flags: 8 /* TypeProperty */,
                 name: prop, nonMinifiedName,
                 ns: undefined,
                 securityContext: undefined,
@@ -10152,7 +10170,8 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
         childFlags: 0,
         directChildFlags: 0,
         childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
-        ngContentIndex: undefined, childCount, bindings, outputs,
+        ngContentIndex: undefined, childCount, bindings,
+        bindingFlags: calcBindingFlags(bindings), outputs,
         element: undefined,
         provider: { token, tokenKey: tokenKey(token), value, deps: depDefs },
         text: undefined,
@@ -10679,7 +10698,7 @@ function _pureExpressionDef(flags, propertyNames) {
     for (let /** @type {?} */ i = 0; i < propertyNames.length; i++) {
         const /** @type {?} */ prop = propertyNames[i];
         bindings[i] = {
-            type: 7 /* PureExpressionProperty */,
+            flags: 8 /* TypeProperty */,
             name: prop,
             ns: undefined,
             nonMinifiedName: prop,
@@ -10704,6 +10723,7 @@ function _pureExpressionDef(flags, propertyNames) {
         references: {},
         ngContentIndex: undefined,
         childCount: 0, bindings,
+        bindingFlags: calcBindingFlags(bindings),
         outputs: [],
         element: undefined,
         provider: undefined,
@@ -10926,6 +10946,7 @@ function queryDef(flags, id, bindings) {
         references: {},
         childCount: 0,
         bindings: [],
+        bindingFlags: 0,
         outputs: [],
         element: undefined,
         provider: undefined,
@@ -11111,7 +11132,7 @@ function textDef(ngContentIndex, constants) {
     const /** @type {?} */ bindings = new Array(constants.length - 1);
     for (let /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
-            type: 6 /* TextInterpolation */,
+            flags: 8 /* TypeProperty */,
             name: undefined,
             ns: undefined,
             nonMinifiedName: undefined,
@@ -11136,6 +11157,7 @@ function textDef(ngContentIndex, constants) {
         matchedQueryIds: 0,
         references: {}, ngContentIndex,
         childCount: 0, bindings,
+        bindingFlags: calcBindingFlags(bindings),
         outputs: [],
         element: undefined,
         provider: undefined,
@@ -11279,9 +11301,6 @@ function _addInterpolationPart(value, binding) {
  */
 function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     // clone nodes and set auto calculated values
-    if (nodes.length === 0) {
-        throw new Error(`Illegal State: Views without nodes are not allowed!`);
-    }
     const /** @type {?} */ reverseChildNodes = new Array(nodes.length);
     let /** @type {?} */ viewBindingCount = 0;
     let /** @type {?} */ viewDisposableCount = 0;
@@ -11408,6 +11427,9 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
 function validateNode(parent, node, nodeCount) {
     const /** @type {?} */ template = node.element && node.element.template;
     if (template) {
+        if (!template.lastRenderRootNode) {
+            throw new Error(`Illegal State: Embedded templates without nodes are not allowed!`);
+        }
         if (template.lastRenderRootNode &&
             template.lastRenderRootNode.flags & 8388608 /* EmbeddedViews */) {
             throw new Error(`Illegal State: Last root node of a template can't have embedded views, at index ${node.index}!`);
@@ -12260,18 +12282,17 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
     const /** @type {?} */ changed = ((checkAndUpdateNode))(view, nodeDef, argStyle, ...givenValues);
     if (changed) {
         const /** @type {?} */ values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
-        if (nodeDef.flags & (8192 /* TypeDirective */ | 1 /* TypeElement */)) {
+        if (nodeDef.flags & 8192 /* TypeDirective */) {
             const /** @type {?} */ bindingValues = {};
             for (let /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
                 const /** @type {?} */ binding = nodeDef.bindings[i];
                 const /** @type {?} */ value = values[i];
-                if ((binding.type === 4 /* ComponentHostProperty */ ||
-                    binding.type === 5 /* DirectiveProperty */)) {
+                if (binding.flags & 8 /* TypeProperty */) {
                     bindingValues[normalizeDebugBindingName(binding.nonMinifiedName)] =
                         normalizeDebugBindingValue(value);
                 }
             }
-            const /** @type {?} */ elDef = nodeDef.flags & 8192 /* TypeDirective */ ? nodeDef.parent : nodeDef;
+            const /** @type {?} */ elDef = nodeDef.parent;
             const /** @type {?} */ el = asElementData(view, elDef.index).renderElement;
             if (!elDef.element.name) {
                 // a comment.
