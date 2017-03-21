@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-8e6995c
+ * @license Angular v4.0.0-rc.5-64beae9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.5-8e6995c');
+const VERSION = new Version('4.0.0-rc.5-64beae9');
 
 /**
  * @license
@@ -5775,9 +5775,10 @@ class ViewContainerRef {
      * @param {?=} index
      * @param {?=} injector
      * @param {?=} projectableNodes
+     * @param {?=} ngModule
      * @return {?}
      */
-    createComponent(componentFactory, index, injector, projectableNodes) { }
+    createComponent(componentFactory, index, injector, projectableNodes, ngModule) { }
     /**
      * Inserts a View identified by a {\@link ViewRef} into the container at the specified `index`.
      *
@@ -8450,7 +8451,9 @@ function markParentViewsForCheck(view) {
  * @return {?}
  */
 function dispatchEvent(view, nodeIndex, eventName, event) {
-    markParentViewsForCheck(view);
+    const /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    const /** @type {?} */ startView = nodeDef.flags & 16777216 /* ComponentView */ ? asElementData(view, nodeIndex).componentView : view;
+    markParentViewsForCheck(startView);
     return Services.handleEvent(view, nodeIndex, eventName, event);
 }
 /**
@@ -9577,7 +9580,7 @@ class ViewContainerRef_ {
             elDef = viewParentEl(view);
             view = view.parent;
         }
-        return view ? new Injector_(view, elDef) : this._view.root.injector;
+        return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
     }
     /**
      * @return {?}
@@ -9625,11 +9628,15 @@ class ViewContainerRef_ {
      * @param {?=} index
      * @param {?=} injector
      * @param {?=} projectableNodes
+     * @param {?=} ngModuleRef
      * @return {?}
      */
-    createComponent(componentFactory, index, injector, projectableNodes) {
+    createComponent(componentFactory, index, injector, projectableNodes, ngModuleRef) {
         const /** @type {?} */ contextInjector = injector || this.parentInjector;
-        const /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes);
+        if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
+            ngModuleRef = contextInjector.get(NgModuleRef);
+        }
+        const /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
         this.insert(componentRef.hostView, index);
         return componentRef;
     }
@@ -9835,7 +9842,7 @@ class Injector_ {
      * @return {?}
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-        const /** @type {?} */ allowPrivateServices = (this.elDef.flags & 16777216 /* ComponentView */) !== 0;
+        const /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & 16777216 /* ComponentView */) !== 0 : false;
         return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token, tokenKey: tokenKey(token) }, notFoundValue);
     }
 }
@@ -10473,7 +10480,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
         notFoundValue = null;
     }
     const /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
-    if (depDef.flags & 1 /* SkipSelf */) {
+    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
         allowPrivateServices = false;
         elDef = elDef.parent;
     }
@@ -12482,32 +12489,50 @@ class DebugContext_ {
      * @return {?}
      */
     logError(console, ...values) {
-        let /** @type {?} */ logViewFactory;
+        let /** @type {?} */ logViewDef;
         let /** @type {?} */ logNodeIndex;
         if (this.nodeDef.flags & 2 /* TypeText */) {
-            logViewFactory = this.view.def.factory;
+            logViewDef = this.view.def;
             logNodeIndex = this.nodeDef.index;
         }
         else {
-            logViewFactory = this.elView.def.factory;
+            logViewDef = this.elView.def;
             logNodeIndex = this.elDef.index;
         }
-        let /** @type {?} */ currNodeIndex = -1;
+        // Note: we only generate a log function for text and element nodes
+        // to make the generated code as small as possible.
+        const /** @type {?} */ renderNodeIndex = getRenderNodeIndex(logViewDef, logNodeIndex);
+        let /** @type {?} */ currRenderNodeIndex = -1;
         let /** @type {?} */ nodeLogger = () => {
-            currNodeIndex++;
-            if (currNodeIndex === logNodeIndex) {
+            currRenderNodeIndex++;
+            if (currRenderNodeIndex === renderNodeIndex) {
                 return console.error.bind(console, ...values);
             }
             else {
                 return NOOP;
             }
         };
-        logViewFactory(nodeLogger);
-        if (currNodeIndex < logNodeIndex) {
+        logViewDef.factory(nodeLogger);
+        if (currRenderNodeIndex < renderNodeIndex) {
             console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
             ((console.error))(...values);
         }
     }
+}
+/**
+ * @param {?} viewDef
+ * @param {?} nodeIndex
+ * @return {?}
+ */
+function getRenderNodeIndex(viewDef$$1, nodeIndex) {
+    let /** @type {?} */ renderNodeIndex = -1;
+    for (let /** @type {?} */ i = 0; i <= nodeIndex; i++) {
+        const /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
+        if (nodeDef.flags & 3 /* CatRenderNode */) {
+            renderNodeIndex++;
+        }
+    }
+    return renderNodeIndex;
 }
 /**
  * @param {?} view

@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.5-8e6995c
+ * @license Angular v4.0.0-rc.5-64beae9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-rc.5-8e6995c');
+var VERSION = new Version('4.0.0-rc.5-64beae9');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -6049,9 +6049,10 @@ var ViewContainerRef = (function () {
      * @param {?=} index
      * @param {?=} injector
      * @param {?=} projectableNodes
+     * @param {?=} ngModule
      * @return {?}
      */
-    ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) { };
+    ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModule) { };
     /**
      * Inserts a View identified by a {\@link ViewRef} into the container at the specified `index`.
      *
@@ -8807,7 +8808,9 @@ function markParentViewsForCheck(view) {
  * @return {?}
  */
 function dispatchEvent(view, nodeIndex, eventName, event) {
-    markParentViewsForCheck(view);
+    var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+    var /** @type {?} */ startView = nodeDef.flags & 16777216 /* ComponentView */ ? asElementData(view, nodeIndex).componentView : view;
+    markParentViewsForCheck(startView);
     return Services.handleEvent(view, nodeIndex, eventName, event);
 }
 /**
@@ -9982,7 +9985,7 @@ var ViewContainerRef_ = (function () {
                 elDef = viewParentEl(view);
                 view = view.parent;
             }
-            return view ? new Injector_(view, elDef) : this._view.root.injector;
+            return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
         },
         enumerable: true,
         configurable: true
@@ -10037,11 +10040,15 @@ var ViewContainerRef_ = (function () {
      * @param {?=} index
      * @param {?=} injector
      * @param {?=} projectableNodes
+     * @param {?=} ngModuleRef
      * @return {?}
      */
-    ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes) {
+    ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
         var /** @type {?} */ contextInjector = injector || this.parentInjector;
-        var /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes);
+        if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
+            ngModuleRef = contextInjector.get(NgModuleRef);
+        }
+        var /** @type {?} */ componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
         this.insert(componentRef.hostView, index);
         return componentRef;
     };
@@ -10269,7 +10276,7 @@ var Injector_ = (function () {
      */
     Injector_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        var /** @type {?} */ allowPrivateServices = (this.elDef.flags & 16777216 /* ComponentView */) !== 0;
+        var /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & 16777216 /* ComponentView */) !== 0 : false;
         return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token: token, tokenKey: tokenKey(token) }, notFoundValue);
     };
     return Injector_;
@@ -10899,7 +10906,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
         notFoundValue = null;
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
-    if (depDef.flags & 1 /* SkipSelf */) {
+    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
         allowPrivateServices = false;
         elDef = elDef.parent;
     }
@@ -12952,20 +12959,23 @@ var DebugContext_ = (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             values[_i - 1] = arguments[_i];
         }
-        var /** @type {?} */ logViewFactory;
+        var /** @type {?} */ logViewDef;
         var /** @type {?} */ logNodeIndex;
         if (this.nodeDef.flags & 2 /* TypeText */) {
-            logViewFactory = this.view.def.factory;
+            logViewDef = this.view.def;
             logNodeIndex = this.nodeDef.index;
         }
         else {
-            logViewFactory = this.elView.def.factory;
+            logViewDef = this.elView.def;
             logNodeIndex = this.elDef.index;
         }
-        var /** @type {?} */ currNodeIndex = -1;
+        // Note: we only generate a log function for text and element nodes
+        // to make the generated code as small as possible.
+        var /** @type {?} */ renderNodeIndex = getRenderNodeIndex(logViewDef, logNodeIndex);
+        var /** @type {?} */ currRenderNodeIndex = -1;
         var /** @type {?} */ nodeLogger = function () {
-            currNodeIndex++;
-            if (currNodeIndex === logNodeIndex) {
+            currRenderNodeIndex++;
+            if (currRenderNodeIndex === renderNodeIndex) {
                 return (_a = console.error).bind.apply(_a, [console].concat(values));
             }
             else {
@@ -12973,14 +12983,29 @@ var DebugContext_ = (function () {
             }
             var _a;
         };
-        logViewFactory(nodeLogger);
-        if (currNodeIndex < logNodeIndex) {
+        logViewDef.factory(nodeLogger);
+        if (currRenderNodeIndex < renderNodeIndex) {
             console.error('Illegal state: the ViewDefinitionFactory did not call the logger!');
             console.error.apply(console, values);
         }
     };
     return DebugContext_;
 }());
+/**
+ * @param {?} viewDef
+ * @param {?} nodeIndex
+ * @return {?}
+ */
+function getRenderNodeIndex(viewDef$$1, nodeIndex) {
+    var /** @type {?} */ renderNodeIndex = -1;
+    for (var /** @type {?} */ i = 0; i <= nodeIndex; i++) {
+        var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
+        if (nodeDef.flags & 3 /* CatRenderNode */) {
+            renderNodeIndex++;
+        }
+    }
+    return renderNodeIndex;
+}
 /**
  * @param {?} view
  * @return {?}

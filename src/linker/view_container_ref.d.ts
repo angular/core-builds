@@ -8,6 +8,7 @@
 import { Injector } from '../di/injector';
 import { ComponentFactory, ComponentRef } from './component_factory';
 import { ElementRef } from './element_ref';
+import { NgModuleRef } from './ng_module_factory';
 import { TemplateRef } from './template_ref';
 import { EmbeddedViewRef, ViewRef } from './view_ref';
 /**
@@ -70,7 +71,7 @@ export declare abstract class ViewContainerRef {
      *
      * Returns the {@link ComponentRef} of the Host View created for the newly instantiated Component.
      */
-    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][]): ComponentRef<C>;
+    abstract createComponent<C>(componentFactory: ComponentFactory<C>, index?: number, injector?: Injector, projectableNodes?: any[][], ngModule?: NgModuleRef<any>): ComponentRef<C>;
     /**
      * Inserts a View identified by a {@link ViewRef} into the container at the specified `index`.
      *
