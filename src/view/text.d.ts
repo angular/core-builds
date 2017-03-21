@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { NodeDef, TextData, ViewData } from './types';
 export declare function textDef(ngContentIndex: number, constants: string[]): NodeDef;
 export declare function createText(view: ViewData, renderHost: any, def: NodeDef): TextData;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-e59e5e2
+ * @license Angular v4.0.0-rc.5-5efc860
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.5-e59e5e2');
+const VERSION = new Version('4.0.0-rc.5-5efc860');
 
 /**
  * @license
@@ -8912,7 +8912,6 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     const /** @type {?} */ bindingDefs = new Array(bindings.length);
     for (let /** @type {?} */ i = 0; i < bindings.length; i++) {
         const [bindingFlags, namespaceAndName, suffixOrSecurityContext] = bindings[i];
-        let /** @type {?} */ bindingDef;
         const [ns, name] = splitNamespace(namespaceAndName);
         let /** @type {?} */ securityContext;
         let /** @type {?} */ suffix;
@@ -11311,7 +11310,6 @@ function _addInterpolationPart(value, binding) {
  */
 function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     // clone nodes and set auto calculated values
-    const /** @type {?} */ reverseChildNodes = new Array(nodes.length);
     let /** @type {?} */ viewBindingCount = 0;
     let /** @type {?} */ viewDisposableCount = 0;
     let /** @type {?} */ viewNodeFlags = 0;
@@ -11379,7 +11377,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         if (node.flags & 10112 /* CatProvider */) {
             if (!currentElementHasPublicProviders) {
                 currentElementHasPublicProviders = true;
-                // Use protoypical inheritance to not get O(n^2) complexity...
+                // Use prototypical inheritance to not get O(n^2) complexity...
                 currentParent.element.publicProviders =
                     Object.create(currentParent.element.publicProviders);
                 currentParent.element.allProviders = currentParent.element.publicProviders;
@@ -11392,7 +11390,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
             else {
                 if (!currentElementHasPrivateProviders) {
                     currentElementHasPrivateProviders = true;
-                    // Use protoypical inheritance to not get O(n^2) complexity...
+                    // Use protoyypical inheritance to not get O(n^2) complexity...
                     currentParent.element.allProviders = Object.create(currentParent.element.publicProviders);
                 }
                 currentParent.element.allProviders[node.provider.tokenKey] = node;
@@ -12245,7 +12243,6 @@ function debugUpdateDirectives(view, checkType) {
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
-    
 }
 /**
  * @param {?} view

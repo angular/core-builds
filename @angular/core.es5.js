@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.5-e59e5e2
+ * @license Angular v4.0.0-rc.5-5efc860
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-rc.5-e59e5e2');
+var VERSION = new Version('4.0.0-rc.5-5efc860');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -9270,7 +9270,6 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     var /** @type {?} */ bindingDefs = new Array(bindings.length);
     for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
         var _c = bindings[i], bindingFlags = _c[0], namespaceAndName_1 = _c[1], suffixOrSecurityContext = _c[2];
-        var /** @type {?} */ bindingDef = void 0;
         var _d = splitNamespace(namespaceAndName_1), ns_1 = _d[0], name_1 = _d[1];
         var /** @type {?} */ securityContext = void 0;
         var /** @type {?} */ suffix = void 0;
@@ -11733,7 +11732,6 @@ function _addInterpolationPart(value, binding) {
  */
 function viewDef(flags, nodes, updateDirectives, updateRenderer) {
     // clone nodes and set auto calculated values
-    var /** @type {?} */ reverseChildNodes = new Array(nodes.length);
     var /** @type {?} */ viewBindingCount = 0;
     var /** @type {?} */ viewDisposableCount = 0;
     var /** @type {?} */ viewNodeFlags = 0;
@@ -11801,7 +11799,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         if (node.flags & 10112 /* CatProvider */) {
             if (!currentElementHasPublicProviders) {
                 currentElementHasPublicProviders = true;
-                // Use protoypical inheritance to not get O(n^2) complexity...
+                // Use prototypical inheritance to not get O(n^2) complexity...
                 currentParent.element.publicProviders =
                     Object.create(currentParent.element.publicProviders);
                 currentParent.element.allProviders = currentParent.element.publicProviders;
@@ -11814,7 +11812,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
             else {
                 if (!currentElementHasPrivateProviders) {
                     currentElementHasPrivateProviders = true;
-                    // Use protoypical inheritance to not get O(n^2) complexity...
+                    // Use protoyypical inheritance to not get O(n^2) complexity...
                     currentParent.element.allProviders = Object.create(currentParent.element.publicProviders);
                 }
                 currentParent.element.allProviders[node.provider.tokenKey] = node;
