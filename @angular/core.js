@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-2489e4b
+ * @license Angular v4.0.0-rc.5-8e6995c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -145,6 +145,9 @@ function stringify(token) {
         return `${token.name}`;
     }
     const /** @type {?} */ res = token.toString();
+    if (res == null) {
+        return '' + res;
+    }
     const /** @type {?} */ newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
@@ -826,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.5-2489e4b');
+const VERSION = new Version('4.0.0-rc.5-8e6995c');
 
 /**
  * @license
