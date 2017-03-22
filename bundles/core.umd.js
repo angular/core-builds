@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-a50d79d
+ * @license Angular v4.0.0-rc.5-ea49a95
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.5-a50d79d
+ * @license Angular v4.0.0-rc.5-ea49a95
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -868,7 +868,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-rc.5-a50d79d');
+var VERSION = new Version('4.0.0-rc.5-ea49a95');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -14134,6 +14134,7 @@ exports.ɵmakeDecorator = makeDecorator;
 exports.ɵisObservable = isObservable;
 exports.ɵisPromise = isPromise;
 exports.ɵmerge = merge$1;
+exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
 exports.ɵNgModuleInjector = NgModuleInjector;
 exports.ɵregisterModuleFactory = registerModuleFactory;
 exports.ɵEMPTY_ARRAY = EMPTY_ARRAY;
