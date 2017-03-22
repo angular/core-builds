@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-rc.5-5efc860
+ * @license Angular v4.0.0-rc.5-1bcbcfd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-rc.5-5efc860');
+var VERSION = new Version('4.0.0-rc.5-1bcbcfd');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -1809,6 +1809,11 @@ var ReflectionCapabilities = (function () {
         return "./" + stringify(type);
     };
     /**
+     * @param {?} type
+     * @return {?}
+     */
+    ReflectionCapabilities.prototype.resourceUri = function (type) { return "./" + stringify(type); };
+    /**
      * @param {?} name
      * @param {?} moduleUrl
      * @param {?} members
@@ -1884,6 +1889,12 @@ var ReflectorReader = (function () {
      * @return {?}
      */
     ReflectorReader.prototype.importUri = function (typeOrFunc) { };
+    /**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    ReflectorReader.prototype.resourceUri = function (typeOrFunc) { };
     /**
      * @abstract
      * @param {?} name
@@ -1982,6 +1993,11 @@ var Reflector = (function (_super) {
      * @return {?}
      */
     Reflector.prototype.importUri = function (type) { return this.reflectionCapabilities.importUri(type); };
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    Reflector.prototype.resourceUri = function (type) { return this.reflectionCapabilities.resourceUri(type); };
     /**
      * @param {?} name
      * @param {?} moduleUrl

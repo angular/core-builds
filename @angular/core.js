@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.5-5efc860
+ * @license Angular v4.0.0-rc.5-1bcbcfd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.5-5efc860');
+const VERSION = new Version('4.0.0-rc.5-1bcbcfd');
 
 /**
  * @license
@@ -1755,6 +1755,11 @@ class ReflectionCapabilities {
         return `./${stringify(type)}`;
     }
     /**
+     * @param {?} type
+     * @return {?}
+     */
+    resourceUri(type) { return `./${stringify(type)}`; }
+    /**
      * @param {?} name
      * @param {?} moduleUrl
      * @param {?} members
@@ -1828,6 +1833,12 @@ class ReflectorReader {
      * @return {?}
      */
     importUri(typeOrFunc) { }
+    /**
+     * @abstract
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    resourceUri(typeOrFunc) { }
     /**
      * @abstract
      * @param {?} name
@@ -1924,6 +1935,11 @@ class Reflector extends ReflectorReader {
      * @return {?}
      */
     importUri(type) { return this.reflectionCapabilities.importUri(type); }
+    /**
+     * @param {?} type
+     * @return {?}
+     */
+    resourceUri(type) { return this.reflectionCapabilities.resourceUri(type); }
     /**
      * @param {?} name
      * @param {?} moduleUrl
