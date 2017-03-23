@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-rc.6-c8ab5cb
+ * @license Angular v4.0.0-rc.6-b800a0c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-rc.6-c8ab5cb');
+const VERSION = new Version('4.0.0-rc.6-b800a0c');
 
 /**
  * @license
@@ -13544,8 +13544,6 @@ function transition$$1(stateChangeExpr, steps) {
  * @description
  * Entry point for all public APIs of the core package.
  */
-
-// This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * Generated bundle index. Do not edit.
