@@ -12,5 +12,6 @@ export declare function createPipeInstance(view: ViewData, def: NodeDef): any;
 export declare function createDirectiveInstance(view: ViewData, def: NodeDef): any;
 export declare function checkAndUpdateDirectiveInline(view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any): boolean;
 export declare function checkAndUpdateDirectiveDynamic(view: ViewData, def: NodeDef, values: any[]): boolean;
+export declare const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR: {};
 export declare function resolveDep(view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, depDef: DepDef, notFoundValue?: Object): any;
 export declare function callLifecycleHooksChildrenFirst(view: ViewData, lifecycles: NodeFlags): void;
