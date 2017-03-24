@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-8785b2b
+ * @license Angular v4.0.0-c17b912
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-8785b2b
+ * @license Angular v4.0.0-c17b912
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -868,7 +868,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-8785b2b');
+var VERSION = new Version('4.0.0-c17b912');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -2886,24 +2886,6 @@ function isPromise(obj) {
 function isObservable(obj) {
     // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
     return !!obj && typeof obj.subscribe === 'function';
-}
-/**
- * @template V
- * @param {?} m1
- * @param {?} m2
- * @return {?}
- */
-function merge$1(m1, m2) {
-    var /** @type {?} */ m = {};
-    for (var _i = 0, _a = Object.keys(m1); _i < _a.length; _i++) {
-        var k = _a[_i];
-        m[k] = m1[k];
-    }
-    for (var _b = 0, _c = Object.keys(m2); _b < _c.length; _b++) {
-        var k = _c[_b];
-        m[k] = m2[k];
-    }
-    return m;
 }
 /**
  * @license
@@ -14133,7 +14115,6 @@ exports.ɵstringify = stringify;
 exports.ɵmakeDecorator = makeDecorator;
 exports.ɵisObservable = isObservable;
 exports.ɵisPromise = isPromise;
-exports.ɵmerge = merge$1;
 exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
 exports.ɵNgModuleInjector = NgModuleInjector;
 exports.ɵregisterModuleFactory = registerModuleFactory;
