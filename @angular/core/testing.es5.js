@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-6605dd1
+ * @license Angular v4.0.0-816b389
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -904,7 +904,7 @@ function getComponentType(error) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Public Test Library for unit testing Angular2 Applications. Assumes that you are running
+ * Public Test Library for unit testing Angular applications. Assumes that you are running
  * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
  * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
