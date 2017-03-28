@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-d438b88
+ * @license Angular v4.0.0-aa16ccd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-d438b88');
+var VERSION = new Version('4.0.0-aa16ccd');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -12787,7 +12787,7 @@ function camelCaseToDashCase(input) {
 function normalizeDebugBindingValue(value) {
     try {
         // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value ? value.toString().slice(0, 30) : value;
+        return value != null ? value.toString().slice(0, 30) : value;
     }
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';

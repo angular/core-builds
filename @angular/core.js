@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-d438b88
+ * @license Angular v4.0.0-aa16ccd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-d438b88');
+const VERSION = new Version('4.0.0-aa16ccd');
 
 /**
  * @license
@@ -12354,7 +12354,7 @@ function camelCaseToDashCase(input) {
 function normalizeDebugBindingValue(value) {
     try {
         // Limit the size of the value as otherwise the DOM just gets polluted.
-        return value ? value.toString().slice(0, 30) : value;
+        return value != null ? value.toString().slice(0, 30) : value;
     }
     catch (e) {
         return '[ERROR] Exception while trying to serialize the value';
