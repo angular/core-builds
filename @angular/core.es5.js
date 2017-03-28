@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-861953c
+ * @license Angular v4.0.0-93d48f1
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-861953c');
+var VERSION = new Version('4.0.0-93d48f1');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7787,6 +7787,7 @@ var DefaultKeyValueDiffer = (function () {
     function DefaultKeyValueDiffer() {
         this._records = new Map();
         this._mapHead = null;
+        this._appendAfter = null;
         this._previousMapHead = null;
         this._changesHead = null;
         this._changesTail = null;
@@ -7874,57 +7875,110 @@ var DefaultKeyValueDiffer = (function () {
      */
     DefaultKeyValueDiffer.prototype.onDestroy = function () { };
     /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
      * @param {?} map
      * @return {?}
      */
     DefaultKeyValueDiffer.prototype.check = function (map) {
         var _this = this;
         this._reset();
-        var /** @type {?} */ records = this._records;
-        var /** @type {?} */ oldSeqRecord = this._mapHead;
-        var /** @type {?} */ lastOldSeqRecord = null;
-        var /** @type {?} */ lastNewSeqRecord = null;
-        var /** @type {?} */ seqChanged = false;
+        var /** @type {?} */ insertBefore = this._mapHead;
+        this._appendAfter = null;
         this._forEach(map, function (value, key) {
-            var /** @type {?} */ newSeqRecord;
-            if (oldSeqRecord && key === oldSeqRecord.key) {
-                newSeqRecord = oldSeqRecord;
-                _this._maybeAddToChanges(newSeqRecord, value);
+            if (insertBefore && insertBefore.key === key) {
+                _this._maybeAddToChanges(insertBefore, value);
+                _this._appendAfter = insertBefore;
+                insertBefore = insertBefore._next;
             }
             else {
-                seqChanged = true;
-                if (oldSeqRecord !== null) {
-                    _this._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
-                    _this._addToRemovals(oldSeqRecord);
-                }
-                if (records.has(key)) {
-                    newSeqRecord = records.get(key);
-                    _this._maybeAddToChanges(newSeqRecord, value);
-                }
-                else {
-                    newSeqRecord = new KeyValueChangeRecord_(key);
-                    records.set(key, newSeqRecord);
-                    newSeqRecord.currentValue = value;
-                    _this._addToAdditions(newSeqRecord);
-                }
+                var /** @type {?} */ record = _this._getOrCreateRecordForKey(key, value);
+                insertBefore = _this._insertBeforeOrAppend(insertBefore, record);
             }
-            if (seqChanged) {
-                if (_this._isInRemovals(newSeqRecord)) {
-                    _this._removeFromRemovals(newSeqRecord);
-                }
-                if (lastNewSeqRecord == null) {
-                    _this._mapHead = newSeqRecord;
-                }
-                else {
-                    lastNewSeqRecord._next = newSeqRecord;
-                }
-            }
-            lastOldSeqRecord = oldSeqRecord;
-            lastNewSeqRecord = newSeqRecord;
-            oldSeqRecord = oldSeqRecord && oldSeqRecord._next;
         });
-        this._truncate(lastOldSeqRecord, oldSeqRecord);
+        // Items remaining at the end of the list have been deleted
+        if (insertBefore) {
+            if (insertBefore._prev) {
+                insertBefore._prev._next = null;
+            }
+            this._removalsHead = insertBefore;
+            this._removalsTail = insertBefore;
+            for (var /** @type {?} */ record = insertBefore; record !== null; record = record._nextRemoved) {
+                if (record === this._mapHead) {
+                    this._mapHead = null;
+                }
+                this._records.delete(record.key);
+                record._nextRemoved = record._next;
+                record.previousValue = record.currentValue;
+                record.currentValue = null;
+                record._prev = null;
+                record._next = null;
+            }
+        }
         return this.isDirty;
+    };
+    /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     * @param {?} before
+     * @param {?} record
+     * @return {?}
+     */
+    DefaultKeyValueDiffer.prototype._insertBeforeOrAppend = function (before, record) {
+        if (before) {
+            var /** @type {?} */ prev = before._prev;
+            record._next = before;
+            record._prev = prev;
+            before._prev = record;
+            if (prev) {
+                prev._next = record;
+            }
+            if (before === this._mapHead) {
+                this._mapHead = record;
+            }
+            this._appendAfter = before;
+            return before;
+        }
+        if (this._appendAfter) {
+            this._appendAfter._next = record;
+            record._prev = this._appendAfter;
+        }
+        else {
+            this._mapHead = record;
+        }
+        this._appendAfter = record;
+        return null;
+    };
+    /**
+     * @param {?} key
+     * @param {?} value
+     * @return {?}
+     */
+    DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = function (key, value) {
+        if (this._records.has(key)) {
+            var /** @type {?} */ record_1 = this._records.get(key);
+            this._maybeAddToChanges(record_1, value);
+            var /** @type {?} */ prev = record_1._prev;
+            var /** @type {?} */ next = record_1._next;
+            if (prev) {
+                prev._next = next;
+            }
+            if (next) {
+                next._prev = prev;
+            }
+            record_1._next = null;
+            record_1._prev = null;
+            return record_1;
+        }
+        var /** @type {?} */ record = new KeyValueChangeRecord_(key);
+        this._records.set(key, record);
+        record.currentValue = value;
+        this._addToAdditions(record);
+        return record;
     };
     /**
      * \@internal
@@ -7933,10 +7987,13 @@ var DefaultKeyValueDiffer = (function () {
     DefaultKeyValueDiffer.prototype._reset = function () {
         if (this.isDirty) {
             var /** @type {?} */ record = void 0;
-            // Record the state of the mapping
-            for (record = this._previousMapHead = this._mapHead; record !== null; record = record._next) {
+            // let `_previousMapHead` contain the state of the map before the changes
+            this._previousMapHead = this._mapHead;
+            for (record = this._previousMapHead; record !== null; record = record._next) {
                 record._nextPrevious = record._next;
             }
+            // Update `record.previousValue` with the value of the item before the changes
+            // We need to update all changed items (that's those which have been added and changed)
             for (record = this._changesHead; record !== null; record = record._nextChanged) {
                 record.previousValue = record.currentValue;
             }
@@ -7946,30 +8003,6 @@ var DefaultKeyValueDiffer = (function () {
             this._changesHead = this._changesTail = null;
             this._additionsHead = this._additionsTail = null;
             this._removalsHead = this._removalsTail = null;
-        }
-    };
-    /**
-     * @param {?} lastRecord
-     * @param {?} record
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype._truncate = function (lastRecord, record) {
-        while (record !== null) {
-            if (lastRecord === null) {
-                this._mapHead = null;
-            }
-            else {
-                lastRecord._next = null;
-            }
-            var /** @type {?} */ nextRecord = record._next;
-            this._addToRemovals(record);
-            lastRecord = record;
-            record = nextRecord;
-        }
-        for (var /** @type {?} */ rec = this._removalsHead; rec !== null; rec = rec._nextRemoved) {
-            rec.previousValue = rec.currentValue;
-            rec.currentValue = null;
-            this._records.delete(rec.key);
         }
     };
     /**
@@ -7983,64 +8016,6 @@ var DefaultKeyValueDiffer = (function () {
             record.currentValue = newValue;
             this._addToChanges(record);
         }
-    };
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype._isInRemovals = function (record) {
-        return record === this._removalsHead || record._nextRemoved !== null ||
-            record._prevRemoved !== null;
-    };
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype._addToRemovals = function (record) {
-        if (this._removalsHead === null) {
-            this._removalsHead = this._removalsTail = record;
-        }
-        else {
-            this._removalsTail._nextRemoved = record;
-            record._prevRemoved = this._removalsTail;
-            this._removalsTail = record;
-        }
-    };
-    /**
-     * @param {?} prev
-     * @param {?} record
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype._removeFromSeq = function (prev, record) {
-        var /** @type {?} */ next = record._next;
-        if (prev === null) {
-            this._mapHead = next;
-        }
-        else {
-            prev._next = next;
-        }
-        record._next = null;
-    };
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype._removeFromRemovals = function (record) {
-        var /** @type {?} */ prev = record._prevRemoved;
-        var /** @type {?} */ next = record._nextRemoved;
-        if (prev === null) {
-            this._removalsHead = next;
-        }
-        else {
-            prev._nextRemoved = next;
-        }
-        if (next === null) {
-            this._removalsTail = prev;
-        }
-        else {
-            next._prevRemoved = prev;
-        }
-        record._prevRemoved = record._nextRemoved = null;
     };
     /**
      * @param {?} record
@@ -8138,15 +8113,15 @@ var KeyValueChangeRecord_ = (function () {
         /**
          * \@internal
          */
+        this._prev = null;
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
         /**
          * \@internal
          */
         this._nextRemoved = null;
-        /**
-         * \@internal
-         */
-        this._prevRemoved = null;
         /**
          * \@internal
          */

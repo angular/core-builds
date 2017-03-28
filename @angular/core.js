@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-861953c
+ * @license Angular v4.0.0-93d48f1
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-861953c');
+const VERSION = new Version('4.0.0-93d48f1');
 
 /**
  * @license
@@ -7445,6 +7445,7 @@ class DefaultKeyValueDiffer {
     constructor() {
         this._records = new Map();
         this._mapHead = null;
+        this._appendAfter = null;
         this._previousMapHead = null;
         this._changesHead = null;
         this._changesTail = null;
@@ -7528,56 +7529,109 @@ class DefaultKeyValueDiffer {
      */
     onDestroy() { }
     /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
      * @param {?} map
      * @return {?}
      */
     check(map) {
         this._reset();
-        const /** @type {?} */ records = this._records;
-        let /** @type {?} */ oldSeqRecord = this._mapHead;
-        let /** @type {?} */ lastOldSeqRecord = null;
-        let /** @type {?} */ lastNewSeqRecord = null;
-        let /** @type {?} */ seqChanged = false;
+        let /** @type {?} */ insertBefore = this._mapHead;
+        this._appendAfter = null;
         this._forEach(map, (value, key) => {
-            let /** @type {?} */ newSeqRecord;
-            if (oldSeqRecord && key === oldSeqRecord.key) {
-                newSeqRecord = oldSeqRecord;
-                this._maybeAddToChanges(newSeqRecord, value);
+            if (insertBefore && insertBefore.key === key) {
+                this._maybeAddToChanges(insertBefore, value);
+                this._appendAfter = insertBefore;
+                insertBefore = insertBefore._next;
             }
             else {
-                seqChanged = true;
-                if (oldSeqRecord !== null) {
-                    this._removeFromSeq(lastOldSeqRecord, oldSeqRecord);
-                    this._addToRemovals(oldSeqRecord);
-                }
-                if (records.has(key)) {
-                    newSeqRecord = records.get(key);
-                    this._maybeAddToChanges(newSeqRecord, value);
-                }
-                else {
-                    newSeqRecord = new KeyValueChangeRecord_(key);
-                    records.set(key, newSeqRecord);
-                    newSeqRecord.currentValue = value;
-                    this._addToAdditions(newSeqRecord);
-                }
+                const /** @type {?} */ record = this._getOrCreateRecordForKey(key, value);
+                insertBefore = this._insertBeforeOrAppend(insertBefore, record);
             }
-            if (seqChanged) {
-                if (this._isInRemovals(newSeqRecord)) {
-                    this._removeFromRemovals(newSeqRecord);
-                }
-                if (lastNewSeqRecord == null) {
-                    this._mapHead = newSeqRecord;
-                }
-                else {
-                    lastNewSeqRecord._next = newSeqRecord;
-                }
-            }
-            lastOldSeqRecord = oldSeqRecord;
-            lastNewSeqRecord = newSeqRecord;
-            oldSeqRecord = oldSeqRecord && oldSeqRecord._next;
         });
-        this._truncate(lastOldSeqRecord, oldSeqRecord);
+        // Items remaining at the end of the list have been deleted
+        if (insertBefore) {
+            if (insertBefore._prev) {
+                insertBefore._prev._next = null;
+            }
+            this._removalsHead = insertBefore;
+            this._removalsTail = insertBefore;
+            for (let /** @type {?} */ record = insertBefore; record !== null; record = record._nextRemoved) {
+                if (record === this._mapHead) {
+                    this._mapHead = null;
+                }
+                this._records.delete(record.key);
+                record._nextRemoved = record._next;
+                record.previousValue = record.currentValue;
+                record.currentValue = null;
+                record._prev = null;
+                record._next = null;
+            }
+        }
         return this.isDirty;
+    }
+    /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     * @param {?} before
+     * @param {?} record
+     * @return {?}
+     */
+    _insertBeforeOrAppend(before, record) {
+        if (before) {
+            const /** @type {?} */ prev = before._prev;
+            record._next = before;
+            record._prev = prev;
+            before._prev = record;
+            if (prev) {
+                prev._next = record;
+            }
+            if (before === this._mapHead) {
+                this._mapHead = record;
+            }
+            this._appendAfter = before;
+            return before;
+        }
+        if (this._appendAfter) {
+            this._appendAfter._next = record;
+            record._prev = this._appendAfter;
+        }
+        else {
+            this._mapHead = record;
+        }
+        this._appendAfter = record;
+        return null;
+    }
+    /**
+     * @param {?} key
+     * @param {?} value
+     * @return {?}
+     */
+    _getOrCreateRecordForKey(key, value) {
+        if (this._records.has(key)) {
+            const /** @type {?} */ record = this._records.get(key);
+            this._maybeAddToChanges(record, value);
+            const /** @type {?} */ prev = record._prev;
+            const /** @type {?} */ next = record._next;
+            if (prev) {
+                prev._next = next;
+            }
+            if (next) {
+                next._prev = prev;
+            }
+            record._next = null;
+            record._prev = null;
+            return record;
+        }
+        const /** @type {?} */ record = new KeyValueChangeRecord_(key);
+        this._records.set(key, record);
+        record.currentValue = value;
+        this._addToAdditions(record);
+        return record;
     }
     /**
      * \@internal
@@ -7586,10 +7640,13 @@ class DefaultKeyValueDiffer {
     _reset() {
         if (this.isDirty) {
             let /** @type {?} */ record;
-            // Record the state of the mapping
-            for (record = this._previousMapHead = this._mapHead; record !== null; record = record._next) {
+            // let `_previousMapHead` contain the state of the map before the changes
+            this._previousMapHead = this._mapHead;
+            for (record = this._previousMapHead; record !== null; record = record._next) {
                 record._nextPrevious = record._next;
             }
+            // Update `record.previousValue` with the value of the item before the changes
+            // We need to update all changed items (that's those which have been added and changed)
             for (record = this._changesHead; record !== null; record = record._nextChanged) {
                 record.previousValue = record.currentValue;
             }
@@ -7599,30 +7656,6 @@ class DefaultKeyValueDiffer {
             this._changesHead = this._changesTail = null;
             this._additionsHead = this._additionsTail = null;
             this._removalsHead = this._removalsTail = null;
-        }
-    }
-    /**
-     * @param {?} lastRecord
-     * @param {?} record
-     * @return {?}
-     */
-    _truncate(lastRecord, record) {
-        while (record !== null) {
-            if (lastRecord === null) {
-                this._mapHead = null;
-            }
-            else {
-                lastRecord._next = null;
-            }
-            const /** @type {?} */ nextRecord = record._next;
-            this._addToRemovals(record);
-            lastRecord = record;
-            record = nextRecord;
-        }
-        for (let /** @type {?} */ rec = this._removalsHead; rec !== null; rec = rec._nextRemoved) {
-            rec.previousValue = rec.currentValue;
-            rec.currentValue = null;
-            this._records.delete(rec.key);
         }
     }
     /**
@@ -7636,64 +7669,6 @@ class DefaultKeyValueDiffer {
             record.currentValue = newValue;
             this._addToChanges(record);
         }
-    }
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    _isInRemovals(record) {
-        return record === this._removalsHead || record._nextRemoved !== null ||
-            record._prevRemoved !== null;
-    }
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    _addToRemovals(record) {
-        if (this._removalsHead === null) {
-            this._removalsHead = this._removalsTail = record;
-        }
-        else {
-            this._removalsTail._nextRemoved = record;
-            record._prevRemoved = this._removalsTail;
-            this._removalsTail = record;
-        }
-    }
-    /**
-     * @param {?} prev
-     * @param {?} record
-     * @return {?}
-     */
-    _removeFromSeq(prev, record) {
-        const /** @type {?} */ next = record._next;
-        if (prev === null) {
-            this._mapHead = next;
-        }
-        else {
-            prev._next = next;
-        }
-        record._next = null;
-    }
-    /**
-     * @param {?} record
-     * @return {?}
-     */
-    _removeFromRemovals(record) {
-        const /** @type {?} */ prev = record._prevRemoved;
-        const /** @type {?} */ next = record._nextRemoved;
-        if (prev === null) {
-            this._removalsHead = next;
-        }
-        else {
-            prev._nextRemoved = next;
-        }
-        if (next === null) {
-            this._removalsTail = prev;
-        }
-        else {
-            next._prevRemoved = prev;
-        }
-        record._prevRemoved = record._nextRemoved = null;
     }
     /**
      * @param {?} record
@@ -7790,15 +7765,15 @@ class KeyValueChangeRecord_ {
         /**
          * \@internal
          */
+        this._prev = null;
+        /**
+         * \@internal
+         */
         this._nextAdded = null;
         /**
          * \@internal
          */
         this._nextRemoved = null;
-        /**
-         * \@internal
-         */
-        this._prevRemoved = null;
         /**
          * \@internal
          */
