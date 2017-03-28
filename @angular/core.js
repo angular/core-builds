@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-eac99c1
+ * @license Angular v4.0.0-d05aa70
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -50,8 +50,8 @@ class OpaqueToken {
  * runtime representation) such as when injecting an interface, callable type, array or
  * parametrized type.
  *
- * `InjectionToken` is parametrize on `T` which is the type of object which will be returned by the
- * `Injector`. This provides additional level of type safety.
+ * `InjectionToken` is parameterized on `T` which is the type of object which will be returned by
+ * the `Injector`. This provides additional level of type safety.
  *
  * ```
  * interface MyInterface {...}
@@ -61,7 +61,7 @@ class OpaqueToken {
  *
  * ### Example
  *
- * {\@example core/di/ts/injector_spec.ts region='Injector'}
+ * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
  * \@stable
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-eac99c1');
+const VERSION = new Version('4.0.0-d05aa70');
 
 /**
  * @license
