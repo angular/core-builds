@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-a5c972a
+ * @license Angular v4.0.0-6269d28
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -861,7 +861,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-a5c972a');
+var VERSION = new Version('4.0.0-6269d28');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7058,7 +7058,7 @@ var DefaultIterableDiffer = (function () {
         if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
-            throw new Error("Error trying to diff '" + collection + "'");
+            throw new Error("Error trying to diff '" + stringify(collection) + "'. Only arrays and iterables are allowed");
         }
         if (this.check(collection)) {
             return this;
@@ -7865,7 +7865,7 @@ var DefaultKeyValueDiffer = (function () {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            throw new Error("Error trying to diff '" + map + "'");
+            throw new Error("Error trying to diff '" + stringify(map) + "'. Only maps and objects are allowed");
         }
         return this.check(map) ? this : null;
     };
