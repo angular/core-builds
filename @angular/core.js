@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-8e03f65
+ * @license Angular v4.0.0-a5c972a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-8e03f65');
+const VERSION = new Version('4.0.0-a5c972a');
 
 /**
  * @license
@@ -6731,7 +6731,7 @@ class DefaultIterableDiffer {
         if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
-            throw new Error(`Error trying to diff '${stringify(collection)}'. Only arrays and iterables are allowed`);
+            throw new Error(`Error trying to diff '${collection}'`);
         }
         if (this.check(collection)) {
             return this;
@@ -7519,7 +7519,7 @@ class DefaultKeyValueDiffer {
             map = new Map();
         }
         else if (!(map instanceof Map || isJsObject(map))) {
-            throw new Error(`Error trying to diff '${stringify(map)}'. Only maps and objects are allowed`);
+            throw new Error(`Error trying to diff '${map}'`);
         }
         return this.check(map) ? this : null;
     }
