@@ -13,7 +13,7 @@ import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
 export interface ViewDefinition {
-    factory: ViewDefinitionFactory;
+    factory: ViewDefinitionFactory | null;
     flags: ViewFlags;
     updateDirectives: ViewUpdateFn;
     updateRenderer: ViewUpdateFn;
@@ -26,7 +26,7 @@ export interface ViewDefinition {
     /** aggregated NodeFlags for all nodes **/
     nodeFlags: NodeFlags;
     rootNodeFlags: NodeFlags;
-    lastRenderRootNode: NodeDef;
+    lastRenderRootNode: NodeDef | null;
     bindingCount: number;
     outputCount: number;
     /**
@@ -83,8 +83,8 @@ export declare const enum ViewFlags {
 export interface NodeDef {
     flags: NodeFlags;
     index: number;
-    parent: NodeDef;
-    renderParent: NodeDef;
+    parent: NodeDef | null;
+    renderParent: NodeDef | null;
     /** this is checked against NgContentDef.index to find matched nodes */
     ngContentIndex: number;
     /** number of transitive children */
@@ -118,11 +118,11 @@ export interface NodeDef {
      * Used as a bloom filter.
      */
     childMatchedQueries: number;
-    element: ElementDef;
-    provider: ProviderDef;
-    text: TextDef;
-    query: QueryDef;
-    ngContent: NgContentDef;
+    element: ElementDef | null;
+    provider: ProviderDef | null;
+    text: TextDef | null;
+    query: QueryDef | null;
+    ngContent: NgContentDef | null;
 }
 /**
  * Bitmask for NodeDef.flags.
@@ -169,11 +169,11 @@ export declare const enum NodeFlags {
 }
 export interface BindingDef {
     flags: BindingFlags;
-    ns: string;
-    name: string;
-    nonMinifiedName: string;
-    securityContext: SecurityContext;
-    suffix: string;
+    ns: string | null;
+    name: string | null;
+    nonMinifiedName: string | null;
+    securityContext: SecurityContext | null;
+    suffix: string | null;
 }
 export declare const enum BindingFlags {
     TypeElementAttribute = 1,
@@ -187,9 +187,9 @@ export declare const enum BindingFlags {
 }
 export interface OutputDef {
     type: OutputType;
-    target: 'window' | 'document' | 'body' | 'component';
+    target: 'window' | 'document' | 'body' | 'component' | null;
     eventName: string;
-    propName: string;
+    propName: string | null;
 }
 export declare const enum OutputType {
     ElementOutput = 0,
@@ -203,29 +203,29 @@ export declare const enum QueryValueType {
     Provider = 4,
 }
 export interface ElementDef {
-    name: string;
-    ns: string;
+    name: string | null;
+    ns: string | null;
     /** ns, name, value */
-    attrs: [string, string, string][];
-    template: ViewDefinition;
-    componentProvider: NodeDef;
-    componentRendererType: RendererType2;
-    componentView: ViewDefinitionFactory;
+    attrs: [string, string, string][] | null;
+    template: ViewDefinition | null;
+    componentProvider: NodeDef | null;
+    componentRendererType: RendererType2 | null;
+    componentView: ViewDefinitionFactory | null;
     /**
      * visible public providers for DI in the view,
      * as see from this element. This does not include private providers.
      */
     publicProviders: {
         [tokenKey: string]: NodeDef;
-    };
+    } | null;
     /**
      * same as visiblePublicProviders, but also includes private providers
      * that are located on this element.
      */
     allProviders: {
         [tokenKey: string]: NodeDef;
-    };
-    handleEvent: ElementHandleEventFn;
+    } | null;
+    handleEvent: ElementHandleEventFn | null;
 }
 export interface ElementHandleEventFn {
     (view: ViewData, eventName: string, event: any): boolean;
@@ -283,9 +283,9 @@ export interface ViewData {
     def: ViewDefinition;
     root: RootData;
     renderer: Renderer2;
-    parentNodeDef: NodeDef;
-    parent: ViewData;
-    viewContainerParent: ViewData;
+    parentNodeDef: NodeDef | null;
+    parent: ViewData | null;
+    viewContainerParent: ViewData | null;
     component: any;
     context: any;
     nodes: {
@@ -293,7 +293,7 @@ export interface ViewData {
     };
     state: ViewState;
     oldValues: any[];
-    disposables: DisposableFn[];
+    disposables: DisposableFn[] | null;
 }
 /**
  * Bitmask of states
@@ -341,7 +341,7 @@ export declare function asTextData(view: ViewData, index: number): TextData;
 export interface ElementData {
     renderElement: any;
     componentView: ViewData;
-    viewContainer: ViewContainerData;
+    viewContainer: ViewContainerData | null;
     template: TemplateData;
 }
 export interface ViewContainerData extends ViewContainerRef {
@@ -393,7 +393,7 @@ export interface RootData {
 }
 export declare abstract class DebugContext {
     readonly abstract view: ViewData;
-    readonly abstract nodeIndex: number;
+    readonly abstract nodeIndex: number | null;
     readonly abstract injector: Injector;
     readonly abstract component: any;
     readonly abstract providerTokens: any[];
@@ -416,7 +416,7 @@ export interface Services {
     checkAndUpdateView(view: ViewData): void;
     checkNoChangesView(view: ViewData): void;
     destroyView(view: ViewData): void;
-    resolveDep(view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, depDef: DepDef, notFoundValue?: any): any;
+    resolveDep(view: ViewData, elDef: NodeDef | null, allowPrivateServices: boolean, depDef: DepDef, notFoundValue?: any): any;
     createDebugContext(view: ViewData, nodeIndex: number): DebugContext;
     handleEvent: ViewHandleEventFn;
     updateDirectives: (view: ViewData, checkType: CheckType) => void;

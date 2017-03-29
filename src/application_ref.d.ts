@@ -60,7 +60,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(parentPlatformFactory: (extraProviders?: Provider[]) => PlatformRef, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
+export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: Provider[]) => PlatformRef) | null, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *
@@ -78,7 +78,7 @@ export declare function destroyPlatform(): void;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function getPlatform(): PlatformRef;
+export declare function getPlatform(): PlatformRef | null;
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
@@ -160,7 +160,7 @@ export declare class PlatformRef_ extends PlatformRef {
     readonly destroyed: boolean;
     destroy(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
-    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
+    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone?);
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     private _bootstrapModuleWithZone<M>(moduleType, compilerOptions?, ngZone?);
     private _moduleDoBootstrap(moduleRef);

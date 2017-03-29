@@ -31,6 +31,6 @@ export declare class Reflector extends ReflectorReader {
     method(name: string): MethodFn;
     importUri(type: any): string;
     resourceUri(type: any): string;
-    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
+    resolveIdentifier(name: string, moduleUrl: string, members: string[] | null, runtime: any): any;
     resolveEnum(identifier: any, name: string): any;
 }
