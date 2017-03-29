@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-0c36f23
+ * @license Angular v4.0.0-4916278
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.0.0-0c36f23
+ * @license Angular v4.0.0-4916278
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -868,7 +868,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.0.0-0c36f23');
+var VERSION = new Version('4.0.0-4916278');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -1031,7 +1031,7 @@ var Injector = (function () {
      */
     Injector.prototype.get = function (token, notFoundValue) { };
     /**
-     * @deprecated from v4.0.0 use Type<T> or InjectToken<T>
+     * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
      * @suppress {duplicate}
      * @abstract
      * @param {?} token
