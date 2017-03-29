@@ -44,7 +44,7 @@ export declare abstract class ViewContainerRef {
     /**
      * Returns the {@link ViewRef} for the View located in this container at the specified index.
      */
-    abstract get(index: number): ViewRef | null;
+    abstract get(index: number): ViewRef;
     /**
      * Returns the number of Views currently attached to this container.
      */
@@ -102,5 +102,5 @@ export declare abstract class ViewContainerRef {
      *
      * If the `index` param is omitted, the last {@link ViewRef} is detached.
      */
-    abstract detach(index?: number): ViewRef | null;
+    abstract detach(index?: number): ViewRef;
 }

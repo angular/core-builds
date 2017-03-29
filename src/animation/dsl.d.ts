@@ -96,7 +96,7 @@ export interface AnimationStyleMetadata extends AnimationMetadata {
  */
 export interface AnimationAnimateMetadata extends AnimationMetadata {
     timings: string | number | AnimateTimings;
-    styles: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata | null;
+    styles: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata;
 }
 /**
  * Metadata representing the entry of animations. Instances of this class are provided via the
@@ -213,7 +213,7 @@ export declare function trigger(name: string, definitions: AnimationMetadata[]):
  *
  * @experimental Animation support is experimental.
  */
-export declare function animate(timings: string | number, styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata | null): AnimationAnimateMetadata;
+export declare function animate(timings: string | number, styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata): AnimationAnimateMetadata;
 /**
  * `group` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {@link
