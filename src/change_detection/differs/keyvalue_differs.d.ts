@@ -71,15 +71,15 @@ export interface KeyValueChangeRecord<K, V> {
     /**
      * Current key in the Map.
      */
-    key: K;
+    readonly key: K;
     /**
-     * Current value for the key or `undefined` if removed.
+     * Current value for the key or `null` if removed.
      */
-    currentValue: V;
+    readonly currentValue: V | null;
     /**
-     * Previous value for the key or `undefined` if added.
+     * Previous value for the key or `null` if added.
      */
-    previousValue: V;
+    readonly previousValue: V | null;
 }
 /**
  * Provides a factory for {@link KeyValueDiffer}.

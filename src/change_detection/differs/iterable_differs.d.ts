@@ -27,7 +27,7 @@ export interface IterableDiffer<V> {
      * @returns an object describing the difference. The return value is only valid until the next
      * `diff()` invocation.
      */
-    diff(object: NgIterable<V>): IterableChanges<V>;
+    diff(object: NgIterable<V>): IterableChanges<V> | null;
 }
 /**
  * An object describing the changes in the `Iterable` collection since last time
@@ -79,13 +79,13 @@ export interface IterableChanges<V> {
  */
 export interface IterableChangeRecord<V> {
     /** Current index of the item in `Iterable` or null if removed. */
-    currentIndex: number;
+    readonly currentIndex: number | null;
     /** Previous index of the item in `Iterable` or null if added. */
-    previousIndex: number;
+    readonly previousIndex: number | null;
     /** The item. */
-    item: V;
+    readonly item: V;
     /** Track by identity as computed by the `trackByFn`. */
-    trackById: any;
+    readonly trackById: any;
 }
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
