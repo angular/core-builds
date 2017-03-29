@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.0.0-23bf348
+ * @license Angular v4.0.0-ca66530
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.0.0-23bf348');
+const VERSION = new Version('4.0.0-ca66530');
 
 /**
  * @license
@@ -1508,7 +1508,7 @@ function isType(v) {
 /**
  * Attention: This regex has to hold even if the code is minified!
  */
-const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{\s*("use strict";)?\s*(return\s+)?(\S+\s+!==\s+null\s+&&\s+)?\S+\.apply\(this,\s*arguments\)/;
+const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 class ReflectionCapabilities {
     /**
      * @param {?=} reflect
