@@ -21,9 +21,9 @@ export declare class DefaultKeyValueDiffer<K, V> implements KeyValueDiffer<K, V>
     forEachChangedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
     forEachAddedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
     forEachRemovedItem(fn: (r: KeyValueChangeRecord<K, V>) => void): void;
-    diff(map: Map<any, any> | {
+    diff(map?: Map<any, any> | {
         [k: string]: any;
-    }): any;
+    } | null): any;
     onDestroy(): void;
     /**
      * Check the current state of the map vs the previous.

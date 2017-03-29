@@ -13,7 +13,7 @@ import { ChangeDetectorRef, ComponentRef, DebugElement, ElementRef, NgZone } fro
  */
 export declare class ComponentFixture<T> {
     componentRef: ComponentRef<T>;
-    ngZone: NgZone;
+    ngZone: NgZone | null;
     private _autoDetect;
     /**
      * The DebugElement associated with the root element of this component.
@@ -43,7 +43,7 @@ export declare class ComponentFixture<T> {
     private _onStableSubscription;
     private _onMicrotaskEmptySubscription;
     private _onErrorSubscription;
-    constructor(componentRef: ComponentRef<T>, ngZone: NgZone, _autoDetect: boolean);
+    constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, _autoDetect: boolean);
     private _tick(checkNoChanges);
     /**
      * Trigger a change detection cycle for the component.

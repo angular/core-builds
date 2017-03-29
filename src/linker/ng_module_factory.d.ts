@@ -50,7 +50,7 @@ export declare class NgModuleFactory<T> {
         new (parentInjector: Injector): NgModuleInjector<T>;
     }, _moduleType: Type<T>);
     readonly moduleType: Type<T>;
-    create(parentInjector: Injector): NgModuleRef<T>;
+    create(parentInjector: Injector | null): NgModuleRef<T>;
 }
 export declare abstract class NgModuleInjector<T> implements Injector, NgModuleRef<T> {
     parent: Injector;
