@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.0-691cb98
+ * @license Angular v4.1.0-beta.0-64f1bf6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.0-691cb98
+ * @license Angular v4.1.0-beta.0-64f1bf6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-beta.0-691cb98');
+var VERSION = new Version('4.1.0-beta.0-64f1bf6');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -13426,7 +13426,7 @@ var LIFECYCLE_HOOKS_VALUES = [
  * \@experimental Animation support is experimental.
  */
 /**
- * \@internal
+ * \@experimental Animation support is experimental.
  */
 /**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular's

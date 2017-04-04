@@ -41,6 +41,10 @@ export declare const AUTO_STYLE = "*";
 /**
  * @experimental Animation support is experimental.
  */
+export declare const PRE_STYLE = "!";
+/**
+ * @experimental Animation support is experimental.
+ */
 export interface AnimationMetadata {
     type: AnimationMetadataType;
 }
