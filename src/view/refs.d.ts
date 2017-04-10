@@ -16,7 +16,7 @@ import { Type } from '../type';
 import { ElementData, NodeDef, TemplateData, ViewContainerData, ViewData, ViewDefinitionFactory } from './types';
 export declare function createComponentFactory(selector: string, componentType: Type<any>, viewDefFactory: ViewDefinitionFactory, inputs: {
     [propName: string]: string;
-}, outputs: {
+} | null, outputs: {
     [propName: string]: string;
 }, ngContentSelectors: string[]): ComponentFactory<any>;
 export declare function getComponentViewDefinitionFactory(componentFactory: ComponentFactory<any>): ViewDefinitionFactory;
