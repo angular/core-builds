@@ -14,7 +14,7 @@ export interface ɵStyleData {
 export declare type AnimateTimings = {
     duration: number;
     delay: number;
-    easing: string;
+    easing: string | null;
 };
 /**
  * @experimental Animation support is experimental.
