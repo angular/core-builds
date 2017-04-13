@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.0-f4b5784
+ * @license Angular v4.1.0-beta.1-c664486
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.0-f4b5784
+ * @license Angular v4.1.0-beta.1-c664486
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-beta.0-f4b5784');
+var VERSION = new Version('4.1.0-beta.1-c664486');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -9784,8 +9784,9 @@ var ComponentFactory_ = (function (_super) {
          */
         get: function () {
             var /** @type {?} */ inputsArr = [];
-            for (var /** @type {?} */ propName in this._inputs) {
-                var /** @type {?} */ templateName = this._inputs[propName];
+            var /** @type {?} */ inputs = ((this._inputs));
+            for (var /** @type {?} */ propName in inputs) {
+                var /** @type {?} */ templateName = inputs[propName];
                 inputsArr.push({ propName: propName, templateName: templateName });
             }
             return inputsArr;
@@ -13875,7 +13876,6 @@ function keyframes$1(steps) {
  * @return {?}
  */
 function transition$1(stateChangeExpr, steps, locals) {
-    if (locals === void 0) { locals = null; }
     return { type: 2 /* Transition */, expr: stateChangeExpr, animation: steps, locals: locals };
 }
 /**

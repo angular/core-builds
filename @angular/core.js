@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.0-f4b5784
+ * @license Angular v4.1.0-beta.1-c664486
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-beta.0-f4b5784');
+const VERSION = new Version('4.1.0-beta.1-c664486');
 
 /**
  * @license
@@ -9424,8 +9424,9 @@ class ComponentFactory_ extends ComponentFactory {
      */
     get inputs() {
         const /** @type {?} */ inputsArr = [];
-        for (let /** @type {?} */ propName in this._inputs) {
-            const /** @type {?} */ templateName = this._inputs[propName];
+        const /** @type {?} */ inputs = ((this._inputs));
+        for (let /** @type {?} */ propName in inputs) {
+            const /** @type {?} */ templateName = inputs[propName];
             inputsArr.push({ propName, templateName });
         }
         return inputsArr;
@@ -13391,7 +13392,7 @@ function keyframes$1(steps) {
  * @param {?=} locals
  * @return {?}
  */
-function transition$1(stateChangeExpr, steps, locals = null) {
+function transition$1(stateChangeExpr, steps, locals) {
     return { type: 2 /* Transition */, expr: stateChangeExpr, animation: steps, locals };
 }
 /**

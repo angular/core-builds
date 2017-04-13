@@ -14,7 +14,7 @@ export interface ɵStyleData {
 export declare type AnimateTimings = {
     duration: number;
     delay: number;
-    easing: string;
+    easing: string | undefined;
 };
 /**
  * @experimental Animation support is experimental.
@@ -75,7 +75,7 @@ export interface AnimationTransitionMetadata extends AnimationMetadata {
     expr: string | ((fromState: string, toState: string) => boolean);
     animation: AnimationMetadata | AnimationMetadata[];
     locals?: {
-        [varName: string]: string | number | boolean;
+        [varName: string]: string | number;
     };
 }
 /**
@@ -84,7 +84,7 @@ export interface AnimationTransitionMetadata extends AnimationMetadata {
 export interface AnimationReferenceMetadata extends AnimationMetadata {
     animation: AnimationMetadata | AnimationMetadata[];
     locals?: {
-        [varName: string]: string | number | boolean;
+        [varName: string]: string | number;
     };
 }
 /**
@@ -163,7 +163,7 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  */
 export interface AnimationWaitMetadata extends AnimationMetadata {
     delay: number | string;
-    animation: AnimationMetadata | AnimationMetadata[];
+    animation?: AnimationMetadata | AnimationMetadata[];
 }
 /**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular's
@@ -580,13 +580,13 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  * @experimental Animation support is experimental.
  */
 export declare function transition(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata | AnimationMetadata[], locals?: {
-    [varName: string]: string | number | boolean;
+    [varName: string]: string | number;
 }): AnimationTransitionMetadata;
 /**
  * @experimental Animation support is experimental.
  */
 export declare function animation(steps: AnimationMetadata | AnimationMetadata[], locals?: {
-    [varName: string]: string | number | boolean;
+    [varName: string]: string | number;
 }): AnimationReferenceMetadata;
 /**
  * @experimental Animation support is experimental.
@@ -594,7 +594,7 @@ export declare function animation(steps: AnimationMetadata | AnimationMetadata[]
 export declare function animateChild(): AnimationAnimateChildMetadata;
 export declare function animateChild(timings: number | string): AnimationAnimateChildMetadata;
 export declare function animateChild(animation: AnimationReferenceMetadata, locals?: {
-    [varName: string]: string | number | boolean;
+    [varName: string]: string | number;
 }): AnimationAnimateChildMetadata;
 /**
  * @experimental Animation support is experimental.
