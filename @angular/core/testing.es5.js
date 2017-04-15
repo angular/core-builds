@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.1-092f0df
+ * @license Angular v4.1.0-beta.1-8479e9e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
