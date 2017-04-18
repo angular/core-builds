@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-bccfaa4
+ * @license Angular v4.1.0-beta.1-5293794
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.1-bccfaa4
+ * @license Angular v4.1.0-beta.1-5293794
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -173,7 +173,7 @@ var ComponentFixture = (function () {
                         // Do this check in the next tick so that ngZone gets a chance to update the state of
                         // pending macrotasks.
                         scheduleMicroTask(function () {
-                            if (!_this.ngZone.hasPendingMacrotasks) {
+                            if (!ngZone.hasPendingMacrotasks) {
                                 if (_this._promise !== null) {
                                     _this._resolve(true);
                                     _this._resolve = null;

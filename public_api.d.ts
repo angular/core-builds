@@ -11,7 +11,3 @@
  * Entry point for all public APIs of the core package.
  */
 export * from './src/core';
-export interface ɵStrictNullChecksNotSupported {
-    dontUseStrictNullChecksWithAngularYetSeeIssue15432: string | null;
-    [key: string]: string;
-}

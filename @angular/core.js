@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-bccfaa4
+ * @license Angular v4.1.0-beta.1-5293794
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-beta.1-bccfaa4');
+const VERSION = new Version('4.1.0-beta.1-5293794');
 
 /**
  * @license
@@ -4310,7 +4310,7 @@ function createPlatform(injector) {
     _platform = injector.get(PlatformRef);
     const /** @type {?} */ inits = injector.get(PLATFORM_INITIALIZER, null);
     if (inits)
-        inits.forEach(init => init());
+        inits.forEach((init) => init());
     return _platform;
 }
 /**
@@ -7616,7 +7616,7 @@ class DefaultKeyValueDiffer {
      */
     _getOrCreateRecordForKey(key, value) {
         if (this._records.has(key)) {
-            const /** @type {?} */ record = this._records.get(key);
+            const /** @type {?} */ record = ((this._records.get(key)));
             this._maybeAddToChanges(record, value);
             const /** @type {?} */ prev = record._prev;
             const /** @type {?} */ next = record._next;
@@ -9145,7 +9145,7 @@ function setElementClass(view, renderNode$$1, name, value) {
  * @return {?}
  */
 function setElementStyle(view, binding, renderNode$$1, name, value) {
-    let /** @type {?} */ renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, value);
+    let /** @type {?} */ renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, /** @type {?} */ (value));
     if (renderValue != null) {
         renderValue = renderValue.toString();
         const /** @type {?} */ unit = binding.suffix;
@@ -13489,6 +13489,8 @@ function transition$$1(stateChangeExpr, steps) {
  * @description
  * Entry point for all public APIs of the core package.
  */
+
+// This file only reexports content of the `src` folder. Keep it that way.
 
 /**
  * Generated bundle index. Do not edit.

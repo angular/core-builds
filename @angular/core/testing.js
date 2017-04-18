@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-bccfaa4
+ * @license Angular v4.1.0-beta.1-5293794
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -158,7 +158,7 @@ class ComponentFixture {
                         // Do this check in the next tick so that ngZone gets a chance to update the state of
                         // pending macrotasks.
                         scheduleMicroTask(() => {
-                            if (!this.ngZone.hasPendingMacrotasks) {
+                            if (!ngZone.hasPendingMacrotasks) {
                                 if (this._promise !== null) {
                                     this._resolve(true);
                                     this._resolve = null;
