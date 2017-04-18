@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-6f3710e
+ * @license Angular v4.1.0-beta.1-b46aba9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.1-6f3710e
+ * @license Angular v4.1.0-beta.1-b46aba9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-beta.1-6f3710e');
+var VERSION = new Version('4.1.0-beta.1-b46aba9');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7902,7 +7902,6 @@ var DefaultKeyValueDiffer = (function () {
                 insertBefore._prev._next = null;
             }
             this._removalsHead = insertBefore;
-            this._removalsTail = insertBefore;
             for (var /** @type {?} */ record = insertBefore; record !== null; record = record._nextRemoved) {
                 if (record === this._mapHead) {
                     this._mapHead = null;
@@ -7915,6 +7914,11 @@ var DefaultKeyValueDiffer = (function () {
                 record._next = null;
             }
         }
+        // Make sure tails have no next records from previous runs
+        if (this._changesTail)
+            this._changesTail._nextChanged = null;
+        if (this._additionsTail)
+            this._additionsTail._nextAdded = null;
         return this.isDirty;
     };
     /**
@@ -8002,7 +8006,7 @@ var DefaultKeyValueDiffer = (function () {
             }
             this._changesHead = this._changesTail = null;
             this._additionsHead = this._additionsTail = null;
-            this._removalsHead = this._removalsTail = null;
+            this._removalsHead = null;
         }
     };
     /**
@@ -8052,22 +8056,11 @@ var DefaultKeyValueDiffer = (function () {
         var /** @type {?} */ changes = [];
         var /** @type {?} */ additions = [];
         var /** @type {?} */ removals = [];
-        var /** @type {?} */ record;
-        for (record = this._mapHead; record !== null; record = record._next) {
-            items.push(stringify(record));
-        }
-        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-            previous.push(stringify(record));
-        }
-        for (record = this._changesHead; record !== null; record = record._nextChanged) {
-            changes.push(stringify(record));
-        }
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            additions.push(stringify(record));
-        }
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            removals.push(stringify(record));
-        }
+        this.forEachItem(function (r) { return items.push(stringify(r)); });
+        this.forEachPreviousItem(function (r) { return previous.push(stringify(r)); });
+        this.forEachChangedItem(function (r) { return changes.push(stringify(r)); });
+        this.forEachAddedItem(function (r) { return additions.push(stringify(r)); });
+        this.forEachRemovedItem(function (r) { return removals.push(stringify(r)); });
         return 'map: ' + items.join(', ') + '\n' +
             'previous: ' + previous.join(', ') + '\n' +
             'additions: ' + additions.join(', ') + '\n' +
@@ -13535,7 +13528,6 @@ function trigger$1(name, definitions) {
  * @return {?}
  */
 function animate$1(timings, styles) {
-    if (styles === void 0) { styles = null; }
     return { type: 5 /* Animate */, styles: styles, timings: timings };
 }
 /**
@@ -13569,10 +13561,11 @@ function animate$1(timings, styles) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} locals
  * @return {?}
  */
-function group$1(steps) {
-    return { type: 4 /* Group */, steps: steps };
+function group$1(steps, locals) {
+    return { type: 4 /* Group */, steps: steps, locals: locals };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -13608,10 +13601,11 @@ function group$1(steps) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} locals
  * @return {?}
  */
-function sequence$1(steps) {
-    return { type: 3 /* Sequence */, steps: steps };
+function sequence$1(steps, locals) {
+    return { type: 3 /* Sequence */, steps: steps, locals: locals };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -13892,22 +13886,18 @@ function transition$1(stateChangeExpr, steps, locals) {
  * \@experimental Animation support is experimental.
  * @param {?} selector
  * @param {?} animation
+ * @param {?=} locals
  * @return {?}
  */
 /**
  * \@experimental Animation support is experimental.
  * @param {?} selector
  * @param {?} animation
+ * @param {?=} locals
  * @return {?}
  */
 /**
  * @param {...?} args
- * @return {?}
- */
-/**
- * \@experimental Animation support is experimental.
- * @param {?} delay
- * @param {?=} animation
  * @return {?}
  */
 /**

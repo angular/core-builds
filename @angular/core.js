@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-6f3710e
+ * @license Angular v4.1.0-beta.1-b46aba9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-beta.1-6f3710e');
+const VERSION = new Version('4.1.0-beta.1-b46aba9');
 
 /**
  * @license
@@ -7554,7 +7554,6 @@ class DefaultKeyValueDiffer {
                 insertBefore._prev._next = null;
             }
             this._removalsHead = insertBefore;
-            this._removalsTail = insertBefore;
             for (let /** @type {?} */ record = insertBefore; record !== null; record = record._nextRemoved) {
                 if (record === this._mapHead) {
                     this._mapHead = null;
@@ -7567,6 +7566,11 @@ class DefaultKeyValueDiffer {
                 record._next = null;
             }
         }
+        // Make sure tails have no next records from previous runs
+        if (this._changesTail)
+            this._changesTail._nextChanged = null;
+        if (this._additionsTail)
+            this._additionsTail._nextAdded = null;
         return this.isDirty;
     }
     /**
@@ -7654,7 +7658,7 @@ class DefaultKeyValueDiffer {
             }
             this._changesHead = this._changesTail = null;
             this._additionsHead = this._additionsTail = null;
-            this._removalsHead = this._removalsTail = null;
+            this._removalsHead = null;
         }
     }
     /**
@@ -7704,22 +7708,11 @@ class DefaultKeyValueDiffer {
         const /** @type {?} */ changes = [];
         const /** @type {?} */ additions = [];
         const /** @type {?} */ removals = [];
-        let /** @type {?} */ record;
-        for (record = this._mapHead; record !== null; record = record._next) {
-            items.push(stringify(record));
-        }
-        for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
-            previous.push(stringify(record));
-        }
-        for (record = this._changesHead; record !== null; record = record._nextChanged) {
-            changes.push(stringify(record));
-        }
-        for (record = this._additionsHead; record !== null; record = record._nextAdded) {
-            additions.push(stringify(record));
-        }
-        for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
-            removals.push(stringify(record));
-        }
+        this.forEachItem(r => items.push(stringify(r)));
+        this.forEachPreviousItem(r => previous.push(stringify(r)));
+        this.forEachChangedItem(r => changes.push(stringify(r)));
+        this.forEachAddedItem(r => additions.push(stringify(r)));
+        this.forEachRemovedItem(r => removals.push(stringify(r)));
         return 'map: ' + items.join(', ') + '\n' +
             'previous: ' + previous.join(', ') + '\n' +
             'additions: ' + additions.join(', ') + '\n' +
@@ -13052,7 +13045,7 @@ function trigger$1(name, definitions) {
  * @param {?=} styles
  * @return {?}
  */
-function animate$1(timings, styles = null) {
+function animate$1(timings, styles) {
     return { type: 5 /* Animate */, styles: styles, timings: timings };
 }
 /**
@@ -13086,10 +13079,11 @@ function animate$1(timings, styles = null) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} locals
  * @return {?}
  */
-function group$1(steps) {
-    return { type: 4 /* Group */, steps: steps };
+function group$1(steps, locals) {
+    return { type: 4 /* Group */, steps, locals };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -13125,10 +13119,11 @@ function group$1(steps) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} locals
  * @return {?}
  */
-function sequence$1(steps) {
-    return { type: 3 /* Sequence */, steps: steps };
+function sequence$1(steps, locals) {
+    return { type: 3 /* Sequence */, steps, locals };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -13411,6 +13406,7 @@ function transition$1(stateChangeExpr, steps, locals) {
  * \@experimental Animation support is experimental.
  * @param {?} selector
  * @param {?} animation
+ * @param {?=} locals
  * @return {?}
  */
 
@@ -13418,18 +13414,12 @@ function transition$1(stateChangeExpr, steps, locals) {
  * \@experimental Animation support is experimental.
  * @param {?} selector
  * @param {?} animation
+ * @param {?=} locals
  * @return {?}
  */
 
 /**
  * @param {...?} args
- * @return {?}
- */
-
-/**
- * \@experimental Animation support is experimental.
- * @param {?} delay
- * @param {?=} animation
  * @return {?}
  */
 

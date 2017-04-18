@@ -28,11 +28,10 @@ export declare const enum AnimationMetadataType {
     Animate = 5,
     KeyframeSequence = 6,
     Style = 7,
-    Definition = 8,
+    Reference = 8,
     AnimateChild = 9,
     Query = 10,
     Stagger = 11,
-    Wait = 12,
 }
 /**
  * @experimental Animation support is experimental.
@@ -75,7 +74,7 @@ export interface AnimationTransitionMetadata extends AnimationMetadata {
     expr: string | ((fromState: string, toState: string) => boolean);
     animation: AnimationMetadata | AnimationMetadata[];
     locals?: {
-        [varName: string]: string | number;
+        [name: string]: any;
     };
 }
 /**
@@ -84,7 +83,7 @@ export interface AnimationTransitionMetadata extends AnimationMetadata {
 export interface AnimationReferenceMetadata extends AnimationMetadata {
     animation: AnimationMetadata | AnimationMetadata[];
     locals?: {
-        [varName: string]: string | number;
+        [name: string]: any;
     };
 }
 /**
@@ -94,6 +93,9 @@ export interface AnimationQueryMetadata extends AnimationMetadata {
     selector: string;
     multi: boolean;
     animation: AnimationMetadata | AnimationMetadata[];
+    locals?: {
+        [name: string]: any;
+    };
 }
 /**
  * Metadata representing the entry of animations. Instances of this class are provided via the
@@ -126,7 +128,7 @@ export interface AnimationStyleMetadata extends AnimationMetadata {
  */
 export interface AnimationAnimateMetadata extends AnimationMetadata {
     timings: string | number | AnimateTimings;
-    styles: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata | null;
+    styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata;
 }
 /**
  * @experimental Animation support is experimental.
@@ -142,6 +144,9 @@ export interface AnimationAnimateChildMetadata extends AnimationMetadata {
  */
 export interface AnimationSequenceMetadata extends AnimationMetadata {
     steps: AnimationMetadata[];
+    locals?: {
+        [name: string]: any;
+    };
 }
 /**
  * Metadata representing the entry of animations. Instances of this class are provided via the
@@ -151,19 +156,18 @@ export interface AnimationSequenceMetadata extends AnimationMetadata {
  */
 export interface AnimationGroupMetadata extends AnimationMetadata {
     steps: AnimationMetadata[];
+    locals?: {
+        [name: string]: any;
+    };
 }
 /**
 * @experimental Animation support is experimental.
 */
 export interface AnimationStaggerMetadata extends AnimationMetadata {
     args: any[];
-}
-/**
- * @experimental Animation support is experimental.
- */
-export interface AnimationWaitMetadata extends AnimationMetadata {
-    delay: number | string;
-    animation?: AnimationMetadata | AnimationMetadata[];
+    locals?: {
+        [name: string]: any;
+    };
 }
 /**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular's
@@ -262,7 +266,7 @@ export declare function trigger(name: string, definitions: AnimationMetadata[]):
  *
  * @experimental Animation support is experimental.
  */
-export declare function animate(timings: string | number, styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata | null): AnimationAnimateMetadata;
+export declare function animate(timings: string | number, styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata): AnimationAnimateMetadata;
 /**
  * `group` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {@link
@@ -294,7 +298,9 @@ export declare function animate(timings: string | number, styles?: AnimationStyl
  *
  * @experimental Animation support is experimental.
  */
-export declare function group(steps: AnimationMetadata[]): AnimationGroupMetadata;
+export declare function group(steps: AnimationMetadata[], locals?: {
+    [name: string]: any;
+}): AnimationGroupMetadata;
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {@link
@@ -329,7 +335,9 @@ export declare function group(steps: AnimationMetadata[]): AnimationGroupMetadat
  *
  * @experimental Animation support is experimental.
  */
-export declare function sequence(steps: AnimationMetadata[]): AnimationSequenceMetadata;
+export declare function sequence(steps: AnimationMetadata[], locals?: {
+    [name: string]: any;
+}): AnimationSequenceMetadata;
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {@link
@@ -586,30 +594,32 @@ export declare function transition(stateChangeExpr: string | ((fromState: string
  * @experimental Animation support is experimental.
  */
 export declare function animation(steps: AnimationMetadata | AnimationMetadata[], locals?: {
-    [varName: string]: string | number;
+    [name: string]: any;
 }): AnimationReferenceMetadata;
 /**
  * @experimental Animation support is experimental.
  */
 export declare function animateChild(): AnimationAnimateChildMetadata;
-export declare function animateChild(timings: number | string): AnimationAnimateChildMetadata;
+export declare function animateChild(locals: {
+    [name: string]: any;
+}): AnimationAnimateChildMetadata;
 export declare function animateChild(animation: AnimationReferenceMetadata, locals?: {
     [varName: string]: string | number;
 }): AnimationAnimateChildMetadata;
 /**
  * @experimental Animation support is experimental.
  */
-export declare function query(selector: string, animation: AnimationMetadata | AnimationMetadata[]): AnimationQueryMetadata;
+export declare function query(selector: string, animation: AnimationMetadata | AnimationMetadata[], locals?: {
+    [name: string]: any;
+}): AnimationQueryMetadata;
 /**
  * @experimental Animation support is experimental.
  */
-export declare function queryAll(selector: string, animation: AnimationMetadata | AnimationMetadata[]): AnimationQueryMetadata;
+export declare function queryAll(selector: string, animation: AnimationMetadata | AnimationMetadata[], locals?: {
+    [name: string]: any;
+}): AnimationQueryMetadata;
 /**
  * @experimental Animation support is experimental.
  */
 export declare function stagger(animation: AnimationMetadata | AnimationMetadata[]): AnimationStaggerMetadata;
 export declare function stagger(timings: string | number, animation: AnimationMetadata | AnimationMetadata[]): AnimationStaggerMetadata;
-/**
- * @experimental Animation support is experimental.
- */
-export declare function wait(delay: number | string, animation?: AnimationMetadata | AnimationMetadata[]): AnimationWaitMetadata;
