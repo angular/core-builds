@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-beta.1-b46aba9
+ * @license Angular v4.1.0-beta.1-47acf3d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-beta.1-b46aba9
+ * @license Angular v4.1.0-beta.1-47acf3d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-beta.1-b46aba9');
+var VERSION = new Version('4.1.0-beta.1-47acf3d');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7964,7 +7964,7 @@ var DefaultKeyValueDiffer = (function () {
      */
     DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = function (key, value) {
         if (this._records.has(key)) {
-            var /** @type {?} */ record_1 = this._records.get(key);
+            var /** @type {?} */ record_1 = ((this._records.get(key)));
             this._maybeAddToChanges(record_1, value);
             var /** @type {?} */ prev = record_1._prev;
             var /** @type {?} */ next = record_1._next;
@@ -9504,7 +9504,7 @@ function setElementClass(view, renderNode$$1, name, value) {
  * @return {?}
  */
 function setElementStyle(view, binding, renderNode$$1, name, value) {
-    var /** @type {?} */ renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, value);
+    var /** @type {?} */ renderValue = view.root.sanitizer.sanitize(SecurityContext.STYLE, /** @type {?} */ (value));
     if (renderValue != null) {
         renderValue = renderValue.toString();
         var /** @type {?} */ unit = binding.suffix;
@@ -13420,9 +13420,6 @@ var LIFECYCLE_HOOKS_VALUES = [
  * \@experimental Animation support is experimental.
  */
 /**
- * \@experimental Animation support is experimental.
- */
-/**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {\@link
  * Component#animations-anchor component animations metadata page} to gain a better understanding of
@@ -13477,7 +13474,7 @@ var LIFECYCLE_HOOKS_VALUES = [
  * @return {?}
  */
 function trigger$1(name, definitions) {
-    return { type: 0 /* Trigger */, name: name, definitions: definitions };
+    return { type: 7 /* Trigger */, name: name, definitions: definitions };
 }
 /**
  * `animate` is an animation-specific function that is designed to be used inside of Angular's
@@ -13528,7 +13525,8 @@ function trigger$1(name, definitions) {
  * @return {?}
  */
 function animate$1(timings, styles) {
-    return { type: 5 /* Animate */, styles: styles, timings: timings };
+    if (styles === void 0) { styles = null; }
+    return { type: 4 /* Animate */, styles: styles, timings: timings };
 }
 /**
  * `group` is an animation-specific function that is designed to be used inside of Angular's
@@ -13565,7 +13563,8 @@ function animate$1(timings, styles) {
  * @return {?}
  */
 function group$1(steps, locals) {
-    return { type: 4 /* Group */, steps: steps, locals: locals };
+    if (locals === void 0) { locals = null; }
+    return { type: 3 /* Group */, steps: steps, locals: locals };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -13605,7 +13604,8 @@ function group$1(steps, locals) {
  * @return {?}
  */
 function sequence$1(steps, locals) {
-    return { type: 3 /* Sequence */, steps: steps, locals: locals };
+    if (locals === void 0) { locals = null; }
+    return { type: 2 /* Sequence */, steps: steps, locals: locals };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -13652,7 +13652,7 @@ function sequence$1(steps, locals) {
  * @return {?}
  */
 function style$1(tokens) {
-    return { type: 7 /* Style */, styles: tokens };
+    return { type: 6 /* Style */, styles: tokens, offset: null };
 }
 /**
  * `state` is an animation-specific function that is designed to be used inside of Angular's
@@ -13706,7 +13706,7 @@ function style$1(tokens) {
  * @return {?}
  */
 function state$1(name, styles) {
-    return { type: 1 /* State */, name: name, styles: styles };
+    return { type: 0 /* State */, name: name, styles: styles };
 }
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's
@@ -13756,7 +13756,7 @@ function state$1(name, styles) {
  * @return {?}
  */
 function keyframes$1(steps) {
-    return { type: 6 /* KeyframeSequence */, steps: steps };
+    return { type: 5 /* Keyframes */, steps: steps };
 }
 /**
  * `transition` is an animation-specific function that is designed to be used inside of Angular's
@@ -13870,7 +13870,8 @@ function keyframes$1(steps) {
  * @return {?}
  */
 function transition$1(stateChangeExpr, steps, locals) {
-    return { type: 2 /* Transition */, expr: stateChangeExpr, animation: steps, locals: locals };
+    if (locals === void 0) { locals = null; }
+    return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps, locals: locals };
 }
 /**
  * \@experimental Animation support is experimental.
@@ -13879,12 +13880,12 @@ function transition$1(stateChangeExpr, steps, locals) {
  * @return {?}
  */
 /**
- * @param {...?} args
+ * \@experimental Animation support is experimental.
+ * @param {?=} locals
  * @return {?}
  */
 /**
  * \@experimental Animation support is experimental.
- * @param {?} selector
  * @param {?} animation
  * @param {?=} locals
  * @return {?}
@@ -13897,7 +13898,16 @@ function transition$1(stateChangeExpr, steps, locals) {
  * @return {?}
  */
 /**
- * @param {...?} args
+ * \@experimental Animation support is experimental.
+ * @param {?} selector
+ * @param {?} animation
+ * @param {?=} locals
+ * @return {?}
+ */
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?} timings
+ * @param {?} animation
  * @return {?}
  */
 /**

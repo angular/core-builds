@@ -52,14 +52,14 @@ export interface AnimationStyleMetadata extends AnimationMetadata {
     } | Array<{
         [key: string]: string | number;
     } | '*'>;
-    offset?: number;
+    offset: number | null;
 }
 /**
  * @deprecated This symbol has moved. Please Import from @angular/animations instead!
  */
 export interface AnimationAnimateMetadata extends AnimationMetadata {
     timings: string | number | AnimateTimings;
-    styles?: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata;
+    styles: AnimationStyleMetadata | AnimationKeyframesSequenceMetadata | null;
 }
 /**
  * @deprecated This symbol has moved. Please Import from @angular/animations instead!
