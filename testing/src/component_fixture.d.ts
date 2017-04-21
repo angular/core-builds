@@ -45,6 +45,7 @@ export declare class ComponentFixture<T> {
     private _onErrorSubscription;
     constructor(componentRef: ComponentRef<T>, ngZone: NgZone | null, _autoDetect: boolean);
     private _tick(checkNoChanges);
+    private _flushAnimations();
     /**
      * Trigger a change detection cycle for the component.
      */
