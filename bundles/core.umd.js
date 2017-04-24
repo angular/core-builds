@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-rc.0-2991221
+ * @license Angular v4.1.0-rc.0-feda017
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-rc.0-2991221
+ * @license Angular v4.1.0-rc.0-feda017
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-rc.0-2991221');
+var VERSION = new Version('4.1.0-rc.0-feda017');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
