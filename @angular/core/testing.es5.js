@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-rc.0-46b20be
+ * @license Angular v4.1.0-ed4eaf3
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -135,10 +135,6 @@ var ComponentFixture = (function () {
         this._onStableSubscription = null;
         this._onMicrotaskEmptySubscription = null;
         this._onErrorSubscription = null;
-        /** @internal
-         *
-         */
-        this._flushAnimationsFn = function () { };
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
         this.debugElement = getDebugNode(this.elementRef.nativeElement);
@@ -188,7 +184,6 @@ var ComponentFixture = (function () {
             this.checkNoChanges();
         }
     };
-    ComponentFixture.prototype._flushAnimations = function () { this._flushAnimationsFn(); };
     /**
      * Trigger a change detection cycle for the component.
      */
@@ -198,15 +193,11 @@ var ComponentFixture = (function () {
         if (this.ngZone != null) {
             // Run the change detection inside the NgZone so that any async tasks as part of the change
             // detection are captured by the zone and can be waited for in isStable.
-            this.ngZone.run(function () {
-                _this._tick(checkNoChanges);
-                _this._flushAnimations();
-            });
+            this.ngZone.run(function () { _this._tick(checkNoChanges); });
         }
         else {
             // Running without zone. Just do the change detection.
             this._tick(checkNoChanges);
-            this._flushAnimations();
         }
     };
     /**
@@ -403,17 +394,6 @@ function discardPeriodicTasks() {
 function flushMicrotasks() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
 }
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @experimental Animation support is experimental.
- */
-var FLUSH_ANIMATIONS_FN = new InjectionToken('FLUSH_ANIMATIONS');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -818,12 +798,7 @@ var TestBed = (function () {
         testComponentRenderer.insertRootElement(rootElId);
         var initComponent = function () {
             var componentRef = componentFactory.create(Injector.NULL, [], "#" + rootElId, _this._moduleRef);
-            var cmp = new ComponentFixture(componentRef, ngZone, autoDetect);
-            var FLUSH_ANIMATIONS = _this.get(FLUSH_ANIMATIONS_FN, null);
-            if (FLUSH_ANIMATIONS) {
-                cmp._flushAnimationsFn = FLUSH_ANIMATIONS;
-            }
-            return cmp;
+            return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
         this._activeFixtures.push(fixture);
@@ -975,5 +950,5 @@ var __core_private_testing_placeholder__ = '';
  * @description
  * Entry point for all public APIs of the core/testing package.
  */
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, FLUSH_ANIMATIONS_FN };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.es5.js.map

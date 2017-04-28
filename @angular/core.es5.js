@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.1.0-rc.0-46b20be
+ * @license Angular v4.1.0-ed4eaf3
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -860,7 +860,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.1.0-rc.0-46b20be');
+var VERSION = new Version('4.1.0-ed4eaf3');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -5403,6 +5403,16 @@ var RendererFactory2 = (function () {
      * @return {?}
      */
     RendererFactory2.prototype.createRenderer = function (hostElement, type) { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RendererFactory2.prototype.begin = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RendererFactory2.prototype.end = function () { };
     return RendererFactory2;
 }());
 var RendererStyleFlags2 = {};
@@ -10113,7 +10123,11 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.detectChanges = function () { Services.checkAndUpdateView(this._view); };
+    ViewRef_.prototype.detectChanges = function () {
+        this._view.root.rendererFactory.begin();
+        Services.checkAndUpdateView(this._view);
+        this._view.root.rendererFactory.end();
+    };
     /**
      * @return {?}
      */
@@ -13039,6 +13053,14 @@ var DebugRendererFactory2 = (function () {
     DebugRendererFactory2.prototype.createRenderer = function (element, renderData) {
         return new DebugRenderer2(this.delegate.createRenderer(element, renderData));
     };
+    /**
+     * @return {?}
+     */
+    DebugRendererFactory2.prototype.begin = function () { this.delegate.begin(); };
+    /**
+     * @return {?}
+     */
+    DebugRendererFactory2.prototype.end = function () { this.delegate.end(); };
     return DebugRendererFactory2;
 }());
 var DebugRenderer2 = (function () {

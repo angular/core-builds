@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-rc.0-46b20be
+ * @license Angular v4.1.0-ed4eaf3
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-rc.0-46b20be');
+const VERSION = new Version('4.1.0-ed4eaf3');
 
 /**
  * @license
@@ -5169,6 +5169,16 @@ class RendererFactory2 {
      * @return {?}
      */
     createRenderer(hostElement, type) { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    begin() { }
+    /**
+     * @abstract
+     * @return {?}
+     */
+    end() { }
 }
 let RendererStyleFlags2 = {};
 RendererStyleFlags2.Important = 1;
@@ -9696,7 +9706,11 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    detectChanges() { Services.checkAndUpdateView(this._view); }
+    detectChanges() {
+        this._view.root.rendererFactory.begin();
+        Services.checkAndUpdateView(this._view);
+        this._view.root.rendererFactory.end();
+    }
     /**
      * @return {?}
      */
@@ -12564,6 +12578,14 @@ class DebugRendererFactory2 {
     createRenderer(element, renderData) {
         return new DebugRenderer2(this.delegate.createRenderer(element, renderData));
     }
+    /**
+     * @return {?}
+     */
+    begin() { this.delegate.begin(); }
+    /**
+     * @return {?}
+     */
+    end() { this.delegate.end(); }
 }
 class DebugRenderer2 {
     /**
