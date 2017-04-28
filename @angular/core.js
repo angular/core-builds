@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-a2b2afb
+ * @license Angular v4.1.0-a4de214
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-a2b2afb');
+const VERSION = new Version('4.1.0-a4de214');
 
 /**
  * @license
@@ -4632,14 +4632,18 @@ class ApplicationRef {
      * specified application component onto DOM elements identified by the [componentType]'s
      * selector and kicks off automatic change detection to finish initializing the component.
      *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * [componentType]'s selector.
+     *
      * ### Example
      * {\@example core/ts/platform/platform.ts region='longform'}
      * @abstract
      * @template C
      * @param {?} componentFactory
+     * @param {?=} rootSelectorOrNode
      * @return {?}
      */
-    bootstrap(componentFactory) { }
+    bootstrap(componentFactory, rootSelectorOrNode) { }
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
      *
@@ -4781,9 +4785,10 @@ class ApplicationRef_ extends ApplicationRef {
     /**
      * @template C
      * @param {?} componentOrFactory
+     * @param {?=} rootSelectorOrNode
      * @return {?}
      */
-    bootstrap(componentOrFactory) {
+    bootstrap(componentOrFactory, rootSelectorOrNode) {
         if (!this._initStatus.done) {
             throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
@@ -4799,7 +4804,8 @@ class ApplicationRef_ extends ApplicationRef {
         const /** @type {?} */ ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
             null :
             this._injector.get(NgModuleRef);
-        const /** @type {?} */ compRef = componentFactory.create(Injector.NULL, [], componentFactory.selector, ngModule);
+        const /** @type {?} */ selectorOrNode = rootSelectorOrNode || componentFactory.selector;
+        const /** @type {?} */ compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
         compRef.onDestroy(() => { this._unloadComponent(compRef); });
         const /** @type {?} */ testability = compRef.injector.get(Testability, null);
         if (testability) {
@@ -8405,7 +8411,7 @@ function markParentViewsForCheck(view) {
     let /** @type {?} */ currView = view;
     while (currView) {
         if (currView.def.flags & 2 /* OnPush */) {
-            currView.state |= 2 /* ChecksEnabled */;
+            currView.state |= 4 /* ChecksEnabled */;
         }
         currView = currView.viewContainerParent || currView.parent;
     }
@@ -9451,7 +9457,9 @@ class ComponentFactory_ extends ComponentFactory {
         const /** @type {?} */ componentNodeIndex = ((((viewDef.nodes[0].element)).componentProvider)).index;
         const /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
         const /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
-        view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
+        if (rootSelectorOrNode) {
+            view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
+        }
         return new ComponentRef_(view, new ViewRef_(view), component);
     }
 }
@@ -9684,7 +9692,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    get destroyed() { return (this._view.state & 8 /* Destroyed */) !== 0; }
+    get destroyed() { return (this._view.state & 16 /* Destroyed */) !== 0; }
     /**
      * @return {?}
      */
@@ -9692,7 +9700,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    detach() { this._view.state &= ~2 /* ChecksEnabled */; }
+    detach() { this._view.state &= ~2 /* Attached */; }
     /**
      * @return {?}
      */
@@ -9704,7 +9712,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    reattach() { this._view.state |= 2 /* ChecksEnabled */; }
+    reattach() { this._view.state |= 2 /* Attached */; }
     /**
      * @param {?} callback
      * @return {?}
@@ -10437,6 +10445,11 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
         notFoundValue = null;
     }
     const /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
+    if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
+        // directives on the same element as a component should be able to control the change detector
+        // of that component as well.
+        allowPrivateServices = !!(elDef && ((elDef.element)).componentView);
+    }
     if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
         allowPrivateServices = false;
         elDef = ((elDef.parent));
@@ -10527,7 +10540,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
     if (def.flags & 16384 /* Component */) {
         const /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((def.parent)).index).componentView;
         if (compView.def.flags & 2 /* OnPush */) {
-            compView.state |= 2 /* ChecksEnabled */;
+            compView.state |= 4 /* ChecksEnabled */;
         }
     }
     const /** @type {?} */ binding = def.bindings[bindingIdx];
@@ -11469,7 +11482,7 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         viewContainerParent: null, parentNodeDef,
         context: null,
         component: null, nodes,
-        state: 1 /* FirstCheck */ | 2 /* ChecksEnabled */, root, renderer,
+        state: 1 /* FirstCheck */ | 6 /* CatDetectChanges */, root, renderer,
         oldValues: new Array(def.bindingCount), disposables
     };
     return view;
@@ -11603,7 +11616,7 @@ function checkAndUpdateView(view) {
     callLifecycleHooksChildrenFirst(view, 4194304 /* AfterViewChecked */ |
         (view.state & 1 /* FirstCheck */ ? 2097152 /* AfterViewInit */ : 0));
     if (view.def.flags & 2 /* OnPush */) {
-        view.state &= ~2 /* ChecksEnabled */;
+        view.state &= ~4 /* ChecksEnabled */;
     }
     view.state &= ~1 /* FirstCheck */;
 }
@@ -11795,7 +11808,7 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 function destroyView(view) {
-    if (view.state & 8 /* Destroyed */) {
+    if (view.state & 16 /* Destroyed */) {
         return;
     }
     execEmbeddedViewsAction(view, ViewAction.Destroy);
@@ -11812,7 +11825,7 @@ function destroyView(view) {
     if (isComponentView(view)) {
         view.renderer.destroy();
     }
-    view.state |= 8 /* Destroyed */;
+    view.state |= 16 /* Destroyed */;
 }
 /**
  * @param {?} view
@@ -11899,14 +11912,14 @@ function callViewAction(view, action) {
     const /** @type {?} */ viewState = view.state;
     switch (action) {
         case ViewAction.CheckNoChanges:
-            if ((viewState & 2 /* ChecksEnabled */) &&
-                (viewState & (4 /* Errored */ | 8 /* Destroyed */)) === 0) {
+            if ((viewState & 6 /* CatDetectChanges */) === 6 /* CatDetectChanges */ &&
+                (viewState & (8 /* Errored */ | 16 /* Destroyed */)) === 0) {
                 checkNoChangesView(view);
             }
             break;
         case ViewAction.CheckAndUpdate:
-            if ((viewState & 2 /* ChecksEnabled */) &&
-                (viewState & (4 /* Errored */ | 8 /* Destroyed */)) === 0) {
+            if ((viewState & 6 /* CatDetectChanges */) === 6 /* CatDetectChanges */ &&
+                (viewState & (8 /* Errored */ | 16 /* Destroyed */)) === 0) {
                 checkAndUpdateView(view);
             }
             break;
@@ -12177,7 +12190,7 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  * @return {?}
  */
 function debugUpdateDirectives(view, checkType) {
-    if (view.state & 8 /* Destroyed */) {
+    if (view.state & 16 /* Destroyed */) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
@@ -12211,7 +12224,7 @@ function debugUpdateDirectives(view, checkType) {
  * @return {?}
  */
 function debugUpdateRenderer(view, checkType) {
-    if (view.state & 8 /* Destroyed */) {
+    if (view.state & 16 /* Destroyed */) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
@@ -12539,7 +12552,7 @@ function callWithDebugContext(action, fn, self, args) {
         if (isViewDebugError(e) || !_currentView) {
             throw e;
         }
-        _currentView.state |= 4 /* Errored */;
+        _currentView.state |= 8 /* Errored */;
         throw viewWrappedDebugError(e, /** @type {?} */ ((getCurrentDebugContext())));
     }
 }
