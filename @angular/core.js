@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-ac220fc
+ * @license Angular v4.1.0-e263e19
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-ac220fc');
+const VERSION = new Version('4.1.0-e263e19');
 
 /**
  * @license
@@ -4853,6 +4853,10 @@ class ApplicationRef_ extends ApplicationRef {
                 this._views.forEach((view) => view.checkNoChanges());
             }
         }
+        catch (e) {
+            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
+            this._exceptionHandler.handleError(e);
+        }
         finally {
             this._runningTick = false;
             wtfLeave(scope);
@@ -8370,7 +8374,7 @@ function resolveRendererType2(type) {
  */
 function checkBinding(view, def, bindingIdx, value) {
     const /** @type {?} */ oldValues = view.oldValues;
-    if ((view.state & 1 /* FirstCheck */) ||
+    if ((view.state & 2 /* FirstCheck */) ||
         !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
         return true;
     }
@@ -8399,8 +8403,8 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
  */
 function checkBindingNoChanges(view, def, bindingIdx, value) {
     const /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & 1 /* FirstCheck */) || !devModeEqual(oldValue, value)) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
+    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
     }
 }
 /**
@@ -8411,7 +8415,7 @@ function markParentViewsForCheck(view) {
     let /** @type {?} */ currView = view;
     while (currView) {
         if (currView.def.flags & 2 /* OnPush */) {
-            currView.state |= 4 /* ChecksEnabled */;
+            currView.state |= 8 /* ChecksEnabled */;
         }
         currView = currView.viewContainerParent || currView.parent;
     }
@@ -9014,7 +9018,15 @@ function listenToElementOutputs(view, compView, def, el) {
  * @return {?}
  */
 function renderEventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
+    return (event) => {
+        try {
+            return dispatchEvent(view, index, eventName, event);
+        }
+        catch (e) {
+            // Attention: Don't rethrow, to keep in sync with directive events.
+            view.root.errorHandler.handleError(e);
+        }
+    };
 }
 /**
  * @param {?} view
@@ -9700,7 +9712,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    detach() { this._view.state &= ~2 /* Attached */; }
+    detach() { this._view.state &= ~4 /* Attached */; }
     /**
      * @return {?}
      */
@@ -9712,7 +9724,7 @@ class ViewRef_ {
     /**
      * @return {?}
      */
-    reattach() { this._view.state |= 2 /* Attached */; }
+    reattach() { this._view.state |= 4 /* Attached */; }
     /**
      * @param {?} callback
      * @return {?}
@@ -10216,7 +10228,15 @@ function createDirectiveInstance(view, def) {
  * @return {?}
  */
 function eventHandlerClosure(view, index, eventName) {
-    return (event) => dispatchEvent(view, index, eventName, event);
+    return (event) => {
+        try {
+            return dispatchEvent(view, index, eventName, event);
+        }
+        catch (e) {
+            // Attention: Don't rethrow, as it would cancel Observable subscriptions!
+            view.root.errorHandler.handleError(e);
+        }
+    };
 }
 /**
  * @param {?} view
@@ -10282,7 +10302,7 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 1 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
+    if ((view.state & 2 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
         directive.ngOnInit();
     }
     if (def.flags & 131072 /* DoCheck */) {
@@ -10310,7 +10330,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 1 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
+    if ((view.state & 2 /* FirstCheck */) && (def.flags & 32768 /* OnInit */)) {
         directive.ngOnInit();
     }
     if (def.flags & 131072 /* DoCheck */) {
@@ -10540,7 +10560,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
     if (def.flags & 16384 /* Component */) {
         const /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((def.parent)).index).componentView;
         if (compView.def.flags & 2 /* OnPush */) {
-            compView.state |= 4 /* ChecksEnabled */;
+            compView.state |= 8 /* ChecksEnabled */;
         }
     }
     const /** @type {?} */ binding = def.bindings[bindingIdx];
@@ -10557,7 +10577,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
         }
         const /** @type {?} */ binding = def.bindings[bindingIdx];
         changes[((binding.nonMinifiedName))] =
-            new SimpleChange(oldValue, value, (view.state & 1 /* FirstCheck */) !== 0);
+            new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
     }
     view.oldValues[def.bindingIndex + bindingIdx] = value;
     return changes;
@@ -11482,7 +11502,7 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         viewContainerParent: null, parentNodeDef,
         context: null,
         component: null, nodes,
-        state: 1 /* FirstCheck */ | 6 /* CatDetectChanges */, root, renderer,
+        state: 13 /* CatInit */, root, renderer,
         oldValues: new Array(def.bindingCount), disposables
     };
     return view;
@@ -11605,20 +11625,26 @@ function checkNoChangesView(view) {
  * @return {?}
  */
 function checkAndUpdateView(view) {
+    if (view.state & 1 /* BeforeFirstCheck */) {
+        view.state &= ~1 /* BeforeFirstCheck */;
+        view.state |= 2 /* FirstCheck */;
+    }
+    else {
+        view.state &= ~2 /* FirstCheck */;
+    }
     Services.updateDirectives(view, 0 /* CheckAndUpdate */);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, 33554432 /* TypeContentQuery */, 268435456 /* DynamicQuery */, 0 /* CheckAndUpdate */);
     callLifecycleHooksChildrenFirst(view, 1048576 /* AfterContentChecked */ |
-        (view.state & 1 /* FirstCheck */ ? 524288 /* AfterContentInit */ : 0));
+        (view.state & 2 /* FirstCheck */ ? 524288 /* AfterContentInit */ : 0));
     Services.updateRenderer(view, 0 /* CheckAndUpdate */);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, 67108864 /* TypeViewQuery */, 268435456 /* DynamicQuery */, 0 /* CheckAndUpdate */);
     callLifecycleHooksChildrenFirst(view, 4194304 /* AfterViewChecked */ |
-        (view.state & 1 /* FirstCheck */ ? 2097152 /* AfterViewInit */ : 0));
+        (view.state & 2 /* FirstCheck */ ? 2097152 /* AfterViewInit */ : 0));
     if (view.def.flags & 2 /* OnPush */) {
-        view.state &= ~4 /* ChecksEnabled */;
+        view.state &= ~8 /* ChecksEnabled */;
     }
-    view.state &= ~1 /* FirstCheck */;
 }
 /**
  * @param {?} view
@@ -11800,7 +11826,7 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
 function checkNoChangesQuery(view, nodeDef) {
     const /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
     if (queryList.dirty) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), `Query ${ /** @type {?} */((nodeDef.query)).id} not dirty`, `Query ${ /** @type {?} */((nodeDef.query)).id} dirty`, (view.state & 1 /* FirstCheck */) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), `Query ${ /** @type {?} */((nodeDef.query)).id} not dirty`, `Query ${ /** @type {?} */((nodeDef.query)).id} dirty`, (view.state & 1 /* BeforeFirstCheck */) !== 0);
     }
 }
 /**
@@ -11912,14 +11938,14 @@ function callViewAction(view, action) {
     const /** @type {?} */ viewState = view.state;
     switch (action) {
         case ViewAction.CheckNoChanges:
-            if ((viewState & 6 /* CatDetectChanges */) === 6 /* CatDetectChanges */ &&
-                (viewState & (8 /* Errored */ | 16 /* Destroyed */)) === 0) {
+            if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */ &&
+                (viewState & 16 /* Destroyed */) === 0) {
                 checkNoChangesView(view);
             }
             break;
         case ViewAction.CheckAndUpdate:
-            if ((viewState & 6 /* CatDetectChanges */) === 6 /* CatDetectChanges */ &&
-                (viewState & (8 /* Errored */ | 16 /* Destroyed */)) === 0) {
+            if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */ &&
+                (viewState & 16 /* Destroyed */) === 0) {
                 checkAndUpdateView(view);
             }
             break;
@@ -12067,11 +12093,12 @@ function debugCreateRootView(elInjector, projectableNodes, rootSelectorOrNode, d
  */
 function createRootData(elInjector, ngModule, rendererFactory, projectableNodes, rootSelectorOrNode) {
     const /** @type {?} */ sanitizer = ngModule.injector.get(Sanitizer);
+    const /** @type {?} */ errorHandler = ngModule.injector.get(ErrorHandler);
     const /** @type {?} */ renderer = rendererFactory.createRenderer(null, null);
     return {
         ngModule,
         injector: elInjector, projectableNodes,
-        selectorOrNode: rootSelectorOrNode, sanitizer, rendererFactory, renderer
+        selectorOrNode: rootSelectorOrNode, sanitizer, rendererFactory, renderer, errorHandler
     };
 }
 /**
@@ -12552,7 +12579,6 @@ function callWithDebugContext(action, fn, self, args) {
         if (isViewDebugError(e) || !_currentView) {
             throw e;
         }
-        _currentView.state |= 8 /* Errored */;
         throw viewWrappedDebugError(e, /** @type {?} */ ((getCurrentDebugContext())));
     }
 }

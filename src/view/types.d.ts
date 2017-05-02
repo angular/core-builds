@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../di';
+import { ErrorHandler } from '../error_handler';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { QueryList } from '../linker/query_list';
 import { TemplateRef } from '../linker/template_ref';
@@ -299,12 +300,13 @@ export interface ViewData {
  * Bitmask of states
  */
 export declare const enum ViewState {
-    FirstCheck = 1,
-    Attached = 2,
-    ChecksEnabled = 4,
-    Errored = 8,
+    BeforeFirstCheck = 1,
+    FirstCheck = 2,
+    Attached = 4,
+    ChecksEnabled = 8,
     Destroyed = 16,
-    CatDetectChanges = 6,
+    CatDetectChanges = 12,
+    CatInit = 13,
 }
 export interface DisposableFn {
     (): void;
@@ -391,6 +393,7 @@ export interface RootData {
     selectorOrNode: any;
     renderer: Renderer2;
     rendererFactory: RendererFactory2;
+    errorHandler: ErrorHandler;
     sanitizer: Sanitizer;
 }
 export declare abstract class DebugContext {
