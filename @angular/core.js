@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.1.0-ea9d8a6
+ * @license Angular v4.1.0-5ba8c14
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.1.0-ea9d8a6');
+const VERSION = new Version('4.1.0-5ba8c14');
 
 /**
  * @license
