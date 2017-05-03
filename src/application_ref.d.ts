@@ -84,8 +84,8 @@ export declare function getPlatform(): PlatformRef | null;
  * has exactly one platform, and services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
  *
- * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
- * explicitly by calling {@link createPlatform}().
+ * A page's platform is initialized implicitly when a platform is created via a platform factory
+ * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
  *
  * @stable
  */
@@ -168,8 +168,6 @@ export declare class PlatformRef_ extends PlatformRef {
 /**
  * A reference to an Angular application running on a page.
  *
- * For more about Angular applications, see the documentation for {@link bootstrap}.
- *
  * @stable
  */
 export declare abstract class ApplicationRef {
@@ -182,10 +180,13 @@ export declare abstract class ApplicationRef {
      * specified application component onto DOM elements identified by the [componentType]'s
      * selector and kicks off automatic change detection to finish initializing the component.
      *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * [componentType]'s selector.
+     *
      * ### Example
      * {@example core/ts/platform/platform.ts region='longform'}
      */
-    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
+    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
      *
@@ -247,7 +248,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus);
     attachView(viewRef: ViewRef): void;
     detachView(viewRef: ViewRef): void;
-    bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
+    bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
     private _loadComponent(componentRef);
     private _unloadComponent(componentRef);
     tick(): void;
