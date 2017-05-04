@@ -259,7 +259,7 @@ export declare const ContentChild: ContentChildDecorator;
 /**
  * Type of the ViewChildren decorator / constructor function.
  *
- * See {@ViewChildren}.
+ * See {@link ViewChildren}.
  *
  * @stable
  */
