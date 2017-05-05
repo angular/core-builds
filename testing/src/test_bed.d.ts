@@ -56,7 +56,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef): TestBed;
+    static initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed;
     /**
      * Reset the providers for the test injector.
      *
@@ -93,7 +93,7 @@ export declare class TestBed implements Injector {
     private _instantiated;
     private _compiler;
     private _moduleRef;
-    private _moduleWithComponentFactories;
+    private _moduleFactory;
     private _compilerOptions;
     private _moduleOverrides;
     private _componentOverrides;
@@ -104,6 +104,9 @@ export declare class TestBed implements Injector {
     private _imports;
     private _schemas;
     private _activeFixtures;
+    private _aotSummaries;
+    platform: PlatformRef;
+    ngModule: Type<any> | Type<any>[];
     /**
      * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
      * angular module. These are common to every test in the suite.
@@ -117,7 +120,7 @@ export declare class TestBed implements Injector {
      *
      * @experimental
      */
-    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef): void;
+    initTestEnvironment(ngModule: Type<any> | Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): void;
     /**
      * Reset the providers for the test injector.
      *
@@ -125,8 +128,6 @@ export declare class TestBed implements Injector {
      */
     resetTestEnvironment(): void;
     resetTestingModule(): void;
-    platform: PlatformRef;
-    ngModule: Type<any> | Type<any>[];
     configureCompiler(config: {
         providers?: any[];
         useJit?: boolean;
