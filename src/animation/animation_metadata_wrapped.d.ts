@@ -108,7 +108,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
 /**
  * @deprecated This symbol has moved. Please Import from @angular/animations instead!
  */
-export declare function transition(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata | AnimationMetadata[]): AnimationTransitionMetadata;
+export declare function transition(stateChangeExpr: string, steps: AnimationMetadata | AnimationMetadata[]): AnimationTransitionMetadata;
 /**
  * @deprecated This has been renamed to `AnimationEvent`. Please import it from @angular/animations.
  */
