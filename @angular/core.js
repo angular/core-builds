@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.0-9da6340
+ * @license Angular v4.2.0-beta.0-4874765
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.0-beta.0-9da6340');
+const VERSION = new Version('4.2.0-beta.0-4874765');
 
 /**
  * @license
@@ -3657,9 +3657,11 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
  */
 class EventEmitter extends Subject {
     /**
-     * Creates an instance of [EventEmitter], which depending on [isAsync],
+     * Creates an instance of {\@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
-     * @param {?=} isAsync
+     *
+     * @param {?=} isAsync By default, events are delivered synchronously (default value: `false`).
+     * Set to `true` for asynchronous event delivery.
      */
     constructor(isAsync = false) {
         super();
