@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.2.0-beta.0-98dd609
+ * @license Angular v4.2.0-beta.0-c5ce040
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -860,7 +860,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-beta.0-98dd609');
+var VERSION = new Version('4.2.0-beta.0-c5ce040');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -3797,9 +3797,11 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 var EventEmitter = (function (_super) {
     __extends(EventEmitter, _super);
     /**
-     * Creates an instance of [EventEmitter], which depending on [isAsync],
+     * Creates an instance of {\@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
-     * @param {?=} isAsync
+     *
+     * @param {?=} isAsync By default, events are delivered synchronously (default value: `false`).
+     * Set to `true` for asynchronous event delivery.
      */
     function EventEmitter(isAsync) {
         if (isAsync === void 0) { isAsync = false; }
