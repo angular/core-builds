@@ -16,6 +16,7 @@ export declare function checkBinding(view: ViewData, def: NodeDef, bindingIdx: n
 export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean;
 export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
 export declare function markParentViewsForCheck(view: ViewData): void;
+export declare function markParentViewsForCheckProjectedViews(view: ViewData, endView: ViewData): void;
 export declare function dispatchEvent(view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
 export declare function declaredViewContainer(view: ViewData): ElementData | null;
 /**
