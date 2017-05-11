@@ -13,8 +13,35 @@ import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
-export interface ViewDefinition {
-    factory: ViewDefinitionFactory | null;
+/**
+ * Factory for ViewDefinitions/NgModuleDefinitions.
+ * We use a function so we can reexeute it in case an error happens and use the given logger
+ * function to log the error from the definition of the node, which is shown in all browser
+ * logs.
+ */
+export interface DefinitionFactory<D extends Definition<any>> {
+    (logger: NodeLogger): D;
+}
+/**
+ * Function to call console.error at the right source location. This is an indirection
+ * via another function as browser will log the location that actually called
+ * `console.error`.
+ */
+export interface NodeLogger {
+    (): () => void;
+}
+export interface Definition<DF extends DefinitionFactory<any>> {
+    factory: DF | null;
+}
+export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory> {
+    providers: NgModuleProviderDef[];
+    providersByKey: {
+        [tokenKey: string]: NgModuleProviderDef;
+    };
+}
+export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
+}
+export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
     flags: ViewFlags;
     updateDirectives: ViewUpdateFn;
     updateRenderer: ViewUpdateFn;
@@ -37,22 +64,7 @@ export interface ViewDefinition {
      */
     nodeMatchedQueries: number;
 }
-/**
- * Factory for ViewDefinitions.
- * We use a function so we can reexeute it in case an error happens and use the given logger
- * function to log the error from the definition of the node, which is shown in all browser
- * logs.
- */
-export interface ViewDefinitionFactory {
-    (logger: NodeLogger): ViewDefinition;
-}
-/**
- * Function to call console.error at the right source location. This is an indirection
- * via another function as browser will log the location that actually called
- * `console.error`.
- */
-export interface NodeLogger {
-    (): () => void;
+export interface ViewDefinitionFactory extends DefinitionFactory<ViewDefinition> {
 }
 export interface ViewUpdateFn {
     (check: NodeCheckFn, view: ViewData): void;
@@ -234,7 +246,13 @@ export interface ElementHandleEventFn {
 }
 export interface ProviderDef {
     token: any;
-    tokenKey: string;
+    value: any;
+    deps: DepDef[];
+}
+export interface NgModuleProviderDef {
+    flags: NodeFlags;
+    index: number;
+    token: any;
     value: any;
     deps: DepDef[];
 }
@@ -276,6 +294,11 @@ export interface NgContentDef {
      * have a ngContentIndex on its own.
      */
     index: number;
+}
+export interface NgModuleData extends Injector, NgModuleRef<any> {
+    _def: NgModuleDefinition;
+    _parent: Injector;
+    _providers: any[];
 }
 /**
  * View instance data.
