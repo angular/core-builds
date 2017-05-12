@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-0626464
+ * @license Angular v4.2.0-beta.1-38c524d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -231,6 +231,13 @@ class ComponentFixture {
             this._promise = new Promise(res => { this._resolve = res; });
             return this._promise;
         }
+    }
+    /**
+     * Get a promise that resolves when the ui state is stable following animations.
+     */
+    whenRenderingDone() {
+        // this is temporary until this is functional
+        return this.whenStable();
     }
     /**
      * Trigger component destruction.
