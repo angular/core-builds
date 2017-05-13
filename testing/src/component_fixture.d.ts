@@ -72,10 +72,6 @@ export declare class ComponentFixture<T> {
      */
     whenStable(): Promise<any>;
     /**
-     * Get a promise that resolves when the ui state is stable following animations.
-     */
-    whenRenderingDone(): Promise<any>;
-    /**
      * Trigger component destruction.
      */
     destroy(): void;
