@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-4a599ee
+ * @license Angular v4.2.0-beta.1-ecc356e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.2.0-beta.1-4a599ee
+ * @license Angular v4.2.0-beta.1-ecc356e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -250,6 +250,13 @@ var ComponentFixture = (function () {
             this._promise = new Promise(function (res) { _this._resolve = res; });
             return this._promise;
         }
+    };
+    /**
+     * Get a promise that resolves when the ui state is stable following animations.
+     */
+    ComponentFixture.prototype.whenRenderingDone = function () {
+        // this is temporary until this is functional
+        return this.whenStable();
     };
     /**
      * Trigger component destruction.
