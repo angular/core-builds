@@ -13,6 +13,7 @@ import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
 import { Sanitizer, SecurityContext } from '../security';
+import { Type } from '../type';
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
  * We use a function so we can reexeute it in case an error happens and use the given logger
@@ -163,6 +164,7 @@ export declare const enum NodeFlags {
     PrivateProvider = 8192,
     TypeDirective = 16384,
     Component = 32768,
+    CatProviderNoDirective = 3840,
     CatProvider = 20224,
     OnInit = 65536,
     OnDestroy = 131072,
@@ -441,10 +443,20 @@ export declare const enum CheckType {
     CheckAndUpdate = 0,
     CheckNoChanges = 1,
 }
+export interface ProviderOverride {
+    token: any;
+    flags: NodeFlags;
+    value: any;
+    deps: ([DepFlags, any] | any)[];
+}
 export interface Services {
     setCurrentNode(view: ViewData, nodeIndex: number): void;
     createRootView(injector: Injector, projectableNodes: any[][], rootSelectorOrNode: string | any, def: ViewDefinition, ngModule: NgModuleRef<any>, context?: any): ViewData;
-    createEmbeddedView(parent: ViewData, anchorDef: NodeDef, context?: any): ViewData;
+    createEmbeddedView(parent: ViewData, anchorDef: NodeDef, viewDef: ViewDefinition, context?: any): ViewData;
+    createComponentView(parentView: ViewData, nodeDef: NodeDef, viewDef: ViewDefinition, hostElement: any): ViewData;
+    createNgModuleRef(moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[], def: NgModuleDefinition): NgModuleRef<any>;
+    overrideProvider(override: ProviderOverride): void;
+    clearProviderOverrides(): void;
     checkAndUpdateView(view: ViewData): void;
     checkNoChangesView(view: ViewData): void;
     destroyView(view: ViewData): void;

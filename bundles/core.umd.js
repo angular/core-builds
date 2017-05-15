@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-1eba623
+ * @license Angular v4.2.0-beta.1-39b92f7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.2.0-beta.1-1eba623
+ * @license Angular v4.2.0-beta.1-39b92f7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +867,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-beta.1-1eba623');
+var VERSION = new Version('4.2.0-beta.1-39b92f7');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -8318,6 +8318,99 @@ MissingTranslationStrategy.Ignore = 2;
 MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
 MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
 MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @return {?}
+ */
+function _iterableDiffersFactory() {
+    return defaultIterableDiffers;
+}
+/**
+ * @return {?}
+ */
+function _keyValueDiffersFactory() {
+    return defaultKeyValueDiffers;
+}
+/**
+ * @param {?=} locale
+ * @return {?}
+ */
+function _localeFactory(locale) {
+    return locale || 'en-US';
+}
+/**
+ * This module includes the providers of \@angular/core that are needed
+ * to bootstrap components via `ApplicationRef`.
+ *
+ * \@experimental
+ */
+var ApplicationModule = (function () {
+    /**
+     * @param {?} appRef
+     */
+    function ApplicationModule(appRef) {
+    }
+    return ApplicationModule;
+}());
+ApplicationModule.decorators = [
+    { type: NgModule, args: [{
+                providers: [
+                    ApplicationRef_,
+                    { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                    ApplicationInitStatus,
+                    Compiler,
+                    APP_ID_RANDOM_PROVIDER,
+                    { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                    {
+                        provide: LOCALE_ID,
+                        useFactory: _localeFactory,
+                        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                    },
+                ]
+            },] },
+];
+/**
+ * @nocollapse
+ */
+ApplicationModule.ctorParameters = function () { return [
+    { type: ApplicationRef, },
+]; };
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var LifecycleHooks = {};
+LifecycleHooks.OnInit = 0;
+LifecycleHooks.OnDestroy = 1;
+LifecycleHooks.DoCheck = 2;
+LifecycleHooks.OnChanges = 3;
+LifecycleHooks.AfterContentInit = 4;
+LifecycleHooks.AfterContentChecked = 5;
+LifecycleHooks.AfterViewInit = 6;
+LifecycleHooks.AfterViewChecked = 7;
+LifecycleHooks[LifecycleHooks.OnInit] = "OnInit";
+LifecycleHooks[LifecycleHooks.OnDestroy] = "OnDestroy";
+LifecycleHooks[LifecycleHooks.DoCheck] = "DoCheck";
+LifecycleHooks[LifecycleHooks.OnChanges] = "OnChanges";
+LifecycleHooks[LifecycleHooks.AfterContentInit] = "AfterContentInit";
+LifecycleHooks[LifecycleHooks.AfterContentChecked] = "AfterContentChecked";
+LifecycleHooks[LifecycleHooks.AfterViewInit] = "AfterViewInit";
+LifecycleHooks[LifecycleHooks.AfterViewChecked] = "AfterViewChecked";
+var LIFECYCLE_HOOKS_VALUES = [
+    LifecycleHooks.OnInit, LifecycleHooks.OnDestroy, LifecycleHooks.DoCheck, LifecycleHooks.OnChanges,
+    LifecycleHooks.AfterContentInit, LifecycleHooks.AfterContentChecked, LifecycleHooks.AfterViewInit,
+    LifecycleHooks.AfterViewChecked
+];
 var SecurityContext = {};
 SecurityContext.NONE = 0;
 SecurityContext.HTML = 1;
@@ -8485,6 +8578,10 @@ var Services = {
     setCurrentNode: /** @type {?} */ ((undefined)),
     createRootView: /** @type {?} */ ((undefined)),
     createEmbeddedView: /** @type {?} */ ((undefined)),
+    createComponentView: /** @type {?} */ ((undefined)),
+    createNgModuleRef: /** @type {?} */ ((undefined)),
+    overrideProvider: /** @type {?} */ ((undefined)),
+    clearProviderOverrides: /** @type {?} */ ((undefined)),
     checkAndUpdateView: /** @type {?} */ ((undefined)),
     checkNoChangesView: /** @type {?} */ ((undefined)),
     destroyView: /** @type {?} */ ((undefined)),
@@ -8811,6 +8908,24 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
         });
     }
     return { matchedQueries: matchedQueries, references: references, matchedQueryIds: matchedQueryIds };
+}
+/**
+ * @param {?} deps
+ * @return {?}
+ */
+function splitDepsDsl(deps) {
+    return deps.map(function (value) {
+        var /** @type {?} */ token;
+        var /** @type {?} */ flags;
+        if (Array.isArray(value)) {
+            flags = value[0], token = value[1];
+        }
+        else {
+            flags = 0 /* None */;
+            token = value;
+        }
+        return { flags: flags, token: token, tokenKey: tokenKey(token) };
+    });
 }
 /**
  * @param {?} view
@@ -9494,62 +9609,8 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @param {?} ngContentIndex
- * @param {?} index
- * @return {?}
- */
-function ngContentDef(ngContentIndex, index) {
-    return {
-        // will bet set by the view definition
-        index: -1,
-        parent: null,
-        renderParent: null,
-        bindingIndex: -1,
-        outputIndex: -1,
-        // regular values
-        flags: 8 /* TypeNgContent */,
-        childFlags: 0,
-        directChildFlags: 0,
-        childMatchedQueries: 0,
-        matchedQueries: {},
-        matchedQueryIds: 0,
-        references: {}, ngContentIndex: ngContentIndex,
-        childCount: 0,
-        bindings: [],
-        bindingFlags: 0,
-        outputs: [],
-        element: null,
-        provider: null,
-        text: null,
-        query: null,
-        ngContent: { index: index }
-    };
-}
-/**
- * @param {?} view
- * @param {?} renderHost
- * @param {?} def
- * @return {?}
- */
-function appendNgContent(view, renderHost, def) {
-    var /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
-    if (!parentEl) {
-        // Nothing to do if there is no parent element.
-        return;
-    }
-    var /** @type {?} */ ngContentIndex = ((def.ngContent)).index;
-    visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
-}
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var NOT_CREATED = new Object();
-var InjectorRefTokenKey = tokenKey(Injector);
+var NOT_CREATED$1 = new Object();
+var InjectorRefTokenKey$1 = tokenKey(Injector);
 var NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
  * @param {?} flags
@@ -9559,18 +9620,7 @@ var NgModuleRefTokenKey = tokenKey(NgModuleRef);
  * @return {?}
  */
 function moduleProvideDef(flags, token, value, deps) {
-    var /** @type {?} */ depDefs = deps.map(function (value) {
-        var /** @type {?} */ token;
-        var /** @type {?} */ flags;
-        if (Array.isArray(value)) {
-            flags = value[0], token = value[1];
-        }
-        else {
-            flags = 0 /* None */;
-            token = value;
-        }
-        return { flags: flags, token: token, tokenKey: tokenKey(token) };
-    });
+    var /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the module definition
         index: -1,
@@ -9604,8 +9654,8 @@ function initNgModule(data) {
     var /** @type {?} */ providers = data._providers = new Array(def.providers.length);
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED :
-            _createProviderInstance(data, provDef);
+        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 :
+            _createProviderInstance$1(data, provDef);
     }
 }
 /**
@@ -9627,16 +9677,16 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
     switch (tokenKey$$1) {
-        case InjectorRefTokenKey:
+        case InjectorRefTokenKey$1:
         case NgModuleRefTokenKey:
             return data;
     }
     var /** @type {?} */ providerDef = data._def.providersByKey[tokenKey$$1];
     if (providerDef) {
         var /** @type {?} */ providerInstance = data._providers[providerDef.index];
-        if (providerInstance === NOT_CREATED) {
+        if (providerInstance === NOT_CREATED$1) {
             providerInstance = data._providers[providerDef.index] =
-                _createProviderInstance(data, providerDef);
+                _createProviderInstance$1(data, providerDef);
         }
         return providerInstance;
     }
@@ -9647,20 +9697,20 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
  * @param {?} providerDef
  * @return {?}
  */
-function _createProviderInstance(ngModule, providerDef) {
+function _createProviderInstance$1(ngModule, providerDef) {
     var /** @type {?} */ injectable;
     switch (providerDef.flags & 201347067 /* Types */) {
         case 512 /* TypeClassProvider */:
-            injectable = _createClass(ngModule, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
+            injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
             break;
         case 1024 /* TypeFactoryProvider */:
-            injectable = _callFactory(ngModule, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
+            injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
             break;
         case 2048 /* TypeUseExistingProvider */:
-            injectable = resolveNgModuleDep(ngModule, /** @type {?} */ ((providerDef)).deps[0]);
+            injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
             break;
         case 256 /* TypeValueProvider */:
-            injectable = ((providerDef)).value;
+            injectable = providerDef.value;
             break;
     }
     return injectable;
@@ -9740,7 +9790,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
         var /** @type {?} */ provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             var /** @type {?} */ instance = ngModule._providers[i];
-            if (instance && instance !== NOT_CREATED) {
+            if (instance && instance !== NOT_CREATED$1) {
                 instance.ngOnDestroy();
             }
         }
@@ -9954,15 +10004,6 @@ function createComponentFactory(selector, componentType, viewDefFactory, inputs,
  */
 function getComponentViewDefinitionFactory(componentFactory) {
     return ((componentFactory)).viewDefFactory;
-}
-/**
- * @param {?} ngModuleType
- * @param {?} bootstrapComponents
- * @param {?} defFactory
- * @return {?}
- */
-function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
-    return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
 var ComponentFactory_ = (function (_super) {
     __extends(ComponentFactory_, _super);
@@ -10433,7 +10474,7 @@ var TemplateRef_ = (function (_super) {
      * @return {?}
      */
     TemplateRef_.prototype.createEmbeddedView = function (context) {
-        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, context));
+        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, /** @type {?} */ ((((this._def.element)).template)), context));
     };
     Object.defineProperty(TemplateRef_.prototype, "elementRef", {
         /**
@@ -10698,41 +10739,16 @@ var RendererAdapter = (function () {
     RendererAdapter.prototype.animate = function () { throw new Error('Renderer.animate is no longer supported!'); };
     return RendererAdapter;
 }());
-var NgModuleFactory_ = (function (_super) {
-    __extends(NgModuleFactory_, _super);
-    /**
-     * @param {?} _moduleType
-     * @param {?} _bootstrapComponents
-     * @param {?} _ngModuleDefFactory
-     */
-    function NgModuleFactory_(_moduleType, _bootstrapComponents, _ngModuleDefFactory) {
-        var _this = 
-        // Attention: this ctor is called as top level function.
-        // Putting any logic in here will destroy closure tree shaking!
-        _super.call(this) || this;
-        _this._moduleType = _moduleType;
-        _this._bootstrapComponents = _bootstrapComponents;
-        _this._ngModuleDefFactory = _ngModuleDefFactory;
-        return _this;
-    }
-    Object.defineProperty(NgModuleFactory_.prototype, "moduleType", {
-        /**
-         * @return {?}
-         */
-        get: function () { return this._moduleType; },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * @param {?} parentInjector
-     * @return {?}
-     */
-    NgModuleFactory_.prototype.create = function (parentInjector) {
-        var /** @type {?} */ def = resolveDefinition(this._ngModuleDefFactory);
-        return new NgModuleRef_(this._moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
-    };
-    return NgModuleFactory_;
-}(NgModuleFactory));
+/**
+ * @param {?} moduleType
+ * @param {?} parent
+ * @param {?} bootstrapComponents
+ * @param {?} def
+ * @return {?}
+ */
+function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
+    return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
+}
 var NgModuleRef_ = (function () {
     /**
      * @param {?} _moduleType
@@ -10813,8 +10829,8 @@ var ElementRefTokenKey = tokenKey(ElementRef);
 var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 var TemplateRefTokenKey = tokenKey(TemplateRef);
 var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
-var InjectorRefTokenKey$1 = tokenKey(Injector);
-var NOT_CREATED$1 = new Object();
+var InjectorRefTokenKey = tokenKey(Injector);
+var NOT_CREATED = new Object();
 /**
  * @param {?} flags
  * @param {?} matchedQueries
@@ -10888,18 +10904,7 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
     if (!bindings) {
         bindings = [];
     }
-    var /** @type {?} */ depDefs = deps.map(function (value) {
-        var /** @type {?} */ token;
-        var /** @type {?} */ flags;
-        if (Array.isArray(value)) {
-            flags = value[0], token = value[1];
-        }
-        else {
-            flags = 0 /* None */;
-            token = value;
-        }
-        return { flags: flags, token: token, tokenKey: tokenKey(token) };
-    });
+    var /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the view definition
         index: -1,
@@ -10927,7 +10932,7 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 : _createProviderInstance$1(view, def);
+    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -11086,7 +11091,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
  * @param {?} def
  * @return {?}
  */
-function _createProviderInstance$1(view, def) {
+function _createProviderInstance(view, def) {
     // private services can see other private services
     var /** @type {?} */ allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
     var /** @type {?} */ providerDef = def.provider;
@@ -11243,14 +11248,14 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                     var /** @type {?} */ cdView = findCompView(view, elDef, allowPrivateServices);
                     return createChangeDetectorRef(cdView);
                 }
-                case InjectorRefTokenKey$1:
+                case InjectorRefTokenKey:
                     return createInjector(view, elDef);
                 default:
                     var /** @type {?} */ providerDef_1 = (((allowPrivateServices ? ((elDef.element)).allProviders : ((elDef.element)).publicProviders)))[tokenKey$$1];
                     if (providerDef_1) {
                         var /** @type {?} */ providerData = asProviderData(view, providerDef_1.index);
-                        if (providerData.instance === NOT_CREATED$1) {
-                            providerData.instance = _createProviderInstance$1(view, providerDef_1);
+                        if (providerData.instance === NOT_CREATED) {
+                            providerData.instance = _createProviderInstance(view, providerDef_1);
                         }
                         return providerData.instance;
                     }
@@ -11381,7 +11386,7 @@ function callElementProvidersLifecycles(view, elDef, lifecycles) {
  */
 function callProviderLifecycles(view, index, lifecycles) {
     var /** @type {?} */ provider = asProviderData(view, index).instance;
-    if (provider === NOT_CREATED$1) {
+    if (provider === NOT_CREATED) {
         return;
     }
     Services.setCurrentNode(view, index);
@@ -11400,6 +11405,267 @@ function callProviderLifecycles(view, index, lifecycles) {
     if (lifecycles & 131072 /* OnDestroy */) {
         provider.ngOnDestroy();
     }
+}
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {?} flags
+ * @param {?} id
+ * @param {?} bindings
+ * @return {?}
+ */
+function queryDef(flags, id, bindings) {
+    var /** @type {?} */ bindingDefs = [];
+    for (var /** @type {?} */ propName in bindings) {
+        var /** @type {?} */ bindingType = bindings[propName];
+        bindingDefs.push({ propName: propName, bindingType: bindingType });
+    }
+    return {
+        // will bet set by the view definition
+        index: -1,
+        parent: null,
+        renderParent: null,
+        bindingIndex: -1,
+        outputIndex: -1,
+        // regular values
+        flags: flags,
+        childFlags: 0,
+        directChildFlags: 0,
+        childMatchedQueries: 0,
+        ngContentIndex: -1,
+        matchedQueries: {},
+        matchedQueryIds: 0,
+        references: {},
+        childCount: 0,
+        bindings: [],
+        bindingFlags: 0,
+        outputs: [],
+        element: null,
+        provider: null,
+        text: null,
+        query: { id: id, filterId: filterQueryId(id), bindings: bindingDefs },
+        ngContent: null
+    };
+}
+/**
+ * @return {?}
+ */
+function createQuery() {
+    return new QueryList();
+}
+/**
+ * @param {?} view
+ * @return {?}
+ */
+function dirtyParentQueries(view) {
+    var /** @type {?} */ queryIds = view.def.nodeMatchedQueries;
+    while (view.parent && isEmbeddedView(view)) {
+        var /** @type {?} */ tplDef = ((view.parentNodeDef));
+        view = view.parent;
+        // content queries
+        var /** @type {?} */ end = tplDef.index + tplDef.childCount;
+        for (var /** @type {?} */ i = 0; i <= end; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            if ((nodeDef.flags & 67108864 /* TypeContentQuery */) &&
+                (nodeDef.flags & 536870912 /* DynamicQuery */) &&
+                (((nodeDef.query)).filterId & queryIds) === ((nodeDef.query)).filterId) {
+                asQueryList(view, i).setDirty();
+            }
+            if ((nodeDef.flags & 1 /* TypeElement */ && i + nodeDef.childCount < tplDef.index) ||
+                !(nodeDef.childFlags & 67108864 /* TypeContentQuery */) ||
+                !(nodeDef.childFlags & 536870912 /* DynamicQuery */)) {
+                // skip elements that don't contain the template element or no query.
+                i += nodeDef.childCount;
+            }
+        }
+    }
+    // view queries
+    if (view.def.nodeFlags & 134217728 /* TypeViewQuery */) {
+        for (var /** @type {?} */ i = 0; i < view.def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = view.def.nodes[i];
+            if ((nodeDef.flags & 134217728 /* TypeViewQuery */) && (nodeDef.flags & 536870912 /* DynamicQuery */)) {
+                asQueryList(view, i).setDirty();
+            }
+            // only visit the root nodes
+            i += nodeDef.childCount;
+        }
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} nodeDef
+ * @return {?}
+ */
+function checkAndUpdateQuery(view, nodeDef) {
+    var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
+    if (!queryList.dirty) {
+        return;
+    }
+    var /** @type {?} */ directiveInstance;
+    var /** @type {?} */ newValues = ((undefined));
+    if (nodeDef.flags & 67108864 /* TypeContentQuery */) {
+        var /** @type {?} */ elementDef_1 = ((((nodeDef.parent)).parent));
+        newValues = calcQueryValues(view, elementDef_1.index, elementDef_1.index + elementDef_1.childCount, /** @type {?} */ ((nodeDef.query)), []);
+        directiveInstance = asProviderData(view, /** @type {?} */ ((nodeDef.parent)).index).instance;
+    }
+    else if (nodeDef.flags & 134217728 /* TypeViewQuery */) {
+        newValues = calcQueryValues(view, 0, view.def.nodes.length - 1, /** @type {?} */ ((nodeDef.query)), []);
+        directiveInstance = view.component;
+    }
+    queryList.reset(newValues);
+    var /** @type {?} */ bindings = ((nodeDef.query)).bindings;
+    var /** @type {?} */ notify = false;
+    for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
+        var /** @type {?} */ binding = bindings[i];
+        var /** @type {?} */ boundValue = void 0;
+        switch (binding.bindingType) {
+            case 0 /* First */:
+                boundValue = queryList.first;
+                break;
+            case 1 /* All */:
+                boundValue = queryList;
+                notify = true;
+                break;
+        }
+        directiveInstance[binding.propName] = boundValue;
+    }
+    if (notify) {
+        queryList.notifyOnChanges();
+    }
+}
+/**
+ * @param {?} view
+ * @param {?} startIndex
+ * @param {?} endIndex
+ * @param {?} queryDef
+ * @param {?} values
+ * @return {?}
+ */
+function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
+    for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
+        var /** @type {?} */ nodeDef = view.def.nodes[i];
+        var /** @type {?} */ valueType = nodeDef.matchedQueries[queryDef.id];
+        if (valueType != null) {
+            values.push(getQueryValue(view, nodeDef, valueType));
+        }
+        if (nodeDef.flags & 1 /* TypeElement */ && ((nodeDef.element)).template &&
+            (((((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
+                queryDef.filterId) {
+            // check embedded views that were attached at the place of their template.
+            var /** @type {?} */ elementData = asElementData(view, i);
+            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+                var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
+                for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
+                    var /** @type {?} */ embeddedView = embeddedViews[k];
+                    var /** @type {?} */ dvc = declaredViewContainer(embeddedView);
+                    if (dvc && dvc === elementData) {
+                        calcQueryValues(embeddedView, 0, embeddedView.def.nodes.length - 1, queryDef, values);
+                    }
+                }
+            }
+            var /** @type {?} */ projectedViews = elementData.template._projectedViews;
+            if (projectedViews) {
+                for (var /** @type {?} */ k = 0; k < projectedViews.length; k++) {
+                    var /** @type {?} */ projectedView = projectedViews[k];
+                    calcQueryValues(projectedView, 0, projectedView.def.nodes.length - 1, queryDef, values);
+                }
+            }
+        }
+        if ((nodeDef.childMatchedQueries & queryDef.filterId) !== queryDef.filterId) {
+            // if no child matches the query, skip the children.
+            i += nodeDef.childCount;
+        }
+    }
+    return values;
+}
+/**
+ * @param {?} view
+ * @param {?} nodeDef
+ * @param {?} queryValueType
+ * @return {?}
+ */
+function getQueryValue(view, nodeDef, queryValueType) {
+    if (queryValueType != null) {
+        // a match
+        var /** @type {?} */ value = void 0;
+        switch (queryValueType) {
+            case 1 /* RenderElement */:
+                value = asElementData(view, nodeDef.index).renderElement;
+                break;
+            case 0 /* ElementRef */:
+                value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
+                break;
+            case 2 /* TemplateRef */:
+                value = asElementData(view, nodeDef.index).template;
+                break;
+            case 3 /* ViewContainerRef */:
+                value = asElementData(view, nodeDef.index).viewContainer;
+                break;
+            case 4 /* Provider */:
+                value = asProviderData(view, nodeDef.index).instance;
+                break;
+        }
+        return value;
+    }
+}
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {?} ngContentIndex
+ * @param {?} index
+ * @return {?}
+ */
+function ngContentDef(ngContentIndex, index) {
+    return {
+        // will bet set by the view definition
+        index: -1,
+        parent: null,
+        renderParent: null,
+        bindingIndex: -1,
+        outputIndex: -1,
+        // regular values
+        flags: 8 /* TypeNgContent */,
+        childFlags: 0,
+        directChildFlags: 0,
+        childMatchedQueries: 0,
+        matchedQueries: {},
+        matchedQueryIds: 0,
+        references: {}, ngContentIndex: ngContentIndex,
+        childCount: 0,
+        bindings: [],
+        bindingFlags: 0,
+        outputs: [],
+        element: null,
+        provider: null,
+        text: null,
+        query: null,
+        ngContent: { index: index }
+    };
+}
+/**
+ * @param {?} view
+ * @param {?} renderHost
+ * @param {?} def
+ * @return {?}
+ */
+function appendNgContent(view, renderHost, def) {
+    var /** @type {?} */ parentEl = getParentRenderElement(view, renderHost, def);
+    if (!parentEl) {
+        // Nothing to do if there is no parent element.
+        return;
+    }
+    var /** @type {?} */ ngContentIndex = ((def.ngContent)).index;
+    visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
 }
 /**
  * @license
@@ -11649,213 +11915,6 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
         data.value = value;
     }
     return changed;
-}
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @param {?} flags
- * @param {?} id
- * @param {?} bindings
- * @return {?}
- */
-function queryDef(flags, id, bindings) {
-    var /** @type {?} */ bindingDefs = [];
-    for (var /** @type {?} */ propName in bindings) {
-        var /** @type {?} */ bindingType = bindings[propName];
-        bindingDefs.push({ propName: propName, bindingType: bindingType });
-    }
-    return {
-        // will bet set by the view definition
-        index: -1,
-        parent: null,
-        renderParent: null,
-        bindingIndex: -1,
-        outputIndex: -1,
-        // regular values
-        flags: flags,
-        childFlags: 0,
-        directChildFlags: 0,
-        childMatchedQueries: 0,
-        ngContentIndex: -1,
-        matchedQueries: {},
-        matchedQueryIds: 0,
-        references: {},
-        childCount: 0,
-        bindings: [],
-        bindingFlags: 0,
-        outputs: [],
-        element: null,
-        provider: null,
-        text: null,
-        query: { id: id, filterId: filterQueryId(id), bindings: bindingDefs },
-        ngContent: null
-    };
-}
-/**
- * @return {?}
- */
-function createQuery() {
-    return new QueryList();
-}
-/**
- * @param {?} view
- * @return {?}
- */
-function dirtyParentQueries(view) {
-    var /** @type {?} */ queryIds = view.def.nodeMatchedQueries;
-    while (view.parent && isEmbeddedView(view)) {
-        var /** @type {?} */ tplDef = ((view.parentNodeDef));
-        view = view.parent;
-        // content queries
-        var /** @type {?} */ end = tplDef.index + tplDef.childCount;
-        for (var /** @type {?} */ i = 0; i <= end; i++) {
-            var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & 67108864 /* TypeContentQuery */) &&
-                (nodeDef.flags & 536870912 /* DynamicQuery */) &&
-                (((nodeDef.query)).filterId & queryIds) === ((nodeDef.query)).filterId) {
-                asQueryList(view, i).setDirty();
-            }
-            if ((nodeDef.flags & 1 /* TypeElement */ && i + nodeDef.childCount < tplDef.index) ||
-                !(nodeDef.childFlags & 67108864 /* TypeContentQuery */) ||
-                !(nodeDef.childFlags & 536870912 /* DynamicQuery */)) {
-                // skip elements that don't contain the template element or no query.
-                i += nodeDef.childCount;
-            }
-        }
-    }
-    // view queries
-    if (view.def.nodeFlags & 134217728 /* TypeViewQuery */) {
-        for (var /** @type {?} */ i = 0; i < view.def.nodes.length; i++) {
-            var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & 134217728 /* TypeViewQuery */) && (nodeDef.flags & 536870912 /* DynamicQuery */)) {
-                asQueryList(view, i).setDirty();
-            }
-            // only visit the root nodes
-            i += nodeDef.childCount;
-        }
-    }
-}
-/**
- * @param {?} view
- * @param {?} nodeDef
- * @return {?}
- */
-function checkAndUpdateQuery(view, nodeDef) {
-    var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
-    if (!queryList.dirty) {
-        return;
-    }
-    var /** @type {?} */ directiveInstance;
-    var /** @type {?} */ newValues = ((undefined));
-    if (nodeDef.flags & 67108864 /* TypeContentQuery */) {
-        var /** @type {?} */ elementDef_1 = ((((nodeDef.parent)).parent));
-        newValues = calcQueryValues(view, elementDef_1.index, elementDef_1.index + elementDef_1.childCount, /** @type {?} */ ((nodeDef.query)), []);
-        directiveInstance = asProviderData(view, /** @type {?} */ ((nodeDef.parent)).index).instance;
-    }
-    else if (nodeDef.flags & 134217728 /* TypeViewQuery */) {
-        newValues = calcQueryValues(view, 0, view.def.nodes.length - 1, /** @type {?} */ ((nodeDef.query)), []);
-        directiveInstance = view.component;
-    }
-    queryList.reset(newValues);
-    var /** @type {?} */ bindings = ((nodeDef.query)).bindings;
-    var /** @type {?} */ notify = false;
-    for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
-        var /** @type {?} */ binding = bindings[i];
-        var /** @type {?} */ boundValue = void 0;
-        switch (binding.bindingType) {
-            case 0 /* First */:
-                boundValue = queryList.first;
-                break;
-            case 1 /* All */:
-                boundValue = queryList;
-                notify = true;
-                break;
-        }
-        directiveInstance[binding.propName] = boundValue;
-    }
-    if (notify) {
-        queryList.notifyOnChanges();
-    }
-}
-/**
- * @param {?} view
- * @param {?} startIndex
- * @param {?} endIndex
- * @param {?} queryDef
- * @param {?} values
- * @return {?}
- */
-function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
-    for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
-        var /** @type {?} */ nodeDef = view.def.nodes[i];
-        var /** @type {?} */ valueType = nodeDef.matchedQueries[queryDef.id];
-        if (valueType != null) {
-            values.push(getQueryValue(view, nodeDef, valueType));
-        }
-        if (nodeDef.flags & 1 /* TypeElement */ && ((nodeDef.element)).template &&
-            (((((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
-                queryDef.filterId) {
-            // check embedded views that were attached at the place of their template.
-            var /** @type {?} */ elementData = asElementData(view, i);
-            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
-                var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
-                for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
-                    var /** @type {?} */ embeddedView = embeddedViews[k];
-                    var /** @type {?} */ dvc = declaredViewContainer(embeddedView);
-                    if (dvc && dvc === elementData) {
-                        calcQueryValues(embeddedView, 0, embeddedView.def.nodes.length - 1, queryDef, values);
-                    }
-                }
-            }
-            var /** @type {?} */ projectedViews = elementData.template._projectedViews;
-            if (projectedViews) {
-                for (var /** @type {?} */ k = 0; k < projectedViews.length; k++) {
-                    var /** @type {?} */ projectedView = projectedViews[k];
-                    calcQueryValues(projectedView, 0, projectedView.def.nodes.length - 1, queryDef, values);
-                }
-            }
-        }
-        if ((nodeDef.childMatchedQueries & queryDef.filterId) !== queryDef.filterId) {
-            // if no child matches the query, skip the children.
-            i += nodeDef.childCount;
-        }
-    }
-    return values;
-}
-/**
- * @param {?} view
- * @param {?} nodeDef
- * @param {?} queryValueType
- * @return {?}
- */
-function getQueryValue(view, nodeDef, queryValueType) {
-    if (queryValueType != null) {
-        // a match
-        var /** @type {?} */ value = void 0;
-        switch (queryValueType) {
-            case 1 /* RenderElement */:
-                value = asElementData(view, nodeDef.index).renderElement;
-                break;
-            case 0 /* ElementRef */:
-                value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
-                break;
-            case 2 /* TemplateRef */:
-                value = asElementData(view, nodeDef.index).template;
-                break;
-            case 3 /* ViewContainerRef */:
-                value = asElementData(view, nodeDef.index).viewContainer;
-                break;
-            case 4 /* Provider */:
-                value = asProviderData(view, nodeDef.index).instance;
-                break;
-        }
-        return value;
-    }
 }
 /**
  * @license
@@ -12202,13 +12261,14 @@ function validateNode(parent, node, nodeCount) {
 /**
  * @param {?} parent
  * @param {?} anchorDef
+ * @param {?} viewDef
  * @param {?=} context
  * @return {?}
  */
-function createEmbeddedView(parent, anchorDef$$1, context) {
+function createEmbeddedView(parent, anchorDef$$1, viewDef, context) {
     // embedded views are seen as siblings to the anchor, so we need
     // to get the parent of the anchor and use it as parentIndex.
-    var /** @type {?} */ view = createView(parent.root, parent.renderer, parent, anchorDef$$1, /** @type {?} */ ((((anchorDef$$1.element)).template)));
+    var /** @type {?} */ view = createView(parent.root, parent.renderer, parent, anchorDef$$1, viewDef);
     initView(view, parent.component, context);
     createViewNodes(view);
     return view;
@@ -12224,6 +12284,24 @@ function createRootView(root, def, context) {
     initView(view, context, context);
     createViewNodes(view);
     return view;
+}
+/**
+ * @param {?} parentView
+ * @param {?} nodeDef
+ * @param {?} viewDef
+ * @param {?} hostElement
+ * @return {?}
+ */
+function createComponentView(parentView, nodeDef, viewDef, hostElement) {
+    var /** @type {?} */ rendererType = ((nodeDef.element)).componentRendererType;
+    var /** @type {?} */ compRenderer;
+    if (!rendererType) {
+        compRenderer = parentView.root.renderer;
+    }
+    else {
+        compRenderer = parentView.root.rendererFactory.createRenderer(hostElement, rendererType);
+    }
+    return createView(parentView.root, compRenderer, parentView, /** @type {?} */ ((nodeDef.element)).componentProvider, viewDef);
 }
 /**
  * @param {?} root
@@ -12279,15 +12357,7 @@ function createViewNodes(view) {
                 var /** @type {?} */ componentView = ((undefined));
                 if (nodeDef.flags & 33554432 /* ComponentView */) {
                     var /** @type {?} */ compViewDef = resolveDefinition(/** @type {?} */ ((((nodeDef.element)).componentView)));
-                    var /** @type {?} */ rendererType = ((nodeDef.element)).componentRendererType;
-                    var /** @type {?} */ compRenderer = void 0;
-                    if (!rendererType) {
-                        compRenderer = view.root.renderer;
-                    }
-                    else {
-                        compRenderer = view.root.rendererFactory.createRenderer(el, rendererType);
-                    }
-                    componentView = createView(view.root, compRenderer, view, /** @type {?} */ ((nodeDef.element)).componentProvider, compViewDef);
+                    componentView = Services.createComponentView(view, nodeDef, compViewDef, el);
                 }
                 listenToElementOutputs(view, componentView, nodeDef, el);
                 nodeData = ({
@@ -12826,6 +12896,10 @@ function initServicesIfNeeded() {
     Services.setCurrentNode = services.setCurrentNode;
     Services.createRootView = services.createRootView;
     Services.createEmbeddedView = services.createEmbeddedView;
+    Services.createComponentView = services.createComponentView;
+    Services.createNgModuleRef = services.createNgModuleRef;
+    Services.overrideProvider = services.overrideProvider;
+    Services.clearProviderOverrides = services.clearProviderOverrides;
     Services.checkAndUpdateView = services.checkAndUpdateView;
     Services.checkNoChangesView = services.checkNoChangesView;
     Services.destroyView = services.destroyView;
@@ -12844,6 +12918,10 @@ function createProdServices() {
         setCurrentNode: function () { },
         createRootView: createProdRootView,
         createEmbeddedView: createEmbeddedView,
+        createComponentView: createComponentView,
+        createNgModuleRef: createNgModuleRef,
+        overrideProvider: NOOP,
+        clearProviderOverrides: NOOP,
         checkAndUpdateView: checkAndUpdateView,
         checkNoChangesView: checkNoChangesView,
         destroyView: destroyView,
@@ -12863,13 +12941,17 @@ function createDebugServices() {
         setCurrentNode: debugSetCurrentNode,
         createRootView: debugCreateRootView,
         createEmbeddedView: debugCreateEmbeddedView,
+        createComponentView: debugCreateComponentView,
+        createNgModuleRef: debugCreateNgModuleRef,
+        overrideProvider: debugOverrideProvider,
+        clearProviderOverrides: debugClearProviderOverrides,
         checkAndUpdateView: debugCheckAndUpdateView,
         checkNoChangesView: debugCheckNoChangesView,
         destroyView: debugDestroyView,
         createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
         handleEvent: debugHandleEvent,
         updateDirectives: debugUpdateDirectives,
-        updateRenderer: debugUpdateRenderer
+        updateRenderer: debugUpdateRenderer,
     };
 }
 /**
@@ -12897,7 +12979,8 @@ function createProdRootView(elInjector, projectableNodes, rootSelectorOrNode, de
 function debugCreateRootView(elInjector, projectableNodes, rootSelectorOrNode, def, ngModule, context) {
     var /** @type {?} */ rendererFactory = ngModule.injector.get(RendererFactory2);
     var /** @type {?} */ root = createRootData(elInjector, ngModule, new DebugRendererFactory2(rendererFactory), projectableNodes, rootSelectorOrNode);
-    return callWithDebugContext(DebugAction.create, createRootView, null, [root, def, context]);
+    var /** @type {?} */ defWithOverride = applyProviderOverridesToView(def);
+    return callWithDebugContext(DebugAction.create, createRootView, null, [root, defWithOverride, context]);
 }
 /**
  * @param {?} elInjector
@@ -12916,6 +12999,158 @@ function createRootData(elInjector, ngModule, rendererFactory, projectableNodes,
         injector: elInjector, projectableNodes: projectableNodes,
         selectorOrNode: rootSelectorOrNode, sanitizer: sanitizer, rendererFactory: rendererFactory, renderer: renderer, errorHandler: errorHandler
     };
+}
+/**
+ * @param {?} parentView
+ * @param {?} anchorDef
+ * @param {?} viewDef
+ * @param {?=} context
+ * @return {?}
+ */
+function debugCreateEmbeddedView(parentView, anchorDef, viewDef$$1, context) {
+    var /** @type {?} */ defWithOverride = applyProviderOverridesToView(viewDef$$1);
+    return callWithDebugContext(DebugAction.create, createEmbeddedView, null, [parentView, anchorDef, defWithOverride, context]);
+}
+/**
+ * @param {?} parentView
+ * @param {?} nodeDef
+ * @param {?} viewDef
+ * @param {?} hostElement
+ * @return {?}
+ */
+function debugCreateComponentView(parentView, nodeDef, viewDef$$1, hostElement) {
+    var /** @type {?} */ defWithOverride = applyProviderOverridesToView(viewDef$$1);
+    return callWithDebugContext(DebugAction.create, createComponentView, null, [parentView, nodeDef, defWithOverride, hostElement]);
+}
+/**
+ * @param {?} moduleType
+ * @param {?} parentInjector
+ * @param {?} bootstrapComponents
+ * @param {?} def
+ * @return {?}
+ */
+function debugCreateNgModuleRef(moduleType, parentInjector, bootstrapComponents, def) {
+    var /** @type {?} */ defWithOverride = applyProviderOverridesToNgModule(def);
+    return createNgModuleRef(moduleType, parentInjector, bootstrapComponents, defWithOverride);
+}
+var providerOverrides = new Map();
+/**
+ * @param {?} override
+ * @return {?}
+ */
+function debugOverrideProvider(override) {
+    providerOverrides.set(override.token, override);
+}
+/**
+ * @return {?}
+ */
+function debugClearProviderOverrides() {
+    providerOverrides.clear();
+}
+/**
+ * @param {?} def
+ * @return {?}
+ */
+function applyProviderOverridesToView(def) {
+    if (providerOverrides.size === 0) {
+        return def;
+    }
+    var /** @type {?} */ elementIndicesWithOverwrittenProviders = findElementIndicesWithOverwrittenProviders(def);
+    if (elementIndicesWithOverwrittenProviders.length === 0) {
+        return def;
+    }
+    // clone the whole view definition,
+    // as it maintains references between the nodes that are hard to update.
+    def = ((def.factory))(function () { return NOOP; });
+    for (var /** @type {?} */ i = 0; i < elementIndicesWithOverwrittenProviders.length; i++) {
+        applyProviderOverridesToElement(def, elementIndicesWithOverwrittenProviders[i]);
+    }
+    return def;
+    /**
+     * @param {?} def
+     * @return {?}
+     */
+    function findElementIndicesWithOverwrittenProviders(def) {
+        var /** @type {?} */ elIndicesWithOverwrittenProviders = [];
+        var /** @type {?} */ lastElementDef = null;
+        for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = def.nodes[i];
+            if (nodeDef.flags & 1 /* TypeElement */) {
+                lastElementDef = nodeDef;
+            }
+            if (lastElementDef && nodeDef.flags & 3840 /* CatProviderNoDirective */ &&
+                providerOverrides.has(/** @type {?} */ ((nodeDef.provider)).token)) {
+                elIndicesWithOverwrittenProviders.push(/** @type {?} */ ((lastElementDef)).index);
+                lastElementDef = null;
+            }
+        }
+        return elIndicesWithOverwrittenProviders;
+    }
+    /**
+     * @param {?} viewDef
+     * @param {?} elIndex
+     * @return {?}
+     */
+    function applyProviderOverridesToElement(viewDef$$1, elIndex) {
+        for (var /** @type {?} */ i = elIndex + 1; i < viewDef$$1.nodes.length; i++) {
+            var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
+            if (nodeDef.flags & 1 /* TypeElement */) {
+                // stop at the next element
+                return;
+            }
+            if (nodeDef.flags & 3840 /* CatProviderNoDirective */) {
+                // Make all providers lazy, so that we don't get into trouble
+                // with ordering problems of providers on the same element
+                nodeDef.flags |= 4096 /* LazyProvider */;
+                var /** @type {?} */ provider = ((nodeDef.provider));
+                var /** @type {?} */ override = providerOverrides.get(provider.token);
+                if (override) {
+                    nodeDef.flags = (nodeDef.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
+                    provider.deps = splitDepsDsl(override.deps);
+                    provider.value = override.value;
+                }
+            }
+        }
+    }
+}
+/**
+ * @param {?} def
+ * @return {?}
+ */
+function applyProviderOverridesToNgModule(def) {
+    if (providerOverrides.size === 0 || !hasOverrrides(def)) {
+        return def;
+    }
+    // clone the whole view definition,
+    // as it maintains references between the nodes that are hard to update.
+    def = ((def.factory))(function () { return NOOP; });
+    applyProviderOverrides(def);
+    return def;
+    /**
+     * @param {?} def
+     * @return {?}
+     */
+    function hasOverrrides(def) {
+        return def.providers.some(function (node) { return !!(node.flags & 3840 /* CatProviderNoDirective */) && providerOverrides.has(node.token); });
+    }
+    /**
+     * @param {?} def
+     * @return {?}
+     */
+    function applyProviderOverrides(def) {
+        for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
+            var /** @type {?} */ provider = def.providers[i];
+            // Make all providers lazy, so that we don't get into trouble
+            // with ordering problems of providers on the same element
+            provider.flags |= 4096 /* LazyProvider */;
+            var /** @type {?} */ override = providerOverrides.get(provider.token);
+            if (override) {
+                provider.flags = (provider.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
+                provider.deps = splitDepsDsl(override.deps);
+                provider.value = override.value;
+            }
+        }
+    }
 }
 /**
  * @param {?} view
@@ -12962,15 +13197,6 @@ function prodCheckNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v
     return (nodeDef.flags & 224 /* CatPureExpression */) ?
         asPureExpressionData(view, nodeIndex).value :
         undefined;
-}
-/**
- * @param {?} parent
- * @param {?} anchorDef
- * @param {?=} context
- * @return {?}
- */
-function debugCreateEmbeddedView(parent, anchorDef, context) {
-    return callWithDebugContext(DebugAction.create, createEmbeddedView, null, [parent, anchorDef, context]);
 }
 /**
  * @param {?} view
@@ -13744,76 +13970,57 @@ var DebugRenderer2 = (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
+ * @param {?} override
  * @return {?}
  */
-function _iterableDiffersFactory() {
-    return defaultIterableDiffers;
-}
-/**
- * @return {?}
- */
-function _keyValueDiffersFactory() {
-    return defaultKeyValueDiffers;
-}
-/**
- * @param {?=} locale
- * @return {?}
- */
-function _localeFactory(locale) {
-    return locale || 'en-US';
-}
-/**
- * @return {?}
- */
-function _initViewEngine() {
+function overrideProvider(override) {
     initServicesIfNeeded();
+    return Services.overrideProvider(override);
 }
 /**
- * This module includes the providers of \@angular/core that are needed
- * to bootstrap components via `ApplicationRef`.
- *
- * \@experimental
+ * @return {?}
  */
-var ApplicationModule = (function () {
-    /**
-     * @param {?} appRef
-     */
-    function ApplicationModule(appRef) {
-    }
-    return ApplicationModule;
-}());
-ApplicationModule.decorators = [
-    { type: NgModule, args: [{
-                providers: [
-                    ApplicationRef_,
-                    { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                    ApplicationInitStatus,
-                    Compiler,
-                    APP_ID_RANDOM_PROVIDER,
-                    { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                    {
-                        provide: LOCALE_ID,
-                        useFactory: _localeFactory,
-                        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-                    },
-                    { provide: APP_INITIALIZER, useValue: _initViewEngine, multi: true },
-                ]
-            },] },
-];
+function clearProviderOverrides() {
+    initServicesIfNeeded();
+    return Services.clearProviderOverrides();
+}
 /**
- * @nocollapse
+ * @param {?} ngModuleType
+ * @param {?} bootstrapComponents
+ * @param {?} defFactory
+ * @return {?}
  */
-ApplicationModule.ctorParameters = function () { return [
-    { type: ApplicationRef, },
-]; };
+function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
+    return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
+}
+var NgModuleFactory_ = (function (_super) {
+    __extends(NgModuleFactory_, _super);
+    /**
+     * @param {?} moduleType
+     * @param {?} _bootstrapComponents
+     * @param {?} _ngModuleDefFactory
+     */
+    function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
+        var _this = 
+        // Attention: this ctor is called as top level function.
+        // Putting any logic in here will destroy closure tree shaking!
+        _super.call(this) || this;
+        _this.moduleType = moduleType;
+        _this._bootstrapComponents = _bootstrapComponents;
+        _this._ngModuleDefFactory = _ngModuleDefFactory;
+        return _this;
+    }
+    /**
+     * @param {?} parentInjector
+     * @return {?}
+     */
+    NgModuleFactory_.prototype.create = function (parentInjector) {
+        initServicesIfNeeded();
+        var /** @type {?} */ def = resolveDefinition(this._ngModuleDefFactory);
+        return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
+    };
+    return NgModuleFactory_;
+}(NgModuleFactory));
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -13821,28 +14028,6 @@ ApplicationModule.ctorParameters = function () { return [
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var LifecycleHooks = {};
-LifecycleHooks.OnInit = 0;
-LifecycleHooks.OnDestroy = 1;
-LifecycleHooks.DoCheck = 2;
-LifecycleHooks.OnChanges = 3;
-LifecycleHooks.AfterContentInit = 4;
-LifecycleHooks.AfterContentChecked = 5;
-LifecycleHooks.AfterViewInit = 6;
-LifecycleHooks.AfterViewChecked = 7;
-LifecycleHooks[LifecycleHooks.OnInit] = "OnInit";
-LifecycleHooks[LifecycleHooks.OnDestroy] = "OnDestroy";
-LifecycleHooks[LifecycleHooks.DoCheck] = "DoCheck";
-LifecycleHooks[LifecycleHooks.OnChanges] = "OnChanges";
-LifecycleHooks[LifecycleHooks.AfterContentInit] = "AfterContentInit";
-LifecycleHooks[LifecycleHooks.AfterContentChecked] = "AfterContentChecked";
-LifecycleHooks[LifecycleHooks.AfterViewInit] = "AfterViewInit";
-LifecycleHooks[LifecycleHooks.AfterViewChecked] = "AfterViewChecked";
-var LIFECYCLE_HOOKS_VALUES = [
-    LifecycleHooks.OnInit, LifecycleHooks.OnDestroy, LifecycleHooks.DoCheck, LifecycleHooks.OnChanges,
-    LifecycleHooks.AfterContentInit, LifecycleHooks.AfterContentChecked, LifecycleHooks.AfterViewInit,
-    LifecycleHooks.AfterViewChecked
-];
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -14520,6 +14705,8 @@ exports.ɵstringify = stringify;
 exports.ɵmakeDecorator = makeDecorator;
 exports.ɵisObservable = isObservable;
 exports.ɵisPromise = isPromise;
+exports.ɵclearProviderOverrides = clearProviderOverrides;
+exports.ɵoverrideProvider = overrideProvider;
 exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
 exports.ɵregisterModuleFactory = registerModuleFactory;
 exports.ɵEMPTY_ARRAY = EMPTY_ARRAY;
@@ -14556,15 +14743,14 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵba = animate$1;
-exports.ɵbb = group$1;
-exports.ɵbf = keyframes$1;
-exports.ɵbc = sequence$1;
-exports.ɵbe = state$1;
-exports.ɵbd = style$1;
-exports.ɵbg = transition$1;
-exports.ɵz = trigger$1;
-exports.ɵo = _initViewEngine;
+exports.ɵz = animate$1;
+exports.ɵba = group$1;
+exports.ɵbe = keyframes$1;
+exports.ɵbb = sequence$1;
+exports.ɵbd = state$1;
+exports.ɵbc = style$1;
+exports.ɵbf = transition$1;
+exports.ɵy = trigger$1;
 exports.ɵl = _iterableDiffersFactory;
 exports.ɵm = _keyValueDiffersFactory;
 exports.ɵn = _localeFactory;
@@ -14577,16 +14763,16 @@ exports.ɵk = DefaultKeyValueDifferFactory;
 exports.ɵc = ReflectiveInjector_;
 exports.ɵd = ReflectiveDependency;
 exports.ɵe = resolveReflectiveProviders;
-exports.ɵp = wtfEnabled;
-exports.ɵr = createScope$1;
-exports.ɵq = detectWTF;
-exports.ɵu = endTimeRange;
-exports.ɵs = leave;
-exports.ɵt = startTimeRange;
+exports.ɵo = wtfEnabled;
+exports.ɵq = createScope$1;
+exports.ɵp = detectWTF;
+exports.ɵt = endTimeRange;
+exports.ɵr = leave;
+exports.ɵs = startTimeRange;
 exports.ɵa = makeParamDecorator;
 exports.ɵb = makePropDecorator;
-exports.ɵw = _def;
-exports.ɵx = DebugContext;
+exports.ɵv = _def;
+exports.ɵw = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

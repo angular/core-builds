@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-1eba623
+ * @license Angular v4.2.0-beta.1-39b92f7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.2.0-beta.1-1eba623
+ * @license Angular v4.2.0-beta.1-39b92f7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -632,6 +632,10 @@ var TestBed = (function () {
         getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
         return TestBed;
     };
+    TestBed.overrideProvider = function (token, provider) {
+        getTestBed().overrideProvider(token, provider);
+        return TestBed;
+    };
     TestBed.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = _angular_core.Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
@@ -674,6 +678,7 @@ var TestBed = (function () {
         this._aotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
+        _angular_core.ɵclearProviderOverrides();
         this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -817,6 +822,40 @@ var TestBed = (function () {
     TestBed.prototype.overridePipe = function (pipe, override) {
         this._assertNotInstantiated('overridePipe', 'override pipe metadata');
         this._pipeOverrides.push([pipe, override]);
+    };
+    TestBed.prototype.overrideProvider = function (token, provider) {
+        var flags = 0;
+        var value;
+        if (provider.useFactory) {
+            flags |= 1024 /* TypeFactoryProvider */;
+            value = provider.useFactory;
+        }
+        else {
+            flags |= 256 /* TypeValueProvider */;
+            value = provider.useValue;
+        }
+        var deps = (provider.deps || []).map(function (dep) {
+            var depFlags = 0;
+            var depToken;
+            if (Array.isArray(dep)) {
+                dep.forEach(function (entry) {
+                    if (entry instanceof _angular_core.Optional) {
+                        depFlags |= 2 /* Optional */;
+                    }
+                    else if (entry instanceof _angular_core.SkipSelf) {
+                        depFlags |= 1 /* SkipSelf */;
+                    }
+                    else {
+                        depToken = entry;
+                    }
+                });
+            }
+            else {
+                depToken = dep;
+            }
+            return [depFlags, depToken];
+        });
+        _angular_core.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value });
     };
     TestBed.prototype.createComponent = function (component) {
         var _this = this;

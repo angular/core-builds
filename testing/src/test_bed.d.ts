@@ -88,6 +88,16 @@ export declare class TestBed implements Injector {
     static overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): typeof TestBed;
     static overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): typeof TestBed;
     static overrideTemplate(component: Type<any>, template: string): typeof TestBed;
+    /**
+     * Overwrites all providers for the given token with the given provider definition.
+     */
+    static overrideProvider(token: any, provider: {
+        useFactory: Function;
+        deps: any[];
+    }): void;
+    static overrideProvider(token: any, provider: {
+        useValue: any;
+    }): void;
     static get(token: any, notFoundValue?: any): any;
     static createComponent<T>(component: Type<T>): ComponentFixture<T>;
     private _instantiated;
@@ -143,6 +153,16 @@ export declare class TestBed implements Injector {
     overrideComponent(component: Type<any>, override: MetadataOverride<Component>): void;
     overrideDirective(directive: Type<any>, override: MetadataOverride<Directive>): void;
     overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): void;
+    /**
+     * Overwrites all providers for the given token with the given provider definition.
+     */
+    overrideProvider(token: any, provider: {
+        useFactory: Function;
+        deps: any[];
+    }): void;
+    overrideProvider(token: any, provider: {
+        useValue: any;
+    }): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 /**

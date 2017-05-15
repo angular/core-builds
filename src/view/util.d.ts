@@ -1,6 +1,6 @@
 import { ViewEncapsulation } from '../metadata/view';
 import { RendererType2 } from '../render/api';
-import { BindingDef, BindingFlags, Definition, DefinitionFactory, ElementData, NodeDef, QueryValueType, ViewData } from './types';
+import { BindingDef, BindingFlags, Definition, DefinitionFactory, DepDef, DepFlags, ElementData, NodeDef, QueryValueType, ViewData } from './types';
 export declare const NOOP: any;
 export declare function tokenKey(token: any): string;
 export declare function unwrapValue(view: ViewData, nodeIdx: number, bindingIdx: number, value: any): any;
@@ -39,6 +39,7 @@ export declare function splitMatchedQueriesDsl(matchedQueriesDsl: [string | numb
     };
     matchedQueryIds: number;
 };
+export declare function splitDepsDsl(deps: ([DepFlags, any] | any)[]): DepDef[];
 export declare function getParentRenderElement(view: ViewData, renderHost: any, def: NodeDef): any;
 export declare function resolveDefinition<D extends Definition<any>>(factory: DefinitionFactory<D>): D;
 export declare function rootRenderNodes(view: ViewData): any[];

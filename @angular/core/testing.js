@@ -1,9 +1,9 @@
 /**
- * @license Angular v4.2.0-beta.1-1eba623
+ * @license Angular v4.2.0-beta.1-39b92f7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { Compiler, InjectionToken, Injector, NgModule, NgZone, ReflectiveInjector, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵstringify } from '@angular/core';
+import { Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -590,6 +590,10 @@ class TestBed {
         getTestBed().overrideComponent(component, { set: { template, templateUrl: null } });
         return TestBed;
     }
+    static overrideProvider(token, provider) {
+        getTestBed().overrideProvider(token, provider);
+        return TestBed;
+    }
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
         return getTestBed().get(token, notFoundValue);
     }
@@ -631,6 +635,7 @@ class TestBed {
         this._aotSummaries = () => [];
     }
     resetTestingModule() {
+        ɵclearProviderOverrides();
         this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -766,6 +771,40 @@ class TestBed {
     overridePipe(pipe, override) {
         this._assertNotInstantiated('overridePipe', 'override pipe metadata');
         this._pipeOverrides.push([pipe, override]);
+    }
+    overrideProvider(token, provider) {
+        let flags = 0;
+        let value;
+        if (provider.useFactory) {
+            flags |= 1024 /* TypeFactoryProvider */;
+            value = provider.useFactory;
+        }
+        else {
+            flags |= 256 /* TypeValueProvider */;
+            value = provider.useValue;
+        }
+        const deps = (provider.deps || []).map((dep) => {
+            let depFlags = 0;
+            let depToken;
+            if (Array.isArray(dep)) {
+                dep.forEach((entry) => {
+                    if (entry instanceof Optional) {
+                        depFlags |= 2 /* Optional */;
+                    }
+                    else if (entry instanceof SkipSelf) {
+                        depFlags |= 1 /* SkipSelf */;
+                    }
+                    else {
+                        depToken = entry;
+                    }
+                });
+            }
+            else {
+                depToken = dep;
+            }
+            return [depFlags, depToken];
+        });
+        ɵoverrideProvider({ token, flags, deps, value });
     }
     createComponent(component) {
         this._initIfNeeded();
