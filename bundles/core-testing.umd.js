@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-a68ad6d
+ * @license Angular v4.2.0-beta.1-221f85a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -15,7 +15,7 @@ var __extends = (undefined && undefined.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /**
- * @license Angular v4.2.0-beta.1-a68ad6d
+ * @license Angular v4.2.0-beta.1-221f85a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
