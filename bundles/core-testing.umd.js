@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-9a7f5d5
+ * @license Angular v4.2.0-beta.1-c805082
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-beta.1-9a7f5d5
+ * @license Angular v4.2.0-beta.1-c805082
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,6 +761,9 @@ var TestBed = (function () {
         var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
         var ngZoneInjector = _angular_core.ReflectiveInjector.resolveAndCreate([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
+        // before accessing it.
+        this._moduleRef.injector.get(_angular_core.ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     };
     TestBed.prototype._createCompilerAndModule = function () {

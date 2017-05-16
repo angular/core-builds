@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-9a7f5d5
+ * @license Angular v4.2.0-beta.1-c805082
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,7 +829,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.0-beta.1-9a7f5d5');
+const VERSION = new Version('4.2.0-beta.1-c805082');
 
 /**
  * @license
@@ -2829,20 +2829,40 @@ class ApplicationInitStatus {
      * @param {?} appInits
      */
     constructor(appInits) {
+        this.appInits = appInits;
+        this.initialized = false;
         this._done = false;
-        const asyncInitPromises = [];
-        if (appInits) {
-            for (let i = 0; i < appInits.length; i++) {
-                const initResult = appInits[i]();
+        this._donePromise = new Promise((res, rej) => {
+            this.resolve = res;
+            this.reject = rej;
+        });
+    }
+    /**
+     * \@internal
+     * @return {?}
+     */
+    runInitializers() {
+        if (this.initialized) {
+            return;
+        }
+        const /** @type {?} */ asyncInitPromises = [];
+        const /** @type {?} */ complete = () => {
+            this._done = true;
+            this.resolve();
+        };
+        if (this.appInits) {
+            for (let /** @type {?} */ i = 0; i < this.appInits.length; i++) {
+                const /** @type {?} */ initResult = this.appInits[i]();
                 if (isPromise(initResult)) {
                     asyncInitPromises.push(initResult);
                 }
             }
         }
-        this._donePromise = Promise.all(asyncInitPromises).then(() => { this._done = true; });
+        Promise.all(asyncInitPromises).then(() => { complete(); }).catch(e => { this.reject(e); });
         if (asyncInitPromises.length === 0) {
-            this._done = true;
+            complete();
         }
+        this.initialized = true;
     }
     /**
      * @return {?}
@@ -4480,6 +4500,7 @@ class PlatformRef_ extends PlatformRef {
             ((ngZone)).onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } });
             return _callAndReportToErrorHandler(exceptionHandler, () => {
                 const /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
+                initStatus.runInitializers();
                 return initStatus.donePromise.then(() => {
                     this._moduleDoBootstrap(moduleRef);
                     return moduleRef;

@@ -9,11 +9,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-beta.1-9a7f5d5
+ * @license Angular v4.2.0-beta.1-c805082
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -751,6 +751,9 @@ var TestBed = (function () {
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
+        // before accessing it.
+        this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     };
     TestBed.prototype._createCompilerAndModule = function () {
