@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-af99cf2
+ * @license Angular v4.2.0-beta.1-9a7f5d5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9,13 +9,18 @@
 	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx));
 }(this, (function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject) { 'use strict';
 
-var __extends = (undefined && undefined.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /**
- * @license Angular v4.2.0-beta.1-af99cf2
+ * @license Angular v4.2.0-beta.1-9a7f5d5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -867,7 +872,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-beta.1-af99cf2');
+var VERSION = new Version('4.2.0-beta.1-9a7f5d5');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -2036,7 +2041,7 @@ var Reflector = (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * The {@link Reflector} used internally in Angular to access metadata
+ * The {\@link Reflector} used internally in Angular to access metadata
  * about symbols.
  */
 var reflector = new Reflector(new ReflectionCapabilities());
@@ -7096,6 +7101,8 @@ var DefaultIterableDiffer = (function () {
             this._movesHead = this._movesTail = null;
             this._removalsHead = this._removalsTail = null;
             this._identityChangesHead = this._identityChangesTail = null;
+            // todo(vicb) when assert gets supported
+            // assert(!this.isDirty);
         }
     };
     /**
@@ -7564,7 +7571,7 @@ var _DuplicateItemRecordList = (function () {
     _DuplicateItemRecordList.prototype.get = function (trackById, afterIndex) {
         var /** @type {?} */ record;
         for (record = this._head; record !== null; record = record._nextDup) {
-            if ((afterIndex === null || afterIndex < record.currentIndex) &&
+            if ((afterIndex === null || afterIndex < ((record.currentIndex))) &&
                 looseIdentical(record.trackById, trackById)) {
                 return record;
             }
@@ -8575,22 +8582,22 @@ var DebugContext = (function () {
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
  */
 var Services = {
-    setCurrentNode: /** @type {?} */ ((undefined)),
-    createRootView: /** @type {?} */ ((undefined)),
-    createEmbeddedView: /** @type {?} */ ((undefined)),
-    createComponentView: /** @type {?} */ ((undefined)),
-    createNgModuleRef: /** @type {?} */ ((undefined)),
-    overrideProvider: /** @type {?} */ ((undefined)),
-    clearProviderOverrides: /** @type {?} */ ((undefined)),
-    checkAndUpdateView: /** @type {?} */ ((undefined)),
-    checkNoChangesView: /** @type {?} */ ((undefined)),
-    destroyView: /** @type {?} */ ((undefined)),
-    resolveDep: /** @type {?} */ ((undefined)),
-    createDebugContext: /** @type {?} */ ((undefined)),
-    handleEvent: /** @type {?} */ ((undefined)),
-    updateDirectives: /** @type {?} */ ((undefined)),
-    updateRenderer: /** @type {?} */ ((undefined)),
-    dirtyParentQueries: /** @type {?} */ ((undefined)),
+    setCurrentNode: undefined,
+    createRootView: undefined,
+    createEmbeddedView: undefined,
+    createComponentView: undefined,
+    createNgModuleRef: undefined,
+    overrideProvider: undefined,
+    clearProviderOverrides: undefined,
+    checkAndUpdateView: undefined,
+    checkNoChangesView: undefined,
+    destroyView: undefined,
+    resolveDep: undefined,
+    createDebugContext: undefined,
+    handleEvent: undefined,
+    updateDirectives: undefined,
+    updateRenderer: undefined,
+    dirtyParentQueries: undefined,
 };
 /**
  * @license
