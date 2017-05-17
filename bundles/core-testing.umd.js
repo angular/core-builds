@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-d761059
+ * @license Angular v4.2.0-beta.1-54a6e4f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-beta.1-d761059
+ * @license Angular v4.2.0-beta.1-54a6e4f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -256,11 +256,20 @@ var ComponentFixture = (function () {
             return this._promise;
         }
     };
+    ComponentFixture.prototype._getRenderer = function () {
+        if (this._renderer === undefined) {
+            this._renderer = this.componentRef.injector.get(_angular_core.RendererFactory2, null);
+        }
+        return this._renderer;
+    };
     /**
-     * Get a promise that resolves when the ui state is stable following animations.
-     */
+      * Get a promise that resolves when the ui state is stable following animations.
+      */
     ComponentFixture.prototype.whenRenderingDone = function () {
-        // this is temporary until this is functional
+        var renderer = this._getRenderer();
+        if (renderer && renderer.whenRenderingDone) {
+            return renderer.whenRenderingDone();
+        }
         return this.whenStable();
     };
     /**

@@ -1,9 +1,9 @@
 /**
- * @license Angular v4.2.0-beta.1-d761059
+ * @license Angular v4.2.0-beta.1-54a6e4f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, RendererFactory2, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -232,11 +232,20 @@ class ComponentFixture {
             return this._promise;
         }
     }
+    _getRenderer() {
+        if (this._renderer === undefined) {
+            this._renderer = this.componentRef.injector.get(RendererFactory2, null);
+        }
+        return this._renderer;
+    }
     /**
-     * Get a promise that resolves when the ui state is stable following animations.
-     */
+      * Get a promise that resolves when the ui state is stable following animations.
+      */
     whenRenderingDone() {
-        // this is temporary until this is functional
+        const renderer = this._getRenderer();
+        if (renderer && renderer.whenRenderingDone) {
+            return renderer.whenRenderingDone();
+        }
         return this.whenStable();
     }
     /**

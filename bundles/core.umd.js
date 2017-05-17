@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-d761059
+ * @license Angular v4.2.0-beta.1-54a6e4f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-beta.1-d761059
+ * @license Angular v4.2.0-beta.1-54a6e4f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -872,7 +872,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-beta.1-d761059');
+var VERSION = new Version('4.2.0-beta.1-54a6e4f');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -5366,6 +5366,11 @@ var RendererFactory2 = (function () {
      * @return {?}
      */
     RendererFactory2.prototype.end = function () { };
+    /**
+     * @abstract
+     * @return {?}
+     */
+    RendererFactory2.prototype.whenRenderingDone = function () { };
     return RendererFactory2;
 }());
 var RendererStyleFlags2 = {};
@@ -13742,6 +13747,15 @@ var DebugRendererFactory2 = (function () {
             this.delegate.end();
         }
     };
+    /**
+     * @return {?}
+     */
+    DebugRendererFactory2.prototype.whenRenderingDone = function () {
+        if (this.delegate.whenRenderingDone) {
+            return this.delegate.whenRenderingDone();
+        }
+        return Promise.resolve(null);
+    };
     return DebugRendererFactory2;
 }());
 var DebugRenderer2 = (function () {
@@ -14129,7 +14143,7 @@ var NgModuleFactory_ = (function (_super) {
  * @return {?}
  */
 function trigger$1(name, definitions) {
-    return { name: name, definitions: definitions };
+    return { type: 7 /* Trigger */, name: name, definitions: definitions, options: {} };
 }
 /**
  * `animate` is an animation-specific function that is designed to be used inside of Angular's
@@ -14214,10 +14228,12 @@ function animate$1(timings, styles) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} options
  * @return {?}
  */
-function group$1(steps) {
-    return { type: 3 /* Group */, steps: steps };
+function group$1(steps, options) {
+    if (options === void 0) { options = null; }
+    return { type: 3 /* Group */, steps: steps, options: options };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -14253,10 +14269,12 @@ function group$1(steps) {
  *
  * \@experimental Animation support is experimental.
  * @param {?} steps
+ * @param {?=} options
  * @return {?}
  */
-function sequence$1(steps) {
-    return { type: 2 /* Sequence */, steps: steps };
+function sequence$1(steps, options) {
+    if (options === void 0) { options = null; }
+    return { type: 2 /* Sequence */, steps: steps, options: options };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -14303,7 +14321,7 @@ function sequence$1(steps) {
  * @return {?}
  */
 function style$1(tokens) {
-    return { type: 6 /* Style */, styles: tokens };
+    return { type: 6 /* Style */, styles: tokens, offset: null };
 }
 /**
  * `state` is an animation-specific function that is designed to be used inside of Angular's
@@ -14407,7 +14425,7 @@ function state$1(name, styles) {
  * @return {?}
  */
 function keyframes$1(steps) {
-    return { type: 5 /* KeyframeSequence */, steps: steps };
+    return { type: 5 /* Keyframes */, steps: steps };
 }
 /**
  * `transition` is an animation-specific function that is designed to be used inside of Angular's
@@ -14517,11 +14535,43 @@ function keyframes$1(steps) {
  * \@experimental Animation support is experimental.
  * @param {?} stateChangeExpr
  * @param {?} steps
+ * @param {?=} options
  * @return {?}
  */
-function transition$1(stateChangeExpr, steps) {
-    return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps };
+function transition$1(stateChangeExpr, steps, options) {
+    if (options === void 0) { options = null; }
+    return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps, options: options };
 }
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?} steps
+ * @param {?=} options
+ * @return {?}
+ */
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?=} options
+ * @return {?}
+ */
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?} animation
+ * @param {?=} options
+ * @return {?}
+ */
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?} selector
+ * @param {?} animation
+ * @param {?=} options
+ * @return {?}
+ */
+/**
+ * \@experimental Animation support is experimental.
+ * @param {?} timings
+ * @param {?} animation
+ * @return {?}
+ */
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
