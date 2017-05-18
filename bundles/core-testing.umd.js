@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-beta.1-86b7bd9
+ * @license Angular v4.2.0-beta.1-7d9f96a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-beta.1-86b7bd9
+ * @license Angular v4.2.0-beta.1-7d9f96a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
