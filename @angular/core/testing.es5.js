@@ -9,7 +9,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-rc.0-c8b08f3
+ * @license Angular v4.2.0-rc.0-670771d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
