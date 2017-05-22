@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-6e41add
+ * @license Angular v4.2.0-rc.0-85d4c4b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-rc.0-6e41add
+ * @license Angular v4.2.0-rc.0-85d4c4b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -406,6 +406,19 @@ function _getFakeAsyncZoneSpec() {
 function tick(millis) {
     if (millis === void 0) { millis = 0; }
     _getFakeAsyncZoneSpec().tick(millis);
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns {number} The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    return _getFakeAsyncZoneSpec().flush(maxTurns);
 }
 /**
  * Discard all remaining periodic tasks.
@@ -1016,6 +1029,7 @@ exports.ComponentFixture = ComponentFixture;
 exports.resetFakeAsyncZone = resetFakeAsyncZone;
 exports.fakeAsync = fakeAsync;
 exports.tick = tick;
+exports.flush = flush;
 exports.discardPeriodicTasks = discardPeriodicTasks;
 exports.flushMicrotasks = flushMicrotasks;
 exports.TestComponentRenderer = TestComponentRenderer;

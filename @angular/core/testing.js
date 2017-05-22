@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-6e41add
+ * @license Angular v4.2.0-rc.0-85d4c4b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -377,6 +377,19 @@ function _getFakeAsyncZoneSpec() {
  */
 function tick(millis = 0) {
     _getFakeAsyncZoneSpec().tick(millis);
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns {number} The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    return _getFakeAsyncZoneSpec().flush(maxTurns);
 }
 /**
  * Discard all remaining periodic tasks.
@@ -986,5 +999,5 @@ const __core_private_testing_placeholder__ = '';
  * Entry point for all public APIs of the core/testing package.
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map
