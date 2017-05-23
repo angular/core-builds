@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-3b28c75
+ * @license Angular v4.2.0-rc.0-5af143e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-rc.0-3b28c75
+ * @license Angular v4.2.0-rc.0-5af143e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -872,7 +872,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.0-3b28c75');
+var VERSION = new Version('4.2.0-rc.0-5af143e');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -1873,62 +1873,6 @@ function getParentCtor(ctor) {
     return parentCtor || Object;
 }
 /**
- * Provides read-only access to reflection data about symbols. Used internally by Angular
- * to power dependency injection and compilation.
- * @abstract
- */
-var ReflectorReader = (function () {
-    function ReflectorReader() {
-    }
-    /**
-     * @abstract
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    ReflectorReader.prototype.parameters = function (typeOrFunc) { };
-    /**
-     * @abstract
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    ReflectorReader.prototype.annotations = function (typeOrFunc) { };
-    /**
-     * @abstract
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    ReflectorReader.prototype.propMetadata = function (typeOrFunc) { };
-    /**
-     * @abstract
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    ReflectorReader.prototype.importUri = function (typeOrFunc) { };
-    /**
-     * @abstract
-     * @param {?} typeOrFunc
-     * @return {?}
-     */
-    ReflectorReader.prototype.resourceUri = function (typeOrFunc) { };
-    /**
-     * @abstract
-     * @param {?} name
-     * @param {?} moduleUrl
-     * @param {?} members
-     * @param {?} runtime
-     * @return {?}
-     */
-    ReflectorReader.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) { };
-    /**
-     * @abstract
-     * @param {?} identifier
-     * @param {?} name
-     * @return {?}
-     */
-    ReflectorReader.prototype.resolveEnum = function (identifier, name) { };
-    return ReflectorReader;
-}());
-/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -1939,15 +1883,12 @@ var ReflectorReader = (function () {
  * Provides access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  */
-var Reflector = (function (_super) {
-    __extends(Reflector, _super);
+var Reflector = (function () {
     /**
      * @param {?} reflectionCapabilities
      */
     function Reflector(reflectionCapabilities) {
-        var _this = _super.call(this) || this;
-        _this.reflectionCapabilities = reflectionCapabilities;
-        return _this;
+        this.reflectionCapabilities = reflectionCapabilities;
     }
     /**
      * @param {?} caps
@@ -2032,7 +1973,7 @@ var Reflector = (function (_super) {
         return this.reflectionCapabilities.resolveEnum(identifier, name);
     };
     return Reflector;
-}(ReflectorReader));
+}());
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -8316,7 +8257,6 @@ var _CORE_PLATFORM_PROVIDERS = [
     PlatformRef_,
     { provide: PlatformRef, useExisting: PlatformRef_ },
     { provide: Reflector, useFactory: _reflector, deps: [] },
-    { provide: ReflectorReader, useExisting: Reflector },
     TestabilityRegistry,
     Console,
 ];
@@ -8416,35 +8356,6 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = function () { return [
     { type: ApplicationRef, },
 ]; };
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var LifecycleHooks = {};
-LifecycleHooks.OnInit = 0;
-LifecycleHooks.OnDestroy = 1;
-LifecycleHooks.DoCheck = 2;
-LifecycleHooks.OnChanges = 3;
-LifecycleHooks.AfterContentInit = 4;
-LifecycleHooks.AfterContentChecked = 5;
-LifecycleHooks.AfterViewInit = 6;
-LifecycleHooks.AfterViewChecked = 7;
-LifecycleHooks[LifecycleHooks.OnInit] = "OnInit";
-LifecycleHooks[LifecycleHooks.OnDestroy] = "OnDestroy";
-LifecycleHooks[LifecycleHooks.DoCheck] = "DoCheck";
-LifecycleHooks[LifecycleHooks.OnChanges] = "OnChanges";
-LifecycleHooks[LifecycleHooks.AfterContentInit] = "AfterContentInit";
-LifecycleHooks[LifecycleHooks.AfterContentChecked] = "AfterContentChecked";
-LifecycleHooks[LifecycleHooks.AfterViewInit] = "AfterViewInit";
-LifecycleHooks[LifecycleHooks.AfterViewChecked] = "AfterViewChecked";
-var LIFECYCLE_HOOKS_VALUES = [
-    LifecycleHooks.OnInit, LifecycleHooks.OnDestroy, LifecycleHooks.DoCheck, LifecycleHooks.OnChanges,
-    LifecycleHooks.AfterContentInit, LifecycleHooks.AfterContentChecked, LifecycleHooks.AfterViewInit,
-    LifecycleHooks.AfterViewChecked
-];
 var SecurityContext = {};
 SecurityContext.NONE = 0;
 SecurityContext.HTML = 1;
@@ -15064,13 +14975,8 @@ exports.ɵConsole = Console;
 exports.ɵERROR_COMPONENT_TYPE = ERROR_COMPONENT_TYPE;
 exports.ɵComponentFactory = ComponentFactory;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
-exports.ɵLIFECYCLE_HOOKS_VALUES = LIFECYCLE_HOOKS_VALUES;
-exports.ɵLifecycleHooks = LifecycleHooks;
 exports.ɵViewMetadata = ViewMetadata;
-exports.ɵReflector = Reflector;
-exports.ɵreflector = reflector;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
-exports.ɵReflectorReader = ReflectorReader;
 exports.ɵRenderDebugInfo = RenderDebugInfo;
 exports.ɵglobal = _global;
 exports.ɵlooseIdentical = looseIdentical;
@@ -15116,14 +15022,14 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵz = animate$1;
-exports.ɵba = group$1;
-exports.ɵbe = keyframes$1;
-exports.ɵbb = sequence$1;
-exports.ɵbd = state$1;
-exports.ɵbc = style$1;
-exports.ɵbf = transition$1;
-exports.ɵy = trigger$1;
+exports.ɵy = animate$1;
+exports.ɵz = group$1;
+exports.ɵbd = keyframes$1;
+exports.ɵba = sequence$1;
+exports.ɵbc = state$1;
+exports.ɵbb = style$1;
+exports.ɵbe = transition$1;
+exports.ɵx = trigger$1;
 exports.ɵl = _iterableDiffersFactory;
 exports.ɵm = _keyValueDiffersFactory;
 exports.ɵn = _localeFactory;
@@ -15144,8 +15050,8 @@ exports.ɵr = leave;
 exports.ɵs = startTimeRange;
 exports.ɵa = makeParamDecorator;
 exports.ɵb = makePropDecorator;
-exports.ɵv = _def;
-exports.ɵw = DebugContext;
+exports.ɵu = _def;
+exports.ɵv = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
