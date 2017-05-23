@@ -1,15 +1,6 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.2.0-rc.0-1651a8f
+ * @license Angular v4.2.0-rc.0-fa809ec
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -76,7 +67,7 @@ var OpaqueToken = (function () {
  * \@stable
  */
 var InjectionToken = (function (_super) {
-    __extends(InjectionToken, _super);
+    tslib_1.__extends(InjectionToken, _super);
     /**
      * @param {?} desc
      */
@@ -805,7 +796,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.0-1651a8f');
+var VERSION = new Version('4.2.0-rc.0-fa809ec');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -3280,7 +3271,7 @@ var CodegenComponentFactoryResolver = (function () {
     return CodegenComponentFactoryResolver;
 }());
 var ComponentFactoryBoundToModule = (function (_super) {
-    __extends(ComponentFactoryBoundToModule, _super);
+    tslib_1.__extends(ComponentFactoryBoundToModule, _super);
     /**
      * @param {?} factory
      * @param {?} ngModule
@@ -3609,7 +3600,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  * \@stable
  */
 var EventEmitter = (function (_super) {
-    __extends(EventEmitter, _super);
+    tslib_1.__extends(EventEmitter, _super);
     /**
      * Creates an instance of {\@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
@@ -4492,7 +4483,7 @@ function _callAndReportToErrorHandler(errorHandler, callback) {
  * @suppress {checkTypes}
  */
 var PlatformRef_ = (function (_super) {
-    __extends(PlatformRef_, _super);
+    tslib_1.__extends(PlatformRef_, _super);
     /**
      * @param {?} _injector
      */
@@ -4724,7 +4715,7 @@ var ApplicationRef = (function () {
  * @suppress {checkTypes}
  */
 var ApplicationRef_ = (function (_super) {
-    __extends(ApplicationRef_, _super);
+    tslib_1.__extends(ApplicationRef_, _super);
     /**
      * @param {?} _zone
      * @param {?} _console
@@ -6150,7 +6141,7 @@ var ChangeDetectorRef = (function () {
  * @abstract
  */
 var ViewRef = (function (_super) {
-    __extends(ViewRef, _super);
+    tslib_1.__extends(ViewRef, _super);
     function ViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -6229,7 +6220,7 @@ var ViewRef = (function (_super) {
  * @abstract
  */
 var EmbeddedViewRef = (function (_super) {
-    __extends(EmbeddedViewRef, _super);
+    tslib_1.__extends(EmbeddedViewRef, _super);
     function EmbeddedViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -6347,7 +6338,7 @@ var DebugNode = (function () {
  * \@experimental All debugging apis are currently experimental.
  */
 var DebugElement = (function (_super) {
-    __extends(DebugElement, _super);
+    tslib_1.__extends(DebugElement, _super);
     /**
      * @param {?} nativeNode
      * @param {?} parent
@@ -9884,7 +9875,7 @@ function getComponentViewDefinitionFactory(componentFactory) {
     return ((componentFactory)).viewDefFactory;
 }
 var ComponentFactory_ = (function (_super) {
-    __extends(ComponentFactory_, _super);
+    tslib_1.__extends(ComponentFactory_, _super);
     /**
      * @param {?} selector
      * @param {?} componentType
@@ -9961,7 +9952,7 @@ var ComponentFactory_ = (function (_super) {
     return ComponentFactory_;
 }(ComponentFactory));
 var ComponentRef_ = (function (_super) {
-    __extends(ComponentRef_, _super);
+    tslib_1.__extends(ComponentRef_, _super);
     /**
      * @param {?} _view
      * @param {?} _viewRef
@@ -10336,7 +10327,7 @@ function createTemplateData(view, def) {
     return new TemplateRef_(view, def);
 }
 var TemplateRef_ = (function (_super) {
-    __extends(TemplateRef_, _super);
+    tslib_1.__extends(TemplateRef_, _super);
     /**
      * @param {?} _parentView
      * @param {?} _def
@@ -13881,7 +13872,7 @@ function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
 var NgModuleFactory_ = (function (_super) {
-    __extends(NgModuleFactory_, _super);
+    tslib_1.__extends(NgModuleFactory_, _super);
     /**
      * @param {?} moduleType
      * @param {?} _bootstrapComponents

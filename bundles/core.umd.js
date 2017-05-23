@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-1651a8f
+ * @license Angular v4.2.0-rc.0-fa809ec
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -9,18 +9,34 @@
 	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx));
 }(this, (function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject) { 'use strict';
 
-var __extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
 /**
- * @license Angular v4.2.0-rc.0-1651a8f
+ * @license Angular v4.2.0-rc.0-fa809ec
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -179,7 +195,7 @@ function stringify(token) {
  * found in the LICENSE file at https://angular.io/license
  */
 var _nextClassId = 0;
-var Reflect = _global['Reflect'];
+var Reflect$1 = _global['Reflect'];
 /**
  * @param {?} annotation
  * @return {?}
@@ -231,7 +247,7 @@ function applyParams(fnOrArray, key) {
                 paramAnnotations.push(annotation);
             }
         }
-        Reflect.defineMetadata('parameters', paramsAnnotations, fn);
+        Reflect$1.defineMetadata('parameters', paramsAnnotations, fn);
         return fn;
     }
     throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
@@ -339,7 +355,7 @@ function Class(clsDef) {
         }
     }
     if (this && this.annotations instanceof Array) {
-        Reflect.defineMetadata('annotations', this.annotations, constructor);
+        Reflect$1.defineMetadata('annotations', this.annotations, constructor);
     }
     var /** @type {?} */ constructorName = constructor['name'];
     if (!constructorName || constructorName === 'constructor') {
@@ -362,7 +378,7 @@ function makeDecorator(name, props, parentClass, chainFn) {
      * @return {?}
      */
     function DecoratorFactory(objOrType) {
-        if (!(Reflect && Reflect.getOwnMetadata)) {
+        if (!(Reflect$1 && Reflect$1.getOwnMetadata)) {
             throw 'reflect-metadata shim is required when using class decorators';
         }
         if (this instanceof DecoratorFactory) {
@@ -373,9 +389,9 @@ function makeDecorator(name, props, parentClass, chainFn) {
         var /** @type {?} */ chainAnnotation = typeof this === 'function' && Array.isArray(this.annotations) ? this.annotations : [];
         chainAnnotation.push(annotationInstance);
         var /** @type {?} */ TypeDecorator = (function TypeDecorator(cls) {
-            var /** @type {?} */ annotations = Reflect.getOwnMetadata('annotations', cls) || [];
+            var /** @type {?} */ annotations = Reflect$1.getOwnMetadata('annotations', cls) || [];
             annotations.push(annotationInstance);
-            Reflect.defineMetadata('annotations', annotations, cls);
+            Reflect$1.defineMetadata('annotations', annotations, cls);
             return cls;
         });
         TypeDecorator.annotations = chainAnnotation;
@@ -440,7 +456,7 @@ function makeParamDecorator(name, props, parentClass) {
          * @return {?}
          */
         function ParamDecorator(cls, unusedKey, index) {
-            var /** @type {?} */ parameters = Reflect.getOwnMetadata('parameters', cls) || [];
+            var /** @type {?} */ parameters = Reflect$1.getOwnMetadata('parameters', cls) || [];
             // there might be gaps if some in between parameters do not have annotations.
             // we pad with nulls.
             while (parameters.length <= index) {
@@ -448,7 +464,7 @@ function makeParamDecorator(name, props, parentClass) {
             }
             parameters[index] = parameters[index] || []; /** @type {?} */
             ((parameters[index])).push(annotationInstance);
-            Reflect.defineMetadata('parameters', parameters, cls);
+            Reflect$1.defineMetadata('parameters', parameters, cls);
             return cls;
         }
     }
@@ -482,10 +498,10 @@ function makePropDecorator(name, props, parentClass) {
         }
         var /** @type {?} */ decoratorInstance = new (((PropDecoratorFactory)).bind.apply(((PropDecoratorFactory)), [void 0].concat(args)))();
         return function PropDecorator(target, name) {
-            var /** @type {?} */ meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
+            var /** @type {?} */ meta = Reflect$1.getOwnMetadata('propMetadata', target.constructor) || {};
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
-            Reflect.defineMetadata('propMetadata', meta, target.constructor);
+            Reflect$1.defineMetadata('propMetadata', meta, target.constructor);
         };
     }
     if (parentClass) {
@@ -812,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.0-1651a8f');
+var VERSION = new Version('4.2.0-rc.0-fa809ec');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
