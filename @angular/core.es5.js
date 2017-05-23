@@ -9,7 +9,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-rc.0-5af143e
+ * @license Angular v4.2.0-rc.0-a80ac0a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -343,13 +343,13 @@ function Class(clsDef) {
 /**
  * @suppress {globalThis}
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @param {?=} chainFn
  * @return {?}
  */
 function makeDecorator(name, props, parentClass, chainFn) {
-    var /** @type {?} */ metaCtor = makeMetadataCtor([props]);
+    var /** @type {?} */ metaCtor = makeMetadataCtor(props);
     /**
      * @param {?} objOrType
      * @return {?}
@@ -385,34 +385,26 @@ function makeDecorator(name, props, parentClass, chainFn) {
     return DecoratorFactory;
 }
 /**
- * @param {?} props
+ * @param {?=} props
  * @return {?}
  */
 function makeMetadataCtor(props) {
     return function ctor() {
-        var _this = this;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        props.forEach(function (prop, i) {
-            var /** @type {?} */ argVal = args[i];
-            if (Array.isArray(prop)) {
-                // plain parameter
-                _this[prop[0]] = argVal === undefined ? prop[1] : argVal;
+        if (props) {
+            var /** @type {?} */ values = props.apply(void 0, args);
+            for (var /** @type {?} */ propName in values) {
+                this[propName] = values[propName];
             }
-            else {
-                for (var /** @type {?} */ propName in prop) {
-                    _this[propName] =
-                        argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
-                }
-            }
-        });
+        }
     };
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -462,7 +454,7 @@ function makeParamDecorator(name, props, parentClass) {
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -544,7 +536,7 @@ var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents
  * \@stable
  * \@Annotation
  */
-var Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
+var Attribute = makeParamDecorator('Attribute', function (attributeName) { return ({ attributeName: attributeName }); });
 /**
  * Base class for query metadata.
  *
@@ -565,56 +557,37 @@ var Query = (function () {
  *  \@stable
  *  \@Annotation
  */
-var ContentChildren = makePropDecorator('ContentChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: false,
-        descendants: false,
-        read: undefined,
-    }
-], Query);
+var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
+}, Query);
 /**
  * ContentChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ContentChild = makePropDecorator('ContentChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: false,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
+}, Query);
 /**
  * ViewChildren decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ViewChildren = makePropDecorator('ViewChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
+}, Query);
 /**
  * ViewChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ViewChild = makePropDecorator('ViewChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ViewChild = makePropDecorator('ViewChild', function (selector, data) { return (Object.assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data)); }, Query);
 var ChangeDetectionStrategy = {};
 ChangeDetectionStrategy.OnPush = 0;
 ChangeDetectionStrategy.Default = 1;
@@ -654,14 +627,9 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * \@stable
  * \@Annotation
  */
-var Directive = makeDecorator('Directive', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    providers: undefined,
-    exportAs: undefined,
-    queries: undefined
+var Directive = makeDecorator('Directive', function (dir) {
+    if (dir === void 0) { dir = {}; }
+    return dir;
 });
 /**
  * Component decorator and metadata.
@@ -669,25 +637,9 @@ var Directive = makeDecorator('Directive', {
  * \@stable
  * \@Annotation
  */
-var Component = makeDecorator('Component', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    exportAs: undefined,
-    moduleId: undefined,
-    providers: undefined,
-    viewProviders: undefined,
-    changeDetection: ChangeDetectionStrategy.Default,
-    queries: undefined,
-    templateUrl: undefined,
-    template: undefined,
-    styleUrls: undefined,
-    styles: undefined,
-    animations: undefined,
-    encapsulation: undefined,
-    interpolation: undefined,
-    entryComponents: undefined
+var Component = makeDecorator('Component', function (c) {
+    if (c === void 0) { c = {}; }
+    return (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
 }, Directive);
 /**
  * Pipe decorator and metadata.
@@ -695,38 +647,35 @@ var Component = makeDecorator('Component', {
  * \@stable
  * \@Annotation
  */
-var Pipe = makeDecorator('Pipe', {
-    name: undefined,
-    pure: true,
-});
+var Pipe = makeDecorator('Pipe', function (p) { return (Object.assign({ pure: true }, p)); });
 /**
  * Input decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
+var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * Output decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
+var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * HostBinding decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
+var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); });
 /**
  * HostListener decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
+var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -759,16 +708,7 @@ var NO_ERRORS_SCHEMA = {
  * \@stable
  * \@Annotation
  */
-var NgModule = makeDecorator('NgModule', {
-    providers: undefined,
-    declarations: undefined,
-    imports: undefined,
-    exports: undefined,
-    entryComponents: undefined,
-    bootstrap: undefined,
-    schemas: undefined,
-    id: undefined,
-});
+var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; });
 var ViewEncapsulation = {};
 ViewEncapsulation.Emulated = 0;
 ViewEncapsulation.Native = 1;
@@ -865,7 +805,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.0-5af143e');
+var VERSION = new Version('4.2.0-rc.0-a80ac0a');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -879,42 +819,42 @@ var VERSION = new Version('4.2.0-rc.0-5af143e');
  * \@stable
  * \@Annotation
  */
-var Inject = makeParamDecorator('Inject', [['token', undefined]]);
+var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
 /**
  * Optional decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Optional = makeParamDecorator('Optional', []);
+var Optional = makeParamDecorator('Optional');
 /**
  * Injectable decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Injectable = makeDecorator('Injectable', []);
+var Injectable = makeDecorator('Injectable');
 /**
  * Self decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Self = makeParamDecorator('Self', []);
+var Self = makeParamDecorator('Self');
 /**
  * SkipSelf decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var SkipSelf = makeParamDecorator('SkipSelf', []);
+var SkipSelf = makeParamDecorator('SkipSelf');
 /**
  * Host decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Host = makeParamDecorator('Host', []);
+var Host = makeParamDecorator('Host');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -2195,7 +2135,7 @@ function _extractToken(typeOrFunc, metadata, params) {
     var /** @type {?} */ optional = false;
     if (!Array.isArray(metadata)) {
         if (metadata instanceof Inject) {
-            return _createDependency(metadata['token'], optional, null);
+            return _createDependency(metadata.token, optional, null);
         }
         else {
             return _createDependency(metadata, optional, null);
@@ -2208,7 +2148,7 @@ function _extractToken(typeOrFunc, metadata, params) {
             token = paramMetadata;
         }
         else if (paramMetadata instanceof Inject) {
-            token = paramMetadata['token'];
+            token = paramMetadata.token;
         }
         else if (paramMetadata instanceof Optional) {
             optional = true;
@@ -14877,5 +14817,5 @@ function transition$$1(stateChangeExpr, steps) {
 /**
  * Generated bundle index. Do not edit.
  */
-export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵy, group$1 as ɵz, keyframes$1 as ɵbd, sequence$1 as ɵba, state$1 as ɵbc, style$1 as ɵbb, transition$1 as ɵbe, trigger$1 as ɵx, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵo, createScope$1 as ɵq, detectWTF as ɵp, endTimeRange as ɵt, leave as ɵr, startTimeRange as ɵs, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵu, DebugContext as ɵv };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵx, group$1 as ɵy, keyframes$1 as ɵbc, sequence$1 as ɵz, state$1 as ɵbb, style$1 as ɵba, transition$1 as ɵbd, trigger$1 as ɵw, _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm, ApplicationRef_ as ɵe, _appIdRandomProviderFactory as ɵf, defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh, DefaultIterableDifferFactory as ɵi, DefaultKeyValueDifferFactory as ɵj, ReflectiveInjector_ as ɵb, ReflectiveDependency as ɵc, resolveReflectiveProviders as ɵd, wtfEnabled as ɵn, createScope$1 as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr, makeParamDecorator as ɵa, _def as ɵt, DebugContext as ɵu };
 //# sourceMappingURL=core.es5.js.map

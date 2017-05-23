@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-5af143e
+ * @license Angular v4.2.0-rc.0-a80ac0a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -331,13 +331,13 @@ function Class(clsDef) {
 /**
  * @suppress {globalThis}
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @param {?=} chainFn
  * @return {?}
  */
 function makeDecorator(name, props, parentClass, chainFn) {
-    const /** @type {?} */ metaCtor = makeMetadataCtor([props]);
+    const /** @type {?} */ metaCtor = makeMetadataCtor(props);
     /**
      * @param {?} objOrType
      * @return {?}
@@ -373,29 +373,22 @@ function makeDecorator(name, props, parentClass, chainFn) {
     return DecoratorFactory;
 }
 /**
- * @param {?} props
+ * @param {?=} props
  * @return {?}
  */
 function makeMetadataCtor(props) {
     return function ctor(...args) {
-        props.forEach((prop, i) => {
-            const /** @type {?} */ argVal = args[i];
-            if (Array.isArray(prop)) {
-                // plain parameter
-                this[prop[0]] = argVal === undefined ? prop[1] : argVal;
+        if (props) {
+            const /** @type {?} */ values = props(...args);
+            for (const /** @type {?} */ propName in values) {
+                this[propName] = values[propName];
             }
-            else {
-                for (const /** @type {?} */ propName in prop) {
-                    this[propName] =
-                        argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
-                }
-            }
-        });
+        }
     };
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -441,7 +434,7 @@ function makeParamDecorator(name, props, parentClass) {
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -520,7 +513,7 @@ const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponen
  * \@stable
  * \@Annotation
  */
-const Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
+const Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName }));
 /**
  * Base class for query metadata.
  *
@@ -538,56 +531,28 @@ class Query {
  *  \@stable
  *  \@Annotation
  */
-const ContentChildren = makePropDecorator('ContentChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: false,
-        descendants: false,
-        read: undefined,
-    }
-], Query);
+const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
 /**
  * ContentChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const ContentChild = makePropDecorator('ContentChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: false,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+const ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data)), Query);
 /**
  * ViewChildren decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const ViewChildren = makePropDecorator('ViewChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+const ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data)), Query);
 /**
  * ViewChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const ViewChild = makePropDecorator('ViewChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+const ViewChild = makePropDecorator('ViewChild', (selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data)), Query);
 
 let ChangeDetectionStrategy = {};
 ChangeDetectionStrategy.OnPush = 0;
@@ -629,79 +594,49 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * \@stable
  * \@Annotation
  */
-const Directive = makeDecorator('Directive', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    providers: undefined,
-    exportAs: undefined,
-    queries: undefined
-});
+const Directive = makeDecorator('Directive', (dir = {}) => dir);
 /**
  * Component decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Component = makeDecorator('Component', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    exportAs: undefined,
-    moduleId: undefined,
-    providers: undefined,
-    viewProviders: undefined,
-    changeDetection: ChangeDetectionStrategy.Default,
-    queries: undefined,
-    templateUrl: undefined,
-    template: undefined,
-    styleUrls: undefined,
-    styles: undefined,
-    animations: undefined,
-    encapsulation: undefined,
-    interpolation: undefined,
-    entryComponents: undefined
-}, Directive);
+const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive);
 /**
  * Pipe decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Pipe = makeDecorator('Pipe', {
-    name: undefined,
-    pure: true,
-});
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)));
 /**
  * Input decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
+const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
 /**
  * Output decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
+const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
 /**
  * HostBinding decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
+const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
 /**
  * HostListener decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
+const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ eventName, args }));
 
 /**
  * @license
@@ -735,16 +670,7 @@ const NO_ERRORS_SCHEMA = {
  * \@stable
  * \@Annotation
  */
-const NgModule = makeDecorator('NgModule', {
-    providers: undefined,
-    declarations: undefined,
-    imports: undefined,
-    exports: undefined,
-    entryComponents: undefined,
-    bootstrap: undefined,
-    schemas: undefined,
-    id: undefined,
-});
+const NgModule = makeDecorator('NgModule', (ngModule) => ngModule);
 
 let ViewEncapsulation = {};
 ViewEncapsulation.Emulated = 0;
@@ -829,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.0-rc.0-5af143e');
+const VERSION = new Version('4.2.0-rc.0-a80ac0a');
 
 /**
  * @license
@@ -844,42 +770,42 @@ const VERSION = new Version('4.2.0-rc.0-5af143e');
  * \@stable
  * \@Annotation
  */
-const Inject = makeParamDecorator('Inject', [['token', undefined]]);
+const Inject = makeParamDecorator('Inject', (token) => ({ token }));
 /**
  * Optional decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Optional = makeParamDecorator('Optional', []);
+const Optional = makeParamDecorator('Optional');
 /**
  * Injectable decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Injectable = makeDecorator('Injectable', []);
+const Injectable = makeDecorator('Injectable');
 /**
  * Self decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Self = makeParamDecorator('Self', []);
+const Self = makeParamDecorator('Self');
 /**
  * SkipSelf decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const SkipSelf = makeParamDecorator('SkipSelf', []);
+const SkipSelf = makeParamDecorator('SkipSelf');
 /**
  * Host decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-const Host = makeParamDecorator('Host', []);
+const Host = makeParamDecorator('Host');
 
 /**
  * @license
@@ -2131,7 +2057,7 @@ function _extractToken(typeOrFunc, metadata, params) {
     let /** @type {?} */ optional = false;
     if (!Array.isArray(metadata)) {
         if (metadata instanceof Inject) {
-            return _createDependency(metadata['token'], optional, null);
+            return _createDependency(metadata.token, optional, null);
         }
         else {
             return _createDependency(metadata, optional, null);
@@ -2144,7 +2070,7 @@ function _extractToken(typeOrFunc, metadata, params) {
             token = paramMetadata;
         }
         else if (paramMetadata instanceof Inject) {
-            token = paramMetadata['token'];
+            token = paramMetadata.token;
         }
         else if (paramMetadata instanceof Optional) {
             optional = true;
@@ -14401,5 +14327,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵy, group$1 as ɵz, keyframes$1 as ɵbd, sequence$1 as ɵba, state$1 as ɵbc, style$1 as ɵbb, transition$1 as ɵbe, trigger$1 as ɵx, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, ApplicationRef_ as ɵf, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵo, createScope$1 as ɵq, detectWTF as ɵp, endTimeRange as ɵt, leave as ɵr, startTimeRange as ɵs, makeParamDecorator as ɵa, makePropDecorator as ɵb, _def as ɵu, DebugContext as ɵv };
+export { Class, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, OpaqueToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵx, group$1 as ɵy, keyframes$1 as ɵbc, sequence$1 as ɵz, state$1 as ɵbb, style$1 as ɵba, transition$1 as ɵbd, trigger$1 as ɵw, _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm, ApplicationRef_ as ɵe, _appIdRandomProviderFactory as ɵf, defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh, DefaultIterableDifferFactory as ɵi, DefaultKeyValueDifferFactory as ɵj, ReflectiveInjector_ as ɵb, ReflectiveDependency as ɵc, resolveReflectiveProviders as ɵd, wtfEnabled as ɵn, createScope$1 as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr, makeParamDecorator as ɵa, _def as ɵt, DebugContext as ɵu };
 //# sourceMappingURL=core.js.map

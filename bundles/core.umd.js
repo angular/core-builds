@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.0-5af143e
+ * @license Angular v4.2.0-rc.0-a80ac0a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -20,7 +20,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 /**
- * @license Angular v4.2.0-rc.0-5af143e
+ * @license Angular v4.2.0-rc.0-a80ac0a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -350,13 +350,13 @@ function Class(clsDef) {
 /**
  * @suppress {globalThis}
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @param {?=} chainFn
  * @return {?}
  */
 function makeDecorator(name, props, parentClass, chainFn) {
-    var /** @type {?} */ metaCtor = makeMetadataCtor([props]);
+    var /** @type {?} */ metaCtor = makeMetadataCtor(props);
     /**
      * @param {?} objOrType
      * @return {?}
@@ -392,34 +392,26 @@ function makeDecorator(name, props, parentClass, chainFn) {
     return DecoratorFactory;
 }
 /**
- * @param {?} props
+ * @param {?=} props
  * @return {?}
  */
 function makeMetadataCtor(props) {
     return function ctor() {
-        var _this = this;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        props.forEach(function (prop, i) {
-            var /** @type {?} */ argVal = args[i];
-            if (Array.isArray(prop)) {
-                // plain parameter
-                _this[prop[0]] = argVal === undefined ? prop[1] : argVal;
+        if (props) {
+            var /** @type {?} */ values = props.apply(void 0, args);
+            for (var /** @type {?} */ propName in values) {
+                this[propName] = values[propName];
             }
-            else {
-                for (var /** @type {?} */ propName in prop) {
-                    _this[propName] =
-                        argVal && argVal.hasOwnProperty(propName) ? argVal[propName] : prop[propName];
-                }
-            }
-        });
+        }
     };
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -469,7 +461,7 @@ function makeParamDecorator(name, props, parentClass) {
 }
 /**
  * @param {?} name
- * @param {?} props
+ * @param {?=} props
  * @param {?=} parentClass
  * @return {?}
  */
@@ -551,7 +543,7 @@ var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents
  * \@stable
  * \@Annotation
  */
-var Attribute = makeParamDecorator('Attribute', [['attributeName', undefined]]);
+var Attribute = makeParamDecorator('Attribute', function (attributeName) { return ({ attributeName: attributeName }); });
 /**
  * Base class for query metadata.
  *
@@ -572,56 +564,37 @@ var Query = (function () {
  *  \@stable
  *  \@Annotation
  */
-var ContentChildren = makePropDecorator('ContentChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: false,
-        descendants: false,
-        read: undefined,
-    }
-], Query);
+var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
+}, Query);
 /**
  * ContentChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ContentChild = makePropDecorator('ContentChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: false,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
+}, Query);
 /**
  * ViewChildren decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ViewChildren = makePropDecorator('ViewChildren', [
-    ['selector', undefined], {
-        first: false,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
+    if (data === void 0) { data = {}; }
+    return (Object.assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
+}, Query);
 /**
  * ViewChild decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var ViewChild = makePropDecorator('ViewChild', [
-    ['selector', undefined], {
-        first: true,
-        isViewQuery: true,
-        descendants: true,
-        read: undefined,
-    }
-], Query);
+var ViewChild = makePropDecorator('ViewChild', function (selector, data) { return (Object.assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data)); }, Query);
 var ChangeDetectionStrategy = {};
 ChangeDetectionStrategy.OnPush = 0;
 ChangeDetectionStrategy.Default = 1;
@@ -661,14 +634,9 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * \@stable
  * \@Annotation
  */
-var Directive = makeDecorator('Directive', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    providers: undefined,
-    exportAs: undefined,
-    queries: undefined
+var Directive = makeDecorator('Directive', function (dir) {
+    if (dir === void 0) { dir = {}; }
+    return dir;
 });
 /**
  * Component decorator and metadata.
@@ -676,25 +644,9 @@ var Directive = makeDecorator('Directive', {
  * \@stable
  * \@Annotation
  */
-var Component = makeDecorator('Component', {
-    selector: undefined,
-    inputs: undefined,
-    outputs: undefined,
-    host: undefined,
-    exportAs: undefined,
-    moduleId: undefined,
-    providers: undefined,
-    viewProviders: undefined,
-    changeDetection: ChangeDetectionStrategy.Default,
-    queries: undefined,
-    templateUrl: undefined,
-    template: undefined,
-    styleUrls: undefined,
-    styles: undefined,
-    animations: undefined,
-    encapsulation: undefined,
-    interpolation: undefined,
-    entryComponents: undefined
+var Component = makeDecorator('Component', function (c) {
+    if (c === void 0) { c = {}; }
+    return (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
 }, Directive);
 /**
  * Pipe decorator and metadata.
@@ -702,38 +654,35 @@ var Component = makeDecorator('Component', {
  * \@stable
  * \@Annotation
  */
-var Pipe = makeDecorator('Pipe', {
-    name: undefined,
-    pure: true,
-});
+var Pipe = makeDecorator('Pipe', function (p) { return (Object.assign({ pure: true }, p)); });
 /**
  * Input decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Input = makePropDecorator('Input', [['bindingPropertyName', undefined]]);
+var Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * Output decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Output = makePropDecorator('Output', [['bindingPropertyName', undefined]]);
+var Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * HostBinding decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var HostBinding = makePropDecorator('HostBinding', [['hostPropertyName', undefined]]);
+var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); });
 /**
  * HostListener decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var HostListener = makePropDecorator('HostListener', [['eventName', undefined], ['args', []]]);
+var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -766,16 +715,7 @@ var NO_ERRORS_SCHEMA = {
  * \@stable
  * \@Annotation
  */
-var NgModule = makeDecorator('NgModule', {
-    providers: undefined,
-    declarations: undefined,
-    imports: undefined,
-    exports: undefined,
-    entryComponents: undefined,
-    bootstrap: undefined,
-    schemas: undefined,
-    id: undefined,
-});
+var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; });
 var ViewEncapsulation = {};
 ViewEncapsulation.Emulated = 0;
 ViewEncapsulation.Native = 1;
@@ -872,7 +812,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.0-5af143e');
+var VERSION = new Version('4.2.0-rc.0-a80ac0a');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -886,42 +826,42 @@ var VERSION = new Version('4.2.0-rc.0-5af143e');
  * \@stable
  * \@Annotation
  */
-var Inject = makeParamDecorator('Inject', [['token', undefined]]);
+var Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
 /**
  * Optional decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Optional = makeParamDecorator('Optional', []);
+var Optional = makeParamDecorator('Optional');
 /**
  * Injectable decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Injectable = makeDecorator('Injectable', []);
+var Injectable = makeDecorator('Injectable');
 /**
  * Self decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Self = makeParamDecorator('Self', []);
+var Self = makeParamDecorator('Self');
 /**
  * SkipSelf decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var SkipSelf = makeParamDecorator('SkipSelf', []);
+var SkipSelf = makeParamDecorator('SkipSelf');
 /**
  * Host decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Host = makeParamDecorator('Host', []);
+var Host = makeParamDecorator('Host');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -2202,7 +2142,7 @@ function _extractToken(typeOrFunc, metadata, params) {
     var /** @type {?} */ optional = false;
     if (!Array.isArray(metadata)) {
         if (metadata instanceof Inject) {
-            return _createDependency(metadata['token'], optional, null);
+            return _createDependency(metadata.token, optional, null);
         }
         else {
             return _createDependency(metadata, optional, null);
@@ -2215,7 +2155,7 @@ function _extractToken(typeOrFunc, metadata, params) {
             token = paramMetadata;
         }
         else if (paramMetadata instanceof Inject) {
-            token = paramMetadata['token'];
+            token = paramMetadata.token;
         }
         else if (paramMetadata instanceof Optional) {
             optional = true;
@@ -15022,36 +14962,35 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵy = animate$1;
-exports.ɵz = group$1;
-exports.ɵbd = keyframes$1;
-exports.ɵba = sequence$1;
-exports.ɵbc = state$1;
-exports.ɵbb = style$1;
-exports.ɵbe = transition$1;
-exports.ɵx = trigger$1;
-exports.ɵl = _iterableDiffersFactory;
-exports.ɵm = _keyValueDiffersFactory;
-exports.ɵn = _localeFactory;
-exports.ɵf = ApplicationRef_;
-exports.ɵg = _appIdRandomProviderFactory;
-exports.ɵh = defaultIterableDiffers;
-exports.ɵi = defaultKeyValueDiffers;
-exports.ɵj = DefaultIterableDifferFactory;
-exports.ɵk = DefaultKeyValueDifferFactory;
-exports.ɵc = ReflectiveInjector_;
-exports.ɵd = ReflectiveDependency;
-exports.ɵe = resolveReflectiveProviders;
-exports.ɵo = wtfEnabled;
-exports.ɵq = createScope$1;
-exports.ɵp = detectWTF;
-exports.ɵt = endTimeRange;
-exports.ɵr = leave;
-exports.ɵs = startTimeRange;
+exports.ɵx = animate$1;
+exports.ɵy = group$1;
+exports.ɵbc = keyframes$1;
+exports.ɵz = sequence$1;
+exports.ɵbb = state$1;
+exports.ɵba = style$1;
+exports.ɵbd = transition$1;
+exports.ɵw = trigger$1;
+exports.ɵk = _iterableDiffersFactory;
+exports.ɵl = _keyValueDiffersFactory;
+exports.ɵm = _localeFactory;
+exports.ɵe = ApplicationRef_;
+exports.ɵf = _appIdRandomProviderFactory;
+exports.ɵg = defaultIterableDiffers;
+exports.ɵh = defaultKeyValueDiffers;
+exports.ɵi = DefaultIterableDifferFactory;
+exports.ɵj = DefaultKeyValueDifferFactory;
+exports.ɵb = ReflectiveInjector_;
+exports.ɵc = ReflectiveDependency;
+exports.ɵd = resolveReflectiveProviders;
+exports.ɵn = wtfEnabled;
+exports.ɵp = createScope$1;
+exports.ɵo = detectWTF;
+exports.ɵs = endTimeRange;
+exports.ɵq = leave;
+exports.ɵr = startTimeRange;
 exports.ɵa = makeParamDecorator;
-exports.ɵb = makePropDecorator;
-exports.ɵu = _def;
-exports.ɵv = DebugContext;
+exports.ɵt = _def;
+exports.ɵu = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
