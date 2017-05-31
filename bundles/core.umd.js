@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.0-rc.1-dfbbbb5
+ * @license Angular v4.2.0-rc.1-cb2cb7c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.2.0-rc.1-dfbbbb5
+ * @license Angular v4.2.0-rc.1-cb2cb7c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -828,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.0-rc.1-dfbbbb5');
+var VERSION = new Version('4.2.0-rc.1-cb2cb7c');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
