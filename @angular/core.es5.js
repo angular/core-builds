@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.2.1-ed73d4f
+ * @license Angular v4.2.1-6ca4692
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -796,7 +796,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.1-ed73d4f');
+var VERSION = new Version('4.2.1-6ca4692');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
