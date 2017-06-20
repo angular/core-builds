@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.3-63a5f33
+ * @license Angular v4.2.3-77860a0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,16 +706,16 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  */
 class ViewMetadata {
     /**
-     * @param {?=} __0
+     * @param {?=} opts
      */
-    constructor({ templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation } = {}) {
-        this.templateUrl = templateUrl;
-        this.template = template;
-        this.styleUrls = styleUrls;
-        this.styles = styles;
-        this.encapsulation = encapsulation;
-        this.animations = animations;
-        this.interpolation = interpolation;
+    constructor(opts = {}) {
+        this.templateUrl = opts.templateUrl;
+        this.template = opts.template;
+        this.styleUrls = opts.styleUrls;
+        this.styles = opts.styles;
+        this.encapsulation = opts.encapsulation;
+        this.animations = opts.animations;
+        this.interpolation = opts.interpolation;
     }
 }
 
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.3-63a5f33');
+const VERSION = new Version('4.2.3-77860a0');
 
 /**
  * @license
@@ -7542,26 +7542,6 @@ class DefaultKeyValueDiffer {
         }
     }
     /**
-     * @return {?}
-     */
-    toString() {
-        const /** @type {?} */ items = [];
-        const /** @type {?} */ previous = [];
-        const /** @type {?} */ changes = [];
-        const /** @type {?} */ additions = [];
-        const /** @type {?} */ removals = [];
-        this.forEachItem(r => items.push(stringify(r)));
-        this.forEachPreviousItem(r => previous.push(stringify(r)));
-        this.forEachChangedItem(r => changes.push(stringify(r)));
-        this.forEachAddedItem(r => additions.push(stringify(r)));
-        this.forEachRemovedItem(r => removals.push(stringify(r)));
-        return 'map: ' + items.join(', ') + '\n' +
-            'previous: ' + previous.join(', ') + '\n' +
-            'additions: ' + additions.join(', ') + '\n' +
-            'changes: ' + changes.join(', ') + '\n' +
-            'removals: ' + removals.join(', ') + '\n';
-    }
-    /**
      * \@internal
      * @template K, V
      * @param {?} obj
@@ -7612,15 +7592,6 @@ class KeyValueChangeRecord_ {
          * \@internal
          */
         this._nextChanged = null;
-    }
-    /**
-     * @return {?}
-     */
-    toString() {
-        return looseIdentical(this.previousValue, this.currentValue) ?
-            stringify(this.key) :
-            (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
-                stringify(this.currentValue) + ']');
     }
 }
 
