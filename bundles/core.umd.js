@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.2-c59c390
+ * @license Angular v4.2.2-009651e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.2.2-c59c390
+ * @license Angular v4.2.2-009651e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -766,17 +766,17 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  */
 var ViewMetadata = (function () {
     /**
-     * @param {?=} opts
+     * @param {?=} __0
      */
-    function ViewMetadata(opts) {
-        if (opts === void 0) { opts = {}; }
-        this.templateUrl = opts.templateUrl;
-        this.template = opts.template;
-        this.styleUrls = opts.styleUrls;
-        this.styles = opts.styles;
-        this.encapsulation = opts.encapsulation;
-        this.animations = opts.animations;
-        this.interpolation = opts.interpolation;
+    function ViewMetadata(_a) {
+        var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
+        this.templateUrl = templateUrl;
+        this.template = template;
+        this.styleUrls = styleUrls;
+        this.styles = styles;
+        this.encapsulation = encapsulation;
+        this.animations = animations;
+        this.interpolation = interpolation;
     }
     return ViewMetadata;
 }());
@@ -828,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.2-c59c390');
+var VERSION = new Version('4.2.2-009651e');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.

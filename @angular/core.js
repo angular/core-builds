@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.2-c59c390
+ * @license Angular v4.2.2-009651e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,16 +706,16 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  */
 class ViewMetadata {
     /**
-     * @param {?=} opts
+     * @param {?=} __0
      */
-    constructor(opts = {}) {
-        this.templateUrl = opts.templateUrl;
-        this.template = opts.template;
-        this.styleUrls = opts.styleUrls;
-        this.styles = opts.styles;
-        this.encapsulation = opts.encapsulation;
-        this.animations = opts.animations;
-        this.interpolation = opts.interpolation;
+    constructor({ templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation } = {}) {
+        this.templateUrl = templateUrl;
+        this.template = template;
+        this.styleUrls = styleUrls;
+        this.styles = styles;
+        this.encapsulation = encapsulation;
+        this.animations = animations;
+        this.interpolation = interpolation;
     }
 }
 
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.2-c59c390');
+const VERSION = new Version('4.2.2-009651e');
 
 /**
  * @license

@@ -73,7 +73,7 @@ export declare class ViewMetadata {
     animations: any[] | undefined;
     /** {@link Component#interpolation} */
     interpolation: [string, string] | undefined;
-    constructor(opts?: {
+    constructor({templateUrl, template, encapsulation, styles, styleUrls, animations, interpolation}?: {
         templateUrl?: string;
         template?: string;
         encapsulation?: ViewEncapsulation;
