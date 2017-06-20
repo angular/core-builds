@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.2-f194f18
+ * @license Angular v4.2.2-c59c390
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.2.2-f194f18
+ * @license Angular v4.2.2-c59c390
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -766,17 +766,17 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  */
 var ViewMetadata = (function () {
     /**
-     * @param {?=} __0
+     * @param {?=} opts
      */
-    function ViewMetadata(_a) {
-        var _b = _a === void 0 ? {} : _a, templateUrl = _b.templateUrl, template = _b.template, encapsulation = _b.encapsulation, styles = _b.styles, styleUrls = _b.styleUrls, animations = _b.animations, interpolation = _b.interpolation;
-        this.templateUrl = templateUrl;
-        this.template = template;
-        this.styleUrls = styleUrls;
-        this.styles = styles;
-        this.encapsulation = encapsulation;
-        this.animations = animations;
-        this.interpolation = interpolation;
+    function ViewMetadata(opts) {
+        if (opts === void 0) { opts = {}; }
+        this.templateUrl = opts.templateUrl;
+        this.template = opts.template;
+        this.styleUrls = opts.styleUrls;
+        this.styles = opts.styles;
+        this.encapsulation = opts.encapsulation;
+        this.animations = opts.animations;
+        this.interpolation = opts.interpolation;
     }
     return ViewMetadata;
 }());
@@ -828,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.2.2-f194f18');
+var VERSION = new Version('4.2.2-c59c390');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7909,26 +7909,6 @@ var DefaultKeyValueDiffer = (function () {
         }
     };
     /**
-     * @return {?}
-     */
-    DefaultKeyValueDiffer.prototype.toString = function () {
-        var /** @type {?} */ items = [];
-        var /** @type {?} */ previous = [];
-        var /** @type {?} */ changes = [];
-        var /** @type {?} */ additions = [];
-        var /** @type {?} */ removals = [];
-        this.forEachItem(function (r) { return items.push(stringify(r)); });
-        this.forEachPreviousItem(function (r) { return previous.push(stringify(r)); });
-        this.forEachChangedItem(function (r) { return changes.push(stringify(r)); });
-        this.forEachAddedItem(function (r) { return additions.push(stringify(r)); });
-        this.forEachRemovedItem(function (r) { return removals.push(stringify(r)); });
-        return 'map: ' + items.join(', ') + '\n' +
-            'previous: ' + previous.join(', ') + '\n' +
-            'additions: ' + additions.join(', ') + '\n' +
-            'changes: ' + changes.join(', ') + '\n' +
-            'removals: ' + removals.join(', ') + '\n';
-    };
-    /**
      * \@internal
      * @template K, V
      * @param {?} obj
@@ -7981,15 +7961,6 @@ var KeyValueChangeRecord_ = (function () {
          */
         this._nextChanged = null;
     }
-    /**
-     * @return {?}
-     */
-    KeyValueChangeRecord_.prototype.toString = function () {
-        return looseIdentical(this.previousValue, this.currentValue) ?
-            stringify(this.key) :
-            (stringify(this.key) + '[' + stringify(this.previousValue) + '->' +
-                stringify(this.currentValue) + ']');
-    };
     return KeyValueChangeRecord_;
 }());
 /**
