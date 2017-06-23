@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.3.0-beta.0-e80851d
+ * @license Angular v4.3.0-beta.0-b754e60
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -796,7 +796,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.3.0-beta.0-e80851d');
+var VERSION = new Version('4.3.0-beta.0-b754e60');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -12502,8 +12502,6 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
     }
 }
 /**
- * Workaround https://github.com/angular/tsickle/issues/497
- * @suppress {misplacedTypeAnnotation}
  * @param {?} view
  * @param {?} nodeDef
  * @return {?}
