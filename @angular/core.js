@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.4-ffbdf74
+ * @license Angular v4.2.4-7205d7a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.4-ffbdf74');
+const VERSION = new Version('4.2.4-7205d7a');
 
 /**
  * @license
@@ -13522,7 +13522,7 @@ function animate$1(timings, styles = null) {
  * how animations in Angular are used.
  *
  * `group` specifies a list of animation steps that are all run in parallel. Grouped animations are
- * useful when a series of styles must be animated/closed off at different statrting/ending times.
+ * useful when a series of styles must be animated/closed off at different starting/ending times.
  *
  * The `group` function can either be used within a {\@link sequence sequence} or a {\@link transition
  * transition} and it will only continue to the next instruction once all of the inner animation
