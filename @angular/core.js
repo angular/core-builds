@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.4-7728d7e
+ * @license Angular v4.2.4-f31b0d6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.4-7728d7e');
+const VERSION = new Version('4.2.4-f31b0d6');
 
 /**
  * @license
@@ -12070,6 +12070,8 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
     }
 }
 /**
+ * Workaround https://github.com/angular/tsickle/issues/497
+ * @suppress {misplacedTypeAnnotation}
  * @param {?} view
  * @param {?} nodeDef
  * @return {?}
