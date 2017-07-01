@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.0-beta.1-d5dc53e
+ * @license Angular v4.3.0-beta.1-b479ed9
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.3.0-beta.1-d5dc53e');
+const VERSION = new Version('4.3.0-beta.1-b479ed9');
 
 /**
  * @license
@@ -3606,26 +3606,46 @@ class NgZone {
      * @param {?} __0
      */
     constructor({ enableLongStackTrace = false }) {
-        this._hasPendingMicrotasks = false;
-        this._hasPendingMacrotasks = false;
-        this._isStable = true;
-        this._nesting = 0;
-        this._onUnstable = new EventEmitter(false);
-        this._onMicrotaskEmpty = new EventEmitter(false);
-        this._onStable = new EventEmitter(false);
-        this._onErrorEvents = new EventEmitter(false);
+        this.hasPendingMicrotasks = false;
+        this.hasPendingMacrotasks = false;
+        /**
+         * Whether there are no outstanding microtasks or macrotasks.
+         */
+        this.isStable = true;
+        /**
+         * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+         */
+        this.onUnstable = new EventEmitter(false);
+        /**
+         * Notifies when there is no more microtasks enqueue in the current VM Turn.
+         * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+         * For this reason this event can fire multiple times per VM Turn.
+         */
+        this.onMicrotaskEmpty = new EventEmitter(false);
+        /**
+         * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+         * implies we are about to relinquish VM turn.
+         * This event gets called just once.
+         */
+        this.onStable = new EventEmitter(false);
+        /**
+         * Notifies that an error has been delivered.
+         */
+        this.onError = new EventEmitter(false);
         if (typeof Zone == 'undefined') {
             throw new Error('Angular requires Zone.js prolyfill.');
         }
         Zone.assertZonePatched();
-        this.outer = this.inner = Zone.current;
+        const self = this;
+        self._nesting = 0;
+        self._outer = self._inner = Zone.current;
         if (Zone['wtfZoneSpec']) {
-            this.inner = this.inner.fork(Zone['wtfZoneSpec']);
+            self._inner = self._inner.fork(Zone['wtfZoneSpec']);
         }
         if (enableLongStackTrace && Zone['longStackTraceZoneSpec']) {
-            this.inner = this.inner.fork(Zone['longStackTraceZoneSpec']);
+            self._inner = self._inner.fork(Zone['longStackTraceZoneSpec']);
         }
-        this.forkInnerZoneWithAngularBehavior();
+        forkInnerZoneWithAngularBehavior(self);
     }
     /**
      * @return {?}
@@ -3661,14 +3681,14 @@ class NgZone {
      * @param {?} fn
      * @return {?}
      */
-    run(fn) { return this.inner.run(fn); }
+    run(fn) { return (((this)))._inner.run(fn); }
     /**
      * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
      * rethrown.
      * @param {?} fn
      * @return {?}
      */
-    runGuarded(fn) { return this.inner.runGuarded(fn); }
+    runGuarded(fn) { return (((this)))._inner.runGuarded(fn); }
     /**
      * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
      * the function.
@@ -3684,146 +3704,96 @@ class NgZone {
      * @param {?} fn
      * @return {?}
      */
-    runOutsideAngular(fn) { return this.outer.run(fn); }
-    /**
-     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-     * @return {?}
-     */
-    get onUnstable() { return this._onUnstable; }
-    /**
-     * Notifies when there is no more microtasks enqueue in the current VM Turn.
-     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-     * For this reason this event can fire multiple times per VM Turn.
-     * @return {?}
-     */
-    get onMicrotaskEmpty() { return this._onMicrotaskEmpty; }
-    /**
-     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-     * implies we are about to relinquish VM turn.
-     * This event gets called just once.
-     * @return {?}
-     */
-    get onStable() { return this._onStable; }
-    /**
-     * Notify that an error has been delivered.
-     * @return {?}
-     */
-    get onError() { return this._onErrorEvents; }
-    /**
-     * Whether there are no outstanding microtasks or macrotasks.
-     * @return {?}
-     */
-    get isStable() { return this._isStable; }
-    /**
-     * @return {?}
-     */
-    get hasPendingMicrotasks() { return this._hasPendingMicrotasks; }
-    /**
-     * @return {?}
-     */
-    get hasPendingMacrotasks() { return this._hasPendingMacrotasks; }
-    /**
-     * @return {?}
-     */
-    checkStable() {
-        if (this._nesting == 0 && !this._hasPendingMicrotasks && !this._isStable) {
+    runOutsideAngular(fn) { return (((this)))._outer.run(fn); }
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function checkStable(zone) {
+    if (zone._nesting == 0 && !zone.hasPendingMicrotasks && !zone.isStable) {
+        try {
+            zone._nesting++;
+            zone.onMicrotaskEmpty.emit(null);
+        }
+        finally {
+            zone._nesting--;
+            if (!zone.hasPendingMicrotasks) {
+                try {
+                    zone.runOutsideAngular(() => zone.onStable.emit(null));
+                }
+                finally {
+                    zone.isStable = true;
+                }
+            }
+        }
+    }
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function forkInnerZoneWithAngularBehavior(zone) {
+    zone._inner = zone._inner.fork({
+        name: 'angular',
+        properties: /** @type {?} */ ({ 'isAngularZone': true }),
+        onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
             try {
-                this._nesting++;
-                this._onMicrotaskEmpty.emit(null);
+                onEnter(zone);
+                return delegate.invokeTask(target, task, applyThis, applyArgs);
             }
             finally {
-                this._nesting--;
-                if (!this._hasPendingMicrotasks) {
-                    try {
-                        this.runOutsideAngular(() => this._onStable.emit(null));
-                    }
-                    finally {
-                        this._isStable = true;
-                    }
+                onLeave(zone);
+            }
+        },
+        onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
+            try {
+                onEnter(zone);
+                return delegate.invoke(target, callback, applyThis, applyArgs, source);
+            }
+            finally {
+                onLeave(zone);
+            }
+        },
+        onHasTask: (delegate, current, target, hasTaskState) => {
+            delegate.hasTask(target, hasTaskState);
+            if (current === target) {
+                // We are only interested in hasTask events which originate from our zone
+                // (A child hasTask event is not interesting to us)
+                if (hasTaskState.change == 'microTask') {
+                    zone.hasPendingMicrotasks = hasTaskState.microTask;
+                    checkStable(zone);
+                }
+                else if (hasTaskState.change == 'macroTask') {
+                    zone.hasPendingMacrotasks = hasTaskState.macroTask;
                 }
             }
+        },
+        onHandleError: (delegate, current, target, error) => {
+            delegate.handleError(target, error);
+            zone.onError.emit(error);
+            return false;
         }
+    });
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function onEnter(zone) {
+    zone._nesting++;
+    if (zone.isStable) {
+        zone.isStable = false;
+        zone.onUnstable.emit(null);
     }
-    /**
-     * @return {?}
-     */
-    forkInnerZoneWithAngularBehavior() {
-        this.inner = this.inner.fork({
-            name: 'angular',
-            properties: /** @type {?} */ ({ 'isAngularZone': true }),
-            onInvokeTask: (delegate, current, target, task, applyThis, applyArgs) => {
-                try {
-                    this.onEnter();
-                    return delegate.invokeTask(target, task, applyThis, applyArgs);
-                }
-                finally {
-                    this.onLeave();
-                }
-            },
-            onInvoke: (delegate, current, target, callback, applyThis, applyArgs, source) => {
-                try {
-                    this.onEnter();
-                    return delegate.invoke(target, callback, applyThis, applyArgs, source);
-                }
-                finally {
-                    this.onLeave();
-                }
-            },
-            onHasTask: (delegate, current, target, hasTaskState) => {
-                delegate.hasTask(target, hasTaskState);
-                if (current === target) {
-                    // We are only interested in hasTask events which originate from our zone
-                    // (A child hasTask event is not interesting to us)
-                    if (hasTaskState.change == 'microTask') {
-                        this.setHasMicrotask(hasTaskState.microTask);
-                    }
-                    else if (hasTaskState.change == 'macroTask') {
-                        this.setHasMacrotask(hasTaskState.macroTask);
-                    }
-                }
-            },
-            onHandleError: (delegate, current, target, error) => {
-                delegate.handleError(target, error);
-                this.triggerError(error);
-                return false;
-            }
-        });
-    }
-    /**
-     * @return {?}
-     */
-    onEnter() {
-        this._nesting++;
-        if (this._isStable) {
-            this._isStable = false;
-            this._onUnstable.emit(null);
-        }
-    }
-    /**
-     * @return {?}
-     */
-    onLeave() {
-        this._nesting--;
-        this.checkStable();
-    }
-    /**
-     * @param {?} hasMicrotasks
-     * @return {?}
-     */
-    setHasMicrotask(hasMicrotasks) {
-        this._hasPendingMicrotasks = hasMicrotasks;
-        this.checkStable();
-    }
-    /**
-     * @param {?} hasMacrotasks
-     * @return {?}
-     */
-    setHasMacrotask(hasMacrotasks) { this._hasPendingMacrotasks = hasMacrotasks; }
-    /**
-     * @param {?} error
-     * @return {?}
-     */
-    triggerError(error) { this._onErrorEvents.emit(error); }
+}
+/**
+ * @param {?} zone
+ * @return {?}
+ */
+function onLeave(zone) {
+    zone._nesting--;
+    checkStable(zone);
 }
 
 /**
