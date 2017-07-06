@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.0-beta.1-70981c6
+ * @license Angular v4.3.0-beta.1-c69fff1
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.3.0-beta.1-70981c6
+ * @license Angular v4.3.0-beta.1-c69fff1
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -828,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.3.0-beta.1-70981c6');
+var VERSION = new Version('4.3.0-beta.1-c69fff1');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -6988,10 +6988,10 @@ var DefaultIterableDiffer = (function () {
         // The previous record after which we will append the current one.
         var /** @type {?} */ previousRecord;
         if (record === null) {
-            previousRecord = ((this._itTail));
+            previousRecord = this._itTail;
         }
         else {
-            previousRecord = ((record._prev));
+            previousRecord = record._prev;
             // Remove the record from the collection since we know it does not match the item.
             this._remove(record);
         }
@@ -7429,13 +7429,13 @@ var _DuplicateItemRecordList = (function () {
     };
     /**
      * @param {?} trackById
-     * @param {?} afterIndex
+     * @param {?} atOrAfterIndex
      * @return {?}
      */
-    _DuplicateItemRecordList.prototype.get = function (trackById, afterIndex) {
+    _DuplicateItemRecordList.prototype.get = function (trackById, atOrAfterIndex) {
         var /** @type {?} */ record;
         for (record = this._head; record !== null; record = record._nextDup) {
-            if ((afterIndex === null || afterIndex < ((record.currentIndex))) &&
+            if ((atOrAfterIndex === null || atOrAfterIndex <= ((record.currentIndex))) &&
                 looseIdentical(record.trackById, trackById)) {
                 return record;
             }
@@ -7495,18 +7495,18 @@ var _DuplicateMap = (function () {
     };
     /**
      * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
-     * have already iterated over, we use the afterIndex to pretend it is not there.
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
      *
      * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
-     * have any more `a`s needs to return the last `a` not the first or second.
+     * have any more `a`s needs to return the second `a`.
      * @param {?} trackById
-     * @param {?} afterIndex
+     * @param {?} atOrAfterIndex
      * @return {?}
      */
-    _DuplicateMap.prototype.get = function (trackById, afterIndex) {
+    _DuplicateMap.prototype.get = function (trackById, atOrAfterIndex) {
         var /** @type {?} */ key = trackById;
         var /** @type {?} */ recordList = this.map.get(key);
-        return recordList ? recordList.get(trackById, afterIndex) : null;
+        return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
     };
     /**
      * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
