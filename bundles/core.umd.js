@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.0-beta.1-c1474f3
+ * @license Angular v4.3.0-beta.1-2ba3ada
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.3.0-beta.1-c1474f3
+ * @license Angular v4.3.0-beta.1-2ba3ada
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -828,7 +828,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.3.0-beta.1-c1474f3');
+var VERSION = new Version('4.3.0-beta.1-2ba3ada');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -11502,18 +11502,10 @@ function pureArrayDef(argCount) {
     return _pureExpressionDef(32 /* TypePureArray */, new Array(argCount));
 }
 /**
- * @param {?} propToIndex
+ * @param {?} propertyNames
  * @return {?}
  */
-function pureObjectDef(propToIndex) {
-    var /** @type {?} */ keys = Object.keys(propToIndex);
-    var /** @type {?} */ nbKeys = keys.length;
-    var /** @type {?} */ propertyNames = new Array(nbKeys);
-    for (var /** @type {?} */ i = 0; i < nbKeys; i++) {
-        var /** @type {?} */ key = keys[i];
-        var /** @type {?} */ index = propToIndex[key];
-        propertyNames[index] = key;
-    }
+function pureObjectDef(propertyNames) {
     return _pureExpressionDef(64 /* TypePureObject */, propertyNames);
 }
 /**
