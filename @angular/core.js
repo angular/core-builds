@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.0-beta.1-9c3386b
+ * @license Angular v4.3.0-beta.1-671a175
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.3.0-beta.1-9c3386b');
+const VERSION = new Version('4.3.0-beta.1-671a175');
 
 /**
  * @license
@@ -11066,10 +11066,18 @@ function pureArrayDef(argCount) {
     return _pureExpressionDef(32 /* TypePureArray */, new Array(argCount));
 }
 /**
- * @param {?} propertyNames
+ * @param {?} propToIndex
  * @return {?}
  */
-function pureObjectDef(propertyNames) {
+function pureObjectDef(propToIndex) {
+    const /** @type {?} */ keys = Object.keys(propToIndex);
+    const /** @type {?} */ nbKeys = keys.length;
+    const /** @type {?} */ propertyNames = new Array(nbKeys);
+    for (let /** @type {?} */ i = 0; i < nbKeys; i++) {
+        const /** @type {?} */ key = keys[i];
+        const /** @type {?} */ index = propToIndex[key];
+        propertyNames[index] = key;
+    }
     return _pureExpressionDef(64 /* TypePureObject */, propertyNames);
 }
 /**
