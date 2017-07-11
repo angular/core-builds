@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.2.6-dbfd717
+ * @license Angular v4.2.6-afd5d72
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.2.6-dbfd717');
+const VERSION = new Version('4.2.6-afd5d72');
 
 /**
  * @license
@@ -5664,7 +5664,7 @@ class ChangeDetectorRef {
      * class Cmp {
      *   numberOfTicks = 0;
      *
-     *   constructor(ref: ChangeDetectorRef) {
+     *   constructor(private ref: ChangeDetectorRef) {
      *     setInterval(() => {
      *       this.numberOfTicks ++
      *       // the following is required, otherwise the view will not be updated
