@@ -158,6 +158,10 @@ export declare function Class(clsDef: ClassDefinition): Type<any>;
 /**
  * @suppress {globalThis}
  */
-export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void): (...args: any[]) => (cls: any) => any;
+export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void): {
+    new (...args: any[]): any;
+    (...args: any[]): any;
+    (...args: any[]): (cls: any) => any;
+};
 export declare function makeParamDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any): any;
 export declare function makePropDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any): any;

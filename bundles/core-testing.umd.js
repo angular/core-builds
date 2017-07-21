@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.0-abee785
+ * @license Angular v5.0.0-beta.0-b7a6f52
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.0-abee785
+ * @license Angular v5.0.0-beta.0-b7a6f52
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -353,7 +353,7 @@ var _inFakeAsyncCall = false;
  * {@example testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
- * @returns {Function} The function wrapped to be executed in the fakeAsync zone
+ * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
@@ -429,7 +429,7 @@ function tick(millis) {
  * of time that would have been elapsed.
  *
  * @param maxTurns
- * @returns {number} The simulated time elapsed, in millis.
+ * @returns The simulated time elapsed, in millis.
  *
  * @experimental
  */
