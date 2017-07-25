@@ -116,12 +116,25 @@ export declare class NgZone {
      *
      * If a synchronous error happens it will be rethrown and not reported via `onError`.
      */
-    run(fn: () => any): any;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], name?: string): T;
     /**
      * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
      * rethrown.
      */
-    runGuarded(fn: () => any): any;
+    runGuarded<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
     /**
      * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
      * the function.
@@ -135,5 +148,5 @@ export declare class NgZone {
      *
      * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
      */
-    runOutsideAngular(fn: () => any): any;
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
 }

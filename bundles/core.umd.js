@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.0-6fc5940
+ * @license Angular v5.0.0-beta.0-6279e50
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.0-6fc5940
+ * @license Angular v5.0.0-beta.0-6279e50
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1107,7 +1107,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.0-6fc5940');
+var VERSION = new Version('5.0.0-beta.0-6279e50');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4071,17 +4071,55 @@ var NgZone = (function () {
      * within the Angular zone.
      *
      * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * @template T
      * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
      * @return {?}
      */
-    NgZone.prototype.run = function (fn) { return (((this)))._inner.run(fn); };
+    NgZone.prototype.run = function (fn, applyThis, applyArgs) {
+        return ((((this)))._inner.run(fn, applyThis, applyArgs));
+    };
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {\@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * @template T
+     * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
+     * @param {?=} name
+     * @return {?}
+     */
+    NgZone.prototype.runTask = function (fn, applyThis, applyArgs, name) {
+        var /** @type {?} */ zone = (((this)))._inner;
+        var /** @type {?} */ task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
+        try {
+            return (zone.runTask(task, applyThis, applyArgs));
+        }
+        finally {
+            zone.cancelTask(task);
+        }
+    };
     /**
      * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
      * rethrown.
+     * @template T
      * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
      * @return {?}
      */
-    NgZone.prototype.runGuarded = function (fn) { return (((this)))._inner.runGuarded(fn); };
+    NgZone.prototype.runGuarded = function (fn, applyThis, applyArgs) {
+        return ((((this)))._inner.runGuarded(fn, applyThis, applyArgs));
+    };
     /**
      * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
      * the function.
@@ -4094,12 +4132,20 @@ var NgZone = (function () {
      * outside of the Angular zone.
      *
      * Use {\@link #run} to reenter the Angular zone and do work that updates the application model.
+     * @template T
      * @param {?} fn
      * @return {?}
      */
-    NgZone.prototype.runOutsideAngular = function (fn) { return (((this)))._outer.run(fn); };
+    NgZone.prototype.runOutsideAngular = function (fn) {
+        return ((((this)))._outer.run(fn));
+    };
     return NgZone;
 }());
+/**
+ * @return {?}
+ */
+function noop() { }
+var EMPTY_PAYLOAD = {};
 /**
  * @param {?} zone
  * @return {?}
@@ -8267,10 +8313,18 @@ function markParentViewsForCheckProjectedViews(view, endView) {
  * @return {?}
  */
 function dispatchEvent(view, nodeIndex, eventName, event) {
-    var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-    var /** @type {?} */ startView = nodeDef.flags & 33554432 /* ComponentView */ ? asElementData(view, nodeIndex).componentView : view;
-    markParentViewsForCheck(startView);
-    return Services.handleEvent(view, nodeIndex, eventName, event);
+    try {
+        var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
+        var /** @type {?} */ startView = nodeDef.flags & 33554432 /* ComponentView */ ?
+            asElementData(view, nodeIndex).componentView :
+            view;
+        markParentViewsForCheck(startView);
+        return Services.handleEvent(view, nodeIndex, eventName, event);
+    }
+    catch (e) {
+        // Attention: Don't rethrow, as it would cancel Observable subscriptions!
+        view.root.errorHandler.handleError(e);
+    }
 }
 /**
  * @param {?} view
@@ -8876,15 +8930,7 @@ function listenToElementOutputs(view, compView, def, el) {
  * @return {?}
  */
 function renderEventHandlerClosure(view, index, eventName) {
-    return function (event) {
-        try {
-            return dispatchEvent(view, index, eventName, event);
-        }
-        catch (e) {
-            // Attention: Don't rethrow, to keep in sync with directive events.
-            view.root.errorHandler.handleError(e);
-        }
-    };
+    return function (event) { return dispatchEvent(view, index, eventName, event); };
 }
 /**
  * @param {?} view
@@ -10436,15 +10482,7 @@ function createDirectiveInstance(view, def) {
  * @return {?}
  */
 function eventHandlerClosure(view, index, eventName) {
-    return function (event) {
-        try {
-            return dispatchEvent(view, index, eventName, event);
-        }
-        catch (e) {
-            // Attention: Don't rethrow, as it would cancel Observable subscriptions!
-            view.root.errorHandler.handleError(e);
-        }
-    };
+    return function (event) { return dispatchEvent(view, index, eventName, event); };
 }
 /**
  * @param {?} view
