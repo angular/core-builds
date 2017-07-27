@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.0-4ce29f3
+ * @license Angular v4.3.1-bcea196
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.3.0-4ce29f3');
+const VERSION = new Version('4.3.1-bcea196');
 
 /**
  * @license
@@ -3771,7 +3771,7 @@ function forkInnerZoneWithAngularBehavior(zone) {
         },
         onHandleError: (delegate, current, target, error) => {
             delegate.handleError(target, error);
-            zone.onError.emit(error);
+            zone.runOutsideAngular(() => zone.onError.emit(error));
             return false;
         }
     });
@@ -4247,15 +4247,16 @@ class PlatformRef {
 }
 /**
  * @param {?} errorHandler
+ * @param {?} ngZone
  * @param {?} callback
  * @return {?}
  */
-function _callAndReportToErrorHandler(errorHandler, callback) {
+function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
     try {
         const /** @type {?} */ result = callback();
         if (isPromise(result)) {
             return result.catch((e) => {
-                errorHandler.handleError(e);
+                ngZone.runOutsideAngular(() => errorHandler.handleError(e));
                 // rethrow as the exception handler might not do it
                 throw e;
             });
@@ -4263,7 +4264,7 @@ function _callAndReportToErrorHandler(errorHandler, callback) {
         return result;
     }
     catch (e) {
-        errorHandler.handleError(e);
+        ngZone.runOutsideAngular(() => errorHandler.handleError(e));
         // rethrow as the exception handler might not do it
         throw e;
     }
@@ -4338,8 +4339,8 @@ class PlatformRef_ extends PlatformRef {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(() => remove(this._modules, moduleRef)); /** @type {?} */
-            ((ngZone)).onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } });
-            return _callAndReportToErrorHandler(exceptionHandler, () => {
+            ((ngZone)).runOutsideAngular(() => ((ngZone)).onError.subscribe({ next: (error) => { exceptionHandler.handleError(error); } }));
+            return _callAndReportToErrorHandler(exceptionHandler, /** @type {?} */ ((ngZone)), () => {
                 const /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 initStatus.runInitializers();
                 return initStatus.donePromise.then(() => {
@@ -4638,7 +4639,7 @@ class ApplicationRef_ extends ApplicationRef {
         }
         catch (e) {
             // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-            this._exceptionHandler.handleError(e);
+            this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
         }
         finally {
             this._runningTick = false;
