@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { StaticProvider } from '../../di';
+import { Provider } from '../../di';
 import { ChangeDetectorRef } from '../change_detector_ref';
 /**
  * A differ that tracks changes made to an object over time.
@@ -130,6 +130,6 @@ export declare class KeyValueDiffers {
      * })
      * ```
      */
-    static extend<S>(factories: KeyValueDifferFactory[]): StaticProvider;
+    static extend<S>(factories: KeyValueDifferFactory[]): Provider;
     find(kv: any): KeyValueDifferFactory;
 }

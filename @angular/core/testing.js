@@ -1,9 +1,9 @@
 /**
- * @license Angular v5.0.0-beta.2-fcadbf4
+ * @license Angular v5.0.0-beta.2-f69561b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, ReflectiveInjector, RendererFactory2, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -731,7 +731,7 @@ class TestBed {
             }
         }
         const ngZone = new NgZone({ enableLongStackTrace: true });
-        const ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
+        const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
