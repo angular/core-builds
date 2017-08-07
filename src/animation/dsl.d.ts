@@ -109,6 +109,11 @@ export interface AnimationTriggerMetadata extends AnimationMetadata {
 export interface AnimationStateMetadata extends AnimationMetadata {
     name: string;
     styles: AnimationStyleMetadata;
+    options?: {
+        params: {
+            [name: string]: any;
+        };
+    };
 }
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
@@ -545,7 +550,11 @@ export declare function style(tokens: '*' | {
  *
  * @experimental Animation support is experimental.
  */
-export declare function state(name: string, styles: AnimationStyleMetadata): AnimationStateMetadata;
+export declare function state(name: string, styles: AnimationStyleMetadata, options?: {
+    params: {
+        [name: string]: any;
+    };
+}): AnimationStateMetadata;
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the {@link
