@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-685cc26
+ * @license Angular v5.0.0-beta.2-fcadbf4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.2-685cc26
+ * @license Angular v5.0.0-beta.2-fcadbf4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -797,7 +797,7 @@ var TestBed = (function () {
             }
         }
         var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
-        var ngZoneInjector = _angular_core.ReflectiveInjector.resolveAndCreate([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
+        var ngZoneInjector = _angular_core.Injector.create([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.

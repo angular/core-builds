@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-685cc26
+ * @license Angular v5.0.0-beta.2-fcadbf4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -138,6 +138,9 @@ function looseIdentical(a, b) {
 function stringify(token) {
     if (typeof token === 'string') {
         return token;
+    }
+    if (token instanceof Array) {
+        return '[' + token.map(stringify).join(', ') + ']';
     }
     if (token == null) {
         return '' + token;
@@ -1042,7 +1045,7 @@ class ViewMetadata {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.2-685cc26');
+const VERSION = new Version('5.0.0-beta.2-fcadbf4');
 
 /**
  * @fileoverview added by tsickle
@@ -1211,7 +1214,7 @@ class _NullInjector {
      */
     get(token, notFoundValue = _THROW_IF_NOT_FOUND) {
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
-            throw new Error(`No provider for ${stringify(token)}!`);
+            throw new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
         }
         return notFoundValue;
     }
@@ -1238,9 +1241,337 @@ class _NullInjector {
  * @abstract
  */
 class Injector {
+    /**
+     * Create a new Injector which is configure using `StaticProvider`s.
+     *
+     * ### Example
+     *
+     * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */
+    static create(providers, parent) {
+        return new StaticInjector(providers, parent);
+    }
 }
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new _NullInjector();
+const IDENT = function (value) {
+    return value;
+};
+const EMPTY = ([]);
+const CIRCULAR = IDENT;
+const MULTI_PROVIDER_FN = function () {
+    return Array.prototype.slice.call(arguments);
+};
+const GET_PROPERTY_NAME = ({});
+const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
+const NG_TOKEN_PATH = 'ngTokenPath';
+const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+const NULL_INJECTOR = Injector.NULL;
+const NEW_LINE = /\n/gm;
+const NO_NEW_LINE = 'ɵ';
+class StaticInjector {
+    /**
+     * @param {?} providers
+     * @param {?=} parent
+     */
+    constructor(providers, parent = NULL_INJECTOR) {
+        this.parent = parent;
+        const /** @type {?} */ records = this._records = new Map();
+        records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
+        recursivelyProcessProviders(records, providers);
+    }
+    /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    get(token, notFoundValue) {
+        const /** @type {?} */ record = this._records.get(token);
+        try {
+            return tryResolveToken(token, record, this._records, this.parent, notFoundValue);
+        }
+        catch (e) {
+            const /** @type {?} */ tokenPath = e[NG_TEMP_TOKEN_PATH];
+            e.message = formatError('\n' + e.message, tokenPath);
+            e[NG_TOKEN_PATH] = tokenPath;
+            e[NG_TEMP_TOKEN_PATH] = null;
+            throw e;
+        }
+    }
+    /**
+     * @return {?}
+     */
+    toString() {
+        const /** @type {?} */ tokens = ([]), /** @type {?} */ records = this._records;
+        records.forEach((v, token) => tokens.push(stringify(token)));
+        return `StaticInjector[${tokens.join(', ')}]`;
+    }
+}
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function resolveProvider(provider) {
+    const /** @type {?} */ deps = computeDeps(provider);
+    let /** @type {?} */ fn = IDENT;
+    let /** @type {?} */ value = EMPTY;
+    let /** @type {?} */ useNew = false;
+    let /** @type {?} */ provide = resolveForwardRef(provider.provide);
+    if (USE_VALUE in provider) {
+        // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
+        value = ((provider)).useValue;
+    }
+    else if (((provider)).useFactory) {
+        fn = ((provider)).useFactory;
+    }
+    else if (((provider)).useExisting) {
+        // Just use IDENT
+    }
+    else if (((provider)).useClass) {
+        useNew = true;
+        fn = resolveForwardRef(((provider)).useClass);
+    }
+    else if (typeof provide == 'function') {
+        useNew = true;
+        fn = provide;
+    }
+    else {
+        throw staticError('StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable', provider);
+    }
+    return { deps, fn, useNew, value };
+}
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function multiProviderMixError(token) {
+    return staticError('Cannot mix multi providers and regular providers', token);
+}
+/**
+ * @param {?} records
+ * @param {?} provider
+ * @return {?}
+ */
+function recursivelyProcessProviders(records, provider) {
+    if (provider) {
+        provider = resolveForwardRef(provider);
+        if (provider instanceof Array) {
+            // if we have an array recurse into the array
+            for (let /** @type {?} */ i = 0; i < provider.length; i++) {
+                recursivelyProcessProviders(records, provider[i]);
+            }
+        }
+        else if (typeof provider === 'function') {
+            // Functions were supported in ReflectiveInjector, but are not here. For safety give useful
+            // error messages
+            throw staticError('Function/Class not supported', provider);
+        }
+        else if (provider && typeof provider === 'object' && provider.provide) {
+            // At this point we have what looks like a provider: {provide: ?, ....}
+            let /** @type {?} */ token = resolveForwardRef(provider.provide);
+            const /** @type {?} */ resolvedProvider = resolveProvider(provider);
+            if (provider.multi === true) {
+                // This is a multi provider.
+                let /** @type {?} */ multiProvider = records.get(token);
+                if (multiProvider) {
+                    if (multiProvider.fn !== MULTI_PROVIDER_FN) {
+                        throw multiProviderMixError(token);
+                    }
+                }
+                else {
+                    // Create a placeholder factory which will look up the constituents of the multi provider.
+                    records.set(token, multiProvider = ({
+                        token: provider.provide,
+                        deps: [],
+                        useNew: false,
+                        fn: MULTI_PROVIDER_FN,
+                        value: EMPTY
+                    }));
+                }
+                // Treat the provider as the token.
+                token = provider;
+                multiProvider.deps.push({ token, options: 6 /* Default */ });
+            }
+            const /** @type {?} */ record = records.get(token);
+            if (record && record.fn == MULTI_PROVIDER_FN) {
+                throw multiProviderMixError(token);
+            }
+            records.set(token, resolvedProvider);
+        }
+        else {
+            throw staticError('Unexpected provider', provider);
+        }
+    }
+}
+/**
+ * @param {?} token
+ * @param {?} record
+ * @param {?} records
+ * @param {?} parent
+ * @param {?} notFoundValue
+ * @return {?}
+ */
+function tryResolveToken(token, record, records, parent, notFoundValue) {
+    try {
+        return resolveToken(token, record, records, parent, notFoundValue);
+    }
+    catch (e) {
+        // ensure that 'e' is of type Error.
+        if (!(e instanceof Error)) {
+            e = new Error(e);
+        }
+        const /** @type {?} */ path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+        path.unshift(token);
+        if (record && record.value == CIRCULAR) {
+            // Reset the Circular flag.
+            record.value = EMPTY;
+        }
+        throw e;
+    }
+}
+/**
+ * @param {?} token
+ * @param {?} record
+ * @param {?} records
+ * @param {?} parent
+ * @param {?} notFoundValue
+ * @return {?}
+ */
+function resolveToken(token, record, records, parent, notFoundValue) {
+    let /** @type {?} */ value;
+    if (record) {
+        // If we don't have a record, this implies that we don't own the provider hence don't know how
+        // to resolve it.
+        value = record.value;
+        if (value == CIRCULAR) {
+            throw Error(NO_NEW_LINE + 'Circular dependency');
+        }
+        else if (value === EMPTY) {
+            record.value = CIRCULAR;
+            let /** @type {?} */ obj = undefined;
+            let /** @type {?} */ useNew = record.useNew;
+            let /** @type {?} */ fn = record.fn;
+            let /** @type {?} */ depRecords = record.deps;
+            let /** @type {?} */ deps = EMPTY;
+            if (depRecords.length) {
+                deps = [];
+                for (let /** @type {?} */ i = 0; i < depRecords.length; i++) {
+                    const /** @type {?} */ depRecord = depRecords[i];
+                    const /** @type {?} */ options = depRecord.options;
+                    const /** @type {?} */ childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
+                    deps.push(tryResolveToken(
+                    // Current Token to resolve
+                    depRecord.token, 
+                    // A record which describes how to resolve the token.
+                    // If undefined, this means we don't have such a record
+                    childRecord, 
+                    // Other records we know about.
+                    records, 
+                    // If we don't know how to resolve dependency and we should not check parent for it,
+                    // than pass in Null injector.
+                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND));
+                }
+            }
+            record.value = value = useNew ? new ((fn))(...deps) : fn.apply(obj, deps);
+        }
+    }
+    else {
+        value = parent.get(token, notFoundValue);
+    }
+    return value;
+}
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function computeDeps(provider) {
+    let /** @type {?} */ deps = EMPTY;
+    const /** @type {?} */ providerDeps = ((provider)).deps;
+    if (providerDeps && providerDeps.length) {
+        deps = [];
+        for (let /** @type {?} */ i = 0; i < providerDeps.length; i++) {
+            let /** @type {?} */ options = 6;
+            let /** @type {?} */ token = resolveForwardRef(providerDeps[i]);
+            if (token instanceof Array) {
+                for (let /** @type {?} */ j = 0, /** @type {?} */ annotations = token; j < annotations.length; j++) {
+                    const /** @type {?} */ annotation = annotations[j];
+                    if (annotation instanceof Optional || annotation == Optional) {
+                        options = options | 1 /* Optional */;
+                    }
+                    else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
+                        options = options & ~2 /* CheckSelf */;
+                    }
+                    else if (annotation instanceof Self || annotation == Self) {
+                        options = options & ~4 /* CheckParent */;
+                    }
+                    else if (annotation instanceof Inject) {
+                        token = ((annotation)).token;
+                    }
+                    else {
+                        token = resolveForwardRef(annotation);
+                    }
+                }
+            }
+            deps.push({ token, options });
+        }
+    }
+    else if (((provider)).useExisting) {
+        const /** @type {?} */ token = resolveForwardRef(((provider)).useExisting);
+        deps = [{ token, options: 6 /* Default */ }];
+    }
+    else if (!providerDeps && !(USE_VALUE in provider)) {
+        // useValue & useExisting are the only ones which are exempt from deps all others need it.
+        throw staticError('\'deps\' required', provider);
+    }
+    return deps;
+}
+/**
+ * @param {?} text
+ * @param {?} obj
+ * @return {?}
+ */
+function formatError(text, obj) {
+    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
+    let /** @type {?} */ context = stringify(obj);
+    if (obj instanceof Array) {
+        context = obj.map(stringify).join(' -> ');
+    }
+    else if (typeof obj === 'object') {
+        let /** @type {?} */ parts = ([]);
+        for (let /** @type {?} */ key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                let /** @type {?} */ value = obj[key];
+                parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
+            }
+        }
+        context = `{${parts.join(', ')}}`;
+    }
+    return `StaticInjectorError[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
+}
+/**
+ * @param {?} text
+ * @param {?} obj
+ * @return {?}
+ */
+function staticError(text, obj) {
+    return new Error(formatError(text, obj));
+}
+/**
+ * @template T
+ * @param {?} objWithPropertyToExtract
+ * @return {?}
+ */
+function getClosureSafeProperty(objWithPropertyToExtract) {
+    for (let /** @type {?} */ key in objWithPropertyToExtract) {
+        if (objWithPropertyToExtract[key] === GET_PROPERTY_NAME) {
+            return key;
+        }
+    }
+    throw Error('!prop');
+}
 
 /**
  * @fileoverview added by tsickle
@@ -1674,7 +2005,7 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * `Key` should not be created directly. {\@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
- * \@experimental
+ * @deprecated No replacement
  */
 class ReflectiveKey {
     /**
@@ -2879,32 +3210,6 @@ function _mapProviders(injector, fn) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
- * as token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: TypeProvider = MyService;
- * ```
- *
- * \@description
- *
- * Create an instance by invoking the `new` operator and supplying additional arguments.
- * This form is a short form of `TypeProvider`;
- *
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
- *
- * \@stable
- * @record
- */
-function TypeProvider() { }
-/**
  * \@whatItDoes Configures the {\@link Injector} to return a value for a token.
  * \@howToUse
  * ```
@@ -2929,7 +3234,7 @@ function ValueProvider() { }
  * \@Injectable()
  * class MyService {}
  *
- * const provider: ClassProvider = {provide: 'someToken', useClass: MyService};
+ * const provider: ClassProvider = {provide: 'someToken', useClass: MyService, deps: []};
  * ```
  *
  * \@description
@@ -2937,15 +3242,36 @@ function ValueProvider() { }
  *
  * ### Example
  *
- * {\@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ * {\@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
  *
  * Note that following two providers are not equal:
- * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ * {\@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
  * \@stable
  * @record
  */
-function ClassProvider() { }
+
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: ClassProvider = {provide: MyClass, deps: []};
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * \@stable
+ * @record
+ */
+
 /**
  * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
  * \@howToUse
@@ -2988,6 +3314,56 @@ function ExistingProvider() { }
  * @record
  */
 function FactoryProvider() { }
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
+ * as token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: TypeProvider = MyService;
+ * ```
+ *
+ * \@description
+ *
+ * Create an instance by invoking the `new` operator and supplying additional arguments.
+ * This form is a short form of `TypeProvider`;
+ *
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
+ *
+ * \@stable
+ * @record
+ */
+function TypeProvider() { }
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: ClassProvider = {provide: 'someToken', useClass: MyService};
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ *
+ * Note that following two providers are not equal:
+ * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ *
+ * \@stable
+ * @record
+ */
+function ClassProvider() { }
 
 /**
  * @fileoverview added by tsickle
@@ -4413,7 +4789,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers = []) {
                 parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
             else {
-                createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                createPlatform(Injector.create(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
             }
         }
         return assertPlatform(marker);
@@ -4556,7 +4932,7 @@ class PlatformRef_ extends PlatformRef {
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(() => {
-            const /** @type {?} */ ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.injector);
+            const /** @type {?} */ ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.injector);
             const /** @type {?} */ moduleRef = (moduleFactory.create(ngZoneInjector));
             const /** @type {?} */ exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
@@ -7399,20 +7775,13 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @return {?}
- */
-function _reflector() {
-    return reflector;
-}
 const _CORE_PLATFORM_PROVIDERS = [
     // Set a default platform name for platforms that don't set it explicitly.
     { provide: PLATFORM_ID, useValue: 'unknown' },
-    PlatformRef_,
+    { provide: PlatformRef_, deps: [Injector] },
     { provide: PlatformRef, useExisting: PlatformRef_ },
-    { provide: Reflector, useFactory: _reflector, deps: [] },
-    TestabilityRegistry,
-    Console,
+    { provide: TestabilityRegistry, deps: [] },
+    { provide: Console, deps: [] },
 ];
 /**
  * This platform has to be included in any other platform
@@ -11369,7 +11738,7 @@ function validateNode(parent, node, nodeCount) {
     if (node.flags & 20224 /* CatProvider */) {
         const /** @type {?} */ parentFlags = parent ? parent.flags : 0;
         if ((parentFlags & 1 /* TypeElement */) === 0) {
-            throw new Error(`Illegal State: Provider/Directive nodes need to be children of elements or anchors, at index ${node.index}!`);
+            throw new Error(`Illegal State: StaticProvider/Directive nodes need to be children of elements or anchors, at index ${node.index}!`);
         }
     }
     if (node.query) {
@@ -14361,5 +14730,5 @@ function AnimationTransitionEvent() { }
  * Generated bundle index. Do not edit.
  */
 
-export { Class, TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, TypeProvider, ValueProvider, ClassProvider, ExistingProvider, FactoryProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFn, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, ViewDefinition as ɵViewDefinition, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, AnimationMetadata$$1 as AnimationMetadata, AnimationTriggerMetadata$$1 as AnimationTriggerMetadata, AnimationStateMetadata$$1 as AnimationStateMetadata, AnimationTransitionMetadata$$1 as AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata$$1 as AnimationKeyframesSequenceMetadata, AnimationStyleMetadata$$1 as AnimationStyleMetadata, AnimationAnimateMetadata$$1 as AnimationAnimateMetadata, AnimationSequenceMetadata$$1 as AnimationSequenceMetadata, AnimationGroupMetadata$$1 as AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, animate$1 as ɵx, group$1 as ɵy, keyframes$1 as ɵbc, sequence$1 as ɵz, state$1 as ɵbb, style$1 as ɵba, transition$1 as ɵbd, trigger$1 as ɵw, _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm, ApplicationRef_ as ɵe, _appIdRandomProviderFactory as ɵf, defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh, DefaultIterableDifferFactory as ɵi, DefaultKeyValueDifferFactory as ɵj, ReflectiveInjector_ as ɵb, ReflectiveDependency as ɵc, resolveReflectiveProviders as ɵd, wtfEnabled as ɵn, createScope$1 as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr, makeParamDecorator as ɵa, _def as ɵt, DebugContext as ɵu };
+export { Class, TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFn, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, ViewDefinition as ɵViewDefinition, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, AnimationMetadata$$1 as AnimationMetadata, AnimationTriggerMetadata$$1 as AnimationTriggerMetadata, AnimationStateMetadata$$1 as AnimationStateMetadata, AnimationTransitionMetadata$$1 as AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata$$1 as AnimationKeyframesSequenceMetadata, AnimationStyleMetadata$$1 as AnimationStyleMetadata, AnimationAnimateMetadata$$1 as AnimationAnimateMetadata, AnimationSequenceMetadata$$1 as AnimationSequenceMetadata, AnimationGroupMetadata$$1 as AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
 //# sourceMappingURL=core.js.map
