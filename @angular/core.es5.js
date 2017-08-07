@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v5.0.0-beta.2-04b18a9
+ * @license Angular v5.0.0-beta.2-5b7432b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1075,7 +1075,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.2-04b18a9');
+var VERSION = new Version('5.0.0-beta.2-5b7432b');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
