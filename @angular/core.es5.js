@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v5.0.0-beta.2-c0c03dc
+ * @license Angular v5.0.0-beta.2-05472cb
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1075,7 +1075,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.2-c0c03dc');
+var VERSION = new Version('5.0.0-beta.2-05472cb');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -14002,10 +14002,11 @@ function style$1(tokens) {
  * \@experimental Animation support is experimental.
  * @param {?} name
  * @param {?} styles
+ * @param {?=} options
  * @return {?}
  */
-function state$1(name, styles) {
-    return { type: 0 /* State */, name: name, styles: styles };
+function state$1(name, styles, options) {
+    return { type: 0 /* State */, name: name, styles: styles, options: options };
 }
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's

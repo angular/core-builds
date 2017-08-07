@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-c0c03dc
+ * @license Angular v5.0.0-beta.2-05472cb
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1042,7 +1042,7 @@ class ViewMetadata {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.2-c0c03dc');
+const VERSION = new Version('5.0.0-beta.2-05472cb');
 
 /**
  * @fileoverview added by tsickle
@@ -13608,10 +13608,11 @@ function style$1(tokens) {
  * \@experimental Animation support is experimental.
  * @param {?} name
  * @param {?} styles
+ * @param {?=} options
  * @return {?}
  */
-function state$1(name, styles) {
-    return { type: 0 /* State */, name, styles };
+function state$1(name, styles, options) {
+    return { type: 0 /* State */, name, styles, options };
 }
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's
