@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Provider } from '../../di';
+import { StaticProvider } from '../../di';
 import { ChangeDetectorRef } from '../change_detector_ref';
 /**
  * A type describing supported iterable types.
@@ -152,7 +152,7 @@ export declare class IterableDiffers {
      * })
      * ```
      */
-    static extend(factories: IterableDifferFactory[]): Provider;
+    static extend(factories: IterableDifferFactory[]): StaticProvider;
     find(iterable: any): IterableDifferFactory;
 }
 export declare function getTypeNameForDebugging(type: any): string;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-f69561b
+ * @license Angular v5.0.0-beta.2-f0a5501
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.2-f69561b
+ * @license Angular v5.0.0-beta.2-f0a5501
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -174,6 +174,9 @@ function looseIdentical(a, b) {
 function stringify(token) {
     if (typeof token === 'string') {
         return token;
+    }
+    if (token instanceof Array) {
+        return '[' + token.map(stringify).join(', ') + ']';
     }
     if (token == null) {
         return '' + token;
@@ -1107,7 +1110,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.2-f69561b');
+var VERSION = new Version('5.0.0-beta.2-f0a5501');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1276,7 +1279,7 @@ var _NullInjector = (function () {
     _NullInjector.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
-            throw new Error("No provider for " + stringify(token) + "!");
+            throw new Error("NullInjectorError: No provider for " + stringify(token) + "!");
         }
         return notFoundValue;
     };
@@ -1306,10 +1309,340 @@ var _NullInjector = (function () {
 var Injector = (function () {
     function Injector() {
     }
+    /**
+     * Create a new Injector which is configure using `StaticProvider`s.
+     *
+     * ### Example
+     *
+     * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */
+    Injector.create = function (providers, parent) {
+        return new StaticInjector(providers, parent);
+    };
     return Injector;
 }());
 Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 Injector.NULL = new _NullInjector();
+var IDENT = function (value) {
+    return value;
+};
+var EMPTY = ([]);
+var CIRCULAR = IDENT;
+var MULTI_PROVIDER_FN = function () {
+    return Array.prototype.slice.call(arguments);
+};
+var GET_PROPERTY_NAME = ({});
+var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
+var NG_TOKEN_PATH = 'ngTokenPath';
+var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+var NULL_INJECTOR = Injector.NULL;
+var NEW_LINE = /\n/gm;
+var NO_NEW_LINE = 'ɵ';
+var StaticInjector = (function () {
+    /**
+     * @param {?} providers
+     * @param {?=} parent
+     */
+    function StaticInjector(providers, parent) {
+        if (parent === void 0) { parent = NULL_INJECTOR; }
+        this.parent = parent;
+        var /** @type {?} */ records = this._records = new Map();
+        records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
+        recursivelyProcessProviders(records, providers);
+    }
+    /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    StaticInjector.prototype.get = function (token, notFoundValue) {
+        var /** @type {?} */ record = this._records.get(token);
+        try {
+            return tryResolveToken(token, record, this._records, this.parent, notFoundValue);
+        }
+        catch (e) {
+            var /** @type {?} */ tokenPath = e[NG_TEMP_TOKEN_PATH];
+            e.message = formatError('\n' + e.message, tokenPath);
+            e[NG_TOKEN_PATH] = tokenPath;
+            e[NG_TEMP_TOKEN_PATH] = null;
+            throw e;
+        }
+    };
+    /**
+     * @return {?}
+     */
+    StaticInjector.prototype.toString = function () {
+        var /** @type {?} */ tokens = ([]), /** @type {?} */ records = this._records;
+        records.forEach(function (v, token) { return tokens.push(stringify(token)); });
+        return "StaticInjector[" + tokens.join(', ') + "]";
+    };
+    return StaticInjector;
+}());
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function resolveProvider(provider) {
+    var /** @type {?} */ deps = computeDeps(provider);
+    var /** @type {?} */ fn = IDENT;
+    var /** @type {?} */ value = EMPTY;
+    var /** @type {?} */ useNew = false;
+    var /** @type {?} */ provide = resolveForwardRef(provider.provide);
+    if (USE_VALUE in provider) {
+        // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
+        value = ((provider)).useValue;
+    }
+    else if (((provider)).useFactory) {
+        fn = ((provider)).useFactory;
+    }
+    else if (((provider)).useExisting) {
+        // Just use IDENT
+    }
+    else if (((provider)).useClass) {
+        useNew = true;
+        fn = resolveForwardRef(((provider)).useClass);
+    }
+    else if (typeof provide == 'function') {
+        useNew = true;
+        fn = provide;
+    }
+    else {
+        throw staticError('StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable', provider);
+    }
+    return { deps: deps, fn: fn, useNew: useNew, value: value };
+}
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function multiProviderMixError(token) {
+    return staticError('Cannot mix multi providers and regular providers', token);
+}
+/**
+ * @param {?} records
+ * @param {?} provider
+ * @return {?}
+ */
+function recursivelyProcessProviders(records, provider) {
+    if (provider) {
+        provider = resolveForwardRef(provider);
+        if (provider instanceof Array) {
+            // if we have an array recurse into the array
+            for (var /** @type {?} */ i = 0; i < provider.length; i++) {
+                recursivelyProcessProviders(records, provider[i]);
+            }
+        }
+        else if (typeof provider === 'function') {
+            // Functions were supported in ReflectiveInjector, but are not here. For safety give useful
+            // error messages
+            throw staticError('Function/Class not supported', provider);
+        }
+        else if (provider && typeof provider === 'object' && provider.provide) {
+            // At this point we have what looks like a provider: {provide: ?, ....}
+            var /** @type {?} */ token = resolveForwardRef(provider.provide);
+            var /** @type {?} */ resolvedProvider = resolveProvider(provider);
+            if (provider.multi === true) {
+                // This is a multi provider.
+                var /** @type {?} */ multiProvider = records.get(token);
+                if (multiProvider) {
+                    if (multiProvider.fn !== MULTI_PROVIDER_FN) {
+                        throw multiProviderMixError(token);
+                    }
+                }
+                else {
+                    // Create a placeholder factory which will look up the constituents of the multi provider.
+                    records.set(token, multiProvider = ({
+                        token: provider.provide,
+                        deps: [],
+                        useNew: false,
+                        fn: MULTI_PROVIDER_FN,
+                        value: EMPTY
+                    }));
+                }
+                // Treat the provider as the token.
+                token = provider;
+                multiProvider.deps.push({ token: token, options: 6 /* Default */ });
+            }
+            var /** @type {?} */ record = records.get(token);
+            if (record && record.fn == MULTI_PROVIDER_FN) {
+                throw multiProviderMixError(token);
+            }
+            records.set(token, resolvedProvider);
+        }
+        else {
+            throw staticError('Unexpected provider', provider);
+        }
+    }
+}
+/**
+ * @param {?} token
+ * @param {?} record
+ * @param {?} records
+ * @param {?} parent
+ * @param {?} notFoundValue
+ * @return {?}
+ */
+function tryResolveToken(token, record, records, parent, notFoundValue) {
+    try {
+        return resolveToken(token, record, records, parent, notFoundValue);
+    }
+    catch (e) {
+        // ensure that 'e' is of type Error.
+        if (!(e instanceof Error)) {
+            e = new Error(e);
+        }
+        var /** @type {?} */ path = e[NG_TEMP_TOKEN_PATH] = e[NG_TEMP_TOKEN_PATH] || [];
+        path.unshift(token);
+        if (record && record.value == CIRCULAR) {
+            // Reset the Circular flag.
+            record.value = EMPTY;
+        }
+        throw e;
+    }
+}
+/**
+ * @param {?} token
+ * @param {?} record
+ * @param {?} records
+ * @param {?} parent
+ * @param {?} notFoundValue
+ * @return {?}
+ */
+function resolveToken(token, record, records, parent, notFoundValue) {
+    var /** @type {?} */ value;
+    if (record) {
+        // If we don't have a record, this implies that we don't own the provider hence don't know how
+        // to resolve it.
+        value = record.value;
+        if (value == CIRCULAR) {
+            throw Error(NO_NEW_LINE + 'Circular dependency');
+        }
+        else if (value === EMPTY) {
+            record.value = CIRCULAR;
+            var /** @type {?} */ obj = undefined;
+            var /** @type {?} */ useNew = record.useNew;
+            var /** @type {?} */ fn = record.fn;
+            var /** @type {?} */ depRecords = record.deps;
+            var /** @type {?} */ deps = EMPTY;
+            if (depRecords.length) {
+                deps = [];
+                for (var /** @type {?} */ i = 0; i < depRecords.length; i++) {
+                    var /** @type {?} */ depRecord = depRecords[i];
+                    var /** @type {?} */ options = depRecord.options;
+                    var /** @type {?} */ childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
+                    deps.push(tryResolveToken(
+                    // Current Token to resolve
+                    depRecord.token, 
+                    // A record which describes how to resolve the token.
+                    // If undefined, this means we don't have such a record
+                    childRecord, 
+                    // Other records we know about.
+                    records, 
+                    // If we don't know how to resolve dependency and we should not check parent for it,
+                    // than pass in Null injector.
+                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND));
+                }
+            }
+            record.value = value = useNew ? new (((fn)).bind.apply(((fn)), [void 0].concat(deps)))() : fn.apply(obj, deps);
+        }
+    }
+    else {
+        value = parent.get(token, notFoundValue);
+    }
+    return value;
+}
+/**
+ * @param {?} provider
+ * @return {?}
+ */
+function computeDeps(provider) {
+    var /** @type {?} */ deps = EMPTY;
+    var /** @type {?} */ providerDeps = ((provider)).deps;
+    if (providerDeps && providerDeps.length) {
+        deps = [];
+        for (var /** @type {?} */ i = 0; i < providerDeps.length; i++) {
+            var /** @type {?} */ options = 6;
+            var /** @type {?} */ token = resolveForwardRef(providerDeps[i]);
+            if (token instanceof Array) {
+                for (var /** @type {?} */ j = 0, /** @type {?} */ annotations = token; j < annotations.length; j++) {
+                    var /** @type {?} */ annotation = annotations[j];
+                    if (annotation instanceof Optional || annotation == Optional) {
+                        options = options | 1 /* Optional */;
+                    }
+                    else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
+                        options = options & ~2 /* CheckSelf */;
+                    }
+                    else if (annotation instanceof Self || annotation == Self) {
+                        options = options & ~4 /* CheckParent */;
+                    }
+                    else if (annotation instanceof Inject) {
+                        token = ((annotation)).token;
+                    }
+                    else {
+                        token = resolveForwardRef(annotation);
+                    }
+                }
+            }
+            deps.push({ token: token, options: options });
+        }
+    }
+    else if (((provider)).useExisting) {
+        var /** @type {?} */ token = resolveForwardRef(((provider)).useExisting);
+        deps = [{ token: token, options: 6 /* Default */ }];
+    }
+    else if (!providerDeps && !(USE_VALUE in provider)) {
+        // useValue & useExisting are the only ones which are exempt from deps all others need it.
+        throw staticError('\'deps\' required', provider);
+    }
+    return deps;
+}
+/**
+ * @param {?} text
+ * @param {?} obj
+ * @return {?}
+ */
+function formatError(text, obj) {
+    text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
+    var /** @type {?} */ context = stringify(obj);
+    if (obj instanceof Array) {
+        context = obj.map(stringify).join(' -> ');
+    }
+    else if (typeof obj === 'object') {
+        var /** @type {?} */ parts = ([]);
+        for (var /** @type {?} */ key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                var /** @type {?} */ value = obj[key];
+                parts.push(key + ':' + (typeof value === 'string' ? JSON.stringify(value) : stringify(value)));
+            }
+        }
+        context = "{" + parts.join(', ') + "}";
+    }
+    return "StaticInjectorError[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
+}
+/**
+ * @param {?} text
+ * @param {?} obj
+ * @return {?}
+ */
+function staticError(text, obj) {
+    return new Error(formatError(text, obj));
+}
+/**
+ * @template T
+ * @param {?} objWithPropertyToExtract
+ * @return {?}
+ */
+function getClosureSafeProperty(objWithPropertyToExtract) {
+    for (var /** @type {?} */ key in objWithPropertyToExtract) {
+        if (objWithPropertyToExtract[key] === GET_PROPERTY_NAME) {
+            return key;
+        }
+    }
+    throw Error('!prop');
+}
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1741,7 +2074,7 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * `Key` should not be created directly. {\@link ReflectiveInjector} creates keys automatically when
  * resolving
  * providers.
- * \@experimental
+ * @deprecated No replacement
  */
 var ReflectiveKey = (function () {
     /**
@@ -2982,32 +3315,6 @@ function _mapProviders(injector, fn) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
- * as token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: TypeProvider = MyService;
- * ```
- *
- * \@description
- *
- * Create an instance by invoking the `new` operator and supplying additional arguments.
- * This form is a short form of `TypeProvider`;
- *
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
- *
- * \@stable
- * @record
- */
-function TypeProvider() { }
-/**
  * \@whatItDoes Configures the {\@link Injector} to return a value for a token.
  * \@howToUse
  * ```
@@ -3032,7 +3339,7 @@ function ValueProvider() { }
  * \@Injectable()
  * class MyService {}
  *
- * const provider: ClassProvider = {provide: 'someToken', useClass: MyService};
+ * const provider: ClassProvider = {provide: 'someToken', useClass: MyService, deps: []};
  * ```
  *
  * \@description
@@ -3040,15 +3347,34 @@ function ValueProvider() { }
  *
  * ### Example
  *
- * {\@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ * {\@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
  *
  * Note that following two providers are not equal:
- * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ * {\@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
  * \@stable
  * @record
  */
-function ClassProvider() { }
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: ClassProvider = {provide: MyClass, deps: []};
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+ *
+ * \@stable
+ * @record
+ */
 /**
  * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
  * \@howToUse
@@ -3091,6 +3417,56 @@ function ExistingProvider() { }
  * @record
  */
 function FactoryProvider() { }
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
+ * as token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: TypeProvider = MyService;
+ * ```
+ *
+ * \@description
+ *
+ * Create an instance by invoking the `new` operator and supplying additional arguments.
+ * This form is a short form of `TypeProvider`;
+ *
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
+ *
+ * \@stable
+ * @record
+ */
+function TypeProvider() { }
+/**
+ * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
+ * \@howToUse
+ * ```
+ * \@Injectable()
+ * class MyService {}
+ *
+ * const provider: ClassProvider = {provide: 'someToken', useClass: MyService};
+ * ```
+ *
+ * \@description
+ * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ *
+ * ### Example
+ *
+ * {\@example core/di/ts/provider_spec.ts region='ClassProvider'}
+ *
+ * Note that following two providers are not equal:
+ * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
+ *
+ * \@stable
+ * @record
+ */
+function ClassProvider() { }
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4577,7 +4953,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers) {
                 parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
             else {
-                createPlatform(ReflectiveInjector.resolveAndCreate(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                createPlatform(Injector.create(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
             }
         }
         return assertPlatform(marker);
@@ -4734,7 +5110,7 @@ var PlatformRef_ = (function (_super) {
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(function () {
-            var /** @type {?} */ ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], _this.injector);
+            var /** @type {?} */ ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], _this.injector);
             var /** @type {?} */ moduleRef = (moduleFactory.create(ngZoneInjector));
             var /** @type {?} */ exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
@@ -7724,20 +8100,13 @@ var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @return {?}
- */
-function _reflector() {
-    return reflector;
-}
 var _CORE_PLATFORM_PROVIDERS = [
     // Set a default platform name for platforms that don't set it explicitly.
     { provide: PLATFORM_ID, useValue: 'unknown' },
-    PlatformRef_,
+    { provide: PlatformRef_, deps: [Injector] },
     { provide: PlatformRef, useExisting: PlatformRef_ },
-    { provide: Reflector, useFactory: _reflector, deps: [] },
-    TestabilityRegistry,
-    Console,
+    { provide: TestabilityRegistry, deps: [] },
+    { provide: Console, deps: [] },
 ];
 /**
  * This platform has to be included in any other platform
@@ -11751,7 +12120,7 @@ function validateNode(parent, node, nodeCount) {
     if (node.flags & 20224 /* CatProvider */) {
         var /** @type {?} */ parentFlags = parent ? parent.flags : 0;
         if ((parentFlags & 1 /* TypeElement */) === 0) {
-            throw new Error("Illegal State: Provider/Directive nodes need to be children of elements or anchors, at index " + node.index + "!");
+            throw new Error("Illegal State: StaticProvider/Directive nodes need to be children of elements or anchors, at index " + node.index + "!");
         }
     }
     if (node.query) {
@@ -14823,11 +15192,11 @@ exports.resolveForwardRef = resolveForwardRef;
 exports.ForwardRefFn = ForwardRefFn;
 exports.Injector = Injector;
 exports.ReflectiveInjector = ReflectiveInjector;
-exports.TypeProvider = TypeProvider;
 exports.ValueProvider = ValueProvider;
-exports.ClassProvider = ClassProvider;
 exports.ExistingProvider = ExistingProvider;
 exports.FactoryProvider = FactoryProvider;
+exports.TypeProvider = TypeProvider;
+exports.ClassProvider = ClassProvider;
 exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
 exports.ResolvedReflectiveProvider = ResolvedReflectiveProvider;
 exports.ReflectiveKey = ReflectiveKey;
@@ -14963,35 +15332,37 @@ exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
 exports.AnimationTransitionEvent = AnimationTransitionEvent;
-exports.ɵx = animate$1;
-exports.ɵy = group$1;
-exports.ɵbc = keyframes$1;
-exports.ɵz = sequence$1;
-exports.ɵbb = state$1;
-exports.ɵba = style$1;
-exports.ɵbd = transition$1;
-exports.ɵw = trigger$1;
-exports.ɵk = _iterableDiffersFactory;
-exports.ɵl = _keyValueDiffersFactory;
-exports.ɵm = _localeFactory;
-exports.ɵe = ApplicationRef_;
-exports.ɵf = _appIdRandomProviderFactory;
-exports.ɵg = defaultIterableDiffers;
-exports.ɵh = defaultKeyValueDiffers;
-exports.ɵi = DefaultIterableDifferFactory;
-exports.ɵj = DefaultKeyValueDifferFactory;
-exports.ɵb = ReflectiveInjector_;
-exports.ɵc = ReflectiveDependency;
-exports.ɵd = resolveReflectiveProviders;
-exports.ɵn = wtfEnabled;
-exports.ɵp = createScope$1;
-exports.ɵo = detectWTF;
-exports.ɵs = endTimeRange;
-exports.ɵq = leave;
-exports.ɵr = startTimeRange;
+exports.ɵz = animate$1;
+exports.ɵba = group$1;
+exports.ɵbe = keyframes$1;
+exports.ɵbb = sequence$1;
+exports.ɵbd = state$1;
+exports.ɵbc = style$1;
+exports.ɵbf = transition$1;
+exports.ɵy = trigger$1;
+exports.ɵm = _iterableDiffersFactory;
+exports.ɵn = _keyValueDiffersFactory;
+exports.ɵo = _localeFactory;
+exports.ɵg = ApplicationRef_;
+exports.ɵf = PlatformRef_;
+exports.ɵh = _appIdRandomProviderFactory;
+exports.ɵi = defaultIterableDiffers;
+exports.ɵj = defaultKeyValueDiffers;
+exports.ɵk = DefaultIterableDifferFactory;
+exports.ɵl = DefaultKeyValueDifferFactory;
+exports.ɵb = StaticInjector;
+exports.ɵc = ReflectiveInjector_;
+exports.ɵd = ReflectiveDependency;
+exports.ɵe = resolveReflectiveProviders;
+exports.ɵp = wtfEnabled;
+exports.ɵr = createScope$1;
+exports.ɵq = detectWTF;
+exports.ɵu = endTimeRange;
+exports.ɵs = leave;
+exports.ɵt = startTimeRange;
 exports.ɵa = makeParamDecorator;
-exports.ɵt = _def;
-exports.ɵu = DebugContext;
+exports.ɵv = _def;
+exports.ɵw = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
