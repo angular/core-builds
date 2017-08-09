@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-7f2037f
+ * @license Angular v5.0.0-beta.2-dca50de
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1045,7 +1045,7 @@ class ViewMetadata {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.2-7f2037f');
+const VERSION = new Version('5.0.0-beta.2-dca50de');
 
 /**
  * @fileoverview added by tsickle
@@ -2849,7 +2849,7 @@ const UNDEFINED = new Object();
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
  *
- * \@stable
+ * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  * @abstract
  */
 class ReflectiveInjector {

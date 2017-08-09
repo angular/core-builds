@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-7f2037f
+ * @license Angular v5.0.0-beta.2-dca50de
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.2-7f2037f
+ * @license Angular v5.0.0-beta.2-dca50de
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1110,7 +1110,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.2-7f2037f');
+var VERSION = new Version('5.0.0-beta.2-dca50de');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2941,7 +2941,7 @@ var UNDEFINED = new Object();
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
  *
- * \@stable
+ * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  * @abstract
  */
 var ReflectiveInjector = (function () {
