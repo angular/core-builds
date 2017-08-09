@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.2-1e18331
+ * @license Angular v5.0.0-beta.2-e54bd59
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1045,7 +1045,7 @@ class ViewMetadata {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.2-1e18331');
+const VERSION = new Version('5.0.0-beta.2-e54bd59');
 
 /**
  * @fileoverview added by tsickle
@@ -9807,6 +9807,9 @@ class ViewContainerRef_ {
      * @return {?}
      */
     insert(viewRef, index) {
+        if (viewRef.destroyed) {
+            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+        }
         const /** @type {?} */ viewRef_ = (viewRef);
         const /** @type {?} */ viewData = viewRef_._view;
         attachEmbeddedView(this._view, this._data, index, viewData);
@@ -9819,6 +9822,9 @@ class ViewContainerRef_ {
      * @return {?}
      */
     move(viewRef, currentIndex) {
+        if (viewRef.destroyed) {
+            throw new Error('Cannot move a destroyed View in a ViewContainer!');
+        }
         const /** @type {?} */ previousIndex = this._embeddedViews.indexOf(viewRef._view);
         moveEmbeddedView(this._data, previousIndex, currentIndex);
         return viewRef;
