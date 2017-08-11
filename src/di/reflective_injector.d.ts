@@ -251,6 +251,7 @@ export declare abstract class ReflectiveInjector implements Injector {
     abstract get(token: any, notFoundValue?: any): any;
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
+    private static INJECTOR_KEY;
     keyIds: number[];
     objs: any[];
     /**

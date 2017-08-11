@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v5.0.0-beta.3-679608d
+ * @license Angular v5.0.0-beta.3-cac130e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -91,95 +91,10 @@ var InjectionToken = (function (_super) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var __window = typeof window !== 'undefined' && window;
-var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope && self;
-var __global = typeof global !== 'undefined' && global;
-var _global = __window || __global || __self;
-var _symbolIterator = null;
-/**
- * @return {?}
- */
-function getSymbolIterator() {
-    if (!_symbolIterator) {
-        var /** @type {?} */ Symbol = _global['Symbol'];
-        if (Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
-        }
-        else {
-            // es6-shim specific logic
-            var /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
-            for (var /** @type {?} */ i = 0; i < keys.length; ++i) {
-                var /** @type {?} */ key = keys[i];
-                if (key !== 'entries' && key !== 'size' &&
-                    ((Map)).prototype[key] === Map.prototype['entries']) {
-                    _symbolIterator = key;
-                }
-            }
-        }
-    }
-    return _symbolIterator;
-}
-/**
- * @param {?} fn
- * @return {?}
- */
-function scheduleMicroTask(fn) {
-    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
-}
-/**
- * @param {?} a
- * @param {?} b
- * @return {?}
- */
-function looseIdentical(a, b) {
-    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
-}
-/**
- * @param {?} token
- * @return {?}
- */
-function stringify(token) {
-    if (typeof token === 'string') {
-        return token;
-    }
-    if (token instanceof Array) {
-        return '[' + token.map(stringify).join(', ') + ']';
-    }
-    if (token == null) {
-        return '' + token;
-    }
-    if (token.overriddenName) {
-        return "" + token.overriddenName;
-    }
-    if (token.name) {
-        return "" + token.name;
-    }
-    var /** @type {?} */ res = token.toString();
-    if (res == null) {
-        return '' + res;
-    }
-    var /** @type {?} */ newLineIndex = res.indexOf('\n');
-    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
-}
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-var _nextClassId = 0;
-var Reflect = _global['Reflect'];
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as ES7
  * decorators as well as
  * Angular DSL syntax.
- *
- * DSL syntax:
- *
- * ```
- * var MyClass = ng
- *   .Component({...})
- *   .Class({...});
- * ```
  *
  * ES7 syntax:
  *
@@ -191,173 +106,9 @@ var Reflect = _global['Reflect'];
  * @record
  */
 function TypeDecorator() { }
-/**
- * @param {?} annotation
- * @return {?}
- */
-function extractAnnotation(annotation) {
-    if (typeof annotation === 'function' && annotation.hasOwnProperty('annotation')) {
-        // it is a decorator, extract annotation
-        annotation = annotation.annotation;
-    }
-    return annotation;
-}
-/**
- * @param {?} fnOrArray
- * @param {?} key
- * @return {?}
- */
-function applyParams(fnOrArray, key) {
-    if (fnOrArray === Object || fnOrArray === String || fnOrArray === Function ||
-        fnOrArray === Number || fnOrArray === Array) {
-        throw new Error("Can not use native " + stringify(fnOrArray) + " as constructor");
-    }
-    if (typeof fnOrArray === 'function') {
-        return fnOrArray;
-    }
-    if (Array.isArray(fnOrArray)) {
-        var /** @type {?} */ annotations = (fnOrArray);
-        var /** @type {?} */ annoLength = annotations.length - 1;
-        var /** @type {?} */ fn = fnOrArray[annoLength];
-        if (typeof fn !== 'function') {
-            throw new Error("Last position of Class method array must be Function in key " + key + " was '" + stringify(fn) + "'");
-        }
-        if (annoLength != fn.length) {
-            throw new Error("Number of annotations (" + annoLength + ") does not match number of arguments (" + fn.length + ") in the function: " + stringify(fn));
-        }
-        var /** @type {?} */ paramsAnnotations = [];
-        for (var /** @type {?} */ i = 0, /** @type {?} */ ii = annotations.length - 1; i < ii; i++) {
-            var /** @type {?} */ paramAnnotations = [];
-            paramsAnnotations.push(paramAnnotations);
-            var /** @type {?} */ annotation = annotations[i];
-            if (Array.isArray(annotation)) {
-                for (var /** @type {?} */ j = 0; j < annotation.length; j++) {
-                    paramAnnotations.push(extractAnnotation(annotation[j]));
-                }
-            }
-            else if (typeof annotation === 'function') {
-                paramAnnotations.push(extractAnnotation(annotation));
-            }
-            else {
-                paramAnnotations.push(annotation);
-            }
-        }
-        Reflect.defineMetadata('parameters', paramsAnnotations, fn);
-        return fn;
-    }
-    throw new Error("Only Function or Array is supported in Class definition for key '" + key + "' is '" + stringify(fnOrArray) + "'");
-}
-/**
- * Provides a way for expressing ES6 classes with parameter annotations in ES5.
- *
- * ## Basic Example
- *
- * ```
- * var Greeter = ng.Class({
- *   constructor: function(name) {
- *     this.name = name;
- *   },
- *
- *   greet: function() {
- *     alert('Hello ' + this.name + '!');
- *   }
- * });
- * ```
- *
- * is equivalent to ES6:
- *
- * ```
- * class Greeter {
- *   constructor(name) {
- *     this.name = name;
- *   }
- *
- *   greet() {
- *     alert('Hello ' + this.name + '!');
- *   }
- * }
- * ```
- *
- * or equivalent to ES5:
- *
- * ```
- * var Greeter = function (name) {
- *   this.name = name;
- * }
- *
- * Greeter.prototype.greet = function () {
- *   alert('Hello ' + this.name + '!');
- * }
- * ```
- *
- * ### Example with parameter annotations
- *
- * ```
- * var MyService = ng.Class({
- *   constructor: [String, [new Optional(), Service], function(name, myService) {
- *     ...
- *   }]
- * });
- * ```
- *
- * is equivalent to ES6:
- *
- * ```
- * class MyService {
- *   constructor(name: string, \@Optional() myService: Service) {
- *     ...
- *   }
- * }
- * ```
- *
- * ### Example with inheritance
- *
- * ```
- * var Shape = ng.Class({
- *   constructor: (color) {
- *     this.color = color;
- *   }
- * });
- *
- * var Square = ng.Class({
- *   extends: Shape,
- *   constructor: function(color, size) {
- *     Shape.call(this, color);
- *     this.size = size;
- *   }
- * });
- * ```
- * @suppress {globalThis}
- * \@stable
- * @param {?} clsDef
- * @return {?}
- */
-function Class(clsDef) {
-    var /** @type {?} */ constructor = applyParams(clsDef.hasOwnProperty('constructor') ? clsDef.constructor : undefined, 'constructor');
-    var /** @type {?} */ proto = constructor.prototype;
-    if (clsDef.hasOwnProperty('extends')) {
-        if (typeof clsDef.extends === 'function') {
-            ((constructor)).prototype = proto =
-                Object.create(((clsDef.extends)).prototype);
-        }
-        else {
-            throw new Error("Class definition 'extends' property must be a constructor function was: " + stringify(clsDef.extends));
-        }
-    }
-    for (var /** @type {?} */ key in clsDef) {
-        if (key !== 'extends' && key !== 'prototype' && clsDef.hasOwnProperty(key)) {
-            proto[key] = applyParams(clsDef[key], key);
-        }
-    }
-    if (this && this.annotations instanceof Array) {
-        Reflect.defineMetadata('annotations', this.annotations, constructor);
-    }
-    var /** @type {?} */ constructorName = constructor['name'];
-    if (!constructorName || constructorName === 'constructor') {
-        ((constructor))['overriddenName'] = "class" + _nextClassId++;
-    }
-    return (constructor);
-}
+var ANNOTATIONS = '__annotations__';
+var PARAMETERS = '__paramaters__';
+var PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
  * @param {?} name
@@ -373,24 +124,20 @@ function makeDecorator(name, props, parentClass, chainFn) {
      * @return {?}
      */
     function DecoratorFactory(objOrType) {
-        if (!(Reflect && Reflect.getOwnMetadata)) {
-            throw 'reflect-metadata shim is required when using class decorators';
-        }
         if (this instanceof DecoratorFactory) {
             metaCtor.call(this, objOrType);
             return this;
         }
         var /** @type {?} */ annotationInstance = new ((DecoratorFactory))(objOrType);
-        var /** @type {?} */ chainAnnotation = typeof this === 'function' && Array.isArray(this.annotations) ? this.annotations : [];
-        chainAnnotation.push(annotationInstance);
         var /** @type {?} */ TypeDecorator = (function TypeDecorator(cls) {
-            var /** @type {?} */ annotations = Reflect.getOwnMetadata('annotations', cls) || [];
+            // Use of Object.defineProperty is important since it creates non-enumerable property which
+            // prevents the property is copied during subclassing.
+            var /** @type {?} */ annotations = cls.hasOwnProperty(ANNOTATIONS) ?
+                ((cls))[ANNOTATIONS] :
+                Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
             annotations.push(annotationInstance);
-            Reflect.defineMetadata('annotations', annotations, cls);
             return cls;
         });
-        TypeDecorator.annotations = chainAnnotation;
-        TypeDecorator.Class = Class;
         if (chainFn)
             chainFn(TypeDecorator);
         return TypeDecorator;
@@ -451,15 +198,17 @@ function makeParamDecorator(name, props, parentClass) {
          * @return {?}
          */
         function ParamDecorator(cls, unusedKey, index) {
-            var /** @type {?} */ parameters = Reflect.getOwnMetadata('parameters', cls) || [];
+            // Use of Object.defineProperty is important since it creates non-enumerable property which
+            // prevents the property is copied during subclassing.
+            var /** @type {?} */ parameters = cls.hasOwnProperty(PARAMETERS) ?
+                ((cls))[PARAMETERS] :
+                Object.defineProperty(cls, PARAMETERS, { value: [] })[PARAMETERS];
             // there might be gaps if some in between parameters do not have annotations.
             // we pad with nulls.
             while (parameters.length <= index) {
                 parameters.push(null);
             }
-            parameters[index] = parameters[index] || []; /** @type {?} */
-            ((parameters[index])).push(annotationInstance);
-            Reflect.defineMetadata('parameters', parameters, cls);
+            (parameters[index] = parameters[index] || []).push(annotationInstance);
             return cls;
         }
     }
@@ -493,10 +242,14 @@ function makePropDecorator(name, props, parentClass) {
         }
         var /** @type {?} */ decoratorInstance = new (((PropDecoratorFactory)).bind.apply(((PropDecoratorFactory)), [void 0].concat(args)))();
         return function PropDecorator(target, name) {
-            var /** @type {?} */ meta = Reflect.getOwnMetadata('propMetadata', target.constructor) || {};
+            var /** @type {?} */ constructor = target.constructor;
+            // Use of Object.defineProperty is important since it creates non-enumerable property which
+            // prevents the property is copied during subclassing.
+            var /** @type {?} */ meta = constructor.hasOwnProperty(PROP_METADATA) ?
+                ((constructor))[PROP_METADATA] :
+                Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
-            Reflect.defineMetadata('propMetadata', meta, target.constructor);
         };
     }
     if (parentClass) {
@@ -1078,7 +831,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.3-679608d');
+var VERSION = new Version('5.0.0-beta.3-cac130e');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1174,6 +927,81 @@ function HostDecorator() { }
  * \@Annotation
  */
 var Host = makeParamDecorator('Host');
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+var __window = typeof window !== 'undefined' && window;
+var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
+    self instanceof WorkerGlobalScope && self;
+var __global = typeof global !== 'undefined' && global;
+var _global = __window || __global || __self;
+var _symbolIterator = null;
+/**
+ * @return {?}
+ */
+function getSymbolIterator() {
+    if (!_symbolIterator) {
+        var /** @type {?} */ Symbol = _global['Symbol'];
+        if (Symbol && Symbol.iterator) {
+            _symbolIterator = Symbol.iterator;
+        }
+        else {
+            // es6-shim specific logic
+            var /** @type {?} */ keys = Object.getOwnPropertyNames(Map.prototype);
+            for (var /** @type {?} */ i = 0; i < keys.length; ++i) {
+                var /** @type {?} */ key = keys[i];
+                if (key !== 'entries' && key !== 'size' &&
+                    ((Map)).prototype[key] === Map.prototype['entries']) {
+                    _symbolIterator = key;
+                }
+            }
+        }
+    }
+    return _symbolIterator;
+}
+/**
+ * @param {?} fn
+ * @return {?}
+ */
+function scheduleMicroTask(fn) {
+    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+}
+/**
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function looseIdentical(a, b) {
+    return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
+}
+/**
+ * @param {?} token
+ * @return {?}
+ */
+function stringify(token) {
+    if (typeof token === 'string') {
+        return token;
+    }
+    if (token instanceof Array) {
+        return '[' + token.map(stringify).join(', ') + ']';
+    }
+    if (token == null) {
+        return '' + token;
+    }
+    if (token.overriddenName) {
+        return "" + token.overriddenName;
+    }
+    if (token.name) {
+        return "" + token.name;
+    }
+    var /** @type {?} */ res = token.toString();
+    if (res == null) {
+        return '' + res;
+    }
+    var /** @type {?} */ newLineIndex = res.indexOf('\n');
+    return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
+}
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2238,17 +2066,16 @@ var ReflectionCapabilities = (function () {
             // Newer tsickle uses a function closure
             // Retain the non-function case for compatibility with older tsickle
             var /** @type {?} */ ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
-            var /** @type {?} */ paramTypes = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
-            var /** @type {?} */ paramAnnotations = ctorParameters.map(function (ctorParam) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
-            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
+            var /** @type {?} */ paramTypes_1 = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
+            var /** @type {?} */ paramAnnotations_1 = ctorParameters.map(function (ctorParam) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
+            return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
         }
         // API for metadata created by invoking the decorators.
-        if (this._reflect != null && this._reflect.getOwnMetadata != null) {
-            var /** @type {?} */ paramAnnotations = this._reflect.getOwnMetadata('parameters', type);
-            var /** @type {?} */ paramTypes = this._reflect.getOwnMetadata('design:paramtypes', type);
-            if (paramTypes || paramAnnotations) {
-                return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
-            }
+        var /** @type {?} */ paramAnnotations = type.hasOwnProperty(PARAMETERS) && ((type))[PARAMETERS];
+        var /** @type {?} */ paramTypes = this._reflect && this._reflect.getOwnMetadata &&
+            this._reflect.getOwnMetadata('design:paramtypes', type);
+        if (paramTypes || paramAnnotations) {
+            return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
         }
         // If a class has no decorators, at least create metadata
         // based on function.length.
@@ -2292,8 +2119,8 @@ var ReflectionCapabilities = (function () {
             return convertTsickleDecoratorIntoMetadata(((typeOrFunc)).decorators);
         }
         // API for metadata created by invoking the decorators.
-        if (this._reflect && this._reflect.getOwnMetadata) {
-            return this._reflect.getOwnMetadata('annotations', typeOrFunc);
+        if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
+            return ((typeOrFunc))[ANNOTATIONS];
         }
         return null;
     };
@@ -2336,8 +2163,8 @@ var ReflectionCapabilities = (function () {
             return propMetadata_1;
         }
         // API for metadata created by invoking the decorators.
-        if (this._reflect && this._reflect.getOwnMetadata) {
-            return this._reflect.getOwnMetadata('propMetadata', typeOrFunc);
+        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+            return ((typeOrFunc))[PROP_METADATA];
         }
         return null;
     };
@@ -3169,7 +2996,7 @@ var ReflectiveInjector_ = (function () {
      * @return {?}
      */
     ReflectiveInjector_.prototype._getByKey = function (key, visibility, notFoundValue) {
-        if (key === INJECTOR_KEY) {
+        if (key === ReflectiveInjector_.INJECTOR_KEY) {
             return this;
         }
         if (visibility instanceof Self) {
@@ -3265,7 +3092,7 @@ var ReflectiveInjector_ = (function () {
     ReflectiveInjector_.prototype.toString = function () { return this.displayName; };
     return ReflectiveInjector_;
 }());
-var INJECTOR_KEY = ReflectiveKey.get(Injector);
+ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
 /**
  * @param {?} injector
  * @param {?} fn
@@ -15121,5 +14948,5 @@ function AnimationTransitionEvent() { }
 /**
  * Generated bundle index. Do not edit.
  */
-export { Class, TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFn, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, ViewDefinition as ɵViewDefinition, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, AnimationMetadata$$1 as AnimationMetadata, AnimationTriggerMetadata$$1 as AnimationTriggerMetadata, AnimationStateMetadata$$1 as AnimationStateMetadata, AnimationTransitionMetadata$$1 as AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata$$1 as AnimationKeyframesSequenceMetadata, AnimationStyleMetadata$$1 as AnimationStyleMetadata, AnimationAnimateMetadata$$1 as AnimationAnimateMetadata, AnimationSequenceMetadata$$1 as AnimationSequenceMetadata, AnimationGroupMetadata$$1 as AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
+export { TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFn, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ERROR_COMPONENT_TYPE as ɵERROR_COMPONENT_TYPE, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ViewMetadata as ɵViewMetadata, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, ViewDefinition as ɵViewDefinition, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, AnimationMetadata$$1 as AnimationMetadata, AnimationTriggerMetadata$$1 as AnimationTriggerMetadata, AnimationStateMetadata$$1 as AnimationStateMetadata, AnimationTransitionMetadata$$1 as AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata$$1 as AnimationKeyframesSequenceMetadata, AnimationStyleMetadata$$1 as AnimationStyleMetadata, AnimationAnimateMetadata$$1 as AnimationAnimateMetadata, AnimationSequenceMetadata$$1 as AnimationSequenceMetadata, AnimationGroupMetadata$$1 as AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
 //# sourceMappingURL=core.es5.js.map
