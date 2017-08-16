@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.3-1cfa79c
+ * @license Angular v5.0.0-beta.3-0a73e8d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -797,7 +797,7 @@ class ViewMetadata {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.3-1cfa79c');
+const VERSION = new Version('5.0.0-beta.3-0a73e8d');
 
 /**
  * @fileoverview added by tsickle
@@ -6668,29 +6668,6 @@ class DefaultIterableDiffer {
         }
         return record;
     }
-    /**
-     * @return {?}
-     */
-    toString() {
-        const /** @type {?} */ list = [];
-        this.forEachItem((record) => list.push(record));
-        const /** @type {?} */ previous = [];
-        this.forEachPreviousItem((record) => previous.push(record));
-        const /** @type {?} */ additions = [];
-        this.forEachAddedItem((record) => additions.push(record));
-        const /** @type {?} */ moves = [];
-        this.forEachMovedItem((record) => moves.push(record));
-        const /** @type {?} */ removals = [];
-        this.forEachRemovedItem((record) => removals.push(record));
-        const /** @type {?} */ identityChanges = [];
-        this.forEachIdentityChange((record) => identityChanges.push(record));
-        return 'collection: ' + list.join(', ') + '\n' +
-            'previous: ' + previous.join(', ') + '\n' +
-            'additions: ' + additions.join(', ') + '\n' +
-            'moves: ' + moves.join(', ') + '\n' +
-            'removals: ' + removals.join(', ') + '\n' +
-            'identityChanges: ' + identityChanges.join(', ') + '\n';
-    }
 }
 /**
  * \@stable
@@ -6745,14 +6722,6 @@ class IterableChangeRecord_ {
          * \@internal
          */
         this._nextIdentityChange = null;
-    }
-    /**
-     * @return {?}
-     */
-    toString() {
-        return this.previousIndex === this.currentIndex ? stringify(this.item) :
-            stringify(this.item) + '[' +
-                stringify(this.previousIndex) + '->' + stringify(this.currentIndex) + ']';
     }
 }
 class _DuplicateItemRecordList {
@@ -6894,10 +6863,6 @@ class _DuplicateMap {
      * @return {?}
      */
     clear() { this.map.clear(); }
-    /**
-     * @return {?}
-     */
-    toString() { return '_DuplicateMap(' + stringify(this.map) + ')'; }
 }
 /**
  * @param {?} item
