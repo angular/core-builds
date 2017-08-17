@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-3a50098
+ * @license Angular v5.0.0-beta.4-0cc77b4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.4-3a50098
+ * @license Angular v5.0.0-beta.4-0cc77b4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -117,6 +117,15 @@ var InjectionToken = (function (_super) {
      * @return {?}
      */
     InjectionToken.prototype.toString = function () { return "InjectionToken " + this._desc; };
+    Object.defineProperty(InjectionToken.prototype, "ngMetadataName", {
+        /**
+         * \@internal
+         * @return {?}
+         */
+        get: function () { return 'InjectionToken'; },
+        enumerable: true,
+        configurable: true
+    });
     return InjectionToken;
 }(OpaqueToken));
 /**
@@ -177,7 +186,7 @@ function makeDecorator(name, props, parentClass, chainFn) {
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    DecoratorFactory.prototype.toString = function () { return "@" + name; };
+    DecoratorFactory.prototype.ngMetadataName = name;
     ((DecoratorFactory)).annotationCls = DecoratorFactory;
     return (DecoratorFactory);
 }
@@ -247,7 +256,7 @@ function makeParamDecorator(name, props, parentClass) {
     if (parentClass) {
         ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    ParamDecoratorFactory.prototype.toString = function () { return "@" + name; };
+    ParamDecoratorFactory.prototype.ngMetadataName = name;
     ((ParamDecoratorFactory)).annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
 }
@@ -287,7 +296,7 @@ function makePropDecorator(name, props, parentClass) {
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
-    PropDecoratorFactory.prototype.toString = function () { return "@" + name; };
+    PropDecoratorFactory.prototype.ngMetadataName = name;
     ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
     return PropDecoratorFactory;
 }
@@ -771,47 +780,6 @@ ViewEncapsulation[ViewEncapsulation.Emulated] = "Emulated";
 ViewEncapsulation[ViewEncapsulation.Native] = "Native";
 ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
- * Metadata properties available for configuring Views.
- *
- * For details on the `\@Component` annotation, see {\@link Component}.
- *
- * ### Example
- *
- * ```
- * \@Component({
- *   selector: 'greet',
- *   template: 'Hello {{name}}!',
- * })
- * class Greet {
- *   name: string;
- *
- *   constructor() {
- *     this.name = 'World';
- *   }
- * }
- * ```
- *
- * @deprecated Use Component instead.
- *
- * {\@link Component}
- */
-var ViewMetadata = (function () {
-    /**
-     * @param {?=} opts
-     */
-    function ViewMetadata(opts) {
-        if (opts === void 0) { opts = {}; }
-        this.templateUrl = opts.templateUrl;
-        this.template = opts.template;
-        this.styleUrls = opts.styleUrls;
-        this.styles = opts.styles;
-        this.encapsulation = opts.encapsulation;
-        this.animations = opts.animations;
-        this.interpolation = opts.interpolation;
-    }
-    return ViewMetadata;
-}());
-/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
@@ -863,7 +831,7 @@ var ViewMetadata = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.4-3a50098');
+var VERSION = new Version('5.0.0-beta.4-0cc77b4');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1475,7 +1443,6 @@ function getClosureSafeProperty(objWithPropertyToExtract) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var ERROR_COMPONENT_TYPE = 'ngComponentType';
 var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 var ERROR_LOGGER = 'ngErrorLogger';
@@ -15067,10 +15034,8 @@ exports.ɵisListLikeIterable = isListLikeIterable;
 exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
 exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
 exports.ɵConsole = Console;
-exports.ɵERROR_COMPONENT_TYPE = ERROR_COMPONENT_TYPE;
 exports.ɵComponentFactory = ComponentFactory;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
-exports.ɵViewMetadata = ViewMetadata;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
 exports.ɵDirectRenderer = DirectRenderer;
 exports.ɵRenderDebugInfo = RenderDebugInfo;

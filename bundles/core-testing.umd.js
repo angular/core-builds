@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-3a50098
+ * @license Angular v5.0.0-beta.4-0cc77b4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.4-3a50098
+ * @license Angular v5.0.0-beta.4-0cc77b4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -536,6 +536,11 @@ var TestingCompiler = (function (_super) {
      * `compileModuleAndAllComponents*`.
      */
     TestingCompiler.prototype.getComponentFactory = function (component) { throw unimplemented(); };
+    /**
+     * Returns the component type that is stored in the given error.
+     * This can be used for errors created by compileModule...
+     */
+    TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
     return TestingCompiler;
 }(_angular_core.Compiler));
 /**
@@ -787,8 +792,9 @@ var TestBed = (function () {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType).ngModuleFactory;
             }
             catch (e) {
-                if (getComponentType(e)) {
-                    throw new Error("This test module uses the component " + _angular_core.ɵstringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
+                var errorCompType = this._compiler.getComponentFromError(e);
+                if (errorCompType) {
+                    throw new Error("This test module uses the component " + _angular_core.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -1012,9 +1018,6 @@ function withModule(moduleDef, fn) {
         };
     }
     return new InjectSetupWrapper(function () { return moduleDef; });
-}
-function getComponentType(error) {
-    return error[_angular_core.ɵERROR_COMPONENT_TYPE];
 }
 /**
  * @license
