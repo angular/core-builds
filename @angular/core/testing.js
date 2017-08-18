@@ -1,9 +1,9 @@
 /**
- * @license Angular v5.0.0-beta.4-83713dd
+ * @license Angular v5.0.0-beta.4-a56468c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -479,6 +479,11 @@ class TestingCompiler extends Compiler {
      * `compileModuleAndAllComponents*`.
      */
     getComponentFactory(component) { throw unimplemented(); }
+    /**
+     * Returns the component type that is stored in the given error.
+     * This can be used for errors created by compileModule...
+     */
+    getComponentFromError(error) { throw unimplemented(); }
 }
 /**
  * A factory for creating a Compiler
@@ -721,8 +726,9 @@ class TestBed {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType).ngModuleFactory;
             }
             catch (e) {
-                if (getComponentType(e)) {
-                    throw new Error(`This test module uses the component ${ɵstringify(getComponentType(e))} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
+                const errorCompType = this._compiler.getComponentFromError(e);
+                if (errorCompType) {
+                    throw new Error(`This test module uses the component ${ɵstringify(errorCompType)} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
                         `Please call "TestBed.compileComponents" before your test.`);
                 }
                 else {
@@ -936,9 +942,6 @@ function withModule(moduleDef, fn) {
         };
     }
     return new InjectSetupWrapper(() => moduleDef);
-}
-function getComponentType(error) {
-    return error[ɵERROR_COMPONENT_TYPE];
 }
 
 /**
