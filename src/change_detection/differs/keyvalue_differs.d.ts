@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { StaticProvider } from '../../di';
-import { ChangeDetectorRef } from '../change_detector_ref';
 /**
  * A differ that tracks changes made to an object over time.
  *
@@ -95,10 +94,6 @@ export interface KeyValueDifferFactory {
      * Create a `KeyValueDiffer`.
      */
     create<K, V>(): KeyValueDiffer<K, V>;
-    /**
-     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
-     */
-    create<K, V>(_cdr?: ChangeDetectorRef): KeyValueDiffer<K, V>;
 }
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.

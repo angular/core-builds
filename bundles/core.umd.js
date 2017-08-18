@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-a56468c
+ * @license Angular v5.0.0-beta.4-f2a2a6b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.4-a56468c
+ * @license Angular v5.0.0-beta.4-f2a2a6b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -831,7 +831,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.4-a56468c');
+var VERSION = new Version('5.0.0-beta.4-f2a2a6b');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4523,17 +4523,6 @@ var Testability = (function () {
      */
     Testability.prototype.getPendingRequestCount = function () { return this._pendingCount; };
     /**
-     * @deprecated use findProviders
-     * @param {?} using
-     * @param {?} provider
-     * @param {?} exactMatch
-     * @return {?}
-     */
-    Testability.prototype.findBindings = function (using, provider, exactMatch) {
-        // TODO(juliemr): implement.
-        return [];
-    };
-    /**
      * @param {?} using
      * @param {?} provider
      * @param {?} exactMatch
@@ -5912,15 +5901,6 @@ var DebugNode = (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(DebugNode.prototype, "source", {
-        /**
-         * @deprecated since v4
-         * @return {?}
-         */
-        get: function () { return 'Deprecated since v4'; },
-        enumerable: true,
-        configurable: true
-    });
     return DebugNode;
 }());
 /**
@@ -6317,14 +6297,12 @@ var DefaultIterableDifferFactory = (function () {
      */
     DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
     /**
-     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
      * @template V
-     * @param {?=} cdRefOrTrackBy
      * @param {?=} trackByFn
      * @return {?}
      */
-    DefaultIterableDifferFactory.prototype.create = function (cdRefOrTrackBy, trackByFn) {
-        return new DefaultIterableDiffer(trackByFn || (cdRefOrTrackBy));
+    DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
+        return new DefaultIterableDiffer(trackByFn);
     };
     return DefaultIterableDifferFactory;
 }());
@@ -7176,14 +7154,10 @@ var DefaultKeyValueDifferFactory = (function () {
      */
     DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
     /**
-     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
      * @template K, V
-     * @param {?=} cd
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.create = function (cd) {
-        return new DefaultKeyValueDiffer();
-    };
+    DefaultKeyValueDifferFactory.prototype.create = function () { return new DefaultKeyValueDiffer(); };
     return DefaultKeyValueDifferFactory;
 }());
 var DefaultKeyValueDiffer = (function () {
@@ -7544,13 +7518,6 @@ function IterableChangeRecord() { }
  * @record
  */
 function CollectionChangeRecord() { }
-/**
- * Nolonger used.
- *
- * @deprecated v4.0.0 - Use TrackByFunction instead
- * @record
- */
-function TrackByFn() { }
 /**
  * An optional function passed into {\@link NgForOf} that defines how to track
  * items in an iterable (e.g. fby index or id)
@@ -15014,7 +14981,6 @@ exports.KeyValueDiffers = KeyValueDiffers;
 exports.PipeTransform = PipeTransform;
 exports.SimpleChange = SimpleChange;
 exports.SimpleChanges = SimpleChanges;
-exports.TrackByFn = TrackByFn;
 exports.TrackByFunction = TrackByFunction;
 exports.WrappedValue = WrappedValue;
 exports.platformCore = platformCore;
