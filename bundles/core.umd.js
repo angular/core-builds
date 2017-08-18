@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-56a5b02
+ * @license Angular v5.0.0-beta.4-a56468c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.4-56a5b02
+ * @license Angular v5.0.0-beta.4-a56468c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -831,7 +831,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.4-56a5b02');
+var VERSION = new Version('5.0.0-beta.4-a56468c');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1521,15 +1521,7 @@ function defaultErrorLogger(console) {
  * \@stable
  */
 var ErrorHandler = (function () {
-    /**
-     * @param {?=} deprecatedParameter
-     */
-    function ErrorHandler(
-        /**
-         * @deprecated since v4.0 parameter no longer has an effect, as ErrorHandler will never
-         * rethrow.
-         */
-        deprecatedParameter) {
+    function ErrorHandler() {
         /**
          * \@internal
          */
