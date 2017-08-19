@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-f2a2a6b
+ * @license Angular v5.0.0-beta.4-e228f2c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -763,7 +763,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.4-f2a2a6b');
+const VERSION = new Version('5.0.0-beta.4-e228f2c');
 
 /**
  * @fileoverview added by tsickle
@@ -10767,8 +10767,13 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
         if (nodeDef.flags & 1 /* TypeElement */ && ((nodeDef.element)).template &&
             (((((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
                 queryDef.filterId) {
-            // check embedded views that were attached at the place of their template.
             const /** @type {?} */ elementData = asElementData(view, i);
+            // check embedded views that were attached at the place of their template,
+            // but process child nodes first if some match the query (see issue #16568)
+            if ((nodeDef.childMatchedQueries & queryDef.filterId) === queryDef.filterId) {
+                calcQueryValues(view, i + 1, i + nodeDef.childCount, queryDef, values);
+                i += nodeDef.childCount;
+            }
             if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
                 const /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
                 for (let /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
