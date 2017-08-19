@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-a56468c
+ * @license Angular v5.0.0-beta.4-f2a2a6b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -757,8 +757,7 @@ class TestBed {
         /** @nocollapse */
         DynamicTestModule.ctorParameters = () => [];
         const compilerFactory = this.platform.injector.get(TestingCompilerFactory);
-        this._compiler =
-            compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
+        this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         this._compiler.loadAotSummaries(this._aotSummaries);
         this._moduleOverrides.forEach((entry) => this._compiler.overrideModule(entry[0], entry[1]));
         this._componentOverrides.forEach((entry) => this._compiler.overrideComponent(entry[0], entry[1]));
