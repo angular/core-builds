@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-55d151a
+ * @license Angular v5.0.0-beta.4-ec56760
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.4-55d151a
+ * @license Angular v5.0.0-beta.4-ec56760
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -831,7 +831,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.4-55d151a');
+var VERSION = new Version('5.0.0-beta.4-ec56760');
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7491,7 +7491,7 @@ var KeyValueChangeRecord_ = (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * A strategy for tracking changes over time to an iterable. Used by {\@link NgFor} to
+ * A strategy for tracking changes over time to an iterable. Used by {\@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
  * \@stable
