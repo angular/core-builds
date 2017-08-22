@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-7ce9e06
+ * @license Angular v5.0.0-beta.4-ec56760
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -763,7 +763,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.4-7ce9e06');
+const VERSION = new Version('5.0.0-beta.4-ec56760');
 
 /**
  * @fileoverview added by tsickle
@@ -7169,7 +7169,7 @@ class KeyValueChangeRecord_ {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * A strategy for tracking changes over time to an iterable. Used by {\@link NgFor} to
+ * A strategy for tracking changes over time to an iterable. Used by {\@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
  * \@stable
