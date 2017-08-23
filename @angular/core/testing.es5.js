@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.3.5-1f43713
+ * @license Angular v4.3.5-641be64
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -139,39 +139,43 @@ var ComponentFixture = (function () {
         this.componentRef = componentRef;
         this.ngZone = ngZone;
         if (ngZone) {
-            this._onUnstableSubscription =
-                ngZone.onUnstable.subscribe({ next: function () { _this._isStable = false; } });
-            this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
-                next: function () {
-                    if (_this._autoDetect) {
-                        // Do a change detection run with checkNoChanges set to true to check
-                        // there are no changes on the second run.
-                        _this.detectChanges(true);
+            // Create subscriptions outside the NgZone so that the callbacks run oustide
+            // of NgZone.
+            ngZone.runOutsideAngular(function () {
+                _this._onUnstableSubscription =
+                    ngZone.onUnstable.subscribe({ next: function () { _this._isStable = false; } });
+                _this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
+                    next: function () {
+                        if (_this._autoDetect) {
+                            // Do a change detection run with checkNoChanges set to true to check
+                            // there are no changes on the second run.
+                            _this.detectChanges(true);
+                        }
                     }
-                }
-            });
-            this._onStableSubscription = ngZone.onStable.subscribe({
-                next: function () {
-                    _this._isStable = true;
-                    // Check whether there is a pending whenStable() completer to resolve.
-                    if (_this._promise !== null) {
-                        // If so check whether there are no pending macrotasks before resolving.
-                        // Do this check in the next tick so that ngZone gets a chance to update the state of
-                        // pending macrotasks.
-                        scheduleMicroTask(function () {
-                            if (!ngZone.hasPendingMacrotasks) {
-                                if (_this._promise !== null) {
-                                    _this._resolve(true);
-                                    _this._resolve = null;
-                                    _this._promise = null;
+                });
+                _this._onStableSubscription = ngZone.onStable.subscribe({
+                    next: function () {
+                        _this._isStable = true;
+                        // Check whether there is a pending whenStable() completer to resolve.
+                        if (_this._promise !== null) {
+                            // If so check whether there are no pending macrotasks before resolving.
+                            // Do this check in the next tick so that ngZone gets a chance to update the state of
+                            // pending macrotasks.
+                            scheduleMicroTask(function () {
+                                if (!ngZone.hasPendingMacrotasks) {
+                                    if (_this._promise !== null) {
+                                        _this._resolve(true);
+                                        _this._resolve = null;
+                                        _this._promise = null;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
+                });
+                _this._onErrorSubscription =
+                    ngZone.onError.subscribe({ next: function (error) { throw error; } });
             });
-            this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: function (error) { throw error; } });
         }
     }
     ComponentFixture.prototype._tick = function (checkNoChanges) {

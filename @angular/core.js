@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.5-1f43713
+ * @license Angular v4.3.5-641be64
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.3.5-1f43713');
+const VERSION = new Version('4.3.5-641be64');
 
 /**
  * @license
@@ -4522,16 +4522,21 @@ class ApplicationRef_ extends ApplicationRef {
             });
         });
         const isStable = new Observable((observer) => {
-            const stableSub = this._zone.onStable.subscribe(() => {
-                NgZone.assertNotInAngularZone();
-                // Check whether there are no pending macro/micro tasks in the next tick
-                // to allow for NgZone to update the state.
-                scheduleMicroTask(() => {
-                    if (!this._stable && !this._zone.hasPendingMacrotasks &&
-                        !this._zone.hasPendingMicrotasks) {
-                        this._stable = true;
-                        observer.next(true);
-                    }
+            // Create the subscription to onStable outside the Angular Zone so that
+            // the callback is run outside the Angular Zone.
+            let stableSub;
+            this._zone.runOutsideAngular(() => {
+                stableSub = this._zone.onStable.subscribe(() => {
+                    NgZone.assertNotInAngularZone();
+                    // Check whether there are no pending macro/micro tasks in the next tick
+                    // to allow for NgZone to update the state.
+                    scheduleMicroTask(() => {
+                        if (!this._stable && !this._zone.hasPendingMacrotasks &&
+                            !this._zone.hasPendingMicrotasks) {
+                            this._stable = true;
+                            observer.next(true);
+                        }
+                    });
                 });
             });
             const unstableSub = this._zone.onUnstable.subscribe(() => {
