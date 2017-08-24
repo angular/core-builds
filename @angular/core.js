@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.4-409688f
+ * @license Angular v5.0.0-beta.4
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -763,7 +763,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.4-409688f');
+const VERSION = new Version('5.0.0-beta.4');
 
 /**
  * @fileoverview added by tsickle
@@ -4818,16 +4818,21 @@ class ApplicationRef_ extends ApplicationRef {
             });
         });
         const /** @type {?} */ isStable = new Observable((observer) => {
-            const /** @type {?} */ stableSub = this._zone.onStable.subscribe(() => {
-                NgZone.assertNotInAngularZone();
-                // Check whether there are no pending macro/micro tasks in the next tick
-                // to allow for NgZone to update the state.
-                scheduleMicroTask(() => {
-                    if (!this._stable && !this._zone.hasPendingMacrotasks &&
-                        !this._zone.hasPendingMicrotasks) {
-                        this._stable = true;
-                        observer.next(true);
-                    }
+            // Create the subscription to onStable outside the Angular Zone so that
+            // the callback is run outside the Angular Zone.
+            let /** @type {?} */ stableSub;
+            this._zone.runOutsideAngular(() => {
+                stableSub = this._zone.onStable.subscribe(() => {
+                    NgZone.assertNotInAngularZone();
+                    // Check whether there are no pending macro/micro tasks in the next tick
+                    // to allow for NgZone to update the state.
+                    scheduleMicroTask(() => {
+                        if (!this._stable && !this._zone.hasPendingMacrotasks &&
+                            !this._zone.hasPendingMicrotasks) {
+                            this._stable = true;
+                            observer.next(true);
+                        }
+                    });
                 });
             });
             const /** @type {?} */ unstableSub = this._zone.onUnstable.subscribe(() => {
