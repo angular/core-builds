@@ -1,9 +1,9 @@
 /**
- * @license Angular v4.2.0-beta.0-4874765
+ * @license Angular v5.0.0-beta.4-d64c935
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { Compiler, InjectionToken, Injector, NgModule, NgZone, ReflectiveInjector, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -138,39 +138,43 @@ class ComponentFixture {
         this.componentRef = componentRef;
         this.ngZone = ngZone;
         if (ngZone) {
-            this._onUnstableSubscription =
-                ngZone.onUnstable.subscribe({ next: () => { this._isStable = false; } });
-            this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
-                next: () => {
-                    if (this._autoDetect) {
-                        // Do a change detection run with checkNoChanges set to true to check
-                        // there are no changes on the second run.
-                        this.detectChanges(true);
+            // Create subscriptions outside the NgZone so that the callbacks run oustide
+            // of NgZone.
+            ngZone.runOutsideAngular(() => {
+                this._onUnstableSubscription =
+                    ngZone.onUnstable.subscribe({ next: () => { this._isStable = false; } });
+                this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
+                    next: () => {
+                        if (this._autoDetect) {
+                            // Do a change detection run with checkNoChanges set to true to check
+                            // there are no changes on the second run.
+                            this.detectChanges(true);
+                        }
                     }
-                }
-            });
-            this._onStableSubscription = ngZone.onStable.subscribe({
-                next: () => {
-                    this._isStable = true;
-                    // Check whether there is a pending whenStable() completer to resolve.
-                    if (this._promise !== null) {
-                        // If so check whether there are no pending macrotasks before resolving.
-                        // Do this check in the next tick so that ngZone gets a chance to update the state of
-                        // pending macrotasks.
-                        scheduleMicroTask(() => {
-                            if (!ngZone.hasPendingMacrotasks) {
-                                if (this._promise !== null) {
-                                    this._resolve(true);
-                                    this._resolve = null;
-                                    this._promise = null;
+                });
+                this._onStableSubscription = ngZone.onStable.subscribe({
+                    next: () => {
+                        this._isStable = true;
+                        // Check whether there is a pending whenStable() completer to resolve.
+                        if (this._promise !== null) {
+                            // If so check whether there are no pending macrotasks before resolving.
+                            // Do this check in the next tick so that ngZone gets a chance to update the state of
+                            // pending macrotasks.
+                            scheduleMicroTask(() => {
+                                if (!ngZone.hasPendingMacrotasks) {
+                                    if (this._promise !== null) {
+                                        this._resolve(true);
+                                        this._resolve = null;
+                                        this._promise = null;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
+                });
+                this._onErrorSubscription =
+                    ngZone.onError.subscribe({ next: (error) => { throw error; } });
             });
-            this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: (error) => { throw error; } });
         }
     }
     _tick(checkNoChanges) {
@@ -231,6 +235,22 @@ class ComponentFixture {
             this._promise = new Promise(res => { this._resolve = res; });
             return this._promise;
         }
+    }
+    _getRenderer() {
+        if (this._renderer === undefined) {
+            this._renderer = this.componentRef.injector.get(RendererFactory2, null);
+        }
+        return this._renderer;
+    }
+    /**
+      * Get a promise that resolves when the ui state is stable following animations.
+      */
+    whenRenderingDone() {
+        const renderer = this._getRenderer();
+        if (renderer && renderer.whenRenderingDone) {
+            return renderer.whenRenderingDone();
+        }
+        return this.whenStable();
     }
     /**
      * Trigger component destruction.
@@ -297,7 +317,7 @@ let _inFakeAsyncCall = false;
  * {@example testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
- * @returns {Function} The function wrapped to be executed in the fakeAsync zone
+ * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
@@ -361,6 +381,19 @@ function _getFakeAsyncZoneSpec() {
  */
 function tick(millis = 0) {
     _getFakeAsyncZoneSpec().tick(millis);
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    return _getFakeAsyncZoneSpec().flush(maxTurns);
 }
 /**
  * Discard all remaining periodic tasks.
@@ -450,6 +483,11 @@ class TestingCompiler extends Compiler {
      * `compileModuleAndAllComponents*`.
      */
     getComponentFactory(component) { throw unimplemented(); }
+    /**
+     * Returns the component type that is stored in the given error.
+     * This can be used for errors created by compileModule...
+     */
+    getComponentFromError(error) { throw unimplemented(); }
 }
 /**
  * A factory for creating a Compiler
@@ -583,6 +621,10 @@ class TestBed {
         getTestBed().overrideComponent(component, { set: { template, templateUrl: null } });
         return TestBed;
     }
+    static overrideProvider(token, provider) {
+        getTestBed().overrideProvider(token, provider);
+        return TestBed;
+    }
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
         return getTestBed().get(token, notFoundValue);
     }
@@ -624,6 +666,7 @@ class TestBed {
         this._aotSummaries = () => [];
     }
     resetTestingModule() {
+        ɵclearProviderOverrides();
         this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -687,8 +730,9 @@ class TestBed {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType).ngModuleFactory;
             }
             catch (e) {
-                if (getComponentType(e)) {
-                    throw new Error(`This test module uses the component ${ɵstringify(getComponentType(e))} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
+                const errorCompType = this._compiler.getComponentFromError(e);
+                if (errorCompType) {
+                    throw new Error(`This test module uses the component ${ɵstringify(errorCompType)} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
                         `Please call "TestBed.compileComponents" before your test.`);
                 }
                 else {
@@ -697,8 +741,11 @@ class TestBed {
             }
         }
         const ngZone = new NgZone({ enableLongStackTrace: true });
-        const ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
+        const ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
+        // before accessing it.
+        this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     }
     _createCompilerAndModule() {
@@ -714,8 +761,7 @@ class TestBed {
         /** @nocollapse */
         DynamicTestModule.ctorParameters = () => [];
         const compilerFactory = this.platform.injector.get(TestingCompilerFactory);
-        this._compiler =
-            compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
+        this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         this._compiler.loadAotSummaries(this._aotSummaries);
         this._moduleOverrides.forEach((entry) => this._compiler.overrideModule(entry[0], entry[1]));
         this._componentOverrides.forEach((entry) => this._compiler.overrideComponent(entry[0], entry[1]));
@@ -759,6 +805,40 @@ class TestBed {
     overridePipe(pipe, override) {
         this._assertNotInstantiated('overridePipe', 'override pipe metadata');
         this._pipeOverrides.push([pipe, override]);
+    }
+    overrideProvider(token, provider) {
+        let flags = 0;
+        let value;
+        if (provider.useFactory) {
+            flags |= 1024 /* TypeFactoryProvider */;
+            value = provider.useFactory;
+        }
+        else {
+            flags |= 256 /* TypeValueProvider */;
+            value = provider.useValue;
+        }
+        const deps = (provider.deps || []).map((dep) => {
+            let depFlags = 0;
+            let depToken;
+            if (Array.isArray(dep)) {
+                dep.forEach((entry) => {
+                    if (entry instanceof Optional) {
+                        depFlags |= 2 /* Optional */;
+                    }
+                    else if (entry instanceof SkipSelf) {
+                        depFlags |= 1 /* SkipSelf */;
+                    }
+                    else {
+                        depToken = entry;
+                    }
+                });
+            }
+            else {
+                depToken = dep;
+            }
+            return [depFlags, depToken];
+        });
+        ɵoverrideProvider({ token, flags, deps, value });
     }
     createComponent(component) {
         this._initIfNeeded();
@@ -866,9 +946,6 @@ function withModule(moduleDef, fn) {
     }
     return new InjectSetupWrapper(() => moduleDef);
 }
-function getComponentType(error) {
-    return error[ɵERROR_COMPONENT_TYPE];
-}
 
 /**
  * @license
@@ -928,5 +1005,5 @@ const __core_private_testing_placeholder__ = '';
  * Entry point for all public APIs of the core/testing package.
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.js.map

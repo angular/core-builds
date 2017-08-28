@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { EventEmitter } from '../event_emitter';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
@@ -79,16 +72,32 @@ import { EventEmitter } from '../event_emitter';
  * @experimental
  */
 export declare class NgZone {
-    private outer;
-    private inner;
-    private _hasPendingMicrotasks;
-    private _hasPendingMacrotasks;
-    private _isStable;
-    private _nesting;
-    private _onUnstable;
-    private _onMicrotaskEmpty;
-    private _onStable;
-    private _onErrorEvents;
+    readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
+    /**
+     * Whether there are no outstanding microtasks or macrotasks.
+     */
+    readonly isStable: boolean;
+    /**
+     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
+     */
+    readonly onUnstable: EventEmitter<any>;
+    /**
+     * Notifies when there is no more microtasks enqueue in the current VM Turn.
+     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
+     * For this reason this event can fire multiple times per VM Turn.
+     */
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    /**
+     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
+     * implies we are about to relinquish VM turn.
+     * This event gets called just once.
+     */
+    readonly onStable: EventEmitter<any>;
+    /**
+     * Notifies that an error has been delivered.
+     */
+    readonly onError: EventEmitter<any>;
     constructor({enableLongStackTrace}: {
         enableLongStackTrace?: boolean;
     });
@@ -107,12 +116,25 @@ export declare class NgZone {
      *
      * If a synchronous error happens it will be rethrown and not reported via `onError`.
      */
-    run(fn: () => any): any;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], name?: string): T;
     /**
      * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
      * rethrown.
      */
-    runGuarded(fn: () => any): any;
+    runGuarded<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
     /**
      * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
      * the function.
@@ -126,38 +148,5 @@ export declare class NgZone {
      *
      * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
      */
-    runOutsideAngular(fn: () => any): any;
-    /**
-     * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
-     */
-    readonly onUnstable: EventEmitter<any>;
-    /**
-     * Notifies when there is no more microtasks enqueue in the current VM Turn.
-     * This is a hint for Angular to do change detection, which may enqueue more microtasks.
-     * For this reason this event can fire multiple times per VM Turn.
-     */
-    readonly onMicrotaskEmpty: EventEmitter<any>;
-    /**
-     * Notifies when the last `onMicrotaskEmpty` has run and there are no more microtasks, which
-     * implies we are about to relinquish VM turn.
-     * This event gets called just once.
-     */
-    readonly onStable: EventEmitter<any>;
-    /**
-     * Notify that an error has been delivered.
-     */
-    readonly onError: EventEmitter<any>;
-    /**
-     * Whether there are no outstanding microtasks or macrotasks.
-     */
-    readonly isStable: boolean;
-    readonly hasPendingMicrotasks: boolean;
-    readonly hasPendingMacrotasks: boolean;
-    private checkStable();
-    private forkInnerZoneWithAngularBehavior();
-    private onEnter();
-    private onLeave();
-    private setHasMicrotask(hasMicrotasks);
-    private setHasMacrotask(hasMacrotasks);
-    private triggerError(error);
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
 }

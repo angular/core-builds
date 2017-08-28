@@ -1,14 +1,10 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.2.0-beta.0-4874765
+ * @license Angular v5.0.0-beta.4-d64c935
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { Compiler, InjectionToken, Injector, NgModule, NgZone, ReflectiveInjector, getDebugNode, ɵERROR_COMPONENT_TYPE, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -143,39 +139,43 @@ var ComponentFixture = (function () {
         this.componentRef = componentRef;
         this.ngZone = ngZone;
         if (ngZone) {
-            this._onUnstableSubscription =
-                ngZone.onUnstable.subscribe({ next: function () { _this._isStable = false; } });
-            this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
-                next: function () {
-                    if (_this._autoDetect) {
-                        // Do a change detection run with checkNoChanges set to true to check
-                        // there are no changes on the second run.
-                        _this.detectChanges(true);
+            // Create subscriptions outside the NgZone so that the callbacks run oustide
+            // of NgZone.
+            ngZone.runOutsideAngular(function () {
+                _this._onUnstableSubscription =
+                    ngZone.onUnstable.subscribe({ next: function () { _this._isStable = false; } });
+                _this._onMicrotaskEmptySubscription = ngZone.onMicrotaskEmpty.subscribe({
+                    next: function () {
+                        if (_this._autoDetect) {
+                            // Do a change detection run with checkNoChanges set to true to check
+                            // there are no changes on the second run.
+                            _this.detectChanges(true);
+                        }
                     }
-                }
-            });
-            this._onStableSubscription = ngZone.onStable.subscribe({
-                next: function () {
-                    _this._isStable = true;
-                    // Check whether there is a pending whenStable() completer to resolve.
-                    if (_this._promise !== null) {
-                        // If so check whether there are no pending macrotasks before resolving.
-                        // Do this check in the next tick so that ngZone gets a chance to update the state of
-                        // pending macrotasks.
-                        scheduleMicroTask(function () {
-                            if (!ngZone.hasPendingMacrotasks) {
-                                if (_this._promise !== null) {
-                                    _this._resolve(true);
-                                    _this._resolve = null;
-                                    _this._promise = null;
+                });
+                _this._onStableSubscription = ngZone.onStable.subscribe({
+                    next: function () {
+                        _this._isStable = true;
+                        // Check whether there is a pending whenStable() completer to resolve.
+                        if (_this._promise !== null) {
+                            // If so check whether there are no pending macrotasks before resolving.
+                            // Do this check in the next tick so that ngZone gets a chance to update the state of
+                            // pending macrotasks.
+                            scheduleMicroTask(function () {
+                                if (!ngZone.hasPendingMacrotasks) {
+                                    if (_this._promise !== null) {
+                                        _this._resolve(true);
+                                        _this._resolve = null;
+                                        _this._promise = null;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
+                });
+                _this._onErrorSubscription =
+                    ngZone.onError.subscribe({ next: function (error) { throw error; } });
             });
-            this._onErrorSubscription =
-                ngZone.onError.subscribe({ next: function (error) { throw error; } });
         }
     }
     ComponentFixture.prototype._tick = function (checkNoChanges) {
@@ -240,6 +240,22 @@ var ComponentFixture = (function () {
             this._promise = new Promise(function (res) { _this._resolve = res; });
             return this._promise;
         }
+    };
+    ComponentFixture.prototype._getRenderer = function () {
+        if (this._renderer === undefined) {
+            this._renderer = this.componentRef.injector.get(RendererFactory2, null);
+        }
+        return this._renderer;
+    };
+    /**
+      * Get a promise that resolves when the ui state is stable following animations.
+      */
+    ComponentFixture.prototype.whenRenderingDone = function () {
+        var renderer = this._getRenderer();
+        if (renderer && renderer.whenRenderingDone) {
+            return renderer.whenRenderingDone();
+        }
+        return this.whenStable();
     };
     /**
      * Trigger component destruction.
@@ -306,7 +322,7 @@ var _inFakeAsyncCall = false;
  * {@example testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
- * @returns {Function} The function wrapped to be executed in the fakeAsync zone
+ * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
@@ -377,6 +393,19 @@ function tick(millis) {
     _getFakeAsyncZoneSpec().tick(millis);
 }
 /**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    return _getFakeAsyncZoneSpec().flush(maxTurns);
+}
+/**
  * Discard all remaining periodic tasks.
  *
  * @experimental
@@ -443,7 +472,7 @@ function unimplemented() {
  * @experimental
  */
 var TestingCompiler = (function (_super) {
-    __extends(TestingCompiler, _super);
+    tslib_1.__extends(TestingCompiler, _super);
     function TestingCompiler() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -476,6 +505,11 @@ var TestingCompiler = (function (_super) {
      * `compileModuleAndAllComponents*`.
      */
     TestingCompiler.prototype.getComponentFactory = function (component) { throw unimplemented(); };
+    /**
+     * Returns the component type that is stored in the given error.
+     * This can be used for errors created by compileModule...
+     */
+    TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
     return TestingCompiler;
 }(Compiler));
 /**
@@ -615,6 +649,10 @@ var TestBed = (function () {
         getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
         return TestBed;
     };
+    TestBed.overrideProvider = function (token, provider) {
+        getTestBed().overrideProvider(token, provider);
+        return TestBed;
+    };
     TestBed.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
@@ -657,6 +695,7 @@ var TestBed = (function () {
         this._aotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
+        ɵclearProviderOverrides();
         this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -722,8 +761,9 @@ var TestBed = (function () {
                     this._compiler.compileModuleAndAllComponentsSync(moduleType).ngModuleFactory;
             }
             catch (e) {
-                if (getComponentType(e)) {
-                    throw new Error("This test module uses the component " + ɵstringify(getComponentType(e)) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
+                var errorCompType = this._compiler.getComponentFromError(e);
+                if (errorCompType) {
+                    throw new Error("This test module uses the component " + ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -732,8 +772,11 @@ var TestBed = (function () {
             }
         }
         var ngZone = new NgZone({ enableLongStackTrace: true });
-        var ngZoneInjector = ReflectiveInjector.resolveAndCreate([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
+        var ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
+        // before accessing it.
+        this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
     };
     TestBed.prototype._createCompilerAndModule = function () {
@@ -753,8 +796,7 @@ var TestBed = (function () {
         /** @nocollapse */
         DynamicTestModule.ctorParameters = function () { return []; };
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
-        this._compiler =
-            compilerFactory.createTestingCompiler(this._compilerOptions.concat([{ useDebug: true }]));
+        this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         this._compiler.loadAotSummaries(this._aotSummaries);
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
         this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
@@ -800,6 +842,40 @@ var TestBed = (function () {
     TestBed.prototype.overridePipe = function (pipe, override) {
         this._assertNotInstantiated('overridePipe', 'override pipe metadata');
         this._pipeOverrides.push([pipe, override]);
+    };
+    TestBed.prototype.overrideProvider = function (token, provider) {
+        var flags = 0;
+        var value;
+        if (provider.useFactory) {
+            flags |= 1024 /* TypeFactoryProvider */;
+            value = provider.useFactory;
+        }
+        else {
+            flags |= 256 /* TypeValueProvider */;
+            value = provider.useValue;
+        }
+        var deps = (provider.deps || []).map(function (dep) {
+            var depFlags = 0;
+            var depToken;
+            if (Array.isArray(dep)) {
+                dep.forEach(function (entry) {
+                    if (entry instanceof Optional) {
+                        depFlags |= 2 /* Optional */;
+                    }
+                    else if (entry instanceof SkipSelf) {
+                        depFlags |= 1 /* SkipSelf */;
+                    }
+                    else {
+                        depToken = entry;
+                    }
+                });
+            }
+            else {
+                depToken = dep;
+            }
+            return [depFlags, depToken];
+        });
+        ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value });
     };
     TestBed.prototype.createComponent = function (component) {
         var _this = this;
@@ -911,9 +987,6 @@ function withModule(moduleDef, fn) {
     }
     return new InjectSetupWrapper(function () { return moduleDef; });
 }
-function getComponentType(error) {
-    return error[ɵERROR_COMPONENT_TYPE];
-}
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -968,5 +1041,5 @@ var __core_private_testing_placeholder__ = '';
  * @description
  * Entry point for all public APIs of the core/testing package.
  */
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
+export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
 //# sourceMappingURL=testing.es5.js.map

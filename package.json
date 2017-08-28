@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "4.2.0-beta.0-4874765",
+  "version": "5.0.0-beta.4-d64c935",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./@angular/core.es5.js",
@@ -8,6 +8,9 @@
   "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
+  "dependencies": {
+    "tslib": "^1.7.1"
+  },
   "peerDependencies": {
     "rxjs": "^5.0.1",
     "zone.js": "^0.8.4"

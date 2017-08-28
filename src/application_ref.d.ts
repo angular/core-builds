@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { ErrorHandler } from '../src/error_handler';
 import { ApplicationInitStatus } from './application_init';
 import { Console } from './console';
-import { InjectionToken, Injector, Provider } from './di';
+import { InjectionToken, Injector, StaticProvider } from './di';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -60,7 +60,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: Provider[]) => PlatformRef) | null, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
+export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *

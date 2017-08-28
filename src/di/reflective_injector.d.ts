@@ -41,7 +41,7 @@ import { ResolvedReflectiveProvider } from './reflective_provider';
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
  *
- * @stable
+ * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  */
 export declare abstract class ReflectiveInjector implements Injector {
     /**
@@ -102,7 +102,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This function is slower than the corresponding `fromResolvedProviders`
      * because it needs to resolve the passed-in providers first.
-     * See {@link Injector#resolve} and {@link Injector#fromResolvedProviders}.
+     * See {@link ReflectiveInjector#resolve} and {@link ReflectiveInjector#fromResolvedProviders}.
      */
     static resolveAndCreate(providers: Provider[], parent?: Injector): ReflectiveInjector;
     /**
@@ -169,7 +169,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This function is slower than the corresponding `createChildFromResolved`
      * because it needs to resolve the passed-in providers first.
-     * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
+     * See {@link ReflectiveInjector#resolve} and {@link ReflectiveInjector#createChildFromResolved}.
      */
     abstract resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     /**
@@ -251,6 +251,7 @@ export declare abstract class ReflectiveInjector implements Injector {
     abstract get(token: any, notFoundValue?: any): any;
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
+    private static INJECTOR_KEY;
     keyIds: number[];
     objs: any[];
     /**

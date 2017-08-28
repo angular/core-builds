@@ -39,7 +39,6 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     check(collection: NgIterable<V>): boolean;
     readonly isDirty: boolean;
     private _addToRemovals(record);
-    toString(): string;
 }
 /**
  * @stable
@@ -50,5 +49,4 @@ export declare class IterableChangeRecord_<V> implements IterableChangeRecord<V>
     currentIndex: number | null;
     previousIndex: number | null;
     constructor(item: V, trackById: any);
-    toString(): string;
 }
