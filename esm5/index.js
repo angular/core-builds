@@ -1,13 +1,14 @@
-import * as tslib_1 from "tslib";
 /**
- * @license Angular v5.0.0-beta.5-ee04217
+ * @license Angular v5.0.0-beta.5-fd701b0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
+import { __assign, __extends } from 'tslib';
 import { Observable } from 'rxjs/Observable';
 import { merge } from 'rxjs/observable/merge';
 import { share } from 'rxjs/operator/share';
 import { Subject } from 'rxjs/Subject';
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -35,10 +36,7 @@ import { Subject } from 'rxjs/Subject';
  * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
  * instead.
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ var OpaqueToken = (function () {
+var OpaqueToken = (function () {
     /**
      * @param {?} _desc
      */
@@ -74,7 +72,7 @@ import { Subject } from 'rxjs/Subject';
  * \@stable
  */
 var InjectionToken = (function (_super) {
-    tslib_1.__extends(InjectionToken, _super);
+    __extends(InjectionToken, _super);
     /**
      * @param {?} desc
      */
@@ -96,6 +94,7 @@ var InjectionToken = (function (_super) {
     });
     return InjectionToken;
 }(OpaqueToken));
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -197,7 +196,7 @@ function makeParamDecorator(name, props, parentClass) {
             metaCtor.apply(this, args);
             return this;
         }
-        var /** @type {?} */ annotationInstance = new (((ParamDecoratorFactory)).bind.apply(((ParamDecoratorFactory)), [void 0].concat(args)))();
+        var /** @type {?} */ annotationInstance = new ((_a = ((ParamDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
         ((ParamDecorator)).annotation = annotationInstance;
         return ParamDecorator;
         /**
@@ -220,6 +219,7 @@ function makeParamDecorator(name, props, parentClass) {
             (parameters[index] = parameters[index] || []).push(annotationInstance);
             return cls;
         }
+        var _a;
     }
     if (parentClass) {
         ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -249,7 +249,7 @@ function makePropDecorator(name, props, parentClass) {
             metaCtor.apply(this, args);
             return this;
         }
-        var /** @type {?} */ decoratorInstance = new (((PropDecoratorFactory)).bind.apply(((PropDecoratorFactory)), [void 0].concat(args)))();
+        var /** @type {?} */ decoratorInstance = new ((_a = ((PropDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
         return function PropDecorator(target, name) {
             var /** @type {?} */ constructor = target.constructor;
             // Use of Object.defineProperty is important since it creates non-enumerable property which
@@ -260,6 +260,7 @@ function makePropDecorator(name, props, parentClass) {
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
         };
+        var _a;
     }
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -268,6 +269,7 @@ function makePropDecorator(name, props, parentClass) {
     ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
     return PropDecoratorFactory;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -320,6 +322,7 @@ var ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('AnalyzeForEntryComponents
  * \@stable
  * @record
  */
+
 /**
  * Attribute decorator and metadata.
  *
@@ -358,7 +361,7 @@ function ContentChildrenDecorator() { }
  */
 var ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
     if (data === void 0) { data = {}; }
-    return (Object.assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
+    return (__assign({ selector: selector, first: false, isViewQuery: false, descendants: false }, data));
 }, Query);
 /**
  * Type of the ContentChild decorator / constructor function.
@@ -376,7 +379,7 @@ function ContentChildDecorator() { }
  */
 var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
     if (data === void 0) { data = {}; }
-    return (Object.assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
+    return (__assign({ selector: selector, first: true, isViewQuery: false, descendants: true }, data));
 }, Query);
 /**
  * Type of the ViewChildren decorator / constructor function.
@@ -395,7 +398,7 @@ function ViewChildrenDecorator() { }
  */
 var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
     if (data === void 0) { data = {}; }
-    return (Object.assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
+    return (__assign({ selector: selector, first: false, isViewQuery: true, descendants: true }, data));
 }, Query);
 /**
  * Type of the ViewChild decorator / constructor function.
@@ -412,23 +415,60 @@ function ViewChildDecorator() { }
  * \@stable
  * \@Annotation
  */
-var ViewChild = makePropDecorator('ViewChild', function (selector, data) { return (Object.assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data)); }, Query);
+var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
+    return (__assign({ selector: selector, first: true, isViewQuery: true, descendants: true }, data));
+}, Query);
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var ChangeDetectionStrategy = {};
-ChangeDetectionStrategy.OnPush = 0;
-ChangeDetectionStrategy.Default = 1;
+/** @enum {number} */
+var ChangeDetectionStrategy = {
+    /**
+     * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+     */
+    OnPush: 0,
+    /**
+     * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+     */
+    Default: 1,
+};
 ChangeDetectionStrategy[ChangeDetectionStrategy.OnPush] = "OnPush";
 ChangeDetectionStrategy[ChangeDetectionStrategy.Default] = "Default";
-var ChangeDetectorStatus = {};
-ChangeDetectorStatus.CheckOnce = 0;
-ChangeDetectorStatus.Checked = 1;
-ChangeDetectorStatus.CheckAlways = 2;
-ChangeDetectorStatus.Detached = 3;
-ChangeDetectorStatus.Errored = 4;
-ChangeDetectorStatus.Destroyed = 5;
+/** @enum {number} */
+var ChangeDetectorStatus = {
+    /**
+     * `CheckOnce` means that after calling detectChanges the mode of the change detector
+     * will become `Checked`.
+     */
+    CheckOnce: 0,
+    /**
+     * `Checked` means that the change detector should be skipped until its mode changes to
+     * `CheckOnce`.
+     */
+    Checked: 1,
+    /**
+     * `CheckAlways` means that after calling detectChanges the mode of the change detector
+     * will remain `CheckAlways`.
+     */
+    CheckAlways: 2,
+    /**
+     * `Detached` means that the change detector sub tree is not a part of the main tree and
+     * should be skipped.
+     */
+    Detached: 3,
+    /**
+     * `Errored` means that the change detector encountered an error checking a binding
+     * or calling a directive lifecycle method and is now in an inconsistent state. Change
+     * detectors in this state will no longer detect changes.
+     */
+    Errored: 4,
+    /**
+     * `Destroyed` means that the change detector is destroyed.
+     */
+    Destroyed: 5,
+};
 ChangeDetectorStatus[ChangeDetectorStatus.CheckOnce] = "CheckOnce";
 ChangeDetectorStatus[ChangeDetectorStatus.Checked] = "Checked";
 ChangeDetectorStatus[ChangeDetectorStatus.CheckAlways] = "CheckAlways";
@@ -443,6 +483,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === ChangeDetectionStrategy.Default;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -486,7 +527,7 @@ function ComponentDecorator() { }
  */
 var Component = makeDecorator('Component', function (c) {
     if (c === void 0) { c = {}; }
-    return (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
+    return (__assign({ changeDetection: ChangeDetectionStrategy.Default }, c));
 }, Directive);
 /**
  * Type of the Pipe decorator / constructor function.
@@ -494,19 +535,21 @@ var Component = makeDecorator('Component', function (c) {
  * \@stable
  * @record
  */
+
 /**
  * Pipe decorator and metadata.
  *
  * \@stable
  * \@Annotation
  */
-var Pipe = makeDecorator('Pipe', function (p) { return (Object.assign({ pure: true }, p)); });
+var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); });
 /**
  * Type of the Input decorator / constructor function.
  *
  * \@stable
  * @record
  */
+
 /**
  * Input decorator and metadata.
  *
@@ -520,6 +563,7 @@ var Input = makePropDecorator('Input', function (bindingPropertyName) { return (
  * \@stable
  * @record
  */
+
 /**
  * Output decorator and metadata.
  *
@@ -533,6 +577,7 @@ var Output = makePropDecorator('Output', function (bindingPropertyName) { return
  * \@stable
  * @record
  */
+
 /**
  * HostBinding decorator and metadata.
  *
@@ -546,6 +591,7 @@ var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) {
  * \@stable
  * @record
  */
+
 /**
  * HostListener decorator and metadata.
  *
@@ -553,6 +599,7 @@ var HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) {
  * \@Annotation
  */
 var HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -686,6 +733,7 @@ function AfterViewInit() { }
  * @record
  */
 function AfterViewChecked() { }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -729,6 +777,7 @@ var NO_ERRORS_SCHEMA = {
  * \@stable
  * @record
  */
+
 /**
  * NgModule decorator and metadata.
  *
@@ -736,21 +785,43 @@ var NO_ERRORS_SCHEMA = {
  * \@Annotation
  */
 var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; });
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var ViewEncapsulation = {};
-ViewEncapsulation.Emulated = 0;
-ViewEncapsulation.Native = 1;
-ViewEncapsulation.None = 2;
+/** @enum {number} */
+var ViewEncapsulation = {
+    /**
+     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+     * Element and pre-processing the style rules provided via
+     * {@link Component#styles} or {@link Component#styleUrls}, and adding the new Host Element
+     * attribute to all selectors.
+     *
+     * This is the default option.
+     */
+    Emulated: 0,
+    /**
+     * Use the native encapsulation mechanism of the renderer.
+     *
+     * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     */
+    Native: 1,
+    /**
+     * Don't provide any template or style encapsulation.
+     */
+    None: 2,
+};
 ViewEncapsulation[ViewEncapsulation.Emulated] = "Emulated";
 ViewEncapsulation[ViewEncapsulation.Native] = "Native";
 ViewEncapsulation[ViewEncapsulation.None] = "None";
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -760,10 +831,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  *
  * \@stable
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ var Version = (function () {
+var Version = (function () {
     /**
      * @param {?} full
      */
@@ -799,7 +867,8 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.5-ee04217');
+var VERSION = new Version('5.0.0-beta.5-fd701b0');
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -895,6 +964,7 @@ function HostDecorator() { }
  * \@Annotation
  */
 var Host = makeParamDecorator('Host');
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -910,9 +980,9 @@ var _symbolIterator = null;
  */
 function getSymbolIterator() {
     if (!_symbolIterator) {
-        var /** @type {?} */ Symbol = _global['Symbol'];
-        if (Symbol && Symbol.iterator) {
-            _symbolIterator = Symbol.iterator;
+        var /** @type {?} */ Symbol_1 = _global['Symbol'];
+        if (Symbol_1 && Symbol_1.iterator) {
+            _symbolIterator = Symbol_1.iterator;
         }
         else {
             // es6-shim specific logic
@@ -970,6 +1040,7 @@ function stringify(token) {
     var /** @type {?} */ newLineIndex = res.indexOf('\n');
     return newLineIndex === -1 ? res : res.substring(0, newLineIndex);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1026,6 +1097,7 @@ function resolveForwardRef(type) {
         return type;
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1102,6 +1174,13 @@ var GET_PROPERTY_NAME = ({});
 var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
 var NG_TOKEN_PATH = 'ngTokenPath';
 var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+/** @enum {number} */
+var OptionFlags = {
+    Optional: 1,
+    CheckSelf: 2,
+    CheckParent: 4,
+    Default: 6,
+};
 var NULL_INJECTOR = Injector.NULL;
 var NEW_LINE = /\n/gm;
 var NO_NEW_LINE = 'ɵ';
@@ -1228,7 +1307,7 @@ function recursivelyProcessProviders(records, provider) {
                 }
                 // Treat the provider as the token.
                 token = provider;
-                multiProvider.deps.push({ token: token, options: 6 /* Default */ });
+                multiProvider.deps.push({ token: token, options: OptionFlags.Default });
             }
             var /** @type {?} */ record = records.get(token);
             if (record && record.fn == MULTI_PROVIDER_FN) {
@@ -1296,7 +1375,7 @@ function resolveToken(token, record, records, parent, notFoundValue) {
                 for (var /** @type {?} */ i = 0; i < depRecords.length; i++) {
                     var /** @type {?} */ depRecord = depRecords[i];
                     var /** @type {?} */ options = depRecord.options;
-                    var /** @type {?} */ childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
+                    var /** @type {?} */ childRecord = options & OptionFlags.CheckSelf ? records.get(depRecord.token) : undefined;
                     deps.push(tryResolveToken(
                     // Current Token to resolve
                     depRecord.token, 
@@ -1307,16 +1386,17 @@ function resolveToken(token, record, records, parent, notFoundValue) {
                     records, 
                     // If we don't know how to resolve dependency and we should not check parent for it,
                     // than pass in Null injector.
-                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND));
+                    !childRecord && !(options & OptionFlags.CheckParent) ? NULL_INJECTOR : parent, options & OptionFlags.Optional ? null : Injector.THROW_IF_NOT_FOUND));
                 }
             }
-            record.value = value = useNew ? new (((fn)).bind.apply(((fn)), [void 0].concat(deps)))() : fn.apply(obj, deps);
+            record.value = value = useNew ? new ((_a = ((fn))).bind.apply(_a, [void 0].concat(deps)))() : fn.apply(obj, deps);
         }
     }
     else {
         value = parent.get(token, notFoundValue);
     }
     return value;
+    var _a;
 }
 /**
  * @param {?} provider
@@ -1328,19 +1408,19 @@ function computeDeps(provider) {
     if (providerDeps && providerDeps.length) {
         deps = [];
         for (var /** @type {?} */ i = 0; i < providerDeps.length; i++) {
-            var /** @type {?} */ options = 6;
+            var /** @type {?} */ options = OptionFlags.Default;
             var /** @type {?} */ token = resolveForwardRef(providerDeps[i]);
             if (token instanceof Array) {
                 for (var /** @type {?} */ j = 0, /** @type {?} */ annotations = token; j < annotations.length; j++) {
                     var /** @type {?} */ annotation = annotations[j];
                     if (annotation instanceof Optional || annotation == Optional) {
-                        options = options | 1 /* Optional */;
+                        options = options | OptionFlags.Optional;
                     }
                     else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
-                        options = options & ~2 /* CheckSelf */;
+                        options = options & ~OptionFlags.CheckSelf;
                     }
                     else if (annotation instanceof Self || annotation == Self) {
-                        options = options & ~4 /* CheckParent */;
+                        options = options & ~OptionFlags.CheckParent;
                     }
                     else if (annotation instanceof Inject) {
                         token = ((annotation)).token;
@@ -1355,7 +1435,7 @@ function computeDeps(provider) {
     }
     else if (((provider)).useExisting) {
         var /** @type {?} */ token = resolveForwardRef(((provider)).useExisting);
-        deps = [{ token: token, options: 6 /* Default */ }];
+        deps = [{ token: token, options: OptionFlags.Default }];
     }
     else if (!providerDeps && !(USE_VALUE in provider)) {
         // useValue & useExisting are the only ones which are exempt from deps all others need it.
@@ -1407,10 +1487,12 @@ function getClosureSafeProperty(objWithPropertyToExtract) {
     }
     throw Error('!prop');
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+
 var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 var ERROR_LOGGER = 'ngErrorLogger';
@@ -1418,6 +1500,7 @@ var ERROR_LOGGER = 'ngErrorLogger';
  * @param {?} error
  * @return {?}
  */
+
 /**
  * @param {?} error
  * @return {?}
@@ -1451,6 +1534,7 @@ function defaultErrorLogger(console) {
     }
     console.error.apply(console, values);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1550,6 +1634,7 @@ function wrappedError(message, originalError) {
     ((error))[ERROR_ORIGINAL_ERROR] = originalError;
     return error;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1591,6 +1676,7 @@ function constructResolvingPath(keys) {
 /**
  * @record
  */
+
 /**
  * @param {?} injector
  * @param {?} key
@@ -1804,6 +1890,7 @@ function outOfBoundsError(index) {
 function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
     return Error("Cannot mix multi providers and regular providers, got: " + provider1 + " " + provider2);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1903,6 +1990,7 @@ var KeyRegistry = (function () {
     return KeyRegistry;
 }());
 var _globalKeyRegistry = new KeyRegistry();
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -1928,6 +2016,7 @@ var _globalKeyRegistry = new KeyRegistry();
 function isType(v) {
     return typeof v === 'function';
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2026,7 +2115,9 @@ var ReflectionCapabilities = (function () {
             // Retain the non-function case for compatibility with older tsickle
             var /** @type {?} */ ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
             var /** @type {?} */ paramTypes_1 = ctorParameters.map(function (ctorParam) { return ctorParam && ctorParam.type; });
-            var /** @type {?} */ paramAnnotations_1 = ctorParameters.map(function (ctorParam) { return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators); });
+            var /** @type {?} */ paramAnnotations_1 = ctorParameters.map(function (ctorParam) {
+                return ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators);
+            });
             return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
         }
         // API for metadata created by invoking the decorators.
@@ -2245,6 +2336,7 @@ function getParentCtor(ctor) {
     // to simplify checking later on.
     return parentCtor || Object;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2252,6 +2344,7 @@ function getParentCtor(ctor) {
 /**
  * @record
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2351,6 +2444,7 @@ var Reflector = (function () {
     };
     return Reflector;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2367,6 +2461,7 @@ var Reflector = (function () {
  * about symbols.
  */
 var reflector = new Reflector(new ReflectionCapabilities());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -2649,6 +2744,7 @@ function _extractToken(typeOrFunc, metadata, params) {
 function _createDependency(token, optional, visibility) {
     return new ReflectiveDependency(ReflectiveKey.get(token), optional, visibility);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3064,6 +3160,7 @@ function _mapProviders(injector, fn) {
     }
     return res;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3109,6 +3206,7 @@ function ValueProvider() { }
  * \@stable
  * @record
  */
+
 /**
  * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
  * \@howToUse
@@ -3129,6 +3227,7 @@ function ValueProvider() { }
  * \@stable
  * @record
  */
+
 /**
  * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
  * \@howToUse
@@ -3221,6 +3320,7 @@ function TypeProvider() { }
  * @record
  */
 function ClassProvider() { }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3237,6 +3337,7 @@ function ClassProvider() { }
  * @description
  * The `di` module provides dependency injection container services.
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3260,6 +3361,7 @@ function isObservable(obj) {
     // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
     return !!obj && typeof obj.subscribe === 'function';
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3348,6 +3450,7 @@ ApplicationInitStatus.decorators = [
 ApplicationInitStatus.ctorParameters = function () { return [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
 ]; };
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3415,6 +3518,7 @@ var APP_BOOTSTRAP_LISTENER = new InjectionToken('appBootstrapListener');
  * \@experimental
  */
 var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3452,6 +3556,7 @@ Console.decorators = [
 ];
 /** @nocollapse */
 Console.ctorParameters = function () { return []; };
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3577,6 +3682,7 @@ var CompilerFactory = (function () {
     }
     return CompilerFactory;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3604,6 +3710,7 @@ var ComponentFactory = (function () {
     }
     return ComponentFactory;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3622,6 +3729,7 @@ var ERROR_COMPONENT = 'ngComponent';
  * @param {?} error
  * @return {?}
  */
+
 var _NullComponentFactoryResolver = (function () {
     function _NullComponentFactoryResolver() {
     }
@@ -3678,7 +3786,7 @@ var CodegenComponentFactoryResolver = (function () {
     return CodegenComponentFactoryResolver;
 }());
 var ComponentFactoryBoundToModule = (function (_super) {
-    tslib_1.__extends(ComponentFactoryBoundToModule, _super);
+    __extends(ComponentFactoryBoundToModule, _super);
     /**
      * @param {?} factory
      * @param {?} ngModule
@@ -3741,6 +3849,7 @@ var ComponentFactoryBoundToModule = (function (_super) {
     };
     return ComponentFactoryBoundToModule;
 }(ComponentFactory));
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3762,6 +3871,7 @@ var NgModuleRef = (function () {
 /**
  * @record
  */
+
 /**
  * \@experimental
  * @abstract
@@ -3771,6 +3881,7 @@ var NgModuleFactory = (function () {
     }
     return NgModuleFactory;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3792,9 +3903,11 @@ function WtfScopeFn() { }
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 var trace;
 var events;
 /**
@@ -3845,6 +3958,7 @@ function startTimeRange(rangeType, action) {
 function endTimeRange(range) {
     trace.endTimeRange(range);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3930,6 +4044,7 @@ var wtfStartTimeRange = wtfEnabled ? startTimeRange : function (rangeType, actio
  * \@experimental
  */
 var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -3989,7 +4104,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  * \@stable
  */
 var EventEmitter = (function (_super) {
-    tslib_1.__extends(EventEmitter, _super);
+    __extends(EventEmitter, _super);
     /**
      * Creates an instance of {\@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
@@ -4047,6 +4162,7 @@ var EventEmitter = (function (_super) {
     };
     return EventEmitter;
 }(Subject));
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4275,6 +4391,7 @@ var NgZone = (function () {
  * @return {?}
  */
 function noop() { }
+
 var EMPTY_PAYLOAD = {};
 /**
  * @param {?} zone
@@ -4365,6 +4482,7 @@ function onLeave(zone) {
     zone._nesting--;
     checkStable(zone);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4596,6 +4714,7 @@ function setTestabilityGetter(getter) {
     _testabilityGetter = getter;
 }
 var _testabilityGetter = new _NoopGetTestability();
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -4784,7 +4903,7 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
  * @suppress {checkTypes}
  */
 var PlatformRef_ = (function (_super) {
-    tslib_1.__extends(PlatformRef_, _super);
+    __extends(PlatformRef_, _super);
     /**
      * @param {?} _injector
      */
@@ -4860,7 +4979,7 @@ var PlatformRef_ = (function (_super) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); }); /** @type {?} */
-            ((ngZone)).runOutsideAngular(function () { return ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
+            ((ngZone)).runOutsideAngular(function () { /** @type {?} */ return ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
             return _callAndReportToErrorHandler(exceptionHandler, /** @type {?} */ ((ngZone)), function () {
                 var /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 initStatus.runInitializers();
@@ -4939,7 +5058,7 @@ var ApplicationRef = (function () {
  * @suppress {checkTypes}
  */
 var ApplicationRef_ = (function (_super) {
-    tslib_1.__extends(ApplicationRef_, _super);
+    __extends(ApplicationRef_, _super);
     /**
      * @param {?} _zone
      * @param {?} _console
@@ -5175,6 +5294,7 @@ function remove(list, el) {
         list.splice(index, 1);
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5187,6 +5307,7 @@ function remove(list, el) {
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for Zone
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5279,9 +5400,11 @@ var RendererFactory2 = (function () {
     }
     return RendererFactory2;
 }());
-var RendererStyleFlags2 = {};
-RendererStyleFlags2.Important = 1;
-RendererStyleFlags2.DashCase = 2;
+/** @enum {number} */
+var RendererStyleFlags2 = {
+    Important: 1,
+    DashCase: 2,
+};
 RendererStyleFlags2[RendererStyleFlags2.Important] = "Important";
 RendererStyleFlags2[RendererStyleFlags2.DashCase] = "DashCase";
 /**
@@ -5293,6 +5416,7 @@ var Renderer2 = (function () {
     }
     return Renderer2;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5305,14 +5429,12 @@ var Renderer2 = (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for render
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ var ElementRef = (function () {
+var ElementRef = (function () {
     /**
      * @param {?} nativeElement
      */
@@ -5321,6 +5443,7 @@ var Renderer2 = (function () {
     }
     return ElementRef;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5353,6 +5476,7 @@ function registerModuleFactory(id, factory) {
 /**
  * @return {?}
  */
+
 /**
  * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
  * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
@@ -5367,6 +5491,7 @@ function getModuleFactory(id) {
         throw new Error("No module with ID " + id + " loaded");
     return factory;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5537,6 +5662,7 @@ function flatten(list) {
         return ((flat)).concat(flatItem);
     }, []);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5639,6 +5765,7 @@ function checkNotEmpty(value, modulePath, exportName) {
     }
     return value;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5662,6 +5789,7 @@ var TemplateRef = (function () {
     }
     return TemplateRef;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5690,6 +5818,7 @@ var ViewContainerRef = (function () {
     }
     return ViewContainerRef;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5698,14 +5827,12 @@ var ViewContainerRef = (function () {
  * \@stable
  * @abstract
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ var ChangeDetectorRef = (function () {
+var ChangeDetectorRef = (function () {
     function ChangeDetectorRef() {
     }
     return ChangeDetectorRef;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5715,7 +5842,7 @@ var ViewContainerRef = (function () {
  * @abstract
  */
 var ViewRef = (function (_super) {
-    tslib_1.__extends(ViewRef, _super);
+    __extends(ViewRef, _super);
     function ViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -5777,7 +5904,7 @@ var ViewRef = (function (_super) {
  * @abstract
  */
 var EmbeddedViewRef = (function (_super) {
-    tslib_1.__extends(EmbeddedViewRef, _super);
+    __extends(EmbeddedViewRef, _super);
     function EmbeddedViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -5786,6 +5913,7 @@ var EmbeddedViewRef = (function (_super) {
 /**
  * @record
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5798,6 +5926,7 @@ var EmbeddedViewRef = (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  */
 // Public API for compiler
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -5811,7 +5940,7 @@ var EventListener = (function () {
         this.name = name;
         this.callback = callback;
     }
-    ;
+    
     return EventListener;
 }());
 /**
@@ -5880,7 +6009,7 @@ var DebugNode = (function () {
  * \@experimental All debugging apis are currently experimental.
  */
 var DebugElement = (function (_super) {
-    tslib_1.__extends(DebugElement, _super);
+    __extends(DebugElement, _super);
     /**
      * @param {?} nativeNode
      * @param {?} parent
@@ -6059,6 +6188,7 @@ function getDebugNode(nativeNode) {
 /**
  * @return {?}
  */
+
 /**
  * @param {?} node
  * @return {?}
@@ -6081,6 +6211,7 @@ function removeDebugNodeFromIndex(node) {
  * @record
  */
 function Predicate() { }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -6250,6 +6381,7 @@ function iterateListLike(obj, fn) {
 function isJsObject(o) {
     return o !== null && (typeof o === 'function' || typeof o === 'object');
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7107,6 +7239,7 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
     }
     return previousIndex + addRemoveOffset + moveOffset;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7452,6 +7585,7 @@ var KeyValueChangeRecord_ = (function () {
     }
     return KeyValueChangeRecord_;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7591,6 +7725,7 @@ var IterableDiffers = (function () {
 function getTypeNameForDebugging(type) {
     return type['name'] || typeof type;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7705,6 +7840,7 @@ var KeyValueDiffers = (function () {
     };
     return KeyValueDiffers;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7743,6 +7879,7 @@ var KeyValueDiffers = (function () {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */ function PipeTransform() { }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7764,6 +7901,7 @@ var keyValDiff = [new DefaultKeyValueDifferFactory()];
 var iterableDiff = [new DefaultIterableDifferFactory()];
 var defaultIterableDiffers = new IterableDiffers(iterableDiff);
 var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7780,6 +7918,7 @@ var defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  * @description
  * Change detection enables data binding in Angular.
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7805,6 +7944,7 @@ var _CORE_PLATFORM_PROVIDERS = [
  * \@experimental
  */
 var platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7828,13 +7968,16 @@ var TRANSLATIONS = new InjectionToken('Translations');
  * \@experimental i18n support is experimental.
  */
 var TRANSLATIONS_FORMAT = new InjectionToken('TranslationsFormat');
-var MissingTranslationStrategy = {};
-MissingTranslationStrategy.Error = 0;
-MissingTranslationStrategy.Warning = 1;
-MissingTranslationStrategy.Ignore = 2;
+/** @enum {number} */
+var MissingTranslationStrategy = {
+    Error: 0,
+    Warning: 1,
+    Ignore: 2,
+};
 MissingTranslationStrategy[MissingTranslationStrategy.Error] = "Error";
 MissingTranslationStrategy[MissingTranslationStrategy.Warning] = "Warning";
 MissingTranslationStrategy[MissingTranslationStrategy.Ignore] = "Ignore";
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7901,17 +8044,20 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = function () { return [
     { type: ApplicationRef, },
 ]; };
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var SecurityContext = {};
-SecurityContext.NONE = 0;
-SecurityContext.HTML = 1;
-SecurityContext.STYLE = 2;
-SecurityContext.SCRIPT = 3;
-SecurityContext.URL = 4;
-SecurityContext.RESOURCE_URL = 5;
+/** @enum {number} */
+var SecurityContext = {
+    NONE: 0,
+    HTML: 1,
+    STYLE: 2,
+    SCRIPT: 3,
+    URL: 4,
+    RESOURCE_URL: 5,
+};
 SecurityContext[SecurityContext.NONE] = "NONE";
 SecurityContext[SecurityContext.HTML] = "HTML";
 SecurityContext[SecurityContext.STYLE] = "STYLE";
@@ -7929,6 +8075,7 @@ var Sanitizer = (function () {
     }
     return Sanitizer;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -7940,21 +8087,27 @@ var Sanitizer = (function () {
  * logs.
  * @record
  */
+
 /**
  * Function to call console.error at the right source location. This is an indirection
  * via another function as browser will log the location that actually called
  * `console.error`.
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
+
 /**
  * @record
  */
@@ -7962,15 +8115,26 @@ function ViewDefinition() { }
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
+/** @enum {number} */
+var ArgumentType = { Inline: 0, Dynamic: 1, };
 /**
  * @record
  */
+
+/** @enum {number} */
+var ViewFlags = {
+    None: 0,
+    OnPush: 2,
+};
 /**
  * A node definition in the view.
  *
@@ -7978,67 +8142,157 @@ function ViewDefinition() { }
  * of a ViewDefinition stay monomorphic!
  * @record
  */
+
+/** @enum {number} */
+var NodeFlags = {
+    None: 0,
+    TypeElement: 1,
+    TypeText: 2,
+    ProjectedTemplate: 4,
+    CatRenderNode: 3,
+    TypeNgContent: 8,
+    TypePipe: 16,
+    TypePureArray: 32,
+    TypePureObject: 64,
+    TypePurePipe: 128,
+    CatPureExpression: 224,
+    TypeValueProvider: 256,
+    TypeClassProvider: 512,
+    TypeFactoryProvider: 1024,
+    TypeUseExistingProvider: 2048,
+    LazyProvider: 4096,
+    PrivateProvider: 8192,
+    TypeDirective: 16384,
+    Component: 32768,
+    CatProviderNoDirective: 3840,
+    CatProvider: 20224,
+    OnInit: 65536,
+    OnDestroy: 131072,
+    DoCheck: 262144,
+    OnChanges: 524288,
+    AfterContentInit: 1048576,
+    AfterContentChecked: 2097152,
+    AfterViewInit: 4194304,
+    AfterViewChecked: 8388608,
+    EmbeddedViews: 16777216,
+    ComponentView: 33554432,
+    TypeContentQuery: 67108864,
+    TypeViewQuery: 134217728,
+    StaticQuery: 268435456,
+    DynamicQuery: 536870912,
+    CatQuery: 201326592,
+    // mutually exclusive values...
+    Types: 201347067,
+};
 /**
  * @record
  */
+
+/** @enum {number} */
+var BindingFlags = {
+    TypeElementAttribute: 1,
+    TypeElementClass: 2,
+    TypeElementStyle: 4,
+    TypeProperty: 8,
+    SyntheticProperty: 16,
+    SyntheticHostProperty: 32,
+    CatSyntheticProperty: 48,
+    // mutually exclusive values...
+    Types: 15,
+};
 /**
  * @record
  */
+
+/** @enum {number} */
+var OutputType = { ElementOutput: 0, DirectiveOutput: 1, };
+/** @enum {number} */
+var QueryValueType = {
+    ElementRef: 0,
+    RenderElement: 1,
+    TemplateRef: 2,
+    ViewContainerRef: 3,
+    Provider: 4,
+};
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
+/** @enum {number} */
+var DepFlags = {
+    None: 0,
+    SkipSelf: 1,
+    Optional: 2,
+    Value: 8,
+};
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
+/** @enum {number} */
+var QueryBindingType = { First: 0, All: 1, };
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * View instance data.
  * Attention: Adding fields to this is performance sensitive!
  * @record
  */
+
+/** @enum {number} */
+var ViewState = {
+    BeforeFirstCheck: 1,
+    FirstCheck: 2,
+    Attached: 4,
+    ChecksEnabled: 8,
+    IsProjectedView: 16,
+    CheckProjectedView: 32,
+    CheckProjectedViews: 64,
+    Destroyed: 128,
+    CatDetectChanges: 12,
+    CatInit: 13,
+};
 /**
  * @record
  */
-/**
- * Node instance data.
- *
- * We have a separate type per NodeType to save memory
- * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
- *
- * To keep our code monomorphic,
- * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
- * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
- * purposes.
- */
+
 /**
  * Data for an instantiated NodeType.Text.
  *
  * Attention: Adding fields to this is performance sensitive!
  * @record
  */
+
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -8054,12 +8308,15 @@ function asTextData(view, index) {
  * Attention: Adding fields to this is performance sensitive!
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * @record
  */
+
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -8075,6 +8332,7 @@ function asElementData(view, index) {
  * Attention: Adding fields to this is performance sensitive!
  * @record
  */
+
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -8090,6 +8348,7 @@ function asProviderData(view, index) {
  * Attention: Adding fields to this is performance sensitive!
  * @record
  */
+
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
  * @param {?} view
@@ -8111,6 +8370,7 @@ function asQueryList(view, index) {
 /**
  * @record
  */
+
 /**
  * @abstract
  */
@@ -8119,9 +8379,12 @@ var DebugContext = (function () {
     }
     return DebugContext;
 }());
+/** @enum {number} */
+var CheckType = { CheckAndUpdate: 0, CheckNoChanges: 1, };
 /**
  * @record
  */
+
 /**
  * This object is used to prevent cycles in the source files and to have a place where
  * debug mode can hook it. It is lazily filled when `isDevMode` is known.
@@ -8144,6 +8407,7 @@ var Services = {
     updateRenderer: /** @type {?} */ ((undefined)),
     dirtyParentQueries: /** @type {?} */ ((undefined)),
 };
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -8218,6 +8482,7 @@ function isViewDebugError(err) {
 function viewDestroyedError(action) {
     return new Error("ViewDestroyedError: Attempt to use a destroyed view: " + action);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -8307,7 +8572,7 @@ function resolveRendererType2(type) {
  */
 function checkBinding(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValues = view.oldValues;
-    if ((view.state & 2 /* FirstCheck */) ||
+    if ((view.state & ViewState.FirstCheck) ||
         !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
         return true;
     }
@@ -8336,8 +8601,8 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
  */
 function checkBindingNoChanges(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
+    if ((view.state & ViewState.BeforeFirstCheck) || !devModeEqual(oldValue, value)) {
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.BeforeFirstCheck) !== 0);
     }
 }
 /**
@@ -8347,8 +8612,8 @@ function checkBindingNoChanges(view, def, bindingIdx, value) {
 function markParentViewsForCheck(view) {
     var /** @type {?} */ currView = view;
     while (currView) {
-        if (currView.def.flags & 2 /* OnPush */) {
-            currView.state |= 8 /* ChecksEnabled */;
+        if (currView.def.flags & ViewFlags.OnPush) {
+            currView.state |= ViewState.ChecksEnabled;
         }
         currView = currView.viewContainerParent || currView.parent;
     }
@@ -8361,7 +8626,7 @@ function markParentViewsForCheck(view) {
 function markParentViewsForCheckProjectedViews(view, endView) {
     var /** @type {?} */ currView = view;
     while (currView && currView !== endView) {
-        currView.state |= 64 /* CheckProjectedViews */;
+        currView.state |= ViewState.CheckProjectedViews;
         currView = currView.viewContainerParent || currView.parent;
     }
 }
@@ -8375,7 +8640,7 @@ function markParentViewsForCheckProjectedViews(view, endView) {
 function dispatchEvent(view, nodeIndex, eventName, event) {
     try {
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        var /** @type {?} */ startView = nodeDef.flags & 33554432 /* ComponentView */ ?
+        var /** @type {?} */ startView = nodeDef.flags & NodeFlags.ComponentView ?
             asElementData(view, nodeIndex).componentView :
             view;
         markParentViewsForCheck(startView);
@@ -8419,10 +8684,10 @@ function viewParentEl(view) {
  * @return {?}
  */
 function renderNode(view, def) {
-    switch (def.flags & 201347067 /* Types */) {
-        case 1 /* TypeElement */:
+    switch (def.flags & NodeFlags.Types) {
+        case NodeFlags.TypeElement:
             return asElementData(view, def.index).renderElement;
-        case 2 /* TypeText */:
+        case NodeFlags.TypeText:
             return asTextData(view, def.index).renderText;
     }
 }
@@ -8439,14 +8704,14 @@ function elementEventFullName(target, name) {
  * @return {?}
  */
 function isComponentView(view) {
-    return !!view.parent && !!(((view.parentNodeDef)).flags & 32768 /* Component */);
+    return !!view.parent && !!(((view.parentNodeDef)).flags & NodeFlags.Component);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function isEmbeddedView(view) {
-    return !!view.parent && !(((view.parentNodeDef)).flags & 32768 /* Component */);
+    return !!view.parent && !(((view.parentNodeDef)).flags & NodeFlags.Component);
 }
 /**
  * @param {?} queryId
@@ -8489,7 +8754,7 @@ function splitDepsDsl(deps) {
             flags = value[0], token = value[1];
         }
         else {
-            flags = 0 /* None */;
+            flags = DepFlags.None;
             token = value;
         }
         return { flags: flags, token: token, tokenKey: tokenKey(token) };
@@ -8504,8 +8769,8 @@ function splitDepsDsl(deps) {
 function getParentRenderElement(view, renderHost, def) {
     var /** @type {?} */ renderParent = def.renderParent;
     if (renderParent) {
-        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
-            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
+        if ((renderParent.flags & NodeFlags.TypeElement) === 0 ||
+            (renderParent.flags & NodeFlags.ComponentView) === 0 ||
             (((renderParent.element)).componentRendererType && ((((renderParent.element)).componentRendererType)).encapsulation ===
                 ViewEncapsulation.Native)) {
             // only children of non components, or children of components with native encapsulation should
@@ -8538,9 +8803,11 @@ function resolveDefinition(factory) {
  */
 function rootRenderNodes(view) {
     var /** @type {?} */ renderNodes = [];
-    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
+    visitRootRenderNodes(view, RenderNodeAction.Collect, undefined, undefined, renderNodes);
     return renderNodes;
 }
+/** @enum {number} */
+var RenderNodeAction = { Collect: 0, AppendChild: 1, InsertBefore: 2, RemoveChild: 3, };
 /**
  * @param {?} view
  * @param {?} action
@@ -8551,7 +8818,7 @@ function rootRenderNodes(view) {
  */
 function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
     // We need to re-compute the parent node in case the nodes have been moved around manually
-    if (action === 3 /* RemoveChild */) {
+    if (action === RenderNodeAction.RemoveChild) {
         parentNode = view.renderer.parentNode(renderNode(view, /** @type {?} */ ((view.def.lastRenderRootNode))));
     }
     visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
@@ -8569,7 +8836,7 @@ function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
 function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
     for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
+        if (nodeDef.flags & (NodeFlags.TypeElement | NodeFlags.TypeText | NodeFlags.TypeNgContent)) {
             visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
         }
         // jump to next sibling
@@ -8622,18 +8889,18 @@ function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nex
  * @return {?}
  */
 function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-    if (nodeDef.flags & 8 /* TypeNgContent */) {
+    if (nodeDef.flags & NodeFlags.TypeNgContent) {
         visitProjectedRenderNodes(view, /** @type {?} */ ((nodeDef.ngContent)).index, action, parentNode, nextSibling, target);
     }
     else {
         var /** @type {?} */ rn = renderNode(view, nodeDef);
-        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
-            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
+        if (action === RenderNodeAction.RemoveChild && (nodeDef.flags & NodeFlags.ComponentView) &&
+            (nodeDef.bindingFlags & BindingFlags.CatSyntheticProperty)) {
             // Note: we might need to do both actions.
-            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
+            if (nodeDef.bindingFlags & (BindingFlags.SyntheticProperty)) {
                 execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
             }
-            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
+            if (nodeDef.bindingFlags & (BindingFlags.SyntheticHostProperty)) {
                 var /** @type {?} */ compView = asElementData(view, nodeDef.index).componentView;
                 execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
             }
@@ -8641,13 +8908,13 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
         else {
             execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
         }
-        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+        if (nodeDef.flags & NodeFlags.EmbeddedViews) {
             var /** @type {?} */ embeddedViews = ((asElementData(view, nodeDef.index).viewContainer))._embeddedViews;
             for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                 visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
             }
         }
-        if (nodeDef.flags & 1 /* TypeElement */ && !((nodeDef.element)).name) {
+        if (nodeDef.flags & NodeFlags.TypeElement && !((nodeDef.element)).name) {
             visitSiblingRenderNodes(view, action, nodeDef.index + 1, nodeDef.index + nodeDef.childCount, parentNode, nextSibling, target);
         }
     }
@@ -8664,16 +8931,16 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
 function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
     var /** @type {?} */ renderer = view.renderer;
     switch (action) {
-        case 1 /* AppendChild */:
+        case RenderNodeAction.AppendChild:
             renderer.appendChild(parentNode, renderNode);
             break;
-        case 2 /* InsertBefore */:
+        case RenderNodeAction.InsertBefore:
             renderer.insertBefore(parentNode, renderNode, nextSibling);
             break;
-        case 3 /* RemoveChild */:
+        case RenderNodeAction.RemoveChild:
             renderer.removeChild(parentNode, renderNode);
             break;
-        case 0 /* Collect */:
+        case RenderNodeAction.Collect:
             ((target)).push(renderNode);
             break;
     }
@@ -8779,6 +9046,7 @@ function _toStringWithNull(v) {
 }
 var EMPTY_ARRAY = [];
 var EMPTY_MAP = {};
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -8793,7 +9061,7 @@ var EMPTY_MAP = {};
  * @return {?}
  */
 function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
-    flags |= 1 /* TypeElement */;
+    flags |= NodeFlags.TypeElement;
     var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
     var /** @type {?} */ template = templateFactory ? resolveDefinition(templateFactory) : null;
     return {
@@ -8860,12 +9128,12 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         var _d = splitNamespace(namespaceAndName_1), ns_1 = _d[0], name_1 = _d[1];
         var /** @type {?} */ securityContext = ((undefined));
         var /** @type {?} */ suffix = ((undefined));
-        switch (bindingFlags & 15 /* Types */) {
-            case 4 /* TypeElementStyle */:
+        switch (bindingFlags & BindingFlags.Types) {
+            case BindingFlags.TypeElementStyle:
                 suffix = (suffixOrSecurityContext);
                 break;
-            case 1 /* TypeElementAttribute */:
-            case 8 /* TypeProperty */:
+            case BindingFlags.TypeElementAttribute:
+            case BindingFlags.TypeProperty:
                 securityContext = (suffixOrSecurityContext);
                 break;
         }
@@ -8877,7 +9145,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     for (var /** @type {?} */ i = 0; i < outputs.length; i++) {
         var _e = outputs[i], target = _e[0], eventName = _e[1];
         outputDefs[i] = {
-            type: 0 /* ElementOutput */,
+            type: OutputType.ElementOutput,
             target: /** @type {?} */ (target), eventName: eventName,
             propName: null
         };
@@ -8890,9 +9158,9 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     }));
     componentRendererType = resolveRendererType2(componentRendererType);
     if (componentView) {
-        flags |= 33554432 /* ComponentView */;
+        flags |= NodeFlags.ComponentView;
     }
-    flags |= 1 /* TypeElement */;
+    flags |= NodeFlags.TypeElement;
     return {
         // will bet set by the view definition
         index: -1,
@@ -8956,8 +9224,8 @@ function createElement(view, renderHost, def) {
     }
     if (elDef.attrs) {
         for (var /** @type {?} */ i = 0; i < elDef.attrs.length; i++) {
-            var _a = elDef.attrs[i], ns = _a[0], name = _a[1], value = _a[2];
-            renderer.setAttribute(el, name, value, ns);
+            var _a = elDef.attrs[i], ns = _a[0], name_2 = _a[1], value = _a[2];
+            renderer.setAttribute(el, name_2, value, ns);
         }
     }
     return el;
@@ -9061,19 +9329,19 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     var /** @type {?} */ elData = asElementData(view, def.index);
     var /** @type {?} */ renderNode$$1 = elData.renderElement;
     var /** @type {?} */ name = ((binding.name));
-    switch (binding.flags & 15 /* Types */) {
-        case 1 /* TypeElementAttribute */:
+    switch (binding.flags & BindingFlags.Types) {
+        case BindingFlags.TypeElementAttribute:
             setElementAttribute(view, binding, renderNode$$1, binding.ns, name, value);
             break;
-        case 2 /* TypeElementClass */:
+        case BindingFlags.TypeElementClass:
             setElementClass(view, renderNode$$1, name, value);
             break;
-        case 4 /* TypeElementStyle */:
+        case BindingFlags.TypeElementStyle:
             setElementStyle(view, binding, renderNode$$1, name, value);
             break;
-        case 8 /* TypeProperty */:
-            var /** @type {?} */ bindView = (def.flags & 33554432 /* ComponentView */ &&
-                binding.flags & 32 /* SyntheticHostProperty */) ?
+        case BindingFlags.TypeProperty:
+            var /** @type {?} */ bindView = (def.flags & NodeFlags.ComponentView &&
+                binding.flags & BindingFlags.SyntheticHostProperty) ?
                 elData.componentView :
                 view;
             setElementProperty(bindView, binding, renderNode$$1, name, value);
@@ -9159,6 +9427,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
     var /** @type {?} */ renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
     view.renderer.setProperty(renderNode$$1, name, renderValue);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -9215,7 +9484,7 @@ function initNgModule(data) {
     var /** @type {?} */ providers = data._providers = new Array(def.providers.length);
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 :
+        providers[i] = provDef.flags & NodeFlags.LazyProvider ? NOT_CREATED$1 :
             _createProviderInstance$1(data, provDef);
     }
 }
@@ -9227,13 +9496,13 @@ function initNgModule(data) {
  */
 function resolveNgModuleDep(data, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-    if (depDef.flags & 8 /* Value */) {
+    if (depDef.flags & DepFlags.Value) {
         return depDef.token;
     }
-    if (depDef.flags & 2 /* Optional */) {
+    if (depDef.flags & DepFlags.Optional) {
         notFoundValue = null;
     }
-    if (depDef.flags & 1 /* SkipSelf */) {
+    if (depDef.flags & DepFlags.SkipSelf) {
         return data._parent.get(depDef.token, notFoundValue);
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
@@ -9260,17 +9529,17 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
  */
 function _createProviderInstance$1(ngModule, providerDef) {
     var /** @type {?} */ injectable;
-    switch (providerDef.flags & 201347067 /* Types */) {
-        case 512 /* TypeClassProvider */:
+    switch (providerDef.flags & NodeFlags.Types) {
+        case NodeFlags.TypeClassProvider:
             injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
             break;
-        case 1024 /* TypeFactoryProvider */:
+        case NodeFlags.TypeFactoryProvider:
             injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
             break;
-        case 2048 /* TypeUseExistingProvider */:
+        case NodeFlags.TypeUseExistingProvider:
             injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
             break;
-        case 256 /* TypeValueProvider */:
+        case NodeFlags.TypeValueProvider:
             injectable = providerDef.value;
             break;
     }
@@ -9349,7 +9618,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
     var /** @type {?} */ def = ngModule._def;
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        if (provDef.flags & 131072 /* OnDestroy */) {
+        if (provDef.flags & NodeFlags.OnDestroy) {
             var /** @type {?} */ instance = ngModule._providers[i];
             if (instance && instance !== NOT_CREATED$1) {
                 instance.ngOnDestroy();
@@ -9357,6 +9626,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
         }
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -9395,7 +9665,7 @@ function attachEmbeddedView(parentView, elementData, viewIndex, view) {
 function attachProjectedView(vcElementData, view) {
     var /** @type {?} */ dvcElementData = declaredViewContainer(view);
     if (!dvcElementData || dvcElementData === vcElementData ||
-        view.state & 16 /* IsProjectedView */) {
+        view.state & ViewState.IsProjectedView) {
         return;
     }
     // Note: For performance reasons, we
@@ -9405,7 +9675,7 @@ function attachProjectedView(vcElementData, view) {
     //    nested projected views as well, even accross component boundaries).
     // - don't track the insertion order of views in the projected views array
     //   (hard, as when the views of the same template are inserted different view containers)
-    view.state |= 16 /* IsProjectedView */;
+    view.state |= ViewState.IsProjectedView;
     var /** @type {?} */ projectedViews = dvcElementData.template._projectedViews;
     if (!projectedViews) {
         projectedViews = dvcElementData.template._projectedViews = [];
@@ -9421,14 +9691,14 @@ function attachProjectedView(vcElementData, view) {
  * @return {?}
  */
 function markNodeAsProjectedTemplate(viewDef, nodeDef) {
-    if (nodeDef.flags & 4 /* ProjectedTemplate */) {
+    if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
         return;
     }
-    viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
-    nodeDef.flags |= 4 /* ProjectedTemplate */;
+    viewDef.nodeFlags |= NodeFlags.ProjectedTemplate;
+    nodeDef.flags |= NodeFlags.ProjectedTemplate;
     var /** @type {?} */ parentNodeDef = nodeDef.parent;
     while (parentNodeDef) {
-        parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
+        parentNodeDef.childFlags |= NodeFlags.ProjectedTemplate;
         parentNodeDef = parentNodeDef.parent;
     }
 }
@@ -9458,7 +9728,7 @@ function detachEmbeddedView(elementData, viewIndex) {
  * @return {?}
  */
 function detachProjectedView(view) {
-    if (!(view.state & 16 /* IsProjectedView */)) {
+    if (!(view.state & ViewState.IsProjectedView)) {
         return;
     }
     var /** @type {?} */ dvcElementData = declaredViewContainer(view);
@@ -9505,14 +9775,14 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
     var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
     // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
     // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-    visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
+    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function renderDetachView(view) {
-    visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
+    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, null, null, undefined);
 }
 /**
  * @param {?} arr
@@ -9543,6 +9813,7 @@ function removeFromArray(arr, index) {
         arr.splice(index, 1);
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -9568,7 +9839,7 @@ function getComponentViewDefinitionFactory(componentFactory) {
     return ((componentFactory)).viewDefFactory;
 }
 var ComponentFactory_ = (function (_super) {
-    tslib_1.__extends(ComponentFactory_, _super);
+    __extends(ComponentFactory_, _super);
     /**
      * @param {?} selector
      * @param {?} componentType
@@ -9645,7 +9916,7 @@ var ComponentFactory_ = (function (_super) {
     return ComponentFactory_;
 }(ComponentFactory));
 var ComponentRef_ = (function (_super) {
-    tslib_1.__extends(ComponentRef_, _super);
+    __extends(ComponentRef_, _super);
     /**
      * @param {?} _view
      * @param {?} _viewRef
@@ -9685,7 +9956,7 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
+    
     Object.defineProperty(ComponentRef_.prototype, "hostView", {
         /**
          * @return {?}
@@ -9694,7 +9965,7 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
+    
     Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
         /**
          * @return {?}
@@ -9703,7 +9974,7 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
+    
     Object.defineProperty(ComponentRef_.prototype, "componentType", {
         /**
          * @return {?}
@@ -9810,7 +10081,7 @@ var ViewContainerRef_ = (function () {
         enumerable: true,
         configurable: true
     });
-    ;
+    
     /**
      * @template C
      * @param {?} templateRef
@@ -9932,7 +10203,7 @@ var ViewRef_ = (function () {
         /**
          * @return {?}
          */
-        get: function () { return (this._view.state & 128 /* Destroyed */) !== 0; },
+        get: function () { return (this._view.state & ViewState.Destroyed) !== 0; },
         enumerable: true,
         configurable: true
     });
@@ -9943,7 +10214,7 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.detach = function () { this._view.state &= ~4 /* Attached */; };
+    ViewRef_.prototype.detach = function () { this._view.state &= ~ViewState.Attached; };
     /**
      * @return {?}
      */
@@ -9964,7 +10235,7 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.reattach = function () { this._view.state |= 4 /* Attached */; };
+    ViewRef_.prototype.reattach = function () { this._view.state |= ViewState.Attached; };
     /**
      * @param {?} callback
      * @return {?}
@@ -10026,7 +10297,7 @@ function createTemplateData(view, def) {
     return new TemplateRef_(view, def);
 }
 var TemplateRef_ = (function (_super) {
-    tslib_1.__extends(TemplateRef_, _super);
+    __extends(TemplateRef_, _super);
     /**
      * @param {?} _parentView
      * @param {?} _def
@@ -10080,8 +10351,8 @@ var Injector_ = (function () {
      */
     Injector_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        var /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
-        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        var /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & NodeFlags.ComponentView) !== 0 : false;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
     };
     return Injector_;
 }());
@@ -10092,14 +10363,14 @@ var Injector_ = (function () {
  */
 function nodeValue(view, index) {
     var /** @type {?} */ def = view.def.nodes[index];
-    if (def.flags & 1 /* TypeElement */) {
+    if (def.flags & NodeFlags.TypeElement) {
         var /** @type {?} */ elData = asElementData(view, def.index);
         return ((def.element)).template ? elData.template : elData.renderElement;
     }
-    else if (def.flags & 2 /* TypeText */) {
+    else if (def.flags & NodeFlags.TypeText) {
         return asTextData(view, def.index).renderText;
     }
-    else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
+    else if (def.flags & (NodeFlags.CatProvider | NodeFlags.TypePipe)) {
         return asProviderData(view, def.index).instance;
     }
     throw new Error("Illegal state: read nodeValue for node index " + index);
@@ -10340,7 +10611,7 @@ var NgModuleRef_ = (function () {
      */
     NgModuleRef_.prototype.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: 0 /* None */ }, notFoundValue);
+        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: DepFlags.None }, notFoundValue);
     };
     Object.defineProperty(NgModuleRef_.prototype, "instance", {
         /**
@@ -10374,7 +10645,7 @@ var NgModuleRef_ = (function () {
             throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
         }
         this._destroyed = true;
-        callNgModuleLifecycle(this, 131072 /* OnDestroy */);
+        callNgModuleLifecycle(this, NodeFlags.OnDestroy);
         this._destroyListeners.forEach(function (listener) { return listener(); });
     };
     /**
@@ -10384,6 +10655,7 @@ var NgModuleRef_ = (function () {
     NgModuleRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
     return NgModuleRef_;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -10419,7 +10691,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
         for (var /** @type {?} */ prop in props) {
             var _a = props[prop], bindingIndex = _a[0], nonMinifiedName = _a[1];
             bindings[bindingIndex] = {
-                flags: 8 /* TypeProperty */,
+                flags: BindingFlags.TypeProperty,
                 name: prop, nonMinifiedName: nonMinifiedName,
                 ns: null,
                 securityContext: null,
@@ -10430,10 +10702,10 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
     var /** @type {?} */ outputDefs = [];
     if (outputs) {
         for (var /** @type {?} */ propName in outputs) {
-            outputDefs.push({ type: 1 /* DirectiveOutput */, propName: propName, target: null, eventName: outputs[propName] });
+            outputDefs.push({ type: OutputType.DirectiveOutput, propName: propName, target: null, eventName: outputs[propName] });
         }
     }
-    flags |= 16384 /* TypeDirective */;
+    flags |= NodeFlags.TypeDirective;
     return _def(flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
 }
 /**
@@ -10443,7 +10715,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
  * @return {?}
  */
 function pipeDef(flags, ctor, deps) {
-    flags |= 16 /* TypePipe */;
+    flags |= NodeFlags.TypePipe;
     return _def(flags, null, 0, ctor, ctor, deps);
 }
 /**
@@ -10504,7 +10776,7 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
+    return def.flags & NodeFlags.LazyProvider ? NOT_CREATED : _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -10529,7 +10801,7 @@ function createPipeInstance(view, def) {
  */
 function createDirectiveInstance(view, def) {
     // components can see other private services, other directives can't.
-    var /** @type {?} */ allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
+    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.Component) > 0;
     // directives are always eager and classes!
     var /** @type {?} */ instance = createClass(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((def.provider)).value, /** @type {?} */ ((def.provider)).deps);
     if (def.outputs.length) {
@@ -10614,10 +10886,10 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
+    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
         directive.ngOnInit();
     }
-    if (def.flags & 262144 /* DoCheck */) {
+    if (def.flags & NodeFlags.DoCheck) {
         directive.ngDoCheck();
     }
     return changed;
@@ -10642,10 +10914,10 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
+    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
         directive.ngOnInit();
     }
-    if (def.flags & 262144 /* DoCheck */) {
+    if (def.flags & NodeFlags.DoCheck) {
         directive.ngDoCheck();
     }
     return changed;
@@ -10657,20 +10929,20 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
  */
 function _createProviderInstance(view, def) {
     // private services can see other private services
-    var /** @type {?} */ allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
+    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.PrivateProvider) > 0;
     var /** @type {?} */ providerDef = def.provider;
     var /** @type {?} */ injectable;
-    switch (def.flags & 201347067 /* Types */) {
-        case 512 /* TypeClassProvider */:
+    switch (def.flags & NodeFlags.Types) {
+        case NodeFlags.TypeClassProvider:
             injectable = createClass(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
             break;
-        case 1024 /* TypeFactoryProvider */:
+        case NodeFlags.TypeFactoryProvider:
             injectable = callFactory(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
             break;
-        case 2048 /* TypeUseExistingProvider */:
+        case NodeFlags.TypeUseExistingProvider:
             injectable = resolveDep(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).deps[0]);
             break;
-        case 256 /* TypeValueProvider */:
+        case NodeFlags.TypeValueProvider:
             injectable = ((providerDef)).value;
             break;
     }
@@ -10770,11 +11042,11 @@ var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
  */
 function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-    if (depDef.flags & 8 /* Value */) {
+    if (depDef.flags & DepFlags.Value) {
         return depDef.token;
     }
     var /** @type {?} */ startView = view;
-    if (depDef.flags & 2 /* Optional */) {
+    if (depDef.flags & DepFlags.Optional) {
         notFoundValue = null;
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
@@ -10783,7 +11055,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
         // of that component as well.
         allowPrivateServices = !!(elDef && ((elDef.element)).componentView);
     }
-    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
+    if (elDef && (depDef.flags & DepFlags.SkipSelf)) {
         allowPrivateServices = false;
         elDef = ((elDef.parent));
     }
@@ -10870,10 +11142,10 @@ function findCompView(view, elDef, allowPrivateServices) {
  * @return {?}
  */
 function updateProp(view, providerData, def, bindingIdx, value, changes) {
-    if (def.flags & 32768 /* Component */) {
+    if (def.flags & NodeFlags.Component) {
         var /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((def.parent)).index).componentView;
-        if (compView.def.flags & 2 /* OnPush */) {
-            compView.state |= 8 /* ChecksEnabled */;
+        if (compView.def.flags & ViewFlags.OnPush) {
+            compView.state |= ViewState.ChecksEnabled;
         }
     }
     var /** @type {?} */ binding = def.bindings[bindingIdx];
@@ -10882,7 +11154,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
     // the user passed in the property name as an object has to `providerDef`,
     // so Closure Compiler will have renamed the property correctly already.
     providerData.instance[propName] = value;
-    if (def.flags & 524288 /* OnChanges */) {
+    if (def.flags & NodeFlags.OnChanges) {
         changes = changes || {};
         var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
         if (oldValue instanceof WrappedValue) {
@@ -10890,7 +11162,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
         }
         var /** @type {?} */ binding_1 = def.bindings[bindingIdx];
         changes[((binding_1.nonMinifiedName))] =
-            new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
+            new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
     }
     view.oldValues[def.bindingIndex + bindingIdx] = value;
     return changes;
@@ -10907,8 +11179,8 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
     var /** @type {?} */ nodes = view.def.nodes;
     for (var /** @type {?} */ i = 0; i < nodes.length; i++) {
         var /** @type {?} */ nodeDef = nodes[i];
-        var /** @type {?} */ parent = nodeDef.parent;
-        if (!parent && nodeDef.flags & lifecycles) {
+        var /** @type {?} */ parent_1 = nodeDef.parent;
+        if (!parent_1 && nodeDef.flags & lifecycles) {
             // matching root node (e.g. a pipe)
             callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
         }
@@ -10916,13 +11188,13 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
             // no child matches one of the lifecycles
             i += nodeDef.childCount;
         }
-        while (parent && (parent.flags & 1 /* TypeElement */) &&
-            i === parent.index + parent.childCount) {
+        while (parent_1 && (parent_1.flags & NodeFlags.TypeElement) &&
+            i === parent_1.index + parent_1.childCount) {
             // last child of an element
-            if (parent.directChildFlags & lifecycles) {
-                callElementProvidersLifecycles(view, parent, lifecycles);
+            if (parent_1.directChildFlags & lifecycles) {
+                callElementProvidersLifecycles(view, parent_1, lifecycles);
             }
-            parent = parent.parent;
+            parent_1 = parent_1.parent;
         }
     }
 }
@@ -10954,22 +11226,23 @@ function callProviderLifecycles(view, index, lifecycles) {
         return;
     }
     Services.setCurrentNode(view, index);
-    if (lifecycles & 1048576 /* AfterContentInit */) {
+    if (lifecycles & NodeFlags.AfterContentInit) {
         provider.ngAfterContentInit();
     }
-    if (lifecycles & 2097152 /* AfterContentChecked */) {
+    if (lifecycles & NodeFlags.AfterContentChecked) {
         provider.ngAfterContentChecked();
     }
-    if (lifecycles & 4194304 /* AfterViewInit */) {
+    if (lifecycles & NodeFlags.AfterViewInit) {
         provider.ngAfterViewInit();
     }
-    if (lifecycles & 8388608 /* AfterViewChecked */) {
+    if (lifecycles & NodeFlags.AfterViewChecked) {
         provider.ngAfterViewChecked();
     }
-    if (lifecycles & 131072 /* OnDestroy */) {
+    if (lifecycles & NodeFlags.OnDestroy) {
         provider.ngOnDestroy();
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -11039,24 +11312,24 @@ function dirtyParentQueries(view) {
         var /** @type {?} */ end = tplDef.index + tplDef.childCount;
         for (var /** @type {?} */ i = 0; i <= end; i++) {
             var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & 67108864 /* TypeContentQuery */) &&
-                (nodeDef.flags & 536870912 /* DynamicQuery */) &&
+            if ((nodeDef.flags & NodeFlags.TypeContentQuery) &&
+                (nodeDef.flags & NodeFlags.DynamicQuery) &&
                 (((nodeDef.query)).filterId & queryIds) === ((nodeDef.query)).filterId) {
                 asQueryList(view, i).setDirty();
             }
-            if ((nodeDef.flags & 1 /* TypeElement */ && i + nodeDef.childCount < tplDef.index) ||
-                !(nodeDef.childFlags & 67108864 /* TypeContentQuery */) ||
-                !(nodeDef.childFlags & 536870912 /* DynamicQuery */)) {
+            if ((nodeDef.flags & NodeFlags.TypeElement && i + nodeDef.childCount < tplDef.index) ||
+                !(nodeDef.childFlags & NodeFlags.TypeContentQuery) ||
+                !(nodeDef.childFlags & NodeFlags.DynamicQuery)) {
                 // skip elements that don't contain the template element or no query.
                 i += nodeDef.childCount;
             }
         }
     }
     // view queries
-    if (view.def.nodeFlags & 134217728 /* TypeViewQuery */) {
+    if (view.def.nodeFlags & NodeFlags.TypeViewQuery) {
         for (var /** @type {?} */ i = 0; i < view.def.nodes.length; i++) {
             var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & 134217728 /* TypeViewQuery */) && (nodeDef.flags & 536870912 /* DynamicQuery */)) {
+            if ((nodeDef.flags & NodeFlags.TypeViewQuery) && (nodeDef.flags & NodeFlags.DynamicQuery)) {
                 asQueryList(view, i).setDirty();
             }
             // only visit the root nodes
@@ -11076,12 +11349,12 @@ function checkAndUpdateQuery(view, nodeDef) {
     }
     var /** @type {?} */ directiveInstance;
     var /** @type {?} */ newValues = ((undefined));
-    if (nodeDef.flags & 67108864 /* TypeContentQuery */) {
-        var /** @type {?} */ elementDef_1 = ((((nodeDef.parent)).parent));
-        newValues = calcQueryValues(view, elementDef_1.index, elementDef_1.index + elementDef_1.childCount, /** @type {?} */ ((nodeDef.query)), []);
+    if (nodeDef.flags & NodeFlags.TypeContentQuery) {
+        var /** @type {?} */ elementDef = ((((nodeDef.parent)).parent));
+        newValues = calcQueryValues(view, elementDef.index, elementDef.index + elementDef.childCount, /** @type {?} */ ((nodeDef.query)), []);
         directiveInstance = asProviderData(view, /** @type {?} */ ((nodeDef.parent)).index).instance;
     }
-    else if (nodeDef.flags & 134217728 /* TypeViewQuery */) {
+    else if (nodeDef.flags & NodeFlags.TypeViewQuery) {
         newValues = calcQueryValues(view, 0, view.def.nodes.length - 1, /** @type {?} */ ((nodeDef.query)), []);
         directiveInstance = view.component;
     }
@@ -11092,10 +11365,10 @@ function checkAndUpdateQuery(view, nodeDef) {
         var /** @type {?} */ binding = bindings[i];
         var /** @type {?} */ boundValue = void 0;
         switch (binding.bindingType) {
-            case 0 /* First */:
+            case QueryBindingType.First:
                 boundValue = queryList.first;
                 break;
-            case 1 /* All */:
+            case QueryBindingType.All:
                 boundValue = queryList;
                 notify = true;
                 break;
@@ -11121,7 +11394,7 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
         if (valueType != null) {
             values.push(getQueryValue(view, nodeDef, valueType));
         }
-        if (nodeDef.flags & 1 /* TypeElement */ && ((nodeDef.element)).template &&
+        if (nodeDef.flags & NodeFlags.TypeElement && ((nodeDef.element)).template &&
             (((((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
                 queryDef.filterId) {
             var /** @type {?} */ elementData = asElementData(view, i);
@@ -11131,7 +11404,7 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
                 calcQueryValues(view, i + 1, i + nodeDef.childCount, queryDef, values);
                 i += nodeDef.childCount;
             }
-            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+            if (nodeDef.flags & NodeFlags.EmbeddedViews) {
                 var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
                 for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                     var /** @type {?} */ embeddedView = embeddedViews[k];
@@ -11167,28 +11440,36 @@ function getQueryValue(view, nodeDef, queryValueType) {
         // a match
         var /** @type {?} */ value = void 0;
         switch (queryValueType) {
-            case 1 /* RenderElement */:
+            case QueryValueType.RenderElement:
                 value = asElementData(view, nodeDef.index).renderElement;
                 break;
-            case 0 /* ElementRef */:
+            case QueryValueType.ElementRef:
                 value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
                 break;
-            case 2 /* TemplateRef */:
+            case QueryValueType.TemplateRef:
                 value = asElementData(view, nodeDef.index).template;
                 break;
-            case 3 /* ViewContainerRef */:
+            case QueryValueType.ViewContainerRef:
                 value = asElementData(view, nodeDef.index).viewContainer;
                 break;
-            case 4 /* Provider */:
+            case QueryValueType.Provider:
                 value = asProviderData(view, nodeDef.index).instance;
                 break;
         }
         return value;
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} ngContentIndex
@@ -11204,7 +11485,7 @@ function ngContentDef(ngContentIndex, index) {
         bindingIndex: -1,
         outputIndex: -1,
         // regular values
-        flags: 8 /* TypeNgContent */,
+        flags: NodeFlags.TypeNgContent,
         childFlags: 0,
         directChildFlags: 0,
         childMatchedQueries: 0,
@@ -11235,8 +11516,9 @@ function appendNgContent(view, renderHost, def) {
         return;
     }
     var /** @type {?} */ ngContentIndex = ((def.ngContent)).index;
-    visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
+    visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, null, undefined);
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -11254,14 +11536,14 @@ function appendNgContent(view, renderHost, def) {
  */
 function purePipeDef(argCount) {
     // argCount + 1 to include the pipe as first arg
-    return _pureExpressionDef(128 /* TypePurePipe */, new Array(argCount + 1));
+    return _pureExpressionDef(NodeFlags.TypePurePipe, new Array(argCount + 1));
 }
 /**
  * @param {?} argCount
  * @return {?}
  */
 function pureArrayDef(argCount) {
-    return _pureExpressionDef(32 /* TypePureArray */, new Array(argCount));
+    return _pureExpressionDef(NodeFlags.TypePureArray, new Array(argCount));
 }
 /**
  * @param {?} propToIndex
@@ -11276,7 +11558,7 @@ function pureObjectDef(propToIndex) {
         var /** @type {?} */ index = propToIndex[key];
         propertyNames[index] = key;
     }
-    return _pureExpressionDef(64 /* TypePureObject */, propertyNames);
+    return _pureExpressionDef(NodeFlags.TypePureObject, propertyNames);
 }
 /**
  * @param {?} flags
@@ -11288,7 +11570,7 @@ function _pureExpressionDef(flags, propertyNames) {
     for (var /** @type {?} */ i = 0; i < propertyNames.length; i++) {
         var /** @type {?} */ prop = propertyNames[i];
         bindings[i] = {
-            flags: 8 /* TypeProperty */,
+            flags: BindingFlags.TypeProperty,
             name: prop,
             ns: null,
             nonMinifiedName: prop,
@@ -11372,8 +11654,8 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
     if (changed) {
         var /** @type {?} */ data = asPureExpressionData(view, def.index);
         var /** @type {?} */ value = void 0;
-        switch (def.flags & 201347067 /* Types */) {
-            case 32 /* TypePureArray */:
+        switch (def.flags & NodeFlags.Types) {
+            case NodeFlags.TypePureArray:
                 value = new Array(bindings.length);
                 if (bindLen > 0)
                     value[0] = v0;
@@ -11396,7 +11678,7 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
                 if (bindLen > 9)
                     value[9] = v9;
                 break;
-            case 64 /* TypePureObject */:
+            case NodeFlags.TypePureObject:
                 value = {};
                 if (bindLen > 0)
                     value[((bindings[0].name))] = v0;
@@ -11419,7 +11701,7 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
                 if (bindLen > 9)
                     value[((bindings[9].name))] = v9;
                 break;
-            case 128 /* TypePurePipe */:
+            case NodeFlags.TypePurePipe:
                 var /** @type {?} */ pipe = v0;
                 switch (bindLen) {
                     case 1:
@@ -11478,17 +11760,17 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
     if (changed) {
         var /** @type {?} */ data = asPureExpressionData(view, def.index);
         var /** @type {?} */ value = void 0;
-        switch (def.flags & 201347067 /* Types */) {
-            case 32 /* TypePureArray */:
+        switch (def.flags & NodeFlags.Types) {
+            case NodeFlags.TypePureArray:
                 value = values;
                 break;
-            case 64 /* TypePureObject */:
+            case NodeFlags.TypePureObject:
                 value = {};
                 for (var /** @type {?} */ i = 0; i < values.length; i++) {
                     value[((bindings[i].name))] = values[i];
                 }
                 break;
-            case 128 /* TypePurePipe */:
+            case NodeFlags.TypePurePipe:
                 var /** @type {?} */ pipe = values[0];
                 var /** @type {?} */ params = values.slice(1);
                 value = pipe.transform.apply(pipe, params);
@@ -11498,6 +11780,7 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
     }
     return changed;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -11518,7 +11801,7 @@ function textDef(ngContentIndex, constants) {
     var /** @type {?} */ bindings = new Array(constants.length - 1);
     for (var /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
-            flags: 8 /* TypeProperty */,
+            flags: BindingFlags.TypeProperty,
             name: null,
             ns: null,
             nonMinifiedName: null,
@@ -11526,7 +11809,7 @@ function textDef(ngContentIndex, constants) {
             suffix: constants[i]
         };
     }
-    var /** @type {?} */ flags = 2;
+    var /** @type {?} */ flags = NodeFlags.TypeText;
     return {
         // will bet set by the view definition
         index: -1,
@@ -11670,6 +11953,7 @@ function _addInterpolationPart(value, binding) {
     var /** @type {?} */ valueStr = value != null ? value.toString() : '';
     return valueStr + binding.suffix;
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -11708,7 +11992,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         node.outputIndex = viewDisposableCount;
         // renderParent needs to account for ng-container!
         var /** @type {?} */ currentRenderParent = void 0;
-        if (currentParent && currentParent.flags & 1 /* TypeElement */ &&
+        if (currentParent && currentParent.flags & NodeFlags.TypeElement &&
             !((currentParent.element)).name) {
             currentRenderParent = currentParent.renderParent;
         }
@@ -11744,10 +12028,10 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
         viewBindingCount += node.bindings.length;
         viewDisposableCount += node.outputs.length;
-        if (!currentRenderParent && (node.flags & 3 /* CatRenderNode */)) {
+        if (!currentRenderParent && (node.flags & NodeFlags.CatRenderNode)) {
             lastRenderRootNode = node;
         }
-        if (node.flags & 20224 /* CatProvider */) {
+        if (node.flags & NodeFlags.CatProvider) {
             if (!currentElementHasPublicProviders) {
                 currentElementHasPublicProviders = true; /** @type {?} */
                 ((((
@@ -11756,8 +12040,8 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
                     Object.create(/** @type {?} */ ((((currentParent)).element)).publicProviders); /** @type {?} */
                 ((((currentParent)).element)).allProviders = ((((currentParent)).element)).publicProviders;
             }
-            var /** @type {?} */ isPrivateService = (node.flags & 8192 /* PrivateProvider */) !== 0;
-            var /** @type {?} */ isComponent = (node.flags & 32768 /* Component */) !== 0;
+            var /** @type {?} */ isPrivateService = (node.flags & NodeFlags.PrivateProvider) !== 0;
+            var /** @type {?} */ isComponent = (node.flags & NodeFlags.Component) !== 0;
             if (!isPrivateService || isComponent) {
                 ((((((currentParent)).element)).publicProviders))[tokenKey(/** @type {?} */ ((node.provider)).token)] = node;
             }
@@ -11787,7 +12071,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
         currentParent = newParent;
     }
-    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return ((((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
+    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { /** @type {?} */ return ((((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
     return {
         // Will be filled later...
         factory: null,
@@ -11815,22 +12099,22 @@ function validateNode(parent, node, nodeCount) {
             throw new Error("Illegal State: Embedded templates without nodes are not allowed!");
         }
         if (template.lastRenderRootNode &&
-            template.lastRenderRootNode.flags & 16777216 /* EmbeddedViews */) {
+            template.lastRenderRootNode.flags & NodeFlags.EmbeddedViews) {
             throw new Error("Illegal State: Last root node of a template can't have embedded views, at index " + node.index + "!");
         }
     }
-    if (node.flags & 20224 /* CatProvider */) {
+    if (node.flags & NodeFlags.CatProvider) {
         var /** @type {?} */ parentFlags = parent ? parent.flags : 0;
-        if ((parentFlags & 1 /* TypeElement */) === 0) {
+        if ((parentFlags & NodeFlags.TypeElement) === 0) {
             throw new Error("Illegal State: StaticProvider/Directive nodes need to be children of elements or anchors, at index " + node.index + "!");
         }
     }
     if (node.query) {
-        if (node.flags & 67108864 /* TypeContentQuery */ &&
-            (!parent || (parent.flags & 16384 /* TypeDirective */) === 0)) {
+        if (node.flags & NodeFlags.TypeContentQuery &&
+            (!parent || (parent.flags & NodeFlags.TypeDirective) === 0)) {
             throw new Error("Illegal State: Content Query nodes need to be children of directives, at index " + node.index + "!");
         }
-        if (node.flags & 134217728 /* TypeViewQuery */ && parent) {
+        if (node.flags & NodeFlags.TypeViewQuery && parent) {
             throw new Error("Illegal State: View Query nodes have to be top level nodes, at index " + node.index + "!");
         }
     }
@@ -11903,7 +12187,7 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         viewContainerParent: null, parentNodeDef: parentNodeDef,
         context: null,
         component: null, nodes: nodes,
-        state: 13 /* CatInit */, root: root, renderer: renderer,
+        state: ViewState.CatInit, root: root, renderer: renderer,
         oldValues: new Array(def.bindingCount), disposables: disposables
     };
     return view;
@@ -11934,11 +12218,11 @@ function createViewNodes(view) {
         var /** @type {?} */ nodeDef = def.nodes[i];
         Services.setCurrentNode(view, i);
         var /** @type {?} */ nodeData = void 0;
-        switch (nodeDef.flags & 201347067 /* Types */) {
-            case 1 /* TypeElement */:
+        switch (nodeDef.flags & NodeFlags.Types) {
+            case NodeFlags.TypeElement:
                 var /** @type {?} */ el = (createElement(view, renderHost, nodeDef));
                 var /** @type {?} */ componentView = ((undefined));
-                if (nodeDef.flags & 33554432 /* ComponentView */) {
+                if (nodeDef.flags & NodeFlags.ComponentView) {
                     var /** @type {?} */ compViewDef = resolveDefinition(/** @type {?} */ ((((nodeDef.element)).componentView)));
                     componentView = Services.createComponentView(view, nodeDef, compViewDef, el);
                 }
@@ -11949,45 +12233,45 @@ function createViewNodes(view) {
                     viewContainer: null,
                     template: /** @type {?} */ ((nodeDef.element)).template ? createTemplateData(view, nodeDef) : undefined
                 });
-                if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+                if (nodeDef.flags & NodeFlags.EmbeddedViews) {
                     nodeData.viewContainer = createViewContainerData(view, nodeDef, nodeData);
                 }
                 break;
-            case 2 /* TypeText */:
+            case NodeFlags.TypeText:
                 nodeData = (createText(view, renderHost, nodeDef));
                 break;
-            case 512 /* TypeClassProvider */:
-            case 1024 /* TypeFactoryProvider */:
-            case 2048 /* TypeUseExistingProvider */:
-            case 256 /* TypeValueProvider */: {
+            case NodeFlags.TypeClassProvider:
+            case NodeFlags.TypeFactoryProvider:
+            case NodeFlags.TypeUseExistingProvider:
+            case NodeFlags.TypeValueProvider: {
                 var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
                 nodeData = ({ instance: instance });
                 break;
             }
-            case 16 /* TypePipe */: {
+            case NodeFlags.TypePipe: {
                 var /** @type {?} */ instance = createPipeInstance(view, nodeDef);
                 nodeData = ({ instance: instance });
                 break;
             }
-            case 16384 /* TypeDirective */: {
+            case NodeFlags.TypeDirective: {
                 var /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
                 nodeData = ({ instance: instance });
-                if (nodeDef.flags & 32768 /* Component */) {
+                if (nodeDef.flags & NodeFlags.Component) {
                     var /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((nodeDef.parent)).index).componentView;
                     initView(compView, instance, instance);
                 }
                 break;
             }
-            case 32 /* TypePureArray */:
-            case 64 /* TypePureObject */:
-            case 128 /* TypePurePipe */:
+            case NodeFlags.TypePureArray:
+            case NodeFlags.TypePureObject:
+            case NodeFlags.TypePurePipe:
                 nodeData = (createPureExpression(view, nodeDef));
                 break;
-            case 67108864 /* TypeContentQuery */:
-            case 134217728 /* TypeViewQuery */:
+            case NodeFlags.TypeContentQuery:
+            case NodeFlags.TypeViewQuery:
                 nodeData = (createQuery());
                 break;
-            case 8 /* TypeNgContent */:
+            case NodeFlags.TypeNgContent:
                 appendNgContent(view, renderHost, nodeDef);
                 // no runtime data needed for NgContent...
                 nodeData = undefined;
@@ -11999,7 +12283,7 @@ function createViewNodes(view) {
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
     // fill static content and view queries
-    execQueriesAction(view, 67108864 /* TypeContentQuery */ | 134217728 /* TypeViewQuery */, 268435456 /* StaticQuery */, 0 /* CheckAndUpdate */);
+    execQueriesAction(view, NodeFlags.TypeContentQuery | NodeFlags.TypeViewQuery, NodeFlags.StaticQuery, CheckType.CheckAndUpdate);
 }
 /**
  * @param {?} view
@@ -12007,41 +12291,41 @@ function createViewNodes(view) {
  */
 function checkNoChangesView(view) {
     markProjectedViewsForCheck(view);
-    Services.updateDirectives(view, 1 /* CheckNoChanges */);
+    Services.updateDirectives(view, CheckType.CheckNoChanges);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    Services.updateRenderer(view, 1 /* CheckNoChanges */);
+    Services.updateRenderer(view, CheckType.CheckNoChanges);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
     // Note: We don't check queries for changes as we didn't do this in v2.x.
     // TODO(tbosch): investigate if we can enable the check again in v5.x with a nicer error message.
-    view.state &= ~(64 /* CheckProjectedViews */ | 32 /* CheckProjectedView */);
+    view.state &= ~(ViewState.CheckProjectedViews | ViewState.CheckProjectedView);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkAndUpdateView(view) {
-    if (view.state & 1 /* BeforeFirstCheck */) {
-        view.state &= ~1 /* BeforeFirstCheck */;
-        view.state |= 2 /* FirstCheck */;
+    if (view.state & ViewState.BeforeFirstCheck) {
+        view.state &= ~ViewState.BeforeFirstCheck;
+        view.state |= ViewState.FirstCheck;
     }
     else {
-        view.state &= ~2 /* FirstCheck */;
+        view.state &= ~ViewState.FirstCheck;
     }
     markProjectedViewsForCheck(view);
-    Services.updateDirectives(view, 0 /* CheckAndUpdate */);
+    Services.updateDirectives(view, CheckType.CheckAndUpdate);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, 67108864 /* TypeContentQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
-    callLifecycleHooksChildrenFirst(view, 2097152 /* AfterContentChecked */ |
-        (view.state & 2 /* FirstCheck */ ? 1048576 /* AfterContentInit */ : 0));
-    Services.updateRenderer(view, 0 /* CheckAndUpdate */);
+    execQueriesAction(view, NodeFlags.TypeContentQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
+    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
+        (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
+    Services.updateRenderer(view, CheckType.CheckAndUpdate);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, 134217728 /* TypeViewQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
-    callLifecycleHooksChildrenFirst(view, 8388608 /* AfterViewChecked */ |
-        (view.state & 2 /* FirstCheck */ ? 4194304 /* AfterViewInit */ : 0));
-    if (view.def.flags & 2 /* OnPush */) {
-        view.state &= ~8 /* ChecksEnabled */;
+    execQueriesAction(view, NodeFlags.TypeViewQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
+    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
+        (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
+    if (view.def.flags & ViewFlags.OnPush) {
+        view.state &= ~ViewState.ChecksEnabled;
     }
-    view.state &= ~(64 /* CheckProjectedViews */ | 32 /* CheckProjectedView */);
+    view.state &= ~(ViewState.CheckProjectedViews | ViewState.CheckProjectedView);
 }
 /**
  * @param {?} view
@@ -12060,7 +12344,7 @@ function checkAndUpdateView(view) {
  * @return {?}
  */
 function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === 0 /* Inline */) {
+    if (argStyle === ArgumentType.Inline) {
         return checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12073,22 +12357,22 @@ function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6,
  */
 function markProjectedViewsForCheck(view) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & 4 /* ProjectedTemplate */)) {
+    if (!(def.nodeFlags & NodeFlags.ProjectedTemplate)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & 4 /* ProjectedTemplate */) {
+        if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
             var /** @type {?} */ projectedViews = asElementData(view, i).template._projectedViews;
             if (projectedViews) {
                 for (var /** @type {?} */ i_1 = 0; i_1 < projectedViews.length; i_1++) {
                     var /** @type {?} */ projectedView = projectedViews[i_1];
-                    projectedView.state |= 32 /* CheckProjectedView */;
+                    projectedView.state |= ViewState.CheckProjectedView;
                     markParentViewsForCheckProjectedViews(projectedView, view);
                 }
             }
         }
-        else if ((nodeDef.childFlags & 4 /* ProjectedTemplate */) === 0) {
+        else if ((nodeDef.childFlags & NodeFlags.ProjectedTemplate) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12113,20 +12397,20 @@ function markProjectedViewsForCheck(view) {
  */
 function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ changed = false;
-    switch (nodeDef.flags & 201347067 /* Types */) {
-        case 1 /* TypeElement */:
+    switch (nodeDef.flags & NodeFlags.Types) {
+        case NodeFlags.TypeElement:
             changed = checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case 2 /* TypeText */:
+        case NodeFlags.TypeText:
             changed = checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case 16384 /* TypeDirective */:
+        case NodeFlags.TypeDirective:
             changed =
                 checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case 32 /* TypePureArray */:
-        case 64 /* TypePureObject */:
-        case 128 /* TypePurePipe */:
+        case NodeFlags.TypePureArray:
+        case NodeFlags.TypePureObject:
+        case NodeFlags.TypePurePipe:
             changed =
                 checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
@@ -12141,19 +12425,19 @@ function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7,
  */
 function checkAndUpdateNodeDynamic(view, nodeDef, values) {
     var /** @type {?} */ changed = false;
-    switch (nodeDef.flags & 201347067 /* Types */) {
-        case 1 /* TypeElement */:
+    switch (nodeDef.flags & NodeFlags.Types) {
+        case NodeFlags.TypeElement:
             changed = checkAndUpdateElementDynamic(view, nodeDef, values);
             break;
-        case 2 /* TypeText */:
+        case NodeFlags.TypeText:
             changed = checkAndUpdateTextDynamic(view, nodeDef, values);
             break;
-        case 16384 /* TypeDirective */:
+        case NodeFlags.TypeDirective:
             changed = checkAndUpdateDirectiveDynamic(view, nodeDef, values);
             break;
-        case 32 /* TypePureArray */:
-        case 64 /* TypePureObject */:
-        case 128 /* TypePurePipe */:
+        case NodeFlags.TypePureArray:
+        case NodeFlags.TypePureObject:
+        case NodeFlags.TypePurePipe:
             changed = checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
             break;
     }
@@ -12186,7 +12470,7 @@ function checkAndUpdateNodeDynamic(view, nodeDef, values) {
  * @return {?}
  */
 function checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === 0 /* Inline */) {
+    if (argStyle === ArgumentType.Inline) {
         checkNoChangesNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12254,7 +12538,7 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
 function checkNoChangesQuery(view, nodeDef) {
     var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
     if (queryList.dirty) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), "Query " + (((nodeDef.query))).id + " not dirty", "Query " + (((nodeDef.query))).id + " dirty", (view.state & 1 /* BeforeFirstCheck */) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), "Query " + (((nodeDef.query))).id + " not dirty", "Query " + (((nodeDef.query))).id + " dirty", (view.state & ViewState.BeforeFirstCheck) !== 0);
     }
 }
 /**
@@ -12262,12 +12546,12 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 function destroyView(view) {
-    if (view.state & 128 /* Destroyed */) {
+    if (view.state & ViewState.Destroyed) {
         return;
     }
     execEmbeddedViewsAction(view, ViewAction.Destroy);
     execComponentViewsAction(view, ViewAction.Destroy);
-    callLifecycleHooksChildrenFirst(view, 131072 /* OnDestroy */);
+    callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
     if (view.disposables) {
         for (var /** @type {?} */ i = 0; i < view.disposables.length; i++) {
             view.disposables[i]();
@@ -12280,7 +12564,7 @@ function destroyView(view) {
     if (isComponentView(view)) {
         view.renderer.destroy();
     }
-    view.state |= 128 /* Destroyed */;
+    view.state |= ViewState.Destroyed;
 }
 /**
  * @param {?} view
@@ -12290,21 +12574,23 @@ function destroyViewNodes(view) {
     var /** @type {?} */ len = view.def.nodes.length;
     for (var /** @type {?} */ i = 0; i < len; i++) {
         var /** @type {?} */ def = view.def.nodes[i];
-        if (def.flags & 1 /* TypeElement */) {
+        if (def.flags & NodeFlags.TypeElement) {
             ((view.renderer.destroyNode))(asElementData(view, i).renderElement);
         }
-        else if (def.flags & 2 /* TypeText */) {
+        else if (def.flags & NodeFlags.TypeText) {
             ((view.renderer.destroyNode))(asTextData(view, i).renderText);
         }
     }
 }
-var ViewAction = {};
-ViewAction.CreateViewNodes = 0;
-ViewAction.CheckNoChanges = 1;
-ViewAction.CheckNoChangesProjectedViews = 2;
-ViewAction.CheckAndUpdate = 3;
-ViewAction.CheckAndUpdateProjectedViews = 4;
-ViewAction.Destroy = 5;
+/** @enum {number} */
+var ViewAction = {
+    CreateViewNodes: 0,
+    CheckNoChanges: 1,
+    CheckNoChangesProjectedViews: 2,
+    CheckAndUpdate: 3,
+    CheckAndUpdateProjectedViews: 4,
+    Destroy: 5,
+};
 ViewAction[ViewAction.CreateViewNodes] = "CreateViewNodes";
 ViewAction[ViewAction.CheckNoChanges] = "CheckNoChanges";
 ViewAction[ViewAction.CheckNoChangesProjectedViews] = "CheckNoChangesProjectedViews";
@@ -12318,16 +12604,16 @@ ViewAction[ViewAction.Destroy] = "Destroy";
  */
 function execComponentViewsAction(view, action) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & 33554432 /* ComponentView */)) {
+    if (!(def.nodeFlags & NodeFlags.ComponentView)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & 33554432 /* ComponentView */) {
+        if (nodeDef.flags & NodeFlags.ComponentView) {
             // a leaf
             callViewAction(asElementData(view, i).componentView, action);
         }
-        else if ((nodeDef.childFlags & 33554432 /* ComponentView */) === 0) {
+        else if ((nodeDef.childFlags & NodeFlags.ComponentView) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12342,19 +12628,19 @@ function execComponentViewsAction(view, action) {
  */
 function execEmbeddedViewsAction(view, action) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & 16777216 /* EmbeddedViews */)) {
+    if (!(def.nodeFlags & NodeFlags.EmbeddedViews)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+        if (nodeDef.flags & NodeFlags.EmbeddedViews) {
             // a leaf
             var /** @type {?} */ embeddedViews = ((asElementData(view, i).viewContainer))._embeddedViews;
             for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                 callViewAction(embeddedViews[k], action);
             }
         }
-        else if ((nodeDef.childFlags & 16777216 /* EmbeddedViews */) === 0) {
+        else if ((nodeDef.childFlags & NodeFlags.EmbeddedViews) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12371,41 +12657,41 @@ function callViewAction(view, action) {
     var /** @type {?} */ viewState = view.state;
     switch (action) {
         case ViewAction.CheckNoChanges:
-            if ((viewState & 128 /* Destroyed */) === 0) {
-                if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */) {
+            if ((viewState & ViewState.Destroyed) === 0) {
+                if ((viewState & ViewState.CatDetectChanges) === ViewState.CatDetectChanges) {
                     checkNoChangesView(view);
                 }
-                else if (viewState & 64 /* CheckProjectedViews */) {
+                else if (viewState & ViewState.CheckProjectedViews) {
                     execProjectedViewsAction(view, ViewAction.CheckNoChangesProjectedViews);
                 }
             }
             break;
         case ViewAction.CheckNoChangesProjectedViews:
-            if ((viewState & 128 /* Destroyed */) === 0) {
-                if (viewState & 32 /* CheckProjectedView */) {
+            if ((viewState & ViewState.Destroyed) === 0) {
+                if (viewState & ViewState.CheckProjectedView) {
                     checkNoChangesView(view);
                 }
-                else if (viewState & 64 /* CheckProjectedViews */) {
+                else if (viewState & ViewState.CheckProjectedViews) {
                     execProjectedViewsAction(view, action);
                 }
             }
             break;
         case ViewAction.CheckAndUpdate:
-            if ((viewState & 128 /* Destroyed */) === 0) {
-                if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */) {
+            if ((viewState & ViewState.Destroyed) === 0) {
+                if ((viewState & ViewState.CatDetectChanges) === ViewState.CatDetectChanges) {
                     checkAndUpdateView(view);
                 }
-                else if (viewState & 64 /* CheckProjectedViews */) {
+                else if (viewState & ViewState.CheckProjectedViews) {
                     execProjectedViewsAction(view, ViewAction.CheckAndUpdateProjectedViews);
                 }
             }
             break;
         case ViewAction.CheckAndUpdateProjectedViews:
-            if ((viewState & 128 /* Destroyed */) === 0) {
-                if (viewState & 32 /* CheckProjectedView */) {
+            if ((viewState & ViewState.Destroyed) === 0) {
+                if (viewState & ViewState.CheckProjectedView) {
                     checkAndUpdateView(view);
                 }
-                else if (viewState & 64 /* CheckProjectedViews */) {
+                else if (viewState & ViewState.CheckProjectedViews) {
                     execProjectedViewsAction(view, action);
                 }
             }
@@ -12446,10 +12732,10 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
         if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
             Services.setCurrentNode(view, nodeDef.index);
             switch (checkType) {
-                case 0 /* CheckAndUpdate */:
+                case CheckType.CheckAndUpdate:
                     checkAndUpdateQuery(view, nodeDef);
                     break;
-                case 1 /* CheckNoChanges */:
+                case CheckType.CheckNoChanges:
                     checkNoChangesQuery(view, nodeDef);
                     break;
             }
@@ -12461,6 +12747,7 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
         }
     }
 }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -12515,10 +12802,12 @@ function createProdServices() {
         checkNoChangesView: checkNoChangesView,
         destroyView: destroyView,
         createDebugContext: function (view, nodeIndex) { return new DebugContext_(view, nodeIndex); },
-        handleEvent: function (view, nodeIndex, eventName, event) { return view.def.handleEvent(view, nodeIndex, eventName, event); },
-        updateDirectives: function (view, checkType) { return view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+        handleEvent: function (view, nodeIndex, eventName, event) {
+            return view.def.handleEvent(view, nodeIndex, eventName, event);
+        },
+        updateDirectives: function (view, checkType) { return view.def.updateDirectives(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
             prodCheckNoChangesNode, view); },
-        updateRenderer: function (view, checkType) { return view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+        updateRenderer: function (view, checkType) { return view.def.updateRenderer(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
             prodCheckNoChangesNode, view); },
     };
 }
@@ -12664,10 +12953,10 @@ function applyProviderOverridesToView(def) {
         var /** @type {?} */ lastElementDef = null;
         for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
             var /** @type {?} */ nodeDef = def.nodes[i];
-            if (nodeDef.flags & 1 /* TypeElement */) {
+            if (nodeDef.flags & NodeFlags.TypeElement) {
                 lastElementDef = nodeDef;
             }
-            if (lastElementDef && nodeDef.flags & 3840 /* CatProviderNoDirective */ &&
+            if (lastElementDef && nodeDef.flags & NodeFlags.CatProviderNoDirective &&
                 providerOverrides.has(/** @type {?} */ ((nodeDef.provider)).token)) {
                 elIndicesWithOverwrittenProviders.push(/** @type {?} */ ((lastElementDef)).index);
                 lastElementDef = null;
@@ -12683,18 +12972,18 @@ function applyProviderOverridesToView(def) {
     function applyProviderOverridesToElement(viewDef$$1, elIndex) {
         for (var /** @type {?} */ i = elIndex + 1; i < viewDef$$1.nodes.length; i++) {
             var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
-            if (nodeDef.flags & 1 /* TypeElement */) {
+            if (nodeDef.flags & NodeFlags.TypeElement) {
                 // stop at the next element
                 return;
             }
-            if (nodeDef.flags & 3840 /* CatProviderNoDirective */) {
+            if (nodeDef.flags & NodeFlags.CatProviderNoDirective) {
                 // Make all providers lazy, so that we don't get into trouble
                 // with ordering problems of providers on the same element
-                nodeDef.flags |= 4096 /* LazyProvider */;
+                nodeDef.flags |= NodeFlags.LazyProvider;
                 var /** @type {?} */ provider = ((nodeDef.provider));
                 var /** @type {?} */ override = providerOverrides.get(provider.token);
                 if (override) {
-                    nodeDef.flags = (nodeDef.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
+                    nodeDef.flags = (nodeDef.flags & ~NodeFlags.CatProviderNoDirective) | override.flags;
                     provider.deps = splitDepsDsl(override.deps);
                     provider.value = override.value;
                 }
@@ -12720,7 +13009,9 @@ function applyProviderOverridesToNgModule(def) {
      * @return {?}
      */
     function hasOverrrides(def) {
-        return def.providers.some(function (node) { return !!(node.flags & 3840 /* CatProviderNoDirective */) && providerOverrides.has(node.token); });
+        return def.providers.some(function (node) {
+            return !!(node.flags & NodeFlags.CatProviderNoDirective) && providerOverrides.has(node.token);
+        });
     }
     /**
      * @param {?} def
@@ -12731,10 +13022,10 @@ function applyProviderOverridesToNgModule(def) {
             var /** @type {?} */ provider = def.providers[i];
             // Make all providers lazy, so that we don't get into trouble
             // with ordering problems of providers on the same element
-            provider.flags |= 4096 /* LazyProvider */;
+            provider.flags |= NodeFlags.LazyProvider;
             var /** @type {?} */ override = providerOverrides.get(provider.token);
             if (override) {
-                provider.flags = (provider.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
+                provider.flags = (provider.flags & ~NodeFlags.CatProviderNoDirective) | override.flags;
                 provider.deps = splitDepsDsl(override.deps);
                 provider.value = override.value;
             }
@@ -12760,7 +13051,7 @@ function applyProviderOverridesToNgModule(def) {
 function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.flags & 224 /* CatPureExpression */) ?
+    return (nodeDef.flags & NodeFlags.CatPureExpression) ?
         asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
@@ -12783,7 +13074,7 @@ function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v
 function prodCheckNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.flags & 224 /* CatPureExpression */) ?
+    return (nodeDef.flags & NodeFlags.CatPureExpression) ?
         asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
@@ -12808,12 +13099,14 @@ function debugCheckNoChangesView(view) {
 function debugDestroyView(view) {
     return callWithDebugContext(DebugAction.destroy, destroyView, null, [view]);
 }
-var DebugAction = {};
-DebugAction.create = 0;
-DebugAction.detectChanges = 1;
-DebugAction.checkNoChanges = 2;
-DebugAction.destroy = 3;
-DebugAction.handleEvent = 4;
+/** @enum {number} */
+var DebugAction = {
+    create: 0,
+    detectChanges: 1,
+    checkNoChanges: 2,
+    destroy: 3,
+    handleEvent: 4,
+};
 DebugAction[DebugAction.create] = "create";
 DebugAction[DebugAction.detectChanges] = "detectChanges";
 DebugAction[DebugAction.checkNoChanges] = "checkNoChanges";
@@ -12848,7 +13141,7 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  * @return {?}
  */
 function debugUpdateDirectives(view, checkType) {
-    if (view.state & 128 /* Destroyed */) {
+    if (view.state & ViewState.Destroyed) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
@@ -12866,16 +13159,16 @@ function debugUpdateDirectives(view, checkType) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === 0 /* CheckAndUpdate */) {
+        if (checkType === CheckType.CheckAndUpdate) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.flags & 16384 /* TypeDirective */) {
+        if (nodeDef.flags & NodeFlags.TypeDirective) {
             debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
         }
-        return (nodeDef.flags & 224 /* CatPureExpression */) ?
+        return (nodeDef.flags & NodeFlags.CatPureExpression) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -12886,7 +13179,7 @@ function debugUpdateDirectives(view, checkType) {
  * @return {?}
  */
 function debugUpdateRenderer(view, checkType) {
-    if (view.state & 128 /* Destroyed */) {
+    if (view.state & ViewState.Destroyed) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
@@ -12904,16 +13197,16 @@ function debugUpdateRenderer(view, checkType) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === 0 /* CheckAndUpdate */) {
+        if (checkType === CheckType.CheckAndUpdate) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.flags & 3 /* CatRenderNode */) {
+        if (nodeDef.flags & NodeFlags.CatRenderNode) {
             debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         }
-        return (nodeDef.flags & 224 /* CatPureExpression */) ?
+        return (nodeDef.flags & NodeFlags.CatPureExpression) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -12928,13 +13221,13 @@ function debugUpdateRenderer(view, checkType) {
 function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
     var /** @type {?} */ changed = ((checkAndUpdateNode)).apply(void 0, [view, nodeDef, argStyle].concat(givenValues));
     if (changed) {
-        var /** @type {?} */ values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
-        if (nodeDef.flags & 16384 /* TypeDirective */) {
+        var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
+        if (nodeDef.flags & NodeFlags.TypeDirective) {
             var /** @type {?} */ bindingValues = {};
             for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
                 var /** @type {?} */ binding = nodeDef.bindings[i];
                 var /** @type {?} */ value = values[i];
-                if (binding.flags & 8 /* TypeProperty */) {
+                if (binding.flags & BindingFlags.TypeProperty) {
                     bindingValues[normalizeDebugBindingName(/** @type {?} */ ((binding.nonMinifiedName)))] =
                         normalizeDebugBindingValue(value);
                 }
@@ -13014,7 +13307,7 @@ function normalizeDebugBindingValue(value) {
 function nextDirectiveWithBinding(view, nodeIndex) {
     for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & 16384 /* TypeDirective */ && nodeDef.bindings && nodeDef.bindings.length) {
+        if (nodeDef.flags & NodeFlags.TypeDirective && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
@@ -13028,7 +13321,7 @@ function nextDirectiveWithBinding(view, nodeIndex) {
 function nextRenderNodeWithBinding(view, nodeIndex) {
     for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if ((nodeDef.flags & 3 /* CatRenderNode */) && nodeDef.bindings && nodeDef.bindings.length) {
+        if ((nodeDef.flags & NodeFlags.CatRenderNode) && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
@@ -13048,7 +13341,7 @@ var DebugContext_ = (function () {
         this.nodeDef = view.def.nodes[nodeIndex];
         var /** @type {?} */ elDef = this.nodeDef;
         var /** @type {?} */ elView = view;
-        while (elDef && (elDef.flags & 1 /* TypeElement */) === 0) {
+        while (elDef && (elDef.flags & NodeFlags.TypeElement) === 0) {
             elDef = ((elDef.parent));
         }
         if (!elDef) {
@@ -13104,7 +13397,7 @@ var DebugContext_ = (function () {
             if (this.elDef) {
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.flags & 20224 /* CatProvider */) {
+                    if (childDef.flags & NodeFlags.CatProvider) {
                         tokens.push(/** @type {?} */ ((childDef.provider)).token);
                     }
                     i += childDef.childCount;
@@ -13125,7 +13418,7 @@ var DebugContext_ = (function () {
                 collectReferences(this.elView, this.elDef, references);
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.flags & 20224 /* CatProvider */) {
+                    if (childDef.flags & NodeFlags.CatProvider) {
                         collectReferences(this.elView, childDef, references);
                     }
                     i += childDef.childCount;
@@ -13152,7 +13445,7 @@ var DebugContext_ = (function () {
          * @return {?}
          */
         get: function () {
-            return this.nodeDef.flags & 2 /* TypeText */ ? renderNode(this.view, this.nodeDef) :
+            return this.nodeDef.flags & NodeFlags.TypeText ? renderNode(this.view, this.nodeDef) :
                 renderNode(this.elView, this.elDef);
         },
         enumerable: true,
@@ -13170,7 +13463,7 @@ var DebugContext_ = (function () {
         }
         var /** @type {?} */ logViewDef;
         var /** @type {?} */ logNodeIndex;
-        if (this.nodeDef.flags & 2 /* TypeText */) {
+        if (this.nodeDef.flags & NodeFlags.TypeText) {
             logViewDef = this.view.def;
             logNodeIndex = this.nodeDef.index;
         }
@@ -13209,7 +13502,7 @@ function getRenderNodeIndex(viewDef$$1, nodeIndex) {
     var /** @type {?} */ renderNodeIndex = -1;
     for (var /** @type {?} */ i = 0; i <= nodeIndex; i++) {
         var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
-        if (nodeDef.flags & 3 /* CatRenderNode */) {
+        if (nodeDef.flags & NodeFlags.CatRenderNode) {
             renderNodeIndex++;
         }
     }
@@ -13560,6 +13853,7 @@ var DebugRenderer2 = (function () {
     DebugRenderer2.prototype.setValue = function (node, value) { return this.delegate.setValue(node, value); };
     return DebugRenderer2;
 }());
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -13596,7 +13890,7 @@ function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
 var NgModuleFactory_ = (function (_super) {
-    tslib_1.__extends(NgModuleFactory_, _super);
+    __extends(NgModuleFactory_, _super);
     /**
      * @param {?} moduleType
      * @param {?} _bootstrapComponents
@@ -13623,6 +13917,7 @@ var NgModuleFactory_ = (function (_super) {
     };
     return NgModuleFactory_;
 }(NgModuleFactory));
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -13634,6 +13929,7 @@ var NgModuleFactory_ = (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -13645,6 +13941,7 @@ var NgModuleFactory_ = (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -13656,6 +13953,7 @@ var NgModuleFactory_ = (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -13671,14 +13969,32 @@ var NgModuleFactory_ = (function (_super) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
- */
+ */ 
+/** @enum {number} */
+var AnimationMetadataType = {
+    State: 0,
+    Transition: 1,
+    Sequence: 2,
+    Group: 3,
+    Animate: 4,
+    Keyframes: 5,
+    Style: 6,
+    Trigger: 7,
+    Reference: 8,
+    AnimateChild: 9,
+    AnimateRef: 10,
+    Query: 11,
+    Stagger: 12,
+};
 /**
  * \@experimental Animation support is experimental.
  */
+
 /**
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link trigger trigger animation function} is called.
@@ -13686,6 +14002,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link state state animation function} is called.
@@ -13693,6 +14010,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link transition transition animation function} is called.
@@ -13700,14 +14018,17 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link keyframes keyframes animation function} is called.
@@ -13715,6 +14036,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link style style animation function} is called.
@@ -13722,6 +14044,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link animate animate animation function} is called.
@@ -13729,6 +14052,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link animateChild animateChild animation function} is called.
@@ -13736,6 +14060,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link useAnimation useAnimation animation function} is called.
@@ -13743,6 +14068,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link sequence sequence animation function} is called.
@@ -13750,6 +14076,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link group group animation function} is called.
@@ -13757,6 +14084,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * Metadata representing the entry of animations. Instances of this interface are provided via the
  * animation DSL when the {\@link stagger stagger animation function} is called.
@@ -13764,6 +14092,7 @@ var NgModuleFactory_ = (function (_super) {
  * \@experimental Animation support is experimental.
  * @record
  */
+
 /**
  * `trigger` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. If this information is new, please navigate to the
@@ -13877,7 +14206,7 @@ var NgModuleFactory_ = (function (_super) {
  * @return {?}
  */
 function trigger$1(name, definitions) {
-    return { type: 7 /* Trigger */, name: name, definitions: definitions, options: {} };
+    return { type: AnimationMetadataType.Trigger, name: name, definitions: definitions, options: {} };
 }
 /**
  * `animate` is an animation-specific function that is designed to be used inside of Angular's
@@ -13929,7 +14258,7 @@ function trigger$1(name, definitions) {
  */
 function animate$1(timings, styles) {
     if (styles === void 0) { styles = null; }
-    return { type: 4 /* Animate */, styles: styles, timings: timings };
+    return { type: AnimationMetadataType.Animate, styles: styles, timings: timings };
 }
 /**
  * `group` is an animation-specific function that is designed to be used inside of Angular's
@@ -13967,7 +14296,7 @@ function animate$1(timings, styles) {
  */
 function group$1(steps, options) {
     if (options === void 0) { options = null; }
-    return { type: 3 /* Group */, steps: steps, options: options };
+    return { type: AnimationMetadataType.Group, steps: steps, options: options };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -14008,7 +14337,7 @@ function group$1(steps, options) {
  */
 function sequence$1(steps, options) {
     if (options === void 0) { options = null; }
-    return { type: 2 /* Sequence */, steps: steps, options: options };
+    return { type: AnimationMetadataType.Sequence, steps: steps, options: options };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -14055,7 +14384,7 @@ function sequence$1(steps, options) {
  * @return {?}
  */
 function style$1(tokens) {
-    return { type: 6 /* Style */, styles: tokens, offset: null };
+    return { type: AnimationMetadataType.Style, styles: tokens, offset: null };
 }
 /**
  * `state` is an animation-specific function that is designed to be used inside of Angular's
@@ -14110,7 +14439,7 @@ function style$1(tokens) {
  * @return {?}
  */
 function state$1(name, styles, options) {
-    return { type: 0 /* State */, name: name, styles: styles, options: options };
+    return { type: AnimationMetadataType.State, name: name, styles: styles, options: options };
 }
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's
@@ -14160,7 +14489,7 @@ function state$1(name, styles, options) {
  * @return {?}
  */
 function keyframes$1(steps) {
-    return { type: 5 /* Keyframes */, steps: steps };
+    return { type: AnimationMetadataType.Keyframes, steps: steps };
 }
 /**
  * `transition` is an animation-specific function that is designed to be used inside of Angular's
@@ -14351,7 +14680,7 @@ function keyframes$1(steps) {
  */
 function transition$1(stateChangeExpr, steps, options) {
     if (options === void 0) { options = null; }
-    return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps, options: options };
+    return { type: AnimationMetadataType.Transition, expr: stateChangeExpr, animation: steps, options: options };
 }
 /**
  * `animation` is an animation-specific function that is designed to be used inside of Angular's
@@ -14391,6 +14720,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * @param {?=} options
  * @return {?}
  */
+
 /**
  * `animateChild` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. It works by allowing a queried element to execute its own
@@ -14490,6 +14820,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * @param {?=} options
  * @return {?}
  */
+
 /**
  * `useAnimation` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. It is used to kick off a reusable animation that is created using {\@link
@@ -14500,6 +14831,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * @param {?=} options
  * @return {?}
  */
+
 /**
  * `query` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language.
@@ -14596,6 +14928,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * @param {?=} options
  * @return {?}
  */
+
 /**
  * `stagger` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language. It is designed to be used inside of an animation {\@link query query()}
@@ -14677,6 +15010,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * @param {?} animation
  * @return {?}
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -14691,52 +15025,52 @@ function transition$1(stateChangeExpr, steps, options) {
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  */
-var AUTO_STYLE$$1 = '*';
+var AUTO_STYLE = '*';
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationMetadata$$1() { }
+function AnimationMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationTriggerMetadata$$1() { }
+function AnimationTriggerMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationStateMetadata$$1() { }
+function AnimationStateMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationTransitionMetadata$$1() { }
+function AnimationTransitionMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationKeyframesSequenceMetadata$$1() { }
+function AnimationKeyframesSequenceMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationStyleMetadata$$1() { }
+function AnimationStyleMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationAnimateMetadata$$1() { }
+function AnimationAnimateMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationSequenceMetadata$$1() { }
+function AnimationSequenceMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationGroupMetadata$$1() { }
+function AnimationGroupMetadata() { }
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @param {?} name
@@ -14810,6 +15144,7 @@ function transition$$1(stateChangeExpr, steps) {
  * @record
  */
 function AnimationTransitionEvent() { }
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -14826,6 +15161,7 @@ function AnimationTransitionEvent() { }
  * @description
  * Entry point from which you should import all public core APIs.
  */
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -14840,9 +15176,11 @@ function AnimationTransitionEvent() { }
 /**
  * @module
  * @description
- * Entry point for all public APIs of the core package.
+ * Entry point for all public APIs of this package.
  */
+
 // This file only reexports content of the `src` folder. Keep it that way.
+
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
@@ -14850,5 +15188,6 @@ function AnimationTransitionEvent() { }
 /**
  * Generated bundle index. Do not edit.
  */
-export { TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, ViewDefinition as ɵViewDefinition, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE$$1 as AUTO_STYLE, AnimationMetadata$$1 as AnimationMetadata, AnimationTriggerMetadata$$1 as AnimationTriggerMetadata, AnimationStateMetadata$$1 as AnimationStateMetadata, AnimationTransitionMetadata$$1 as AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata$$1 as AnimationKeyframesSequenceMetadata, AnimationStyleMetadata$$1 as AnimationStyleMetadata, AnimationAnimateMetadata$$1 as AnimationAnimateMetadata, AnimationSequenceMetadata$$1 as AnimationSequenceMetadata, AnimationGroupMetadata$$1 as AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
-//# sourceMappingURL=core.es5.js.map
+
+export { TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, OpaqueToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, ArgumentType as ɵArgumentType, BindingFlags as ɵBindingFlags, DepFlags as ɵDepFlags, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, NodeFlags as ɵNodeFlags, QueryBindingType as ɵQueryBindingType, QueryValueType as ɵQueryValueType, ViewDefinition as ɵViewDefinition, ViewFlags as ɵViewFlags, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, AnimationMetadata, AnimationTriggerMetadata, AnimationStateMetadata, AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata, AnimationStyleMetadata, AnimationAnimateMetadata, AnimationSequenceMetadata, AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, AnimationMetadataType as ɵx, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
+//# sourceMappingURL=index.js.map

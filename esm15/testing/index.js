@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.5-ee04217
+ * @license Angular v5.0.0-beta.5-fd701b0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1002,8 +1002,14 @@ const __core_private_testing_placeholder__ = '';
 /**
  * @module
  * @description
- * Entry point for all public APIs of the core/testing package.
+ * Entry point for all public APIs of this package.
+ */
+
+// This file only reexports content of the `src` folder. Keep it that way.
+
+/**
+ * Generated bundle index. Do not edit.
  */
 
 export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory };
-//# sourceMappingURL=testing.js.map
+//# sourceMappingURL=index.js.map

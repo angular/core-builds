@@ -1,12 +1,12 @@
 /**
- * @license Angular v5.0.0-beta.5-ee04217
+ * @license Angular v5.0.0-beta.5-fd701b0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
 	typeof define === 'function' && define.amd ? define(['exports', '@angular/core'], factory) :
-	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = global.ng.core.testing || {}),global.ng.core));
+	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
 }(this, (function (exports,_angular_core) { 'use strict';
 
 /*! *****************************************************************************
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.0.0-beta.5-ee04217
+ * @license Angular v5.0.0-beta.5-fd701b0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -140,6 +140,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
     });
     return Zone.current.runGuarded(fn, context);
 }
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -322,6 +323,7 @@ var ComponentFixture = (function () {
 function scheduleMicroTask(fn) {
     Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -458,6 +460,7 @@ function discardPeriodicTasks() {
 function flushMicrotasks() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
 }
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -468,13 +471,7 @@ function flushMicrotasks() {
 /**
  * Injectable completer that allows signaling completion of an asynchronous test. Used internally.
  */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */ var AsyncTestCompleter = (function () {
+var AsyncTestCompleter = (function () {
     function AsyncTestCompleter() {
         var _this = this;
         this._promise = new Promise(function (res, rej) {
@@ -491,6 +488,7 @@ function flushMicrotasks() {
     });
     return AsyncTestCompleter;
 }());
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -557,6 +555,7 @@ var TestingCompilerFactory = (function () {
     }
     return TestingCompilerFactory;
 }());
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -1022,6 +1021,7 @@ function withModule(moduleDef, fn) {
     }
     return new InjectSetupWrapper(function () { return moduleDef; });
 }
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
