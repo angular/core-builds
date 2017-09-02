@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.3.6-b8b551c
+ * @license Angular v4.3.6-7d137d7
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.3.6-b8b551c');
+const VERSION = new Version('4.3.6-7d137d7');
 
 /**
  * @license
@@ -5355,6 +5355,14 @@ class QueryList {
      * @return {?}
      */
     get dirty() { return this._dirty; }
+    /**
+     * internal
+     * @return {?}
+     */
+    destroy() {
+        this._emitter.complete();
+        this._emitter.unsubscribe();
+    }
 }
 /**
  * @template T
@@ -12116,6 +12124,9 @@ function destroyViewNodes(view) {
         }
         else if (def.flags & 2 /* TypeText */) {
             ((view.renderer.destroyNode))(asTextData(view, i).renderText);
+        }
+        else if (def.flags & 67108864 /* TypeContentQuery */ || def.flags & 134217728 /* TypeViewQuery */) {
+            asQueryList(view, i).destroy();
         }
     }
 }
