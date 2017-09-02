@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.5-185a941
+ * @license Angular v5.0.0-beta.5-6ab4966
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-beta.5-185a941
+ * @license Angular v5.0.0-beta.5-6ab4966
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -52,42 +52,6 @@ var __assign = Object.assign || function __assign(t) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-/**
- * Creates a token that can be used in a DI Provider.
- *
- * ### Example ([live demo](http://plnkr.co/edit/Ys9ezXpj2Mnoy3Uc8KBp?p=preview))
- *
- * ```typescript
- * var t = new OpaqueToken("value");
- *
- * var injector = Injector.resolveAndCreate([
- *   {provide: t, useValue: "bindingValue"}
- * ]);
- *
- * expect(injector.get(t)).toEqual("bindingValue");
- * ```
- *
- * Using an `OpaqueToken` is preferable to using strings as tokens because of possible collisions
- * caused by multiple providers using the same string as two different tokens.
- *
- * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
- * error messages.
- * @deprecated since v4.0.0 because it does not support type information, use `InjectionToken<?>`
- * instead.
- */
-var OpaqueToken = (function () {
-    /**
-     * @param {?} _desc
-     */
-    function OpaqueToken(_desc) {
-        this._desc = _desc;
-    }
-    /**
-     * @return {?}
-     */
-    OpaqueToken.prototype.toString = function () { return "Token " + this._desc; };
-    return OpaqueToken;
-}());
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -110,13 +74,12 @@ var OpaqueToken = (function () {
  *
  * \@stable
  */
-var InjectionToken = (function (_super) {
-    __extends(InjectionToken, _super);
+var InjectionToken = (function () {
     /**
-     * @param {?} desc
+     * @param {?} _desc
      */
-    function InjectionToken(desc) {
-        return _super.call(this, desc) || this;
+    function InjectionToken(_desc) {
+        this._desc = _desc;
     }
     /**
      * @return {?}
@@ -132,7 +95,7 @@ var InjectionToken = (function (_super) {
         configurable: true
     });
     return InjectionToken;
-}(OpaqueToken));
+}());
 
 /**
  * @fileoverview added by tsickle
@@ -906,7 +869,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.5-185a941');
+var VERSION = new Version('5.0.0-beta.5-6ab4966');
 
 /**
  * @fileoverview added by tsickle
@@ -5688,6 +5651,14 @@ var QueryList = (function () {
         enumerable: true,
         configurable: true
     });
+    /**
+     * internal
+     * @return {?}
+     */
+    QueryList.prototype.destroy = function () {
+        this._emitter.complete();
+        this._emitter.unsubscribe();
+    };
     return QueryList;
 }());
 /**
@@ -12619,6 +12590,9 @@ function destroyViewNodes(view) {
         else if (def.flags & NodeFlags.TypeText) {
             ((view.renderer.destroyNode))(asTextData(view, i).renderText);
         }
+        else if (def.flags & NodeFlags.TypeContentQuery || def.flags & NodeFlags.TypeViewQuery) {
+            asQueryList(view, i).destroy();
+        }
     }
 }
 /** @enum {number} */
@@ -15276,7 +15250,6 @@ exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
 exports.ResolvedReflectiveProvider = ResolvedReflectiveProvider;
 exports.ReflectiveKey = ReflectiveKey;
 exports.InjectionToken = InjectionToken;
-exports.OpaqueToken = OpaqueToken;
 exports.InjectDecorator = InjectDecorator;
 exports.Inject = Inject;
 exports.OptionalDecorator = OptionalDecorator;
