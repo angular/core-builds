@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { ErrorHandler } from '../src/error_handler';
 import { ApplicationInitStatus } from './application_init';
 import { Console } from './console';
-import { InjectionToken, Injector, Provider } from './di';
+import { InjectionToken, Injector, StaticProvider } from './di';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { ComponentFactoryResolver } from './linker/component_factory_resolver';
@@ -60,7 +60,7 @@ export declare function createPlatform(injector: Injector): PlatformRef;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function createPlatformFactory(parentPlatformFactory: (extraProviders?: Provider[]) => PlatformRef, name: string, providers?: Provider[]): (extraProviders?: Provider[]) => PlatformRef;
+export declare function createPlatformFactory(parentPlatformFactory: ((extraProviders?: StaticProvider[]) => PlatformRef) | null, name: string, providers?: StaticProvider[]): (extraProviders?: StaticProvider[]) => PlatformRef;
 /**
  * Checks that there currently is a platform which contains the given token as a provider.
  *
@@ -78,14 +78,14 @@ export declare function destroyPlatform(): void;
  *
  * @experimental APIs related to application bootstrap are currently under review.
  */
-export declare function getPlatform(): PlatformRef;
+export declare function getPlatform(): PlatformRef | null;
 /**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
  *
- * A page's platform is initialized implicitly when {@link bootstrap}() is called, or
- * explicitly by calling {@link createPlatform}().
+ * A page's platform is initialized implicitly when a platform is created via a platform factory
+ * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
  *
  * @stable
  */
@@ -160,15 +160,13 @@ export declare class PlatformRef_ extends PlatformRef {
     readonly destroyed: boolean;
     destroy(): void;
     bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
-    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone);
+    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone?);
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
     private _bootstrapModuleWithZone<M>(moduleType, compilerOptions?, ngZone?);
     private _moduleDoBootstrap(moduleRef);
 }
 /**
  * A reference to an Angular application running on a page.
- *
- * For more about Angular applications, see the documentation for {@link bootstrap}.
  *
  * @stable
  */
@@ -182,10 +180,13 @@ export declare abstract class ApplicationRef {
      * specified application component onto DOM elements identified by the [componentType]'s
      * selector and kicks off automatic change detection to finish initializing the component.
      *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * [componentType]'s selector.
+     *
      * ### Example
      * {@example core/ts/platform/platform.ts region='longform'}
      */
-    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
+    abstract bootstrap<C>(componentFactory: ComponentFactory<C> | Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
     /**
      * Invoke this method to explicitly process change detection and its side-effects.
      *
@@ -247,7 +248,7 @@ export declare class ApplicationRef_ extends ApplicationRef {
     constructor(_zone: NgZone, _console: Console, _injector: Injector, _exceptionHandler: ErrorHandler, _componentFactoryResolver: ComponentFactoryResolver, _initStatus: ApplicationInitStatus);
     attachView(viewRef: ViewRef): void;
     detachView(viewRef: ViewRef): void;
-    bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>): ComponentRef<C>;
+    bootstrap<C>(componentOrFactory: ComponentFactory<C> | Type<C>, rootSelectorOrNode?: string | any): ComponentRef<C>;
     private _loadComponent(componentRef);
     private _unloadComponent(componentRef);
     tick(): void;

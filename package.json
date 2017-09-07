@@ -1,13 +1,16 @@
 {
   "name": "@angular/core",
-  "version": "4.0.0-rc.5-c5cc3be",
+  "version": "5.0.0-beta.6-f2945c6",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
-  "module": "./@angular/core.es5.js",
-  "es2015": "./@angular/core.js",
-  "typings": "./core.d.ts",
+  "module": "./esm5/index.js",
+  "es2015": "./esm15/index.js",
+  "typings": "./index.d.ts",
   "author": "angular",
   "license": "MIT",
+  "dependencies": {
+    "tslib": "^1.7.1"
+  },
   "peerDependencies": {
     "rxjs": "^5.0.1",
     "zone.js": "^0.8.4"
