@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.6-a69172f
+ * @license Angular v5.0.0-beta.6-8f79150
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -783,7 +783,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.6-a69172f');
+const VERSION = new Version('5.0.0-beta.6-8f79150');
 
 /**
  * @fileoverview added by tsickle
