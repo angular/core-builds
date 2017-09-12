@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.6-9ab9437
+ * @license Angular v5.0.0-beta.6-c8f742e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -643,7 +643,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.6-9ab9437');
+const VERSION = new Version('5.0.0-beta.6-c8f742e');
 
 /**
  * @fileoverview added by tsickle
@@ -4013,6 +4013,7 @@ class Testability {
         });
     }
     /**
+     * Increases the number of pending request
      * @return {?}
      */
     increasePendingRequestCount() {
@@ -4021,6 +4022,7 @@ class Testability {
         return this._pendingCount;
     }
     /**
+     * Decreases the number of pending request
      * @return {?}
      */
     decreasePendingRequestCount() {
@@ -4032,6 +4034,7 @@ class Testability {
         return this._pendingCount;
     }
     /**
+     * Whether an associated application is stable
      * @return {?}
      */
     isStable() {
@@ -4057,7 +4060,8 @@ class Testability {
         }
     }
     /**
-     * @param {?} callback
+     * Run callback when the application is stable
+     * @param {?} callback function to be called after the application is stable
      * @return {?}
      */
     whenStable(callback) {
@@ -4065,13 +4069,15 @@ class Testability {
         this._runCallbacksIfReady();
     }
     /**
+     * Get the number of pending requests
      * @return {?}
      */
     getPendingRequestCount() { return this._pendingCount; }
     /**
-     * @param {?} using
-     * @param {?} provider
-     * @param {?} exactMatch
+     * Find providers by name
+     * @param {?} using The root element to search from
+     * @param {?} provider The name of binding variable
+     * @param {?} exactMatch Whether using exactMatch
      * @return {?}
      */
     findProviders(using, provider, exactMatch) {
@@ -4099,29 +4105,46 @@ class TestabilityRegistry {
         _testabilityGetter.addToWindow(this);
     }
     /**
-     * @param {?} token
-     * @param {?} testability
+     * Registers an application with a testability hook so that it can be tracked
+     * @param {?} token token of application, root element
+     * @param {?} testability Testability hook
      * @return {?}
      */
     registerApplication(token, testability) {
         this._applications.set(token, testability);
     }
     /**
-     * @param {?} elem
+     * Unregisters an application.
+     * @param {?} token token of application, root element
+     * @return {?}
+     */
+    unregisterApplication(token) { this._applications.delete(token); }
+    /**
+     * Unregisters all applications
+     * @return {?}
+     */
+    unregisterAllApplications() { this._applications.clear(); }
+    /**
+     * Get a testability hook associated with the application
+     * @param {?} elem root element
      * @return {?}
      */
     getTestability(elem) { return this._applications.get(elem) || null; }
     /**
+     * Get all registered testabilities
      * @return {?}
      */
     getAllTestabilities() { return Array.from(this._applications.values()); }
     /**
+     * Get all registered applications(root elements)
      * @return {?}
      */
     getAllRootElements() { return Array.from(this._applications.keys()); }
     /**
-     * @param {?} elem
-     * @param {?=} findInAncestors
+     * Find testability of a node in the Tree
+     * @param {?} elem node
+     * @param {?=} findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
      * @return {?}
      */
     findTestabilityInTree(elem, findInAncestors = true) {

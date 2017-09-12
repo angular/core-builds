@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.6-9ab9437
+ * @license Angular v5.0.0-beta.6-c8f742e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-beta.6-9ab9437
+ * @license Angular v5.0.0-beta.6-c8f742e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -733,7 +733,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.6-9ab9437');
+var VERSION = new Version('5.0.0-beta.6-c8f742e');
 
 /**
  * @fileoverview added by tsickle
@@ -4871,9 +4871,14 @@ var Testability = (function () {
         });
     };
     /**
+     * Increases the number of pending request
+     */
+    /**
+     * Increases the number of pending request
      * @return {?}
      */
     Testability.prototype.increasePendingRequestCount = /**
+     * Increases the number of pending request
      * @return {?}
      */
     function () {
@@ -4882,9 +4887,14 @@ var Testability = (function () {
         return this._pendingCount;
     };
     /**
+     * Decreases the number of pending request
+     */
+    /**
+     * Decreases the number of pending request
      * @return {?}
      */
     Testability.prototype.decreasePendingRequestCount = /**
+     * Decreases the number of pending request
      * @return {?}
      */
     function () {
@@ -4896,9 +4906,14 @@ var Testability = (function () {
         return this._pendingCount;
     };
     /**
+     * Whether an associated application is stable
+     */
+    /**
+     * Whether an associated application is stable
      * @return {?}
      */
     Testability.prototype.isStable = /**
+     * Whether an associated application is stable
      * @return {?}
      */
     function () {
@@ -4930,11 +4945,17 @@ var Testability = (function () {
         }
     };
     /**
-     * @param {?} callback
+     * Run callback when the application is stable
+     * @param callback function to be called after the application is stable
+     */
+    /**
+     * Run callback when the application is stable
+     * @param {?} callback function to be called after the application is stable
      * @return {?}
      */
     Testability.prototype.whenStable = /**
-     * @param {?} callback
+     * Run callback when the application is stable
+     * @param {?} callback function to be called after the application is stable
      * @return {?}
      */
     function (callback) {
@@ -4942,22 +4963,35 @@ var Testability = (function () {
         this._runCallbacksIfReady();
     };
     /**
+     * Get the number of pending requests
+     */
+    /**
+     * Get the number of pending requests
      * @return {?}
      */
     Testability.prototype.getPendingRequestCount = /**
+     * Get the number of pending requests
      * @return {?}
      */
     function () { return this._pendingCount; };
     /**
-     * @param {?} using
-     * @param {?} provider
-     * @param {?} exactMatch
+     * Find providers by name
+     * @param using The root element to search from
+     * @param provider The name of binding variable
+     * @param exactMatch Whether using exactMatch
+     */
+    /**
+     * Find providers by name
+     * @param {?} using The root element to search from
+     * @param {?} provider The name of binding variable
+     * @param {?} exactMatch Whether using exactMatch
      * @return {?}
      */
     Testability.prototype.findProviders = /**
-     * @param {?} using
-     * @param {?} provider
-     * @param {?} exactMatch
+     * Find providers by name
+     * @param {?} using The root element to search from
+     * @param {?} provider The name of binding variable
+     * @param {?} exactMatch Whether using exactMatch
      * @return {?}
      */
     function (using, provider, exactMatch) {
@@ -4986,49 +5020,109 @@ var TestabilityRegistry = (function () {
         _testabilityGetter.addToWindow(this);
     }
     /**
-     * @param {?} token
-     * @param {?} testability
+     * Registers an application with a testability hook so that it can be tracked
+     * @param token token of application, root element
+     * @param testability Testability hook
+     */
+    /**
+     * Registers an application with a testability hook so that it can be tracked
+     * @param {?} token token of application, root element
+     * @param {?} testability Testability hook
      * @return {?}
      */
     TestabilityRegistry.prototype.registerApplication = /**
-     * @param {?} token
-     * @param {?} testability
+     * Registers an application with a testability hook so that it can be tracked
+     * @param {?} token token of application, root element
+     * @param {?} testability Testability hook
      * @return {?}
      */
     function (token, testability) {
         this._applications.set(token, testability);
     };
     /**
-     * @param {?} elem
+     * Unregisters an application.
+     * @param token token of application, root element
+     */
+    /**
+     * Unregisters an application.
+     * @param {?} token token of application, root element
+     * @return {?}
+     */
+    TestabilityRegistry.prototype.unregisterApplication = /**
+     * Unregisters an application.
+     * @param {?} token token of application, root element
+     * @return {?}
+     */
+    function (token) { this._applications.delete(token); };
+    /**
+     * Unregisters all applications
+     */
+    /**
+     * Unregisters all applications
+     * @return {?}
+     */
+    TestabilityRegistry.prototype.unregisterAllApplications = /**
+     * Unregisters all applications
+     * @return {?}
+     */
+    function () { this._applications.clear(); };
+    /**
+     * Get a testability hook associated with the application
+     * @param elem root element
+     */
+    /**
+     * Get a testability hook associated with the application
+     * @param {?} elem root element
      * @return {?}
      */
     TestabilityRegistry.prototype.getTestability = /**
-     * @param {?} elem
+     * Get a testability hook associated with the application
+     * @param {?} elem root element
      * @return {?}
      */
     function (elem) { return this._applications.get(elem) || null; };
     /**
+     * Get all registered testabilities
+     */
+    /**
+     * Get all registered testabilities
      * @return {?}
      */
     TestabilityRegistry.prototype.getAllTestabilities = /**
+     * Get all registered testabilities
      * @return {?}
      */
     function () { return Array.from(this._applications.values()); };
     /**
+     * Get all registered applications(root elements)
+     */
+    /**
+     * Get all registered applications(root elements)
      * @return {?}
      */
     TestabilityRegistry.prototype.getAllRootElements = /**
+     * Get all registered applications(root elements)
      * @return {?}
      */
     function () { return Array.from(this._applications.keys()); };
     /**
-     * @param {?} elem
-     * @param {?=} findInAncestors
+     * Find testability of a node in the Tree
+     * @param elem node
+     * @param findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
+     */
+    /**
+     * Find testability of a node in the Tree
+     * @param {?} elem node
+     * @param {?=} findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
      * @return {?}
      */
     TestabilityRegistry.prototype.findTestabilityInTree = /**
-     * @param {?} elem
-     * @param {?=} findInAncestors
+     * Find testability of a node in the Tree
+     * @param {?} elem node
+     * @param {?=} findInAncestors whether finding testability in ancestors if testability was not found in
+     * current node
      * @return {?}
      */
     function (elem, findInAncestors) {
