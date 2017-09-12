@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.6-112e777
+ * @license Angular v5.0.0-beta.6-ca5aeba
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,22 +36,23 @@ import { Subject } from 'rxjs/Subject';
  * \@stable
  */
 var InjectionToken = (function () {
-    /**
-     * @param {?} _desc
-     */
     function InjectionToken(_desc) {
         this._desc = _desc;
     }
     /**
      * @return {?}
      */
-    InjectionToken.prototype.toString = function () { return "InjectionToken " + this._desc; };
+    InjectionToken.prototype.toString = /**
+     * @return {?}
+     */
+    function () { return "InjectionToken " + this._desc; };
     Object.defineProperty(InjectionToken.prototype, "ngMetadataName", {
-        /**
+        /** @internal */
+        get: /**
          * \@internal
          * @return {?}
          */
-        get: function () { return 'InjectionToken'; },
+        function () { return 'InjectionToken'; },
         enumerable: true,
         configurable: true
     });
@@ -76,7 +77,7 @@ var InjectionToken = (function () {
  * \@stable
  * @record
  */
-function TypeDecorator() { }
+
 var ANNOTATIONS = '__annotations__';
 var PARAMETERS = '__paramaters__';
 var PROP_METADATA = '__prop__metadata__';
@@ -99,12 +100,12 @@ function makeDecorator(name, props, parentClass, chainFn) {
             metaCtor.call(this, objOrType);
             return this;
         }
-        var /** @type {?} */ annotationInstance = new ((DecoratorFactory))(objOrType);
-        var /** @type {?} */ TypeDecorator = (function TypeDecorator(cls) {
+        var /** @type {?} */ annotationInstance = new (/** @type {?} */ (DecoratorFactory))(objOrType);
+        var /** @type {?} */ TypeDecorator = /** @type {?} */ (function TypeDecorator(cls) {
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
             var /** @type {?} */ annotations = cls.hasOwnProperty(ANNOTATIONS) ?
-                ((cls))[ANNOTATIONS] :
+                (/** @type {?} */ (cls))[ANNOTATIONS] :
                 Object.defineProperty(cls, ANNOTATIONS, { value: [] })[ANNOTATIONS];
             annotations.push(annotationInstance);
             return cls;
@@ -117,8 +118,8 @@ function makeDecorator(name, props, parentClass, chainFn) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
     DecoratorFactory.prototype.ngMetadataName = name;
-    ((DecoratorFactory)).annotationCls = DecoratorFactory;
-    return (DecoratorFactory);
+    (/** @type {?} */ (DecoratorFactory)).annotationCls = DecoratorFactory;
+    return /** @type {?} */ (DecoratorFactory);
 }
 /**
  * @param {?=} props
@@ -159,8 +160,8 @@ function makeParamDecorator(name, props, parentClass) {
             metaCtor.apply(this, args);
             return this;
         }
-        var /** @type {?} */ annotationInstance = new ((_a = ((ParamDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
-        ((ParamDecorator)).annotation = annotationInstance;
+        var /** @type {?} */ annotationInstance = new ((_a = (/** @type {?} */ (ParamDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
+        (/** @type {?} */ (ParamDecorator)).annotation = annotationInstance;
         return ParamDecorator;
         /**
          * @param {?} cls
@@ -172,7 +173,7 @@ function makeParamDecorator(name, props, parentClass) {
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
             var /** @type {?} */ parameters = cls.hasOwnProperty(PARAMETERS) ?
-                ((cls))[PARAMETERS] :
+                (/** @type {?} */ (cls))[PARAMETERS] :
                 Object.defineProperty(cls, PARAMETERS, { value: [] })[PARAMETERS];
             // there might be gaps if some in between parameters do not have annotations.
             // we pad with nulls.
@@ -188,7 +189,7 @@ function makeParamDecorator(name, props, parentClass) {
         ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
     ParamDecoratorFactory.prototype.ngMetadataName = name;
-    ((ParamDecoratorFactory)).annotationCls = ParamDecoratorFactory;
+    (/** @type {?} */ (ParamDecoratorFactory)).annotationCls = ParamDecoratorFactory;
     return ParamDecoratorFactory;
 }
 /**
@@ -212,13 +213,13 @@ function makePropDecorator(name, props, parentClass) {
             metaCtor.apply(this, args);
             return this;
         }
-        var /** @type {?} */ decoratorInstance = new ((_a = ((PropDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
+        var /** @type {?} */ decoratorInstance = new ((_a = (/** @type {?} */ (PropDecoratorFactory))).bind.apply(_a, [void 0].concat(args)))();
         return function PropDecorator(target, name) {
             var /** @type {?} */ constructor = target.constructor;
             // Use of Object.defineProperty is important since it creates non-enumerable property which
             // prevents the property is copied during subclassing.
             var /** @type {?} */ meta = constructor.hasOwnProperty(PROP_METADATA) ?
-                ((constructor))[PROP_METADATA] :
+                (/** @type {?} */ (constructor))[PROP_METADATA] :
                 Object.defineProperty(constructor, PROP_METADATA, { value: {} })[PROP_METADATA];
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
@@ -229,7 +230,7 @@ function makePropDecorator(name, props, parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
     }
     PropDecoratorFactory.prototype.ngMetadataName = name;
-    ((PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
+    (/** @type {?} */ (PropDecoratorFactory)).annotationCls = PropDecoratorFactory;
     return PropDecoratorFactory;
 }
 
@@ -315,7 +316,7 @@ var Query = (function () {
  * \@stable
  * @record
  */
-function ContentChildrenDecorator() { }
+
 /**
  * ContentChildren decorator and metadata.
  *
@@ -333,7 +334,7 @@ var ContentChildren = makePropDecorator('ContentChildren', function (selector, d
  * \@stable
  * @record
  */
-function ContentChildDecorator() { }
+
 /**
  * ContentChild decorator and metadata.
  *
@@ -352,7 +353,7 @@ var ContentChild = makePropDecorator('ContentChild', function (selector, data) {
  * \@stable
  * @record
  */
-function ViewChildrenDecorator() { }
+
 /**
  * ViewChildren decorator and metadata.
  *
@@ -371,7 +372,7 @@ var ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
  * \@stable
  * @record
  */
-function ViewChildDecorator() { }
+
 /**
  * ViewChild decorator and metadata.
  *
@@ -389,12 +390,12 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
 /** @enum {number} */
 var ChangeDetectionStrategy = {
     /**
-     * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
-     */
+       * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+       */
     OnPush: 0,
     /**
-     * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
-     */
+       * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+       */
     Default: 1,
 };
 ChangeDetectionStrategy[ChangeDetectionStrategy.OnPush] = "OnPush";
@@ -402,34 +403,34 @@ ChangeDetectionStrategy[ChangeDetectionStrategy.Default] = "Default";
 /** @enum {number} */
 var ChangeDetectorStatus = {
     /**
-     * `CheckOnce` means that after calling detectChanges the mode of the change detector
-     * will become `Checked`.
-     */
+       * `CheckOnce` means that after calling detectChanges the mode of the change detector
+       * will become `Checked`.
+       */
     CheckOnce: 0,
     /**
-     * `Checked` means that the change detector should be skipped until its mode changes to
-     * `CheckOnce`.
-     */
+       * `Checked` means that the change detector should be skipped until its mode changes to
+       * `CheckOnce`.
+       */
     Checked: 1,
     /**
-     * `CheckAlways` means that after calling detectChanges the mode of the change detector
-     * will remain `CheckAlways`.
-     */
+       * `CheckAlways` means that after calling detectChanges the mode of the change detector
+       * will remain `CheckAlways`.
+       */
     CheckAlways: 2,
     /**
-     * `Detached` means that the change detector sub tree is not a part of the main tree and
-     * should be skipped.
-     */
+       * `Detached` means that the change detector sub tree is not a part of the main tree and
+       * should be skipped.
+       */
     Detached: 3,
     /**
-     * `Errored` means that the change detector encountered an error checking a binding
-     * or calling a directive lifecycle method and is now in an inconsistent state. Change
-     * detectors in this state will no longer detect changes.
-     */
+       * `Errored` means that the change detector encountered an error checking a binding
+       * or calling a directive lifecycle method and is now in an inconsistent state. Change
+       * detectors in this state will no longer detect changes.
+       */
     Errored: 4,
     /**
-     * `Destroyed` means that the change detector is destroyed.
-     */
+       * `Destroyed` means that the change detector is destroyed.
+       */
     Destroyed: 5,
 };
 ChangeDetectorStatus[ChangeDetectorStatus.CheckOnce] = "CheckOnce";
@@ -464,7 +465,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * \@stable
  * @record
  */
-function DirectiveDecorator() { }
+
 /**
  * Directive decorator and metadata.
  *
@@ -481,7 +482,7 @@ var Directive = makeDecorator('Directive', function (dir) {
  * \@stable
  * @record
  */
-function ComponentDecorator() { }
+
 /**
  * Component decorator and metadata.
  *
@@ -568,153 +569,19 @@ var HostListener = makePropDecorator('HostListener', function (eventName, args) 
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * A `changes` object whose keys are property names and
- * values are instances of {\@link SimpleChange}. See {\@link OnChanges}
- * \@stable
- * @record
- */
-function SimpleChanges() { }
-/**
- * \@whatItDoes Lifecycle hook that is called when any data-bound property of a directive changes.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnChanges'}
- *
- * \@description
- * `ngOnChanges` is called right after the data-bound properties have been checked and before view
- * and content children are checked if at least one of them has changed.
- * The `changes` parameter contains the changed properties.
- *
- * See {\@linkDocs guide/lifecycle-hooks#onchanges "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function OnChanges() { }
-/**
- * \@whatItDoes Lifecycle hook that is called after data-bound properties of a directive are
- * initialized.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
- *
- * \@description
- * `ngOnInit` is called right after the directive's data-bound properties have been checked for the
- * first time, and before any of its children have been checked. It is invoked only once when the
- * directive is instantiated.
- *
- * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function OnInit() { }
-/**
- * \@whatItDoes Lifecycle hook that is called when Angular dirty checks a directive.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
- *
- * \@description
- * `ngDoCheck` gets called to check the changes in the directives in addition to the default
- * algorithm. The default change detection algorithm looks for differences by comparing
- * bound-property values by reference across change detection runs.
- *
- * Note that a directive typically should not use both `DoCheck` and {\@link OnChanges} to respond to
- * changes on the same input, as `ngOnChanges` will continue to be called when the default change
- * detector detects changes.
- *
- * See {\@link KeyValueDiffers} and {\@link IterableDiffers} for implementing custom dirty checking
- * for collections.
- *
- * See {\@linkDocs guide/lifecycle-hooks#docheck "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function DoCheck() { }
-/**
- * \@whatItDoes Lifecycle hook that is called when a directive, pipe or service is destroyed.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
- *
- * \@description
- * `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
- * instance is destroyed.
- *
- * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function OnDestroy() { }
-/**
- *
- * \@whatItDoes Lifecycle hook that is called after a directive's content has been fully
- * initialized.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
- *
- * \@description
- * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function AfterContentInit() { }
-/**
- * \@whatItDoes Lifecycle hook that is called after every check of a directive's content.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
- *
- * \@description
- * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function AfterContentChecked() { }
-/**
- * \@whatItDoes Lifecycle hook that is called after a component's view has been fully
- * initialized.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
- *
- * \@description
- * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function AfterViewInit() { }
-/**
- * \@whatItDoes Lifecycle hook that is called after every check of a component's view.
- * \@howToUse
- * {\@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
- *
- * \@description
- * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
- *
- * \@stable
- * @record
- */
-function AfterViewChecked() { }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
  * A wrapper around a module that also includes the providers.
  *
  * \@stable
  * @record
  */
-function ModuleWithProviders() { }
+
 /**
  * Interface for schema definitions in \@NgModules.
  *
  * \@experimental
  * @record
  */
-function SchemaMetadata() { }
+
 /**
  * Defines a schema that will allow:
  * - any non-Angular elements with a `-` in their name,
@@ -756,24 +623,24 @@ var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; 
 /** @enum {number} */
 var ViewEncapsulation = {
     /**
-     * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via
-     * {@link Component#styles} or {@link Component#styleUrls}, and adding the new Host Element
-     * attribute to all selectors.
-     *
-     * This is the default option.
-     */
+       * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
+       * Element and pre-processing the style rules provided via
+       * {@link Component#styles} or {@link Component#styleUrls}, and adding the new Host Element
+       * attribute to all selectors.
+       *
+       * This is the default option.
+       */
     Emulated: 0,
     /**
-     * Use the native encapsulation mechanism of the renderer.
-     *
-     * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
-     * creating a ShadowRoot for Component's Host Element.
-     */
+       * Use the native encapsulation mechanism of the renderer.
+       *
+       * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       */
     Native: 1,
     /**
-     * Don't provide any template or style encapsulation.
-     */
+       * Don't provide any template or style encapsulation.
+       */
     None: 2,
 };
 ViewEncapsulation[ViewEncapsulation.Emulated] = "Emulated";
@@ -795,33 +662,30 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  * \@stable
  */
 var Version = (function () {
-    /**
-     * @param {?} full
-     */
     function Version(full) {
         this.full = full;
     }
     Object.defineProperty(Version.prototype, "major", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.full.split('.')[0]; },
+        function () { return this.full.split('.')[0]; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(Version.prototype, "minor", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.full.split('.')[1]; },
+        function () { return this.full.split('.')[1]; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(Version.prototype, "patch", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.full.split('.').slice(2).join('.'); },
+        function () { return this.full.split('.').slice(2).join('.'); },
         enumerable: true,
         configurable: true
     });
@@ -830,7 +694,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.6-112e777');
+var VERSION = new Version('5.0.0-beta.6-ca5aeba');
 
 /**
  * @fileoverview added by tsickle
@@ -849,7 +713,7 @@ var VERSION = new Version('5.0.0-beta.6-112e777');
  * \@stable
  * @record
  */
-function InjectDecorator() { }
+
 /**
  * Inject decorator and metadata.
  *
@@ -863,7 +727,7 @@ var Inject = makeParamDecorator('Inject', function (token) { return ({ token: to
  * \@stable
  * @record
  */
-function OptionalDecorator() { }
+
 /**
  * Optional decorator and metadata.
  *
@@ -877,7 +741,7 @@ var Optional = makeParamDecorator('Optional');
  * \@stable
  * @record
  */
-function InjectableDecorator() { }
+
 /**
  * Injectable decorator and metadata.
  *
@@ -891,7 +755,7 @@ var Injectable = makeDecorator('Injectable');
  * \@stable
  * @record
  */
-function SelfDecorator() { }
+
 /**
  * Self decorator and metadata.
  *
@@ -905,7 +769,7 @@ var Self = makeParamDecorator('Self');
  * \@stable
  * @record
  */
-function SkipSelfDecorator() { }
+
 /**
  * SkipSelf decorator and metadata.
  *
@@ -919,7 +783,7 @@ var SkipSelf = makeParamDecorator('SkipSelf');
  * \@stable
  * @record
  */
-function HostDecorator() { }
+
 /**
  * Host decorator and metadata.
  *
@@ -953,7 +817,7 @@ function getSymbolIterator() {
             for (var /** @type {?} */ i = 0; i < keys.length; ++i) {
                 var /** @type {?} */ key = keys[i];
                 if (key !== 'entries' && key !== 'size' &&
-                    ((Map)).prototype[key] === Map.prototype['entries']) {
+                    (/** @type {?} */ (Map)).prototype[key] === Map.prototype['entries']) {
                     _symbolIterator = key;
                 }
             }
@@ -1017,7 +881,7 @@ function stringify(token) {
  * \@experimental
  * @record
  */
-function ForwardRefFn() { }
+
 /**
  * Allows to refer to references which are not yet defined.
  *
@@ -1033,9 +897,9 @@ function ForwardRefFn() { }
  * @return {?}
  */
 function forwardRef(forwardRefFn) {
-    ((forwardRefFn)).__forward_ref__ = forwardRef;
-    ((forwardRefFn)).toString = function () { return stringify(this()); };
-    return (((forwardRefFn)));
+    (/** @type {?} */ (forwardRefFn)).__forward_ref__ = forwardRef;
+    (/** @type {?} */ (forwardRefFn)).toString = function () { return stringify(this()); };
+    return (/** @type {?} */ (/** @type {?} */ (forwardRefFn)));
 }
 /**
  * Lazily retrieves the reference value from a forwardRef.
@@ -1054,7 +918,7 @@ function forwardRef(forwardRefFn) {
 function resolveForwardRef(type) {
     if (typeof type === 'function' && type.hasOwnProperty('__forward_ref__') &&
         type.__forward_ref__ === forwardRef) {
-        return ((type))();
+        return (/** @type {?} */ (type))();
     }
     else {
         return type;
@@ -1075,7 +939,12 @@ var _NullInjector = (function () {
      * @param {?=} notFoundValue
      * @return {?}
      */
-    _NullInjector.prototype.get = function (token, notFoundValue) {
+    _NullInjector.prototype.get = /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = _THROW_IF_NOT_FOUND; }
         if (notFoundValue === _THROW_IF_NOT_FOUND) {
             throw new Error("NullInjectorError: No provider for " + stringify(token) + "!");
@@ -1113,45 +982,51 @@ var Injector = (function () {
      *
      * ### Example
      *
+     * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     */
+    /**
+     * Create a new Injector which is configure using `StaticProvider`s.
+     *
+     * ### Example
+     *
      * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
      * @param {?} providers
      * @param {?=} parent
      * @return {?}
      */
-    Injector.create = function (providers, parent) {
+    Injector.create = /**
+     * Create a new Injector which is configure using `StaticProvider`s.
+     *
+     * ### Example
+     *
+     * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */
+    function (providers, parent) {
         return new StaticInjector(providers, parent);
     };
+    Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+    Injector.NULL = new _NullInjector();
     return Injector;
 }());
-Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-Injector.NULL = new _NullInjector();
 var IDENT = function (value) {
     return value;
 };
-var EMPTY = ([]);
+var EMPTY = /** @type {?} */ ([]);
 var CIRCULAR = IDENT;
 var MULTI_PROVIDER_FN = function () {
     return Array.prototype.slice.call(arguments);
 };
-var GET_PROPERTY_NAME = ({});
+var GET_PROPERTY_NAME = /** @type {?} */ ({});
 var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
 var NG_TOKEN_PATH = 'ngTokenPath';
 var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
-/** @enum {number} */
-var OptionFlags = {
-    Optional: 1,
-    CheckSelf: 2,
-    CheckParent: 4,
-    Default: 6,
-};
 var NULL_INJECTOR = Injector.NULL;
 var NEW_LINE = /\n/gm;
 var NO_NEW_LINE = 'ɵ';
 var StaticInjector = (function () {
-    /**
-     * @param {?} providers
-     * @param {?=} parent
-     */
     function StaticInjector(providers, parent) {
         if (parent === void 0) { parent = NULL_INJECTOR; }
         this.parent = parent;
@@ -1164,12 +1039,17 @@ var StaticInjector = (function () {
      * @param {?=} notFoundValue
      * @return {?}
      */
-    StaticInjector.prototype.get = function (token, notFoundValue) {
+    StaticInjector.prototype.get = /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function (token, notFoundValue) {
         var /** @type {?} */ record = this._records.get(token);
         try {
             return tryResolveToken(token, record, this._records, this.parent, notFoundValue);
         }
-        catch (e) {
+        catch (/** @type {?} */ e) {
             var /** @type {?} */ tokenPath = e[NG_TEMP_TOKEN_PATH];
             e.message = formatError('\n' + e.message, tokenPath);
             e[NG_TOKEN_PATH] = tokenPath;
@@ -1180,8 +1060,11 @@ var StaticInjector = (function () {
     /**
      * @return {?}
      */
-    StaticInjector.prototype.toString = function () {
-        var /** @type {?} */ tokens = ([]), /** @type {?} */ records = this._records;
+    StaticInjector.prototype.toString = /**
+     * @return {?}
+     */
+    function () {
+        var /** @type {?} */ tokens = /** @type {?} */ ([]), /** @type {?} */ records = this._records;
         records.forEach(function (v, token) { return tokens.push(stringify(token)); });
         return "StaticInjector[" + tokens.join(', ') + "]";
     };
@@ -1199,17 +1082,17 @@ function resolveProvider(provider) {
     var /** @type {?} */ provide = resolveForwardRef(provider.provide);
     if (USE_VALUE in provider) {
         // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
-        value = ((provider)).useValue;
+        value = (/** @type {?} */ (provider)).useValue;
     }
-    else if (((provider)).useFactory) {
-        fn = ((provider)).useFactory;
+    else if ((/** @type {?} */ (provider)).useFactory) {
+        fn = (/** @type {?} */ (provider)).useFactory;
     }
-    else if (((provider)).useExisting) {
+    else if ((/** @type {?} */ (provider)).useExisting) {
         // Just use IDENT
     }
-    else if (((provider)).useClass) {
+    else if ((/** @type {?} */ (provider)).useClass) {
         useNew = true;
-        fn = resolveForwardRef(((provider)).useClass);
+        fn = resolveForwardRef((/** @type {?} */ (provider)).useClass);
     }
     else if (typeof provide == 'function') {
         useNew = true;
@@ -1260,7 +1143,7 @@ function recursivelyProcessProviders(records, provider) {
                 }
                 else {
                     // Create a placeholder factory which will look up the constituents of the multi provider.
-                    records.set(token, multiProvider = ({
+                    records.set(token, multiProvider = /** @type {?} */ ({
                         token: provider.provide,
                         deps: [],
                         useNew: false,
@@ -1270,7 +1153,7 @@ function recursivelyProcessProviders(records, provider) {
                 }
                 // Treat the provider as the token.
                 token = provider;
-                multiProvider.deps.push({ token: token, options: OptionFlags.Default });
+                multiProvider.deps.push({ token: token, options: 6 /* Default */ });
             }
             var /** @type {?} */ record = records.get(token);
             if (record && record.fn == MULTI_PROVIDER_FN) {
@@ -1295,7 +1178,7 @@ function tryResolveToken(token, record, records, parent, notFoundValue) {
     try {
         return resolveToken(token, record, records, parent, notFoundValue);
     }
-    catch (e) {
+    catch (/** @type {?} */ e) {
         // ensure that 'e' is of type Error.
         if (!(e instanceof Error)) {
             e = new Error(e);
@@ -1338,21 +1221,16 @@ function resolveToken(token, record, records, parent, notFoundValue) {
                 for (var /** @type {?} */ i = 0; i < depRecords.length; i++) {
                     var /** @type {?} */ depRecord = depRecords[i];
                     var /** @type {?} */ options = depRecord.options;
-                    var /** @type {?} */ childRecord = options & OptionFlags.CheckSelf ? records.get(depRecord.token) : undefined;
+                    var /** @type {?} */ childRecord = options & 2 /* CheckSelf */ ? records.get(depRecord.token) : undefined;
                     deps.push(tryResolveToken(
                     // Current Token to resolve
-                    depRecord.token, 
-                    // A record which describes how to resolve the token.
-                    // If undefined, this means we don't have such a record
-                    childRecord, 
-                    // Other records we know about.
-                    records, 
+                    depRecord.token, childRecord, records, 
                     // If we don't know how to resolve dependency and we should not check parent for it,
                     // than pass in Null injector.
-                    !childRecord && !(options & OptionFlags.CheckParent) ? NULL_INJECTOR : parent, options & OptionFlags.Optional ? null : Injector.THROW_IF_NOT_FOUND));
+                    !childRecord && !(options & 4 /* CheckParent */) ? NULL_INJECTOR : parent, options & 1 /* Optional */ ? null : Injector.THROW_IF_NOT_FOUND));
                 }
             }
-            record.value = value = useNew ? new ((_a = ((fn))).bind.apply(_a, [void 0].concat(deps)))() : fn.apply(obj, deps);
+            record.value = value = useNew ? new ((_a = (/** @type {?} */ (fn))).bind.apply(_a, [void 0].concat(deps)))() : fn.apply(obj, deps);
         }
     }
     else {
@@ -1367,26 +1245,26 @@ function resolveToken(token, record, records, parent, notFoundValue) {
  */
 function computeDeps(provider) {
     var /** @type {?} */ deps = EMPTY;
-    var /** @type {?} */ providerDeps = ((provider)).deps;
+    var /** @type {?} */ providerDeps = (/** @type {?} */ (provider)).deps;
     if (providerDeps && providerDeps.length) {
         deps = [];
         for (var /** @type {?} */ i = 0; i < providerDeps.length; i++) {
-            var /** @type {?} */ options = OptionFlags.Default;
+            var /** @type {?} */ options = 6;
             var /** @type {?} */ token = resolveForwardRef(providerDeps[i]);
             if (token instanceof Array) {
                 for (var /** @type {?} */ j = 0, /** @type {?} */ annotations = token; j < annotations.length; j++) {
                     var /** @type {?} */ annotation = annotations[j];
                     if (annotation instanceof Optional || annotation == Optional) {
-                        options = options | OptionFlags.Optional;
+                        options = options | 1 /* Optional */;
                     }
                     else if (annotation instanceof SkipSelf || annotation == SkipSelf) {
-                        options = options & ~OptionFlags.CheckSelf;
+                        options = options & ~2 /* CheckSelf */;
                     }
                     else if (annotation instanceof Self || annotation == Self) {
-                        options = options & ~OptionFlags.CheckParent;
+                        options = options & ~4 /* CheckParent */;
                     }
                     else if (annotation instanceof Inject) {
-                        token = ((annotation)).token;
+                        token = (/** @type {?} */ (annotation)).token;
                     }
                     else {
                         token = resolveForwardRef(annotation);
@@ -1396,9 +1274,9 @@ function computeDeps(provider) {
             deps.push({ token: token, options: options });
         }
     }
-    else if (((provider)).useExisting) {
-        var /** @type {?} */ token = resolveForwardRef(((provider)).useExisting);
-        deps = [{ token: token, options: OptionFlags.Default }];
+    else if ((/** @type {?} */ (provider)).useExisting) {
+        var /** @type {?} */ token = resolveForwardRef((/** @type {?} */ (provider)).useExisting);
+        deps = [{ token: token, options: 6 /* Default */ }];
     }
     else if (!providerDeps && !(USE_VALUE in provider)) {
         // useValue & useExisting are the only ones which are exempt from deps all others need it.
@@ -1418,7 +1296,7 @@ function formatError(text, obj) {
         context = obj.map(stringify).join(' -> ');
     }
     else if (typeof obj === 'object') {
-        var /** @type {?} */ parts = ([]);
+        var /** @type {?} */ parts = /** @type {?} */ ([]);
         for (var /** @type {?} */ key in obj) {
             if (obj.hasOwnProperty(key)) {
                 var /** @type {?} */ value = obj[key];
@@ -1469,21 +1347,21 @@ var ERROR_LOGGER = 'ngErrorLogger';
  * @return {?}
  */
 function getDebugContext(error) {
-    return ((error))[ERROR_DEBUG_CONTEXT];
+    return (/** @type {?} */ (error))[ERROR_DEBUG_CONTEXT];
 }
 /**
  * @param {?} error
  * @return {?}
  */
 function getOriginalError(error) {
-    return ((error))[ERROR_ORIGINAL_ERROR];
+    return (/** @type {?} */ (error))[ERROR_ORIGINAL_ERROR];
 }
 /**
  * @param {?} error
  * @return {?}
  */
 function getErrorLogger(error) {
-    return ((error))[ERROR_LOGGER] || defaultErrorLogger;
+    return (/** @type {?} */ (error))[ERROR_LOGGER] || defaultErrorLogger;
 }
 /**
  * @param {?} console
@@ -1546,7 +1424,11 @@ var ErrorHandler = (function () {
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype.handleError = function (error) {
+    ErrorHandler.prototype.handleError = /**
+     * @param {?} error
+     * @return {?}
+     */
+    function (error) {
         var /** @type {?} */ originalError = this._findOriginalError(error);
         var /** @type {?} */ context = this._findContext(error);
         // Note: Browser consoles show the place from where console.error was called.
@@ -1560,24 +1442,36 @@ var ErrorHandler = (function () {
             errorLogger(this._console, 'ERROR CONTEXT', context);
         }
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._findContext = function (error) {
+    ErrorHandler.prototype._findContext = /**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */
+    function (error) {
         if (error) {
             return getDebugContext(error) ? getDebugContext(error) :
                 this._findContext(getOriginalError(error));
         }
         return null;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} error
      * @return {?}
      */
-    ErrorHandler.prototype._findOriginalError = function (error) {
+    ErrorHandler.prototype._findOriginalError = /**
+     * \@internal
+     * @param {?} error
+     * @return {?}
+     */
+    function (error) {
         var /** @type {?} */ e = getOriginalError(error);
         while (e && getOriginalError(e)) {
             e = getOriginalError(e);
@@ -1594,7 +1488,7 @@ var ErrorHandler = (function () {
 function wrappedError(message, originalError) {
     var /** @type {?} */ msg = message + " caused by: " + (originalError instanceof Error ? originalError.message : originalError);
     var /** @type {?} */ error = Error(msg);
-    ((error))[ERROR_ORIGINAL_ERROR] = originalError;
+    (/** @type {?} */ (error))[ERROR_ORIGINAL_ERROR] = originalError;
     return error;
 }
 
@@ -1650,12 +1544,12 @@ function constructResolvingPath(keys) {
 function injectionError(injector, key, constructResolvingMessage, originalError) {
     var /** @type {?} */ keys = [key];
     var /** @type {?} */ errMsg = constructResolvingMessage(keys);
-    var /** @type {?} */ error = ((originalError ? wrappedError(errMsg, originalError) : Error(errMsg)));
+    var /** @type {?} */ error = /** @type {?} */ ((originalError ? wrappedError(errMsg, originalError) : Error(errMsg)));
     error.addKey = addKey;
     error.keys = keys;
     error.injectors = [injector];
     error.constructResolvingMessage = constructResolvingMessage;
-    ((error))[ERROR_ORIGINAL_ERROR] = originalError;
+    (/** @type {?} */ (error))[ERROR_ORIGINAL_ERROR] = originalError;
     return error;
 }
 /**
@@ -1884,8 +1778,6 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
 var ReflectiveKey = (function () {
     /**
      * Private
-     * @param {?} token
-     * @param {?} id
      */
     function ReflectiveKey(token, id) {
         this.token = token;
@@ -1897,25 +1789,39 @@ var ReflectiveKey = (function () {
     Object.defineProperty(ReflectiveKey.prototype, "displayName", {
         /**
          * Returns a stringified token.
+         */
+        get: /**
+         * Returns a stringified token.
          * @return {?}
          */
-        get: function () { return stringify(this.token); },
+        function () { return stringify(this.token); },
         enumerable: true,
         configurable: true
     });
     /**
      * Retrieves a `Key` for a token.
+     */
+    /**
+     * Retrieves a `Key` for a token.
      * @param {?} token
      * @return {?}
      */
-    ReflectiveKey.get = function (token) {
+    ReflectiveKey.get = /**
+     * Retrieves a `Key` for a token.
+     * @param {?} token
+     * @return {?}
+     */
+    function (token) {
         return _globalKeyRegistry.get(resolveForwardRef(token));
     };
     Object.defineProperty(ReflectiveKey, "numberOfKeys", {
         /**
+         * @returns the number of keys registered in the system.
+         */
+        get: /**
          * @return {?} the number of keys registered in the system.
          */
-        get: function () { return _globalKeyRegistry.numberOfKeys; },
+        function () { return _globalKeyRegistry.numberOfKeys; },
         enumerable: true,
         configurable: true
     });
@@ -1932,21 +1838,25 @@ var KeyRegistry = (function () {
      * @param {?} token
      * @return {?}
      */
-    KeyRegistry.prototype.get = function (token) {
+    KeyRegistry.prototype.get = /**
+     * @param {?} token
+     * @return {?}
+     */
+    function (token) {
         if (token instanceof ReflectiveKey)
             return token;
         if (this._allKeys.has(token)) {
-            return ((this._allKeys.get(token)));
+            return /** @type {?} */ ((this._allKeys.get(token)));
         }
         var /** @type {?} */ newKey = new ReflectiveKey(token, ReflectiveKey.numberOfKeys);
         this._allKeys.set(token, newKey);
         return newKey;
     };
     Object.defineProperty(KeyRegistry.prototype, "numberOfKeys", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._allKeys.size; },
+        function () { return this._allKeys.size; },
         enumerable: true,
         configurable: true
     });
@@ -1968,10 +1878,7 @@ var _globalKeyRegistry = new KeyRegistry();
  *
  * \@stable
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ var Type = Function;
+var Type = Function;
 /**
  * @param {?} v
  * @return {?}
@@ -1996,35 +1903,47 @@ function isType(v) {
  */
 var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 var ReflectionCapabilities = (function () {
-    /**
-     * @param {?=} reflect
-     */
     function ReflectionCapabilities(reflect) {
         this._reflect = reflect || _global['Reflect'];
     }
     /**
      * @return {?}
      */
-    ReflectionCapabilities.prototype.isReflectionEnabled = function () { return true; };
+    ReflectionCapabilities.prototype.isReflectionEnabled = /**
+     * @return {?}
+     */
+    function () { return true; };
     /**
      * @template T
      * @param {?} t
      * @return {?}
      */
-    ReflectionCapabilities.prototype.factory = function (t) { return function () {
+    ReflectionCapabilities.prototype.factory = /**
+     * @template T
+     * @param {?} t
+     * @return {?}
+     */
+    function (t) { return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         return new (t.bind.apply(t, [void 0].concat(args)))();
     }; };
+    /** @internal */
     /**
      * \@internal
      * @param {?} paramTypes
      * @param {?} paramAnnotations
      * @return {?}
      */
-    ReflectionCapabilities.prototype._zipTypesAndAnnotations = function (paramTypes, paramAnnotations) {
+    ReflectionCapabilities.prototype._zipTypesAndAnnotations = /**
+     * \@internal
+     * @param {?} paramTypes
+     * @param {?} paramAnnotations
+     * @return {?}
+     */
+    function (paramTypes, paramAnnotations) {
         var /** @type {?} */ result;
         if (typeof paramTypes === 'undefined') {
             result = new Array(paramAnnotations.length);
@@ -2056,7 +1975,12 @@ var ReflectionCapabilities = (function () {
      * @param {?} parentCtor
      * @return {?}
      */
-    ReflectionCapabilities.prototype._ownParameters = function (type, parentCtor) {
+    ReflectionCapabilities.prototype._ownParameters = /**
+     * @param {?} type
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    function (type, parentCtor) {
         // If we have no decorators, we only have function.length as metadata.
         // In that case, to detect whether a child class declared an own constructor or not,
         // we need to look inside of that constructor to check whether it is
@@ -2068,11 +1992,11 @@ var ReflectionCapabilities = (function () {
             return null;
         }
         // Prefer the direct API.
-        if (((type)).parameters && ((type)).parameters !== parentCtor.parameters) {
-            return ((type)).parameters;
+        if ((/** @type {?} */ (type)).parameters && (/** @type {?} */ (type)).parameters !== parentCtor.parameters) {
+            return (/** @type {?} */ (type)).parameters;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        var /** @type {?} */ tsickleCtorParams = ((type)).ctorParameters;
+        var /** @type {?} */ tsickleCtorParams = (/** @type {?} */ (type)).ctorParameters;
         if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
             // Newer tsickle uses a function closure
             // Retain the non-function case for compatibility with older tsickle
@@ -2084,7 +2008,7 @@ var ReflectionCapabilities = (function () {
             return this._zipTypesAndAnnotations(paramTypes_1, paramAnnotations_1);
         }
         // API for metadata created by invoking the decorators.
-        var /** @type {?} */ paramAnnotations = type.hasOwnProperty(PARAMETERS) && ((type))[PARAMETERS];
+        var /** @type {?} */ paramAnnotations = type.hasOwnProperty(PARAMETERS) && (/** @type {?} */ (type))[PARAMETERS];
         var /** @type {?} */ paramTypes = this._reflect && this._reflect.getOwnMetadata &&
             this._reflect.getOwnMetadata('design:paramtypes', type);
         if (paramTypes || paramAnnotations) {
@@ -2094,13 +2018,17 @@ var ReflectionCapabilities = (function () {
         // based on function.length.
         // Note: We know that this is a real constructor as we checked
         // the content of the constructor above.
-        return new Array(((type.length))).fill(undefined);
+        return new Array((/** @type {?} */ (type.length))).fill(undefined);
     };
     /**
      * @param {?} type
      * @return {?}
      */
-    ReflectionCapabilities.prototype.parameters = function (type) {
+    ReflectionCapabilities.prototype.parameters = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) {
         // Note: only report metadata if we have at least one class decorator
         // to stay in sync with the static reflector.
         if (!isType(type)) {
@@ -2118,22 +2046,27 @@ var ReflectionCapabilities = (function () {
      * @param {?} parentCtor
      * @return {?}
      */
-    ReflectionCapabilities.prototype._ownAnnotations = function (typeOrFunc, parentCtor) {
+    ReflectionCapabilities.prototype._ownAnnotations = /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    function (typeOrFunc, parentCtor) {
         // Prefer the direct API.
-        if (((typeOrFunc)).annotations && ((typeOrFunc)).annotations !== parentCtor.annotations) {
-            var /** @type {?} */ annotations = ((typeOrFunc)).annotations;
+        if ((/** @type {?} */ (typeOrFunc)).annotations && (/** @type {?} */ (typeOrFunc)).annotations !== parentCtor.annotations) {
+            var /** @type {?} */ annotations = (/** @type {?} */ (typeOrFunc)).annotations;
             if (typeof annotations === 'function' && annotations.annotations) {
                 annotations = annotations.annotations;
             }
             return annotations;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (((typeOrFunc)).decorators && ((typeOrFunc)).decorators !== parentCtor.decorators) {
-            return convertTsickleDecoratorIntoMetadata(((typeOrFunc)).decorators);
+        if ((/** @type {?} */ (typeOrFunc)).decorators && (/** @type {?} */ (typeOrFunc)).decorators !== parentCtor.decorators) {
+            return convertTsickleDecoratorIntoMetadata((/** @type {?} */ (typeOrFunc)).decorators);
         }
         // API for metadata created by invoking the decorators.
         if (typeOrFunc.hasOwnProperty(ANNOTATIONS)) {
-            return ((typeOrFunc))[ANNOTATIONS];
+            return (/** @type {?} */ (typeOrFunc))[ANNOTATIONS];
         }
         return null;
     };
@@ -2141,7 +2074,11 @@ var ReflectionCapabilities = (function () {
      * @param {?} typeOrFunc
      * @return {?}
      */
-    ReflectionCapabilities.prototype.annotations = function (typeOrFunc) {
+    ReflectionCapabilities.prototype.annotations = /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    function (typeOrFunc) {
         if (!isType(typeOrFunc)) {
             return [];
         }
@@ -2155,21 +2092,26 @@ var ReflectionCapabilities = (function () {
      * @param {?} parentCtor
      * @return {?}
      */
-    ReflectionCapabilities.prototype._ownPropMetadata = function (typeOrFunc, parentCtor) {
+    ReflectionCapabilities.prototype._ownPropMetadata = /**
+     * @param {?} typeOrFunc
+     * @param {?} parentCtor
+     * @return {?}
+     */
+    function (typeOrFunc, parentCtor) {
         // Prefer the direct API.
-        if (((typeOrFunc)).propMetadata &&
-            ((typeOrFunc)).propMetadata !== parentCtor.propMetadata) {
-            var /** @type {?} */ propMetadata = ((typeOrFunc)).propMetadata;
+        if ((/** @type {?} */ (typeOrFunc)).propMetadata &&
+            (/** @type {?} */ (typeOrFunc)).propMetadata !== parentCtor.propMetadata) {
+            var /** @type {?} */ propMetadata = (/** @type {?} */ (typeOrFunc)).propMetadata;
             if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
                 propMetadata = propMetadata.propMetadata;
             }
             return propMetadata;
         }
         // API of tsickle for lowering decorators to properties on the class.
-        if (((typeOrFunc)).propDecorators &&
-            ((typeOrFunc)).propDecorators !== parentCtor.propDecorators) {
-            var /** @type {?} */ propDecorators_1 = ((typeOrFunc)).propDecorators;
-            var /** @type {?} */ propMetadata_1 = ({});
+        if ((/** @type {?} */ (typeOrFunc)).propDecorators &&
+            (/** @type {?} */ (typeOrFunc)).propDecorators !== parentCtor.propDecorators) {
+            var /** @type {?} */ propDecorators_1 = (/** @type {?} */ (typeOrFunc)).propDecorators;
+            var /** @type {?} */ propMetadata_1 = /** @type {?} */ ({});
             Object.keys(propDecorators_1).forEach(function (prop) {
                 propMetadata_1[prop] = convertTsickleDecoratorIntoMetadata(propDecorators_1[prop]);
             });
@@ -2177,7 +2119,7 @@ var ReflectionCapabilities = (function () {
         }
         // API for metadata created by invoking the decorators.
         if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
-            return ((typeOrFunc))[PROP_METADATA];
+            return (/** @type {?} */ (typeOrFunc))[PROP_METADATA];
         }
         return null;
     };
@@ -2185,7 +2127,11 @@ var ReflectionCapabilities = (function () {
      * @param {?} typeOrFunc
      * @return {?}
      */
-    ReflectionCapabilities.prototype.propMetadata = function (typeOrFunc) {
+    ReflectionCapabilities.prototype.propMetadata = /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    function (typeOrFunc) {
         if (!isType(typeOrFunc)) {
             return {};
         }
@@ -2215,34 +2161,56 @@ var ReflectionCapabilities = (function () {
      * @param {?} lcProperty
      * @return {?}
      */
-    ReflectionCapabilities.prototype.hasLifecycleHook = function (type, lcProperty) {
+    ReflectionCapabilities.prototype.hasLifecycleHook = /**
+     * @param {?} type
+     * @param {?} lcProperty
+     * @return {?}
+     */
+    function (type, lcProperty) {
         return type instanceof Type && lcProperty in type.prototype;
     };
     /**
      * @param {?} name
      * @return {?}
      */
-    ReflectionCapabilities.prototype.getter = function (name) { return (new Function('o', 'return o.' + name + ';')); };
+    ReflectionCapabilities.prototype.getter = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) { return /** @type {?} */ (new Function('o', 'return o.' + name + ';')); };
     /**
      * @param {?} name
      * @return {?}
      */
-    ReflectionCapabilities.prototype.setter = function (name) {
-        return (new Function('o', 'v', 'return o.' + name + ' = v;'));
+    ReflectionCapabilities.prototype.setter = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) {
+        return /** @type {?} */ (new Function('o', 'v', 'return o.' + name + ' = v;'));
     };
     /**
      * @param {?} name
      * @return {?}
      */
-    ReflectionCapabilities.prototype.method = function (name) {
+    ReflectionCapabilities.prototype.method = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) {
         var /** @type {?} */ functionBody = "if (!o." + name + ") throw new Error('\"" + name + "\" is undefined');\n        return o." + name + ".apply(o, args);";
-        return (new Function('o', 'args', functionBody));
+        return /** @type {?} */ (new Function('o', 'args', functionBody));
     };
+    // There is not a concept of import uri in Js, but this is useful in developing Dart applications.
     /**
      * @param {?} type
      * @return {?}
      */
-    ReflectionCapabilities.prototype.importUri = function (type) {
+    ReflectionCapabilities.prototype.importUri = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) {
         // StaticSymbol
         if (typeof type === 'object' && type['filePath']) {
             return type['filePath'];
@@ -2254,7 +2222,11 @@ var ReflectionCapabilities = (function () {
      * @param {?} type
      * @return {?}
      */
-    ReflectionCapabilities.prototype.resourceUri = function (type) { return "./" + stringify(type); };
+    ReflectionCapabilities.prototype.resourceUri = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) { return "./" + stringify(type); };
     /**
      * @param {?} name
      * @param {?} moduleUrl
@@ -2262,7 +2234,14 @@ var ReflectionCapabilities = (function () {
      * @param {?} runtime
      * @return {?}
      */
-    ReflectionCapabilities.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+    ReflectionCapabilities.prototype.resolveIdentifier = /**
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */
+    function (name, moduleUrl, members, runtime) {
         return runtime;
     };
     /**
@@ -2270,7 +2249,12 @@ var ReflectionCapabilities = (function () {
      * @param {?} name
      * @return {?}
      */
-    ReflectionCapabilities.prototype.resolveEnum = function (enumIdentifier, name) { return enumIdentifier[name]; };
+    ReflectionCapabilities.prototype.resolveEnum = /**
+     * @param {?} enumIdentifier
+     * @param {?} name
+     * @return {?}
+     */
+    function (enumIdentifier, name) { return enumIdentifier[name]; };
     return ReflectionCapabilities;
 }());
 /**
@@ -2305,21 +2289,10 @@ function getParentCtor(ctor) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * @record
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
  * Provides access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  */
 var Reflector = (function () {
-    /**
-     * @param {?} reflectionCapabilities
-     */
     function Reflector(reflectionCapabilities) {
         this.reflectionCapabilities = reflectionCapabilities;
     }
@@ -2327,31 +2300,51 @@ var Reflector = (function () {
      * @param {?} caps
      * @return {?}
      */
-    Reflector.prototype.updateCapabilities = function (caps) { this.reflectionCapabilities = caps; };
+    Reflector.prototype.updateCapabilities = /**
+     * @param {?} caps
+     * @return {?}
+     */
+    function (caps) { this.reflectionCapabilities = caps; };
     /**
      * @param {?} type
      * @return {?}
      */
-    Reflector.prototype.factory = function (type) { return this.reflectionCapabilities.factory(type); };
+    Reflector.prototype.factory = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) { return this.reflectionCapabilities.factory(type); };
     /**
      * @param {?} typeOrFunc
      * @return {?}
      */
-    Reflector.prototype.parameters = function (typeOrFunc) {
+    Reflector.prototype.parameters = /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    function (typeOrFunc) {
         return this.reflectionCapabilities.parameters(typeOrFunc);
     };
     /**
      * @param {?} typeOrFunc
      * @return {?}
      */
-    Reflector.prototype.annotations = function (typeOrFunc) {
+    Reflector.prototype.annotations = /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    function (typeOrFunc) {
         return this.reflectionCapabilities.annotations(typeOrFunc);
     };
     /**
      * @param {?} typeOrFunc
      * @return {?}
      */
-    Reflector.prototype.propMetadata = function (typeOrFunc) {
+    Reflector.prototype.propMetadata = /**
+     * @param {?} typeOrFunc
+     * @return {?}
+     */
+    function (typeOrFunc) {
         return this.reflectionCapabilities.propMetadata(typeOrFunc);
     };
     /**
@@ -2359,34 +2352,59 @@ var Reflector = (function () {
      * @param {?} lcProperty
      * @return {?}
      */
-    Reflector.prototype.hasLifecycleHook = function (type, lcProperty) {
+    Reflector.prototype.hasLifecycleHook = /**
+     * @param {?} type
+     * @param {?} lcProperty
+     * @return {?}
+     */
+    function (type, lcProperty) {
         return this.reflectionCapabilities.hasLifecycleHook(type, lcProperty);
     };
     /**
      * @param {?} name
      * @return {?}
      */
-    Reflector.prototype.getter = function (name) { return this.reflectionCapabilities.getter(name); };
+    Reflector.prototype.getter = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) { return this.reflectionCapabilities.getter(name); };
     /**
      * @param {?} name
      * @return {?}
      */
-    Reflector.prototype.setter = function (name) { return this.reflectionCapabilities.setter(name); };
+    Reflector.prototype.setter = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) { return this.reflectionCapabilities.setter(name); };
     /**
      * @param {?} name
      * @return {?}
      */
-    Reflector.prototype.method = function (name) { return this.reflectionCapabilities.method(name); };
+    Reflector.prototype.method = /**
+     * @param {?} name
+     * @return {?}
+     */
+    function (name) { return this.reflectionCapabilities.method(name); };
     /**
      * @param {?} type
      * @return {?}
      */
-    Reflector.prototype.importUri = function (type) { return this.reflectionCapabilities.importUri(type); };
+    Reflector.prototype.importUri = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) { return this.reflectionCapabilities.importUri(type); };
     /**
      * @param {?} type
      * @return {?}
      */
-    Reflector.prototype.resourceUri = function (type) { return this.reflectionCapabilities.resourceUri(type); };
+    Reflector.prototype.resourceUri = /**
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) { return this.reflectionCapabilities.resourceUri(type); };
     /**
      * @param {?} name
      * @param {?} moduleUrl
@@ -2394,7 +2412,14 @@ var Reflector = (function () {
      * @param {?} runtime
      * @return {?}
      */
-    Reflector.prototype.resolveIdentifier = function (name, moduleUrl, members, runtime) {
+    Reflector.prototype.resolveIdentifier = /**
+     * @param {?} name
+     * @param {?} moduleUrl
+     * @param {?} members
+     * @param {?} runtime
+     * @return {?}
+     */
+    function (name, moduleUrl, members, runtime) {
         return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
     };
     /**
@@ -2402,7 +2427,12 @@ var Reflector = (function () {
      * @param {?} name
      * @return {?}
      */
-    Reflector.prototype.resolveEnum = function (identifier, name) {
+    Reflector.prototype.resolveEnum = /**
+     * @param {?} identifier
+     * @param {?} name
+     * @return {?}
+     */
+    function (identifier, name) {
         return this.reflectionCapabilities.resolveEnum(identifier, name);
     };
     return Reflector;
@@ -2441,11 +2471,6 @@ var reflector = new Reflector(new ReflectionCapabilities());
  * This is internal to Angular and should not be used directly.
  */
 var ReflectiveDependency = (function () {
-    /**
-     * @param {?} key
-     * @param {?} optional
-     * @param {?} visibility
-     */
     function ReflectiveDependency(key, optional, visibility) {
         this.key = key;
         this.optional = optional;
@@ -2455,7 +2480,11 @@ var ReflectiveDependency = (function () {
      * @param {?} key
      * @return {?}
      */
-    ReflectiveDependency.fromKey = function (key) {
+    ReflectiveDependency.fromKey = /**
+     * @param {?} key
+     * @return {?}
+     */
+    function (key) {
         return new ReflectiveDependency(key, false, null);
     };
     return ReflectiveDependency;
@@ -2480,23 +2509,18 @@ var _EMPTY_LIST = [];
  * \@experimental
  * @record
  */
-function ResolvedReflectiveProvider() { }
+
 var ResolvedReflectiveProvider_ = (function () {
-    /**
-     * @param {?} key
-     * @param {?} resolvedFactories
-     * @param {?} multiProvider
-     */
     function ResolvedReflectiveProvider_(key, resolvedFactories, multiProvider) {
         this.key = key;
         this.resolvedFactories = resolvedFactories;
         this.multiProvider = multiProvider;
     }
     Object.defineProperty(ResolvedReflectiveProvider_.prototype, "resolvedFactory", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.resolvedFactories[0]; },
+        function () { return this.resolvedFactories[0]; },
         enumerable: true,
         configurable: true
     });
@@ -2508,10 +2532,6 @@ var ResolvedReflectiveProvider_ = (function () {
  * \@experimental
  */
 var ResolvedReflectiveFactory = (function () {
-    /**
-     * @param {?} factory
-     * @param {?} dependencies
-     */
     function ResolvedReflectiveFactory(factory, dependencies) {
         this.factory = factory;
         this.dependencies = dependencies;
@@ -2615,7 +2635,7 @@ function _normalizeProviders(providers, res) {
         if (b instanceof Type) {
             res.push({ provide: b, useClass: b });
         }
-        else if (b && typeof b == 'object' && ((b)).provide !== undefined) {
+        else if (b && typeof b == 'object' && (/** @type {?} */ (b)).provide !== undefined) {
             res.push(/** @type {?} */ (b));
         }
         else if (b instanceof Array) {
@@ -2764,6 +2784,39 @@ var ReflectiveInjector = (function () {
      * Turns an array of provider definitions into an array of resolved providers.
      *
      * A resolution is a process of flattening multiple nested arrays and converting individual
+     * providers into an array of {@link ResolvedReflectiveProvider}s.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
+     *
+     * ```typescript
+     * @Injectable()
+     * class Engine {
+     * }
+     *
+     * @Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, [[Engine]]]);
+     *
+     * expect(providers.length).toEqual(2);
+     *
+     * expect(providers[0] instanceof ResolvedReflectiveProvider).toBe(true);
+     * expect(providers[0].key.displayName).toBe("Car");
+     * expect(providers[0].dependencies.length).toEqual(1);
+     * expect(providers[0].factory).toBeDefined();
+     *
+     * expect(providers[1].key.displayName).toBe("Engine");
+     * });
+     * ```
+     *
+     * See {@link ReflectiveInjector#fromResolvedProviders} for more info.
+     */
+    /**
+     * Turns an array of provider definitions into an array of resolved providers.
+     *
+     * A resolution is a process of flattening multiple nested arrays and converting individual
      * providers into an array of {\@link ResolvedReflectiveProvider}s.
      *
      * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
@@ -2795,9 +2848,70 @@ var ReflectiveInjector = (function () {
      * @param {?} providers
      * @return {?}
      */
-    ReflectiveInjector.resolve = function (providers) {
+    ReflectiveInjector.resolve = /**
+     * Turns an array of provider definitions into an array of resolved providers.
+     *
+     * A resolution is a process of flattening multiple nested arrays and converting individual
+     * providers into an array of {\@link ResolvedReflectiveProvider}s.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, [[Engine]]]);
+     *
+     * expect(providers.length).toEqual(2);
+     *
+     * expect(providers[0] instanceof ResolvedReflectiveProvider).toBe(true);
+     * expect(providers[0].key.displayName).toBe("Car");
+     * expect(providers[0].dependencies.length).toEqual(1);
+     * expect(providers[0].factory).toBeDefined();
+     *
+     * expect(providers[1].key.displayName).toBe("Engine");
+     * });
+     * ```
+     *
+     * See {\@link ReflectiveInjector#fromResolvedProviders} for more info.
+     * @param {?} providers
+     * @return {?}
+     */
+    function (providers) {
         return resolveReflectiveProviders(providers);
     };
+    /**
+     * Resolves an array of providers and creates an injector from those providers.
+     *
+     * The passed-in providers can be an array of `Type`, {@link Provider},
+     * or a recursive array of more providers.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
+     *
+     * ```typescript
+     * @Injectable()
+     * class Engine {
+     * }
+     *
+     * @Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var injector = ReflectiveInjector.resolveAndCreate([Car, Engine]);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     *
+     * This function is slower than the corresponding `fromResolvedProviders`
+     * because it needs to resolve the passed-in providers first.
+     * See {@link ReflectiveInjector#resolve} and {@link ReflectiveInjector#fromResolvedProviders}.
+     */
     /**
      * Resolves an array of providers and creates an injector from those providers.
      *
@@ -2827,10 +2941,62 @@ var ReflectiveInjector = (function () {
      * @param {?=} parent
      * @return {?}
      */
-    ReflectiveInjector.resolveAndCreate = function (providers, parent) {
+    ReflectiveInjector.resolveAndCreate = /**
+     * Resolves an array of providers and creates an injector from those providers.
+     *
+     * The passed-in providers can be an array of `Type`, {\@link Provider},
+     * or a recursive array of more providers.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var injector = ReflectiveInjector.resolveAndCreate([Car, Engine]);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     *
+     * This function is slower than the corresponding `fromResolvedProviders`
+     * because it needs to resolve the passed-in providers first.
+     * See {\@link ReflectiveInjector#resolve} and {\@link ReflectiveInjector#fromResolvedProviders}.
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */
+    function (providers, parent) {
         var /** @type {?} */ ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
         return ReflectiveInjector.fromResolvedProviders(ResolvedReflectiveProviders, parent);
     };
+    /**
+     * Creates an injector from previously resolved providers.
+     *
+     * This API is the recommended way to construct injectors in performance-sensitive parts.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/KrSMci?p=preview))
+     *
+     * ```typescript
+     * @Injectable()
+     * class Engine {
+     * }
+     *
+     * @Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, Engine]);
+     * var injector = ReflectiveInjector.fromResolvedProviders(providers);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     * @experimental
+     */
     /**
      * Creates an injector from previously resolved providers.
      *
@@ -2857,7 +3023,33 @@ var ReflectiveInjector = (function () {
      * @param {?=} parent
      * @return {?}
      */
-    ReflectiveInjector.fromResolvedProviders = function (providers, parent) {
+    ReflectiveInjector.fromResolvedProviders = /**
+     * Creates an injector from previously resolved providers.
+     *
+     * This API is the recommended way to construct injectors in performance-sensitive parts.
+     *
+     * ### Example ([live demo](http://plnkr.co/edit/KrSMci?p=preview))
+     *
+     * ```typescript
+     * \@Injectable()
+     * class Engine {
+     * }
+     *
+     * \@Injectable()
+     * class Car {
+     *   constructor(public engine:Engine) {}
+     * }
+     *
+     * var providers = ReflectiveInjector.resolve([Car, Engine]);
+     * var injector = ReflectiveInjector.fromResolvedProviders(providers);
+     * expect(injector.get(Car) instanceof Car).toBe(true);
+     * ```
+     * \@experimental
+     * @param {?} providers
+     * @param {?=} parent
+     * @return {?}
+     */
+    function (providers, parent) {
         return new ReflectiveInjector_(providers, parent);
     };
     return ReflectiveInjector;
@@ -2865,8 +3057,6 @@ var ReflectiveInjector = (function () {
 var ReflectiveInjector_ = (function () {
     /**
      * Private
-     * @param {?} _providers
-     * @param {?=} _parent
      */
     function ReflectiveInjector_(_providers, _parent) {
         /**
@@ -2888,15 +3078,20 @@ var ReflectiveInjector_ = (function () {
      * @param {?=} notFoundValue
      * @return {?}
      */
-    ReflectiveInjector_.prototype.get = function (token, notFoundValue) {
+    ReflectiveInjector_.prototype.get = /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = THROW_IF_NOT_FOUND; }
         return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
     };
     Object.defineProperty(ReflectiveInjector_.prototype, "parent", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._parent; },
+        function () { return this._parent; },
         enumerable: true,
         configurable: true
     });
@@ -2904,7 +3099,11 @@ var ReflectiveInjector_ = (function () {
      * @param {?} providers
      * @return {?}
      */
-    ReflectiveInjector_.prototype.resolveAndCreateChild = function (providers) {
+    ReflectiveInjector_.prototype.resolveAndCreateChild = /**
+     * @param {?} providers
+     * @return {?}
+     */
+    function (providers) {
         var /** @type {?} */ ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
         return this.createChildFromResolved(ResolvedReflectiveProviders);
     };
@@ -2912,7 +3111,11 @@ var ReflectiveInjector_ = (function () {
      * @param {?} providers
      * @return {?}
      */
-    ReflectiveInjector_.prototype.createChildFromResolved = function (providers) {
+    ReflectiveInjector_.prototype.createChildFromResolved = /**
+     * @param {?} providers
+     * @return {?}
+     */
+    function (providers) {
         var /** @type {?} */ inj = new ReflectiveInjector_(providers);
         inj._parent = this;
         return inj;
@@ -2921,32 +3124,50 @@ var ReflectiveInjector_ = (function () {
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector_.prototype.resolveAndInstantiate = function (provider) {
+    ReflectiveInjector_.prototype.resolveAndInstantiate = /**
+     * @param {?} provider
+     * @return {?}
+     */
+    function (provider) {
         return this.instantiateResolved(ReflectiveInjector.resolve([provider])[0]);
     };
     /**
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector_.prototype.instantiateResolved = function (provider) {
+    ReflectiveInjector_.prototype.instantiateResolved = /**
+     * @param {?} provider
+     * @return {?}
+     */
+    function (provider) {
         return this._instantiateProvider(provider);
     };
     /**
      * @param {?} index
      * @return {?}
      */
-    ReflectiveInjector_.prototype.getProviderAtIndex = function (index) {
+    ReflectiveInjector_.prototype.getProviderAtIndex = /**
+     * @param {?} index
+     * @return {?}
+     */
+    function (index) {
         if (index < 0 || index >= this._providers.length) {
             throw outOfBoundsError(index);
         }
         return this._providers[index];
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector_.prototype._new = function (provider) {
+    ReflectiveInjector_.prototype._new = /**
+     * \@internal
+     * @param {?} provider
+     * @return {?}
+     */
+    function (provider) {
         if (this._constructionCounter++ > this._getMaxNumberOfObjects()) {
             throw cyclicDependencyError(this, provider.key);
         }
@@ -2955,12 +3176,19 @@ var ReflectiveInjector_ = (function () {
     /**
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getMaxNumberOfObjects = function () { return this.objs.length; };
+    ReflectiveInjector_.prototype._getMaxNumberOfObjects = /**
+     * @return {?}
+     */
+    function () { return this.objs.length; };
     /**
      * @param {?} provider
      * @return {?}
      */
-    ReflectiveInjector_.prototype._instantiateProvider = function (provider) {
+    ReflectiveInjector_.prototype._instantiateProvider = /**
+     * @param {?} provider
+     * @return {?}
+     */
+    function (provider) {
         if (provider.multiProvider) {
             var /** @type {?} */ res = new Array(provider.resolvedFactories.length);
             for (var /** @type {?} */ i = 0; i < provider.resolvedFactories.length; ++i) {
@@ -2977,7 +3205,12 @@ var ReflectiveInjector_ = (function () {
      * @param {?} ResolvedReflectiveFactory
      * @return {?}
      */
-    ReflectiveInjector_.prototype._instantiate = function (provider, ResolvedReflectiveFactory$$1) {
+    ReflectiveInjector_.prototype._instantiate = /**
+     * @param {?} provider
+     * @param {?} ResolvedReflectiveFactory
+     * @return {?}
+     */
+    function (provider, ResolvedReflectiveFactory$$1) {
         var _this = this;
         var /** @type {?} */ factory = ResolvedReflectiveFactory$$1.factory;
         var /** @type {?} */ deps;
@@ -2985,7 +3218,7 @@ var ReflectiveInjector_ = (function () {
             deps =
                 ResolvedReflectiveFactory$$1.dependencies.map(function (dep) { return _this._getByReflectiveDependency(dep); });
         }
-        catch (e) {
+        catch (/** @type {?} */ e) {
             if (e.addKey) {
                 e.addKey(this, provider.key);
             }
@@ -2995,7 +3228,7 @@ var ReflectiveInjector_ = (function () {
         try {
             obj = factory.apply(void 0, deps);
         }
-        catch (e) {
+        catch (/** @type {?} */ e) {
             throw instantiationError(this, e, e.stack, provider.key);
         }
         return obj;
@@ -3004,7 +3237,11 @@ var ReflectiveInjector_ = (function () {
      * @param {?} dep
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getByReflectiveDependency = function (dep) {
+    ReflectiveInjector_.prototype._getByReflectiveDependency = /**
+     * @param {?} dep
+     * @return {?}
+     */
+    function (dep) {
         return this._getByKey(dep.key, dep.visibility, dep.optional ? null : THROW_IF_NOT_FOUND);
     };
     /**
@@ -3013,7 +3250,13 @@ var ReflectiveInjector_ = (function () {
      * @param {?} notFoundValue
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getByKey = function (key, visibility, notFoundValue) {
+    ReflectiveInjector_.prototype._getByKey = /**
+     * @param {?} key
+     * @param {?} visibility
+     * @param {?} notFoundValue
+     * @return {?}
+     */
+    function (key, visibility, notFoundValue) {
         if (key === ReflectiveInjector_.INJECTOR_KEY) {
             return this;
         }
@@ -3028,7 +3271,11 @@ var ReflectiveInjector_ = (function () {
      * @param {?} keyId
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getObjByKeyId = function (keyId) {
+    ReflectiveInjector_.prototype._getObjByKeyId = /**
+     * @param {?} keyId
+     * @return {?}
+     */
+    function (keyId) {
         for (var /** @type {?} */ i = 0; i < this.keyIds.length; i++) {
             if (this.keyIds[i] === keyId) {
                 if (this.objs[i] === UNDEFINED) {
@@ -3039,13 +3286,20 @@ var ReflectiveInjector_ = (function () {
         }
         return UNDEFINED;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} key
      * @param {?} notFoundValue
      * @return {?}
      */
-    ReflectiveInjector_.prototype._throwOrNull = function (key, notFoundValue) {
+    ReflectiveInjector_.prototype._throwOrNull = /**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @return {?}
+     */
+    function (key, notFoundValue) {
         if (notFoundValue !== THROW_IF_NOT_FOUND) {
             return notFoundValue;
         }
@@ -3053,16 +3307,24 @@ var ReflectiveInjector_ = (function () {
             throw noProviderError(this, key);
         }
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} key
      * @param {?} notFoundValue
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getByKeySelf = function (key, notFoundValue) {
+    ReflectiveInjector_.prototype._getByKeySelf = /**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @return {?}
+     */
+    function (key, notFoundValue) {
         var /** @type {?} */ obj = this._getObjByKeyId(key.id);
         return (obj !== UNDEFINED) ? obj : this._throwOrNull(key, notFoundValue);
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} key
@@ -3070,7 +3332,14 @@ var ReflectiveInjector_ = (function () {
      * @param {?} visibility
      * @return {?}
      */
-    ReflectiveInjector_.prototype._getByKeyDefault = function (key, notFoundValue, visibility) {
+    ReflectiveInjector_.prototype._getByKeyDefault = /**
+     * \@internal
+     * @param {?} key
+     * @param {?} notFoundValue
+     * @param {?} visibility
+     * @return {?}
+     */
+    function (key, notFoundValue, visibility) {
         var /** @type {?} */ inj;
         if (visibility instanceof SkipSelf) {
             inj = this._parent;
@@ -3079,7 +3348,7 @@ var ReflectiveInjector_ = (function () {
             inj = this;
         }
         while (inj instanceof ReflectiveInjector_) {
-            var /** @type {?} */ inj_ = (inj);
+            var /** @type {?} */ inj_ = /** @type {?} */ (inj);
             var /** @type {?} */ obj = inj_._getObjByKeyId(key.id);
             if (obj !== UNDEFINED)
                 return obj;
@@ -3093,10 +3362,10 @@ var ReflectiveInjector_ = (function () {
         }
     };
     Object.defineProperty(ReflectiveInjector_.prototype, "displayName", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ providers = _mapProviders(this, function (b) { return ' "' + b.key.displayName + '" '; })
                 .join(', ');
             return "ReflectiveInjector(providers: [" + providers + "])";
@@ -3107,10 +3376,13 @@ var ReflectiveInjector_ = (function () {
     /**
      * @return {?}
      */
-    ReflectiveInjector_.prototype.toString = function () { return this.displayName; };
+    ReflectiveInjector_.prototype.toString = /**
+     * @return {?}
+     */
+    function () { return this.displayName; };
+    ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
     return ReflectiveInjector_;
 }());
-ReflectiveInjector_.INJECTOR_KEY = ReflectiveKey.get(Injector);
 /**
  * @param {?} injector
  * @param {?} fn
@@ -3123,166 +3395,6 @@ function _mapProviders(injector, fn) {
     }
     return res;
 }
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
- * \@whatItDoes Configures the {\@link Injector} to return a value for a token.
- * \@howToUse
- * ```
- * const provider: ValueProvider = {provide: 'someToken', useValue: 'someValue'};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='ValueProvider'}
- *
- * \@stable
- * @record
- */
-function ValueProvider() { }
-/**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: ClassProvider = {provide: 'someToken', useClass: MyService, deps: []};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='StaticClassProvider'}
- *
- * Note that following two providers are not equal:
- * {\@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
- *
- * \@stable
- * @record
- */
-
-/**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: ClassProvider = {provide: MyClass, deps: []};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
- *
- * \@stable
- * @record
- */
-
-/**
- * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
- * \@howToUse
- * ```
- * const provider: ExistingProvider = {provide: 'someToken', useExisting: 'someOtherToken'};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='ExistingProvider'}
- *
- * \@stable
- * @record
- */
-function ExistingProvider() { }
-/**
- * \@whatItDoes Configures the {\@link Injector} to return a value by invoking a `useFactory`
- * function.
- * \@howToUse
- * ```
- * function serviceFactory() { ... }
- *
- * const provider: FactoryProvider = {provide: 'someToken', useFactory: serviceFactory, deps: []};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='FactoryProvider'}
- *
- * Dependencies can also be marked as optional:
- * {\@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
- *
- * \@stable
- * @record
- */
-function FactoryProvider() { }
-/**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
- * as token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: TypeProvider = MyService;
- * ```
- *
- * \@description
- *
- * Create an instance by invoking the `new` operator and supplying additional arguments.
- * This form is a short form of `TypeProvider`;
- *
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
- *
- * \@stable
- * @record
- */
-function TypeProvider() { }
-/**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
- * \@howToUse
- * ```
- * \@Injectable()
- * class MyService {}
- *
- * const provider: ClassProvider = {provide: 'someToken', useClass: MyService};
- * ```
- *
- * \@description
- * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
- *
- * ### Example
- *
- * {\@example core/di/ts/provider_spec.ts region='ClassProvider'}
- *
- * Note that following two providers are not equal:
- * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
- *
- * \@stable
- * @record
- */
-function ClassProvider() { }
 
 /**
  * @fileoverview added by tsickle
@@ -3347,9 +3459,6 @@ var APP_INITIALIZER = new InjectionToken('Application Initializer');
  * \@experimental
  */
 var ApplicationInitStatus = (function () {
-    /**
-     * @param {?} appInits
-     */
     function ApplicationInitStatus(appInits) {
         var _this = this;
         this.appInits = appInits;
@@ -3360,11 +3469,16 @@ var ApplicationInitStatus = (function () {
             _this.reject = rej;
         });
     }
+    /** @internal */
     /**
      * \@internal
      * @return {?}
      */
-    ApplicationInitStatus.prototype.runInitializers = function () {
+    ApplicationInitStatus.prototype.runInitializers = /**
+     * \@internal
+     * @return {?}
+     */
+    function () {
         var _this = this;
         if (this.initialized) {
             return;
@@ -3389,30 +3503,30 @@ var ApplicationInitStatus = (function () {
         this.initialized = true;
     };
     Object.defineProperty(ApplicationInitStatus.prototype, "done", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._done; },
+        function () { return this._done; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ApplicationInitStatus.prototype, "donePromise", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._donePromise; },
+        function () { return this._donePromise; },
         enumerable: true,
         configurable: true
     });
+    ApplicationInitStatus.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ApplicationInitStatus.ctorParameters = function () { return [
+        { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+    ]; };
     return ApplicationInitStatus;
 }());
-ApplicationInitStatus.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-ApplicationInitStatus.ctorParameters = function () { return [
-    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
-]; };
 
 /**
  * @fileoverview added by tsickle
@@ -3500,25 +3614,34 @@ var Console = (function () {
      * @param {?} message
      * @return {?}
      */
-    Console.prototype.log = function (message) {
+    Console.prototype.log = /**
+     * @param {?} message
+     * @return {?}
+     */
+    function (message) {
         // tslint:disable-next-line:no-console
         console.log(message);
     };
+    // Note: for reporting errors use `DOM.logError()` as it is platform specific
     /**
      * @param {?} message
      * @return {?}
      */
-    Console.prototype.warn = function (message) {
+    Console.prototype.warn = /**
+     * @param {?} message
+     * @return {?}
+     */
+    function (message) {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
+    Console.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Console.ctorParameters = function () { return []; };
     return Console;
 }());
-Console.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-Console.ctorParameters = function () { return []; };
 
 /**
  * @fileoverview added by tsickle
@@ -3537,10 +3660,6 @@ Console.ctorParameters = function () { return []; };
  * \@experimental
  */
 var ModuleWithComponentFactories = (function () {
-    /**
-     * @param {?} ngModuleFactory
-     * @param {?} componentFactories
-     */
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
@@ -3569,36 +3688,82 @@ var Compiler = (function () {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents` have to be inlined.
+     */
+    /**
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents` have to be inlined.
      * @template T
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleSync = function (moduleType) { throw _throwError(); };
+    Compiler.prototype.compileModuleSync = /**
+     * Compiles the given NgModule and all of its components. All templates of the components listed
+     * in `entryComponents` have to be inlined.
+     * @template T
+     * @param {?} moduleType
+     * @return {?}
+     */
+    function (moduleType) { throw _throwError(); };
+    /**
+     * Compiles the given NgModule and all of its components
+     */
     /**
      * Compiles the given NgModule and all of its components
      * @template T
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAsync = function (moduleType) { throw _throwError(); };
+    Compiler.prototype.compileModuleAsync = /**
+     * Compiles the given NgModule and all of its components
+     * @template T
+     * @param {?} moduleType
+     * @return {?}
+     */
+    function (moduleType) { throw _throwError(); };
+    /**
+     * Same as {@link #compileModuleSync} but also creates ComponentFactories for all components.
+     */
     /**
      * Same as {\@link #compileModuleSync} but also creates ComponentFactories for all components.
      * @template T
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAndAllComponentsSync = function (moduleType) {
+    Compiler.prototype.compileModuleAndAllComponentsSync = /**
+     * Same as {\@link #compileModuleSync} but also creates ComponentFactories for all components.
+     * @template T
+     * @param {?} moduleType
+     * @return {?}
+     */
+    function (moduleType) {
         throw _throwError();
     };
+    /**
+     * Same as {@link #compileModuleAsync} but also creates ComponentFactories for all components.
+     */
     /**
      * Same as {\@link #compileModuleAsync} but also creates ComponentFactories for all components.
      * @template T
      * @param {?} moduleType
      * @return {?}
      */
-    Compiler.prototype.compileModuleAndAllComponentsAsync = function (moduleType) {
+    Compiler.prototype.compileModuleAndAllComponentsAsync = /**
+     * Same as {\@link #compileModuleAsync} but also creates ComponentFactories for all components.
+     * @template T
+     * @param {?} moduleType
+     * @return {?}
+     */
+    function (moduleType) {
         throw _throwError();
     };
+    /**
+     * Exposes the CSS-style selectors that have been used in `ngContent` directives within
+     * the template of the given component.
+     * This is used by the `upgrade` library to compile the appropriate transclude content
+     * in the AngularJS wrapper component.
+     *
+     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
+     */
     /**
      * Exposes the CSS-style selectors that have been used in `ngContent` directives within
      * the template of the given component.
@@ -3609,25 +3774,50 @@ var Compiler = (function () {
      * @param {?} component
      * @return {?}
      */
-    Compiler.prototype.getNgContentSelectors = function (component) { throw _throwError(); };
+    Compiler.prototype.getNgContentSelectors = /**
+     * Exposes the CSS-style selectors that have been used in `ngContent` directives within
+     * the template of the given component.
+     * This is used by the `upgrade` library to compile the appropriate transclude content
+     * in the AngularJS wrapper component.
+     *
+     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
+     * @param {?} component
+     * @return {?}
+     */
+    function (component) { throw _throwError(); };
+    /**
+     * Clears all caches.
+     */
     /**
      * Clears all caches.
      * @return {?}
      */
-    Compiler.prototype.clearCache = function () { };
+    Compiler.prototype.clearCache = /**
+     * Clears all caches.
+     * @return {?}
+     */
+    function () { };
+    /**
+     * Clears the cache for the given component/ngModule.
+     */
     /**
      * Clears the cache for the given component/ngModule.
      * @param {?} type
      * @return {?}
      */
-    Compiler.prototype.clearCacheFor = function (type) { };
+    Compiler.prototype.clearCacheFor = /**
+     * Clears the cache for the given component/ngModule.
+     * @param {?} type
+     * @return {?}
+     */
+    function (type) { };
+    Compiler.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Compiler.ctorParameters = function () { return []; };
     return Compiler;
 }());
-Compiler.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-Compiler.ctorParameters = function () { return []; };
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -3684,7 +3874,7 @@ var ComponentFactory = (function () {
  */
 function noComponentFactoryError(component) {
     var /** @type {?} */ error = Error("No component factory found for " + stringify(component) + ". Did you add it to @NgModule.entryComponents?");
-    ((error))[ERROR_COMPONENT] = component;
+    (/** @type {?} */ (error))[ERROR_COMPONENT] = component;
     return error;
 }
 var ERROR_COMPONENT = 'ngComponent';
@@ -3701,7 +3891,12 @@ var _NullComponentFactoryResolver = (function () {
      * @param {?} component
      * @return {?}
      */
-    _NullComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+    _NullComponentFactoryResolver.prototype.resolveComponentFactory = /**
+     * @template T
+     * @param {?} component
+     * @return {?}
+     */
+    function (component) {
         throw noComponentFactoryError(component);
     };
     return _NullComponentFactoryResolver;
@@ -3713,15 +3908,10 @@ var _NullComponentFactoryResolver = (function () {
 var ComponentFactoryResolver = (function () {
     function ComponentFactoryResolver() {
     }
+    ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     return ComponentFactoryResolver;
 }());
-ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
 var CodegenComponentFactoryResolver = (function () {
-    /**
-     * @param {?} factories
-     * @param {?} _parent
-     * @param {?} _ngModule
-     */
     function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
         this._parent = _parent;
         this._ngModule = _ngModule;
@@ -3736,7 +3926,12 @@ var CodegenComponentFactoryResolver = (function () {
      * @param {?} component
      * @return {?}
      */
-    CodegenComponentFactoryResolver.prototype.resolveComponentFactory = function (component) {
+    CodegenComponentFactoryResolver.prototype.resolveComponentFactory = /**
+     * @template T
+     * @param {?} component
+     * @return {?}
+     */
+    function (component) {
         var /** @type {?} */ factory = this._factories.get(component);
         if (!factory && this._parent) {
             factory = this._parent.resolveComponentFactory(component);
@@ -3750,10 +3945,6 @@ var CodegenComponentFactoryResolver = (function () {
 }());
 var ComponentFactoryBoundToModule = (function (_super) {
     __extends(ComponentFactoryBoundToModule, _super);
-    /**
-     * @param {?} factory
-     * @param {?} ngModule
-     */
     function ComponentFactoryBoundToModule(factory, ngModule) {
         var _this = _super.call(this) || this;
         _this.factory = factory;
@@ -3761,42 +3952,42 @@ var ComponentFactoryBoundToModule = (function (_super) {
         return _this;
     }
     Object.defineProperty(ComponentFactoryBoundToModule.prototype, "selector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.factory.selector; },
+        function () { return this.factory.selector; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentFactoryBoundToModule.prototype, "componentType", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.factory.componentType; },
+        function () { return this.factory.componentType; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentFactoryBoundToModule.prototype, "ngContentSelectors", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.factory.ngContentSelectors; },
+        function () { return this.factory.ngContentSelectors; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentFactoryBoundToModule.prototype, "inputs", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.factory.inputs; },
+        function () { return this.factory.inputs; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentFactoryBoundToModule.prototype, "outputs", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.factory.outputs; },
+        function () { return this.factory.outputs; },
         enumerable: true,
         configurable: true
     });
@@ -3807,7 +3998,14 @@ var ComponentFactoryBoundToModule = (function (_super) {
      * @param {?=} ngModule
      * @return {?}
      */
-    ComponentFactoryBoundToModule.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+    ComponentFactoryBoundToModule.prototype.create = /**
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
+     * @return {?}
+     */
+    function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
         return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
     };
     return ComponentFactoryBoundToModule;
@@ -3862,7 +4060,7 @@ var NgModuleFactory = (function () {
  * \@experimental
  * @record
  */
-function WtfScopeFn() { }
+
 /**
  * @record
  */
@@ -3877,7 +4075,7 @@ var events;
  * @return {?}
  */
 function detectWTF() {
-    var /** @type {?} */ wtf = ((_global) /** TODO #9100 */)['wtf'];
+    var /** @type {?} */ wtf = (/** @type {?} */ (_global /** TODO #9100 */) /** TODO #9100 */)['wtf'];
     if (wtf) {
         trace = wtf['trace'];
         if (trace) {
@@ -3892,7 +4090,7 @@ function detectWTF() {
  * @param {?=} flags
  * @return {?}
  */
-function createScope$1(signature, flags) {
+function createScope(signature, flags) {
     if (flags === void 0) { flags = null; }
     return events.createScope(signature, flags);
 }
@@ -3975,7 +4173,7 @@ function noopScope(arg0, arg1) {
  *
  * \@experimental
  */
-var wtfCreateScope = wtfEnabled ? createScope$1 : function (signature, flags) { return noopScope; };
+var wtfCreateScope = wtfEnabled ? createScope : function (signature, flags) { return noopScope; };
 /**
  * Used to mark end of Scope.
  *
@@ -4069,10 +4267,10 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
 var EventEmitter = (function (_super) {
     __extends(EventEmitter, _super);
     /**
-     * Creates an instance of {\@link EventEmitter}, which depending on `isAsync`,
+     * Creates an instance of {@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
      *
-     * @param {?=} isAsync By default, events are delivered synchronously (default value: `false`).
+     * @param isAsync By default, events are delivered synchronously (default value: `false`).
      * Set to `true` for asynchronous event delivery.
      */
     function EventEmitter(isAsync) {
@@ -4085,14 +4283,24 @@ var EventEmitter = (function (_super) {
      * @param {?=} value
      * @return {?}
      */
-    EventEmitter.prototype.emit = function (value) { _super.prototype.next.call(this, value); };
+    EventEmitter.prototype.emit = /**
+     * @param {?=} value
+     * @return {?}
+     */
+    function (value) { _super.prototype.next.call(this, value); };
     /**
      * @param {?=} generatorOrNext
      * @param {?=} error
      * @param {?=} complete
      * @return {?}
      */
-    EventEmitter.prototype.subscribe = function (generatorOrNext, error, complete) {
+    EventEmitter.prototype.subscribe = /**
+     * @param {?=} generatorOrNext
+     * @param {?=} error
+     * @param {?=} complete
+     * @return {?}
+     */
+    function (generatorOrNext, error, complete) {
         var /** @type {?} */ schedulerFn;
         var /** @type {?} */ errorFn = function (err) { return null; };
         var /** @type {?} */ completeFn = function () { return null; };
@@ -4203,9 +4411,6 @@ var EventEmitter = (function (_super) {
  * \@experimental
  */
 var NgZone = (function () {
-    /**
-     * @param {?} __0
-     */
     function NgZone(_a) {
         var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
         this.hasPendingMicrotasks = false;
@@ -4238,25 +4443,31 @@ var NgZone = (function () {
             throw new Error('Angular requires Zone.js prolyfill.');
         }
         Zone.assertZonePatched();
-        var /** @type {?} */ self = ((this));
+        var /** @type {?} */ self = /** @type {?} */ ((this));
         self._nesting = 0;
         self._outer = self._inner = Zone.current;
-        if (((Zone))['wtfZoneSpec']) {
-            self._inner = self._inner.fork(((Zone))['wtfZoneSpec']);
+        if ((/** @type {?} */ (Zone))['wtfZoneSpec']) {
+            self._inner = self._inner.fork((/** @type {?} */ (Zone))['wtfZoneSpec']);
         }
-        if (enableLongStackTrace && ((Zone))['longStackTraceZoneSpec']) {
-            self._inner = self._inner.fork(((Zone))['longStackTraceZoneSpec']);
+        if (enableLongStackTrace && (/** @type {?} */ (Zone))['longStackTraceZoneSpec']) {
+            self._inner = self._inner.fork((/** @type {?} */ (Zone))['longStackTraceZoneSpec']);
         }
         forkInnerZoneWithAngularBehavior(self);
     }
     /**
      * @return {?}
      */
-    NgZone.isInAngularZone = function () { return Zone.current.get('isAngularZone') === true; };
+    NgZone.isInAngularZone = /**
+     * @return {?}
+     */
+    function () { return Zone.current.get('isAngularZone') === true; };
     /**
      * @return {?}
      */
-    NgZone.assertInAngularZone = function () {
+    NgZone.assertInAngularZone = /**
+     * @return {?}
+     */
+    function () {
         if (!NgZone.isInAngularZone()) {
             throw new Error('Expected to be in Angular Zone, but it is not!');
         }
@@ -4264,11 +4475,26 @@ var NgZone = (function () {
     /**
      * @return {?}
      */
-    NgZone.assertNotInAngularZone = function () {
+    NgZone.assertNotInAngularZone = /**
+     * @return {?}
+     */
+    function () {
         if (NgZone.isInAngularZone()) {
             throw new Error('Expected to not be in Angular Zone, but it is!');
         }
     };
+    /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
     /**
      * Executes the `fn` function synchronously within the Angular zone and returns value returned by
      * the function.
@@ -4286,9 +4512,38 @@ var NgZone = (function () {
      * @param {?=} applyArgs
      * @return {?}
      */
-    NgZone.prototype.run = function (fn, applyThis, applyArgs) {
-        return ((((this)))._inner.run(fn, applyThis, applyArgs));
+    NgZone.prototype.run = /**
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {\@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * @template T
+     * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
+     * @return {?}
+     */
+    function (fn, applyThis, applyArgs) {
+        return /** @type {?} */ ((/** @type {?} */ ((this)))._inner.run(fn, applyThis, applyArgs));
     };
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
     /**
      * Executes the `fn` function synchronously within the Angular zone as a task and returns value
      * returned by the function.
@@ -4307,16 +4562,38 @@ var NgZone = (function () {
      * @param {?=} name
      * @return {?}
      */
-    NgZone.prototype.runTask = function (fn, applyThis, applyArgs, name) {
-        var /** @type {?} */ zone = (((this)))._inner;
+    NgZone.prototype.runTask = /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {\@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * @template T
+     * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
+     * @param {?=} name
+     * @return {?}
+     */
+    function (fn, applyThis, applyArgs, name) {
+        var /** @type {?} */ zone = (/** @type {?} */ ((this)))._inner;
         var /** @type {?} */ task = zone.scheduleEventTask('NgZoneEvent: ' + name, fn, EMPTY_PAYLOAD, noop, noop);
         try {
-            return (zone.runTask(task, applyThis, applyArgs));
+            return /** @type {?} */ (zone.runTask(task, applyThis, applyArgs));
         }
         finally {
             zone.cancelTask(task);
         }
     };
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
     /**
      * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
      * rethrown.
@@ -4326,9 +4603,31 @@ var NgZone = (function () {
      * @param {?=} applyArgs
      * @return {?}
      */
-    NgZone.prototype.runGuarded = function (fn, applyThis, applyArgs) {
-        return ((((this)))._inner.runGuarded(fn, applyThis, applyArgs));
+    NgZone.prototype.runGuarded = /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     * @template T
+     * @param {?} fn
+     * @param {?=} applyThis
+     * @param {?=} applyArgs
+     * @return {?}
+     */
+    function (fn, applyThis, applyArgs) {
+        return /** @type {?} */ ((/** @type {?} */ ((this)))._inner.runGuarded(fn, applyThis, applyArgs));
     };
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
     /**
      * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
      * the function.
@@ -4345,8 +4644,24 @@ var NgZone = (function () {
      * @param {?} fn
      * @return {?}
      */
-    NgZone.prototype.runOutsideAngular = function (fn) {
-        return ((((this)))._outer.run(fn));
+    NgZone.prototype.runOutsideAngular = /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {\@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {\@link #run} to reenter the Angular zone and do work that updates the application model.
+     * @template T
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
+        return /** @type {?} */ ((/** @type {?} */ ((this)))._outer.run(fn));
     };
     return NgZone;
 }());
@@ -4464,9 +4779,6 @@ function onLeave(zone) {
  * \@experimental
  */
 var Testability = (function () {
-    /**
-     * @param {?} _ngZone
-     */
     function Testability(_ngZone) {
         this._ngZone = _ngZone;
         /**
@@ -4490,11 +4802,16 @@ var Testability = (function () {
         this._callbacks = [];
         this._watchAngularEvents();
     }
+    /** @internal */
     /**
      * \@internal
      * @return {?}
      */
-    Testability.prototype._watchAngularEvents = function () {
+    Testability.prototype._watchAngularEvents = /**
+     * \@internal
+     * @return {?}
+     */
+    function () {
         var _this = this;
         this._ngZone.onUnstable.subscribe({
             next: function () {
@@ -4517,7 +4834,10 @@ var Testability = (function () {
     /**
      * @return {?}
      */
-    Testability.prototype.increasePendingRequestCount = function () {
+    Testability.prototype.increasePendingRequestCount = /**
+     * @return {?}
+     */
+    function () {
         this._pendingCount += 1;
         this._didWork = true;
         return this._pendingCount;
@@ -4525,7 +4845,10 @@ var Testability = (function () {
     /**
      * @return {?}
      */
-    Testability.prototype.decreasePendingRequestCount = function () {
+    Testability.prototype.decreasePendingRequestCount = /**
+     * @return {?}
+     */
+    function () {
         this._pendingCount -= 1;
         if (this._pendingCount < 0) {
             throw new Error('pending async requests below zero');
@@ -4536,20 +4859,28 @@ var Testability = (function () {
     /**
      * @return {?}
      */
-    Testability.prototype.isStable = function () {
+    Testability.prototype.isStable = /**
+     * @return {?}
+     */
+    function () {
         return this._isZoneStable && this._pendingCount == 0 && !this._ngZone.hasPendingMacrotasks;
     };
+    /** @internal */
     /**
      * \@internal
      * @return {?}
      */
-    Testability.prototype._runCallbacksIfReady = function () {
+    Testability.prototype._runCallbacksIfReady = /**
+     * \@internal
+     * @return {?}
+     */
+    function () {
         var _this = this;
         if (this.isStable()) {
             // Schedules the call backs in a new frame so that it is always async.
             scheduleMicroTask(function () {
                 while (_this._callbacks.length !== 0) {
-                    (((_this._callbacks.pop())))(_this._didWork);
+                    (/** @type {?} */ ((_this._callbacks.pop())))(_this._didWork);
                 }
                 _this._didWork = false;
             });
@@ -4563,33 +4894,46 @@ var Testability = (function () {
      * @param {?} callback
      * @return {?}
      */
-    Testability.prototype.whenStable = function (callback) {
+    Testability.prototype.whenStable = /**
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) {
         this._callbacks.push(callback);
         this._runCallbacksIfReady();
     };
     /**
      * @return {?}
      */
-    Testability.prototype.getPendingRequestCount = function () { return this._pendingCount; };
+    Testability.prototype.getPendingRequestCount = /**
+     * @return {?}
+     */
+    function () { return this._pendingCount; };
     /**
      * @param {?} using
      * @param {?} provider
      * @param {?} exactMatch
      * @return {?}
      */
-    Testability.prototype.findProviders = function (using, provider, exactMatch) {
+    Testability.prototype.findProviders = /**
+     * @param {?} using
+     * @param {?} provider
+     * @param {?} exactMatch
+     * @return {?}
+     */
+    function (using, provider, exactMatch) {
         // TODO(juliemr): implement.
         return [];
     };
+    Testability.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    Testability.ctorParameters = function () { return [
+        { type: NgZone, },
+    ]; };
     return Testability;
 }());
-Testability.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-Testability.ctorParameters = function () { return [
-    { type: NgZone, },
-]; };
 /**
  * A global registry of {\@link Testability} instances for specific elements.
  * \@experimental
@@ -4607,38 +4951,58 @@ var TestabilityRegistry = (function () {
      * @param {?} testability
      * @return {?}
      */
-    TestabilityRegistry.prototype.registerApplication = function (token, testability) {
+    TestabilityRegistry.prototype.registerApplication = /**
+     * @param {?} token
+     * @param {?} testability
+     * @return {?}
+     */
+    function (token, testability) {
         this._applications.set(token, testability);
     };
     /**
      * @param {?} elem
      * @return {?}
      */
-    TestabilityRegistry.prototype.getTestability = function (elem) { return this._applications.get(elem) || null; };
+    TestabilityRegistry.prototype.getTestability = /**
+     * @param {?} elem
+     * @return {?}
+     */
+    function (elem) { return this._applications.get(elem) || null; };
     /**
      * @return {?}
      */
-    TestabilityRegistry.prototype.getAllTestabilities = function () { return Array.from(this._applications.values()); };
+    TestabilityRegistry.prototype.getAllTestabilities = /**
+     * @return {?}
+     */
+    function () { return Array.from(this._applications.values()); };
     /**
      * @return {?}
      */
-    TestabilityRegistry.prototype.getAllRootElements = function () { return Array.from(this._applications.keys()); };
+    TestabilityRegistry.prototype.getAllRootElements = /**
+     * @return {?}
+     */
+    function () { return Array.from(this._applications.keys()); };
     /**
      * @param {?} elem
      * @param {?=} findInAncestors
      * @return {?}
      */
-    TestabilityRegistry.prototype.findTestabilityInTree = function (elem, findInAncestors) {
+    TestabilityRegistry.prototype.findTestabilityInTree = /**
+     * @param {?} elem
+     * @param {?=} findInAncestors
+     * @return {?}
+     */
+    function (elem, findInAncestors) {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
+    TestabilityRegistry.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    TestabilityRegistry.ctorParameters = function () { return []; };
     return TestabilityRegistry;
 }());
-TestabilityRegistry.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-TestabilityRegistry.ctorParameters = function () { return []; };
 /**
  * Adapter interface for retrieving the `Testability` service associated for a
  * particular context.
@@ -4647,7 +5011,7 @@ TestabilityRegistry.ctorParameters = function () { return []; };
  * the Protractor team.
  * @record
  */
-function GetTestability() { }
+
 var _NoopGetTestability = (function () {
     function _NoopGetTestability() {
     }
@@ -4655,14 +5019,24 @@ var _NoopGetTestability = (function () {
      * @param {?} registry
      * @return {?}
      */
-    _NoopGetTestability.prototype.addToWindow = function (registry) { };
+    _NoopGetTestability.prototype.addToWindow = /**
+     * @param {?} registry
+     * @return {?}
+     */
+    function (registry) { };
     /**
      * @param {?} registry
      * @param {?} elem
      * @param {?} findInAncestors
      * @return {?}
      */
-    _NoopGetTestability.prototype.findTestabilityInTree = function (registry, elem, findInAncestors) {
+    _NoopGetTestability.prototype.findTestabilityInTree = /**
+     * @param {?} registry
+     * @param {?} elem
+     * @param {?} findInAncestors
+     * @return {?}
+     */
+    function (registry, elem, findInAncestors) {
         return null;
     };
     return _NoopGetTestability;
@@ -4729,10 +5103,6 @@ function isDevMode() {
  * \@experimental
  */
 var NgProbeToken = (function () {
-    /**
-     * @param {?} name
-     * @param {?} token
-     */
     function NgProbeToken(name, token) {
         this.name = name;
         this.token = token;
@@ -4855,7 +5225,7 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
         }
         return result;
     }
-    catch (e) {
+    catch (/** @type {?} */ e) {
         ngZone.runOutsideAngular(function () { return errorHandler.handleError(e); });
         // rethrow as the exception handler might not do it
         throw e;
@@ -4867,9 +5237,6 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
  */
 var PlatformRef_ = (function (_super) {
     __extends(PlatformRef_, _super);
-    /**
-     * @param {?} _injector
-     */
     function PlatformRef_(_injector) {
         var _this = _super.call(this) || this;
         _this._injector = _injector;
@@ -4882,27 +5249,34 @@ var PlatformRef_ = (function (_super) {
      * @param {?} callback
      * @return {?}
      */
-    PlatformRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
+    PlatformRef_.prototype.onDestroy = /**
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) { this._destroyListeners.push(callback); };
     Object.defineProperty(PlatformRef_.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._injector; },
+        function () { return this._injector; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(PlatformRef_.prototype, "destroyed", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._destroyed; },
+        function () { return this._destroyed; },
         enumerable: true,
         configurable: true
     });
     /**
      * @return {?}
      */
-    PlatformRef_.prototype.destroy = function () {
+    PlatformRef_.prototype.destroy = /**
+     * @return {?}
+     */
+    function () {
         if (this._destroyed) {
             throw new Error('The platform has already been destroyed!');
         }
@@ -4915,7 +5289,12 @@ var PlatformRef_ = (function (_super) {
      * @param {?} moduleFactory
      * @return {?}
      */
-    PlatformRef_.prototype.bootstrapModuleFactory = function (moduleFactory) {
+    PlatformRef_.prototype.bootstrapModuleFactory = /**
+     * @template M
+     * @param {?} moduleFactory
+     * @return {?}
+     */
+    function (moduleFactory) {
         return this._bootstrapModuleFactoryWithZone(moduleFactory);
     };
     /**
@@ -4924,7 +5303,13 @@ var PlatformRef_ = (function (_super) {
      * @param {?=} ngZone
      * @return {?}
      */
-    PlatformRef_.prototype._bootstrapModuleFactoryWithZone = function (moduleFactory, ngZone) {
+    PlatformRef_.prototype._bootstrapModuleFactoryWithZone = /**
+     * @template M
+     * @param {?} moduleFactory
+     * @param {?=} ngZone
+     * @return {?}
+     */
+    function (moduleFactory, ngZone) {
         var _this = this;
         // Note: We need to create the NgZone _before_ we instantiate the module,
         // as instantiating the module creates some providers eagerly.
@@ -4936,13 +5321,13 @@ var PlatformRef_ = (function (_super) {
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(function () {
             var /** @type {?} */ ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], _this.injector);
-            var /** @type {?} */ moduleRef = (moduleFactory.create(ngZoneInjector));
+            var /** @type {?} */ moduleRef = /** @type {?} */ (moduleFactory.create(ngZoneInjector));
             var /** @type {?} */ exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); }); /** @type {?} */
-            ((ngZone)).runOutsideAngular(function () { /** @type {?} */ return ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
+            ((ngZone)).runOutsideAngular(function () { return /** @type {?} */ ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
             return _callAndReportToErrorHandler(exceptionHandler, /** @type {?} */ ((ngZone)), function () {
                 var /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 initStatus.runInitializers();
@@ -4959,7 +5344,13 @@ var PlatformRef_ = (function (_super) {
      * @param {?=} compilerOptions
      * @return {?}
      */
-    PlatformRef_.prototype.bootstrapModule = function (moduleType, compilerOptions) {
+    PlatformRef_.prototype.bootstrapModule = /**
+     * @template M
+     * @param {?} moduleType
+     * @param {?=} compilerOptions
+     * @return {?}
+     */
+    function (moduleType, compilerOptions) {
         if (compilerOptions === void 0) { compilerOptions = []; }
         return this._bootstrapModuleWithZone(moduleType, compilerOptions);
     };
@@ -4970,7 +5361,14 @@ var PlatformRef_ = (function (_super) {
      * @param {?=} ngZone
      * @return {?}
      */
-    PlatformRef_.prototype._bootstrapModuleWithZone = function (moduleType, compilerOptions, ngZone) {
+    PlatformRef_.prototype._bootstrapModuleWithZone = /**
+     * @template M
+     * @param {?} moduleType
+     * @param {?=} compilerOptions
+     * @param {?=} ngZone
+     * @return {?}
+     */
+    function (moduleType, compilerOptions, ngZone) {
         var _this = this;
         if (compilerOptions === void 0) { compilerOptions = []; }
         var /** @type {?} */ compilerFactory = this.injector.get(CompilerFactory);
@@ -4982,8 +5380,12 @@ var PlatformRef_ = (function (_super) {
      * @param {?} moduleRef
      * @return {?}
      */
-    PlatformRef_.prototype._moduleDoBootstrap = function (moduleRef) {
-        var /** @type {?} */ appRef = (moduleRef.injector.get(ApplicationRef));
+    PlatformRef_.prototype._moduleDoBootstrap = /**
+     * @param {?} moduleRef
+     * @return {?}
+     */
+    function (moduleRef) {
+        var /** @type {?} */ appRef = /** @type {?} */ (moduleRef.injector.get(ApplicationRef));
         if (moduleRef._bootstrapComponents.length > 0) {
             moduleRef._bootstrapComponents.forEach(function (f) { return appRef.bootstrap(f); });
         }
@@ -4996,15 +5398,15 @@ var PlatformRef_ = (function (_super) {
         }
         this._modules.push(moduleRef);
     };
+    PlatformRef_.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    PlatformRef_.ctorParameters = function () { return [
+        { type: Injector, },
+    ]; };
     return PlatformRef_;
 }(PlatformRef));
-PlatformRef_.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-PlatformRef_.ctorParameters = function () { return [
-    { type: Injector, },
-]; };
 /**
  * A reference to an Angular application running on a page.
  *
@@ -5022,14 +5424,6 @@ var ApplicationRef = (function () {
  */
 var ApplicationRef_ = (function (_super) {
     __extends(ApplicationRef_, _super);
-    /**
-     * @param {?} _zone
-     * @param {?} _console
-     * @param {?} _injector
-     * @param {?} _exceptionHandler
-     * @param {?} _componentFactoryResolver
-     * @param {?} _initStatus
-     */
     function ApplicationRef_(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
         var _this = _super.call(this) || this;
         _this._zone = _zone;
@@ -5092,8 +5486,12 @@ var ApplicationRef_ = (function (_super) {
      * @param {?} viewRef
      * @return {?}
      */
-    ApplicationRef_.prototype.attachView = function (viewRef) {
-        var /** @type {?} */ view = ((viewRef));
+    ApplicationRef_.prototype.attachView = /**
+     * @param {?} viewRef
+     * @return {?}
+     */
+    function (viewRef) {
+        var /** @type {?} */ view = (/** @type {?} */ (viewRef));
         this._views.push(view);
         view.attachToAppRef(this);
     };
@@ -5101,8 +5499,12 @@ var ApplicationRef_ = (function (_super) {
      * @param {?} viewRef
      * @return {?}
      */
-    ApplicationRef_.prototype.detachView = function (viewRef) {
-        var /** @type {?} */ view = ((viewRef));
+    ApplicationRef_.prototype.detachView = /**
+     * @param {?} viewRef
+     * @return {?}
+     */
+    function (viewRef) {
+        var /** @type {?} */ view = (/** @type {?} */ (viewRef));
         remove(this._views, view);
         view.detachFromAppRef();
     };
@@ -5112,7 +5514,13 @@ var ApplicationRef_ = (function (_super) {
      * @param {?=} rootSelectorOrNode
      * @return {?}
      */
-    ApplicationRef_.prototype.bootstrap = function (componentOrFactory, rootSelectorOrNode) {
+    ApplicationRef_.prototype.bootstrap = /**
+     * @template C
+     * @param {?} componentOrFactory
+     * @param {?=} rootSelectorOrNode
+     * @return {?}
+     */
+    function (componentOrFactory, rootSelectorOrNode) {
         var _this = this;
         if (!this._initStatus.done) {
             throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
@@ -5122,7 +5530,8 @@ var ApplicationRef_ = (function (_super) {
             componentFactory = componentOrFactory;
         }
         else {
-            componentFactory = ((this._componentFactoryResolver.resolveComponentFactory(componentOrFactory)));
+            componentFactory =
+                /** @type {?} */ ((this._componentFactoryResolver.resolveComponentFactory(componentOrFactory)));
         }
         this._rootComponentTypes.push(componentFactory.componentType);
         // Create a factory associated with the current module if it's not bound to some other
@@ -5147,7 +5556,11 @@ var ApplicationRef_ = (function (_super) {
      * @param {?} componentRef
      * @return {?}
      */
-    ApplicationRef_.prototype._loadComponent = function (componentRef) {
+    ApplicationRef_.prototype._loadComponent = /**
+     * @param {?} componentRef
+     * @return {?}
+     */
+    function (componentRef) {
         this.attachView(componentRef.hostView);
         this.tick();
         this._rootComponents.push(componentRef);
@@ -5159,14 +5572,21 @@ var ApplicationRef_ = (function (_super) {
      * @param {?} componentRef
      * @return {?}
      */
-    ApplicationRef_.prototype._unloadComponent = function (componentRef) {
+    ApplicationRef_.prototype._unloadComponent = /**
+     * @param {?} componentRef
+     * @return {?}
+     */
+    function (componentRef) {
         this.detachView(componentRef.hostView);
         remove(this._rootComponents, componentRef);
     };
     /**
      * @return {?}
      */
-    ApplicationRef_.prototype.tick = function () {
+    ApplicationRef_.prototype.tick = /**
+     * @return {?}
+     */
+    function () {
         var _this = this;
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
@@ -5179,7 +5599,7 @@ var ApplicationRef_ = (function (_super) {
                 this._views.forEach(function (view) { return view.checkNoChanges(); });
             }
         }
-        catch (e) {
+        catch (/** @type {?} */ e) {
             // Attention: Don't rethrow as it could cancel subscriptions to Observables!
             this._zone.runOutsideAngular(function () { return _this._exceptionHandler.handleError(e); });
         }
@@ -5191,60 +5611,63 @@ var ApplicationRef_ = (function (_super) {
     /**
      * @return {?}
      */
-    ApplicationRef_.prototype.ngOnDestroy = function () {
+    ApplicationRef_.prototype.ngOnDestroy = /**
+     * @return {?}
+     */
+    function () {
         // TODO(alxhub): Dispose of the NgZone.
         this._views.slice().forEach(function (view) { return view.destroy(); });
     };
     Object.defineProperty(ApplicationRef_.prototype, "viewCount", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._views.length; },
+        function () { return this._views.length; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ApplicationRef_.prototype, "componentTypes", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._rootComponentTypes; },
+        function () { return this._rootComponentTypes; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ApplicationRef_.prototype, "components", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._rootComponents; },
+        function () { return this._rootComponents; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ApplicationRef_.prototype, "isStable", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._isStable; },
+        function () { return this._isStable; },
         enumerable: true,
         configurable: true
     });
+    /**
+     * \@internal
+     */
+    ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
+    ApplicationRef_.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    ApplicationRef_.ctorParameters = function () { return [
+        { type: NgZone, },
+        { type: Console, },
+        { type: Injector, },
+        { type: ErrorHandler, },
+        { type: ComponentFactoryResolver, },
+        { type: ApplicationInitStatus, },
+    ]; };
     return ApplicationRef_;
 }(ApplicationRef));
-/**
- * \@internal
- */
-ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-ApplicationRef_.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-ApplicationRef_.ctorParameters = function () { return [
-    { type: NgZone, },
-    { type: Console, },
-    { type: Injector, },
-    { type: ErrorHandler, },
-    { type: ComponentFactoryResolver, },
-    { type: ApplicationInitStatus, },
-]; };
 /**
  * @template T
  * @param {?} list
@@ -5286,14 +5709,6 @@ function remove(list, el) {
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
  */
 var RenderComponentType = (function () {
-    /**
-     * @param {?} id
-     * @param {?} templateUrl
-     * @param {?} slotCount
-     * @param {?} encapsulation
-     * @param {?} styles
-     * @param {?} animations
-     */
     function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
         this.id = id;
         this.templateUrl = templateUrl;
@@ -5317,7 +5732,7 @@ var RenderDebugInfo = (function () {
  * @deprecated Use the `Renderer2` instead.
  * @record
  */
-function DirectRenderer() { }
+
 /**
  * @deprecated Use the `Renderer2` instead.
  * @abstract
@@ -5353,7 +5768,7 @@ var RootRenderer = (function () {
  * \@experimental
  * @record
  */
-function RendererType2() { }
+
 /**
  * \@experimental
  * @abstract
@@ -5397,10 +5812,19 @@ var Renderer2 = (function () {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * A wrapper around a native element inside of a View.
+ *
+ * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
+ * element.
+ *
+ * \@security Permitting direct access to the DOM can make your application more vulnerable to
+ * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
+ * [Security Guide](http://g.co/ng/security).
+ *
+ * \@stable
+ */
 var ElementRef = (function () {
-    /**
-     * @param {?} nativeElement
-     */
     function ElementRef(nativeElement) {
         this.nativeElement = nativeElement;
     }
@@ -5490,37 +5914,41 @@ var QueryList = (function () {
         this._emitter = new EventEmitter();
     }
     Object.defineProperty(QueryList.prototype, "changes", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._emitter; },
+        function () { return this._emitter; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(QueryList.prototype, "length", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._results.length; },
+        function () { return this._results.length; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(QueryList.prototype, "first", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._results[0]; },
+        function () { return this._results[0]; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(QueryList.prototype, "last", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._results[this.length - 1]; },
+        function () { return this._results[this.length - 1]; },
         enumerable: true,
         configurable: true
     });
+    /**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     */
     /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
@@ -5528,25 +5956,56 @@ var QueryList = (function () {
      * @param {?} fn
      * @return {?}
      */
-    QueryList.prototype.map = function (fn) { return this._results.map(fn); };
+    QueryList.prototype.map = /**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     * @template U
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) { return this._results.map(fn); };
+    /**
+     * See
+     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+     */
     /**
      * See
      * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
      * @param {?} fn
      * @return {?}
      */
-    QueryList.prototype.filter = function (fn) {
+    QueryList.prototype.filter = /**
+     * See
+     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         return this._results.filter(fn);
     };
+    /**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     */
     /**
      * See
      * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
      * @param {?} fn
      * @return {?}
      */
-    QueryList.prototype.find = function (fn) {
+    QueryList.prototype.find = /**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         return this._results.find(fn);
     };
+    /**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     */
     /**
      * See
      * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
@@ -5555,68 +6014,123 @@ var QueryList = (function () {
      * @param {?} init
      * @return {?}
      */
-    QueryList.prototype.reduce = function (fn, init) {
+    QueryList.prototype.reduce = /**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     * @template U
+     * @param {?} fn
+     * @param {?} init
+     * @return {?}
+     */
+    function (fn, init) {
         return this._results.reduce(fn, init);
     };
+    /**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     */
     /**
      * See
      * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
      * @param {?} fn
      * @return {?}
      */
-    QueryList.prototype.forEach = function (fn) { this._results.forEach(fn); };
+    QueryList.prototype.forEach = /**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) { this._results.forEach(fn); };
+    /**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     */
     /**
      * See
      * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
      * @param {?} fn
      * @return {?}
      */
-    QueryList.prototype.some = function (fn) {
+    QueryList.prototype.some = /**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         return this._results.some(fn);
     };
     /**
      * @return {?}
      */
-    QueryList.prototype.toArray = function () { return this._results.slice(); };
+    QueryList.prototype.toArray = /**
+     * @return {?}
+     */
+    function () { return this._results.slice(); };
     /**
      * @return {?}
      */
-    QueryList.prototype[getSymbolIterator()] = function () { return ((this._results))[getSymbolIterator()](); };
+    QueryList.prototype[getSymbolIterator()] = /**
+     * @return {?}
+     */
+    function () { return (/** @type {?} */ (this._results))[getSymbolIterator()](); };
     /**
      * @return {?}
      */
-    QueryList.prototype.toString = function () { return this._results.toString(); };
+    QueryList.prototype.toString = /**
+     * @return {?}
+     */
+    function () { return this._results.toString(); };
     /**
      * @param {?} res
      * @return {?}
      */
-    QueryList.prototype.reset = function (res) {
+    QueryList.prototype.reset = /**
+     * @param {?} res
+     * @return {?}
+     */
+    function (res) {
         this._results = flatten(res);
         this._dirty = false;
     };
     /**
      * @return {?}
      */
-    QueryList.prototype.notifyOnChanges = function () { this._emitter.emit(this); };
+    QueryList.prototype.notifyOnChanges = /**
+     * @return {?}
+     */
+    function () { this._emitter.emit(this); };
+    /** internal */
     /**
      * internal
      * @return {?}
      */
-    QueryList.prototype.setDirty = function () { this._dirty = true; };
+    QueryList.prototype.setDirty = /**
+     * internal
+     * @return {?}
+     */
+    function () { this._dirty = true; };
     Object.defineProperty(QueryList.prototype, "dirty", {
-        /**
+        /** internal */
+        get: /**
          * internal
          * @return {?}
          */
-        get: function () { return this._dirty; },
+        function () { return this._dirty; },
         enumerable: true,
         configurable: true
     });
+    /** internal */
     /**
      * internal
      * @return {?}
      */
-    QueryList.prototype.destroy = function () {
+    QueryList.prototype.destroy = /**
+     * internal
+     * @return {?}
+     */
+    function () {
         this._emitter.complete();
         this._emitter.unsubscribe();
     };
@@ -5630,7 +6144,7 @@ var QueryList = (function () {
 function flatten(list) {
     return list.reduce(function (flat, item) {
         var /** @type {?} */ flatItem = Array.isArray(item) ? flatten(item) : item;
-        return ((flat)).concat(flatItem);
+        return (/** @type {?} */ (flat)).concat(flatItem);
     }, []);
 }
 
@@ -5668,10 +6182,6 @@ var DEFAULT_CONFIG = {
  * \@experimental
  */
 var SystemJsNgModuleLoader = (function () {
-    /**
-     * @param {?} _compiler
-     * @param {?=} config
-     */
     function SystemJsNgModuleLoader(_compiler, config) {
         this._compiler = _compiler;
         this._config = config || DEFAULT_CONFIG;
@@ -5680,7 +6190,11 @@ var SystemJsNgModuleLoader = (function () {
      * @param {?} path
      * @return {?}
      */
-    SystemJsNgModuleLoader.prototype.load = function (path) {
+    SystemJsNgModuleLoader.prototype.load = /**
+     * @param {?} path
+     * @return {?}
+     */
+    function (path) {
         var /** @type {?} */ offlineMode = this._compiler instanceof Compiler;
         return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
     };
@@ -5688,7 +6202,11 @@ var SystemJsNgModuleLoader = (function () {
      * @param {?} path
      * @return {?}
      */
-    SystemJsNgModuleLoader.prototype.loadAndCompile = function (path) {
+    SystemJsNgModuleLoader.prototype.loadAndCompile = /**
+     * @param {?} path
+     * @return {?}
+     */
+    function (path) {
         var _this = this;
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         if (exportName === undefined) {
@@ -5703,7 +6221,11 @@ var SystemJsNgModuleLoader = (function () {
      * @param {?} path
      * @return {?}
      */
-    SystemJsNgModuleLoader.prototype.loadFactory = function (path) {
+    SystemJsNgModuleLoader.prototype.loadFactory = /**
+     * @param {?} path
+     * @return {?}
+     */
+    function (path) {
         var _a = path.split(_SEPARATOR), module = _a[0], exportName = _a[1];
         var /** @type {?} */ factoryClassSuffix = FACTORY_CLASS_SUFFIX;
         if (exportName === undefined) {
@@ -5714,16 +6236,16 @@ var SystemJsNgModuleLoader = (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
+    SystemJsNgModuleLoader.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    SystemJsNgModuleLoader.ctorParameters = function () { return [
+        { type: Compiler, },
+        { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+    ]; };
     return SystemJsNgModuleLoader;
 }());
-SystemJsNgModuleLoader.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-SystemJsNgModuleLoader.ctorParameters = function () { return [
-    { type: Compiler, },
-    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
-]; };
 /**
  * @param {?} value
  * @param {?} modulePath
@@ -5903,10 +6425,6 @@ var EmbeddedViewRef = (function (_super) {
  * @suppress {checkTypes} checked by tsc
  */
 var EventListener = (function () {
-    /**
-     * @param {?} name
-     * @param {?} callback
-     */
     function EventListener(name, callback) {
         this.name = name;
         this.callback = callback;
@@ -5918,11 +6436,6 @@ var EventListener = (function () {
  * \@experimental All debugging apis are currently experimental.
  */
 var DebugNode = (function () {
-    /**
-     * @param {?} nativeNode
-     * @param {?} parent
-     * @param {?} _debugContext
-     */
     function DebugNode(nativeNode, parent, _debugContext) {
         this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
@@ -5935,42 +6448,42 @@ var DebugNode = (function () {
         this.listeners = [];
     }
     Object.defineProperty(DebugNode.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._debugContext.injector; },
+        function () { return this._debugContext.injector; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugNode.prototype, "componentInstance", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._debugContext.component; },
+        function () { return this._debugContext.component; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugNode.prototype, "context", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._debugContext.context; },
+        function () { return this._debugContext.context; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugNode.prototype, "references", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._debugContext.references; },
+        function () { return this._debugContext.references; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugNode.prototype, "providerTokens", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._debugContext.providerTokens; },
+        function () { return this._debugContext.providerTokens; },
         enumerable: true,
         configurable: true
     });
@@ -5981,11 +6494,6 @@ var DebugNode = (function () {
  */
 var DebugElement = (function (_super) {
     __extends(DebugElement, _super);
-    /**
-     * @param {?} nativeNode
-     * @param {?} parent
-     * @param {?} _debugContext
-     */
     function DebugElement(nativeNode, parent, _debugContext) {
         var _this = _super.call(this, nativeNode, parent, _debugContext) || this;
         _this.properties = {};
@@ -6000,7 +6508,11 @@ var DebugElement = (function (_super) {
      * @param {?} child
      * @return {?}
      */
-    DebugElement.prototype.addChild = function (child) {
+    DebugElement.prototype.addChild = /**
+     * @param {?} child
+     * @return {?}
+     */
+    function (child) {
         if (child) {
             this.childNodes.push(child);
             child.parent = this;
@@ -6010,7 +6522,11 @@ var DebugElement = (function (_super) {
      * @param {?} child
      * @return {?}
      */
-    DebugElement.prototype.removeChild = function (child) {
+    DebugElement.prototype.removeChild = /**
+     * @param {?} child
+     * @return {?}
+     */
+    function (child) {
         var /** @type {?} */ childIndex = this.childNodes.indexOf(child);
         if (childIndex !== -1) {
             child.parent = null;
@@ -6022,7 +6538,12 @@ var DebugElement = (function (_super) {
      * @param {?} newChildren
      * @return {?}
      */
-    DebugElement.prototype.insertChildrenAfter = function (child, newChildren) {
+    DebugElement.prototype.insertChildrenAfter = /**
+     * @param {?} child
+     * @param {?} newChildren
+     * @return {?}
+     */
+    function (child, newChildren) {
         var _this = this;
         var /** @type {?} */ siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
@@ -6041,7 +6562,12 @@ var DebugElement = (function (_super) {
      * @param {?} newChild
      * @return {?}
      */
-    DebugElement.prototype.insertBefore = function (refChild, newChild) {
+    DebugElement.prototype.insertBefore = /**
+     * @param {?} refChild
+     * @param {?} newChild
+     * @return {?}
+     */
+    function (refChild, newChild) {
         var /** @type {?} */ refIndex = this.childNodes.indexOf(refChild);
         if (refIndex === -1) {
             this.addChild(newChild);
@@ -6058,7 +6584,11 @@ var DebugElement = (function (_super) {
      * @param {?} predicate
      * @return {?}
      */
-    DebugElement.prototype.query = function (predicate) {
+    DebugElement.prototype.query = /**
+     * @param {?} predicate
+     * @return {?}
+     */
+    function (predicate) {
         var /** @type {?} */ results = this.queryAll(predicate);
         return results[0] || null;
     };
@@ -6066,7 +6596,11 @@ var DebugElement = (function (_super) {
      * @param {?} predicate
      * @return {?}
      */
-    DebugElement.prototype.queryAll = function (predicate) {
+    DebugElement.prototype.queryAll = /**
+     * @param {?} predicate
+     * @return {?}
+     */
+    function (predicate) {
         var /** @type {?} */ matches = [];
         _queryElementChildren(this, predicate, matches);
         return matches;
@@ -6075,17 +6609,21 @@ var DebugElement = (function (_super) {
      * @param {?} predicate
      * @return {?}
      */
-    DebugElement.prototype.queryAllNodes = function (predicate) {
+    DebugElement.prototype.queryAllNodes = /**
+     * @param {?} predicate
+     * @return {?}
+     */
+    function (predicate) {
         var /** @type {?} */ matches = [];
         _queryNodeChildren(this, predicate, matches);
         return matches;
     };
     Object.defineProperty(DebugElement.prototype, "children", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
-            return (this.childNodes.filter(function (node) { return node instanceof DebugElement; }));
+        function () {
+            return /** @type {?} */ (this.childNodes.filter(function (node) { return node instanceof DebugElement; }));
         },
         enumerable: true,
         configurable: true
@@ -6095,7 +6633,12 @@ var DebugElement = (function (_super) {
      * @param {?} eventObj
      * @return {?}
      */
-    DebugElement.prototype.triggerEventHandler = function (eventName, eventObj) {
+    DebugElement.prototype.triggerEventHandler = /**
+     * @param {?} eventName
+     * @param {?} eventObj
+     * @return {?}
+     */
+    function (eventName, eventObj) {
         this.listeners.forEach(function (listener) {
             if (listener.name == eventName) {
                 listener.callback(eventObj);
@@ -6181,7 +6724,6 @@ function removeDebugNodeFromIndex(node) {
  * \@experimental All debugging apis are currently experimental.
  * @record
  */
-function Predicate() { }
 
 /**
  * @fileoverview added by tsickle
@@ -6236,9 +6778,6 @@ function devModeEqual(a, b) {
  * \@stable
  */
 var WrappedValue = (function () {
-    /**
-     * @param {?} wrapped
-     */
     function WrappedValue(wrapped) {
         this.wrapped = wrapped;
     }
@@ -6246,7 +6785,11 @@ var WrappedValue = (function () {
      * @param {?} value
      * @return {?}
      */
-    WrappedValue.wrap = function (value) { return new WrappedValue(value); };
+    WrappedValue.wrap = /**
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) { return new WrappedValue(value); };
     return WrappedValue;
 }());
 /**
@@ -6260,7 +6803,11 @@ var ValueUnwrapper = (function () {
      * @param {?} value
      * @return {?}
      */
-    ValueUnwrapper.prototype.unwrap = function (value) {
+    ValueUnwrapper.prototype.unwrap = /**
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) {
         if (value instanceof WrappedValue) {
             this.hasWrappedValue = true;
             return value.wrapped;
@@ -6270,7 +6817,10 @@ var ValueUnwrapper = (function () {
     /**
      * @return {?}
      */
-    ValueUnwrapper.prototype.reset = function () { this.hasWrappedValue = false; };
+    ValueUnwrapper.prototype.reset = /**
+     * @return {?}
+     */
+    function () { this.hasWrappedValue = false; };
     return ValueUnwrapper;
 }());
 /**
@@ -6278,11 +6828,6 @@ var ValueUnwrapper = (function () {
  * \@stable
  */
 var SimpleChange = (function () {
-    /**
-     * @param {?} previousValue
-     * @param {?} currentValue
-     * @param {?} firstChange
-     */
     function SimpleChange(previousValue, currentValue, firstChange) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
@@ -6290,9 +6835,16 @@ var SimpleChange = (function () {
     }
     /**
      * Check whether the new value is the first value assigned.
+     */
+    /**
+     * Check whether the new value is the first value assigned.
      * @return {?}
      */
-    SimpleChange.prototype.isFirstChange = function () { return this.firstChange; };
+    SimpleChange.prototype.isFirstChange = /**
+     * Check whether the new value is the first value assigned.
+     * @return {?}
+     */
+    function () { return this.firstChange; };
     return SimpleChange;
 }());
 /**
@@ -6304,6 +6856,7 @@ function isListLikeIterable(obj) {
         return false;
     return Array.isArray(obj) ||
         (!(obj instanceof Map) &&
+            // JS Map are iterables but return entries as [k, v]
             getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
 }
 /**
@@ -6371,13 +6924,22 @@ var DefaultIterableDifferFactory = (function () {
      * @param {?} obj
      * @return {?}
      */
-    DefaultIterableDifferFactory.prototype.supports = function (obj) { return isListLikeIterable(obj); };
+    DefaultIterableDifferFactory.prototype.supports = /**
+     * @param {?} obj
+     * @return {?}
+     */
+    function (obj) { return isListLikeIterable(obj); };
     /**
      * @template V
      * @param {?=} trackByFn
      * @return {?}
      */
-    DefaultIterableDifferFactory.prototype.create = function (trackByFn) {
+    DefaultIterableDifferFactory.prototype.create = /**
+     * @template V
+     * @param {?=} trackByFn
+     * @return {?}
+     */
+    function (trackByFn) {
         return new DefaultIterableDiffer(trackByFn);
     };
     return DefaultIterableDifferFactory;
@@ -6387,9 +6949,6 @@ var trackByIdentity = function (index, item) { return item; };
  * @deprecated v4.0.0 - Should not be part of public API.
  */
 var DefaultIterableDiffer = (function () {
-    /**
-     * @param {?=} trackByFn
-     */
     function DefaultIterableDiffer(trackByFn) {
         this._length = 0;
         this._collection = null;
@@ -6409,18 +6968,18 @@ var DefaultIterableDiffer = (function () {
         this._trackByFn = trackByFn || trackByIdentity;
     }
     Object.defineProperty(DefaultIterableDiffer.prototype, "collection", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._collection; },
+        function () { return this._collection; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DefaultIterableDiffer.prototype, "length", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._length; },
+        function () { return this._length; },
         enumerable: true,
         configurable: true
     });
@@ -6428,7 +6987,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachItem = function (fn) {
+    DefaultIterableDiffer.prototype.forEachItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._itHead; record !== null; record = record._next) {
             fn(record);
@@ -6438,7 +7001,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachOperation = function (fn) {
+    DefaultIterableDiffer.prototype.forEachOperation = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ nextIt = this._itHead;
         var /** @type {?} */ nextRemove = this._removalsHead;
         var /** @type {?} */ addRemoveOffset = 0;
@@ -6447,8 +7014,8 @@ var DefaultIterableDiffer = (function () {
             // Figure out which is the next record to process
             // Order: remove, add, move
             var /** @type {?} */ record = !nextRemove ||
-                nextIt && ((nextIt.currentIndex)) <
-                    getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ? ((nextIt)) :
+                nextIt && /** @type {?} */ ((nextIt.currentIndex)) < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
+                /** @type {?} */ ((nextIt)) :
                 nextRemove;
             var /** @type {?} */ adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
             var /** @type {?} */ currentIndex = record.currentIndex;
@@ -6458,7 +7025,7 @@ var DefaultIterableDiffer = (function () {
                 nextRemove = nextRemove._nextRemoved;
             }
             else {
-                nextIt = ((nextIt))._next;
+                nextIt = /** @type {?} */ ((nextIt))._next;
                 if (record.previousIndex == null) {
                     addRemoveOffset++;
                 }
@@ -6467,7 +7034,7 @@ var DefaultIterableDiffer = (function () {
                     if (!moveOffsets)
                         moveOffsets = [];
                     var /** @type {?} */ localMovePreviousIndex = adjPreviousIndex - addRemoveOffset;
-                    var /** @type {?} */ localCurrentIndex = ((currentIndex)) - addRemoveOffset;
+                    var /** @type {?} */ localCurrentIndex = /** @type {?} */ ((currentIndex)) - addRemoveOffset;
                     if (localMovePreviousIndex != localCurrentIndex) {
                         for (var /** @type {?} */ i = 0; i < localMovePreviousIndex; i++) {
                             var /** @type {?} */ offset = i < moveOffsets.length ? moveOffsets[i] : (moveOffsets[i] = 0);
@@ -6490,7 +7057,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachPreviousItem = function (fn) {
+    DefaultIterableDiffer.prototype.forEachPreviousItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._previousItHead; record !== null; record = record._nextPrevious) {
             fn(record);
@@ -6500,7 +7071,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachAddedItem = function (fn) {
+    DefaultIterableDiffer.prototype.forEachAddedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._additionsHead; record !== null; record = record._nextAdded) {
             fn(record);
@@ -6510,7 +7085,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachMovedItem = function (fn) {
+    DefaultIterableDiffer.prototype.forEachMovedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._movesHead; record !== null; record = record._nextMoved) {
             fn(record);
@@ -6520,7 +7099,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachRemovedItem = function (fn) {
+    DefaultIterableDiffer.prototype.forEachRemovedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
             fn(record);
@@ -6530,7 +7113,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.forEachIdentityChange = function (fn) {
+    DefaultIterableDiffer.prototype.forEachIdentityChange = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._identityChangesHead; record !== null; record = record._nextIdentityChange) {
             fn(record);
@@ -6540,7 +7127,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} collection
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.diff = function (collection) {
+    DefaultIterableDiffer.prototype.diff = /**
+     * @param {?} collection
+     * @return {?}
+     */
+    function (collection) {
         if (collection == null)
             collection = [];
         if (!isListLikeIterable(collection)) {
@@ -6556,12 +7147,19 @@ var DefaultIterableDiffer = (function () {
     /**
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.onDestroy = function () { };
+    DefaultIterableDiffer.prototype.onDestroy = /**
+     * @return {?}
+     */
+    function () { };
     /**
      * @param {?} collection
      * @return {?}
      */
-    DefaultIterableDiffer.prototype.check = function (collection) {
+    DefaultIterableDiffer.prototype.check = /**
+     * @param {?} collection
+     * @return {?}
+     */
+    function (collection) {
         var _this = this;
         this._reset();
         var /** @type {?} */ record = this._itHead;
@@ -6615,10 +7213,13 @@ var DefaultIterableDiffer = (function () {
         return this.isDirty;
     };
     Object.defineProperty(DefaultIterableDiffer.prototype, "isDirty", {
-        /**
+        /* CollectionChanges is considered dirty if it has any additions, moves, removals, or identity
+         * changes.
+         */
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             return this._additionsHead !== null || this._movesHead !== null ||
                 this._removalsHead !== null || this._identityChangesHead !== null;
         },
@@ -6631,10 +7232,27 @@ var DefaultIterableDiffer = (function () {
      * Set the previousIndexes of moved and added items to their currentIndexes
      * Reset the list of additions, moves and removals
      *
+     * @internal
+     */
+    /**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
      * \@internal
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._reset = function () {
+    DefaultIterableDiffer.prototype._reset = /**
+     * Reset the state of the change objects to show no changes. This means set previousKey to
+     * currentKey, and clear all of the queues (additions, moves, removals).
+     * Set the previousIndexes of moved and added items to their currentIndexes
+     * Reset the list of additions, moves and removals
+     *
+     * \@internal
+     * @return {?}
+     */
+    function () {
         if (this.isDirty) {
             var /** @type {?} */ record = void 0;
             var /** @type {?} */ nextRecord = void 0;
@@ -6664,6 +7282,16 @@ var DefaultIterableDiffer = (function () {
      * - `item` is the current item in the collection
      * - `index` is the position of the item in the collection
      *
+     * @internal
+     */
+    /**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
      * \@internal
      * @param {?} record
      * @param {?} item
@@ -6671,7 +7299,22 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._mismatch = function (record, item, itemTrackBy, index) {
+    DefaultIterableDiffer.prototype._mismatch = /**
+     * This is the core function which handles differences between collections.
+     *
+     * - `record` is the record which we saw at this position last time. If null then it is a new
+     *   item.
+     * - `item` is the current item in the collection
+     * - `index` is the position of the item in the collection
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, item, itemTrackBy, index) {
         // The previous record after which we will append the current one.
         var /** @type {?} */ previousRecord;
         if (record === null) {
@@ -6734,6 +7377,33 @@ var DefaultIterableDiffer = (function () {
      * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
      * at the end.
      *
+     * @internal
+     */
+    /**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
      * \@internal
      * @param {?} record
      * @param {?} item
@@ -6741,7 +7411,39 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._verifyReinsertion = function (record, item, itemTrackBy, index) {
+    DefaultIterableDiffer.prototype._verifyReinsertion = /**
+     * This check is only needed if an array contains duplicates. (Short circuit of nothing dirty)
+     *
+     * Use case: `[a, a]` => `[b, a, a]`
+     *
+     * If we did not have this check then the insertion of `b` would:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) leave `a` at index `1` as is. <-- this is wrong!
+     *   3) reinsert `a` at index 2. <-- this is wrong!
+     *
+     * The correct behavior is:
+     *   1) evict first `a`
+     *   2) insert `b` at `0` index.
+     *   3) reinsert `a` at index 1.
+     *   3) move `a` at from `1` to `2`.
+     *
+     *
+     * Double check that we have not evicted a duplicate item. We need to check if the item type may
+     * have already been removed:
+     * The insertion of b will evict the first 'a'. If we don't reinsert it now it will be reinserted
+     * at the end. Which will show up as the two 'a's switching position. This is incorrect, since a
+     * better way to think of it is as insert of 'b' rather then switch 'a' with 'b' and then add 'a'
+     * at the end.
+     *
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @param {?} itemTrackBy
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, item, itemTrackBy, index) {
         var /** @type {?} */ reinsertRecord = this._unlinkedRecords === null ? null : this._unlinkedRecords.get(itemTrackBy, null);
         if (reinsertRecord !== null) {
             record = this._reinsertAfter(reinsertRecord, /** @type {?} */ ((record._prev)), index);
@@ -6753,6 +7455,13 @@ var DefaultIterableDiffer = (function () {
         return record;
     };
     /**
+     * Get rid of any excess {@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {@link IterableChangeRecord_}.
+     *
+     * @internal
+     */
+    /**
      * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
      *
      * - `record` The first excess {\@link IterableChangeRecord_}.
@@ -6761,7 +7470,16 @@ var DefaultIterableDiffer = (function () {
      * @param {?} record
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._truncate = function (record) {
+    DefaultIterableDiffer.prototype._truncate = /**
+     * Get rid of any excess {\@link IterableChangeRecord_}s from the previous collection
+     *
+     * - `record` The first excess {\@link IterableChangeRecord_}.
+     *
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         // Anything after that needs to be removed;
         while (record !== null) {
             var /** @type {?} */ nextRecord = record._next;
@@ -6787,6 +7505,7 @@ var DefaultIterableDiffer = (function () {
             this._identityChangesTail._nextIdentityChange = null;
         }
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
@@ -6794,7 +7513,14 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._reinsertAfter = function (record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._reinsertAfter = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, prevRecord, index) {
         if (this._unlinkedRecords !== null) {
             this._unlinkedRecords.remove(record);
         }
@@ -6816,6 +7542,7 @@ var DefaultIterableDiffer = (function () {
         this._addToMoves(record, index);
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
@@ -6823,12 +7550,20 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._moveAfter = function (record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._moveAfter = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, prevRecord, index) {
         this._unlink(record);
         this._insertAfter(record, prevRecord, index);
         this._addToMoves(record, index);
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
@@ -6836,7 +7571,14 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._addAfter = function (record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._addAfter = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, prevRecord, index) {
         this._insertAfter(record, prevRecord, index);
         if (this._additionsTail === null) {
             // todo(vicb)
@@ -6851,6 +7593,7 @@ var DefaultIterableDiffer = (function () {
         }
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
@@ -6858,7 +7601,14 @@ var DefaultIterableDiffer = (function () {
      * @param {?} index
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._insertAfter = function (record, prevRecord, index) {
+    DefaultIterableDiffer.prototype._insertAfter = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} prevRecord
+     * @param {?} index
+     * @return {?}
+     */
+    function (record, prevRecord, index) {
         // todo(vicb)
         // assert(record != prevRecord);
         // assert(record._next === null);
@@ -6888,20 +7638,32 @@ var DefaultIterableDiffer = (function () {
         record.currentIndex = index;
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._remove = function (record) {
+    DefaultIterableDiffer.prototype._remove = /**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         return this._addToRemovals(this._unlink(record));
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._unlink = function (record) {
+    DefaultIterableDiffer.prototype._unlink = /**
+     * \@internal
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         if (this._linkedRecords !== null) {
             this._linkedRecords.remove(record);
         }
@@ -6924,13 +7686,20 @@ var DefaultIterableDiffer = (function () {
         }
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
      * @param {?} toIndex
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._addToMoves = function (record, toIndex) {
+    DefaultIterableDiffer.prototype._addToMoves = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} toIndex
+     * @return {?}
+     */
+    function (record, toIndex) {
         // todo(vicb)
         // assert(record._nextMoved === null);
         if (record.previousIndex === toIndex) {
@@ -6952,7 +7721,11 @@ var DefaultIterableDiffer = (function () {
      * @param {?} record
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._addToRemovals = function (record) {
+    DefaultIterableDiffer.prototype._addToRemovals = /**
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         if (this._unlinkedRecords === null) {
             this._unlinkedRecords = new _DuplicateMap();
         }
@@ -6974,13 +7747,20 @@ var DefaultIterableDiffer = (function () {
         }
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @param {?} record
      * @param {?} item
      * @return {?}
      */
-    DefaultIterableDiffer.prototype._addIdentityChange = function (record, item) {
+    DefaultIterableDiffer.prototype._addIdentityChange = /**
+     * \@internal
+     * @param {?} record
+     * @param {?} item
+     * @return {?}
+     */
+    function (record, item) {
         record.item = item;
         if (this._identityChangesTail === null) {
             this._identityChangesTail = this._identityChangesHead = record;
@@ -6996,10 +7776,6 @@ var DefaultIterableDiffer = (function () {
  * \@stable
  */
 var IterableChangeRecord_ = (function () {
-    /**
-     * @param {?} item
-     * @param {?} trackById
-     */
     function IterableChangeRecord_(item, trackById) {
         this.item = item;
         this.trackById = trackById;
@@ -7063,17 +7839,29 @@ var _DuplicateItemRecordList = (function () {
      * Append the record to the list of duplicates.
      *
      * Note: by design all records in the list of duplicates hold the same value in record.item.
+     */
+    /**
+     * Append the record to the list of duplicates.
+     *
+     * Note: by design all records in the list of duplicates hold the same value in record.item.
      * @param {?} record
      * @return {?}
      */
-    _DuplicateItemRecordList.prototype.add = function (record) {
+    _DuplicateItemRecordList.prototype.add = /**
+     * Append the record to the list of duplicates.
+     *
+     * Note: by design all records in the list of duplicates hold the same value in record.item.
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         if (this._head === null) {
             this._head = this._tail = record;
             record._nextDup = null;
             record._prevDup = null;
         }
         else {
-            ((
+            /** @type {?} */ ((
             // todo(vicb)
             // assert(record.item ==  _head.item ||
             //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
@@ -7083,15 +7871,22 @@ var _DuplicateItemRecordList = (function () {
             this._tail = record;
         }
     };
+    // Returns a IterableChangeRecord_ having IterableChangeRecord_.trackById == trackById and
+    // IterableChangeRecord_.currentIndex >= atOrAfterIndex
     /**
      * @param {?} trackById
      * @param {?} atOrAfterIndex
      * @return {?}
      */
-    _DuplicateItemRecordList.prototype.get = function (trackById, atOrAfterIndex) {
+    _DuplicateItemRecordList.prototype.get = /**
+     * @param {?} trackById
+     * @param {?} atOrAfterIndex
+     * @return {?}
+     */
+    function (trackById, atOrAfterIndex) {
         var /** @type {?} */ record;
         for (record = this._head; record !== null; record = record._nextDup) {
-            if ((atOrAfterIndex === null || atOrAfterIndex <= ((record.currentIndex))) &&
+            if ((atOrAfterIndex === null || atOrAfterIndex <= /** @type {?} */ ((record.currentIndex))) &&
                 looseIdentical(record.trackById, trackById)) {
                 return record;
             }
@@ -7099,13 +7894,25 @@ var _DuplicateItemRecordList = (function () {
         return null;
     };
     /**
+     * Remove one {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     */
+    /**
      * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
      *
      * Returns whether the list of duplicates is empty.
      * @param {?} record
      * @return {?}
      */
-    _DuplicateItemRecordList.prototype.remove = function (record) {
+    _DuplicateItemRecordList.prototype.remove = /**
+     * Remove one {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * Returns whether the list of duplicates is empty.
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         // todo(vicb)
         // assert(() {
         //  // verify that the record being removed is in the list.
@@ -7140,7 +7947,11 @@ var _DuplicateMap = (function () {
      * @param {?} record
      * @return {?}
      */
-    _DuplicateMap.prototype.put = function (record) {
+    _DuplicateMap.prototype.put = /**
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         var /** @type {?} */ key = record.trackById;
         var /** @type {?} */ duplicates = this.map.get(key);
         if (!duplicates) {
@@ -7155,15 +7966,37 @@ var _DuplicateMap = (function () {
      *
      * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
      * have any more `a`s needs to return the second `a`.
+     */
+    /**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the second `a`.
      * @param {?} trackById
      * @param {?} atOrAfterIndex
      * @return {?}
      */
-    _DuplicateMap.prototype.get = function (trackById, atOrAfterIndex) {
+    _DuplicateMap.prototype.get = /**
+     * Retrieve the `value` using key. Because the IterableChangeRecord_ value may be one which we
+     * have already iterated over, we use the `atOrAfterIndex` to pretend it is not there.
+     *
+     * Use case: `[a, b, c, a, a]` if we are at index `3` which is the second `a` then asking if we
+     * have any more `a`s needs to return the second `a`.
+     * @param {?} trackById
+     * @param {?} atOrAfterIndex
+     * @return {?}
+     */
+    function (trackById, atOrAfterIndex) {
         var /** @type {?} */ key = trackById;
         var /** @type {?} */ recordList = this.map.get(key);
         return recordList ? recordList.get(trackById, atOrAfterIndex) : null;
     };
+    /**
+     * Removes a {@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     */
     /**
      * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
      *
@@ -7171,9 +8004,16 @@ var _DuplicateMap = (function () {
      * @param {?} record
      * @return {?}
      */
-    _DuplicateMap.prototype.remove = function (record) {
+    _DuplicateMap.prototype.remove = /**
+     * Removes a {\@link IterableChangeRecord_} from the list of duplicates.
+     *
+     * The list of duplicates also is removed from the map if it gets empty.
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         var /** @type {?} */ key = record.trackById;
-        var /** @type {?} */ recordList = ((this.map.get(key)));
+        var /** @type {?} */ recordList = /** @type {?} */ ((this.map.get(key)));
         // Remove the list of duplicates when it gets empty
         if (recordList.remove(record)) {
             this.map.delete(key);
@@ -7181,17 +8021,20 @@ var _DuplicateMap = (function () {
         return record;
     };
     Object.defineProperty(_DuplicateMap.prototype, "isEmpty", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.map.size === 0; },
+        function () { return this.map.size === 0; },
         enumerable: true,
         configurable: true
     });
     /**
      * @return {?}
      */
-    _DuplicateMap.prototype.clear = function () { this.map.clear(); };
+    _DuplicateMap.prototype.clear = /**
+     * @return {?}
+     */
+    function () { this.map.clear(); };
     return _DuplicateMap;
 }());
 /**
@@ -7229,12 +8072,20 @@ var DefaultKeyValueDifferFactory = (function () {
      * @param {?} obj
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.supports = function (obj) { return obj instanceof Map || isJsObject(obj); };
+    DefaultKeyValueDifferFactory.prototype.supports = /**
+     * @param {?} obj
+     * @return {?}
+     */
+    function (obj) { return obj instanceof Map || isJsObject(obj); };
     /**
      * @template K, V
      * @return {?}
      */
-    DefaultKeyValueDifferFactory.prototype.create = function () { return new DefaultKeyValueDiffer(); };
+    DefaultKeyValueDifferFactory.prototype.create = /**
+     * @template K, V
+     * @return {?}
+     */
+    function () { return new DefaultKeyValueDiffer(); };
     return DefaultKeyValueDifferFactory;
 }());
 var DefaultKeyValueDiffer = (function () {
@@ -7251,10 +8102,10 @@ var DefaultKeyValueDiffer = (function () {
         this._removalsTail = null;
     }
     Object.defineProperty(DefaultKeyValueDiffer.prototype, "isDirty", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             return this._additionsHead !== null || this._changesHead !== null ||
                 this._removalsHead !== null;
         },
@@ -7265,7 +8116,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachItem = function (fn) {
+    DefaultKeyValueDiffer.prototype.forEachItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._mapHead; record !== null; record = record._next) {
             fn(record);
@@ -7275,7 +8130,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachPreviousItem = function (fn) {
+    DefaultKeyValueDiffer.prototype.forEachPreviousItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._previousMapHead; record !== null; record = record._nextPrevious) {
             fn(record);
@@ -7285,7 +8144,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachChangedItem = function (fn) {
+    DefaultKeyValueDiffer.prototype.forEachChangedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._changesHead; record !== null; record = record._nextChanged) {
             fn(record);
@@ -7295,7 +8158,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachAddedItem = function (fn) {
+    DefaultKeyValueDiffer.prototype.forEachAddedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._additionsHead; record !== null; record = record._nextAdded) {
             fn(record);
@@ -7305,7 +8172,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.forEachRemovedItem = function (fn) {
+    DefaultKeyValueDiffer.prototype.forEachRemovedItem = /**
+     * @param {?} fn
+     * @return {?}
+     */
+    function (fn) {
         var /** @type {?} */ record;
         for (record = this._removalsHead; record !== null; record = record._nextRemoved) {
             fn(record);
@@ -7315,7 +8186,11 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?=} map
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.diff = function (map) {
+    DefaultKeyValueDiffer.prototype.diff = /**
+     * @param {?=} map
+     * @return {?}
+     */
+    function (map) {
         if (!map) {
             map = new Map();
         }
@@ -7327,14 +8202,27 @@ var DefaultKeyValueDiffer = (function () {
     /**
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.onDestroy = function () { };
+    DefaultKeyValueDiffer.prototype.onDestroy = /**
+     * @return {?}
+     */
+    function () { };
+    /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
+     */
     /**
      * Check the current state of the map vs the previous.
      * The algorithm is optimised for when the keys do no change.
      * @param {?} map
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype.check = function (map) {
+    DefaultKeyValueDiffer.prototype.check = /**
+     * Check the current state of the map vs the previous.
+     * The algorithm is optimised for when the keys do no change.
+     * @param {?} map
+     * @return {?}
+     */
+    function (map) {
         var _this = this;
         this._reset();
         var /** @type {?} */ insertBefore = this._mapHead;
@@ -7386,7 +8274,18 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._insertBeforeOrAppend = function (before, record) {
+    DefaultKeyValueDiffer.prototype._insertBeforeOrAppend = /**
+     * Inserts a record before `before` or append at the end of the list when `before` is null.
+     *
+     * Notes:
+     * - This method appends at `this._appendAfter`,
+     * - This method updates `this._appendAfter`,
+     * - The return value is the new value for the insertion pointer.
+     * @param {?} before
+     * @param {?} record
+     * @return {?}
+     */
+    function (before, record) {
         if (before) {
             var /** @type {?} */ prev = before._prev;
             record._next = before;
@@ -7416,9 +8315,14 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} value
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = function (key, value) {
+    DefaultKeyValueDiffer.prototype._getOrCreateRecordForKey = /**
+     * @param {?} key
+     * @param {?} value
+     * @return {?}
+     */
+    function (key, value) {
         if (this._records.has(key)) {
-            var /** @type {?} */ record_1 = ((this._records.get(key)));
+            var /** @type {?} */ record_1 = /** @type {?} */ ((this._records.get(key)));
             this._maybeAddToChanges(record_1, value);
             var /** @type {?} */ prev = record_1._prev;
             var /** @type {?} */ next = record_1._next;
@@ -7438,11 +8342,16 @@ var DefaultKeyValueDiffer = (function () {
         this._addToAdditions(record);
         return record;
     };
+    /** @internal */
     /**
      * \@internal
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._reset = function () {
+    DefaultKeyValueDiffer.prototype._reset = /**
+     * \@internal
+     * @return {?}
+     */
+    function () {
         if (this.isDirty) {
             var /** @type {?} */ record = void 0;
             // let `_previousMapHead` contain the state of the map before the changes
@@ -7468,7 +8377,12 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} newValue
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._maybeAddToChanges = function (record, newValue) {
+    DefaultKeyValueDiffer.prototype._maybeAddToChanges = /**
+     * @param {?} record
+     * @param {?} newValue
+     * @return {?}
+     */
+    function (record, newValue) {
         if (!looseIdentical(newValue, record.currentValue)) {
             record.previousValue = record.currentValue;
             record.currentValue = newValue;
@@ -7479,12 +8393,16 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._addToAdditions = function (record) {
+    DefaultKeyValueDiffer.prototype._addToAdditions = /**
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         if (this._additionsHead === null) {
             this._additionsHead = this._additionsTail = record;
         }
         else {
-            ((this._additionsTail))._nextAdded = record;
+            /** @type {?} */ ((this._additionsTail))._nextAdded = record;
             this._additionsTail = record;
         }
     };
@@ -7492,12 +8410,16 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} record
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._addToChanges = function (record) {
+    DefaultKeyValueDiffer.prototype._addToChanges = /**
+     * @param {?} record
+     * @return {?}
+     */
+    function (record) {
         if (this._changesHead === null) {
             this._changesHead = this._changesTail = record;
         }
         else {
-            ((this._changesTail))._nextChanged = record;
+            /** @type {?} */ ((this._changesTail))._nextChanged = record;
             this._changesTail = record;
         }
     };
@@ -7508,7 +8430,14 @@ var DefaultKeyValueDiffer = (function () {
      * @param {?} fn
      * @return {?}
      */
-    DefaultKeyValueDiffer.prototype._forEach = function (obj, fn) {
+    DefaultKeyValueDiffer.prototype._forEach = /**
+     * \@internal
+     * @template K, V
+     * @param {?} obj
+     * @param {?} fn
+     * @return {?}
+     */
+    function (obj, fn) {
         if (obj instanceof Map) {
             obj.forEach(fn);
         }
@@ -7522,9 +8451,6 @@ var DefaultKeyValueDiffer = (function () {
  * \@stable
  */
 var KeyValueChangeRecord_ = (function () {
-    /**
-     * @param {?} key
-     */
     function KeyValueChangeRecord_(key) {
         this.key = key;
         this.previousValue = null;
@@ -7575,7 +8501,7 @@ var KeyValueChangeRecord_ = (function () {
  * \@stable
  * @record
  */
-function IterableDiffer() { }
+
 /**
  * An object describing the changes in the `Iterable` collection since last time
  * `IterableDiffer#diff()` was invoked.
@@ -7583,19 +8509,19 @@ function IterableDiffer() { }
  * \@stable
  * @record
  */
-function IterableChanges() { }
+
 /**
  * Record representing the item change information.
  *
  * \@stable
  * @record
  */
-function IterableChangeRecord() { }
+
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
  * @record
  */
-function CollectionChangeRecord() { }
+
 /**
  * An optional function passed into {\@link NgForOf} that defines how to track
  * items in an iterable (e.g. fby index or id)
@@ -7603,22 +8529,19 @@ function CollectionChangeRecord() { }
  * \@stable
  * @record
  */
-function TrackByFunction() { }
+
 /**
  * Provides a factory for {\@link IterableDiffer}.
  *
  * \@stable
  * @record
  */
-function IterableDifferFactory() { }
+
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * \@stable
  */
 var IterableDiffers = (function () {
-    /**
-     * @param {?} factories
-     */
     function IterableDiffers(factories) {
         this.factories = factories;
     }
@@ -7627,7 +8550,12 @@ var IterableDiffers = (function () {
      * @param {?=} parent
      * @return {?}
      */
-    IterableDiffers.create = function (factories, parent) {
+    IterableDiffers.create = /**
+     * @param {?} factories
+     * @param {?=} parent
+     * @return {?}
+     */
+    function (factories, parent) {
         if (parent != null) {
             var /** @type {?} */ copied = parent.factories.slice();
             factories = factories.concat(copied);
@@ -7637,6 +8565,25 @@ var IterableDiffers = (function () {
             return new IterableDiffers(factories);
         }
     };
+    /**
+     * Takes an array of {@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {@link IterableDiffers} instance with the provided factories and return a new
+     * {@link IterableDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link IterableDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     */
     /**
      * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
      * inherited {\@link IterableDiffers} instance with the provided factories and return a new
@@ -7658,7 +8605,28 @@ var IterableDiffers = (function () {
      * @param {?} factories
      * @return {?}
      */
-    IterableDiffers.extend = function (factories) {
+    IterableDiffers.extend = /**
+     * Takes an array of {\@link IterableDifferFactory} and returns a provider used to extend the
+     * inherited {\@link IterableDiffers} instance with the provided factories and return a new
+     * {\@link IterableDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link IterableDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     IterableDiffers.extend([new ImmutableListDiffer()])
+     *   ]
+     * })
+     * ```
+     * @param {?} factories
+     * @return {?}
+     */
+    function (factories) {
         return {
             provide: IterableDiffers,
             useFactory: function (parent) {
@@ -7678,7 +8646,11 @@ var IterableDiffers = (function () {
      * @param {?} iterable
      * @return {?}
      */
-    IterableDiffers.prototype.find = function (iterable) {
+    IterableDiffers.prototype.find = /**
+     * @param {?} iterable
+     * @return {?}
+     */
+    function (iterable) {
         var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(iterable); });
         if (factory != null) {
             return factory;
@@ -7714,7 +8686,7 @@ function getTypeNameForDebugging(type) {
  * \@stable
  * @record
  */
-function KeyValueDiffer() { }
+
 /**
  * An object describing the changes in the `Map` or `{[k:string]: string}` since last time
  * `KeyValueDiffer#diff()` was invoked.
@@ -7722,29 +8694,26 @@ function KeyValueDiffer() { }
  * \@stable
  * @record
  */
-function KeyValueChanges() { }
+
 /**
  * Record representing the item change information.
  *
  * \@stable
  * @record
  */
-function KeyValueChangeRecord() { }
+
 /**
  * Provides a factory for {\@link KeyValueDiffer}.
  *
  * \@stable
  * @record
  */
-function KeyValueDifferFactory() { }
+
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  * \@stable
  */
 var KeyValueDiffers = (function () {
-    /**
-     * @param {?} factories
-     */
     function KeyValueDiffers(factories) {
         this.factories = factories;
     }
@@ -7754,13 +8723,38 @@ var KeyValueDiffers = (function () {
      * @param {?=} parent
      * @return {?}
      */
-    KeyValueDiffers.create = function (factories, parent) {
+    KeyValueDiffers.create = /**
+     * @template S
+     * @param {?} factories
+     * @param {?=} parent
+     * @return {?}
+     */
+    function (factories, parent) {
         if (parent) {
             var /** @type {?} */ copied = parent.factories.slice();
             factories = factories.concat(copied);
         }
         return new KeyValueDiffers(factories);
     };
+    /**
+     * Takes an array of {@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {@link KeyValueDiffers} instance with the provided factories and return a new
+     * {@link KeyValueDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+           * which will only be applied to the injector for this component and its children.
+           * This step is all that's required to make a new {@link KeyValueDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * @Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     */
     /**
      * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
      * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
@@ -7783,7 +8777,29 @@ var KeyValueDiffers = (function () {
      * @param {?} factories
      * @return {?}
      */
-    KeyValueDiffers.extend = function (factories) {
+    KeyValueDiffers.extend = /**
+     * Takes an array of {\@link KeyValueDifferFactory} and returns a provider used to extend the
+     * inherited {\@link KeyValueDiffers} instance with the provided factories and return a new
+     * {\@link KeyValueDiffers} instance.
+     *
+     * The following example shows how to extend an existing list of factories,
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {\@link KeyValueDiffer} available.
+     *
+     * ### Example
+     *
+     * ```
+     * \@Component({
+     *   viewProviders: [
+     *     KeyValueDiffers.extend([new ImmutableMapDiffer()])
+     *   ]
+     * })
+     * ```
+     * @template S
+     * @param {?} factories
+     * @return {?}
+     */
+    function (factories) {
         return {
             provide: KeyValueDiffers,
             useFactory: function (parent) {
@@ -7802,7 +8818,11 @@ var KeyValueDiffers = (function () {
      * @param {?} kv
      * @return {?}
      */
-    KeyValueDiffers.prototype.find = function (kv) {
+    KeyValueDiffers.prototype.find = /**
+     * @param {?} kv
+     * @return {?}
+     */
+    function (kv) {
         var /** @type {?} */ factory = this.factories.find(function (f) { return f.supports(kv); });
         if (factory) {
             return factory;
@@ -7811,45 +8831,6 @@ var KeyValueDiffers = (function () {
     };
     return KeyValueDiffers;
 }());
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
- * To create a Pipe, you must implement this interface.
- *
- * Angular invokes the `transform` method with the value of a binding
- * as the first argument, and any parameters as the second argument in list form.
- *
- * ## Syntax
- *
- * `value | pipeName[:arg0[:arg1...]]`
- *
- * ### Example ([live demo](http://plnkr.co/edit/f5oyIked9M2cKzvZNKHV?p=preview))
- *
- * The `RepeatPipe` below repeats the value as many times as indicated by the first argument:
- *
- * ```
- * import {Pipe, PipeTransform} from '\@angular/core';
- *
- * \@Pipe({name: 'repeat'})
- * export class RepeatPipe implements PipeTransform {
- *   transform(value: any, times: number) {
- *     return value.repeat(times);
- *   }
- * }
- * ```
- *
- * Invoking `{{ 'ok' | repeat:3 }}` in a template produces `okokok`.
- *
- * \@stable
- * @record
- */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ function PipeTransform() { }
 
 /**
  * @fileoverview added by tsickle
@@ -7986,35 +8967,33 @@ function _localeFactory(locale) {
  * \@experimental
  */
 var ApplicationModule = (function () {
-    /**
-     * @param {?} appRef
-     */
+    // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
+    ApplicationModule.decorators = [
+        { type: NgModule, args: [{
+                    providers: [
+                        ApplicationRef_,
+                        { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                        ApplicationInitStatus,
+                        Compiler,
+                        APP_ID_RANDOM_PROVIDER,
+                        { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
+                        { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
+                        {
+                            provide: LOCALE_ID,
+                            useFactory: _localeFactory,
+                            deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+                        },
+                    ]
+                },] },
+    ];
+    /** @nocollapse */
+    ApplicationModule.ctorParameters = function () { return [
+        { type: ApplicationRef, },
+    ]; };
     return ApplicationModule;
 }());
-ApplicationModule.decorators = [
-    { type: NgModule, args: [{
-                providers: [
-                    ApplicationRef_,
-                    { provide: ApplicationRef, useExisting: ApplicationRef_ },
-                    ApplicationInitStatus,
-                    Compiler,
-                    APP_ID_RANDOM_PROVIDER,
-                    { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
-                    { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
-                    {
-                        provide: LOCALE_ID,
-                        useFactory: _localeFactory,
-                        deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
-                    },
-                ]
-            },] },
-];
-/** @nocollapse */
-ApplicationModule.ctorParameters = function () { return [
-    { type: ApplicationRef, },
-]; };
 
 /**
  * @fileoverview added by tsickle
@@ -8082,10 +9061,6 @@ var Sanitizer = (function () {
 /**
  * @record
  */
-function ViewDefinition() { }
-/**
- * @record
- */
 
 /**
  * @record
@@ -8095,17 +9070,14 @@ function ViewDefinition() { }
  * @record
  */
 
-/** @enum {number} */
-var ArgumentType = { Inline: 0, Dynamic: 1, };
 /**
  * @record
  */
 
-/** @enum {number} */
-var ViewFlags = {
-    None: 0,
-    OnPush: 2,
-};
+/**
+ * @record
+ */
+
 /**
  * A node definition in the view.
  *
@@ -8114,77 +9086,6 @@ var ViewFlags = {
  * @record
  */
 
-/** @enum {number} */
-var NodeFlags = {
-    None: 0,
-    TypeElement: 1,
-    TypeText: 2,
-    ProjectedTemplate: 4,
-    CatRenderNode: 3,
-    TypeNgContent: 8,
-    TypePipe: 16,
-    TypePureArray: 32,
-    TypePureObject: 64,
-    TypePurePipe: 128,
-    CatPureExpression: 224,
-    TypeValueProvider: 256,
-    TypeClassProvider: 512,
-    TypeFactoryProvider: 1024,
-    TypeUseExistingProvider: 2048,
-    LazyProvider: 4096,
-    PrivateProvider: 8192,
-    TypeDirective: 16384,
-    Component: 32768,
-    CatProviderNoDirective: 3840,
-    CatProvider: 20224,
-    OnInit: 65536,
-    OnDestroy: 131072,
-    DoCheck: 262144,
-    OnChanges: 524288,
-    AfterContentInit: 1048576,
-    AfterContentChecked: 2097152,
-    AfterViewInit: 4194304,
-    AfterViewChecked: 8388608,
-    EmbeddedViews: 16777216,
-    ComponentView: 33554432,
-    TypeContentQuery: 67108864,
-    TypeViewQuery: 134217728,
-    StaticQuery: 268435456,
-    DynamicQuery: 536870912,
-    CatQuery: 201326592,
-    // mutually exclusive values...
-    Types: 201347067,
-};
-/**
- * @record
- */
-
-/** @enum {number} */
-var BindingFlags = {
-    TypeElementAttribute: 1,
-    TypeElementClass: 2,
-    TypeElementStyle: 4,
-    TypeProperty: 8,
-    SyntheticProperty: 16,
-    SyntheticHostProperty: 32,
-    CatSyntheticProperty: 48,
-    // mutually exclusive values...
-    Types: 15,
-};
-/**
- * @record
- */
-
-/** @enum {number} */
-var OutputType = { ElementOutput: 0, DirectiveOutput: 1, };
-/** @enum {number} */
-var QueryValueType = {
-    ElementRef: 0,
-    RenderElement: 1,
-    TemplateRef: 2,
-    ViewContainerRef: 3,
-    Provider: 4,
-};
 /**
  * @record
  */
@@ -8205,13 +9106,6 @@ var QueryValueType = {
  * @record
  */
 
-/** @enum {number} */
-var DepFlags = {
-    None: 0,
-    SkipSelf: 1,
-    Optional: 2,
-    Value: 8,
-};
 /**
  * @record
  */
@@ -8224,8 +9118,14 @@ var DepFlags = {
  * @record
  */
 
-/** @enum {number} */
-var QueryBindingType = { First: 0, All: 1, };
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
 /**
  * @record
  */
@@ -8240,19 +9140,6 @@ var QueryBindingType = { First: 0, All: 1, };
  * @record
  */
 
-/** @enum {number} */
-var ViewState = {
-    BeforeFirstCheck: 1,
-    FirstCheck: 2,
-    Attached: 4,
-    ChecksEnabled: 8,
-    IsProjectedView: 16,
-    CheckProjectedView: 32,
-    CheckProjectedViews: 64,
-    Destroyed: 128,
-    CatDetectChanges: 12,
-    CatInit: 13,
-};
 /**
  * @record
  */
@@ -8271,7 +9158,7 @@ var ViewState = {
  * @return {?}
  */
 function asTextData(view, index) {
-    return (view.nodes[index]);
+    return /** @type {?} */ (view.nodes[index]);
 }
 /**
  * Data for an instantiated NodeType.Element.
@@ -8295,7 +9182,7 @@ function asTextData(view, index) {
  * @return {?}
  */
 function asElementData(view, index) {
-    return (view.nodes[index]);
+    return /** @type {?} */ (view.nodes[index]);
 }
 /**
  * Data for an instantiated NodeType.Provider.
@@ -8311,7 +9198,7 @@ function asElementData(view, index) {
  * @return {?}
  */
 function asProviderData(view, index) {
-    return (view.nodes[index]);
+    return /** @type {?} */ (view.nodes[index]);
 }
 /**
  * Data for an instantiated NodeType.PureExpression.
@@ -8327,7 +9214,7 @@ function asProviderData(view, index) {
  * @return {?}
  */
 function asPureExpressionData(view, index) {
-    return (view.nodes[index]);
+    return /** @type {?} */ (view.nodes[index]);
 }
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -8336,7 +9223,7 @@ function asPureExpressionData(view, index) {
  * @return {?}
  */
 function asQueryList(view, index) {
-    return (view.nodes[index]);
+    return /** @type {?} */ (view.nodes[index]);
 }
 /**
  * @record
@@ -8350,8 +9237,6 @@ var DebugContext = (function () {
     }
     return DebugContext;
 }());
-/** @enum {number} */
-var CheckType = { CheckAndUpdate: 0, CheckNoChanges: 1, };
 /**
  * @record
  */
@@ -8436,8 +9321,8 @@ function viewDebugError(msg, context) {
  * @return {?}
  */
 function _addDebugContext(err, context) {
-    ((err))[ERROR_DEBUG_CONTEXT] = context;
-    ((err))[ERROR_LOGGER] = context.logError.bind(context);
+    (/** @type {?} */ (err))[ERROR_DEBUG_CONTEXT] = context;
+    (/** @type {?} */ (err))[ERROR_LOGGER] = context.logError.bind(context);
 }
 /**
  * @param {?} err
@@ -8543,7 +9428,7 @@ function resolveRendererType2(type) {
  */
 function checkBinding(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValues = view.oldValues;
-    if ((view.state & ViewState.FirstCheck) ||
+    if ((view.state & 2 /* FirstCheck */) ||
         !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
         return true;
     }
@@ -8572,8 +9457,8 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
  */
 function checkBindingNoChanges(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-    if ((view.state & ViewState.BeforeFirstCheck) || !devModeEqual(oldValue, value)) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & ViewState.BeforeFirstCheck) !== 0);
+    if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.index), oldValue, value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
     }
 }
 /**
@@ -8583,8 +9468,8 @@ function checkBindingNoChanges(view, def, bindingIdx, value) {
 function markParentViewsForCheck(view) {
     var /** @type {?} */ currView = view;
     while (currView) {
-        if (currView.def.flags & ViewFlags.OnPush) {
-            currView.state |= ViewState.ChecksEnabled;
+        if (currView.def.flags & 2 /* OnPush */) {
+            currView.state |= 8 /* ChecksEnabled */;
         }
         currView = currView.viewContainerParent || currView.parent;
     }
@@ -8597,7 +9482,7 @@ function markParentViewsForCheck(view) {
 function markParentViewsForCheckProjectedViews(view, endView) {
     var /** @type {?} */ currView = view;
     while (currView && currView !== endView) {
-        currView.state |= ViewState.CheckProjectedViews;
+        currView.state |= 64 /* CheckProjectedViews */;
         currView = currView.viewContainerParent || currView.parent;
     }
 }
@@ -8611,13 +9496,13 @@ function markParentViewsForCheckProjectedViews(view, endView) {
 function dispatchEvent(view, nodeIndex, eventName, event) {
     try {
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        var /** @type {?} */ startView = nodeDef.flags & NodeFlags.ComponentView ?
+        var /** @type {?} */ startView = nodeDef.flags & 33554432 /* ComponentView */ ?
             asElementData(view, nodeIndex).componentView :
             view;
         markParentViewsForCheck(startView);
         return Services.handleEvent(view, nodeIndex, eventName, event);
     }
-    catch (e) {
+    catch (/** @type {?} */ e) {
         // Attention: Don't rethrow, as it would cancel Observable subscriptions!
         view.root.errorHandler.handleError(e);
     }
@@ -8643,7 +9528,7 @@ function declaredViewContainer(view) {
 function viewParentEl(view) {
     var /** @type {?} */ parentView = view.parent;
     if (parentView) {
-        return ((view.parentNodeDef)).parent;
+        return /** @type {?} */ ((view.parentNodeDef)).parent;
     }
     else {
         return null;
@@ -8655,10 +9540,10 @@ function viewParentEl(view) {
  * @return {?}
  */
 function renderNode(view, def) {
-    switch (def.flags & NodeFlags.Types) {
-        case NodeFlags.TypeElement:
+    switch (def.flags & 201347067 /* Types */) {
+        case 1 /* TypeElement */:
             return asElementData(view, def.index).renderElement;
-        case NodeFlags.TypeText:
+        case 2 /* TypeText */:
             return asTextData(view, def.index).renderText;
     }
 }
@@ -8675,14 +9560,14 @@ function elementEventFullName(target, name) {
  * @return {?}
  */
 function isComponentView(view) {
-    return !!view.parent && !!(((view.parentNodeDef)).flags & NodeFlags.Component);
+    return !!view.parent && !!(/** @type {?} */ ((view.parentNodeDef)).flags & 32768 /* Component */);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function isEmbeddedView(view) {
-    return !!view.parent && !(((view.parentNodeDef)).flags & NodeFlags.Component);
+    return !!view.parent && !(/** @type {?} */ ((view.parentNodeDef)).flags & 32768 /* Component */);
 }
 /**
  * @param {?} queryId
@@ -8725,7 +9610,7 @@ function splitDepsDsl(deps) {
             flags = value[0], token = value[1];
         }
         else {
-            flags = DepFlags.None;
+            flags = 0 /* None */;
             token = value;
         }
         return { flags: flags, token: token, tokenKey: tokenKey(token) };
@@ -8740,10 +9625,9 @@ function splitDepsDsl(deps) {
 function getParentRenderElement(view, renderHost, def) {
     var /** @type {?} */ renderParent = def.renderParent;
     if (renderParent) {
-        if ((renderParent.flags & NodeFlags.TypeElement) === 0 ||
-            (renderParent.flags & NodeFlags.ComponentView) === 0 ||
-            (((renderParent.element)).componentRendererType && ((((renderParent.element)).componentRendererType)).encapsulation ===
-                ViewEncapsulation.Native)) {
+        if ((renderParent.flags & 1 /* TypeElement */) === 0 ||
+            (renderParent.flags & 33554432 /* ComponentView */) === 0 ||
+            (/** @type {?} */ ((renderParent.element)).componentRendererType && /** @type {?} */ ((/** @type {?} */ ((renderParent.element)).componentRendererType)).encapsulation === ViewEncapsulation.Native)) {
             // only children of non components, or children of components with native encapsulation should
             // be attached.
             return asElementData(view, /** @type {?} */ ((def.renderParent)).index).renderElement;
@@ -8760,7 +9644,7 @@ var DEFINITION_CACHE = new WeakMap();
  * @return {?}
  */
 function resolveDefinition(factory) {
-    var /** @type {?} */ value = (((DEFINITION_CACHE.get(factory))));
+    var /** @type {?} */ value = /** @type {?} */ (((DEFINITION_CACHE.get(factory))));
     if (!value) {
         value = factory(function () { return NOOP; });
         value.factory = factory;
@@ -8774,11 +9658,9 @@ function resolveDefinition(factory) {
  */
 function rootRenderNodes(view) {
     var /** @type {?} */ renderNodes = [];
-    visitRootRenderNodes(view, RenderNodeAction.Collect, undefined, undefined, renderNodes);
+    visitRootRenderNodes(view, 0 /* Collect */, undefined, undefined, renderNodes);
     return renderNodes;
 }
-/** @enum {number} */
-var RenderNodeAction = { Collect: 0, AppendChild: 1, InsertBefore: 2, RemoveChild: 3, };
 /**
  * @param {?} view
  * @param {?} action
@@ -8789,7 +9671,7 @@ var RenderNodeAction = { Collect: 0, AppendChild: 1, InsertBefore: 2, RemoveChil
  */
 function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
     // We need to re-compute the parent node in case the nodes have been moved around manually
-    if (action === RenderNodeAction.RemoveChild) {
+    if (action === 3 /* RemoveChild */) {
         parentNode = view.renderer.parentNode(renderNode(view, /** @type {?} */ ((view.def.lastRenderRootNode))));
     }
     visitSiblingRenderNodes(view, action, 0, view.def.nodes.length - 1, parentNode, nextSibling, target);
@@ -8807,7 +9689,7 @@ function visitRootRenderNodes(view, action, parentNode, nextSibling, target) {
 function visitSiblingRenderNodes(view, action, startIndex, endIndex, parentNode, nextSibling, target) {
     for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & (NodeFlags.TypeElement | NodeFlags.TypeText | NodeFlags.TypeNgContent)) {
+        if (nodeDef.flags & (1 /* TypeElement */ | 2 /* TypeText */ | 8 /* TypeNgContent */)) {
             visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target);
         }
         // jump to next sibling
@@ -8828,19 +9710,19 @@ function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nex
     while (compView && !isComponentView(compView)) {
         compView = compView.parent;
     }
-    var /** @type {?} */ hostView = ((compView)).parent;
+    var /** @type {?} */ hostView = /** @type {?} */ ((compView)).parent;
     var /** @type {?} */ hostElDef = viewParentEl(/** @type {?} */ ((compView)));
-    var /** @type {?} */ startIndex = ((hostElDef)).index + 1;
-    var /** @type {?} */ endIndex = ((hostElDef)).index + ((hostElDef)).childCount;
+    var /** @type {?} */ startIndex = /** @type {?} */ ((hostElDef)).index + 1;
+    var /** @type {?} */ endIndex = /** @type {?} */ ((hostElDef)).index + /** @type {?} */ ((hostElDef)).childCount;
     for (var /** @type {?} */ i = startIndex; i <= endIndex; i++) {
-        var /** @type {?} */ nodeDef = ((hostView)).def.nodes[i];
+        var /** @type {?} */ nodeDef = /** @type {?} */ ((hostView)).def.nodes[i];
         if (nodeDef.ngContentIndex === ngContentIndex) {
             visitRenderNode(/** @type {?} */ ((hostView)), nodeDef, action, parentNode, nextSibling, target);
         }
         // jump to next sibling
         i += nodeDef.childCount;
     }
-    if (!((hostView)).parent) {
+    if (!/** @type {?} */ ((hostView)).parent) {
         // a root view
         var /** @type {?} */ projectedNodes = view.root.projectableNodes[ngContentIndex];
         if (projectedNodes) {
@@ -8860,18 +9742,18 @@ function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nex
  * @return {?}
  */
 function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
-    if (nodeDef.flags & NodeFlags.TypeNgContent) {
+    if (nodeDef.flags & 8 /* TypeNgContent */) {
         visitProjectedRenderNodes(view, /** @type {?} */ ((nodeDef.ngContent)).index, action, parentNode, nextSibling, target);
     }
     else {
         var /** @type {?} */ rn = renderNode(view, nodeDef);
-        if (action === RenderNodeAction.RemoveChild && (nodeDef.flags & NodeFlags.ComponentView) &&
-            (nodeDef.bindingFlags & BindingFlags.CatSyntheticProperty)) {
+        if (action === 3 /* RemoveChild */ && (nodeDef.flags & 33554432 /* ComponentView */) &&
+            (nodeDef.bindingFlags & 48 /* CatSyntheticProperty */)) {
             // Note: we might need to do both actions.
-            if (nodeDef.bindingFlags & (BindingFlags.SyntheticProperty)) {
+            if (nodeDef.bindingFlags & (16 /* SyntheticProperty */)) {
                 execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
             }
-            if (nodeDef.bindingFlags & (BindingFlags.SyntheticHostProperty)) {
+            if (nodeDef.bindingFlags & (32 /* SyntheticHostProperty */)) {
                 var /** @type {?} */ compView = asElementData(view, nodeDef.index).componentView;
                 execRenderNodeAction(compView, rn, action, parentNode, nextSibling, target);
             }
@@ -8879,13 +9761,13 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
         else {
             execRenderNodeAction(view, rn, action, parentNode, nextSibling, target);
         }
-        if (nodeDef.flags & NodeFlags.EmbeddedViews) {
-            var /** @type {?} */ embeddedViews = ((asElementData(view, nodeDef.index).viewContainer))._embeddedViews;
+        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+            var /** @type {?} */ embeddedViews = /** @type {?} */ ((asElementData(view, nodeDef.index).viewContainer))._embeddedViews;
             for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                 visitRootRenderNodes(embeddedViews[k], action, parentNode, nextSibling, target);
             }
         }
-        if (nodeDef.flags & NodeFlags.TypeElement && !((nodeDef.element)).name) {
+        if (nodeDef.flags & 1 /* TypeElement */ && !/** @type {?} */ ((nodeDef.element)).name) {
             visitSiblingRenderNodes(view, action, nodeDef.index + 1, nodeDef.index + nodeDef.childCount, parentNode, nextSibling, target);
         }
     }
@@ -8902,17 +9784,17 @@ function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target)
 function execRenderNodeAction(view, renderNode, action, parentNode, nextSibling, target) {
     var /** @type {?} */ renderer = view.renderer;
     switch (action) {
-        case RenderNodeAction.AppendChild:
+        case 1 /* AppendChild */:
             renderer.appendChild(parentNode, renderNode);
             break;
-        case RenderNodeAction.InsertBefore:
+        case 2 /* InsertBefore */:
             renderer.insertBefore(parentNode, renderNode, nextSibling);
             break;
-        case RenderNodeAction.RemoveChild:
+        case 3 /* RemoveChild */:
             renderer.removeChild(parentNode, renderNode);
             break;
-        case RenderNodeAction.Collect:
-            ((target)).push(renderNode);
+        case 0 /* Collect */:
+            /** @type {?} */ ((target)).push(renderNode);
             break;
     }
 }
@@ -8923,7 +9805,7 @@ var NS_PREFIX_RE = /^:([^:]+):(.+)$/;
  */
 function splitNamespace(name) {
     if (name[0] === ':') {
-        var /** @type {?} */ match = ((name.match(NS_PREFIX_RE)));
+        var /** @type {?} */ match = /** @type {?} */ ((name.match(NS_PREFIX_RE)));
         return [match[1], match[2]];
     }
     return ['', name];
@@ -9032,7 +9914,7 @@ var EMPTY_MAP = {};
  * @return {?}
  */
 function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleEvent, templateFactory) {
-    flags |= NodeFlags.TypeElement;
+    flags |= 1 /* TypeElement */;
     var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
     var /** @type {?} */ template = templateFactory ? resolveDefinition(templateFactory) : null;
     return {
@@ -9087,8 +9969,8 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
         handleEvent = NOOP;
     }
     var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
-    var /** @type {?} */ ns = ((null));
-    var /** @type {?} */ name = ((null));
+    var /** @type {?} */ ns = /** @type {?} */ ((null));
+    var /** @type {?} */ name = /** @type {?} */ ((null));
     if (namespaceAndName) {
         _b = splitNamespace(namespaceAndName), ns = _b[0], name = _b[1];
     }
@@ -9097,15 +9979,15 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
         var _c = bindings[i], bindingFlags = _c[0], namespaceAndName_1 = _c[1], suffixOrSecurityContext = _c[2];
         var _d = splitNamespace(namespaceAndName_1), ns_1 = _d[0], name_1 = _d[1];
-        var /** @type {?} */ securityContext = ((undefined));
-        var /** @type {?} */ suffix = ((undefined));
-        switch (bindingFlags & BindingFlags.Types) {
-            case BindingFlags.TypeElementStyle:
-                suffix = (suffixOrSecurityContext);
+        var /** @type {?} */ securityContext = /** @type {?} */ ((undefined));
+        var /** @type {?} */ suffix = /** @type {?} */ ((undefined));
+        switch (bindingFlags & 15 /* Types */) {
+            case 4 /* TypeElementStyle */:
+                suffix = /** @type {?} */ (suffixOrSecurityContext);
                 break;
-            case BindingFlags.TypeElementAttribute:
-            case BindingFlags.TypeProperty:
-                securityContext = (suffixOrSecurityContext);
+            case 1 /* TypeElementAttribute */:
+            case 8 /* TypeProperty */:
+                securityContext = /** @type {?} */ (suffixOrSecurityContext);
                 break;
         }
         bindingDefs[i] =
@@ -9116,22 +9998,22 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
     for (var /** @type {?} */ i = 0; i < outputs.length; i++) {
         var _e = outputs[i], target = _e[0], eventName = _e[1];
         outputDefs[i] = {
-            type: OutputType.ElementOutput,
+            type: 0 /* ElementOutput */,
             target: /** @type {?} */ (target), eventName: eventName,
             propName: null
         };
     }
     fixedAttrs = fixedAttrs || [];
-    var /** @type {?} */ attrs = (fixedAttrs.map(function (_a) {
+    var /** @type {?} */ attrs = /** @type {?} */ (fixedAttrs.map(function (_a) {
         var namespaceAndName = _a[0], value = _a[1];
         var _b = splitNamespace(namespaceAndName), ns = _b[0], name = _b[1];
         return [ns, name, value];
     }));
     componentRendererType = resolveRendererType2(componentRendererType);
     if (componentView) {
-        flags |= NodeFlags.ComponentView;
+        flags |= 33554432 /* ComponentView */;
     }
-    flags |= NodeFlags.TypeElement;
+    flags |= 1 /* TypeElement */;
     return {
         // will bet set by the view definition
         index: -1,
@@ -9174,7 +10056,7 @@ function elementDef(flags, matchedQueriesDsl, ngContentIndex, childCount, namesp
  * @return {?}
  */
 function createElement(view, renderHost, def) {
-    var /** @type {?} */ elDef = ((def.element));
+    var /** @type {?} */ elDef = /** @type {?} */ ((def.element));
     var /** @type {?} */ rootSelectorOrNode = view.root.selectorOrNode;
     var /** @type {?} */ renderer = view.renderer;
     var /** @type {?} */ el;
@@ -9218,7 +10100,7 @@ function listenToElementOutputs(view, compView, def, el) {
             listenTarget = null;
             listenerView = compView;
         }
-        var /** @type {?} */ disposable = (listenerView.renderer.listen(listenTarget || el, output.eventName, handleEventClosure)); /** @type {?} */
+        var /** @type {?} */ disposable = /** @type {?} */ (listenerView.renderer.listen(listenTarget || el, output.eventName, handleEventClosure)); /** @type {?} */
         ((view.disposables))[def.outputIndex + i] = disposable;
     }
 }
@@ -9299,20 +10181,20 @@ function checkAndUpdateElementValue(view, def, bindingIdx, value) {
     var /** @type {?} */ binding = def.bindings[bindingIdx];
     var /** @type {?} */ elData = asElementData(view, def.index);
     var /** @type {?} */ renderNode$$1 = elData.renderElement;
-    var /** @type {?} */ name = ((binding.name));
-    switch (binding.flags & BindingFlags.Types) {
-        case BindingFlags.TypeElementAttribute:
+    var /** @type {?} */ name = /** @type {?} */ ((binding.name));
+    switch (binding.flags & 15 /* Types */) {
+        case 1 /* TypeElementAttribute */:
             setElementAttribute(view, binding, renderNode$$1, binding.ns, name, value);
             break;
-        case BindingFlags.TypeElementClass:
+        case 2 /* TypeElementClass */:
             setElementClass(view, renderNode$$1, name, value);
             break;
-        case BindingFlags.TypeElementStyle:
+        case 4 /* TypeElementStyle */:
             setElementStyle(view, binding, renderNode$$1, name, value);
             break;
-        case BindingFlags.TypeProperty:
-            var /** @type {?} */ bindView = (def.flags & NodeFlags.ComponentView &&
-                binding.flags & BindingFlags.SyntheticHostProperty) ?
+        case 8 /* TypeProperty */:
+            var /** @type {?} */ bindView = (def.flags & 33554432 /* ComponentView */ &&
+                binding.flags & 32 /* SyntheticHostProperty */) ?
                 elData.componentView :
                 view;
             setElementProperty(bindView, binding, renderNode$$1, name, value);
@@ -9455,7 +10337,7 @@ function initNgModule(data) {
     var /** @type {?} */ providers = data._providers = new Array(def.providers.length);
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        providers[i] = provDef.flags & NodeFlags.LazyProvider ? NOT_CREATED$1 :
+        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 :
             _createProviderInstance$1(data, provDef);
     }
 }
@@ -9467,13 +10349,13 @@ function initNgModule(data) {
  */
 function resolveNgModuleDep(data, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-    if (depDef.flags & DepFlags.Value) {
+    if (depDef.flags & 8 /* Value */) {
         return depDef.token;
     }
-    if (depDef.flags & DepFlags.Optional) {
+    if (depDef.flags & 2 /* Optional */) {
         notFoundValue = null;
     }
-    if (depDef.flags & DepFlags.SkipSelf) {
+    if (depDef.flags & 1 /* SkipSelf */) {
         return data._parent.get(depDef.token, notFoundValue);
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
@@ -9500,17 +10382,17 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
  */
 function _createProviderInstance$1(ngModule, providerDef) {
     var /** @type {?} */ injectable;
-    switch (providerDef.flags & NodeFlags.Types) {
-        case NodeFlags.TypeClassProvider:
+    switch (providerDef.flags & 201347067 /* Types */) {
+        case 512 /* TypeClassProvider */:
             injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
             break;
-        case NodeFlags.TypeFactoryProvider:
+        case 1024 /* TypeFactoryProvider */:
             injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
             break;
-        case NodeFlags.TypeUseExistingProvider:
+        case 2048 /* TypeUseExistingProvider */:
             injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
             break;
-        case NodeFlags.TypeValueProvider:
+        case 256 /* TypeValueProvider */:
             injectable = providerDef.value;
             break;
     }
@@ -9589,7 +10471,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
     var /** @type {?} */ def = ngModule._def;
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        if (provDef.flags & NodeFlags.OnDestroy) {
+        if (provDef.flags & 131072 /* OnDestroy */) {
             var /** @type {?} */ instance = ngModule._providers[i];
             if (instance && instance !== NOT_CREATED$1) {
                 instance.ngOnDestroy();
@@ -9617,7 +10499,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
  * @return {?}
  */
 function attachEmbeddedView(parentView, elementData, viewIndex, view) {
-    var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
+    var /** @type {?} */ embeddedViews = /** @type {?} */ ((elementData.viewContainer))._embeddedViews;
     if (viewIndex === null || viewIndex === undefined) {
         viewIndex = embeddedViews.length;
     }
@@ -9625,7 +10507,7 @@ function attachEmbeddedView(parentView, elementData, viewIndex, view) {
     addToArray(embeddedViews, /** @type {?} */ ((viewIndex)), view);
     attachProjectedView(elementData, view);
     Services.dirtyParentQueries(view);
-    var /** @type {?} */ prevView = ((viewIndex)) > 0 ? embeddedViews[((viewIndex)) - 1] : null;
+    var /** @type {?} */ prevView = /** @type {?} */ ((viewIndex)) > 0 ? embeddedViews[/** @type {?} */ ((viewIndex)) - 1] : null;
     renderAttachEmbeddedView(elementData, prevView, view);
 }
 /**
@@ -9636,7 +10518,7 @@ function attachEmbeddedView(parentView, elementData, viewIndex, view) {
 function attachProjectedView(vcElementData, view) {
     var /** @type {?} */ dvcElementData = declaredViewContainer(view);
     if (!dvcElementData || dvcElementData === vcElementData ||
-        view.state & ViewState.IsProjectedView) {
+        view.state & 16 /* IsProjectedView */) {
         return;
     }
     // Note: For performance reasons, we
@@ -9646,7 +10528,7 @@ function attachProjectedView(vcElementData, view) {
     //    nested projected views as well, even accross component boundaries).
     // - don't track the insertion order of views in the projected views array
     //   (hard, as when the views of the same template are inserted different view containers)
-    view.state |= ViewState.IsProjectedView;
+    view.state |= 16 /* IsProjectedView */;
     var /** @type {?} */ projectedViews = dvcElementData.template._projectedViews;
     if (!projectedViews) {
         projectedViews = dvcElementData.template._projectedViews = [];
@@ -9662,14 +10544,14 @@ function attachProjectedView(vcElementData, view) {
  * @return {?}
  */
 function markNodeAsProjectedTemplate(viewDef, nodeDef) {
-    if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
+    if (nodeDef.flags & 4 /* ProjectedTemplate */) {
         return;
     }
-    viewDef.nodeFlags |= NodeFlags.ProjectedTemplate;
-    nodeDef.flags |= NodeFlags.ProjectedTemplate;
+    viewDef.nodeFlags |= 4 /* ProjectedTemplate */;
+    nodeDef.flags |= 4 /* ProjectedTemplate */;
     var /** @type {?} */ parentNodeDef = nodeDef.parent;
     while (parentNodeDef) {
-        parentNodeDef.childFlags |= NodeFlags.ProjectedTemplate;
+        parentNodeDef.childFlags |= 4 /* ProjectedTemplate */;
         parentNodeDef = parentNodeDef.parent;
     }
 }
@@ -9679,7 +10561,7 @@ function markNodeAsProjectedTemplate(viewDef, nodeDef) {
  * @return {?}
  */
 function detachEmbeddedView(elementData, viewIndex) {
-    var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
+    var /** @type {?} */ embeddedViews = /** @type {?} */ ((elementData.viewContainer))._embeddedViews;
     if (viewIndex == null || viewIndex >= embeddedViews.length) {
         viewIndex = embeddedViews.length - 1;
     }
@@ -9699,7 +10581,7 @@ function detachEmbeddedView(elementData, viewIndex) {
  * @return {?}
  */
 function detachProjectedView(view) {
-    if (!(view.state & ViewState.IsProjectedView)) {
+    if (!(view.state & 16 /* IsProjectedView */)) {
         return;
     }
     var /** @type {?} */ dvcElementData = declaredViewContainer(view);
@@ -9718,7 +10600,7 @@ function detachProjectedView(view) {
  * @return {?}
  */
 function moveEmbeddedView(elementData, oldViewIndex, newViewIndex) {
-    var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
+    var /** @type {?} */ embeddedViews = /** @type {?} */ ((elementData.viewContainer))._embeddedViews;
     var /** @type {?} */ view = embeddedViews[oldViewIndex];
     removeFromArray(embeddedViews, oldViewIndex);
     if (newViewIndex == null) {
@@ -9746,14 +10628,14 @@ function renderAttachEmbeddedView(elementData, prevView, view) {
     var /** @type {?} */ nextSibling = view.renderer.nextSibling(prevRenderNode);
     // Note: We can't check if `nextSibling` is present, as on WebWorkers it will always be!
     // However, browsers automatically do `appendChild` when there is no `nextSibling`.
-    visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
+    visitRootRenderNodes(view, 2 /* InsertBefore */, parentNode, nextSibling, undefined);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function renderDetachView(view) {
-    visitRootRenderNodes(view, RenderNodeAction.RemoveChild, null, null, undefined);
+    visitRootRenderNodes(view, 3 /* RemoveChild */, null, null, undefined);
 }
 /**
  * @param {?} arr
@@ -9807,18 +10689,10 @@ function createComponentFactory(selector, componentType, viewDefFactory, inputs,
  * @return {?}
  */
 function getComponentViewDefinitionFactory(componentFactory) {
-    return ((componentFactory)).viewDefFactory;
+    return (/** @type {?} */ (componentFactory)).viewDefFactory;
 }
 var ComponentFactory_ = (function (_super) {
     __extends(ComponentFactory_, _super);
-    /**
-     * @param {?} selector
-     * @param {?} componentType
-     * @param {?} viewDefFactory
-     * @param {?} _inputs
-     * @param {?} _outputs
-     * @param {?} ngContentSelectors
-     */
     function ComponentFactory_(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
         var _this = 
         // Attention: this ctor is called as top level function.
@@ -9833,12 +10707,12 @@ var ComponentFactory_ = (function (_super) {
         return _this;
     }
     Object.defineProperty(ComponentFactory_.prototype, "inputs", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ inputsArr = [];
-            var /** @type {?} */ inputs = ((this._inputs));
+            var /** @type {?} */ inputs = /** @type {?} */ ((this._inputs));
             for (var /** @type {?} */ propName in inputs) {
                 var /** @type {?} */ templateName = inputs[propName];
                 inputsArr.push({ propName: propName, templateName: templateName });
@@ -9849,10 +10723,10 @@ var ComponentFactory_ = (function (_super) {
         configurable: true
     });
     Object.defineProperty(ComponentFactory_.prototype, "outputs", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ outputsArr = [];
             for (var /** @type {?} */ propName in this._outputs) {
                 var /** @type {?} */ templateName = this._outputs[propName];
@@ -9865,18 +10739,29 @@ var ComponentFactory_ = (function (_super) {
     });
     /**
      * Creates a new component.
+     */
+    /**
+     * Creates a new component.
      * @param {?} injector
      * @param {?=} projectableNodes
      * @param {?=} rootSelectorOrNode
      * @param {?=} ngModule
      * @return {?}
      */
-    ComponentFactory_.prototype.create = function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
+    ComponentFactory_.prototype.create = /**
+     * Creates a new component.
+     * @param {?} injector
+     * @param {?=} projectableNodes
+     * @param {?=} rootSelectorOrNode
+     * @param {?=} ngModule
+     * @return {?}
+     */
+    function (injector, projectableNodes, rootSelectorOrNode, ngModule) {
         if (!ngModule) {
             throw new Error('ngModule should be provided');
         }
         var /** @type {?} */ viewDef = resolveDefinition(this.viewDefFactory);
-        var /** @type {?} */ componentNodeIndex = ((((viewDef.nodes[0].element)).componentProvider)).index;
+        var /** @type {?} */ componentNodeIndex = /** @type {?} */ ((/** @type {?} */ ((viewDef.nodes[0].element)).componentProvider)).index;
         var /** @type {?} */ view = Services.createRootView(injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
         var /** @type {?} */ component = asProviderData(view, componentNodeIndex).instance;
         if (rootSelectorOrNode) {
@@ -9888,11 +10773,6 @@ var ComponentFactory_ = (function (_super) {
 }(ComponentFactory));
 var ComponentRef_ = (function (_super) {
     __extends(ComponentRef_, _super);
-    /**
-     * @param {?} _view
-     * @param {?} _viewRef
-     * @param {?} _component
-     */
     function ComponentRef_(_view, _viewRef, _component) {
         var _this = _super.call(this) || this;
         _this._view = _view;
@@ -9902,67 +10782,74 @@ var ComponentRef_ = (function (_super) {
         return _this;
     }
     Object.defineProperty(ComponentRef_.prototype, "location", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             return new ElementRef(asElementData(this._view, this._elDef.index).renderElement);
         },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentRef_.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return new Injector_(this._view, this._elDef); },
+        function () { return new Injector_(this._view, this._elDef); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ComponentRef_.prototype, "instance", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._component; },
+        function () { return this._component; },
         enumerable: true,
         configurable: true
     });
     
     Object.defineProperty(ComponentRef_.prototype, "hostView", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._viewRef; },
+        function () { return this._viewRef; },
         enumerable: true,
         configurable: true
     });
     
     Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._viewRef; },
+        function () { return this._viewRef; },
         enumerable: true,
         configurable: true
     });
     
     Object.defineProperty(ComponentRef_.prototype, "componentType", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return (this._component.constructor); },
+        function () { return /** @type {?} */ (this._component.constructor); },
         enumerable: true,
         configurable: true
     });
     /**
      * @return {?}
      */
-    ComponentRef_.prototype.destroy = function () { this._viewRef.destroy(); };
+    ComponentRef_.prototype.destroy = /**
+     * @return {?}
+     */
+    function () { this._viewRef.destroy(); };
     /**
      * @param {?} callback
      * @return {?}
      */
-    ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
+    ComponentRef_.prototype.onDestroy = /**
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) { this._viewRef.onDestroy(callback); };
     return ComponentRef_;
 }(ComponentRef));
 /**
@@ -9975,11 +10862,6 @@ function createViewContainerData(view, elDef, elData) {
     return new ViewContainerRef_(view, elDef, elData);
 }
 var ViewContainerRef_ = (function () {
-    /**
-     * @param {?} _view
-     * @param {?} _elDef
-     * @param {?} _data
-     */
     function ViewContainerRef_(_view, _elDef, _data) {
         this._view = _view;
         this._elDef = _elDef;
@@ -9990,31 +10872,31 @@ var ViewContainerRef_ = (function () {
         this._embeddedViews = [];
     }
     Object.defineProperty(ViewContainerRef_.prototype, "element", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return new ElementRef(this._data.renderElement); },
+        function () { return new ElementRef(this._data.renderElement); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewContainerRef_.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return new Injector_(this._view, this._elDef); },
+        function () { return new Injector_(this._view, this._elDef); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewContainerRef_.prototype, "parentInjector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ view = this._view;
             var /** @type {?} */ elDef = this._elDef.parent;
             while (!elDef && view) {
                 elDef = viewParentEl(view);
-                view = ((view.parent));
+                view = /** @type {?} */ ((view.parent));
             }
             return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
         },
@@ -10024,10 +10906,13 @@ var ViewContainerRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewContainerRef_.prototype.clear = function () {
+    ViewContainerRef_.prototype.clear = /**
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ len = this._embeddedViews.length;
         for (var /** @type {?} */ i = len - 1; i >= 0; i--) {
-            var /** @type {?} */ view = ((detachEmbeddedView(this._data, i)));
+            var /** @type {?} */ view = /** @type {?} */ ((detachEmbeddedView(this._data, i)));
             Services.destroyView(view);
         }
     };
@@ -10035,7 +10920,11 @@ var ViewContainerRef_ = (function () {
      * @param {?} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.get = function (index) {
+    ViewContainerRef_.prototype.get = /**
+     * @param {?} index
+     * @return {?}
+     */
+    function (index) {
         var /** @type {?} */ view = this._embeddedViews[index];
         if (view) {
             var /** @type {?} */ ref = new ViewRef_(view);
@@ -10045,10 +10934,10 @@ var ViewContainerRef_ = (function () {
         return null;
     };
     Object.defineProperty(ViewContainerRef_.prototype, "length", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._embeddedViews.length; },
+        function () { return this._embeddedViews.length; },
         enumerable: true,
         configurable: true
     });
@@ -10060,8 +10949,15 @@ var ViewContainerRef_ = (function () {
      * @param {?=} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.createEmbeddedView = function (templateRef, context, index) {
-        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context || ({}));
+    ViewContainerRef_.prototype.createEmbeddedView = /**
+     * @template C
+     * @param {?} templateRef
+     * @param {?=} context
+     * @param {?=} index
+     * @return {?}
+     */
+    function (templateRef, context, index) {
+        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context || /** @type {?} */ ({}));
         this.insert(viewRef, index);
         return viewRef;
     };
@@ -10074,7 +10970,16 @@ var ViewContainerRef_ = (function () {
      * @param {?=} ngModuleRef
      * @return {?}
      */
-    ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
+    ViewContainerRef_.prototype.createComponent = /**
+     * @template C
+     * @param {?} componentFactory
+     * @param {?=} index
+     * @param {?=} injector
+     * @param {?=} projectableNodes
+     * @param {?=} ngModuleRef
+     * @return {?}
+     */
+    function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
         var /** @type {?} */ contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
             ngModuleRef = contextInjector.get(NgModuleRef);
@@ -10088,11 +10993,16 @@ var ViewContainerRef_ = (function () {
      * @param {?=} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.insert = function (viewRef, index) {
+    ViewContainerRef_.prototype.insert = /**
+     * @param {?} viewRef
+     * @param {?=} index
+     * @return {?}
+     */
+    function (viewRef, index) {
         if (viewRef.destroyed) {
             throw new Error('Cannot insert a destroyed View in a ViewContainer!');
         }
-        var /** @type {?} */ viewRef_ = (viewRef);
+        var /** @type {?} */ viewRef_ = /** @type {?} */ (viewRef);
         var /** @type {?} */ viewData = viewRef_._view;
         attachEmbeddedView(this._view, this._data, index, viewData);
         viewRef_.attachToViewContainerRef(this);
@@ -10103,7 +11013,12 @@ var ViewContainerRef_ = (function () {
      * @param {?} currentIndex
      * @return {?}
      */
-    ViewContainerRef_.prototype.move = function (viewRef, currentIndex) {
+    ViewContainerRef_.prototype.move = /**
+     * @param {?} viewRef
+     * @param {?} currentIndex
+     * @return {?}
+     */
+    function (viewRef, currentIndex) {
         if (viewRef.destroyed) {
             throw new Error('Cannot move a destroyed View in a ViewContainer!');
         }
@@ -10115,14 +11030,22 @@ var ViewContainerRef_ = (function () {
      * @param {?} viewRef
      * @return {?}
      */
-    ViewContainerRef_.prototype.indexOf = function (viewRef) {
-        return this._embeddedViews.indexOf(((viewRef))._view);
+    ViewContainerRef_.prototype.indexOf = /**
+     * @param {?} viewRef
+     * @return {?}
+     */
+    function (viewRef) {
+        return this._embeddedViews.indexOf((/** @type {?} */ (viewRef))._view);
     };
     /**
      * @param {?=} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.remove = function (index) {
+    ViewContainerRef_.prototype.remove = /**
+     * @param {?=} index
+     * @return {?}
+     */
+    function (index) {
         var /** @type {?} */ viewData = detachEmbeddedView(this._data, index);
         if (viewData) {
             Services.destroyView(viewData);
@@ -10132,7 +11055,11 @@ var ViewContainerRef_ = (function () {
      * @param {?=} index
      * @return {?}
      */
-    ViewContainerRef_.prototype.detach = function (index) {
+    ViewContainerRef_.prototype.detach = /**
+     * @param {?=} index
+     * @return {?}
+     */
+    function (index) {
         var /** @type {?} */ view = detachEmbeddedView(this._data, index);
         return view ? new ViewRef_(view) : null;
     };
@@ -10146,50 +11073,56 @@ function createChangeDetectorRef(view) {
     return new ViewRef_(view);
 }
 var ViewRef_ = (function () {
-    /**
-     * @param {?} _view
-     */
     function ViewRef_(_view) {
         this._view = _view;
         this._viewContainerRef = null;
         this._appRef = null;
     }
     Object.defineProperty(ViewRef_.prototype, "rootNodes", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return rootRenderNodes(this._view); },
+        function () { return rootRenderNodes(this._view); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewRef_.prototype, "context", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this._view.context; },
+        function () { return this._view.context; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(ViewRef_.prototype, "destroyed", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return (this._view.state & ViewState.Destroyed) !== 0; },
+        function () { return (this._view.state & 128 /* Destroyed */) !== 0; },
         enumerable: true,
         configurable: true
     });
     /**
      * @return {?}
      */
-    ViewRef_.prototype.markForCheck = function () { markParentViewsForCheck(this._view); };
+    ViewRef_.prototype.markForCheck = /**
+     * @return {?}
+     */
+    function () { markParentViewsForCheck(this._view); };
     /**
      * @return {?}
      */
-    ViewRef_.prototype.detach = function () { this._view.state &= ~ViewState.Attached; };
+    ViewRef_.prototype.detach = /**
+     * @return {?}
+     */
+    function () { this._view.state &= ~4 /* Attached */; };
     /**
      * @return {?}
      */
-    ViewRef_.prototype.detectChanges = function () {
+    ViewRef_.prototype.detectChanges = /**
+     * @return {?}
+     */
+    function () {
         var /** @type {?} */ fs = this._view.root.rendererFactory;
         if (fs.begin) {
             fs.begin();
@@ -10202,16 +11135,26 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.checkNoChanges = function () { Services.checkNoChangesView(this._view); };
+    ViewRef_.prototype.checkNoChanges = /**
+     * @return {?}
+     */
+    function () { Services.checkNoChangesView(this._view); };
     /**
      * @return {?}
      */
-    ViewRef_.prototype.reattach = function () { this._view.state |= ViewState.Attached; };
+    ViewRef_.prototype.reattach = /**
+     * @return {?}
+     */
+    function () { this._view.state |= 4 /* Attached */; };
     /**
      * @param {?} callback
      * @return {?}
      */
-    ViewRef_.prototype.onDestroy = function (callback) {
+    ViewRef_.prototype.onDestroy = /**
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) {
         if (!this._view.disposables) {
             this._view.disposables = [];
         }
@@ -10220,7 +11163,10 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.destroy = function () {
+    ViewRef_.prototype.destroy = /**
+     * @return {?}
+     */
+    function () {
         if (this._appRef) {
             this._appRef.detachView(this);
         }
@@ -10232,7 +11178,10 @@ var ViewRef_ = (function () {
     /**
      * @return {?}
      */
-    ViewRef_.prototype.detachFromAppRef = function () {
+    ViewRef_.prototype.detachFromAppRef = /**
+     * @return {?}
+     */
+    function () {
         this._appRef = null;
         renderDetachView(this._view);
         Services.dirtyParentQueries(this._view);
@@ -10241,7 +11190,11 @@ var ViewRef_ = (function () {
      * @param {?} appRef
      * @return {?}
      */
-    ViewRef_.prototype.attachToAppRef = function (appRef) {
+    ViewRef_.prototype.attachToAppRef = /**
+     * @param {?} appRef
+     * @return {?}
+     */
+    function (appRef) {
         if (this._viewContainerRef) {
             throw new Error('This view is already attached to a ViewContainer!');
         }
@@ -10251,7 +11204,11 @@ var ViewRef_ = (function () {
      * @param {?} vcRef
      * @return {?}
      */
-    ViewRef_.prototype.attachToViewContainerRef = function (vcRef) {
+    ViewRef_.prototype.attachToViewContainerRef = /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    function (vcRef) {
         if (this._appRef) {
             throw new Error('This view is already attached directly to the ApplicationRef!');
         }
@@ -10269,10 +11226,6 @@ function createTemplateData(view, def) {
 }
 var TemplateRef_ = (function (_super) {
     __extends(TemplateRef_, _super);
-    /**
-     * @param {?} _parentView
-     * @param {?} _def
-     */
     function TemplateRef_(_parentView, _def) {
         var _this = _super.call(this) || this;
         _this._parentView = _parentView;
@@ -10283,14 +11236,18 @@ var TemplateRef_ = (function (_super) {
      * @param {?} context
      * @return {?}
      */
-    TemplateRef_.prototype.createEmbeddedView = function (context) {
-        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, /** @type {?} */ ((((this._def.element)).template)), context));
+    TemplateRef_.prototype.createEmbeddedView = /**
+     * @param {?} context
+     * @return {?}
+     */
+    function (context) {
+        return new ViewRef_(Services.createEmbeddedView(this._parentView, this._def, /** @type {?} */ ((/** @type {?} */ ((this._def.element)).template)), context));
     };
     Object.defineProperty(TemplateRef_.prototype, "elementRef", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             return new ElementRef(asElementData(this._parentView, this._def.index).renderElement);
         },
         enumerable: true,
@@ -10307,10 +11264,6 @@ function createInjector(view, elDef) {
     return new Injector_(view, elDef);
 }
 var Injector_ = (function () {
-    /**
-     * @param {?} view
-     * @param {?} elDef
-     */
     function Injector_(view, elDef) {
         this.view = view;
         this.elDef = elDef;
@@ -10320,10 +11273,15 @@ var Injector_ = (function () {
      * @param {?=} notFoundValue
      * @return {?}
      */
-    Injector_.prototype.get = function (token, notFoundValue) {
+    Injector_.prototype.get = /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        var /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & NodeFlags.ComponentView) !== 0 : false;
-        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: DepFlags.None, token: token, tokenKey: tokenKey(token) }, notFoundValue);
+        var /** @type {?} */ allowPrivateServices = this.elDef ? (this.elDef.flags & 33554432 /* ComponentView */) !== 0 : false;
+        return Services.resolveDep(this.view, this.elDef, allowPrivateServices, { flags: 0 /* None */, token: token, tokenKey: tokenKey(token) }, notFoundValue);
     };
     return Injector_;
 }());
@@ -10334,14 +11292,14 @@ var Injector_ = (function () {
  */
 function nodeValue(view, index) {
     var /** @type {?} */ def = view.def.nodes[index];
-    if (def.flags & NodeFlags.TypeElement) {
+    if (def.flags & 1 /* TypeElement */) {
         var /** @type {?} */ elData = asElementData(view, def.index);
-        return ((def.element)).template ? elData.template : elData.renderElement;
+        return /** @type {?} */ ((def.element)).template ? elData.template : elData.renderElement;
     }
-    else if (def.flags & NodeFlags.TypeText) {
+    else if (def.flags & 2 /* TypeText */) {
         return asTextData(view, def.index).renderText;
     }
-    else if (def.flags & (NodeFlags.CatProvider | NodeFlags.TypePipe)) {
+    else if (def.flags & (20224 /* CatProvider */ | 16 /* TypePipe */)) {
         return asProviderData(view, def.index).instance;
     }
     throw new Error("Illegal state: read nodeValue for node index " + index);
@@ -10354,9 +11312,6 @@ function createRendererV1(view) {
     return new RendererAdapter(view.renderer);
 }
 var RendererAdapter = (function () {
-    /**
-     * @param {?} delegate
-     */
     function RendererAdapter(delegate) {
         this.delegate = delegate;
     }
@@ -10364,7 +11319,11 @@ var RendererAdapter = (function () {
      * @param {?} selectorOrNode
      * @return {?}
      */
-    RendererAdapter.prototype.selectRootElement = function (selectorOrNode) {
+    RendererAdapter.prototype.selectRootElement = /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    function (selectorOrNode) {
         return this.delegate.selectRootElement(selectorOrNode);
     };
     /**
@@ -10372,7 +11331,12 @@ var RendererAdapter = (function () {
      * @param {?} namespaceAndName
      * @return {?}
      */
-    RendererAdapter.prototype.createElement = function (parent, namespaceAndName) {
+    RendererAdapter.prototype.createElement = /**
+     * @param {?} parent
+     * @param {?} namespaceAndName
+     * @return {?}
+     */
+    function (parent, namespaceAndName) {
         var _a = splitNamespace(namespaceAndName), ns = _a[0], name = _a[1];
         var /** @type {?} */ el = this.delegate.createElement(name, ns);
         if (parent) {
@@ -10384,12 +11348,20 @@ var RendererAdapter = (function () {
      * @param {?} hostElement
      * @return {?}
      */
-    RendererAdapter.prototype.createViewRoot = function (hostElement) { return hostElement; };
+    RendererAdapter.prototype.createViewRoot = /**
+     * @param {?} hostElement
+     * @return {?}
+     */
+    function (hostElement) { return hostElement; };
     /**
      * @param {?} parentElement
      * @return {?}
      */
-    RendererAdapter.prototype.createTemplateAnchor = function (parentElement) {
+    RendererAdapter.prototype.createTemplateAnchor = /**
+     * @param {?} parentElement
+     * @return {?}
+     */
+    function (parentElement) {
         var /** @type {?} */ comment = this.delegate.createComment('');
         if (parentElement) {
             this.delegate.appendChild(parentElement, comment);
@@ -10401,7 +11373,12 @@ var RendererAdapter = (function () {
      * @param {?} value
      * @return {?}
      */
-    RendererAdapter.prototype.createText = function (parentElement, value) {
+    RendererAdapter.prototype.createText = /**
+     * @param {?} parentElement
+     * @param {?} value
+     * @return {?}
+     */
+    function (parentElement, value) {
         var /** @type {?} */ node = this.delegate.createText(value);
         if (parentElement) {
             this.delegate.appendChild(parentElement, node);
@@ -10413,7 +11390,12 @@ var RendererAdapter = (function () {
      * @param {?} nodes
      * @return {?}
      */
-    RendererAdapter.prototype.projectNodes = function (parentElement, nodes) {
+    RendererAdapter.prototype.projectNodes = /**
+     * @param {?} parentElement
+     * @param {?} nodes
+     * @return {?}
+     */
+    function (parentElement, nodes) {
         for (var /** @type {?} */ i = 0; i < nodes.length; i++) {
             this.delegate.appendChild(parentElement, nodes[i]);
         }
@@ -10423,7 +11405,12 @@ var RendererAdapter = (function () {
      * @param {?} viewRootNodes
      * @return {?}
      */
-    RendererAdapter.prototype.attachViewAfter = function (node, viewRootNodes) {
+    RendererAdapter.prototype.attachViewAfter = /**
+     * @param {?} node
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    function (node, viewRootNodes) {
         var /** @type {?} */ parentElement = this.delegate.parentNode(node);
         var /** @type {?} */ nextSibling = this.delegate.nextSibling(node);
         for (var /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
@@ -10434,7 +11421,11 @@ var RendererAdapter = (function () {
      * @param {?} viewRootNodes
      * @return {?}
      */
-    RendererAdapter.prototype.detachView = function (viewRootNodes) {
+    RendererAdapter.prototype.detachView = /**
+     * @param {?} viewRootNodes
+     * @return {?}
+     */
+    function (viewRootNodes) {
         for (var /** @type {?} */ i = 0; i < viewRootNodes.length; i++) {
             var /** @type {?} */ node = viewRootNodes[i];
             var /** @type {?} */ parentElement = this.delegate.parentNode(node);
@@ -10446,9 +11437,14 @@ var RendererAdapter = (function () {
      * @param {?} viewAllNodes
      * @return {?}
      */
-    RendererAdapter.prototype.destroyView = function (hostElement, viewAllNodes) {
+    RendererAdapter.prototype.destroyView = /**
+     * @param {?} hostElement
+     * @param {?} viewAllNodes
+     * @return {?}
+     */
+    function (hostElement, viewAllNodes) {
         for (var /** @type {?} */ i = 0; i < viewAllNodes.length; i++) {
-            ((this.delegate.destroyNode))(viewAllNodes[i]);
+            /** @type {?} */ ((this.delegate.destroyNode))(viewAllNodes[i]);
         }
     };
     /**
@@ -10457,7 +11453,13 @@ var RendererAdapter = (function () {
      * @param {?} callback
      * @return {?}
      */
-    RendererAdapter.prototype.listen = function (renderElement, name, callback) {
+    RendererAdapter.prototype.listen = /**
+     * @param {?} renderElement
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    function (renderElement, name, callback) {
         return this.delegate.listen(renderElement, name, /** @type {?} */ (callback));
     };
     /**
@@ -10466,7 +11468,13 @@ var RendererAdapter = (function () {
      * @param {?} callback
      * @return {?}
      */
-    RendererAdapter.prototype.listenGlobal = function (target, name, callback) {
+    RendererAdapter.prototype.listenGlobal = /**
+     * @param {?} target
+     * @param {?} name
+     * @param {?} callback
+     * @return {?}
+     */
+    function (target, name, callback) {
         return this.delegate.listen(target, name, /** @type {?} */ (callback));
     };
     /**
@@ -10475,7 +11483,13 @@ var RendererAdapter = (function () {
      * @param {?} propertyValue
      * @return {?}
      */
-    RendererAdapter.prototype.setElementProperty = function (renderElement, propertyName, propertyValue) {
+    RendererAdapter.prototype.setElementProperty = /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    function (renderElement, propertyName, propertyValue) {
         this.delegate.setProperty(renderElement, propertyName, propertyValue);
     };
     /**
@@ -10484,7 +11498,13 @@ var RendererAdapter = (function () {
      * @param {?} attributeValue
      * @return {?}
      */
-    RendererAdapter.prototype.setElementAttribute = function (renderElement, namespaceAndName, attributeValue) {
+    RendererAdapter.prototype.setElementAttribute = /**
+     * @param {?} renderElement
+     * @param {?} namespaceAndName
+     * @param {?} attributeValue
+     * @return {?}
+     */
+    function (renderElement, namespaceAndName, attributeValue) {
         var _a = splitNamespace(namespaceAndName), ns = _a[0], name = _a[1];
         if (attributeValue != null) {
             this.delegate.setAttribute(renderElement, name, attributeValue, ns);
@@ -10499,14 +11519,26 @@ var RendererAdapter = (function () {
      * @param {?} propertyValue
      * @return {?}
      */
-    RendererAdapter.prototype.setBindingDebugInfo = function (renderElement, propertyName, propertyValue) { };
+    RendererAdapter.prototype.setBindingDebugInfo = /**
+     * @param {?} renderElement
+     * @param {?} propertyName
+     * @param {?} propertyValue
+     * @return {?}
+     */
+    function (renderElement, propertyName, propertyValue) { };
     /**
      * @param {?} renderElement
      * @param {?} className
      * @param {?} isAdd
      * @return {?}
      */
-    RendererAdapter.prototype.setElementClass = function (renderElement, className, isAdd) {
+    RendererAdapter.prototype.setElementClass = /**
+     * @param {?} renderElement
+     * @param {?} className
+     * @param {?} isAdd
+     * @return {?}
+     */
+    function (renderElement, className, isAdd) {
         if (isAdd) {
             this.delegate.addClass(renderElement, className);
         }
@@ -10520,7 +11552,13 @@ var RendererAdapter = (function () {
      * @param {?} styleValue
      * @return {?}
      */
-    RendererAdapter.prototype.setElementStyle = function (renderElement, styleName, styleValue) {
+    RendererAdapter.prototype.setElementStyle = /**
+     * @param {?} renderElement
+     * @param {?} styleName
+     * @param {?} styleValue
+     * @return {?}
+     */
+    function (renderElement, styleName, styleValue) {
         if (styleValue != null) {
             this.delegate.setStyle(renderElement, styleName, styleValue);
         }
@@ -10534,19 +11572,33 @@ var RendererAdapter = (function () {
      * @param {?} args
      * @return {?}
      */
-    RendererAdapter.prototype.invokeElementMethod = function (renderElement, methodName, args) {
-        ((renderElement))[methodName].apply(renderElement, args);
+    RendererAdapter.prototype.invokeElementMethod = /**
+     * @param {?} renderElement
+     * @param {?} methodName
+     * @param {?} args
+     * @return {?}
+     */
+    function (renderElement, methodName, args) {
+        (/** @type {?} */ (renderElement))[methodName].apply(renderElement, args);
     };
     /**
      * @param {?} renderNode
      * @param {?} text
      * @return {?}
      */
-    RendererAdapter.prototype.setText = function (renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); };
+    RendererAdapter.prototype.setText = /**
+     * @param {?} renderNode
+     * @param {?} text
+     * @return {?}
+     */
+    function (renderNode$$1, text) { this.delegate.setValue(renderNode$$1, text); };
     /**
      * @return {?}
      */
-    RendererAdapter.prototype.animate = function () { throw new Error('Renderer.animate is no longer supported!'); };
+    RendererAdapter.prototype.animate = /**
+     * @return {?}
+     */
+    function () { throw new Error('Renderer.animate is no longer supported!'); };
     return RendererAdapter;
 }());
 /**
@@ -10560,12 +11612,6 @@ function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
     return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
 }
 var NgModuleRef_ = (function () {
-    /**
-     * @param {?} _moduleType
-     * @param {?} _parent
-     * @param {?} _bootstrapComponents
-     * @param {?} _def
-     */
     function NgModuleRef_(_moduleType, _parent, _bootstrapComponents, _def) {
         this._moduleType = _moduleType;
         this._parent = _parent;
@@ -10580,50 +11626,62 @@ var NgModuleRef_ = (function () {
      * @param {?=} notFoundValue
      * @return {?}
      */
-    NgModuleRef_.prototype.get = function (token, notFoundValue) {
+    NgModuleRef_.prototype.get = /**
+     * @param {?} token
+     * @param {?=} notFoundValue
+     * @return {?}
+     */
+    function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: DepFlags.None }, notFoundValue);
+        return resolveNgModuleDep(this, { token: token, tokenKey: tokenKey(token), flags: 0 /* None */ }, notFoundValue);
     };
     Object.defineProperty(NgModuleRef_.prototype, "instance", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.get(this._moduleType); },
+        function () { return this.get(this._moduleType); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(NgModuleRef_.prototype, "componentFactoryResolver", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.get(ComponentFactoryResolver); },
+        function () { return this.get(ComponentFactoryResolver); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(NgModuleRef_.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this; },
+        function () { return this; },
         enumerable: true,
         configurable: true
     });
     /**
      * @return {?}
      */
-    NgModuleRef_.prototype.destroy = function () {
+    NgModuleRef_.prototype.destroy = /**
+     * @return {?}
+     */
+    function () {
         if (this._destroyed) {
             throw new Error("The ng module " + stringify(this.instance.constructor) + " has already been destroyed.");
         }
         this._destroyed = true;
-        callNgModuleLifecycle(this, NodeFlags.OnDestroy);
+        callNgModuleLifecycle(this, 131072 /* OnDestroy */);
         this._destroyListeners.forEach(function (listener) { return listener(); });
     };
     /**
      * @param {?} callback
      * @return {?}
      */
-    NgModuleRef_.prototype.onDestroy = function (callback) { this._destroyListeners.push(callback); };
+    NgModuleRef_.prototype.onDestroy = /**
+     * @param {?} callback
+     * @return {?}
+     */
+    function (callback) { this._destroyListeners.push(callback); };
     return NgModuleRef_;
 }());
 
@@ -10662,7 +11720,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
         for (var /** @type {?} */ prop in props) {
             var _a = props[prop], bindingIndex = _a[0], nonMinifiedName = _a[1];
             bindings[bindingIndex] = {
-                flags: BindingFlags.TypeProperty,
+                flags: 8 /* TypeProperty */,
                 name: prop, nonMinifiedName: nonMinifiedName,
                 ns: null,
                 securityContext: null,
@@ -10673,10 +11731,10 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
     var /** @type {?} */ outputDefs = [];
     if (outputs) {
         for (var /** @type {?} */ propName in outputs) {
-            outputDefs.push({ type: OutputType.DirectiveOutput, propName: propName, target: null, eventName: outputs[propName] });
+            outputDefs.push({ type: 1 /* DirectiveOutput */, propName: propName, target: null, eventName: outputs[propName] });
         }
     }
-    flags |= NodeFlags.TypeDirective;
+    flags |= 16384 /* TypeDirective */;
     return _def(flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
 }
 /**
@@ -10686,7 +11744,7 @@ function directiveDef(flags, matchedQueries, childCount, ctor, deps, props, outp
  * @return {?}
  */
 function pipeDef(flags, ctor, deps) {
-    flags |= NodeFlags.TypePipe;
+    flags |= 16 /* TypePipe */;
     return _def(flags, null, 0, ctor, ctor, deps);
 }
 /**
@@ -10747,7 +11805,7 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & NodeFlags.LazyProvider ? NOT_CREATED : _createProviderInstance(view, def);
+    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -10772,13 +11830,13 @@ function createPipeInstance(view, def) {
  */
 function createDirectiveInstance(view, def) {
     // components can see other private services, other directives can't.
-    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.Component) > 0;
+    var /** @type {?} */ allowPrivateServices = (def.flags & 32768 /* Component */) > 0;
     // directives are always eager and classes!
     var /** @type {?} */ instance = createClass(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((def.provider)).value, /** @type {?} */ ((def.provider)).deps);
     if (def.outputs.length) {
         for (var /** @type {?} */ i = 0; i < def.outputs.length; i++) {
             var /** @type {?} */ output = def.outputs[i];
-            var /** @type {?} */ subscription = instance[((output.propName))].subscribe(eventHandlerClosure(view, /** @type {?} */ ((def.parent)).index, output.eventName)); /** @type {?} */
+            var /** @type {?} */ subscription = instance[/** @type {?} */ ((output.propName))].subscribe(eventHandlerClosure(view, /** @type {?} */ ((def.parent)).index, output.eventName)); /** @type {?} */
             ((view.disposables))[def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
         }
     }
@@ -10812,7 +11870,7 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     var /** @type {?} */ providerData = asProviderData(view, def.index);
     var /** @type {?} */ directive = providerData.instance;
     var /** @type {?} */ changed = false;
-    var /** @type {?} */ changes = ((undefined));
+    var /** @type {?} */ changes = /** @type {?} */ ((undefined));
     var /** @type {?} */ bindLen = def.bindings.length;
     if (bindLen > 0 && checkBinding(view, def, 0, v0)) {
         changed = true;
@@ -10857,10 +11915,10 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
         directive.ngOnInit();
     }
-    if (def.flags & NodeFlags.DoCheck) {
+    if (def.flags & 262144 /* DoCheck */) {
         directive.ngDoCheck();
     }
     return changed;
@@ -10875,7 +11933,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     var /** @type {?} */ providerData = asProviderData(view, def.index);
     var /** @type {?} */ directive = providerData.instance;
     var /** @type {?} */ changed = false;
-    var /** @type {?} */ changes = ((undefined));
+    var /** @type {?} */ changes = /** @type {?} */ ((undefined));
     for (var /** @type {?} */ i = 0; i < values.length; i++) {
         if (checkBinding(view, def, i, values[i])) {
             changed = true;
@@ -10885,10 +11943,10 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & ViewState.FirstCheck) && (def.flags & NodeFlags.OnInit)) {
+    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
         directive.ngOnInit();
     }
-    if (def.flags & NodeFlags.DoCheck) {
+    if (def.flags & 262144 /* DoCheck */) {
         directive.ngDoCheck();
     }
     return changed;
@@ -10900,21 +11958,21 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
  */
 function _createProviderInstance(view, def) {
     // private services can see other private services
-    var /** @type {?} */ allowPrivateServices = (def.flags & NodeFlags.PrivateProvider) > 0;
+    var /** @type {?} */ allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
     var /** @type {?} */ providerDef = def.provider;
     var /** @type {?} */ injectable;
-    switch (def.flags & NodeFlags.Types) {
-        case NodeFlags.TypeClassProvider:
+    switch (def.flags & 201347067 /* Types */) {
+        case 512 /* TypeClassProvider */:
             injectable = createClass(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
             break;
-        case NodeFlags.TypeFactoryProvider:
+        case 1024 /* TypeFactoryProvider */:
             injectable = callFactory(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).value, /** @type {?} */ ((providerDef)).deps);
             break;
-        case NodeFlags.TypeUseExistingProvider:
+        case 2048 /* TypeUseExistingProvider */:
             injectable = resolveDep(view, /** @type {?} */ ((def.parent)), allowPrivateServices, /** @type {?} */ ((providerDef)).deps[0]);
             break;
-        case NodeFlags.TypeValueProvider:
-            injectable = ((providerDef)).value;
+        case 256 /* TypeValueProvider */:
+            injectable = /** @type {?} */ ((providerDef)).value;
             break;
     }
     return injectable;
@@ -11013,22 +12071,22 @@ var NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
  */
 function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-    if (depDef.flags & DepFlags.Value) {
+    if (depDef.flags & 8 /* Value */) {
         return depDef.token;
     }
     var /** @type {?} */ startView = view;
-    if (depDef.flags & DepFlags.Optional) {
+    if (depDef.flags & 2 /* Optional */) {
         notFoundValue = null;
     }
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
     if (tokenKey$$1 === ChangeDetectorRefTokenKey) {
         // directives on the same element as a component should be able to control the change detector
         // of that component as well.
-        allowPrivateServices = !!(elDef && ((elDef.element)).componentView);
+        allowPrivateServices = !!(elDef && /** @type {?} */ ((elDef.element)).componentView);
     }
-    if (elDef && (depDef.flags & DepFlags.SkipSelf)) {
+    if (elDef && (depDef.flags & 1 /* SkipSelf */)) {
         allowPrivateServices = false;
-        elDef = ((elDef.parent));
+        elDef = /** @type {?} */ ((elDef.parent));
     }
     while (view) {
         if (elDef) {
@@ -11046,7 +12104,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                 case ViewContainerRefTokenKey:
                     return asElementData(view, elDef.index).viewContainer;
                 case TemplateRefTokenKey: {
-                    if (((elDef.element)).template) {
+                    if (/** @type {?} */ ((elDef.element)).template) {
                         return asElementData(view, elDef.index).template;
                     }
                     break;
@@ -11058,7 +12116,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                 case InjectorRefTokenKey:
                     return createInjector(view, elDef);
                 default:
-                    var /** @type {?} */ providerDef_1 = (((allowPrivateServices ? ((elDef.element)).allProviders : ((elDef.element)).publicProviders)))[tokenKey$$1];
+                    var /** @type {?} */ providerDef_1 = /** @type {?} */ (((allowPrivateServices ? /** @type {?} */ ((elDef.element)).allProviders : /** @type {?} */ ((elDef.element)).publicProviders)))[tokenKey$$1];
                     if (providerDef_1) {
                         var /** @type {?} */ providerData = asProviderData(view, providerDef_1.index);
                         if (providerData.instance === NOT_CREATED) {
@@ -11069,8 +12127,8 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
             }
         }
         allowPrivateServices = isComponentView(view);
-        elDef = ((viewParentEl(view)));
-        view = ((view.parent));
+        elDef = /** @type {?} */ ((viewParentEl(view)));
+        view = /** @type {?} */ ((view.parent));
     }
     var /** @type {?} */ value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
     if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
@@ -11113,27 +12171,27 @@ function findCompView(view, elDef, allowPrivateServices) {
  * @return {?}
  */
 function updateProp(view, providerData, def, bindingIdx, value, changes) {
-    if (def.flags & NodeFlags.Component) {
+    if (def.flags & 32768 /* Component */) {
         var /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((def.parent)).index).componentView;
-        if (compView.def.flags & ViewFlags.OnPush) {
-            compView.state |= ViewState.ChecksEnabled;
+        if (compView.def.flags & 2 /* OnPush */) {
+            compView.state |= 8 /* ChecksEnabled */;
         }
     }
     var /** @type {?} */ binding = def.bindings[bindingIdx];
-    var /** @type {?} */ propName = ((binding.name));
+    var /** @type {?} */ propName = /** @type {?} */ ((binding.name));
     // Note: This is still safe with Closure Compiler as
     // the user passed in the property name as an object has to `providerDef`,
     // so Closure Compiler will have renamed the property correctly already.
     providerData.instance[propName] = value;
-    if (def.flags & NodeFlags.OnChanges) {
+    if (def.flags & 524288 /* OnChanges */) {
         changes = changes || {};
         var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
         if (oldValue instanceof WrappedValue) {
             oldValue = oldValue.wrapped;
         }
         var /** @type {?} */ binding_1 = def.bindings[bindingIdx];
-        changes[((binding_1.nonMinifiedName))] =
-            new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
+        changes[/** @type {?} */ ((binding_1.nonMinifiedName))] =
+            new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
     }
     view.oldValues[def.bindingIndex + bindingIdx] = value;
     return changes;
@@ -11159,7 +12217,7 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
             // no child matches one of the lifecycles
             i += nodeDef.childCount;
         }
-        while (parent_1 && (parent_1.flags & NodeFlags.TypeElement) &&
+        while (parent_1 && (parent_1.flags & 1 /* TypeElement */) &&
             i === parent_1.index + parent_1.childCount) {
             // last child of an element
             if (parent_1.directChildFlags & lifecycles) {
@@ -11197,19 +12255,19 @@ function callProviderLifecycles(view, index, lifecycles) {
         return;
     }
     Services.setCurrentNode(view, index);
-    if (lifecycles & NodeFlags.AfterContentInit) {
+    if (lifecycles & 1048576 /* AfterContentInit */) {
         provider.ngAfterContentInit();
     }
-    if (lifecycles & NodeFlags.AfterContentChecked) {
+    if (lifecycles & 2097152 /* AfterContentChecked */) {
         provider.ngAfterContentChecked();
     }
-    if (lifecycles & NodeFlags.AfterViewInit) {
+    if (lifecycles & 4194304 /* AfterViewInit */) {
         provider.ngAfterViewInit();
     }
-    if (lifecycles & NodeFlags.AfterViewChecked) {
+    if (lifecycles & 8388608 /* AfterViewChecked */) {
         provider.ngAfterViewChecked();
     }
-    if (lifecycles & NodeFlags.OnDestroy) {
+    if (lifecycles & 131072 /* OnDestroy */) {
         provider.ngOnDestroy();
     }
 }
@@ -11277,30 +12335,30 @@ function createQuery() {
 function dirtyParentQueries(view) {
     var /** @type {?} */ queryIds = view.def.nodeMatchedQueries;
     while (view.parent && isEmbeddedView(view)) {
-        var /** @type {?} */ tplDef = ((view.parentNodeDef));
+        var /** @type {?} */ tplDef = /** @type {?} */ ((view.parentNodeDef));
         view = view.parent;
         // content queries
         var /** @type {?} */ end = tplDef.index + tplDef.childCount;
         for (var /** @type {?} */ i = 0; i <= end; i++) {
             var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & NodeFlags.TypeContentQuery) &&
-                (nodeDef.flags & NodeFlags.DynamicQuery) &&
-                (((nodeDef.query)).filterId & queryIds) === ((nodeDef.query)).filterId) {
+            if ((nodeDef.flags & 67108864 /* TypeContentQuery */) &&
+                (nodeDef.flags & 536870912 /* DynamicQuery */) &&
+                (/** @type {?} */ ((nodeDef.query)).filterId & queryIds) === /** @type {?} */ ((nodeDef.query)).filterId) {
                 asQueryList(view, i).setDirty();
             }
-            if ((nodeDef.flags & NodeFlags.TypeElement && i + nodeDef.childCount < tplDef.index) ||
-                !(nodeDef.childFlags & NodeFlags.TypeContentQuery) ||
-                !(nodeDef.childFlags & NodeFlags.DynamicQuery)) {
+            if ((nodeDef.flags & 1 /* TypeElement */ && i + nodeDef.childCount < tplDef.index) ||
+                !(nodeDef.childFlags & 67108864 /* TypeContentQuery */) ||
+                !(nodeDef.childFlags & 536870912 /* DynamicQuery */)) {
                 // skip elements that don't contain the template element or no query.
                 i += nodeDef.childCount;
             }
         }
     }
     // view queries
-    if (view.def.nodeFlags & NodeFlags.TypeViewQuery) {
+    if (view.def.nodeFlags & 134217728 /* TypeViewQuery */) {
         for (var /** @type {?} */ i = 0; i < view.def.nodes.length; i++) {
             var /** @type {?} */ nodeDef = view.def.nodes[i];
-            if ((nodeDef.flags & NodeFlags.TypeViewQuery) && (nodeDef.flags & NodeFlags.DynamicQuery)) {
+            if ((nodeDef.flags & 134217728 /* TypeViewQuery */) && (nodeDef.flags & 536870912 /* DynamicQuery */)) {
                 asQueryList(view, i).setDirty();
             }
             // only visit the root nodes
@@ -11319,27 +12377,27 @@ function checkAndUpdateQuery(view, nodeDef) {
         return;
     }
     var /** @type {?} */ directiveInstance;
-    var /** @type {?} */ newValues = ((undefined));
-    if (nodeDef.flags & NodeFlags.TypeContentQuery) {
-        var /** @type {?} */ elementDef = ((((nodeDef.parent)).parent));
+    var /** @type {?} */ newValues = /** @type {?} */ ((undefined));
+    if (nodeDef.flags & 67108864 /* TypeContentQuery */) {
+        var /** @type {?} */ elementDef = /** @type {?} */ ((/** @type {?} */ ((nodeDef.parent)).parent));
         newValues = calcQueryValues(view, elementDef.index, elementDef.index + elementDef.childCount, /** @type {?} */ ((nodeDef.query)), []);
         directiveInstance = asProviderData(view, /** @type {?} */ ((nodeDef.parent)).index).instance;
     }
-    else if (nodeDef.flags & NodeFlags.TypeViewQuery) {
+    else if (nodeDef.flags & 134217728 /* TypeViewQuery */) {
         newValues = calcQueryValues(view, 0, view.def.nodes.length - 1, /** @type {?} */ ((nodeDef.query)), []);
         directiveInstance = view.component;
     }
     queryList.reset(newValues);
-    var /** @type {?} */ bindings = ((nodeDef.query)).bindings;
+    var /** @type {?} */ bindings = /** @type {?} */ ((nodeDef.query)).bindings;
     var /** @type {?} */ notify = false;
     for (var /** @type {?} */ i = 0; i < bindings.length; i++) {
         var /** @type {?} */ binding = bindings[i];
         var /** @type {?} */ boundValue = void 0;
         switch (binding.bindingType) {
-            case QueryBindingType.First:
+            case 0 /* First */:
                 boundValue = queryList.first;
                 break;
-            case QueryBindingType.All:
+            case 1 /* All */:
                 boundValue = queryList;
                 notify = true;
                 break;
@@ -11365,8 +12423,8 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
         if (valueType != null) {
             values.push(getQueryValue(view, nodeDef, valueType));
         }
-        if (nodeDef.flags & NodeFlags.TypeElement && ((nodeDef.element)).template &&
-            (((((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
+        if (nodeDef.flags & 1 /* TypeElement */ && /** @type {?} */ ((nodeDef.element)).template &&
+            (/** @type {?} */ ((/** @type {?} */ ((nodeDef.element)).template)).nodeMatchedQueries & queryDef.filterId) ===
                 queryDef.filterId) {
             var /** @type {?} */ elementData = asElementData(view, i);
             // check embedded views that were attached at the place of their template,
@@ -11375,8 +12433,8 @@ function calcQueryValues(view, startIndex, endIndex, queryDef, values) {
                 calcQueryValues(view, i + 1, i + nodeDef.childCount, queryDef, values);
                 i += nodeDef.childCount;
             }
-            if (nodeDef.flags & NodeFlags.EmbeddedViews) {
-                var /** @type {?} */ embeddedViews = ((elementData.viewContainer))._embeddedViews;
+            if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
+                var /** @type {?} */ embeddedViews = /** @type {?} */ ((elementData.viewContainer))._embeddedViews;
                 for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                     var /** @type {?} */ embeddedView = embeddedViews[k];
                     var /** @type {?} */ dvc = declaredViewContainer(embeddedView);
@@ -11411,19 +12469,19 @@ function getQueryValue(view, nodeDef, queryValueType) {
         // a match
         var /** @type {?} */ value = void 0;
         switch (queryValueType) {
-            case QueryValueType.RenderElement:
+            case 1 /* RenderElement */:
                 value = asElementData(view, nodeDef.index).renderElement;
                 break;
-            case QueryValueType.ElementRef:
+            case 0 /* ElementRef */:
                 value = new ElementRef(asElementData(view, nodeDef.index).renderElement);
                 break;
-            case QueryValueType.TemplateRef:
+            case 2 /* TemplateRef */:
                 value = asElementData(view, nodeDef.index).template;
                 break;
-            case QueryValueType.ViewContainerRef:
+            case 3 /* ViewContainerRef */:
                 value = asElementData(view, nodeDef.index).viewContainer;
                 break;
-            case QueryValueType.Provider:
+            case 4 /* Provider */:
                 value = asProviderData(view, nodeDef.index).instance;
                 break;
         }
@@ -11434,13 +12492,6 @@ function getQueryValue(view, nodeDef, queryValueType) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} ngContentIndex
@@ -11456,7 +12507,7 @@ function ngContentDef(ngContentIndex, index) {
         bindingIndex: -1,
         outputIndex: -1,
         // regular values
-        flags: NodeFlags.TypeNgContent,
+        flags: 8 /* TypeNgContent */,
         childFlags: 0,
         directChildFlags: 0,
         childMatchedQueries: 0,
@@ -11486,8 +12537,8 @@ function appendNgContent(view, renderHost, def) {
         // Nothing to do if there is no parent element.
         return;
     }
-    var /** @type {?} */ ngContentIndex = ((def.ngContent)).index;
-    visitProjectedRenderNodes(view, ngContentIndex, RenderNodeAction.AppendChild, parentEl, null, undefined);
+    var /** @type {?} */ ngContentIndex = /** @type {?} */ ((def.ngContent)).index;
+    visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
 }
 
 /**
@@ -11507,14 +12558,14 @@ function appendNgContent(view, renderHost, def) {
  */
 function purePipeDef(argCount) {
     // argCount + 1 to include the pipe as first arg
-    return _pureExpressionDef(NodeFlags.TypePurePipe, new Array(argCount + 1));
+    return _pureExpressionDef(128 /* TypePurePipe */, new Array(argCount + 1));
 }
 /**
  * @param {?} argCount
  * @return {?}
  */
 function pureArrayDef(argCount) {
-    return _pureExpressionDef(NodeFlags.TypePureArray, new Array(argCount));
+    return _pureExpressionDef(32 /* TypePureArray */, new Array(argCount));
 }
 /**
  * @param {?} propToIndex
@@ -11529,7 +12580,7 @@ function pureObjectDef(propToIndex) {
         var /** @type {?} */ index = propToIndex[key];
         propertyNames[index] = key;
     }
-    return _pureExpressionDef(NodeFlags.TypePureObject, propertyNames);
+    return _pureExpressionDef(64 /* TypePureObject */, propertyNames);
 }
 /**
  * @param {?} flags
@@ -11541,7 +12592,7 @@ function _pureExpressionDef(flags, propertyNames) {
     for (var /** @type {?} */ i = 0; i < propertyNames.length; i++) {
         var /** @type {?} */ prop = propertyNames[i];
         bindings[i] = {
-            flags: BindingFlags.TypeProperty,
+            flags: 8 /* TypeProperty */,
             name: prop,
             ns: null,
             nonMinifiedName: prop,
@@ -11625,8 +12676,8 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
     if (changed) {
         var /** @type {?} */ data = asPureExpressionData(view, def.index);
         var /** @type {?} */ value = void 0;
-        switch (def.flags & NodeFlags.Types) {
-            case NodeFlags.TypePureArray:
+        switch (def.flags & 201347067 /* Types */) {
+            case 32 /* TypePureArray */:
                 value = new Array(bindings.length);
                 if (bindLen > 0)
                     value[0] = v0;
@@ -11649,30 +12700,30 @@ function checkAndUpdatePureExpressionInline(view, def, v0, v1, v2, v3, v4, v5, v
                 if (bindLen > 9)
                     value[9] = v9;
                 break;
-            case NodeFlags.TypePureObject:
+            case 64 /* TypePureObject */:
                 value = {};
                 if (bindLen > 0)
-                    value[((bindings[0].name))] = v0;
+                    value[/** @type {?} */ ((bindings[0].name))] = v0;
                 if (bindLen > 1)
-                    value[((bindings[1].name))] = v1;
+                    value[/** @type {?} */ ((bindings[1].name))] = v1;
                 if (bindLen > 2)
-                    value[((bindings[2].name))] = v2;
+                    value[/** @type {?} */ ((bindings[2].name))] = v2;
                 if (bindLen > 3)
-                    value[((bindings[3].name))] = v3;
+                    value[/** @type {?} */ ((bindings[3].name))] = v3;
                 if (bindLen > 4)
-                    value[((bindings[4].name))] = v4;
+                    value[/** @type {?} */ ((bindings[4].name))] = v4;
                 if (bindLen > 5)
-                    value[((bindings[5].name))] = v5;
+                    value[/** @type {?} */ ((bindings[5].name))] = v5;
                 if (bindLen > 6)
-                    value[((bindings[6].name))] = v6;
+                    value[/** @type {?} */ ((bindings[6].name))] = v6;
                 if (bindLen > 7)
-                    value[((bindings[7].name))] = v7;
+                    value[/** @type {?} */ ((bindings[7].name))] = v7;
                 if (bindLen > 8)
-                    value[((bindings[8].name))] = v8;
+                    value[/** @type {?} */ ((bindings[8].name))] = v8;
                 if (bindLen > 9)
-                    value[((bindings[9].name))] = v9;
+                    value[/** @type {?} */ ((bindings[9].name))] = v9;
                 break;
-            case NodeFlags.TypePurePipe:
+            case 128 /* TypePurePipe */:
                 var /** @type {?} */ pipe = v0;
                 switch (bindLen) {
                     case 1:
@@ -11731,17 +12782,17 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
     if (changed) {
         var /** @type {?} */ data = asPureExpressionData(view, def.index);
         var /** @type {?} */ value = void 0;
-        switch (def.flags & NodeFlags.Types) {
-            case NodeFlags.TypePureArray:
+        switch (def.flags & 201347067 /* Types */) {
+            case 32 /* TypePureArray */:
                 value = values;
                 break;
-            case NodeFlags.TypePureObject:
+            case 64 /* TypePureObject */:
                 value = {};
                 for (var /** @type {?} */ i = 0; i < values.length; i++) {
-                    value[((bindings[i].name))] = values[i];
+                    value[/** @type {?} */ ((bindings[i].name))] = values[i];
                 }
                 break;
-            case NodeFlags.TypePurePipe:
+            case 128 /* TypePurePipe */:
                 var /** @type {?} */ pipe = values[0];
                 var /** @type {?} */ params = values.slice(1);
                 value = pipe.transform.apply(pipe, params);
@@ -11772,7 +12823,7 @@ function textDef(ngContentIndex, constants) {
     var /** @type {?} */ bindings = new Array(constants.length - 1);
     for (var /** @type {?} */ i = 1; i < constants.length; i++) {
         bindings[i - 1] = {
-            flags: BindingFlags.TypeProperty,
+            flags: 8 /* TypeProperty */,
             name: null,
             ns: null,
             nonMinifiedName: null,
@@ -11780,7 +12831,7 @@ function textDef(ngContentIndex, constants) {
             suffix: constants[i]
         };
     }
-    var /** @type {?} */ flags = NodeFlags.TypeText;
+    var /** @type {?} */ flags = 2;
     return {
         // will bet set by the view definition
         index: -1,
@@ -11862,7 +12913,7 @@ function checkAndUpdateTextInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7, v8,
     if (bindLen > 9 && checkAndUpdateBinding(view, def, 9, v9))
         changed = true;
     if (changed) {
-        var /** @type {?} */ value = ((def.text)).prefix;
+        var /** @type {?} */ value = /** @type {?} */ ((def.text)).prefix;
         if (bindLen > 0)
             value += _addInterpolationPart(v0, bindings[0]);
         if (bindLen > 1)
@@ -11909,7 +12960,7 @@ function checkAndUpdateTextDynamic(view, def, values) {
         for (var /** @type {?} */ i = 0; i < values.length; i++) {
             value = value + _addInterpolationPart(values[i], bindings[i]);
         }
-        value = ((def.text)).prefix + value;
+        value = /** @type {?} */ ((def.text)).prefix + value;
         var /** @type {?} */ renderNode$$1 = asTextData(view, def.index).renderText;
         view.renderer.setValue(renderNode$$1, value);
     }
@@ -11951,7 +13002,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         while (currentParent && i > currentParent.index + currentParent.childCount) {
             var /** @type {?} */ newParent = currentParent.parent;
             if (newParent) {
-                newParent.childFlags |= ((currentParent.childFlags));
+                newParent.childFlags |= /** @type {?} */ ((currentParent.childFlags));
                 newParent.childMatchedQueries |= currentParent.childMatchedQueries;
             }
             currentParent = newParent;
@@ -11963,8 +13014,8 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         node.outputIndex = viewDisposableCount;
         // renderParent needs to account for ng-container!
         var /** @type {?} */ currentRenderParent = void 0;
-        if (currentParent && currentParent.flags & NodeFlags.TypeElement &&
-            !((currentParent.element)).name) {
+        if (currentParent && currentParent.flags & 1 /* TypeElement */ &&
+            !/** @type {?} */ ((currentParent.element)).name) {
             currentRenderParent = currentParent.renderParent;
         }
         else {
@@ -11974,7 +13025,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         if (node.element) {
             var /** @type {?} */ elDef = node.element;
             elDef.publicProviders =
-                currentParent ? ((currentParent.element)).publicProviders : Object.create(null);
+                currentParent ? /** @type {?} */ ((currentParent.element)).publicProviders : Object.create(null);
             elDef.allProviders = elDef.publicProviders;
             // Note: We assume that all providers of an element are before any child element!
             currentElementHasPublicProviders = false;
@@ -11999,35 +13050,29 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
         viewBindingCount += node.bindings.length;
         viewDisposableCount += node.outputs.length;
-        if (!currentRenderParent && (node.flags & NodeFlags.CatRenderNode)) {
+        if (!currentRenderParent && (node.flags & 3 /* CatRenderNode */)) {
             lastRenderRootNode = node;
         }
-        if (node.flags & NodeFlags.CatProvider) {
+        if (node.flags & 20224 /* CatProvider */) {
             if (!currentElementHasPublicProviders) {
                 currentElementHasPublicProviders = true; /** @type {?} */
-                ((((
-                // Use prototypical inheritance to not get O(n^2) complexity...
-                currentParent)).element)).publicProviders =
-                    Object.create(/** @type {?} */ ((((currentParent)).element)).publicProviders); /** @type {?} */
-                ((((currentParent)).element)).allProviders = ((((currentParent)).element)).publicProviders;
+                ((/** @type {?} */ ((currentParent)).element)).publicProviders = Object.create(/** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).publicProviders); /** @type {?} */
+                ((/** @type {?} */ ((currentParent)).element)).allProviders = /** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).publicProviders;
             }
-            var /** @type {?} */ isPrivateService = (node.flags & NodeFlags.PrivateProvider) !== 0;
-            var /** @type {?} */ isComponent = (node.flags & NodeFlags.Component) !== 0;
+            var /** @type {?} */ isPrivateService = (node.flags & 8192 /* PrivateProvider */) !== 0;
+            var /** @type {?} */ isComponent = (node.flags & 32768 /* Component */) !== 0;
             if (!isPrivateService || isComponent) {
-                ((((((currentParent)).element)).publicProviders))[tokenKey(/** @type {?} */ ((node.provider)).token)] = node;
+                /** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).publicProviders))[tokenKey(/** @type {?} */ ((node.provider)).token)] = node;
             }
             else {
                 if (!currentElementHasPrivateProviders) {
                     currentElementHasPrivateProviders = true; /** @type {?} */
-                    ((((
-                    // Use protoyypical inheritance to not get O(n^2) complexity...
-                    currentParent)).element)).allProviders =
-                        Object.create(/** @type {?} */ ((((currentParent)).element)).publicProviders);
+                    ((/** @type {?} */ ((currentParent)).element)).allProviders = Object.create(/** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).publicProviders);
                 } /** @type {?} */
-                ((((((currentParent)).element)).allProviders))[tokenKey(/** @type {?} */ ((node.provider)).token)] = node;
+                ((/** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).allProviders))[tokenKey(/** @type {?} */ ((node.provider)).token)] = node;
             }
             if (isComponent) {
-                ((((currentParent)).element)).componentProvider = node;
+                /** @type {?} */ ((/** @type {?} */ ((currentParent)).element)).componentProvider = node;
             }
         }
         if (node.childCount) {
@@ -12042,7 +13087,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
         }
         currentParent = newParent;
     }
-    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { /** @type {?} */ return ((((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
+    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return /** @type {?} */ ((/** @type {?} */ ((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
     return {
         // Will be filled later...
         factory: null,
@@ -12070,22 +13115,22 @@ function validateNode(parent, node, nodeCount) {
             throw new Error("Illegal State: Embedded templates without nodes are not allowed!");
         }
         if (template.lastRenderRootNode &&
-            template.lastRenderRootNode.flags & NodeFlags.EmbeddedViews) {
+            template.lastRenderRootNode.flags & 16777216 /* EmbeddedViews */) {
             throw new Error("Illegal State: Last root node of a template can't have embedded views, at index " + node.index + "!");
         }
     }
-    if (node.flags & NodeFlags.CatProvider) {
+    if (node.flags & 20224 /* CatProvider */) {
         var /** @type {?} */ parentFlags = parent ? parent.flags : 0;
-        if ((parentFlags & NodeFlags.TypeElement) === 0) {
+        if ((parentFlags & 1 /* TypeElement */) === 0) {
             throw new Error("Illegal State: StaticProvider/Directive nodes need to be children of elements or anchors, at index " + node.index + "!");
         }
     }
     if (node.query) {
-        if (node.flags & NodeFlags.TypeContentQuery &&
-            (!parent || (parent.flags & NodeFlags.TypeDirective) === 0)) {
+        if (node.flags & 67108864 /* TypeContentQuery */ &&
+            (!parent || (parent.flags & 16384 /* TypeDirective */) === 0)) {
             throw new Error("Illegal State: Content Query nodes need to be children of directives, at index " + node.index + "!");
         }
-        if (node.flags & NodeFlags.TypeViewQuery && parent) {
+        if (node.flags & 134217728 /* TypeViewQuery */ && parent) {
             throw new Error("Illegal State: View Query nodes have to be top level nodes, at index " + node.index + "!");
         }
     }
@@ -12131,7 +13176,7 @@ function createRootView(root, def, context) {
  * @return {?}
  */
 function createComponentView(parentView, nodeDef, viewDef, hostElement) {
-    var /** @type {?} */ rendererType = ((nodeDef.element)).componentRendererType;
+    var /** @type {?} */ rendererType = /** @type {?} */ ((nodeDef.element)).componentRendererType;
     var /** @type {?} */ compRenderer;
     if (!rendererType) {
         compRenderer = parentView.root.renderer;
@@ -12158,7 +13203,7 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         viewContainerParent: null, parentNodeDef: parentNodeDef,
         context: null,
         component: null, nodes: nodes,
-        state: ViewState.CatInit, root: root, renderer: renderer,
+        state: 13 /* CatInit */, root: root, renderer: renderer,
         oldValues: new Array(def.bindingCount), disposables: disposables
     };
     return view;
@@ -12181,7 +13226,7 @@ function createViewNodes(view) {
     var /** @type {?} */ renderHost;
     if (isComponentView(view)) {
         var /** @type {?} */ hostDef = view.parentNodeDef;
-        renderHost = asElementData(/** @type {?} */ ((view.parent)), /** @type {?} */ ((((hostDef)).parent)).index).renderElement;
+        renderHost = asElementData(/** @type {?} */ ((view.parent)), /** @type {?} */ ((/** @type {?} */ ((hostDef)).parent)).index).renderElement;
     }
     var /** @type {?} */ def = view.def;
     var /** @type {?} */ nodes = view.nodes;
@@ -12189,60 +13234,60 @@ function createViewNodes(view) {
         var /** @type {?} */ nodeDef = def.nodes[i];
         Services.setCurrentNode(view, i);
         var /** @type {?} */ nodeData = void 0;
-        switch (nodeDef.flags & NodeFlags.Types) {
-            case NodeFlags.TypeElement:
-                var /** @type {?} */ el = (createElement(view, renderHost, nodeDef));
-                var /** @type {?} */ componentView = ((undefined));
-                if (nodeDef.flags & NodeFlags.ComponentView) {
-                    var /** @type {?} */ compViewDef = resolveDefinition(/** @type {?} */ ((((nodeDef.element)).componentView)));
+        switch (nodeDef.flags & 201347067 /* Types */) {
+            case 1 /* TypeElement */:
+                var /** @type {?} */ el = /** @type {?} */ (createElement(view, renderHost, nodeDef));
+                var /** @type {?} */ componentView = /** @type {?} */ ((undefined));
+                if (nodeDef.flags & 33554432 /* ComponentView */) {
+                    var /** @type {?} */ compViewDef = resolveDefinition(/** @type {?} */ ((/** @type {?} */ ((nodeDef.element)).componentView)));
                     componentView = Services.createComponentView(view, nodeDef, compViewDef, el);
                 }
                 listenToElementOutputs(view, componentView, nodeDef, el);
-                nodeData = ({
+                nodeData = /** @type {?} */ ({
                     renderElement: el,
                     componentView: componentView,
                     viewContainer: null,
                     template: /** @type {?} */ ((nodeDef.element)).template ? createTemplateData(view, nodeDef) : undefined
                 });
-                if (nodeDef.flags & NodeFlags.EmbeddedViews) {
+                if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
                     nodeData.viewContainer = createViewContainerData(view, nodeDef, nodeData);
                 }
                 break;
-            case NodeFlags.TypeText:
-                nodeData = (createText(view, renderHost, nodeDef));
+            case 2 /* TypeText */:
+                nodeData = /** @type {?} */ (createText(view, renderHost, nodeDef));
                 break;
-            case NodeFlags.TypeClassProvider:
-            case NodeFlags.TypeFactoryProvider:
-            case NodeFlags.TypeUseExistingProvider:
-            case NodeFlags.TypeValueProvider: {
+            case 512 /* TypeClassProvider */:
+            case 1024 /* TypeFactoryProvider */:
+            case 2048 /* TypeUseExistingProvider */:
+            case 256 /* TypeValueProvider */: {
                 var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
-                nodeData = ({ instance: instance });
+                nodeData = /** @type {?} */ ({ instance: instance });
                 break;
             }
-            case NodeFlags.TypePipe: {
+            case 16 /* TypePipe */: {
                 var /** @type {?} */ instance = createPipeInstance(view, nodeDef);
-                nodeData = ({ instance: instance });
+                nodeData = /** @type {?} */ ({ instance: instance });
                 break;
             }
-            case NodeFlags.TypeDirective: {
+            case 16384 /* TypeDirective */: {
                 var /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
-                nodeData = ({ instance: instance });
-                if (nodeDef.flags & NodeFlags.Component) {
+                nodeData = /** @type {?} */ ({ instance: instance });
+                if (nodeDef.flags & 32768 /* Component */) {
                     var /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((nodeDef.parent)).index).componentView;
                     initView(compView, instance, instance);
                 }
                 break;
             }
-            case NodeFlags.TypePureArray:
-            case NodeFlags.TypePureObject:
-            case NodeFlags.TypePurePipe:
-                nodeData = (createPureExpression(view, nodeDef));
+            case 32 /* TypePureArray */:
+            case 64 /* TypePureObject */:
+            case 128 /* TypePurePipe */:
+                nodeData = /** @type {?} */ (createPureExpression(view, nodeDef));
                 break;
-            case NodeFlags.TypeContentQuery:
-            case NodeFlags.TypeViewQuery:
-                nodeData = (createQuery());
+            case 67108864 /* TypeContentQuery */:
+            case 134217728 /* TypeViewQuery */:
+                nodeData = /** @type {?} */ (createQuery());
                 break;
-            case NodeFlags.TypeNgContent:
+            case 8 /* TypeNgContent */:
                 appendNgContent(view, renderHost, nodeDef);
                 // no runtime data needed for NgContent...
                 nodeData = undefined;
@@ -12254,7 +13299,7 @@ function createViewNodes(view) {
     // so that e.g. ng-content works
     execComponentViewsAction(view, ViewAction.CreateViewNodes);
     // fill static content and view queries
-    execQueriesAction(view, NodeFlags.TypeContentQuery | NodeFlags.TypeViewQuery, NodeFlags.StaticQuery, CheckType.CheckAndUpdate);
+    execQueriesAction(view, 67108864 /* TypeContentQuery */ | 134217728 /* TypeViewQuery */, 268435456 /* StaticQuery */, 0 /* CheckAndUpdate */);
 }
 /**
  * @param {?} view
@@ -12262,41 +13307,41 @@ function createViewNodes(view) {
  */
 function checkNoChangesView(view) {
     markProjectedViewsForCheck(view);
-    Services.updateDirectives(view, CheckType.CheckNoChanges);
+    Services.updateDirectives(view, 1 /* CheckNoChanges */);
     execEmbeddedViewsAction(view, ViewAction.CheckNoChanges);
-    Services.updateRenderer(view, CheckType.CheckNoChanges);
+    Services.updateRenderer(view, 1 /* CheckNoChanges */);
     execComponentViewsAction(view, ViewAction.CheckNoChanges);
     // Note: We don't check queries for changes as we didn't do this in v2.x.
     // TODO(tbosch): investigate if we can enable the check again in v5.x with a nicer error message.
-    view.state &= ~(ViewState.CheckProjectedViews | ViewState.CheckProjectedView);
+    view.state &= ~(64 /* CheckProjectedViews */ | 32 /* CheckProjectedView */);
 }
 /**
  * @param {?} view
  * @return {?}
  */
 function checkAndUpdateView(view) {
-    if (view.state & ViewState.BeforeFirstCheck) {
-        view.state &= ~ViewState.BeforeFirstCheck;
-        view.state |= ViewState.FirstCheck;
+    if (view.state & 1 /* BeforeFirstCheck */) {
+        view.state &= ~1 /* BeforeFirstCheck */;
+        view.state |= 2 /* FirstCheck */;
     }
     else {
-        view.state &= ~ViewState.FirstCheck;
+        view.state &= ~2 /* FirstCheck */;
     }
     markProjectedViewsForCheck(view);
-    Services.updateDirectives(view, CheckType.CheckAndUpdate);
+    Services.updateDirectives(view, 0 /* CheckAndUpdate */);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.TypeContentQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterContentChecked |
-        (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
-    Services.updateRenderer(view, CheckType.CheckAndUpdate);
+    execQueriesAction(view, 67108864 /* TypeContentQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
+    callLifecycleHooksChildrenFirst(view, 2097152 /* AfterContentChecked */ |
+        (view.state & 2 /* FirstCheck */ ? 1048576 /* AfterContentInit */ : 0));
+    Services.updateRenderer(view, 0 /* CheckAndUpdate */);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-    execQueriesAction(view, NodeFlags.TypeViewQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.AfterViewChecked |
-        (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
-    if (view.def.flags & ViewFlags.OnPush) {
-        view.state &= ~ViewState.ChecksEnabled;
+    execQueriesAction(view, 134217728 /* TypeViewQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
+    callLifecycleHooksChildrenFirst(view, 8388608 /* AfterViewChecked */ |
+        (view.state & 2 /* FirstCheck */ ? 4194304 /* AfterViewInit */ : 0));
+    if (view.def.flags & 2 /* OnPush */) {
+        view.state &= ~8 /* ChecksEnabled */;
     }
-    view.state &= ~(ViewState.CheckProjectedViews | ViewState.CheckProjectedView);
+    view.state &= ~(64 /* CheckProjectedViews */ | 32 /* CheckProjectedView */);
 }
 /**
  * @param {?} view
@@ -12315,7 +13360,7 @@ function checkAndUpdateView(view) {
  * @return {?}
  */
 function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === ArgumentType.Inline) {
+    if (argStyle === 0 /* Inline */) {
         return checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12328,22 +13373,22 @@ function checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6,
  */
 function markProjectedViewsForCheck(view) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & NodeFlags.ProjectedTemplate)) {
+    if (!(def.nodeFlags & 4 /* ProjectedTemplate */)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
+        if (nodeDef.flags & 4 /* ProjectedTemplate */) {
             var /** @type {?} */ projectedViews = asElementData(view, i).template._projectedViews;
             if (projectedViews) {
                 for (var /** @type {?} */ i_1 = 0; i_1 < projectedViews.length; i_1++) {
                     var /** @type {?} */ projectedView = projectedViews[i_1];
-                    projectedView.state |= ViewState.CheckProjectedView;
+                    projectedView.state |= 32 /* CheckProjectedView */;
                     markParentViewsForCheckProjectedViews(projectedView, view);
                 }
             }
         }
-        else if ((nodeDef.childFlags & NodeFlags.ProjectedTemplate) === 0) {
+        else if ((nodeDef.childFlags & 4 /* ProjectedTemplate */) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12368,20 +13413,20 @@ function markProjectedViewsForCheck(view) {
  */
 function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ changed = false;
-    switch (nodeDef.flags & NodeFlags.Types) {
-        case NodeFlags.TypeElement:
+    switch (nodeDef.flags & 201347067 /* Types */) {
+        case 1 /* TypeElement */:
             changed = checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeFlags.TypeText:
+        case 2 /* TypeText */:
             changed = checkAndUpdateTextInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeFlags.TypeDirective:
+        case 16384 /* TypeDirective */:
             changed =
                 checkAndUpdateDirectiveInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
-        case NodeFlags.TypePureArray:
-        case NodeFlags.TypePureObject:
-        case NodeFlags.TypePurePipe:
+        case 32 /* TypePureArray */:
+        case 64 /* TypePureObject */:
+        case 128 /* TypePurePipe */:
             changed =
                 checkAndUpdatePureExpressionInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
             break;
@@ -12396,19 +13441,19 @@ function checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7,
  */
 function checkAndUpdateNodeDynamic(view, nodeDef, values) {
     var /** @type {?} */ changed = false;
-    switch (nodeDef.flags & NodeFlags.Types) {
-        case NodeFlags.TypeElement:
+    switch (nodeDef.flags & 201347067 /* Types */) {
+        case 1 /* TypeElement */:
             changed = checkAndUpdateElementDynamic(view, nodeDef, values);
             break;
-        case NodeFlags.TypeText:
+        case 2 /* TypeText */:
             changed = checkAndUpdateTextDynamic(view, nodeDef, values);
             break;
-        case NodeFlags.TypeDirective:
+        case 16384 /* TypeDirective */:
             changed = checkAndUpdateDirectiveDynamic(view, nodeDef, values);
             break;
-        case NodeFlags.TypePureArray:
-        case NodeFlags.TypePureObject:
-        case NodeFlags.TypePurePipe:
+        case 32 /* TypePureArray */:
+        case 64 /* TypePureObject */:
+        case 128 /* TypePurePipe */:
             changed = checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
             break;
     }
@@ -12441,7 +13486,7 @@ function checkAndUpdateNodeDynamic(view, nodeDef, values) {
  * @return {?}
  */
 function checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
-    if (argStyle === ArgumentType.Inline) {
+    if (argStyle === 0 /* Inline */) {
         checkNoChangesNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
     }
     else {
@@ -12509,7 +13554,7 @@ function checkNoChangesNodeDynamic(view, nodeDef, values) {
 function checkNoChangesQuery(view, nodeDef) {
     var /** @type {?} */ queryList = asQueryList(view, nodeDef.index);
     if (queryList.dirty) {
-        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), "Query " + (((nodeDef.query))).id + " not dirty", "Query " + (((nodeDef.query))).id + " dirty", (view.state & ViewState.BeforeFirstCheck) !== 0);
+        throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, nodeDef.index), "Query " + (/** @type {?} */ ((nodeDef.query))).id + " not dirty", "Query " + (/** @type {?} */ ((nodeDef.query))).id + " dirty", (view.state & 1 /* BeforeFirstCheck */) !== 0);
     }
 }
 /**
@@ -12517,12 +13562,12 @@ function checkNoChangesQuery(view, nodeDef) {
  * @return {?}
  */
 function destroyView(view) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 128 /* Destroyed */) {
         return;
     }
     execEmbeddedViewsAction(view, ViewAction.Destroy);
     execComponentViewsAction(view, ViewAction.Destroy);
-    callLifecycleHooksChildrenFirst(view, NodeFlags.OnDestroy);
+    callLifecycleHooksChildrenFirst(view, 131072 /* OnDestroy */);
     if (view.disposables) {
         for (var /** @type {?} */ i = 0; i < view.disposables.length; i++) {
             view.disposables[i]();
@@ -12535,7 +13580,7 @@ function destroyView(view) {
     if (isComponentView(view)) {
         view.renderer.destroy();
     }
-    view.state |= ViewState.Destroyed;
+    view.state |= 128 /* Destroyed */;
 }
 /**
  * @param {?} view
@@ -12545,13 +13590,13 @@ function destroyViewNodes(view) {
     var /** @type {?} */ len = view.def.nodes.length;
     for (var /** @type {?} */ i = 0; i < len; i++) {
         var /** @type {?} */ def = view.def.nodes[i];
-        if (def.flags & NodeFlags.TypeElement) {
-            ((view.renderer.destroyNode))(asElementData(view, i).renderElement);
+        if (def.flags & 1 /* TypeElement */) {
+            /** @type {?} */ ((view.renderer.destroyNode))(asElementData(view, i).renderElement);
         }
-        else if (def.flags & NodeFlags.TypeText) {
-            ((view.renderer.destroyNode))(asTextData(view, i).renderText);
+        else if (def.flags & 2 /* TypeText */) {
+            /** @type {?} */ ((view.renderer.destroyNode))(asTextData(view, i).renderText);
         }
-        else if (def.flags & NodeFlags.TypeContentQuery || def.flags & NodeFlags.TypeViewQuery) {
+        else if (def.flags & 67108864 /* TypeContentQuery */ || def.flags & 134217728 /* TypeViewQuery */) {
             asQueryList(view, i).destroy();
         }
     }
@@ -12578,16 +13623,16 @@ ViewAction[ViewAction.Destroy] = "Destroy";
  */
 function execComponentViewsAction(view, action) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & NodeFlags.ComponentView)) {
+    if (!(def.nodeFlags & 33554432 /* ComponentView */)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & NodeFlags.ComponentView) {
+        if (nodeDef.flags & 33554432 /* ComponentView */) {
             // a leaf
             callViewAction(asElementData(view, i).componentView, action);
         }
-        else if ((nodeDef.childFlags & NodeFlags.ComponentView) === 0) {
+        else if ((nodeDef.childFlags & 33554432 /* ComponentView */) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12602,19 +13647,19 @@ function execComponentViewsAction(view, action) {
  */
 function execEmbeddedViewsAction(view, action) {
     var /** @type {?} */ def = view.def;
-    if (!(def.nodeFlags & NodeFlags.EmbeddedViews)) {
+    if (!(def.nodeFlags & 16777216 /* EmbeddedViews */)) {
         return;
     }
     for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = def.nodes[i];
-        if (nodeDef.flags & NodeFlags.EmbeddedViews) {
+        if (nodeDef.flags & 16777216 /* EmbeddedViews */) {
             // a leaf
-            var /** @type {?} */ embeddedViews = ((asElementData(view, i).viewContainer))._embeddedViews;
+            var /** @type {?} */ embeddedViews = /** @type {?} */ ((asElementData(view, i).viewContainer))._embeddedViews;
             for (var /** @type {?} */ k = 0; k < embeddedViews.length; k++) {
                 callViewAction(embeddedViews[k], action);
             }
         }
-        else if ((nodeDef.childFlags & NodeFlags.EmbeddedViews) === 0) {
+        else if ((nodeDef.childFlags & 16777216 /* EmbeddedViews */) === 0) {
             // a parent with leafs
             // no child is a component,
             // then skip the children
@@ -12631,41 +13676,41 @@ function callViewAction(view, action) {
     var /** @type {?} */ viewState = view.state;
     switch (action) {
         case ViewAction.CheckNoChanges:
-            if ((viewState & ViewState.Destroyed) === 0) {
-                if ((viewState & ViewState.CatDetectChanges) === ViewState.CatDetectChanges) {
+            if ((viewState & 128 /* Destroyed */) === 0) {
+                if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */) {
                     checkNoChangesView(view);
                 }
-                else if (viewState & ViewState.CheckProjectedViews) {
+                else if (viewState & 64 /* CheckProjectedViews */) {
                     execProjectedViewsAction(view, ViewAction.CheckNoChangesProjectedViews);
                 }
             }
             break;
         case ViewAction.CheckNoChangesProjectedViews:
-            if ((viewState & ViewState.Destroyed) === 0) {
-                if (viewState & ViewState.CheckProjectedView) {
+            if ((viewState & 128 /* Destroyed */) === 0) {
+                if (viewState & 32 /* CheckProjectedView */) {
                     checkNoChangesView(view);
                 }
-                else if (viewState & ViewState.CheckProjectedViews) {
+                else if (viewState & 64 /* CheckProjectedViews */) {
                     execProjectedViewsAction(view, action);
                 }
             }
             break;
         case ViewAction.CheckAndUpdate:
-            if ((viewState & ViewState.Destroyed) === 0) {
-                if ((viewState & ViewState.CatDetectChanges) === ViewState.CatDetectChanges) {
+            if ((viewState & 128 /* Destroyed */) === 0) {
+                if ((viewState & 12 /* CatDetectChanges */) === 12 /* CatDetectChanges */) {
                     checkAndUpdateView(view);
                 }
-                else if (viewState & ViewState.CheckProjectedViews) {
+                else if (viewState & 64 /* CheckProjectedViews */) {
                     execProjectedViewsAction(view, ViewAction.CheckAndUpdateProjectedViews);
                 }
             }
             break;
         case ViewAction.CheckAndUpdateProjectedViews:
-            if ((viewState & ViewState.Destroyed) === 0) {
-                if (viewState & ViewState.CheckProjectedView) {
+            if ((viewState & 128 /* Destroyed */) === 0) {
+                if (viewState & 32 /* CheckProjectedView */) {
                     checkAndUpdateView(view);
                 }
-                else if (viewState & ViewState.CheckProjectedViews) {
+                else if (viewState & 64 /* CheckProjectedViews */) {
                     execProjectedViewsAction(view, action);
                 }
             }
@@ -12706,10 +13751,10 @@ function execQueriesAction(view, queryFlags, staticDynamicQueryFlag, checkType) 
         if ((nodeDef.flags & queryFlags) && (nodeDef.flags & staticDynamicQueryFlag)) {
             Services.setCurrentNode(view, nodeDef.index);
             switch (checkType) {
-                case CheckType.CheckAndUpdate:
+                case 0 /* CheckAndUpdate */:
                     checkAndUpdateQuery(view, nodeDef);
                     break;
-                case CheckType.CheckNoChanges:
+                case 1 /* CheckNoChanges */:
                     checkNoChangesQuery(view, nodeDef);
                     break;
             }
@@ -12779,10 +13824,14 @@ function createProdServices() {
         handleEvent: function (view, nodeIndex, eventName, event) {
             return view.def.handleEvent(view, nodeIndex, eventName, event);
         },
-        updateDirectives: function (view, checkType) { return view.def.updateDirectives(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
-            prodCheckNoChangesNode, view); },
-        updateRenderer: function (view, checkType) { return view.def.updateRenderer(checkType === CheckType.CheckAndUpdate ? prodCheckAndUpdateNode :
-            prodCheckNoChangesNode, view); },
+        updateDirectives: function (view, checkType) {
+            return view.def.updateDirectives(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+                prodCheckNoChangesNode, view);
+        },
+        updateRenderer: function (view, checkType) {
+            return view.def.updateRenderer(checkType === 0 /* CheckAndUpdate */ ? prodCheckAndUpdateNode :
+                prodCheckNoChangesNode, view);
+        },
     };
 }
 /**
@@ -12913,7 +13962,7 @@ function applyProviderOverridesToView(def) {
     }
     // clone the whole view definition,
     // as it maintains references between the nodes that are hard to update.
-    def = ((def.factory))(function () { return NOOP; });
+    def = /** @type {?} */ ((def.factory))(function () { return NOOP; });
     for (var /** @type {?} */ i = 0; i < elementIndicesWithOverwrittenProviders.length; i++) {
         applyProviderOverridesToElement(def, elementIndicesWithOverwrittenProviders[i]);
     }
@@ -12927,10 +13976,10 @@ function applyProviderOverridesToView(def) {
         var /** @type {?} */ lastElementDef = null;
         for (var /** @type {?} */ i = 0; i < def.nodes.length; i++) {
             var /** @type {?} */ nodeDef = def.nodes[i];
-            if (nodeDef.flags & NodeFlags.TypeElement) {
+            if (nodeDef.flags & 1 /* TypeElement */) {
                 lastElementDef = nodeDef;
             }
-            if (lastElementDef && nodeDef.flags & NodeFlags.CatProviderNoDirective &&
+            if (lastElementDef && nodeDef.flags & 3840 /* CatProviderNoDirective */ &&
                 providerOverrides.has(/** @type {?} */ ((nodeDef.provider)).token)) {
                 elIndicesWithOverwrittenProviders.push(/** @type {?} */ ((lastElementDef)).index);
                 lastElementDef = null;
@@ -12946,18 +13995,18 @@ function applyProviderOverridesToView(def) {
     function applyProviderOverridesToElement(viewDef$$1, elIndex) {
         for (var /** @type {?} */ i = elIndex + 1; i < viewDef$$1.nodes.length; i++) {
             var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
-            if (nodeDef.flags & NodeFlags.TypeElement) {
+            if (nodeDef.flags & 1 /* TypeElement */) {
                 // stop at the next element
                 return;
             }
-            if (nodeDef.flags & NodeFlags.CatProviderNoDirective) {
+            if (nodeDef.flags & 3840 /* CatProviderNoDirective */) {
                 // Make all providers lazy, so that we don't get into trouble
                 // with ordering problems of providers on the same element
-                nodeDef.flags |= NodeFlags.LazyProvider;
-                var /** @type {?} */ provider = ((nodeDef.provider));
+                nodeDef.flags |= 4096 /* LazyProvider */;
+                var /** @type {?} */ provider = /** @type {?} */ ((nodeDef.provider));
                 var /** @type {?} */ override = providerOverrides.get(provider.token);
                 if (override) {
-                    nodeDef.flags = (nodeDef.flags & ~NodeFlags.CatProviderNoDirective) | override.flags;
+                    nodeDef.flags = (nodeDef.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
                     provider.deps = splitDepsDsl(override.deps);
                     provider.value = override.value;
                 }
@@ -12975,7 +14024,7 @@ function applyProviderOverridesToNgModule(def) {
     }
     // clone the whole view definition,
     // as it maintains references between the nodes that are hard to update.
-    def = ((def.factory))(function () { return NOOP; });
+    def = /** @type {?} */ ((def.factory))(function () { return NOOP; });
     applyProviderOverrides(def);
     return def;
     /**
@@ -12984,7 +14033,7 @@ function applyProviderOverridesToNgModule(def) {
      */
     function hasOverrrides(def) {
         return def.providers.some(function (node) {
-            return !!(node.flags & NodeFlags.CatProviderNoDirective) && providerOverrides.has(node.token);
+            return !!(node.flags & 3840 /* CatProviderNoDirective */) && providerOverrides.has(node.token);
         });
     }
     /**
@@ -12996,10 +14045,10 @@ function applyProviderOverridesToNgModule(def) {
             var /** @type {?} */ provider = def.providers[i];
             // Make all providers lazy, so that we don't get into trouble
             // with ordering problems of providers on the same element
-            provider.flags |= NodeFlags.LazyProvider;
+            provider.flags |= 4096 /* LazyProvider */;
             var /** @type {?} */ override = providerOverrides.get(provider.token);
             if (override) {
-                provider.flags = (provider.flags & ~NodeFlags.CatProviderNoDirective) | override.flags;
+                provider.flags = (provider.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
                 provider.deps = splitDepsDsl(override.deps);
                 provider.value = override.value;
             }
@@ -13025,7 +14074,7 @@ function applyProviderOverridesToNgModule(def) {
 function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.flags & NodeFlags.CatPureExpression) ?
+    return (nodeDef.flags & 224 /* CatPureExpression */) ?
         asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
@@ -13048,7 +14097,7 @@ function prodCheckAndUpdateNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v
 function prodCheckNoChangesNode(view, nodeIndex, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {
     var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
     checkNoChangesNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-    return (nodeDef.flags & NodeFlags.CatPureExpression) ?
+    return (nodeDef.flags & 224 /* CatPureExpression */) ?
         asPureExpressionData(view, nodeIndex).value :
         undefined;
 }
@@ -13115,7 +14164,7 @@ function debugHandleEvent(view, nodeIndex, eventName, event) {
  * @return {?}
  */
 function debugUpdateDirectives(view, checkType) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 128 /* Destroyed */) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
@@ -13133,16 +14182,16 @@ function debugUpdateDirectives(view, checkType) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === CheckType.CheckAndUpdate) {
+        if (checkType === 0 /* CheckAndUpdate */) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.flags & NodeFlags.TypeDirective) {
+        if (nodeDef.flags & 16384 /* TypeDirective */) {
             debugSetCurrentNode(view, nextDirectiveWithBinding(view, nodeIndex));
         }
-        return (nodeDef.flags & NodeFlags.CatPureExpression) ?
+        return (nodeDef.flags & 224 /* CatPureExpression */) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -13153,7 +14202,7 @@ function debugUpdateDirectives(view, checkType) {
  * @return {?}
  */
 function debugUpdateRenderer(view, checkType) {
-    if (view.state & ViewState.Destroyed) {
+    if (view.state & 128 /* Destroyed */) {
         throw viewDestroyedError(DebugAction[_currentAction]);
     }
     debugSetCurrentNode(view, nextRenderNodeWithBinding(view, 0));
@@ -13171,16 +14220,16 @@ function debugUpdateRenderer(view, checkType) {
             values[_i - 3] = arguments[_i];
         }
         var /** @type {?} */ nodeDef = view.def.nodes[nodeIndex];
-        if (checkType === CheckType.CheckAndUpdate) {
+        if (checkType === 0 /* CheckAndUpdate */) {
             debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
         }
         else {
             debugCheckNoChangesNode(view, nodeDef, argStyle, values);
         }
-        if (nodeDef.flags & NodeFlags.CatRenderNode) {
+        if (nodeDef.flags & 3 /* CatRenderNode */) {
             debugSetCurrentNode(view, nextRenderNodeWithBinding(view, nodeIndex));
         }
-        return (nodeDef.flags & NodeFlags.CatPureExpression) ?
+        return (nodeDef.flags & 224 /* CatPureExpression */) ?
             asPureExpressionData(view, nodeDef.index).value :
             undefined;
     }
@@ -13193,22 +14242,22 @@ function debugUpdateRenderer(view, checkType) {
  * @return {?}
  */
 function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
-    var /** @type {?} */ changed = ((checkAndUpdateNode)).apply(void 0, [view, nodeDef, argStyle].concat(givenValues));
+    var /** @type {?} */ changed = (/** @type {?} */ (checkAndUpdateNode)).apply(void 0, [view, nodeDef, argStyle].concat(givenValues));
     if (changed) {
-        var /** @type {?} */ values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
-        if (nodeDef.flags & NodeFlags.TypeDirective) {
+        var /** @type {?} */ values = argStyle === 1 /* Dynamic */ ? givenValues[0] : givenValues;
+        if (nodeDef.flags & 16384 /* TypeDirective */) {
             var /** @type {?} */ bindingValues = {};
             for (var /** @type {?} */ i = 0; i < nodeDef.bindings.length; i++) {
                 var /** @type {?} */ binding = nodeDef.bindings[i];
                 var /** @type {?} */ value = values[i];
-                if (binding.flags & BindingFlags.TypeProperty) {
+                if (binding.flags & 8 /* TypeProperty */) {
                     bindingValues[normalizeDebugBindingName(/** @type {?} */ ((binding.nonMinifiedName)))] =
                         normalizeDebugBindingValue(value);
                 }
             }
-            var /** @type {?} */ elDef = ((nodeDef.parent));
+            var /** @type {?} */ elDef = /** @type {?} */ ((nodeDef.parent));
             var /** @type {?} */ el = asElementData(view, elDef.index).renderElement;
-            if (!((elDef.element)).name) {
+            if (!/** @type {?} */ ((elDef.element)).name) {
                 // a comment.
                 view.renderer.setValue(el, "bindings=" + JSON.stringify(bindingValues, null, 2));
             }
@@ -13235,7 +14284,7 @@ function debugCheckAndUpdateNode(view, nodeDef, argStyle, givenValues) {
  * @return {?}
  */
 function debugCheckNoChangesNode(view, nodeDef, argStyle, values) {
-    ((checkNoChangesNode)).apply(void 0, [view, nodeDef, argStyle].concat(values));
+    (/** @type {?} */ (checkNoChangesNode)).apply(void 0, [view, nodeDef, argStyle].concat(values));
 }
 /**
  * @param {?} name
@@ -13269,7 +14318,7 @@ function normalizeDebugBindingValue(value) {
         // Limit the size of the value as otherwise the DOM just gets polluted.
         return value != null ? value.toString().slice(0, 30) : value;
     }
-    catch (e) {
+    catch (/** @type {?} */ e) {
         return '[ERROR] Exception while trying to serialize the value';
     }
 }
@@ -13281,7 +14330,7 @@ function normalizeDebugBindingValue(value) {
 function nextDirectiveWithBinding(view, nodeIndex) {
     for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if (nodeDef.flags & NodeFlags.TypeDirective && nodeDef.bindings && nodeDef.bindings.length) {
+        if (nodeDef.flags & 16384 /* TypeDirective */ && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
@@ -13295,17 +14344,13 @@ function nextDirectiveWithBinding(view, nodeIndex) {
 function nextRenderNodeWithBinding(view, nodeIndex) {
     for (var /** @type {?} */ i = nodeIndex; i < view.def.nodes.length; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
-        if ((nodeDef.flags & NodeFlags.CatRenderNode) && nodeDef.bindings && nodeDef.bindings.length) {
+        if ((nodeDef.flags & 3 /* CatRenderNode */) && nodeDef.bindings && nodeDef.bindings.length) {
             return i;
         }
     }
     return null;
 }
 var DebugContext_ = (function () {
-    /**
-     * @param {?} view
-     * @param {?} nodeIndex
-     */
     function DebugContext_(view, nodeIndex) {
         this.view = view;
         this.nodeIndex = nodeIndex;
@@ -13315,23 +14360,23 @@ var DebugContext_ = (function () {
         this.nodeDef = view.def.nodes[nodeIndex];
         var /** @type {?} */ elDef = this.nodeDef;
         var /** @type {?} */ elView = view;
-        while (elDef && (elDef.flags & NodeFlags.TypeElement) === 0) {
-            elDef = ((elDef.parent));
+        while (elDef && (elDef.flags & 1 /* TypeElement */) === 0) {
+            elDef = /** @type {?} */ ((elDef.parent));
         }
         if (!elDef) {
             while (!elDef && elView) {
-                elDef = ((viewParentEl(elView)));
-                elView = ((elView.parent));
+                elDef = /** @type {?} */ ((viewParentEl(elView)));
+                elView = /** @type {?} */ ((elView.parent));
             }
         }
         this.elDef = elDef;
         this.elView = elView;
     }
     Object.defineProperty(DebugContext_.prototype, "elOrCompView", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             // Has to be done lazily as we use the DebugContext also during creation of elements...
             return asElementData(this.elView, this.elDef.index).componentView || this.view;
         },
@@ -13339,39 +14384,39 @@ var DebugContext_ = (function () {
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "injector", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return createInjector(this.elView, this.elDef); },
+        function () { return createInjector(this.elView, this.elDef); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "component", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.elOrCompView.component; },
+        function () { return this.elOrCompView.component; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "context", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.elOrCompView.context; },
+        function () { return this.elOrCompView.context; },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "providerTokens", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ tokens = [];
             if (this.elDef) {
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.flags & NodeFlags.CatProvider) {
+                    if (childDef.flags & 20224 /* CatProvider */) {
                         tokens.push(/** @type {?} */ ((childDef.provider)).token);
                     }
                     i += childDef.childCount;
@@ -13383,16 +14428,16 @@ var DebugContext_ = (function () {
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "references", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ references = {};
             if (this.elDef) {
                 collectReferences(this.elView, this.elDef, references);
                 for (var /** @type {?} */ i = this.elDef.index + 1; i <= this.elDef.index + this.elDef.childCount; i++) {
                     var /** @type {?} */ childDef = this.elView.def.nodes[i];
-                    if (childDef.flags & NodeFlags.CatProvider) {
+                    if (childDef.flags & 20224 /* CatProvider */) {
                         collectReferences(this.elView, childDef, references);
                     }
                     i += childDef.childCount;
@@ -13404,10 +14449,10 @@ var DebugContext_ = (function () {
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "componentRenderElement", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
+        function () {
             var /** @type {?} */ elData = findHostElement(this.elOrCompView);
             return elData ? elData.renderElement : undefined;
         },
@@ -13415,11 +14460,11 @@ var DebugContext_ = (function () {
         configurable: true
     });
     Object.defineProperty(DebugContext_.prototype, "renderNode", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () {
-            return this.nodeDef.flags & NodeFlags.TypeText ? renderNode(this.view, this.nodeDef) :
+        function () {
+            return this.nodeDef.flags & 2 /* TypeText */ ? renderNode(this.view, this.nodeDef) :
                 renderNode(this.elView, this.elDef);
         },
         enumerable: true,
@@ -13430,14 +14475,19 @@ var DebugContext_ = (function () {
      * @param {...?} values
      * @return {?}
      */
-    DebugContext_.prototype.logError = function (console) {
+    DebugContext_.prototype.logError = /**
+     * @param {?} console
+     * @param {...?} values
+     * @return {?}
+     */
+    function (console) {
         var values = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             values[_i - 1] = arguments[_i];
         }
         var /** @type {?} */ logViewDef;
         var /** @type {?} */ logNodeIndex;
-        if (this.nodeDef.flags & NodeFlags.TypeText) {
+        if (this.nodeDef.flags & 2 /* TypeText */) {
             logViewDef = this.view.def;
             logNodeIndex = this.nodeDef.index;
         }
@@ -13476,7 +14526,7 @@ function getRenderNodeIndex(viewDef$$1, nodeIndex) {
     var /** @type {?} */ renderNodeIndex = -1;
     for (var /** @type {?} */ i = 0; i <= nodeIndex; i++) {
         var /** @type {?} */ nodeDef = viewDef$$1.nodes[i];
-        if (nodeDef.flags & NodeFlags.CatRenderNode) {
+        if (nodeDef.flags & 3 /* CatRenderNode */) {
             renderNodeIndex++;
         }
     }
@@ -13488,7 +14538,7 @@ function getRenderNodeIndex(viewDef$$1, nodeIndex) {
  */
 function findHostElement(view) {
     while (view && !isComponentView(view)) {
-        view = ((view.parent));
+        view = /** @type {?} */ ((view.parent));
     }
     if (view.parent) {
         return asElementData(view.parent, /** @type {?} */ ((viewParentEl(view))).index);
@@ -13525,7 +14575,7 @@ function callWithDebugContext(action, fn, self, args) {
         _currentAction = oldAction;
         return result;
     }
-    catch (e) {
+    catch (/** @type {?} */ e) {
         if (isViewDebugError(e) || !_currentView) {
             throw e;
         }
@@ -13539,9 +14589,6 @@ function getCurrentDebugContext() {
     return _currentView ? new DebugContext_(_currentView, _currentNodeIndex) : null;
 }
 var DebugRendererFactory2 = (function () {
-    /**
-     * @param {?} delegate
-     */
     function DebugRendererFactory2(delegate) {
         this.delegate = delegate;
     }
@@ -13550,13 +14597,21 @@ var DebugRendererFactory2 = (function () {
      * @param {?} renderData
      * @return {?}
      */
-    DebugRendererFactory2.prototype.createRenderer = function (element, renderData) {
+    DebugRendererFactory2.prototype.createRenderer = /**
+     * @param {?} element
+     * @param {?} renderData
+     * @return {?}
+     */
+    function (element, renderData) {
         return new DebugRenderer2(this.delegate.createRenderer(element, renderData));
     };
     /**
      * @return {?}
      */
-    DebugRendererFactory2.prototype.begin = function () {
+    DebugRendererFactory2.prototype.begin = /**
+     * @return {?}
+     */
+    function () {
         if (this.delegate.begin) {
             this.delegate.begin();
         }
@@ -13564,7 +14619,10 @@ var DebugRendererFactory2 = (function () {
     /**
      * @return {?}
      */
-    DebugRendererFactory2.prototype.end = function () {
+    DebugRendererFactory2.prototype.end = /**
+     * @return {?}
+     */
+    function () {
         if (this.delegate.end) {
             this.delegate.end();
         }
@@ -13572,7 +14630,10 @@ var DebugRendererFactory2 = (function () {
     /**
      * @return {?}
      */
-    DebugRendererFactory2.prototype.whenRenderingDone = function () {
+    DebugRendererFactory2.prototype.whenRenderingDone = /**
+     * @return {?}
+     */
+    function () {
         if (this.delegate.whenRenderingDone) {
             return this.delegate.whenRenderingDone();
         }
@@ -13581,17 +14642,14 @@ var DebugRendererFactory2 = (function () {
     return DebugRendererFactory2;
 }());
 var DebugRenderer2 = (function () {
-    /**
-     * @param {?} delegate
-     */
     function DebugRenderer2(delegate) {
         this.delegate = delegate;
     }
     Object.defineProperty(DebugRenderer2.prototype, "data", {
-        /**
+        get: /**
          * @return {?}
          */
-        get: function () { return this.delegate.data; },
+        function () { return this.delegate.data; },
         enumerable: true,
         configurable: true
     });
@@ -13599,7 +14657,11 @@ var DebugRenderer2 = (function () {
      * @param {?} node
      * @return {?}
      */
-    DebugRenderer2.prototype.destroyNode = function (node) {
+    DebugRenderer2.prototype.destroyNode = /**
+     * @param {?} node
+     * @return {?}
+     */
+    function (node) {
         removeDebugNodeFromIndex(/** @type {?} */ ((getDebugNode(node))));
         if (this.delegate.destroyNode) {
             this.delegate.destroyNode(node);
@@ -13608,13 +14670,21 @@ var DebugRenderer2 = (function () {
     /**
      * @return {?}
      */
-    DebugRenderer2.prototype.destroy = function () { this.delegate.destroy(); };
+    DebugRenderer2.prototype.destroy = /**
+     * @return {?}
+     */
+    function () { this.delegate.destroy(); };
     /**
      * @param {?} name
      * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer2.prototype.createElement = function (name, namespace) {
+    DebugRenderer2.prototype.createElement = /**
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    function (name, namespace) {
         var /** @type {?} */ el = this.delegate.createElement(name, namespace);
         var /** @type {?} */ debugCtx = getCurrentDebugContext();
         if (debugCtx) {
@@ -13628,7 +14698,11 @@ var DebugRenderer2 = (function () {
      * @param {?} value
      * @return {?}
      */
-    DebugRenderer2.prototype.createComment = function (value) {
+    DebugRenderer2.prototype.createComment = /**
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) {
         var /** @type {?} */ comment = this.delegate.createComment(value);
         var /** @type {?} */ debugCtx = getCurrentDebugContext();
         if (debugCtx) {
@@ -13640,7 +14714,11 @@ var DebugRenderer2 = (function () {
      * @param {?} value
      * @return {?}
      */
-    DebugRenderer2.prototype.createText = function (value) {
+    DebugRenderer2.prototype.createText = /**
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) {
         var /** @type {?} */ text = this.delegate.createText(value);
         var /** @type {?} */ debugCtx = getCurrentDebugContext();
         if (debugCtx) {
@@ -13653,7 +14731,12 @@ var DebugRenderer2 = (function () {
      * @param {?} newChild
      * @return {?}
      */
-    DebugRenderer2.prototype.appendChild = function (parent, newChild) {
+    DebugRenderer2.prototype.appendChild = /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @return {?}
+     */
+    function (parent, newChild) {
         var /** @type {?} */ debugEl = getDebugNode(parent);
         var /** @type {?} */ debugChildEl = getDebugNode(newChild);
         if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
@@ -13667,10 +14750,16 @@ var DebugRenderer2 = (function () {
      * @param {?} refChild
      * @return {?}
      */
-    DebugRenderer2.prototype.insertBefore = function (parent, newChild, refChild) {
+    DebugRenderer2.prototype.insertBefore = /**
+     * @param {?} parent
+     * @param {?} newChild
+     * @param {?} refChild
+     * @return {?}
+     */
+    function (parent, newChild, refChild) {
         var /** @type {?} */ debugEl = getDebugNode(parent);
         var /** @type {?} */ debugChildEl = getDebugNode(newChild);
-        var /** @type {?} */ debugRefEl = ((getDebugNode(refChild)));
+        var /** @type {?} */ debugRefEl = /** @type {?} */ ((getDebugNode(refChild)));
         if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
             debugEl.insertBefore(debugRefEl, debugChildEl);
         }
@@ -13681,7 +14770,12 @@ var DebugRenderer2 = (function () {
      * @param {?} oldChild
      * @return {?}
      */
-    DebugRenderer2.prototype.removeChild = function (parent, oldChild) {
+    DebugRenderer2.prototype.removeChild = /**
+     * @param {?} parent
+     * @param {?} oldChild
+     * @return {?}
+     */
+    function (parent, oldChild) {
         var /** @type {?} */ debugEl = getDebugNode(parent);
         var /** @type {?} */ debugChildEl = getDebugNode(oldChild);
         if (debugEl && debugChildEl && debugEl instanceof DebugElement) {
@@ -13693,7 +14787,11 @@ var DebugRenderer2 = (function () {
      * @param {?} selectorOrNode
      * @return {?}
      */
-    DebugRenderer2.prototype.selectRootElement = function (selectorOrNode) {
+    DebugRenderer2.prototype.selectRootElement = /**
+     * @param {?} selectorOrNode
+     * @return {?}
+     */
+    function (selectorOrNode) {
         var /** @type {?} */ el = this.delegate.selectRootElement(selectorOrNode);
         var /** @type {?} */ debugCtx = getCurrentDebugContext();
         if (debugCtx) {
@@ -13708,7 +14806,14 @@ var DebugRenderer2 = (function () {
      * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer2.prototype.setAttribute = function (el, name, value, namespace) {
+    DebugRenderer2.prototype.setAttribute = /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @param {?=} namespace
+     * @return {?}
+     */
+    function (el, name, value, namespace) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
@@ -13722,7 +14827,13 @@ var DebugRenderer2 = (function () {
      * @param {?=} namespace
      * @return {?}
      */
-    DebugRenderer2.prototype.removeAttribute = function (el, name, namespace) {
+    DebugRenderer2.prototype.removeAttribute = /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?=} namespace
+     * @return {?}
+     */
+    function (el, name, namespace) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             var /** @type {?} */ fullName = namespace ? namespace + ':' + name : name;
@@ -13735,7 +14846,12 @@ var DebugRenderer2 = (function () {
      * @param {?} name
      * @return {?}
      */
-    DebugRenderer2.prototype.addClass = function (el, name) {
+    DebugRenderer2.prototype.addClass = /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    function (el, name) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.classes[name] = true;
@@ -13747,7 +14863,12 @@ var DebugRenderer2 = (function () {
      * @param {?} name
      * @return {?}
      */
-    DebugRenderer2.prototype.removeClass = function (el, name) {
+    DebugRenderer2.prototype.removeClass = /**
+     * @param {?} el
+     * @param {?} name
+     * @return {?}
+     */
+    function (el, name) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.classes[name] = false;
@@ -13761,7 +14882,14 @@ var DebugRenderer2 = (function () {
      * @param {?} flags
      * @return {?}
      */
-    DebugRenderer2.prototype.setStyle = function (el, style, value, flags) {
+    DebugRenderer2.prototype.setStyle = /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} value
+     * @param {?} flags
+     * @return {?}
+     */
+    function (el, style, value, flags) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.styles[style] = value;
@@ -13774,7 +14902,13 @@ var DebugRenderer2 = (function () {
      * @param {?} flags
      * @return {?}
      */
-    DebugRenderer2.prototype.removeStyle = function (el, style, flags) {
+    DebugRenderer2.prototype.removeStyle = /**
+     * @param {?} el
+     * @param {?} style
+     * @param {?} flags
+     * @return {?}
+     */
+    function (el, style, flags) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.styles[style] = null;
@@ -13787,7 +14921,13 @@ var DebugRenderer2 = (function () {
      * @param {?} value
      * @return {?}
      */
-    DebugRenderer2.prototype.setProperty = function (el, name, value) {
+    DebugRenderer2.prototype.setProperty = /**
+     * @param {?} el
+     * @param {?} name
+     * @param {?} value
+     * @return {?}
+     */
+    function (el, name, value) {
         var /** @type {?} */ debugEl = getDebugNode(el);
         if (debugEl && debugEl instanceof DebugElement) {
             debugEl.properties[name] = value;
@@ -13800,7 +14940,13 @@ var DebugRenderer2 = (function () {
      * @param {?} callback
      * @return {?}
      */
-    DebugRenderer2.prototype.listen = function (target, eventName, callback) {
+    DebugRenderer2.prototype.listen = /**
+     * @param {?} target
+     * @param {?} eventName
+     * @param {?} callback
+     * @return {?}
+     */
+    function (target, eventName, callback) {
         if (typeof target !== 'string') {
             var /** @type {?} */ debugEl = getDebugNode(target);
             if (debugEl) {
@@ -13813,18 +14959,31 @@ var DebugRenderer2 = (function () {
      * @param {?} node
      * @return {?}
      */
-    DebugRenderer2.prototype.parentNode = function (node) { return this.delegate.parentNode(node); };
+    DebugRenderer2.prototype.parentNode = /**
+     * @param {?} node
+     * @return {?}
+     */
+    function (node) { return this.delegate.parentNode(node); };
     /**
      * @param {?} node
      * @return {?}
      */
-    DebugRenderer2.prototype.nextSibling = function (node) { return this.delegate.nextSibling(node); };
+    DebugRenderer2.prototype.nextSibling = /**
+     * @param {?} node
+     * @return {?}
+     */
+    function (node) { return this.delegate.nextSibling(node); };
     /**
      * @param {?} node
      * @param {?} value
      * @return {?}
      */
-    DebugRenderer2.prototype.setValue = function (node, value) { return this.delegate.setValue(node, value); };
+    DebugRenderer2.prototype.setValue = /**
+     * @param {?} node
+     * @param {?} value
+     * @return {?}
+     */
+    function (node, value) { return this.delegate.setValue(node, value); };
     return DebugRenderer2;
 }());
 
@@ -13865,11 +15024,6 @@ function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
 }
 var NgModuleFactory_ = (function (_super) {
     __extends(NgModuleFactory_, _super);
-    /**
-     * @param {?} moduleType
-     * @param {?} _bootstrapComponents
-     * @param {?} _ngModuleDefFactory
-     */
     function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
         var _this = 
         // Attention: this ctor is called as top level function.
@@ -13884,7 +15038,11 @@ var NgModuleFactory_ = (function (_super) {
      * @param {?} parentInjector
      * @return {?}
      */
-    NgModuleFactory_.prototype.create = function (parentInjector) {
+    NgModuleFactory_.prototype.create = /**
+     * @param {?} parentInjector
+     * @return {?}
+     */
+    function (parentInjector) {
         initServicesIfNeeded();
         var /** @type {?} */ def = resolveDefinition(this._ngModuleDefFactory);
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
@@ -13940,26 +15098,7 @@ var NgModuleFactory_ = (function (_super) {
  * found in the LICENSE file at https://angular.io/license
  * @record
  */
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */ 
-/** @enum {number} */
-var AnimationMetadataType = {
-    State: 0,
-    Transition: 1,
-    Sequence: 2,
-    Group: 3,
-    Animate: 4,
-    Keyframes: 5,
-    Style: 6,
-    Trigger: 7,
-    Reference: 8,
-    AnimateChild: 9,
-    AnimateRef: 10,
-    Query: 11,
-    Stagger: 12,
-};
+
 /**
  * \@experimental Animation support is experimental.
  */
@@ -14180,7 +15319,7 @@ var AnimationMetadataType = {
  * @return {?}
  */
 function trigger$1(name, definitions) {
-    return { type: AnimationMetadataType.Trigger, name: name, definitions: definitions, options: {} };
+    return { type: 7 /* Trigger */, name: name, definitions: definitions, options: {} };
 }
 /**
  * `animate` is an animation-specific function that is designed to be used inside of Angular's
@@ -14232,7 +15371,7 @@ function trigger$1(name, definitions) {
  */
 function animate$1(timings, styles) {
     if (styles === void 0) { styles = null; }
-    return { type: AnimationMetadataType.Animate, styles: styles, timings: timings };
+    return { type: 4 /* Animate */, styles: styles, timings: timings };
 }
 /**
  * `group` is an animation-specific function that is designed to be used inside of Angular's
@@ -14270,7 +15409,7 @@ function animate$1(timings, styles) {
  */
 function group$1(steps, options) {
     if (options === void 0) { options = null; }
-    return { type: AnimationMetadataType.Group, steps: steps, options: options };
+    return { type: 3 /* Group */, steps: steps, options: options };
 }
 /**
  * `sequence` is an animation-specific function that is designed to be used inside of Angular's
@@ -14311,7 +15450,7 @@ function group$1(steps, options) {
  */
 function sequence$1(steps, options) {
     if (options === void 0) { options = null; }
-    return { type: AnimationMetadataType.Sequence, steps: steps, options: options };
+    return { type: 2 /* Sequence */, steps: steps, options: options };
 }
 /**
  * `style` is an animation-specific function that is designed to be used inside of Angular's
@@ -14358,7 +15497,7 @@ function sequence$1(steps, options) {
  * @return {?}
  */
 function style$1(tokens) {
-    return { type: AnimationMetadataType.Style, styles: tokens, offset: null };
+    return { type: 6 /* Style */, styles: tokens, offset: null };
 }
 /**
  * `state` is an animation-specific function that is designed to be used inside of Angular's
@@ -14413,7 +15552,7 @@ function style$1(tokens) {
  * @return {?}
  */
 function state$1(name, styles, options) {
-    return { type: AnimationMetadataType.State, name: name, styles: styles, options: options };
+    return { type: 0 /* State */, name: name, styles: styles, options: options };
 }
 /**
  * `keyframes` is an animation-specific function that is designed to be used inside of Angular's
@@ -14463,7 +15602,7 @@ function state$1(name, styles, options) {
  * @return {?}
  */
 function keyframes$1(steps) {
-    return { type: AnimationMetadataType.Keyframes, steps: steps };
+    return { type: 5 /* Keyframes */, steps: steps };
 }
 /**
  * `transition` is an animation-specific function that is designed to be used inside of Angular's
@@ -14654,7 +15793,7 @@ function keyframes$1(steps) {
  */
 function transition$1(stateChangeExpr, steps, options) {
     if (options === void 0) { options = null; }
-    return { type: AnimationMetadataType.Transition, expr: stateChangeExpr, animation: steps, options: options };
+    return { type: 1 /* Transition */, expr: stateChangeExpr, animation: steps, options: options };
 }
 /**
  * `animation` is an animation-specific function that is designed to be used inside of Angular's
@@ -15004,47 +16143,47 @@ var AUTO_STYLE = '*';
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationTriggerMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationStateMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationTransitionMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationKeyframesSequenceMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationStyleMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationAnimateMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationSequenceMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @record
  */
-function AnimationGroupMetadata() { }
+
 /**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  * @param {?} name
@@ -15117,7 +16256,6 @@ function transition$$1(stateChangeExpr, steps) {
  * @deprecated This has been renamed to `AnimationEvent`. Please import it from \@angular/animations.
  * @record
  */
-function AnimationTransitionEvent() { }
 
 /**
  * @fileoverview added by tsickle
@@ -15163,5 +16301,5 @@ function AnimationTransitionEvent() { }
  * Generated bundle index. Do not edit.
  */
 
-export { TypeDecorator, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Predicate, GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, WtfScopeFn, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildDecorator, ContentChildren, ContentChildrenDecorator, Query, ViewChild, ViewChildDecorator, ViewChildren, ViewChildrenDecorator, Component, ComponentDecorator, Directive, DirectiveDecorator, HostBinding, HostListener, Input, Output, Pipe, AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, DoCheck, OnChanges, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, ModuleWithProviders, NO_ERRORS_SCHEMA, NgModule, SchemaMetadata, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, ForwardRefFn, Injector, ReflectiveInjector, ValueProvider, ExistingProvider, FactoryProvider, TypeProvider, ClassProvider, ResolvedReflectiveFactory, ResolvedReflectiveProvider, ReflectiveKey, InjectionToken, InjectDecorator, Inject, OptionalDecorator, Optional, InjectableDecorator, Injectable, SelfDecorator, Self, SkipSelfDecorator, SkipSelf, HostDecorator, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RendererType2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, CollectionChangeRecord, DefaultIterableDiffer, IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, IterableDiffers, KeyValueChangeRecord, KeyValueChanges, KeyValueDiffer, KeyValueDifferFactory, KeyValueDiffers, PipeTransform, SimpleChange, SimpleChanges, TrackByFunction, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, DirectRenderer as ɵDirectRenderer, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, ArgumentType as ɵArgumentType, BindingFlags as ɵBindingFlags, DepFlags as ɵDepFlags, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, NodeFlags as ɵNodeFlags, QueryBindingType as ɵQueryBindingType, QueryValueType as ɵQueryValueType, ViewDefinition as ɵViewDefinition, ViewFlags as ɵViewFlags, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, AnimationMetadata, AnimationTriggerMetadata, AnimationStateMetadata, AnimationTransitionMetadata, AnimationKeyframesSequenceMetadata, AnimationStyleMetadata, AnimationAnimateMetadata, AnimationSequenceMetadata, AnimationGroupMetadata, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, AnimationTransitionEvent, AnimationMetadataType as ɵx, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
 //# sourceMappingURL=index.js.map
