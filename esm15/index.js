@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-4695c69
+ * @license Angular v5.0.0-beta.7-b6431c6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -643,7 +643,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-4695c69');
+const VERSION = new Version('5.0.0-beta.7-b6431c6');
 
 /**
  * @fileoverview added by tsickle
@@ -4341,74 +4341,40 @@ function getPlatform() {
  * (e.g. {\@link platformBrowser}), or explicitly by calling the {\@link createPlatform} function.
  *
  * \@stable
- * @abstract
  */
 class PlatformRef {
-}
-/**
- * @param {?} errorHandler
- * @param {?} ngZone
- * @param {?} callback
- * @return {?}
- */
-function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
-    try {
-        const /** @type {?} */ result = callback();
-        if (isPromise(result)) {
-            return result.catch((e) => {
-                ngZone.runOutsideAngular(() => errorHandler.handleError(e));
-                // rethrow as the exception handler might not do it
-                throw e;
-            });
-        }
-        return result;
-    }
-    catch (/** @type {?} */ e) {
-        ngZone.runOutsideAngular(() => errorHandler.handleError(e));
-        // rethrow as the exception handler might not do it
-        throw e;
-    }
-}
-/**
- * workaround https://github.com/angular/tsickle/issues/350
- * @suppress {checkTypes}
- */
-class PlatformRef_ extends PlatformRef {
     /**
+     * \@internal
      * @param {?} _injector
      */
     constructor(_injector) {
-        super();
         this._injector = _injector;
         this._modules = [];
         this._destroyListeners = [];
         this._destroyed = false;
     }
     /**
-     * @param {?} callback
-     * @return {?}
-     */
-    onDestroy(callback) { this._destroyListeners.push(callback); }
-    /**
-     * @return {?}
-     */
-    get injector() { return this._injector; }
-    /**
-     * @return {?}
-     */
-    get destroyed() { return this._destroyed; }
-    /**
-     * @return {?}
-     */
-    destroy() {
-        if (this._destroyed) {
-            throw new Error('The platform has already been destroyed!');
-        }
-        this._modules.slice().forEach(module => module.destroy());
-        this._destroyListeners.forEach(listener => listener());
-        this._destroyed = true;
-    }
-    /**
+     * Creates an instance of an `\@NgModule` for the given platform
+     * for offline compilation.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * my_module.ts:
+     *
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * main.ts:
+     * import {MyModuleNgFactory} from './my_module.ngfactory';
+     * import {platformBrowser} from '\@angular/platform-browser';
+     *
+     * let moduleRef = platformBrowser().bootstrapModuleFactory(MyModuleNgFactory);
+     * ```
+     *
+     * \@experimental APIs related to application bootstrap are currently under review.
      * @template M
      * @param {?} moduleFactory
      * @return {?}
@@ -4451,6 +4417,19 @@ class PlatformRef_ extends PlatformRef {
         });
     }
     /**
+     * Creates an instance of an `\@NgModule` for a given platform using the given runtime compiler.
+     *
+     * ## Simple Example
+     *
+     * ```typescript
+     * \@NgModule({
+     *   imports: [BrowserModule]
+     * })
+     * class MyModule {}
+     *
+     * let moduleRef = platformBrowser().bootstrapModule(MyModule);
+     * ```
+     * \@stable
      * @template M
      * @param {?} moduleType
      * @param {?=} compilerOptions
@@ -4490,28 +4469,67 @@ class PlatformRef_ extends PlatformRef {
         }
         this._modules.push(moduleRef);
     }
+    /**
+     * Register a listener to be called when the platform is disposed.
+     * @param {?} callback
+     * @return {?}
+     */
+    onDestroy(callback) { this._destroyListeners.push(callback); }
+    /**
+     * Retrieve the platform {\@link Injector}, which is the parent injector for
+     * every Angular application on the page and provides singleton providers.
+     * @return {?}
+     */
+    get injector() { return this._injector; }
+    /**
+     * Destroy the Angular platform and all Angular applications on the page.
+     * @return {?}
+     */
+    destroy() {
+        if (this._destroyed) {
+            throw new Error('The platform has already been destroyed!');
+        }
+        this._modules.slice().forEach(module => module.destroy());
+        this._destroyListeners.forEach(listener => listener());
+        this._destroyed = true;
+    }
+    /**
+     * @return {?}
+     */
+    get destroyed() { return this._destroyed; }
 }
-PlatformRef_.decorators = [
-    { type: Injectable },
-];
-/** @nocollapse */
-PlatformRef_.ctorParameters = () => [
-    { type: Injector, },
-];
+/**
+ * @param {?} errorHandler
+ * @param {?} ngZone
+ * @param {?} callback
+ * @return {?}
+ */
+function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
+    try {
+        const /** @type {?} */ result = callback();
+        if (isPromise(result)) {
+            return result.catch((e) => {
+                ngZone.runOutsideAngular(() => errorHandler.handleError(e));
+                // rethrow as the exception handler might not do it
+                throw e;
+            });
+        }
+        return result;
+    }
+    catch (/** @type {?} */ e) {
+        ngZone.runOutsideAngular(() => errorHandler.handleError(e));
+        // rethrow as the exception handler might not do it
+        throw e;
+    }
+}
 /**
  * A reference to an Angular application running on a page.
  *
  * \@stable
- * @abstract
  */
 class ApplicationRef {
-}
-/**
- * workaround https://github.com/angular/tsickle/issues/350
- * @suppress {checkTypes}
- */
-class ApplicationRef_ extends ApplicationRef {
     /**
+     * \@internal
      * @param {?} _zone
      * @param {?} _console
      * @param {?} _injector
@@ -4520,7 +4538,6 @@ class ApplicationRef_ extends ApplicationRef {
      * @param {?} _initStatus
      */
     constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
-        super();
         this._zone = _zone;
         this._console = _console;
         this._injector = _injector;
@@ -4577,24 +4594,19 @@ class ApplicationRef_ extends ApplicationRef {
         this._isStable = merge(isCurrentlyStable, share.call(isStable));
     }
     /**
-     * @param {?} viewRef
-     * @return {?}
-     */
-    attachView(viewRef) {
-        const /** @type {?} */ view = (/** @type {?} */ (viewRef));
-        this._views.push(view);
-        view.attachToAppRef(this);
-    }
-    /**
-     * @param {?} viewRef
-     * @return {?}
-     */
-    detachView(viewRef) {
-        const /** @type {?} */ view = (/** @type {?} */ (viewRef));
-        remove(this._views, view);
-        view.detachFromAppRef();
-    }
-    /**
+     * Bootstrap a new component at the root level of the application.
+     *
+     * ### Bootstrap process
+     *
+     * When bootstrapping a new root component into an application, Angular mounts the
+     * specified application component onto DOM elements identified by the [componentType]'s
+     * selector and kicks off automatic change detection to finish initializing the component.
+     *
+     * Optionally, a component can be mounted onto a DOM element that does not match the
+     * [componentType]'s selector.
+     *
+     * ### Example
+     * {\@example core/ts/platform/platform.ts region='longform'}
      * @template C
      * @param {?} componentOrFactory
      * @param {?=} rootSelectorOrNode
@@ -4632,6 +4644,71 @@ class ApplicationRef_ extends ApplicationRef {
         return compRef;
     }
     /**
+     * Invoke this method to explicitly process change detection and its side-effects.
+     *
+     * In development mode, `tick()` also performs a second change detection cycle to ensure that no
+     * further changes are detected. If additional changes are picked up during this second cycle,
+     * bindings in the app have side-effects that cannot be resolved in a single change detection
+     * pass.
+     * In this case, Angular throws an error, since an Angular application can only have one change
+     * detection pass during which all change detection must complete.
+     * @return {?}
+     */
+    tick() {
+        if (this._runningTick) {
+            throw new Error('ApplicationRef.tick is called recursively');
+        }
+        const /** @type {?} */ scope = ApplicationRef._tickScope();
+        try {
+            this._runningTick = true;
+            this._views.forEach((view) => view.detectChanges());
+            if (this._enforceNoNewChanges) {
+                this._views.forEach((view) => view.checkNoChanges());
+            }
+        }
+        catch (/** @type {?} */ e) {
+            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
+            this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
+        }
+        finally {
+            this._runningTick = false;
+            wtfLeave(scope);
+        }
+    }
+    /**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     * @return {?}
+     */
+    get componentTypes() { return this._rootComponentTypes; }
+    /**
+     * Get a list of components registered to this application.
+     * @return {?}
+     */
+    get components() { return this._rootComponents; }
+    /**
+     * Attaches a view so that it will be dirty checked.
+     * The view will be automatically detached when it is destroyed.
+     * This will throw if the view is already attached to a ViewContainer.
+     * @param {?} viewRef
+     * @return {?}
+     */
+    attachView(viewRef) {
+        const /** @type {?} */ view = (/** @type {?} */ (viewRef));
+        this._views.push(view);
+        view.attachToAppRef(this);
+    }
+    /**
+     * Detaches a view from dirty checking again.
+     * @param {?} viewRef
+     * @return {?}
+     */
+    detachView(viewRef) {
+        const /** @type {?} */ view = (/** @type {?} */ (viewRef));
+        remove(this._views, view);
+        view.detachFromAppRef();
+    }
+    /**
      * @param {?} componentRef
      * @return {?}
      */
@@ -4652,30 +4729,7 @@ class ApplicationRef_ extends ApplicationRef {
         remove(this._rootComponents, componentRef);
     }
     /**
-     * @return {?}
-     */
-    tick() {
-        if (this._runningTick) {
-            throw new Error('ApplicationRef.tick is called recursively');
-        }
-        const /** @type {?} */ scope = ApplicationRef_._tickScope();
-        try {
-            this._runningTick = true;
-            this._views.forEach((view) => view.detectChanges());
-            if (this._enforceNoNewChanges) {
-                this._views.forEach((view) => view.checkNoChanges());
-            }
-        }
-        catch (/** @type {?} */ e) {
-            // Attention: Don't rethrow as it could cancel subscriptions to Observables!
-            this._zone.runOutsideAngular(() => this._exceptionHandler.handleError(e));
-        }
-        finally {
-            this._runningTick = false;
-            wtfLeave(scope);
-        }
-    }
-    /**
+     * \@internal
      * @return {?}
      */
     ngOnDestroy() {
@@ -4683,18 +4737,12 @@ class ApplicationRef_ extends ApplicationRef {
         this._views.slice().forEach((view) => view.destroy());
     }
     /**
+     * Returns the number of attached views.
      * @return {?}
      */
     get viewCount() { return this._views.length; }
     /**
-     * @return {?}
-     */
-    get componentTypes() { return this._rootComponentTypes; }
-    /**
-     * @return {?}
-     */
-    get components() { return this._rootComponents; }
-    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
      * @return {?}
      */
     get isStable() { return this._isStable; }
@@ -4702,12 +4750,12 @@ class ApplicationRef_ extends ApplicationRef {
 /**
  * \@internal
  */
-ApplicationRef_._tickScope = wtfCreateScope('ApplicationRef#tick()');
-ApplicationRef_.decorators = [
+ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
+ApplicationRef.decorators = [
     { type: Injectable },
 ];
 /** @nocollapse */
-ApplicationRef_.ctorParameters = () => [
+ApplicationRef.ctorParameters = () => [
     { type: NgZone, },
     { type: Console, },
     { type: Injector, },
@@ -7208,8 +7256,7 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
 const _CORE_PLATFORM_PROVIDERS = [
     // Set a default platform name for platforms that don't set it explicitly.
     { provide: PLATFORM_ID, useValue: 'unknown' },
-    { provide: PlatformRef_, deps: [Injector] },
-    { provide: PlatformRef, useExisting: PlatformRef_ },
+    { provide: PlatformRef, deps: [Injector] },
     { provide: TestabilityRegistry, deps: [] },
     { provide: Console, deps: [] },
 ];
@@ -7298,8 +7345,7 @@ class ApplicationModule {
 ApplicationModule.decorators = [
     { type: NgModule, args: [{
                 providers: [
-                    ApplicationRef_,
-                    { provide: ApplicationRef, useExisting: ApplicationRef_ },
+                    ApplicationRef,
                     ApplicationInitStatus,
                     Compiler,
                     APP_ID_RANDOM_PROVIDER,
@@ -14172,5 +14218,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵz, group$1 as ɵba, keyframes$1 as ɵbe, sequence$1 as ɵbb, state$1 as ɵbd, style$1 as ɵbc, transition$1 as ɵbf, trigger$1 as ɵy, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, ApplicationRef_ as ɵg, PlatformRef_ as ɵf, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵp, createScope$1 as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt, makeParamDecorator as ɵa, _def as ɵv, DebugContext as ɵw };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵx, group$1 as ɵy, keyframes$1 as ɵbc, sequence$1 as ɵz, state$1 as ɵbb, style$1 as ɵba, transition$1 as ɵbd, trigger$1 as ɵw, _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm, _appIdRandomProviderFactory as ɵf, defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh, DefaultIterableDifferFactory as ɵi, DefaultKeyValueDifferFactory as ɵj, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵn, createScope$1 as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr, makeParamDecorator as ɵa, _def as ɵt, DebugContext as ɵu };
 //# sourceMappingURL=index.js.map
