@@ -69,18 +69,6 @@ export interface AttributeDecorator {
      *
      * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
-     * ### Example as ES5 DSL
-     *
-     * ```
-     * var MyComponent = ng
-     *   .Component({...})
-     *   .Class({
-     *     constructor: [new ng.Attribute('title'), function(title) {
-     *       ...
-     *     }]
-     *   })
-     * ```
-     *
      * ### Example as ES5 annotation
      *
      * ```
@@ -175,11 +163,11 @@ export interface ContentChildrenDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): Query;
@@ -234,10 +222,10 @@ export interface ContentChildDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ContentChild;
 }
@@ -259,7 +247,7 @@ export declare const ContentChild: ContentChildDecorator;
 /**
  * Type of the ViewChildren decorator / constructor function.
  *
- * See {@ViewChildren}.
+ * See {@link ViewChildren}.
  *
  * @stable
  */
@@ -293,10 +281,10 @@ export interface ViewChildrenDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChildren;
 }
@@ -348,10 +336,10 @@ export interface ViewChildDecorator {
      * @stable
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChild;
 }

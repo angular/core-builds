@@ -75,7 +75,8 @@ export declare const Renderer2Interceptor: InjectionToken<Renderer2[]>;
  *
  * Use this service to bypass Angular's templating and make custom UI changes that can't be
  * expressed declaratively. For example if you need to set a property or an attribute whose name is
- * not statically known, use {@link #setElementProperty} or {@link #setElementAttribute}
+ * not statically known, use {@link Renderer#setElementProperty} or {@link
+ * Renderer#setElementAttribute}
  * respectively.
  *
  * If you are implementing a custom renderer, you must implement this interface.
@@ -103,6 +104,9 @@ export interface RendererType2 {
  */
 export declare abstract class RendererFactory2 {
     abstract createRenderer(hostElement: any, type: RendererType2 | null): Renderer2;
+    abstract begin?(): void;
+    abstract end?(): void;
+    abstract whenRenderingDone?(): Promise<any>;
 }
 /**
  * @experimental

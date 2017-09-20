@@ -11,8 +11,17 @@ export interface PlatformReflectionCapabilities {
     isReflectionEnabled(): boolean;
     factory(type: Type<any>): Function;
     hasLifecycleHook(type: any, lcProperty: string): boolean;
+    /**
+     * Return a list of annotations/types for constructor parameters
+     */
     parameters(type: Type<any>): any[][];
+    /**
+     * Return a list of annotations declared on the class
+     */
     annotations(type: Type<any>): any[];
+    /**
+     * Return a object literal which describes the annotations on Class fields/properties.
+     */
     propMetadata(typeOrFunc: Type<any>): {
         [key: string]: any[];
     };
@@ -21,6 +30,6 @@ export interface PlatformReflectionCapabilities {
     method(name: string): MethodFn;
     importUri(type: Type<any>): string;
     resourceUri(type: Type<any>): string;
-    resolveIdentifier(name: string, moduleUrl: string, members: string[] | null, runtime: any): any;
+    resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
     resolveEnum(enumIdentifier: any, name: string): any;
 }

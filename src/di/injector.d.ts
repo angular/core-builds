@@ -7,6 +7,7 @@
  */
 import { Type } from '../type';
 import { InjectionToken } from './injection_token';
+import { StaticProvider } from './provider';
 export declare const THROW_IF_NOT_FOUND: Object;
 /**
  * @whatItDoes Injector interface
@@ -34,7 +35,7 @@ export declare abstract class Injector {
     /**
      * Retrieves an instance from the injector based on the provided token.
      * If not found:
-     * - Throws {@link NoProviderError} if no `notFoundValue` that is not equal to
+     * - Throws an error if no `notFoundValue` that is not equal to
      * Injector.THROW_IF_NOT_FOUND is given
      * - Returns the `notFoundValue` otherwise
      */
@@ -44,4 +45,20 @@ export declare abstract class Injector {
      * @suppress {duplicate}
      */
     abstract get(token: any, notFoundValue?: any): any;
+    /**
+     * Create a new Injector which is configure using `StaticProvider`s.
+     *
+     * ### Example
+     *
+     * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     */
+    static create(providers: StaticProvider[], parent?: Injector): Injector;
+}
+export declare class StaticInjector implements Injector {
+    readonly parent: Injector;
+    private _records;
+    constructor(providers: StaticProvider[], parent?: Injector);
+    get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T): T;
+    get(token: any, notFoundValue?: any): any;
+    toString(): string;
 }
