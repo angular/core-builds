@@ -160,13 +160,23 @@ export declare class ApplicationRef {
     private _componentFactoryResolver;
     private _initStatus;
     private _bootstrapListeners;
-    private _rootComponents;
-    private _rootComponentTypes;
     private _views;
     private _runningTick;
     private _enforceNoNewChanges;
-    private _isStable;
     private _stable;
+    /**
+     * Get a list of component types registered to this application.
+     * This list is populated even before the component is created.
+     */
+    readonly componentTypes: Type<any>[];
+    /**
+     * Get a list of components registered to this application.
+     */
+    readonly components: ComponentRef<any>[];
+    /**
+     * Returns an Observable that indicates when the application is stable or unstable.
+     */
+    readonly isStable: Observable<boolean>;
     /**
      * Bootstrap a new component at the root level of the application.
      *
@@ -195,15 +205,6 @@ export declare class ApplicationRef {
      */
     tick(): void;
     /**
-     * Get a list of component types registered to this application.
-     * This list is populated even before the component is created.
-     */
-    readonly componentTypes: Type<any>[];
-    /**
-     * Get a list of components registered to this application.
-     */
-    readonly components: ComponentRef<any>[];
-    /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
@@ -219,8 +220,4 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     readonly viewCount: number;
-    /**
-     * Returns an Observable that indicates when the application is stable or unstable.
-     */
-    readonly isStable: Observable<boolean>;
 }

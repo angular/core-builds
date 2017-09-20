@@ -17,14 +17,11 @@
 export declare class ReflectiveKey {
     token: Object;
     id: number;
+    readonly displayName: string;
     /**
      * Private
      */
     constructor(token: Object, id: number);
-    /**
-     * Returns a stringified token.
-     */
-    readonly displayName: string;
     /**
      * Retrieves a `Key` for a token.
      */

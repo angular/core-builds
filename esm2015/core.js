@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-5751865
+ * @license Angular v5.0.0-beta.7-b14c2d1
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -40,16 +40,15 @@ class InjectionToken {
      */
     constructor(_desc) {
         this._desc = _desc;
+        /**
+         * \@internal
+         */
+        this.ngMetadataName = 'InjectionToken';
     }
     /**
      * @return {?}
      */
     toString() { return `InjectionToken ${this._desc}`; }
-    /**
-     * \@internal
-     * @return {?}
-     */
-    get ngMetadataName() { return 'InjectionToken'; }
 }
 
 /**
@@ -626,24 +625,15 @@ class Version {
      */
     constructor(full) {
         this.full = full;
+        this.major = full.split('.')[0];
+        this.minor = full.split('.')[1];
+        this.patch = full.split('.').slice(2).join('.');
     }
-    /**
-     * @return {?}
-     */
-    get major() { return this.full.split('.')[0]; }
-    /**
-     * @return {?}
-     */
-    get minor() { return this.full.split('.')[1]; }
-    /**
-     * @return {?}
-     */
-    get patch() { return this.full.split('.').slice(2).join('.'); }
 }
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-5751865');
+const VERSION = new Version('5.0.0-beta.7-b14c2d1');
 
 /**
  * @fileoverview added by tsickle
@@ -1679,12 +1669,8 @@ class ReflectiveKey {
         if (!token) {
             throw new Error('Token must be defined!');
         }
+        this.displayName = stringify(this.token);
     }
-    /**
-     * Returns a stringified token.
-     * @return {?}
-     */
-    get displayName() { return stringify(this.token); }
     /**
      * Retrieves a `Key` for a token.
      * @param {?} token
@@ -2614,7 +2600,7 @@ class ReflectiveInjector_ {
          */
         this._constructionCounter = 0;
         this._providers = _providers;
-        this._parent = _parent || null;
+        this.parent = _parent || null;
         const /** @type {?} */ len = _providers.length;
         this.keyIds = new Array(len);
         this.objs = new Array(len);
@@ -2632,10 +2618,6 @@ class ReflectiveInjector_ {
         return this._getByKey(ReflectiveKey.get(token), null, notFoundValue);
     }
     /**
-     * @return {?}
-     */
-    get parent() { return this._parent; }
-    /**
      * @param {?} providers
      * @return {?}
      */
@@ -2649,7 +2631,7 @@ class ReflectiveInjector_ {
      */
     createChildFromResolved(providers) {
         const /** @type {?} */ inj = new ReflectiveInjector_(providers);
-        inj._parent = this;
+        (/** @type {?} */ (inj)).parent = this;
         return inj;
     }
     /**
@@ -2807,7 +2789,7 @@ class ReflectiveInjector_ {
     _getByKeyDefault(key, notFoundValue, visibility) {
         let /** @type {?} */ inj;
         if (visibility instanceof SkipSelf) {
-            inj = this._parent;
+            inj = this.parent;
         }
         else {
             inj = this;
@@ -2817,7 +2799,7 @@ class ReflectiveInjector_ {
             const /** @type {?} */ obj = inj_._getObjByKeyId(key.id);
             if (obj !== UNDEFINED)
                 return obj;
-            inj = inj_._parent;
+            inj = inj_.parent;
         }
         if (inj !== null) {
             return inj.get(key.token, notFoundValue);
@@ -2922,8 +2904,8 @@ class ApplicationInitStatus {
     constructor(appInits) {
         this.appInits = appInits;
         this.initialized = false;
-        this._done = false;
-        this._donePromise = new Promise((res, rej) => {
+        this.done = false;
+        this.donePromise = new Promise((res, rej) => {
             this.resolve = res;
             this.reject = rej;
         });
@@ -2938,7 +2920,7 @@ class ApplicationInitStatus {
         }
         const /** @type {?} */ asyncInitPromises = [];
         const /** @type {?} */ complete = () => {
-            this._done = true;
+            (/** @type {?} */ (this)).done = true;
             this.resolve();
         };
         if (this.appInits) {
@@ -2955,14 +2937,6 @@ class ApplicationInitStatus {
         }
         this.initialized = true;
     }
-    /**
-     * @return {?}
-     */
-    get done() { return this._done; }
-    /**
-     * @return {?}
-     */
-    get donePromise() { return this._donePromise; }
 }
 ApplicationInitStatus.decorators = [
     { type: Injectable },
@@ -4545,12 +4519,19 @@ class ApplicationRef {
         this._componentFactoryResolver = _componentFactoryResolver;
         this._initStatus = _initStatus;
         this._bootstrapListeners = [];
-        this._rootComponents = [];
-        this._rootComponentTypes = [];
         this._views = [];
         this._runningTick = false;
         this._enforceNoNewChanges = false;
         this._stable = true;
+        /**
+         * Get a list of component types registered to this application.
+         * This list is populated even before the component is created.
+         */
+        this.componentTypes = [];
+        /**
+         * Get a list of components registered to this application.
+         */
+        this.components = [];
         this._enforceNoNewChanges = isDevMode();
         this._zone.onMicrotaskEmpty.subscribe({ next: () => { this._zone.run(() => { this.tick(); }); } });
         const /** @type {?} */ isCurrentlyStable = new Observable((observer) => {
@@ -4591,7 +4572,8 @@ class ApplicationRef {
                 unstableSub.unsubscribe();
             };
         });
-        this._isStable = merge(isCurrentlyStable, share.call(isStable));
+        (/** @type {?} */ (this)).isStable =
+            merge(isCurrentlyStable, share.call(isStable));
     }
     /**
      * Bootstrap a new component at the root level of the application.
@@ -4624,7 +4606,7 @@ class ApplicationRef {
             componentFactory =
                 /** @type {?} */ ((this._componentFactoryResolver.resolveComponentFactory(componentOrFactory)));
         }
-        this._rootComponentTypes.push(componentFactory.componentType);
+        this.componentTypes.push(componentFactory.componentType);
         // Create a factory associated with the current module if it's not bound to some other
         const /** @type {?} */ ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
             null :
@@ -4676,17 +4658,6 @@ class ApplicationRef {
         }
     }
     /**
-     * Get a list of component types registered to this application.
-     * This list is populated even before the component is created.
-     * @return {?}
-     */
-    get componentTypes() { return this._rootComponentTypes; }
-    /**
-     * Get a list of components registered to this application.
-     * @return {?}
-     */
-    get components() { return this._rootComponents; }
-    /**
      * Attaches a view so that it will be dirty checked.
      * The view will be automatically detached when it is destroyed.
      * This will throw if the view is already attached to a ViewContainer.
@@ -4715,7 +4686,7 @@ class ApplicationRef {
     _loadComponent(componentRef) {
         this.attachView(componentRef.hostView);
         this.tick();
-        this._rootComponents.push(componentRef);
+        this.components.push(componentRef);
         // Get the listeners lazily to prevent DI cycles.
         const /** @type {?} */ listeners = this._injector.get(APP_BOOTSTRAP_LISTENER, []).concat(this._bootstrapListeners);
         listeners.forEach((listener) => listener(componentRef));
@@ -4726,7 +4697,7 @@ class ApplicationRef {
      */
     _unloadComponent(componentRef) {
         this.detachView(componentRef.hostView);
-        remove(this._rootComponents, componentRef);
+        remove(this.components, componentRef);
     }
     /**
      * \@internal
@@ -4741,11 +4712,6 @@ class ApplicationRef {
      * @return {?}
      */
     get viewCount() { return this._views.length; }
-    /**
-     * Returns an Observable that indicates when the application is stable or unstable.
-     * @return {?}
-     */
-    get isStable() { return this._isStable; }
 }
 /**
  * \@internal
@@ -4993,14 +4959,10 @@ function getModuleFactory(id) {
  */
 class QueryList {
     constructor() {
-        this._dirty = true;
+        this.dirty = true;
         this._results = [];
-        this._emitter = new EventEmitter();
+        this.changes = new EventEmitter();
     }
-    /**
-     * @return {?}
-     */
-    get changes() { return this._emitter; }
     /**
      * @return {?}
      */
@@ -5084,29 +5046,24 @@ class QueryList {
      */
     reset(res) {
         this._results = flatten(res);
-        this._dirty = false;
+        (/** @type {?} */ (this)).dirty = false;
     }
     /**
      * @return {?}
      */
-    notifyOnChanges() { this._emitter.emit(this); }
+    notifyOnChanges() { (/** @type {?} */ (this.changes)).emit(this); }
     /**
      * internal
      * @return {?}
      */
-    setDirty() { this._dirty = true; }
-    /**
-     * internal
-     * @return {?}
-     */
-    get dirty() { return this._dirty; }
+    setDirty() { (/** @type {?} */ (this)).dirty = true; }
     /**
      * internal
      * @return {?}
      */
     destroy() {
-        this._emitter.complete();
-        this._emitter.unsubscribe();
+        (/** @type {?} */ (this.changes)).complete();
+        (/** @type {?} */ (this.changes)).unsubscribe();
     }
 }
 /**
@@ -5818,8 +5775,7 @@ class DefaultIterableDiffer {
      * @param {?=} trackByFn
      */
     constructor(trackByFn) {
-        this._length = 0;
-        this._collection = null;
+        this.length = 0;
         this._linkedRecords = null;
         this._unlinkedRecords = null;
         this._previousItHead = null;
@@ -5835,14 +5791,6 @@ class DefaultIterableDiffer {
         this._identityChangesTail = null;
         this._trackByFn = trackByFn || trackByIdentity;
     }
-    /**
-     * @return {?}
-     */
-    get collection() { return this._collection; }
-    /**
-     * @return {?}
-     */
-    get length() { return this._length; }
     /**
      * @param {?} fn
      * @return {?}
@@ -5988,8 +5936,8 @@ class DefaultIterableDiffer {
         let /** @type {?} */ item;
         let /** @type {?} */ itemTrackBy;
         if (Array.isArray(collection)) {
-            this._length = collection.length;
-            for (let /** @type {?} */ index = 0; index < this._length; index++) {
+            (/** @type {?} */ (this)).length = collection.length;
+            for (let /** @type {?} */ index = 0; index < this.length; index++) {
                 item = collection[index];
                 itemTrackBy = this._trackByFn(index, item);
                 if (record === null || !looseIdentical(record.trackById, itemTrackBy)) {
@@ -6026,10 +5974,10 @@ class DefaultIterableDiffer {
                 record = record._next;
                 index++;
             });
-            this._length = index;
+            (/** @type {?} */ (this)).length = index;
         }
         this._truncate(record);
-        this._collection = collection;
+        (/** @type {?} */ (this)).collection = collection;
         return this.isDirty;
     }
     /**
@@ -9138,6 +9086,9 @@ class ComponentRef_ extends ComponentRef {
         this._viewRef = _viewRef;
         this._component = _component;
         this._elDef = this._view.def.nodes[0];
+        this.hostView = _viewRef;
+        this.changeDetectorRef = _viewRef;
+        this.instance = _component;
     }
     /**
      * @return {?}
@@ -9149,21 +9100,6 @@ class ComponentRef_ extends ComponentRef {
      * @return {?}
      */
     get injector() { return new Injector_(this._view, this._elDef); }
-    /**
-     * @return {?}
-     */
-    get instance() { return this._component; }
-    ;
-    /**
-     * @return {?}
-     */
-    get hostView() { return this._viewRef; }
-    ;
-    /**
-     * @return {?}
-     */
-    get changeDetectorRef() { return this._viewRef; }
-    ;
     /**
      * @return {?}
      */

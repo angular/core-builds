@@ -252,6 +252,7 @@ export declare abstract class ReflectiveInjector implements Injector {
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
     private static INJECTOR_KEY;
+    readonly parent: Injector | null;
     keyIds: number[];
     objs: any[];
     /**
@@ -259,7 +260,6 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
      */
     constructor(_providers: ResolvedReflectiveProvider[], _parent?: Injector);
     get(token: any, notFoundValue?: any): any;
-    readonly parent: Injector | null;
     resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
     resolveAndInstantiate(provider: Provider): any;
