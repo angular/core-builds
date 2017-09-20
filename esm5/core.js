@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-b14c2d1
+ * @license Angular v5.0.0-beta.7-2c4107c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -667,7 +667,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.7-b14c2d1');
+var VERSION = new Version('5.0.0-beta.7-2c4107c');
 
 /**
  * @fileoverview added by tsickle
@@ -12953,22 +12953,21 @@ function checkAndUpdatePureExpressionDynamic(view, def, values) {
  */
 /**
  * @param {?} ngContentIndex
- * @param {?} constants
+ * @param {?} staticText
  * @return {?}
  */
-function textDef(ngContentIndex, constants) {
-    var /** @type {?} */ bindings = new Array(constants.length - 1);
-    for (var /** @type {?} */ i = 1; i < constants.length; i++) {
+function textDef(ngContentIndex, staticText) {
+    var /** @type {?} */ bindings = new Array(staticText.length - 1);
+    for (var /** @type {?} */ i = 1; i < staticText.length; i++) {
         bindings[i - 1] = {
             flags: 8 /* TypeProperty */,
             name: null,
             ns: null,
             nonMinifiedName: null,
             securityContext: null,
-            suffix: constants[i]
+            suffix: staticText[i],
         };
     }
-    var /** @type {?} */ flags = 2;
     return {
         // will bet set by the view definition
         index: -1,
@@ -12977,7 +12976,7 @@ function textDef(ngContentIndex, constants) {
         bindingIndex: -1,
         outputIndex: -1,
         // regular values
-        flags: flags,
+        flags: 2 /* TypeText */,
         childFlags: 0,
         directChildFlags: 0,
         childMatchedQueries: 0,
@@ -12985,13 +12984,13 @@ function textDef(ngContentIndex, constants) {
         matchedQueryIds: 0,
         references: {}, ngContentIndex: ngContentIndex,
         childCount: 0, bindings: bindings,
-        bindingFlags: calcBindingFlags(bindings),
+        bindingFlags: 8 /* TypeProperty */,
         outputs: [],
         element: null,
         provider: null,
-        text: { prefix: constants[0] },
+        text: { prefix: staticText[0] },
         query: null,
-        ngContent: null
+        ngContent: null,
     };
 }
 /**
@@ -13593,16 +13592,6 @@ function checkAndUpdateNodeDynamic(view, nodeDef, values) {
         case 128 /* TypePurePipe */:
             changed = checkAndUpdatePureExpressionDynamic(view, nodeDef, values);
             break;
-    }
-    if (changed) {
-        // Update oldValues after all bindings have been updated,
-        // as a setter for a property might update other properties.
-        var /** @type {?} */ bindLen = nodeDef.bindings.length;
-        var /** @type {?} */ bindingStart = nodeDef.bindingIndex;
-        var /** @type {?} */ oldValues = view.oldValues;
-        for (var /** @type {?} */ i = 0; i < bindLen; i++) {
-            oldValues[bindingStart + i] = values[i];
-        }
     }
     return changed;
 }
