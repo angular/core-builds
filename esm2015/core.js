@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-6e1896b
+ * @license Angular v5.0.0-beta.7-9bbf009
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-6e1896b');
+const VERSION = new Version('5.0.0-beta.7-9bbf009');
 
 /**
  * @fileoverview added by tsickle
@@ -3694,7 +3694,7 @@ class NgZone {
          */
         this.onUnstable = new EventEmitter(false);
         /**
-         * Notifies when there is no more microtasks enqueue in the current VM Turn.
+         * Notifies when there is no more microtasks enqueued in the current VM Turn.
          * This is a hint for Angular to do change detection, which may enqueue more microtasks.
          * For this reason this event can fire multiple times per VM Turn.
          */
@@ -3828,7 +3828,6 @@ class NgZone {
  * @return {?}
  */
 function noop() { }
-
 const EMPTY_PAYLOAD = {};
 /**
  * @param {?} zone
@@ -3918,6 +3917,44 @@ function onEnter(zone) {
 function onLeave(zone) {
     zone._nesting--;
     checkStable(zone);
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ *
+ * \@internal
+ */
+class NoopNgZone {
+    constructor() {
+        this.hasPendingMicrotasks = false;
+        this.hasPendingMacrotasks = false;
+        this.isStable = true;
+        this.onUnstable = new EventEmitter();
+        this.onMicrotaskEmpty = new EventEmitter();
+        this.onStable = new EventEmitter();
+        this.onError = new EventEmitter();
+    }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    run(fn) { return fn(); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    runGuarded(fn) { return fn(); }
+    /**
+     * @param {?} fn
+     * @return {?}
+     */
+    runOutsideAngular(fn) { return fn(); }
+    /**
+     * @template T
+     * @param {?} fn
+     * @return {?}
+     */
+    runTask(fn) { return fn(); }
 }
 
 /**
@@ -4308,6 +4345,13 @@ function getPlatform() {
     return _platform && !_platform.destroyed ? _platform : null;
 }
 /**
+ * Provides additional options to the bootstraping process.
+ *
+ * \@stable
+ * @record
+ */
+
+/**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
@@ -4352,24 +4396,16 @@ class PlatformRef {
      * \@experimental APIs related to application bootstrap are currently under review.
      * @template M
      * @param {?} moduleFactory
+     * @param {?=} options
      * @return {?}
      */
-    bootstrapModuleFactory(moduleFactory) {
-        return this._bootstrapModuleFactoryWithZone(moduleFactory);
-    }
-    /**
-     * @template M
-     * @param {?} moduleFactory
-     * @param {?=} ngZone
-     * @return {?}
-     */
-    _bootstrapModuleFactoryWithZone(moduleFactory, ngZone) {
+    bootstrapModuleFactory(moduleFactory, options) {
         // Note: We need to create the NgZone _before_ we instantiate the module,
         // as instantiating the module creates some providers eagerly.
         // So we create a mini parent injector that just contains the new NgZone and
         // pass that as parent to the NgModuleFactory.
-        if (!ngZone)
-            ngZone = new NgZone({ enableLongStackTrace: isDevMode() });
+        const /** @type {?} */ ngZoneOption = options ? options.ngZone : undefined;
+        const /** @type {?} */ ngZone = getNgZone(ngZoneOption);
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(() => {
@@ -4411,20 +4447,11 @@ class PlatformRef {
      * @return {?}
      */
     bootstrapModule(moduleType, compilerOptions = []) {
-        return this._bootstrapModuleWithZone(moduleType, compilerOptions);
-    }
-    /**
-     * @template M
-     * @param {?} moduleType
-     * @param {?=} compilerOptions
-     * @param {?=} ngZone
-     * @return {?}
-     */
-    _bootstrapModuleWithZone(moduleType, compilerOptions = [], ngZone) {
         const /** @type {?} */ compilerFactory = this.injector.get(CompilerFactory);
-        const /** @type {?} */ compiler = compilerFactory.createCompiler(Array.isArray(compilerOptions) ? compilerOptions : [compilerOptions]);
+        const /** @type {?} */ options = optionsReducer({}, compilerOptions);
+        const /** @type {?} */ compiler = compilerFactory.createCompiler([options]);
         return compiler.compileModuleAsync(moduleType)
-            .then((moduleFactory) => this._bootstrapModuleFactoryWithZone(moduleFactory, ngZone));
+            .then((moduleFactory) => this.bootstrapModuleFactory(moduleFactory, options));
     }
     /**
      * @param {?} moduleRef
@@ -4473,6 +4500,28 @@ class PlatformRef {
      */
     get destroyed() { return this._destroyed; }
 }
+PlatformRef.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+PlatformRef.ctorParameters = () => [
+    { type: Injector, },
+];
+/**
+ * @param {?=} ngZoneOption
+ * @return {?}
+ */
+function getNgZone(ngZoneOption) {
+    let /** @type {?} */ ngZone;
+    if (ngZoneOption === 'noop') {
+        ngZone = new NoopNgZone();
+    }
+    else {
+        ngZone = (ngZoneOption === 'zone.js' ? undefined : ngZoneOption) ||
+            new NgZone({ enableLongStackTrace: isDevMode() });
+    }
+    return ngZone;
+}
 /**
  * @param {?} errorHandler
  * @param {?} ngZone
@@ -4496,6 +4545,21 @@ function _callAndReportToErrorHandler(errorHandler, ngZone, callback) {
         // rethrow as the exception handler might not do it
         throw e;
     }
+}
+/**
+ * @template T
+ * @param {?} dst
+ * @param {?} objs
+ * @return {?}
+ */
+function optionsReducer(dst, objs) {
+    if (Array.isArray(objs)) {
+        dst = objs.reduce(optionsReducer, dst);
+    }
+    else {
+        dst = Object.assign({}, dst, (/** @type {?} */ (objs)));
+    }
+    return dst;
 }
 /**
  * A reference to an Angular application running on a page.

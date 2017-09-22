@@ -83,7 +83,7 @@ export declare class NgZone {
      */
     readonly onUnstable: EventEmitter<any>;
     /**
-     * Notifies when there is no more microtasks enqueue in the current VM Turn.
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
      * This is a hint for Angular to do change detection, which may enqueue more microtasks.
      * For this reason this event can fire multiple times per VM Turn.
      */

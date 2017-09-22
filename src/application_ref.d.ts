@@ -12,6 +12,7 @@ import { ComponentFactory, ComponentRef } from './linker/component_factory';
 import { NgModuleFactory, NgModuleRef } from './linker/ng_module_factory';
 import { ViewRef } from './linker/view_ref';
 import { Type } from './type';
+import { NgZone } from './zone/ng_zone';
 export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
 /**
  * Disable Angular's development mode, which turns off assertions and other
@@ -75,6 +76,21 @@ export declare function destroyPlatform(): void;
  */
 export declare function getPlatform(): PlatformRef | null;
 /**
+ * Provides additional options to the bootstraping process.
+ *
+ * @stable
+ */
+export interface BootstrapOptions {
+    /**
+     * Optionally specify which `NgZone` should be used.
+     *
+     * - Provide your own `NgZone` instance.
+     * - `zone.js` - Use default `NgZone` which requires `Zone.js`.
+     * - `noop` - Use `NoopNgZone` which does nothing.
+     */
+    ngZone?: NgZone | 'zone.js' | 'noop';
+}
+/**
  * The Angular platform is the entry point for Angular on a web page. Each page
  * has exactly one platform, and services (such as reflection) which are common
  * to every Angular application running on the page are bound in its scope.
@@ -112,8 +128,7 @@ export declare class PlatformRef {
      *
      * @experimental APIs related to application bootstrap are currently under review.
      */
-    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>): Promise<NgModuleRef<M>>;
-    private _bootstrapModuleFactoryWithZone<M>(moduleFactory, ngZone?);
+    bootstrapModuleFactory<M>(moduleFactory: NgModuleFactory<M>, options?: BootstrapOptions): Promise<NgModuleRef<M>>;
     /**
      * Creates an instance of an `@NgModule` for a given platform using the given runtime compiler.
      *
@@ -129,8 +144,7 @@ export declare class PlatformRef {
      * ```
      * @stable
      */
-    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: CompilerOptions | CompilerOptions[]): Promise<NgModuleRef<M>>;
-    private _bootstrapModuleWithZone<M>(moduleType, compilerOptions?, ngZone?);
+    bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
     private _moduleDoBootstrap(moduleRef);
     /**
      * Register a listener to be called when the platform is disposed.
