@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-9bbf009
+ * @license Angular v5.0.0-beta.7-0f5c70d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-beta.7-9bbf009
+ * @license Angular v5.0.0-beta.7-0f5c70d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.7-9bbf009');
+var VERSION = new Version('5.0.0-beta.7-0f5c70d');
 
 /**
  * @fileoverview added by tsickle
@@ -6718,7 +6718,6 @@ var EventListener = (function () {
         this.name = name;
         this.callback = callback;
     }
-    
     return EventListener;
 }());
 /**
@@ -9014,8 +9013,8 @@ var KeyValueDiffers = (function () {
      * {@link KeyValueDiffers} instance.
      *
      * The following example shows how to extend an existing list of factories,
-           * which will only be applied to the injector for this component and its children.
-           * This step is all that's required to make a new {@link KeyValueDiffer} available.
+     * which will only be applied to the injector for this component and its children.
+     * This step is all that's required to make a new {@link KeyValueDiffer} available.
      *
      * ### Example
      *
@@ -9326,7 +9325,6 @@ var Sanitizer = (function () {
 /**
  * @record
  */
-
 
 /**
  * @record
@@ -11187,7 +11185,6 @@ var ViewContainerRef_ = (function () {
         enumerable: true,
         configurable: true
     });
-    
     /**
      * @template C
      * @param {?} templateRef

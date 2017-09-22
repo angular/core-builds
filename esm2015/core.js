@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-9bbf009
+ * @license Angular v5.0.0-beta.7-0f5c70d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-9bbf009');
+const VERSION = new Version('5.0.0-beta.7-0f5c70d');
 
 /**
  * @fileoverview added by tsickle
@@ -5396,7 +5396,6 @@ class EventListener {
         this.name = name;
         this.callback = callback;
     }
-    ;
 }
 /**
  * \@experimental All debugging apis are currently experimental.
@@ -7436,7 +7435,6 @@ class Sanitizer {
  * @record
  */
 
-
 /**
  * @record
  */
@@ -9250,7 +9248,6 @@ class ViewContainerRef_ {
      * @return {?}
      */
     get length() { return this._embeddedViews.length; }
-    ;
     /**
      * @template C
      * @param {?} templateRef
