@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-4c73b52
+ * @license Angular v5.0.0-beta.7-6e1896b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-beta.7-4c73b52
+ * @license Angular v5.0.0-beta.7-6e1896b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-beta.7-4c73b52');
+var VERSION = new Version('5.0.0-beta.7-6e1896b');
 
 /**
  * @fileoverview added by tsickle
@@ -1032,7 +1032,8 @@ var MULTI_PROVIDER_FN = function () {
     return Array.prototype.slice.call(arguments);
 };
 var GET_PROPERTY_NAME = /** @type {?} */ ({});
-var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
+var ɵ2 = GET_PROPERTY_NAME;
+var USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ2 });
 var NG_TOKEN_PATH = 'ngTokenPath';
 var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
 var NULL_INJECTOR = Injector.NULL;

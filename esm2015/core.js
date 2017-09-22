@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-4c73b52
+ * @license Angular v5.0.0-beta.7-6e1896b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-4c73b52');
+const VERSION = new Version('5.0.0-beta.7-6e1896b');
 
 /**
  * @fileoverview added by tsickle
@@ -930,7 +930,8 @@ const MULTI_PROVIDER_FN = function () {
     return Array.prototype.slice.call(arguments);
 };
 const GET_PROPERTY_NAME = /** @type {?} */ ({});
-const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: GET_PROPERTY_NAME });
+const ɵ2 = GET_PROPERTY_NAME;
+const USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ2 });
 const NG_TOKEN_PATH = 'ngTokenPath';
 const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
 const NULL_INJECTOR = Injector.NULL;
