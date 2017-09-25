@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-13613d4
+ * @license Angular v5.0.0-beta.7-bb1665c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-13613d4');
+const VERSION = new Version('5.0.0-beta.7-bb1665c');
 
 /**
  * @fileoverview added by tsickle
@@ -8685,6 +8685,10 @@ const NgModuleRefTokenKey = tokenKey(NgModuleRef);
  * @return {?}
  */
 function moduleProvideDef(flags, token, value, deps) {
+    // Need to resolve forwardRefs as e.g. for `useValue` we
+    // lowered the expression and then stopped evaluating it,
+    // i.e. also didn't unwrap it.
+    value = resolveForwardRef(value);
     const /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the module definition
@@ -9876,6 +9880,10 @@ function _def(flags, matchedQueriesDsl, childCount, token, value, deps, bindings
     if (!bindings) {
         bindings = [];
     }
+    // Need to resolve forwardRefs as e.g. for `useValue` we
+    // lowered the expression and then stopped evaluating it,
+    // i.e. also didn't unwrap it.
+    value = resolveForwardRef(value);
     const /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the view definition
