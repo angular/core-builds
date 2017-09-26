@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-2cf52c1
+ * @license Angular v5.0.0-beta.7-f57b7df
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-2cf52c1');
+const VERSION = new Version('5.0.0-beta.7-f57b7df');
 
 /**
  * @fileoverview added by tsickle
@@ -3126,17 +3126,6 @@ class Compiler {
     compileModuleAndAllComponentsAsync(moduleType) {
         throw _throwError();
     }
-    /**
-     * Exposes the CSS-style selectors that have been used in `ngContent` directives within
-     * the template of the given component.
-     * This is used by the `upgrade` library to compile the appropriate transclude content
-     * in the AngularJS wrapper component.
-     *
-     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
-     * @param {?} component
-     * @return {?}
-     */
-    getNgContentSelectors(component) { throw _throwError(); }
     /**
      * Clears all caches.
      * @return {?}

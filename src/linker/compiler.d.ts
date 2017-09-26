@@ -50,15 +50,6 @@ export declare class Compiler {
      */
     compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>): Promise<ModuleWithComponentFactories<T>>;
     /**
-     * Exposes the CSS-style selectors that have been used in `ngContent` directives within
-     * the template of the given component.
-     * This is used by the `upgrade` library to compile the appropriate transclude content
-     * in the AngularJS wrapper component.
-     *
-     * @deprecated since v4. Use ComponentFactory.ngContentSelectors instead.
-     */
-    getNgContentSelectors(component: Type<any>): string[];
-    /**
      * Clears all caches.
      */
     clearCache(): void;
