@@ -32,6 +32,6 @@ export declare abstract class TemplateRef<C> {
      * data-binding and injection context from the original location.
      *
      */
-    readonly elementRef: ElementRef;
+    readonly abstract elementRef: ElementRef;
     abstract createEmbeddedView(context: C): EmbeddedViewRef<C>;
 }

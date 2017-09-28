@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-beta.7-bed8ac7
+ * @license Angular v5.0.0-beta.7-14e8e88
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-beta.7-bed8ac7');
+const VERSION = new Version('5.0.0-beta.7-14e8e88');
 
 /**
  * @fileoverview added by tsickle
@@ -2227,8 +2227,11 @@ class ResolvedReflectiveProvider_ {
         this.key = key;
         this.resolvedFactories = resolvedFactories;
         this.multiProvider = multiProvider;
-        this.resolvedFactory = this.resolvedFactories[0];
     }
+    /**
+     * @return {?}
+     */
+    get resolvedFactory() { return this.resolvedFactories[0]; }
 }
 /**
  * An internal resolved representation of a factory function created by resolving {\@link
@@ -3253,12 +3256,27 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
         super();
         this.factory = factory;
         this.ngModule = ngModule;
-        this.selector = factory.selector;
-        this.componentType = factory.componentType;
-        this.ngContentSelectors = factory.ngContentSelectors;
-        this.inputs = factory.inputs;
-        this.outputs = factory.outputs;
     }
+    /**
+     * @return {?}
+     */
+    get selector() { return this.factory.selector; }
+    /**
+     * @return {?}
+     */
+    get componentType() { return this.factory.componentType; }
+    /**
+     * @return {?}
+     */
+    get ngContentSelectors() { return this.factory.ngContentSelectors; }
+    /**
+     * @return {?}
+     */
+    get inputs() { return this.factory.inputs; }
+    /**
+     * @return {?}
+     */
+    get outputs() { return this.factory.outputs; }
     /**
      * @param {?} injector
      * @param {?=} projectableNodes
@@ -5000,6 +5018,18 @@ class QueryList {
         this.changes = new EventEmitter();
     }
     /**
+     * @return {?}
+     */
+    get length() { return this._results.length; }
+    /**
+     * @return {?}
+     */
+    get first() { return this._results[0]; }
+    /**
+     * @return {?}
+     */
+    get last() { return this._results[this.length - 1]; }
+    /**
      * See
      * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
      * @template U
@@ -5071,9 +5101,6 @@ class QueryList {
     reset(res) {
         this._results = flatten(res);
         (/** @type {?} */ (this)).dirty = false;
-        (/** @type {?} */ (this)).length = this._results.length;
-        (/** @type {?} */ (this)).last = this._results[this.length - 1];
-        (/** @type {?} */ (this)).first = this._results[0];
     }
     /**
      * @return {?}
@@ -9710,7 +9737,6 @@ class NgModuleRef_ {
         this._def = _def;
         this._destroyListeners = [];
         this._destroyed = false;
-        this.injector = this;
         initNgModule(this);
     }
     /**
@@ -9729,6 +9755,10 @@ class NgModuleRef_ {
      * @return {?}
      */
     get componentFactoryResolver() { return this.get(ComponentFactoryResolver); }
+    /**
+     * @return {?}
+     */
+    get injector() { return this; }
     /**
      * @return {?}
      */
@@ -12635,8 +12665,11 @@ class DebugRenderer2 {
      */
     constructor(delegate) {
         this.delegate = delegate;
-        this.data = this.delegate.data;
     }
+    /**
+     * @return {?}
+     */
+    get data() { return this.delegate.data; }
     /**
      * @param {?} node
      * @return {?}

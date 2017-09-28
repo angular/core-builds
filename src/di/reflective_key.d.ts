@@ -17,9 +17,6 @@
 export declare class ReflectiveKey {
     token: Object;
     id: number;
-    /**
-     * Returns a stringified token.
-     */
     readonly displayName: string;
     /**
      * Private
