@@ -23,27 +23,27 @@ export declare abstract class ComponentRef<C> {
     /**
      * Location of the Host Element of this Component Instance.
      */
-    readonly abstract location: ElementRef;
+    readonly location: ElementRef;
     /**
      * The injector on which the component instance exists.
      */
-    readonly abstract injector: Injector;
+    readonly injector: Injector;
     /**
      * The instance of the Component.
      */
-    readonly abstract instance: C;
+    readonly instance: C;
     /**
      * The {@link ViewRef} of the Host View of this Component instance.
      */
-    readonly abstract hostView: ViewRef;
+    readonly hostView: ViewRef;
     /**
      * The {@link ChangeDetectorRef} of the Component instance.
      */
-    readonly abstract changeDetectorRef: ChangeDetectorRef;
+    readonly changeDetectorRef: ChangeDetectorRef;
     /**
      * The component type.
      */
-    readonly abstract componentType: Type<any>;
+    readonly componentType: Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -57,23 +57,23 @@ export declare abstract class ComponentRef<C> {
  * @stable
  */
 export declare abstract class ComponentFactory<C> {
-    readonly abstract selector: string;
-    readonly abstract componentType: Type<any>;
+    readonly selector: string;
+    readonly componentType: Type<any>;
     /**
      * selector for all <ng-content> elements in the component.
      */
-    readonly abstract ngContentSelectors: string[];
+    readonly ngContentSelectors: string[];
     /**
      * the inputs of the component.
      */
-    readonly abstract inputs: {
+    readonly inputs: {
         propName: string;
         templateName: string;
     }[];
     /**
      * the outputs of the component.
      */
-    readonly abstract outputs: {
+    readonly outputs: {
         propName: string;
         templateName: string;
     }[];

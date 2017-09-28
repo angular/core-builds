@@ -426,17 +426,17 @@ export interface RootData {
     sanitizer: Sanitizer;
 }
 export declare abstract class DebugContext {
-    readonly abstract view: ViewData;
-    readonly abstract nodeIndex: number | null;
-    readonly abstract injector: Injector;
-    readonly abstract component: any;
-    readonly abstract providerTokens: any[];
-    readonly abstract references: {
+    readonly view: ViewData;
+    readonly nodeIndex: number | null;
+    readonly injector: Injector;
+    readonly component: any;
+    readonly providerTokens: any[];
+    readonly references: {
         [key: string]: any;
     };
-    readonly abstract context: any;
-    readonly abstract componentRenderElement: any;
-    readonly abstract renderNode: any;
+    readonly context: any;
+    readonly componentRenderElement: any;
+    readonly renderNode: any;
     abstract logError(console: Console, ...values: any[]): void;
 }
 export declare const enum CheckType {
