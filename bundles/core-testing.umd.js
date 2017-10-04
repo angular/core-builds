@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.4.4-6b96b06
+ * @license Angular v4.4.4-95f3b1d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v4.4.4-6b96b06
+ * @license Angular v4.4.4-95f3b1d
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
