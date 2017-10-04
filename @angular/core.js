@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.4.4-544a7ad
+ * @license Angular v4.4.4-df91fd0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.4.4-544a7ad');
+const VERSION = new Version('4.4.4-df91fd0');
 
 /**
  * @license
@@ -5974,7 +5974,6 @@ class EventListener {
         this.name = name;
         this.callback = callback;
     }
-    ;
 }
 /**
  * \@experimental All debugging apis are currently experimental.
@@ -7935,7 +7934,6 @@ class Sanitizer {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
 /**
  * Node instance data.
  *
@@ -9578,17 +9576,14 @@ class ComponentRef_ extends ComponentRef {
      * @return {?}
      */
     get instance() { return this._component; }
-    ;
     /**
      * @return {?}
      */
     get hostView() { return this._viewRef; }
-    ;
     /**
      * @return {?}
      */
     get changeDetectorRef() { return this._viewRef; }
-    ;
     /**
      * @return {?}
      */
@@ -9674,7 +9669,6 @@ class ViewContainerRef_ {
      * @return {?}
      */
     get length() { return this._embeddedViews.length; }
-    ;
     /**
      * @template C
      * @param {?} templateRef

@@ -1,6 +1,6 @@
 import * as tslib_1 from "tslib";
 /**
- * @license Angular v4.4.4-544a7ad
+ * @license Angular v4.4.4-df91fd0
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -796,7 +796,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('4.4.4-544a7ad');
+var VERSION = new Version('4.4.4-df91fd0');
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -6216,7 +6216,6 @@ var EventListener = (function () {
         this.name = name;
         this.callback = callback;
     }
-    ;
     return EventListener;
 }());
 /**
@@ -9919,7 +9918,6 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
     Object.defineProperty(ComponentRef_.prototype, "hostView", {
         /**
          * @return {?}
@@ -9928,7 +9926,6 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
     Object.defineProperty(ComponentRef_.prototype, "changeDetectorRef", {
         /**
          * @return {?}
@@ -9937,7 +9934,6 @@ var ComponentRef_ = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    ;
     Object.defineProperty(ComponentRef_.prototype, "componentType", {
         /**
          * @return {?}
@@ -10044,7 +10040,6 @@ var ViewContainerRef_ = (function () {
         enumerable: true,
         configurable: true
     });
-    ;
     /**
      * @template C
      * @param {?} templateRef
