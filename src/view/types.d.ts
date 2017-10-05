@@ -96,11 +96,12 @@ export declare const enum ViewFlags {
  */
 export interface NodeDef {
     flags: NodeFlags;
-    index: number;
+    nodeIndex: number;
+    checkIndex: number;
     parent: NodeDef | null;
     renderParent: NodeDef | null;
     /** this is checked against NgContentDef.index to find matched nodes */
-    ngContentIndex: number;
+    ngContentIndex: number | null;
     /** number of transitive children */
     childCount: number;
     /** aggregated NodeFlags for all transitive children (does not include self) **/
