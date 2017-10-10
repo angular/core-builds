@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.1-d7eac7e
+ * @license Angular v5.0.0-rc.1-931cf78
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -618,6 +618,10 @@ class TestBed {
         getTestBed().overrideProvider(token, provider);
         return TestBed;
     }
+    static deprecatedOverrideProvider(token, provider) {
+        getTestBed().deprecatedOverrideProvider(token, provider);
+        return TestBed;
+    }
     static get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
         return getTestBed().get(token, notFoundValue);
     }
@@ -802,6 +806,12 @@ class TestBed {
         this._pipeOverrides.push([pipe, override]);
     }
     overrideProvider(token, provider) {
+        this.overrideProviderImpl(token, provider);
+    }
+    deprecatedOverrideProvider(token, provider) {
+        this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
+    }
+    overrideProviderImpl(token, provider, deprecated = false) {
         let flags = 0;
         let value;
         if (provider.useFactory) {

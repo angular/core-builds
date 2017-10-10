@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.1-d7eac7e
+ * @license Angular v5.0.0-rc.1-931cf78
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-rc.1-d7eac7e
+ * @license Angular v5.0.0-rc.1-931cf78
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-rc.1-d7eac7e');
+var VERSION = new Version('5.0.0-rc.1-931cf78');
 
 /**
  * @fileoverview added by tsickle
@@ -10534,7 +10534,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var NOT_CREATED$1 = new Object();
+var UNDEFINED_VALUE = new Object();
 var InjectorRefTokenKey$1 = tokenKey(Injector);
 var NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
@@ -10583,8 +10583,9 @@ function initNgModule(data) {
     var /** @type {?} */ providers = data._providers = new Array(def.providers.length);
     for (var /** @type {?} */ i = 0; i < def.providers.length; i++) {
         var /** @type {?} */ provDef = def.providers[i];
-        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 :
-            _createProviderInstance$1(data, provDef);
+        if (!(provDef.flags & 4096 /* LazyProvider */)) {
+            providers[i] = _createProviderInstance$1(data, provDef);
+        }
     }
 }
 /**
@@ -10613,11 +10614,11 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
     var /** @type {?} */ providerDef = data._def.providersByKey[tokenKey$$1];
     if (providerDef) {
         var /** @type {?} */ providerInstance = data._providers[providerDef.index];
-        if (providerInstance === NOT_CREATED$1) {
+        if (providerInstance === undefined) {
             providerInstance = data._providers[providerDef.index] =
                 _createProviderInstance$1(data, providerDef);
         }
-        return providerInstance;
+        return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
     }
     return data._parent.get(depDef.token, notFoundValue);
 }
@@ -10627,16 +10628,22 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
  * @return {?}
  */
 function _createProviderInstance$1(ngModule, providerDef) {
+    var /** @type {?} */ injectable;
     switch (providerDef.flags & 201347067 /* Types */) {
         case 512 /* TypeClassProvider */:
-            return _createClass(ngModule, providerDef.value, providerDef.deps);
+            injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
+            break;
         case 1024 /* TypeFactoryProvider */:
-            return _callFactory(ngModule, providerDef.value, providerDef.deps);
+            injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
+            break;
         case 2048 /* TypeUseExistingProvider */:
-            return resolveNgModuleDep(ngModule, providerDef.deps[0]);
+            injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
+            break;
         case 256 /* TypeValueProvider */:
-            return providerDef.value;
+            injectable = providerDef.value;
+            break;
     }
+    return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 /**
  * @param {?} ngModule
@@ -10699,7 +10706,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
         var /** @type {?} */ provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             var /** @type {?} */ instance = ngModule._providers[i];
-            if (instance && instance !== NOT_CREATED$1) {
+            if (instance && instance !== UNDEFINED_VALUE) {
                 instance.ngOnDestroy();
             }
         }
@@ -11904,7 +11911,6 @@ var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 var TemplateRefTokenKey = tokenKey(TemplateRef);
 var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 var InjectorRefTokenKey = tokenKey(Injector);
-var NOT_CREATED = new Object();
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -12013,7 +12019,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
+    return _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -12309,8 +12315,9 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                     var /** @type {?} */ providerDef_1 = /** @type {?} */ (((allowPrivateServices ? /** @type {?} */ ((elDef.element)).allProviders : /** @type {?} */ ((elDef.element)).publicProviders)))[tokenKey$$1];
                     if (providerDef_1) {
                         var /** @type {?} */ providerData = asProviderData(view, providerDef_1.nodeIndex);
-                        if (providerData.instance === NOT_CREATED) {
-                            providerData.instance = _createProviderInstance(view, providerDef_1);
+                        if (!providerData) {
+                            providerData = { instance: _createProviderInstance(view, providerDef_1) };
+                            view.nodes[providerDef_1.nodeIndex] = /** @type {?} */ (providerData);
                         }
                         return providerData.instance;
                     }
@@ -12440,8 +12447,12 @@ function callElementProvidersLifecycles(view, elDef, lifecycles) {
  * @return {?}
  */
 function callProviderLifecycles(view, index, lifecycles) {
-    var /** @type {?} */ provider = asProviderData(view, index).instance;
-    if (provider === NOT_CREATED) {
+    var /** @type {?} */ providerData = asProviderData(view, index);
+    if (!providerData) {
+        return;
+    }
+    var /** @type {?} */ provider = providerData.instance;
+    if (!provider) {
         return;
     }
     Services.setCurrentNode(view, index);
@@ -13458,8 +13469,11 @@ function createViewNodes(view) {
             case 1024 /* TypeFactoryProvider */:
             case 2048 /* TypeUseExistingProvider */:
             case 256 /* TypeValueProvider */: {
-                var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
-                nodeData = /** @type {?} */ ({ instance: instance });
+                nodeData = nodes[i];
+                if (!nodeData && !(nodeDef.flags & 4096 /* LazyProvider */)) {
+                    var /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                    nodeData = /** @type {?} */ ({ instance: instance });
+                }
                 break;
             }
             case 16 /* TypePipe */: {
@@ -13468,11 +13482,14 @@ function createViewNodes(view) {
                 break;
             }
             case 16384 /* TypeDirective */: {
-                var /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
-                nodeData = /** @type {?} */ ({ instance: instance });
+                nodeData = nodes[i];
+                if (!nodeData) {
+                    var /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
+                    nodeData = /** @type {?} */ ({ instance: instance });
+                }
                 if (nodeDef.flags & 32768 /* Component */) {
                     var /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((nodeDef.parent)).nodeIndex).componentView;
-                    initView(compView, instance, instance);
+                    initView(compView, nodeData.instance, nodeData.instance);
                 }
                 break;
             }

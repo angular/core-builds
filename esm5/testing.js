@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.1-d7eac7e
+ * @license Angular v5.0.0-rc.1-931cf78
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -796,6 +796,10 @@ var TestBed = (function () {
         getTestBed().overrideProvider(token, provider);
         return TestBed;
     };
+    TestBed.deprecatedOverrideProvider = function (token, provider) {
+        getTestBed().deprecatedOverrideProvider(token, provider);
+        return TestBed;
+    };
     TestBed.get = function (token, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
@@ -1025,6 +1029,13 @@ var TestBed = (function () {
         this._pipeOverrides.push([pipe, override]);
     };
     TestBed.prototype.overrideProvider = function (token, provider) {
+        this.overrideProviderImpl(token, provider);
+    };
+    TestBed.prototype.deprecatedOverrideProvider = function (token, provider) {
+        this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
+    };
+    TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
+        if (deprecated === void 0) { deprecated = false; }
         var flags = 0;
         var value;
         if (provider.useFactory) {
