@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.1-79deeac
+ * @license Angular v5.0.0-rc.1-d7eac7e
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -667,7 +667,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-rc.1-79deeac');
+var VERSION = new Version('5.0.0-rc.1-d7eac7e');
 
 /**
  * @fileoverview added by tsickle
