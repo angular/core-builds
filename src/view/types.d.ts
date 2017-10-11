@@ -449,6 +449,7 @@ export interface ProviderOverride {
     flags: NodeFlags;
     value: any;
     deps: ([DepFlags, any] | any)[];
+    deprecatedBehavior: boolean;
 }
 export interface Services {
     setCurrentNode(view: ViewData, nodeIndex: number): void;

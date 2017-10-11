@@ -1,5 +1,5 @@
 /**
- * @license Angular v4.4.4-3232125
+ * @license Angular v4.4.4-734378c
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('4.4.4-3232125');
+const VERSION = new Version('4.4.4-734378c');
 
 /**
  * @license
@@ -9090,7 +9090,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-const NOT_CREATED$1 = new Object();
+const UNDEFINED_VALUE = new Object();
 const InjectorRefTokenKey$1 = tokenKey(Injector);
 const NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
@@ -9135,8 +9135,9 @@ function initNgModule(data) {
     const /** @type {?} */ providers = data._providers = new Array(def.providers.length);
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
-        providers[i] = provDef.flags & 4096 /* LazyProvider */ ? NOT_CREATED$1 :
-            _createProviderInstance$1(data, provDef);
+        if (!(provDef.flags & 4096 /* LazyProvider */)) {
+            providers[i] = _createProviderInstance$1(data, provDef);
+        }
     }
 }
 /**
@@ -9164,11 +9165,11 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
     const /** @type {?} */ providerDef = data._def.providersByKey[tokenKey$$1];
     if (providerDef) {
         let /** @type {?} */ providerInstance = data._providers[providerDef.index];
-        if (providerInstance === NOT_CREATED$1) {
+        if (providerInstance === undefined) {
             providerInstance = data._providers[providerDef.index] =
                 _createProviderInstance$1(data, providerDef);
         }
-        return providerInstance;
+        return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
     }
     return data._parent.get(depDef.token, notFoundValue);
 }
@@ -9178,16 +9179,22 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
  * @return {?}
  */
 function _createProviderInstance$1(ngModule, providerDef) {
+    let /** @type {?} */ injectable;
     switch (providerDef.flags & 201347067 /* Types */) {
         case 512 /* TypeClassProvider */:
-            return _createClass(ngModule, providerDef.value, providerDef.deps);
+            injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
+            break;
         case 1024 /* TypeFactoryProvider */:
-            return _callFactory(ngModule, providerDef.value, providerDef.deps);
+            injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
+            break;
         case 2048 /* TypeUseExistingProvider */:
-            return resolveNgModuleDep(ngModule, providerDef.deps[0]);
+            injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
+            break;
         case 256 /* TypeValueProvider */:
-            return providerDef.value;
+            injectable = providerDef.value;
+            break;
     }
+    return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 /**
  * @param {?} ngModule
@@ -9250,7 +9257,7 @@ function callNgModuleLifecycle(ngModule, lifecycles) {
         const /** @type {?} */ provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             const /** @type {?} */ instance = ngModule._providers[i];
-            if (instance && instance !== NOT_CREATED$1) {
+            if (instance && instance !== UNDEFINED_VALUE) {
                 instance.ngOnDestroy();
             }
         }
@@ -10202,7 +10209,6 @@ const ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 const TemplateRefTokenKey = tokenKey(TemplateRef);
 const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 const InjectorRefTokenKey = tokenKey(Injector);
-const NOT_CREATED = new Object();
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -10307,7 +10313,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
  * @return {?}
  */
 function createProviderInstance(view, def) {
-    return def.flags & 4096 /* LazyProvider */ ? NOT_CREATED : _createProviderInstance(view, def);
+    return _createProviderInstance(view, def);
 }
 /**
  * @param {?} view
@@ -10609,9 +10615,10 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
                 default:
                     const /** @type {?} */ providerDef = (((allowPrivateServices ? ((elDef.element)).allProviders : ((elDef.element)).publicProviders)))[tokenKey$$1];
                     if (providerDef) {
-                        const /** @type {?} */ providerData = asProviderData(view, providerDef.nodeIndex);
-                        if (providerData.instance === NOT_CREATED) {
-                            providerData.instance = _createProviderInstance(view, providerDef);
+                        let /** @type {?} */ providerData = asProviderData(view, providerDef.nodeIndex);
+                        if (!providerData) {
+                            providerData = { instance: _createProviderInstance(view, providerDef) };
+                            view.nodes[providerDef.nodeIndex] = (providerData);
                         }
                         return providerData.instance;
                     }
@@ -10741,8 +10748,12 @@ function callElementProvidersLifecycles(view, elDef, lifecycles) {
  * @return {?}
  */
 function callProviderLifecycles(view, index, lifecycles) {
-    const /** @type {?} */ provider = asProviderData(view, index).instance;
-    if (provider === NOT_CREATED) {
+    const /** @type {?} */ providerData = asProviderData(view, index);
+    if (!providerData) {
+        return;
+    }
+    const /** @type {?} */ provider = providerData.instance;
+    if (!provider) {
         return;
     }
     Services.setCurrentNode(view, index);
@@ -11759,8 +11770,11 @@ function createViewNodes(view) {
             case 1024 /* TypeFactoryProvider */:
             case 2048 /* TypeUseExistingProvider */:
             case 256 /* TypeValueProvider */: {
-                const /** @type {?} */ instance = createProviderInstance(view, nodeDef);
-                nodeData = ({ instance });
+                nodeData = nodes[i];
+                if (!nodeData && !(nodeDef.flags & 4096 /* LazyProvider */)) {
+                    const /** @type {?} */ instance = createProviderInstance(view, nodeDef);
+                    nodeData = ({ instance });
+                }
                 break;
             }
             case 16 /* TypePipe */: {
@@ -11769,11 +11783,14 @@ function createViewNodes(view) {
                 break;
             }
             case 16384 /* TypeDirective */: {
-                const /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
-                nodeData = ({ instance });
+                nodeData = nodes[i];
+                if (!nodeData) {
+                    const /** @type {?} */ instance = createDirectiveInstance(view, nodeDef);
+                    nodeData = ({ instance });
+                }
                 if (nodeDef.flags & 32768 /* Component */) {
                     const /** @type {?} */ compView = asElementData(view, /** @type {?} */ ((nodeDef.parent)).nodeIndex).componentView;
-                    initView(compView, instance, instance);
+                    initView(compView, nodeData.instance, nodeData.instance);
                 }
                 break;
             }
@@ -12467,9 +12484,6 @@ function applyProviderOverridesToView(def) {
                 return;
             }
             if (nodeDef.flags & 3840 /* CatProviderNoDirective */) {
-                // Make all providers lazy, so that we don't get into trouble
-                // with ordering problems of providers on the same element
-                nodeDef.flags |= 4096 /* LazyProvider */;
                 const /** @type {?} */ provider = ((nodeDef.provider));
                 const /** @type {?} */ override = providerOverrides.get(provider.token);
                 if (override) {
@@ -12486,7 +12500,8 @@ function applyProviderOverridesToView(def) {
  * @return {?}
  */
 function applyProviderOverridesToNgModule(def) {
-    if (providerOverrides.size === 0 || !hasOverrrides(def)) {
+    const { hasOverrides, hasDeprecatedOverrides } = calcHasOverrides(def);
+    if (!hasOverrides) {
         return def;
     }
     // clone the whole view definition,
@@ -12498,8 +12513,20 @@ function applyProviderOverridesToNgModule(def) {
      * @param {?} def
      * @return {?}
      */
-    function hasOverrrides(def) {
-        return def.providers.some(node => !!(node.flags & 3840 /* CatProviderNoDirective */) && providerOverrides.has(node.token));
+    function calcHasOverrides(def) {
+        let /** @type {?} */ hasOverrides = false;
+        let /** @type {?} */ hasDeprecatedOverrides = false;
+        if (providerOverrides.size === 0) {
+            return { hasOverrides, hasDeprecatedOverrides };
+        }
+        def.providers.forEach(node => {
+            const /** @type {?} */ override = providerOverrides.get(node.token);
+            if ((node.flags & 3840 /* CatProviderNoDirective */) && override) {
+                hasOverrides = true;
+                hasDeprecatedOverrides = hasDeprecatedOverrides || override.deprecatedBehavior;
+            }
+        });
+        return { hasOverrides, hasDeprecatedOverrides };
     }
     /**
      * @param {?} def
@@ -12508,9 +12535,12 @@ function applyProviderOverridesToNgModule(def) {
     function applyProviderOverrides(def) {
         for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
             const /** @type {?} */ provider = def.providers[i];
-            // Make all providers lazy, so that we don't get into trouble
-            // with ordering problems of providers on the same element
-            provider.flags |= 4096 /* LazyProvider */;
+            if (hasDeprecatedOverrides) {
+                // We had a bug where me made
+                // all providers lazy. Keep this logic behind a flag
+                // for migrating existing users.
+                provider.flags |= 4096 /* LazyProvider */;
+            }
             const /** @type {?} */ override = providerOverrides.get(provider.token);
             if (override) {
                 provider.flags = (provider.flags & ~3840 /* CatProviderNoDirective */) | override.flags;
