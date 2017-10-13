@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.2-02394d2
+ * @license Angular v5.0.0-rc.2-e81d1fc
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -667,7 +667,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-rc.2-02394d2');
+var VERSION = new Version('5.0.0-rc.2-e81d1fc');
 
 /**
  * @fileoverview added by tsickle
@@ -15995,7 +15995,7 @@ function transition$1(stateChangeExpr, steps, options) {
  * var fadeAnimation = animation([
  *   style({ opacity: '{{ start }}' }),
  *   animate('{{ time }}',
- *     style({ opacity: '{{ end }}'))
+ *     style({ opacity: '{{ end }}'}))
  * ], { params: { time: '1000ms', start: 0, end: 1 }});
  * ```
  *
