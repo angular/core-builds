@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.2-653a211
+ * @license Angular v5.0.0-rc.2-02394d2
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.0.0-rc.2-653a211
+ * @license Angular v5.0.0-rc.2-02394d2
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -423,11 +423,11 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
 /** @enum {number} */
 var ChangeDetectionStrategy = {
     /**
-       * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+       * `OnPush` means that the change detector's mode will be initially set to `CheckOnce`.
        */
     OnPush: 0,
     /**
-       * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+       * `Default` means that the change detector's mode will be initially set to `CheckAlways`.
        */
     Default: 1,
 };
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.0.0-rc.2-653a211');
+var VERSION = new Version('5.0.0-rc.2-02394d2');
 
 /**
  * @fileoverview added by tsickle

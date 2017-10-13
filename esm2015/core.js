@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.0-rc.2-653a211
+ * @license Angular v5.0.0-rc.2-02394d2
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -354,11 +354,11 @@ const ViewChild = makePropDecorator('ViewChild', (selector, data) => (Object.ass
 /** @enum {number} */
 const ChangeDetectionStrategy = {
     /**
-       * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+       * `OnPush` means that the change detector's mode will be initially set to `CheckOnce`.
        */
     OnPush: 0,
     /**
-       * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+       * `Default` means that the change detector's mode will be initially set to `CheckAlways`.
        */
     Default: 1,
 };
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.0-rc.2-653a211');
+const VERSION = new Version('5.0.0-rc.2-02394d2');
 
 /**
  * @fileoverview added by tsickle
