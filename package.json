@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "5.0.0-rc.2-81173b0",
+  "version": "5.0.0-rc.2-b922743",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./esm5/core.js",
@@ -12,7 +12,7 @@
     "tslib": "^1.7.1"
   },
   "peerDependencies": {
-    "rxjs": "^5.0.1",
+    "rxjs": "^5.5.0",
     "zone.js": "^0.8.4"
   },
   "repository": {
