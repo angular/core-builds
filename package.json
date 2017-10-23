@@ -1,0 +1,22 @@
+{
+  "name": "@angular/core",
+  "version": "5.0.0-rc.3-fc0b1d5",
+  "description": "Angular - the core framework",
+  "main": "./bundles/core.umd.js",
+  "module": "./esm5/core.js",
+  "es2015": "./esm2015/core.js",
+  "typings": "./core.d.ts",
+  "author": "angular",
+  "license": "MIT",
+  "dependencies": {
+    "tslib": "^1.7.1"
+  },
+  "peerDependencies": {
+    "rxjs": "^5.5.0",
+    "zone.js": "^0.8.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/angular/angular.git"
+  }
+}
