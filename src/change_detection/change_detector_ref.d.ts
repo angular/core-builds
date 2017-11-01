@@ -10,7 +10,7 @@
  */
 export declare abstract class ChangeDetectorRef {
     /**
-     * Marks all {@link ChangeDetectionStrategy#OnPush} ancestors as to be checked.
+     * Marks all {@link ChangeDetectionStrategy#OnPush OnPush} ancestors as to be checked.
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
@@ -51,9 +51,8 @@ export declare abstract class ChangeDetectorRef {
      *
      * The detached change detector will not be checked until it is reattached.
      *
-     * This can also be used in combination with {@link ChangeDetectorRef#detectChanges} to implement
-     * local change
-     * detection checks.
+     * This can also be used in combination with {@link ChangeDetectorRef#detectChanges detectChanges}
+     * to implement local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
@@ -103,9 +102,8 @@ export declare abstract class ChangeDetectorRef {
     /**
      * Checks the change detector and its children.
      *
-     * This can also be used in combination with {@link ChangeDetectorRef#detach} to implement local
-     * change detection
-     * checks.
+     * This can also be used in combination with {@link ChangeDetectorRef#detach detach} to implement
+     * local change detection checks.
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
@@ -120,7 +118,7 @@ export declare abstract class ChangeDetectorRef {
      * check
      * every five seconds.
      *
-     * See {@link ChangeDetectorRef#detach} for more information.
+     * See {@link ChangeDetectorRef#detach detach} for more information.
      */
     abstract detectChanges(): void;
     /**
