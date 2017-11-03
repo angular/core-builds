@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-567cc26
+ * @license Angular v5.1.0-beta.0-faa6212
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.1.0-beta.0-567cc26
+ * @license Angular v5.1.0-beta.0-faa6212
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-567cc26');
+var VERSION = new Version('5.1.0-beta.0-faa6212');
 
 /**
  * @fileoverview added by tsickle
@@ -941,6 +941,7 @@ function resolveForwardRef(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+var SOURCE = '__source';
 var _THROW_IF_NOT_FOUND = new Object();
 var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 var _NullInjector = (function () {
@@ -1002,7 +1003,7 @@ var Injector = (function () {
      * ### Example
      *
      * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-     * @param {?} providers
+     * @param {?} options
      * @param {?=} parent
      * @return {?}
      */
@@ -1012,12 +1013,17 @@ var Injector = (function () {
      * ### Example
      *
      * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-     * @param {?} providers
+     * @param {?} options
      * @param {?=} parent
      * @return {?}
      */
-    function (providers, parent) {
-        return new StaticInjector(providers, parent);
+    function (options, parent) {
+        if (Array.isArray(options)) {
+            return new StaticInjector(options, parent);
+        }
+        else {
+            return new StaticInjector(options.providers, options.parent, options.name || null);
+        }
     };
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new _NullInjector();
@@ -1040,9 +1046,11 @@ var NULL_INJECTOR = Injector.NULL;
 var NEW_LINE = /\n/gm;
 var NO_NEW_LINE = 'ɵ';
 var StaticInjector = (function () {
-    function StaticInjector(providers, parent) {
+    function StaticInjector(providers, parent, source) {
         if (parent === void 0) { parent = NULL_INJECTOR; }
+        if (source === void 0) { source = null; }
         this.parent = parent;
+        this.source = source;
         var /** @type {?} */ records = this._records = new Map();
         records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
         recursivelyProcessProviders(records, providers);
@@ -1064,7 +1072,10 @@ var StaticInjector = (function () {
         }
         catch (/** @type {?} */ e) {
             var /** @type {?} */ tokenPath = e[NG_TEMP_TOKEN_PATH];
-            e.message = formatError('\n' + e.message, tokenPath);
+            if (token[SOURCE]) {
+                tokenPath.unshift(token[SOURCE]);
+            }
+            e.message = formatError('\n' + e.message, tokenPath, this.source);
             e[NG_TOKEN_PATH] = tokenPath;
             e[NG_TEMP_TOKEN_PATH] = null;
             throw e;
@@ -1300,9 +1311,11 @@ function computeDeps(provider) {
 /**
  * @param {?} text
  * @param {?} obj
+ * @param {?=} source
  * @return {?}
  */
-function formatError(text, obj) {
+function formatError(text, obj, source) {
+    if (source === void 0) { source = null; }
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     var /** @type {?} */ context = stringify(obj);
     if (obj instanceof Array) {
@@ -1318,7 +1331,7 @@ function formatError(text, obj) {
         }
         context = "{" + parts.join(', ') + "}";
     }
-    return "StaticInjectorError[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
+    return "StaticInjectorError" + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
 }
 /**
  * @param {?} text
@@ -5240,7 +5253,8 @@ function createPlatform(injector) {
  */
 function createPlatformFactory(parentPlatformFactory, name, providers) {
     if (providers === void 0) { providers = []; }
-    var /** @type {?} */ marker = new InjectionToken("Platform: " + name);
+    var /** @type {?} */ desc = "Platform: " + name;
+    var /** @type {?} */ marker = new InjectionToken(desc);
     return function (extraProviders) {
         if (extraProviders === void 0) { extraProviders = []; }
         var /** @type {?} */ platform = getPlatform();
@@ -5249,7 +5263,8 @@ function createPlatformFactory(parentPlatformFactory, name, providers) {
                 parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
             else {
-                createPlatform(Injector.create(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
+                var /** @type {?} */ injectedProviders = providers.concat(extraProviders).concat({ provide: marker, useValue: true });
+                createPlatform(Injector.create({ providers: injectedProviders, name: desc }));
             }
         }
         return assertPlatform(marker);
@@ -5402,10 +5417,11 @@ var PlatformRef = (function () {
         // pass that as parent to the NgModuleFactory.
         var /** @type {?} */ ngZoneOption = options ? options.ngZone : undefined;
         var /** @type {?} */ ngZone = getNgZone(ngZoneOption);
+        var /** @type {?} */ providers = [{ provide: NgZone, useValue: ngZone }];
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(function () {
-            var /** @type {?} */ ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], _this.injector);
+            var /** @type {?} */ ngZoneInjector = Injector.create({ providers: providers, parent: _this.injector, name: moduleFactory.moduleType.name });
             var /** @type {?} */ moduleRef = /** @type {?} */ (moduleFactory.create(ngZoneInjector));
             var /** @type {?} */ exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
@@ -9840,9 +9856,10 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
 }
 /**
  * @param {?} deps
+ * @param {?=} sourceName
  * @return {?}
  */
-function splitDepsDsl(deps) {
+function splitDepsDsl(deps, sourceName) {
     return deps.map(function (value) {
         var /** @type {?} */ token;
         var /** @type {?} */ flags;
@@ -9852,6 +9869,9 @@ function splitDepsDsl(deps) {
         else {
             flags = 0 /* None */;
             token = value;
+        }
+        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
+            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
         }
         return { flags: flags, token: token, tokenKey: tokenKey(token) };
     });
@@ -10550,7 +10570,7 @@ function moduleProvideDef(flags, token, value, deps) {
     // lowered the expression and then stopped evaluating it,
     // i.e. also didn't unwrap it.
     value = resolveForwardRef(value);
-    var /** @type {?} */ depDefs = splitDepsDsl(deps);
+    var /** @type {?} */ depDefs = splitDepsDsl(deps, token.name);
     return {
         // will bet set by the module definition
         index: -1,
@@ -11991,7 +12011,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
     // lowered the expression and then stopped evaluating it,
     // i.e. also didn't unwrap it.
     value = resolveForwardRef(value);
-    var /** @type {?} */ depDefs = splitDepsDsl(deps);
+    var /** @type {?} */ depDefs = splitDepsDsl(deps, token.name);
     return {
         // will bet set by the view definition
         nodeIndex: -1,
@@ -16642,35 +16662,34 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵx = animate$1;
-exports.ɵy = group$1;
-exports.ɵbc = keyframes$1;
-exports.ɵz = sequence$1;
-exports.ɵbb = state$1;
-exports.ɵba = style$1;
-exports.ɵbd = transition$1;
-exports.ɵw = trigger$1;
-exports.ɵk = _iterableDiffersFactory;
-exports.ɵl = _keyValueDiffersFactory;
-exports.ɵm = _localeFactory;
-exports.ɵf = _appIdRandomProviderFactory;
-exports.ɵg = defaultIterableDiffers;
-exports.ɵh = defaultKeyValueDiffers;
-exports.ɵi = DefaultIterableDifferFactory;
-exports.ɵj = DefaultKeyValueDifferFactory;
-exports.ɵb = StaticInjector;
-exports.ɵc = ReflectiveInjector_;
-exports.ɵd = ReflectiveDependency;
-exports.ɵe = resolveReflectiveProviders;
-exports.ɵn = wtfEnabled;
-exports.ɵp = createScope;
-exports.ɵo = detectWTF;
-exports.ɵs = endTimeRange;
-exports.ɵq = leave;
-exports.ɵr = startTimeRange;
+exports.ɵw = animate$1;
+exports.ɵx = group$1;
+exports.ɵbb = keyframes$1;
+exports.ɵy = sequence$1;
+exports.ɵba = state$1;
+exports.ɵz = style$1;
+exports.ɵbc = transition$1;
+exports.ɵv = trigger$1;
+exports.ɵj = _iterableDiffersFactory;
+exports.ɵk = _keyValueDiffersFactory;
+exports.ɵl = _localeFactory;
+exports.ɵe = _appIdRandomProviderFactory;
+exports.ɵf = defaultIterableDiffers;
+exports.ɵg = defaultKeyValueDiffers;
+exports.ɵh = DefaultIterableDifferFactory;
+exports.ɵi = DefaultKeyValueDifferFactory;
+exports.ɵb = ReflectiveInjector_;
+exports.ɵc = ReflectiveDependency;
+exports.ɵd = resolveReflectiveProviders;
+exports.ɵm = wtfEnabled;
+exports.ɵo = createScope;
+exports.ɵn = detectWTF;
+exports.ɵr = endTimeRange;
+exports.ɵp = leave;
+exports.ɵq = startTimeRange;
 exports.ɵa = makeParamDecorator;
-exports.ɵt = _def;
-exports.ɵu = DebugContext;
+exports.ɵs = _def;
+exports.ɵt = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -39,7 +39,7 @@ export declare function splitMatchedQueriesDsl(matchedQueriesDsl: [string | numb
     };
     matchedQueryIds: number;
 };
-export declare function splitDepsDsl(deps: ([DepFlags, any] | any)[]): DepDef[];
+export declare function splitDepsDsl(deps: ([DepFlags, any] | any)[], sourceName?: string): DepDef[];
 export declare function getParentRenderElement(view: ViewData, renderHost: any, def: NodeDef): any;
 export declare function resolveDefinition<D extends Definition<any>>(factory: DefinitionFactory<D>): D;
 export declare function rootRenderNodes(view: ViewData): any[];
