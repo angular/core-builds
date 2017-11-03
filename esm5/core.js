@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-a99eb16
+ * @license Angular v5.1.0-beta.0-f076401
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -667,7 +667,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-a99eb16');
+var VERSION = new Version('5.1.0-beta.0-f076401');
 
 /**
  * @fileoverview added by tsickle
@@ -902,7 +902,6 @@ function resolveForwardRef(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var SOURCE = '__source';
 var _THROW_IF_NOT_FOUND = new Object();
 var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 var _NullInjector = (function () {
@@ -964,7 +963,7 @@ var Injector = (function () {
      * ### Example
      *
      * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-     * @param {?} options
+     * @param {?} providers
      * @param {?=} parent
      * @return {?}
      */
@@ -974,17 +973,12 @@ var Injector = (function () {
      * ### Example
      *
      * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
-     * @param {?} options
+     * @param {?} providers
      * @param {?=} parent
      * @return {?}
      */
-    function (options, parent) {
-        if (Array.isArray(options)) {
-            return new StaticInjector(options, parent);
-        }
-        else {
-            return new StaticInjector(options.providers, options.parent, options.name || null);
-        }
+    function (providers, parent) {
+        return new StaticInjector(providers, parent);
     };
     Injector.THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
     Injector.NULL = new _NullInjector();
@@ -1007,11 +1001,9 @@ var NULL_INJECTOR = Injector.NULL;
 var NEW_LINE = /\n/gm;
 var NO_NEW_LINE = 'ɵ';
 var StaticInjector = (function () {
-    function StaticInjector(providers, parent, source) {
+    function StaticInjector(providers, parent) {
         if (parent === void 0) { parent = NULL_INJECTOR; }
-        if (source === void 0) { source = null; }
         this.parent = parent;
-        this.source = source;
         var /** @type {?} */ records = this._records = new Map();
         records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
         recursivelyProcessProviders(records, providers);
@@ -1033,10 +1025,7 @@ var StaticInjector = (function () {
         }
         catch (/** @type {?} */ e) {
             var /** @type {?} */ tokenPath = e[NG_TEMP_TOKEN_PATH];
-            if (token[SOURCE]) {
-                tokenPath.unshift(token[SOURCE]);
-            }
-            e.message = formatError('\n' + e.message, tokenPath, this.source);
+            e.message = formatError('\n' + e.message, tokenPath);
             e[NG_TOKEN_PATH] = tokenPath;
             e[NG_TEMP_TOKEN_PATH] = null;
             throw e;
@@ -1272,11 +1261,9 @@ function computeDeps(provider) {
 /**
  * @param {?} text
  * @param {?} obj
- * @param {?=} source
  * @return {?}
  */
-function formatError(text, obj, source) {
-    if (source === void 0) { source = null; }
+function formatError(text, obj) {
     text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
     var /** @type {?} */ context = stringify(obj);
     if (obj instanceof Array) {
@@ -1292,7 +1279,7 @@ function formatError(text, obj, source) {
         }
         context = "{" + parts.join(', ') + "}";
     }
-    return "StaticInjectorError" + (source ? '(' + source + ')' : '') + "[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
+    return "StaticInjectorError[" + context + "]: " + text.replace(NEW_LINE, '\n  ');
 }
 /**
  * @param {?} text
@@ -5214,8 +5201,7 @@ function createPlatform(injector) {
  */
 function createPlatformFactory(parentPlatformFactory, name, providers) {
     if (providers === void 0) { providers = []; }
-    var /** @type {?} */ desc = "Platform: " + name;
-    var /** @type {?} */ marker = new InjectionToken(desc);
+    var /** @type {?} */ marker = new InjectionToken("Platform: " + name);
     return function (extraProviders) {
         if (extraProviders === void 0) { extraProviders = []; }
         var /** @type {?} */ platform = getPlatform();
@@ -5224,8 +5210,7 @@ function createPlatformFactory(parentPlatformFactory, name, providers) {
                 parentPlatformFactory(providers.concat(extraProviders).concat({ provide: marker, useValue: true }));
             }
             else {
-                var /** @type {?} */ injectedProviders = providers.concat(extraProviders).concat({ provide: marker, useValue: true });
-                createPlatform(Injector.create({ providers: injectedProviders, name: desc }));
+                createPlatform(Injector.create(providers.concat(extraProviders).concat({ provide: marker, useValue: true })));
             }
         }
         return assertPlatform(marker);
@@ -5378,11 +5363,10 @@ var PlatformRef = (function () {
         // pass that as parent to the NgModuleFactory.
         var /** @type {?} */ ngZoneOption = options ? options.ngZone : undefined;
         var /** @type {?} */ ngZone = getNgZone(ngZoneOption);
-        var /** @type {?} */ providers = [{ provide: NgZone, useValue: ngZone }];
         // Attention: Don't use ApplicationRef.run here,
         // as we want to be sure that all possible constructor calls are inside `ngZone.run`!
         return ngZone.run(function () {
-            var /** @type {?} */ ngZoneInjector = Injector.create({ providers: providers, parent: _this.injector, name: moduleFactory.moduleType.name });
+            var /** @type {?} */ ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], _this.injector);
             var /** @type {?} */ moduleRef = /** @type {?} */ (moduleFactory.create(ngZoneInjector));
             var /** @type {?} */ exceptionHandler = moduleRef.injector.get(ErrorHandler, null);
             if (!exceptionHandler) {
@@ -9817,10 +9801,9 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
 }
 /**
  * @param {?} deps
- * @param {?=} sourceName
  * @return {?}
  */
-function splitDepsDsl(deps, sourceName) {
+function splitDepsDsl(deps) {
     return deps.map(function (value) {
         var /** @type {?} */ token;
         var /** @type {?} */ flags;
@@ -9830,9 +9813,6 @@ function splitDepsDsl(deps, sourceName) {
         else {
             flags = 0 /* None */;
             token = value;
-        }
-        if (token && (typeof token === 'function' || typeof token === 'object') && sourceName) {
-            Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
         }
         return { flags: flags, token: token, tokenKey: tokenKey(token) };
     });
@@ -10531,7 +10511,7 @@ function moduleProvideDef(flags, token, value, deps) {
     // lowered the expression and then stopped evaluating it,
     // i.e. also didn't unwrap it.
     value = resolveForwardRef(value);
-    var /** @type {?} */ depDefs = splitDepsDsl(deps, token.name);
+    var /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the module definition
         index: -1,
@@ -11972,7 +11952,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
     // lowered the expression and then stopped evaluating it,
     // i.e. also didn't unwrap it.
     value = resolveForwardRef(value);
-    var /** @type {?} */ depDefs = splitDepsDsl(deps, token.name);
+    var /** @type {?} */ depDefs = splitDepsDsl(deps);
     return {
         // will bet set by the view definition
         nodeIndex: -1,
@@ -16510,5 +16490,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵw, group$1 as ɵx, keyframes$1 as ɵbb, sequence$1 as ɵy, state$1 as ɵba, style$1 as ɵz, transition$1 as ɵbc, trigger$1 as ɵv, _iterableDiffersFactory as ɵj, _keyValueDiffersFactory as ɵk, _localeFactory as ɵl, _appIdRandomProviderFactory as ɵe, defaultIterableDiffers as ɵf, defaultKeyValueDiffers as ɵg, DefaultIterableDifferFactory as ɵh, DefaultKeyValueDifferFactory as ɵi, ReflectiveInjector_ as ɵb, ReflectiveDependency as ɵc, resolveReflectiveProviders as ɵd, wtfEnabled as ɵm, createScope as ɵo, detectWTF as ɵn, endTimeRange as ɵr, leave as ɵp, startTimeRange as ɵq, makeParamDecorator as ɵa, _def as ɵs, DebugContext as ɵt };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearProviderOverrides as ɵclearProviderOverrides, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵx, group$1 as ɵy, keyframes$1 as ɵbc, sequence$1 as ɵz, state$1 as ɵbb, style$1 as ɵba, transition$1 as ɵbd, trigger$1 as ɵw, _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm, _appIdRandomProviderFactory as ɵf, defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh, DefaultIterableDifferFactory as ɵi, DefaultKeyValueDifferFactory as ɵj, StaticInjector as ɵb, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe, wtfEnabled as ɵn, createScope as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr, makeParamDecorator as ɵa, _def as ɵt, DebugContext as ɵu };
 //# sourceMappingURL=core.js.map
