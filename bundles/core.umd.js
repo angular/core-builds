@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-b489259
+ * @license Angular v5.1.0-beta.0-6e8e3bd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.1.0-beta.0-b489259
+ * @license Angular v5.1.0-beta.0-6e8e3bd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-b489259');
+var VERSION = new Version('5.1.0-beta.0-6e8e3bd');
 
 /**
  * @fileoverview added by tsickle
@@ -9492,7 +9492,8 @@ var Services = {
     createComponentView: /** @type {?} */ ((undefined)),
     createNgModuleRef: /** @type {?} */ ((undefined)),
     overrideProvider: /** @type {?} */ ((undefined)),
-    clearProviderOverrides: /** @type {?} */ ((undefined)),
+    overrideComponentView: /** @type {?} */ ((undefined)),
+    clearOverrides: /** @type {?} */ ((undefined)),
     checkAndUpdateView: /** @type {?} */ ((undefined)),
     checkNoChangesView: /** @type {?} */ ((undefined)),
     destroyView: /** @type {?} */ ((undefined)),
@@ -13990,7 +13991,8 @@ function initServicesIfNeeded() {
     Services.createComponentView = services.createComponentView;
     Services.createNgModuleRef = services.createNgModuleRef;
     Services.overrideProvider = services.overrideProvider;
-    Services.clearProviderOverrides = services.clearProviderOverrides;
+    Services.overrideComponentView = services.overrideComponentView;
+    Services.clearOverrides = services.clearOverrides;
     Services.checkAndUpdateView = services.checkAndUpdateView;
     Services.checkNoChangesView = services.checkNoChangesView;
     Services.destroyView = services.destroyView;
@@ -14012,7 +14014,8 @@ function createProdServices() {
         createComponentView: createComponentView,
         createNgModuleRef: createNgModuleRef,
         overrideProvider: NOOP,
-        clearProviderOverrides: NOOP,
+        overrideComponentView: NOOP,
+        clearOverrides: NOOP,
         checkAndUpdateView: checkAndUpdateView,
         checkNoChangesView: checkNoChangesView,
         destroyView: destroyView,
@@ -14041,7 +14044,8 @@ function createDebugServices() {
         createComponentView: debugCreateComponentView,
         createNgModuleRef: debugCreateNgModuleRef,
         overrideProvider: debugOverrideProvider,
-        clearProviderOverrides: debugClearProviderOverrides,
+        overrideComponentView: debugOverrideComponentView,
+        clearOverrides: debugClearOverrides,
         checkAndUpdateView: debugCheckAndUpdateView,
         checkNoChangesView: debugCheckNoChangesView,
         destroyView: debugDestroyView,
@@ -14116,8 +14120,14 @@ function debugCreateEmbeddedView(parentView, anchorDef, viewDef$$1, context) {
  * @return {?}
  */
 function debugCreateComponentView(parentView, nodeDef, viewDef$$1, hostElement) {
-    var /** @type {?} */ defWithOverride = applyProviderOverridesToView(viewDef$$1);
-    return callWithDebugContext(DebugAction.create, createComponentView, null, [parentView, nodeDef, defWithOverride, hostElement]);
+    var /** @type {?} */ overrideComponentView = viewDefOverrides.get(/** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((nodeDef.element)).componentProvider)).provider)).token);
+    if (overrideComponentView) {
+        viewDef$$1 = overrideComponentView;
+    }
+    else {
+        viewDef$$1 = applyProviderOverridesToView(viewDef$$1);
+    }
+    return callWithDebugContext(DebugAction.create, createComponentView, null, [parentView, nodeDef, viewDef$$1, hostElement]);
 }
 /**
  * @param {?} moduleType
@@ -14131,6 +14141,7 @@ function debugCreateNgModuleRef(moduleType, parentInjector, bootstrapComponents,
     return createNgModuleRef(moduleType, parentInjector, bootstrapComponents, defWithOverride);
 }
 var providerOverrides = new Map();
+var viewDefOverrides = new Map();
 /**
  * @param {?} override
  * @return {?}
@@ -14139,10 +14150,21 @@ function debugOverrideProvider(override) {
     providerOverrides.set(override.token, override);
 }
 /**
+ * @param {?} comp
+ * @param {?} compFactory
  * @return {?}
  */
-function debugClearProviderOverrides() {
+function debugOverrideComponentView(comp, compFactory) {
+    var /** @type {?} */ hostViewDef = resolveDefinition(getComponentViewDefinitionFactory(compFactory));
+    var /** @type {?} */ compViewDef = resolveDefinition(/** @type {?} */ ((/** @type {?} */ ((hostViewDef.nodes[0].element)).componentView)));
+    viewDefOverrides.set(comp, compViewDef);
+}
+/**
+ * @return {?}
+ */
+function debugClearOverrides() {
     providerOverrides.clear();
+    viewDefOverrides.clear();
 }
 /**
  * @param {?} def
@@ -15214,11 +15236,20 @@ function overrideProvider(override) {
     return Services.overrideProvider(override);
 }
 /**
+ * @param {?} comp
+ * @param {?} componentFactory
  * @return {?}
  */
-function clearProviderOverrides() {
+function overrideComponentView(comp, componentFactory) {
     initServicesIfNeeded();
-    return Services.clearProviderOverrides();
+    return Services.overrideComponentView(comp, componentFactory);
+}
+/**
+ * @return {?}
+ */
+function clearOverrides() {
+    initServicesIfNeeded();
+    return Services.clearOverrides();
 }
 /**
  * @param {?} ngModuleType
@@ -16604,7 +16635,8 @@ exports.ɵstringify = stringify;
 exports.ɵmakeDecorator = makeDecorator;
 exports.ɵisObservable = isObservable;
 exports.ɵisPromise = isPromise;
-exports.ɵclearProviderOverrides = clearProviderOverrides;
+exports.ɵclearOverrides = clearOverrides;
+exports.ɵoverrideComponentView = overrideComponentView;
 exports.ɵoverrideProvider = overrideProvider;
 exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;
 exports.ɵregisterModuleFactory = registerModuleFactory;

@@ -32,6 +32,7 @@ export declare type TestModuleMetadata = {
     declarations?: any[];
     imports?: any[];
     schemas?: Array<SchemaMetadata | any[]>;
+    aotSummaries?: () => any[];
 };
 /**
  * @whatItDoes Configures and initializes environment for unit testing and provides methods for
@@ -89,15 +90,24 @@ export declare class TestBed implements Injector {
     static overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): typeof TestBed;
     static overrideTemplate(component: Type<any>, template: string): typeof TestBed;
     /**
+     * Overrides the template of the given component, compiling the template
+     * in the context of the TestingModule.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     */
+    static overrideTemplateUsingTestingModule(component: Type<any>, template: string): typeof TestBed;
+    /**
      * Overwrites all providers for the given token with the given provider definition.
+     *
+     * Note: This works for JIT and AOTed components as well.
      */
     static overrideProvider(token: any, provider: {
         useFactory: Function;
         deps: any[];
-    }): void;
+    }): typeof TestBed;
     static overrideProvider(token: any, provider: {
         useValue: any;
-    }): void;
+    }): typeof TestBed;
     /**
      * Overwrites all providers for the given token with the given provider definition.
      *
@@ -126,7 +136,9 @@ export declare class TestBed implements Injector {
     private _imports;
     private _schemas;
     private _activeFixtures;
+    private _testEnvAotSummaries;
     private _aotSummaries;
+    private _templateOverrides;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     /**
@@ -188,6 +200,7 @@ export declare class TestBed implements Injector {
         useValue: any;
     }): void;
     private overrideProviderImpl(token, provider, deprecated?);
+    overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 /**

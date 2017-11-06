@@ -1,9 +1,9 @@
 /**
- * @license Angular v5.1.0-beta.0-b489259
+ * @license Angular v5.1.0-beta.0-6e8e3bd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, Component, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -540,7 +540,9 @@ class TestBed {
         this._imports = [];
         this._schemas = [];
         this._activeFixtures = [];
-        this._aotSummaries = () => [];
+        this._testEnvAotSummaries = () => [];
+        this._aotSummaries = [];
+        this._templateOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -614,6 +616,16 @@ class TestBed {
         getTestBed().overrideComponent(component, { set: { template, templateUrl: (null) } });
         return TestBed;
     }
+    /**
+       * Overrides the template of the given component, compiling the template
+       * in the context of the TestingModule.
+       *
+       * Note: This works for JIT and AOTed components as well.
+       */
+    static overrideTemplateUsingTestingModule(component, template) {
+        getTestBed().overrideTemplateUsingTestingModule(component, template);
+        return TestBed;
+    }
     static overrideProvider(token, provider) {
         getTestBed().overrideProvider(token, provider);
         return TestBed;
@@ -648,7 +660,7 @@ class TestBed {
         this.platform = platform;
         this.ngModule = ngModule;
         if (aotSummaries) {
-            this._aotSummaries = aotSummaries;
+            this._testEnvAotSummaries = aotSummaries;
         }
     }
     /**
@@ -660,10 +672,12 @@ class TestBed {
         this.resetTestingModule();
         this.platform = (null);
         this.ngModule = (null);
-        this._aotSummaries = () => [];
+        this._testEnvAotSummaries = () => [];
     }
     resetTestingModule() {
-        ɵclearProviderOverrides();
+        ɵclearOverrides();
+        this._aotSummaries = [];
+        this._templateOverrides = [];
         this._compiler = (null);
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -705,6 +719,9 @@ class TestBed {
         if (moduleDef.schemas) {
             this._schemas.push(...moduleDef.schemas);
         }
+        if (moduleDef.aotSummaries) {
+            this._aotSummaries.push(moduleDef.aotSummaries);
+        }
     }
     compileComponents() {
         if (this._moduleFactory || this._instantiated) {
@@ -737,6 +754,10 @@ class TestBed {
                 }
             }
         }
+        for (const { component, templateOf } of this._templateOverrides) {
+            const compFactory = this._compiler.getComponentFactory(templateOf);
+            ɵoverrideComponentView(component, compFactory);
+        }
         const ngZone = new NgZone({ enableLongStackTrace: true });
         const ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
@@ -749,7 +770,7 @@ class TestBed {
     }
     _createCompilerAndModule() {
         const providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-        const declarations = this._declarations;
+        const declarations = [...this._declarations, ...this._templateOverrides.map(entry => entry.templateOf)];
         const imports = [this.ngModule, this._imports];
         const schemas = this._schemas;
         class DynamicTestModule {
@@ -761,7 +782,9 @@ class TestBed {
         DynamicTestModule.ctorParameters = () => [];
         const compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
-        this._compiler.loadAotSummaries(this._aotSummaries);
+        for (const summary of [this._testEnvAotSummaries, ...this._aotSummaries]) {
+            this._compiler.loadAotSummaries(summary);
+        }
         this._moduleOverrides.forEach((entry) => this._compiler.overrideModule(entry[0], entry[1]));
         this._componentOverrides.forEach((entry) => this._compiler.overrideComponent(entry[0], entry[1]));
         this._directiveOverrides.forEach((entry) => this._compiler.overrideDirective(entry[0], entry[1]));
@@ -844,6 +867,17 @@ class TestBed {
             return [depFlags, depToken];
         });
         ɵoverrideProvider({ token, flags, deps, value, deprecatedBehavior: deprecated });
+    }
+    overrideTemplateUsingTestingModule(component, template) {
+        this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
+        class OverrideComponent {
+        }
+        OverrideComponent.decorators = [
+            { type: Component, args: [{ selector: 'empty', template },] },
+        ];
+        /** @nocollapse */
+        OverrideComponent.ctorParameters = () => [];
+        this._templateOverrides.push({ component, templateOf: OverrideComponent });
     }
     createComponent(component) {
         this._initIfNeeded();

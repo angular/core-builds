@@ -1,9 +1,9 @@
 /**
- * @license Angular v5.1.0-beta.0-b489259
+ * @license Angular v5.1.0-beta.0-6e8e3bd
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearProviderOverrides, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, Component, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 import { __extends } from 'tslib';
 
 /**
@@ -656,7 +656,9 @@ var TestBed = (function () {
         this._imports = [];
         this._schemas = [];
         this._activeFixtures = [];
-        this._aotSummaries = function () { return []; };
+        this._testEnvAotSummaries = function () { return []; };
+        this._aotSummaries = [];
+        this._templateOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -792,6 +794,28 @@ var TestBed = (function () {
         getTestBed().overrideComponent(component, { set: { template: template, templateUrl: (null) } });
         return TestBed;
     };
+    /**
+     * Overrides the template of the given component, compiling the template
+     * in the context of the TestingModule.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     */
+    /**
+       * Overrides the template of the given component, compiling the template
+       * in the context of the TestingModule.
+       *
+       * Note: This works for JIT and AOTed components as well.
+       */
+    TestBed.overrideTemplateUsingTestingModule = /**
+       * Overrides the template of the given component, compiling the template
+       * in the context of the TestingModule.
+       *
+       * Note: This works for JIT and AOTed components as well.
+       */
+    function (component, template) {
+        getTestBed().overrideTemplateUsingTestingModule(component, template);
+        return TestBed;
+    };
     TestBed.overrideProvider = function (token, provider) {
         getTestBed().overrideProvider(token, provider);
         return TestBed;
@@ -853,7 +877,7 @@ var TestBed = (function () {
         this.platform = platform;
         this.ngModule = ngModule;
         if (aotSummaries) {
-            this._aotSummaries = aotSummaries;
+            this._testEnvAotSummaries = aotSummaries;
         }
     };
     /**
@@ -875,10 +899,12 @@ var TestBed = (function () {
         this.resetTestingModule();
         this.platform = (null);
         this.ngModule = (null);
-        this._aotSummaries = function () { return []; };
+        this._testEnvAotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
-        ɵclearProviderOverrides();
+        ɵclearOverrides();
+        this._aotSummaries = [];
+        this._templateOverrides = [];
         this._compiler = (null);
         this._moduleOverrides = [];
         this._componentOverrides = [];
@@ -920,6 +946,9 @@ var TestBed = (function () {
         if (moduleDef.schemas) {
             (_d = this._schemas).push.apply(_d, moduleDef.schemas);
         }
+        if (moduleDef.aotSummaries) {
+            this._aotSummaries.push(moduleDef.aotSummaries);
+        }
         var _a, _b, _c, _d;
     };
     TestBed.prototype.compileComponents = function () {
@@ -954,6 +983,11 @@ var TestBed = (function () {
                 }
             }
         }
+        for (var _i = 0, _a = this._templateOverrides; _i < _a.length; _i++) {
+            var _b = _a[_i], component = _b.component, templateOf = _b.templateOf;
+            var compFactory = this._compiler.getComponentFactory(templateOf);
+            ɵoverrideComponentView(component, compFactory);
+        }
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
@@ -967,7 +1001,7 @@ var TestBed = (function () {
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-        var declarations = this._declarations;
+        var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var imports = [this.ngModule, this._imports];
         var schemas = this._schemas;
         var DynamicTestModule = (function () {
@@ -982,7 +1016,10 @@ var TestBed = (function () {
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
-        this._compiler.loadAotSummaries(this._aotSummaries);
+        for (var _i = 0, _a = [this._testEnvAotSummaries].concat(this._aotSummaries); _i < _a.length; _i++) {
+            var summary = _a[_i];
+            this._compiler.loadAotSummaries(summary);
+        }
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
         this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
@@ -1068,6 +1105,20 @@ var TestBed = (function () {
             return [depFlags, depToken];
         });
         ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
+    };
+    TestBed.prototype.overrideTemplateUsingTestingModule = function (component, template) {
+        this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
+        var OverrideComponent = (function () {
+            function OverrideComponent() {
+            }
+            OverrideComponent.decorators = [
+                { type: Component, args: [{ selector: 'empty', template: template },] },
+            ];
+            /** @nocollapse */
+            OverrideComponent.ctorParameters = function () { return []; };
+            return OverrideComponent;
+        }());
+        this._templateOverrides.push({ component: component, templateOf: OverrideComponent });
     };
     TestBed.prototype.createComponent = function (component) {
         var _this = this;
