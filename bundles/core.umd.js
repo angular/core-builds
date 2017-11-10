@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-fb4b90a
+ * @license Angular v5.1.0-beta.0-161f88f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.1.0-beta.0-fb4b90a
+ * @license Angular v5.1.0-beta.0-161f88f
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -706,7 +706,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-fb4b90a');
+var VERSION = new Version('5.1.0-beta.0-161f88f');
 
 /**
  * @fileoverview added by tsickle
@@ -4392,7 +4392,7 @@ var NgZone = (function () {
          */
         this.onError = new EventEmitter(false);
         if (typeof Zone == 'undefined') {
-            throw new Error('Angular requires Zone.js prolyfill.');
+            throw new Error("In this configuration Angular requires Zone.js");
         }
         Zone.assertZonePatched();
         var /** @type {?} */ self = /** @type {?} */ ((this));
