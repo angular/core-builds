@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.1-2ca6bdd
+ * @license Angular v5.0.1-aa3d75b
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.1-2ca6bdd');
+const VERSION = new Version('5.0.1-aa3d75b');
 
 /**
  * @fileoverview added by tsickle
@@ -3700,7 +3700,7 @@ class NgZone {
          */
         this.onError = new EventEmitter(false);
         if (typeof Zone == 'undefined') {
-            throw new Error('Angular requires Zone.js prolyfill.');
+            throw new Error(`In this configuration Angular requires Zone.js`);
         }
         Zone.assertZonePatched();
         const /** @type {?} */ self = /** @type {?} */ ((this));
