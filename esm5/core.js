@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-161f88f
+ * @license Angular v5.1.0-beta.0-24cf8b3
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -667,7 +667,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-161f88f');
+var VERSION = new Version('5.1.0-beta.0-24cf8b3');
 
 /**
  * @fileoverview added by tsickle
@@ -9342,6 +9342,44 @@ var Sanitizer = (function () {
  */
 
 /**
+ * @param {?} view
+ * @param {?} priorInitState
+ * @param {?} newInitState
+ * @return {?}
+ */
+function shiftInitState(view, priorInitState, newInitState) {
+    // Only update the InitState if we are currently in the prior state.
+    // For example, only move into CallingInit if we are in BeforeInit. Only
+    // move into CallingContentInit if we are in CallingInit. Normally this will
+    // always be true because of how checkCycle is called in checkAndUpdateView.
+    // However, if checkAndUpdateView is called recursively or if an exception is
+    // thrown while checkAndUpdateView is running, checkAndUpdateView starts over
+    // from the beginning. This ensures the state is monotonically increasing,
+    // terminating in the AfterInit state, which ensures the Init methods are called
+    // at least once and only once.
+    var /** @type {?} */ state = view.state;
+    var /** @type {?} */ initState = state & 1792;
+    if (initState === priorInitState) {
+        view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
+        view.initIndex = -1;
+        return true;
+    }
+    return initState === newInitState;
+}
+/**
+ * @param {?} view
+ * @param {?} initState
+ * @param {?} index
+ * @return {?}
+ */
+function shouldCallLifecycleInitHook(view, initState, index) {
+    if ((view.state & 1792 /* InitState_Mask */) === initState && view.initIndex <= index) {
+        view.initIndex = index + 1;
+        return true;
+    }
+    return false;
+}
+/**
  * @record
  */
 
@@ -12092,7 +12130,8 @@ function checkAndUpdateDirectiveInline(view, def, v0, v1, v2, v3, v4, v5, v6, v7
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
+    if ((def.flags & 65536 /* OnInit */) &&
+        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
         directive.ngOnInit();
     }
     if (def.flags & 262144 /* DoCheck */) {
@@ -12120,7 +12159,8 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     if (changes) {
         directive.ngOnChanges(changes);
     }
-    if ((view.state & 2 /* FirstCheck */) && (def.flags & 65536 /* OnInit */)) {
+    if ((def.flags & 65536 /* OnInit */) &&
+        shouldCallLifecycleInitHook(view, 256 /* InitState_CallingOnInit */, def.nodeIndex)) {
         directive.ngOnInit();
     }
     if (def.flags & 262144 /* DoCheck */) {
@@ -12366,12 +12406,13 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
         return;
     }
     var /** @type {?} */ nodes = view.def.nodes;
+    var /** @type {?} */ initIndex = 0;
     for (var /** @type {?} */ i = 0; i < nodes.length; i++) {
         var /** @type {?} */ nodeDef = nodes[i];
         var /** @type {?} */ parent_1 = nodeDef.parent;
         if (!parent_1 && nodeDef.flags & lifecycles) {
             // matching root node (e.g. a pipe)
-            callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
         }
         if ((nodeDef.childFlags & lifecycles) === 0) {
             // no child matches one of the lifecycles
@@ -12381,7 +12422,7 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
             i === parent_1.nodeIndex + parent_1.childCount) {
             // last child of an element
             if (parent_1.directChildFlags & lifecycles) {
-                callElementProvidersLifecycles(view, parent_1, lifecycles);
+                initIndex = callElementProvidersLifecycles(view, parent_1, lifecycles, initIndex);
             }
             parent_1 = parent_1.parent;
         }
@@ -12391,25 +12432,28 @@ function callLifecycleHooksChildrenFirst(view, lifecycles) {
  * @param {?} view
  * @param {?} elDef
  * @param {?} lifecycles
+ * @param {?} initIndex
  * @return {?}
  */
-function callElementProvidersLifecycles(view, elDef, lifecycles) {
+function callElementProvidersLifecycles(view, elDef, lifecycles, initIndex) {
     for (var /** @type {?} */ i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
         var /** @type {?} */ nodeDef = view.def.nodes[i];
         if (nodeDef.flags & lifecycles) {
-            callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
+            callProviderLifecycles(view, i, nodeDef.flags & lifecycles, initIndex++);
         }
         // only visit direct children
         i += nodeDef.childCount;
     }
+    return initIndex;
 }
 /**
  * @param {?} view
  * @param {?} index
  * @param {?} lifecycles
+ * @param {?} initIndex
  * @return {?}
  */
-function callProviderLifecycles(view, index, lifecycles) {
+function callProviderLifecycles(view, index, lifecycles, initIndex) {
     var /** @type {?} */ providerData = asProviderData(view, index);
     if (!providerData) {
         return;
@@ -12419,13 +12463,15 @@ function callProviderLifecycles(view, index, lifecycles) {
         return;
     }
     Services.setCurrentNode(view, index);
-    if (lifecycles & 1048576 /* AfterContentInit */) {
+    if (lifecycles & 1048576 /* AfterContentInit */ &&
+        shouldCallLifecycleInitHook(view, 512 /* InitState_CallingAfterContentInit */, initIndex)) {
         provider.ngAfterContentInit();
     }
     if (lifecycles & 2097152 /* AfterContentChecked */) {
         provider.ngAfterContentChecked();
     }
-    if (lifecycles & 4194304 /* AfterViewInit */) {
+    if (lifecycles & 4194304 /* AfterViewInit */ &&
+        shouldCallLifecycleInitHook(view, 768 /* InitState_CallingAfterViewInit */, initIndex)) {
         provider.ngAfterViewInit();
     }
     if (lifecycles & 8388608 /* AfterViewChecked */) {
@@ -13376,7 +13422,8 @@ function createView(root, renderer, parent, parentNodeDef, def) {
         context: null,
         component: null, nodes: nodes,
         state: 13 /* CatInit */, root: root, renderer: renderer,
-        oldValues: new Array(def.bindingCount), disposables: disposables
+        oldValues: new Array(def.bindingCount), disposables: disposables,
+        initIndex: -1
     };
     return view;
 }
@@ -13505,21 +13552,23 @@ function checkAndUpdateView(view) {
     else {
         view.state &= ~2 /* FirstCheck */;
     }
+    shiftInitState(view, 0 /* InitState_BeforeInit */, 256 /* InitState_CallingOnInit */);
     markProjectedViewsForCheck(view);
     Services.updateDirectives(view, 0 /* CheckAndUpdate */);
     execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, 67108864 /* TypeContentQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
-    callLifecycleHooksChildrenFirst(view, 2097152 /* AfterContentChecked */ |
-        (view.state & 2 /* FirstCheck */ ? 1048576 /* AfterContentInit */ : 0));
+    var /** @type {?} */ callInit = shiftInitState(view, 256 /* InitState_CallingOnInit */, 512 /* InitState_CallingAfterContentInit */);
+    callLifecycleHooksChildrenFirst(view, 2097152 /* AfterContentChecked */ | (callInit ? 1048576 /* AfterContentInit */ : 0));
     Services.updateRenderer(view, 0 /* CheckAndUpdate */);
     execComponentViewsAction(view, ViewAction.CheckAndUpdate);
     execQueriesAction(view, 134217728 /* TypeViewQuery */, 536870912 /* DynamicQuery */, 0 /* CheckAndUpdate */);
-    callLifecycleHooksChildrenFirst(view, 8388608 /* AfterViewChecked */ |
-        (view.state & 2 /* FirstCheck */ ? 4194304 /* AfterViewInit */ : 0));
+    callInit = shiftInitState(view, 512 /* InitState_CallingAfterContentInit */, 768 /* InitState_CallingAfterViewInit */);
+    callLifecycleHooksChildrenFirst(view, 8388608 /* AfterViewChecked */ | (callInit ? 4194304 /* AfterViewInit */ : 0));
     if (view.def.flags & 2 /* OnPush */) {
         view.state &= ~8 /* ChecksEnabled */;
     }
     view.state &= ~(64 /* CheckProjectedViews */ | 32 /* CheckProjectedView */);
+    shiftInitState(view, 768 /* InitState_CallingAfterViewInit */, 1024 /* InitState_AfterInit */);
 }
 /**
  * @param {?} view

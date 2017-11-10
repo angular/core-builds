@@ -323,6 +323,7 @@ export interface ViewData {
     state: ViewState;
     oldValues: any[];
     disposables: DisposableFn[] | null;
+    initIndex: number;
 }
 /**
  * Bitmask of states
@@ -336,9 +337,17 @@ export declare const enum ViewState {
     CheckProjectedView = 32,
     CheckProjectedViews = 64,
     Destroyed = 128,
+    InitState_Mask = 1792,
+    InitState_BeforeInit = 0,
+    InitState_CallingOnInit = 256,
+    InitState_CallingAfterContentInit = 512,
+    InitState_CallingAfterViewInit = 768,
+    InitState_AfterInit = 1024,
     CatDetectChanges = 12,
     CatInit = 13,
 }
+export declare function shiftInitState(view: ViewData, priorInitState: ViewState, newInitState: ViewState): boolean;
+export declare function shouldCallLifecycleInitHook(view: ViewData, initState: ViewState, index: number): boolean;
 export interface DisposableFn {
     (): void;
 }
