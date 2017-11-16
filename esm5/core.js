@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-f8658cd
+ * @license Angular v5.1.0-beta.0-336041a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -12,6 +12,13 @@ import { Subject } from 'rxjs/Subject';
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Creates a token that can be used in a DI Provider.
@@ -35,7 +42,7 @@ import { Subject } from 'rxjs/Subject';
  *
  * \@stable
  */
-var InjectionToken = (function () {
+var InjectionToken = /** @class */ (function () {
     function InjectionToken(_desc) {
         this._desc = _desc;
         /**
@@ -56,6 +63,13 @@ var InjectionToken = (function () {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * An interface implemented by all Angular type decorators, which allows them to be used as ES7
@@ -297,7 +311,7 @@ var Attribute = makeParamDecorator('Attribute', function (attributeName) { retur
  * \@stable
  * @abstract
  */
-var Query = (function () {
+var Query = /** @class */ (function () {
     function Query() {
     }
     return Query;
@@ -380,6 +394,13 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /** @enum {number} */
 var ChangeDetectionStrategy = {
@@ -563,6 +584,13 @@ var HostListener = makePropDecorator('HostListener', function (eventName, args) 
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * A wrapper around a module that also includes the providers.
  *
  * \@stable
@@ -614,6 +642,13 @@ var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; 
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /** @enum {number} */
 var ViewEncapsulation = {
     /**
@@ -645,17 +680,31 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * \@whatItDoes Represents the version of Angular
  *
  * \@stable
  */
-var Version = (function () {
+var Version = /** @class */ (function () {
     function Version(full) {
         this.full = full;
         this.major = full.split('.')[0];
@@ -667,7 +716,7 @@ var Version = (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.0-beta.0-f8658cd');
+var VERSION = new Version('5.1.0-beta.0-336041a');
 
 /**
  * @fileoverview added by tsickle
@@ -769,6 +818,13 @@ var Host = makeParamDecorator('Host');
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var __window = typeof window !== 'undefined' && window;
 var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
     self instanceof WorkerGlobalScope && self;
@@ -846,6 +902,13 @@ function stringify(token) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * An interface that a function passed into {\@link forwardRef} has to implement.
  *
  * ### Example
@@ -902,9 +965,16 @@ function resolveForwardRef(type) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var _THROW_IF_NOT_FOUND = new Object();
 var THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
-var _NullInjector = (function () {
+var _NullInjector = /** @class */ (function () {
     function _NullInjector() {
     }
     /**
@@ -947,7 +1017,7 @@ var _NullInjector = (function () {
  * \@stable
  * @abstract
  */
-var Injector = (function () {
+var Injector = /** @class */ (function () {
     function Injector() {
     }
     /**
@@ -1000,7 +1070,7 @@ var NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
 var NULL_INJECTOR = Injector.NULL;
 var NEW_LINE = /\n/gm;
 var NO_NEW_LINE = 'ɵ';
-var StaticInjector = (function () {
+var StaticInjector = /** @class */ (function () {
     function StaticInjector(providers, parent) {
         if (parent === void 0) { parent = NULL_INJECTOR; }
         this.parent = parent;
@@ -1307,6 +1377,13 @@ function getClosureSafeProperty(objWithPropertyToExtract) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
 var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
@@ -1387,7 +1464,7 @@ function defaultErrorLogger(console) {
  *
  * \@stable
  */
-var ErrorHandler = (function () {
+var ErrorHandler = /** @class */ (function () {
     function ErrorHandler() {
         /**
          * \@internal
@@ -1749,7 +1826,7 @@ function mixingMultiProvidersWithRegularProvidersError(provider1, provider2) {
  * providers.
  * @deprecated No replacement
  */
-var ReflectiveKey = (function () {
+var ReflectiveKey = /** @class */ (function () {
     /**
      * Private
      */
@@ -1793,7 +1870,7 @@ var ReflectiveKey = (function () {
 /**
  * \@internal
  */
-var KeyRegistry = (function () {
+var KeyRegistry = /** @class */ (function () {
     function KeyRegistry() {
         this._allKeys = new Map();
     }
@@ -1832,6 +1909,13 @@ var _globalKeyRegistry = new KeyRegistry();
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * \@whatItDoes Represents a type that a Component or other object is instances of.
  *
  * \@description
@@ -1865,7 +1949,7 @@ function isType(v) {
  * Attention: This regex has to hold even if the code is minified!
  */
 var DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
-var ReflectionCapabilities = (function () {
+var ReflectionCapabilities = /** @class */ (function () {
     function ReflectionCapabilities(reflect) {
         this._reflect = reflect || _global['Reflect'];
     }
@@ -2252,10 +2336,17 @@ function getParentCtor(ctor) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Provides access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  */
-var Reflector = (function () {
+var Reflector = /** @class */ (function () {
     function Reflector(reflectionCapabilities) {
         this.reflectionCapabilities = reflectionCapabilities;
     }
@@ -2433,7 +2524,7 @@ var reflector = new Reflector(new ReflectionCapabilities());
  * `Dependency` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
-var ReflectiveDependency = (function () {
+var ReflectiveDependency = /** @class */ (function () {
     function ReflectiveDependency(key, optional, visibility) {
         this.key = key;
         this.optional = optional;
@@ -2473,7 +2564,7 @@ var _EMPTY_LIST = [];
  * @record
  */
 
-var ResolvedReflectiveProvider_ = (function () {
+var ResolvedReflectiveProvider_ = /** @class */ (function () {
     function ResolvedReflectiveProvider_(key, resolvedFactories, multiProvider) {
         this.key = key;
         this.resolvedFactories = resolvedFactories;
@@ -2494,7 +2585,7 @@ var ResolvedReflectiveProvider_ = (function () {
  * Provider}.
  * \@experimental
  */
-var ResolvedReflectiveFactory = (function () {
+var ResolvedReflectiveFactory = /** @class */ (function () {
     function ResolvedReflectiveFactory(factory, dependencies) {
         this.factory = factory;
         this.dependencies = dependencies;
@@ -2740,7 +2831,7 @@ var UNDEFINED = new Object();
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  * @abstract
  */
-var ReflectiveInjector = (function () {
+var ReflectiveInjector = /** @class */ (function () {
     function ReflectiveInjector() {
     }
     /**
@@ -3020,7 +3111,7 @@ var ReflectiveInjector = (function () {
     };
     return ReflectiveInjector;
 }());
-var ReflectiveInjector_ = (function () {
+var ReflectiveInjector_ = /** @class */ (function () {
     /**
      * Private
      */
@@ -3376,6 +3467,13 @@ function _mapProviders(injector, fn) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Determine if the argument is shaped like a Promise
  * @param {?} obj
  * @return {?}
@@ -3416,7 +3514,7 @@ var APP_INITIALIZER = new InjectionToken('Application Initializer');
  *
  * \@experimental
  */
-var ApplicationInitStatus = (function () {
+var ApplicationInitStatus = /** @class */ (function () {
     function ApplicationInitStatus(appInits) {
         var _this = this;
         this.appInits = appInits;
@@ -3549,7 +3647,7 @@ var PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var Console = (function () {
+var Console = /** @class */ (function () {
     function Console() {
     }
     /**
@@ -3601,7 +3699,7 @@ var Console = (function () {
  *
  * \@experimental
  */
-var ModuleWithComponentFactories = (function () {
+var ModuleWithComponentFactories = /** @class */ (function () {
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
         this.ngModuleFactory = ngModuleFactory;
         this.componentFactories = componentFactories;
@@ -3624,7 +3722,7 @@ function _throwError() {
  * of components.
  * \@stable
  */
-var Compiler = (function () {
+var Compiler = /** @class */ (function () {
     function Compiler() {
     }
     /**
@@ -3743,7 +3841,7 @@ var COMPILER_OPTIONS = new InjectionToken('compilerOptions');
  * \@experimental
  * @abstract
  */
-var CompilerFactory = (function () {
+var CompilerFactory = /** @class */ (function () {
     function CompilerFactory() {
     }
     return CompilerFactory;
@@ -3754,6 +3852,13 @@ var CompilerFactory = (function () {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Represents an instance of a Component created via a {\@link ComponentFactory}.
  *
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
@@ -3762,7 +3867,7 @@ var CompilerFactory = (function () {
  * \@stable
  * @abstract
  */
-var ComponentRef = (function () {
+var ComponentRef = /** @class */ (function () {
     function ComponentRef() {
     }
     return ComponentRef;
@@ -3771,7 +3876,7 @@ var ComponentRef = (function () {
  * \@stable
  * @abstract
  */
-var ComponentFactory = (function () {
+var ComponentFactory = /** @class */ (function () {
     function ComponentFactory() {
     }
     return ComponentFactory;
@@ -3780,6 +3885,13 @@ var ComponentFactory = (function () {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} component
@@ -3796,7 +3908,7 @@ var ERROR_COMPONENT = 'ngComponent';
  * @return {?}
  */
 
-var _NullComponentFactoryResolver = (function () {
+var _NullComponentFactoryResolver = /** @class */ (function () {
     function _NullComponentFactoryResolver() {
     }
     /**
@@ -3818,13 +3930,13 @@ var _NullComponentFactoryResolver = (function () {
  * \@stable
  * @abstract
  */
-var ComponentFactoryResolver = (function () {
+var ComponentFactoryResolver = /** @class */ (function () {
     function ComponentFactoryResolver() {
     }
     ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
     return ComponentFactoryResolver;
 }());
-var CodegenComponentFactoryResolver = (function () {
+var CodegenComponentFactoryResolver = /** @class */ (function () {
     function CodegenComponentFactoryResolver(factories, _parent, _ngModule) {
         this._parent = _parent;
         this._ngModule = _ngModule;
@@ -3856,7 +3968,7 @@ var CodegenComponentFactoryResolver = (function () {
     };
     return CodegenComponentFactoryResolver;
 }());
-var ComponentFactoryBoundToModule = (function (_super) {
+var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
     __extends(ComponentFactoryBoundToModule, _super);
     function ComponentFactoryBoundToModule(factory, ngModule) {
         var _this = _super.call(this) || this;
@@ -3929,6 +4041,13 @@ var ComponentFactoryBoundToModule = (function (_super) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Represents an instance of an NgModule created via a {\@link NgModuleFactory}.
  *
  * `NgModuleRef` provides access to the NgModule Instance as well other objects related to this
@@ -3937,7 +4056,7 @@ var ComponentFactoryBoundToModule = (function (_super) {
  * \@stable
  * @abstract
  */
-var NgModuleRef = (function () {
+var NgModuleRef = /** @class */ (function () {
     function NgModuleRef() {
     }
     return NgModuleRef;
@@ -3950,7 +4069,7 @@ var NgModuleRef = (function () {
  * \@experimental
  * @abstract
  */
-var NgModuleFactory = (function () {
+var NgModuleFactory = /** @class */ (function () {
     function NgModuleFactory() {
     }
     return NgModuleFactory;
@@ -4177,7 +4296,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
  */
-var EventEmitter = (function (_super) {
+var EventEmitter = /** @class */ (function (_super) {
     __extends(EventEmitter, _super);
     /**
      * Creates an instance of {@link EventEmitter}, which depending on `isAsync`,
@@ -4252,6 +4371,13 @@ var EventEmitter = (function (_super) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * An injectable service for executing work inside or outside of the Angular zone.
  *
  * The most common use of this service is to optimize performance when starting a work consisting of
@@ -4323,7 +4449,7 @@ var EventEmitter = (function (_super) {
  *
  * \@experimental
  */
-var NgZone = (function () {
+var NgZone = /** @class */ (function () {
     function NgZone(_a) {
         var _b = _a.enableLongStackTrace, enableLongStackTrace = _b === void 0 ? false : _b;
         this.hasPendingMicrotasks = false;
@@ -4678,7 +4804,7 @@ function onLeave(zone) {
  *
  * \@internal
  */
-var NoopNgZone = (function () {
+var NoopNgZone = /** @class */ (function () {
     function NoopNgZone() {
         this.hasPendingMicrotasks = false;
         this.hasPendingMacrotasks = false;
@@ -4746,7 +4872,7 @@ var NoopNgZone = (function () {
  * application on the page will have an instance of Testability.
  * \@experimental
  */
-var Testability = (function () {
+var Testability = /** @class */ (function () {
     function Testability(_ngZone) {
         this._ngZone = _ngZone;
         /**
@@ -4940,7 +5066,7 @@ var Testability = (function () {
  * A global registry of {\@link Testability} instances for specific elements.
  * \@experimental
  */
-var TestabilityRegistry = (function () {
+var TestabilityRegistry = /** @class */ (function () {
     function TestabilityRegistry() {
         /**
          * \@internal
@@ -5074,7 +5200,7 @@ var TestabilityRegistry = (function () {
  * @record
  */
 
-var _NoopGetTestability = (function () {
+var _NoopGetTestability = /** @class */ (function () {
     function _NoopGetTestability() {
     }
     /**
@@ -5164,7 +5290,7 @@ function isDevMode() {
  *
  * \@experimental
  */
-var NgProbeToken = (function () {
+var NgProbeToken = /** @class */ (function () {
     function NgProbeToken(name, token) {
         this.name = name;
         this.token = token;
@@ -5270,7 +5396,7 @@ function getPlatform() {
  *
  * \@stable
  */
-var PlatformRef = (function () {
+var PlatformRef = /** @class */ (function () {
     /** @internal */
     function PlatformRef(_injector) {
         this._injector = _injector;
@@ -5373,7 +5499,7 @@ var PlatformRef = (function () {
                 throw new Error('No ErrorHandler. Is platform module (BrowserModule) included?');
             }
             moduleRef.onDestroy(function () { return remove(_this._modules, moduleRef); }); /** @type {?} */
-            ((ngZone)).runOutsideAngular(function () { return /** @type {?} */ ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
+            ((ngZone)).runOutsideAngular(function () { return ((ngZone)).onError.subscribe({ next: function (error) { exceptionHandler.handleError(error); } }); });
             return _callAndReportToErrorHandler(exceptionHandler, /** @type {?} */ ((ngZone)), function () {
                 var /** @type {?} */ initStatus = moduleRef.injector.get(ApplicationInitStatus);
                 initStatus.runInitializers();
@@ -5591,7 +5717,7 @@ function optionsReducer(dst, objs) {
  *
  * \@stable
  */
-var ApplicationRef = (function () {
+var ApplicationRef = /** @class */ (function () {
     /** @internal */
     function ApplicationRef(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
         var _this = this;
@@ -5950,7 +6076,7 @@ function remove(list, el) {
 /**
  * @deprecated Use `RendererType2` (and `Renderer2`) instead.
  */
-var RenderComponentType = (function () {
+var RenderComponentType = /** @class */ (function () {
     function RenderComponentType(id, templateUrl, slotCount, encapsulation, styles, animations) {
         this.id = id;
         this.templateUrl = templateUrl;
@@ -5965,7 +6091,7 @@ var RenderComponentType = (function () {
  * @deprecated Debug info is handeled internally in the view engine now.
  * @abstract
  */
-var RenderDebugInfo = (function () {
+var RenderDebugInfo = /** @class */ (function () {
     function RenderDebugInfo() {
     }
     return RenderDebugInfo;
@@ -5979,7 +6105,7 @@ var RenderDebugInfo = (function () {
  * @deprecated Use the `Renderer2` instead.
  * @abstract
  */
-var Renderer = (function () {
+var Renderer = /** @class */ (function () {
     function Renderer() {
     }
     return Renderer;
@@ -6000,7 +6126,7 @@ var Renderer2Interceptor = new InjectionToken('Renderer2Interceptor');
  * @deprecated Use `RendererFactory2` instead.
  * @abstract
  */
-var RootRenderer = (function () {
+var RootRenderer = /** @class */ (function () {
     function RootRenderer() {
     }
     return RootRenderer;
@@ -6014,7 +6140,7 @@ var RootRenderer = (function () {
  * \@experimental
  * @abstract
  */
-var RendererFactory2 = (function () {
+var RendererFactory2 = /** @class */ (function () {
     function RendererFactory2() {
     }
     return RendererFactory2;
@@ -6030,7 +6156,7 @@ RendererStyleFlags2[RendererStyleFlags2.DashCase] = "DashCase";
  * \@experimental
  * @abstract
  */
-var Renderer2 = (function () {
+var Renderer2 = /** @class */ (function () {
     function Renderer2() {
     }
     return Renderer2;
@@ -6054,6 +6180,13 @@ var Renderer2 = (function () {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * A wrapper around a native element inside of a View.
  *
  * An `ElementRef` is backed by a render-specific element. In the browser, this is usually a DOM
@@ -6065,7 +6198,7 @@ var Renderer2 = (function () {
  *
  * \@stable
  */
-var ElementRef = (function () {
+var ElementRef = /** @class */ (function () {
     function ElementRef(nativeElement) {
         this.nativeElement = nativeElement;
     }
@@ -6077,11 +6210,18 @@ var ElementRef = (function () {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Used to load ng module factories.
  * \@stable
  * @abstract
  */
-var NgModuleFactoryLoader = (function () {
+var NgModuleFactoryLoader = /** @class */ (function () {
     function NgModuleFactoryLoader() {
     }
     return NgModuleFactoryLoader;
@@ -6125,6 +6265,13 @@ function getModuleFactory(id) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * An unmodifiable list of items that Angular keeps up to date when the state
  * of the application changes.
  *
@@ -6148,7 +6295,7 @@ function getModuleFactory(id) {
  * ```
  * \@stable
  */
-var QueryList = (function () {
+var QueryList = /** @class */ (function () {
     function QueryList() {
         this.dirty = true;
         this._results = [];
@@ -6391,7 +6538,7 @@ var FACTORY_CLASS_SUFFIX = 'NgFactory';
  * \@experimental
  * @abstract
  */
-var SystemJsNgModuleLoaderConfig = (function () {
+var SystemJsNgModuleLoaderConfig = /** @class */ (function () {
     function SystemJsNgModuleLoaderConfig() {
     }
     return SystemJsNgModuleLoaderConfig;
@@ -6404,7 +6551,7 @@ var DEFAULT_CONFIG = {
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * \@experimental
  */
-var SystemJsNgModuleLoader = (function () {
+var SystemJsNgModuleLoader = /** @class */ (function () {
     function SystemJsNgModuleLoader(_compiler, config) {
         this._compiler = _compiler;
         this._config = config || DEFAULT_CONFIG;
@@ -6487,6 +6634,13 @@ function checkNotEmpty(value, modulePath, exportName) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Represents an Embedded Template that can be used to instantiate Embedded Views.
  *
  * You can access a `TemplateRef`, in two ways. Via a directive placed on a `<ng-template>` element
@@ -6499,7 +6653,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * \@stable
  * @abstract
  */
-var TemplateRef = (function () {
+var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
     }
     return TemplateRef;
@@ -6508,6 +6662,13 @@ var TemplateRef = (function () {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Represents a container where one or more Views can be attached.
@@ -6528,7 +6689,7 @@ var TemplateRef = (function () {
  * \@stable
  * @abstract
  */
-var ViewContainerRef = (function () {
+var ViewContainerRef = /** @class */ (function () {
     function ViewContainerRef() {
     }
     return ViewContainerRef;
@@ -6539,10 +6700,17 @@ var ViewContainerRef = (function () {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * \@stable
  * @abstract
  */
-var ChangeDetectorRef = (function () {
+var ChangeDetectorRef = /** @class */ (function () {
     function ChangeDetectorRef() {
     }
     return ChangeDetectorRef;
@@ -6553,10 +6721,17 @@ var ChangeDetectorRef = (function () {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * \@stable
  * @abstract
  */
-var ViewRef = (function (_super) {
+var ViewRef = /** @class */ (function (_super) {
     __extends(ViewRef, _super);
     function ViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -6618,7 +6793,7 @@ var ViewRef = (function (_super) {
  * \@experimental
  * @abstract
  */
-var EmbeddedViewRef = (function (_super) {
+var EmbeddedViewRef = /** @class */ (function (_super) {
     __extends(EmbeddedViewRef, _super);
     function EmbeddedViewRef() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -6646,7 +6821,14 @@ var EmbeddedViewRef = (function (_super) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var EventListener = (function () {
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var EventListener = /** @class */ (function () {
     function EventListener(name, callback) {
         this.name = name;
         this.callback = callback;
@@ -6656,7 +6838,7 @@ var EventListener = (function () {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-var DebugNode = (function () {
+var DebugNode = /** @class */ (function () {
     function DebugNode(nativeNode, parent, _debugContext) {
         this._debugContext = _debugContext;
         this.nativeNode = nativeNode;
@@ -6713,7 +6895,7 @@ var DebugNode = (function () {
 /**
  * \@experimental All debugging apis are currently experimental.
  */
-var DebugElement = (function (_super) {
+var DebugElement = /** @class */ (function (_super) {
     __extends(DebugElement, _super);
     function DebugElement(nativeNode, parent, _debugContext) {
         var _this = _super.call(this, nativeNode, parent, _debugContext) || this;
@@ -6998,7 +7180,7 @@ function devModeEqual(a, b) {
  * ```
  * \@stable
  */
-var WrappedValue = (function () {
+var WrappedValue = /** @class */ (function () {
     function WrappedValue(wrapped) {
         this.wrapped = wrapped;
     }
@@ -7016,7 +7198,7 @@ var WrappedValue = (function () {
 /**
  * Helper class for unwrapping WrappedValue s
  */
-var ValueUnwrapper = (function () {
+var ValueUnwrapper = /** @class */ (function () {
     function ValueUnwrapper() {
         this.hasWrappedValue = false;
     }
@@ -7048,7 +7230,7 @@ var ValueUnwrapper = (function () {
  * Represents a basic change from a previous to a new value.
  * \@stable
  */
-var SimpleChange = (function () {
+var SimpleChange = /** @class */ (function () {
     function SimpleChange(previousValue, currentValue, firstChange) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
@@ -7076,7 +7258,7 @@ function isListLikeIterable(obj) {
     if (!isJsObject(obj))
         return false;
     return Array.isArray(obj) ||
-        (!(obj instanceof Map) &&
+        (!(obj instanceof Map) && // JS Map are iterables but return entries as [k, v]
             // JS Map are iterables but return entries as [k, v]
             getSymbolIterator() in obj); // JS Iterable have a Symbol.iterator prop
 }
@@ -7138,7 +7320,7 @@ function isJsObject(o) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var DefaultIterableDifferFactory = (function () {
+var DefaultIterableDifferFactory = /** @class */ (function () {
     function DefaultIterableDifferFactory() {
     }
     /**
@@ -7169,7 +7351,7 @@ var trackByIdentity = function (index, item) { return item; };
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
  */
-var DefaultIterableDiffer = (function () {
+var DefaultIterableDiffer = /** @class */ (function () {
     function DefaultIterableDiffer(trackByFn) {
         this.length = 0;
         this._linkedRecords = null;
@@ -7218,8 +7400,8 @@ var DefaultIterableDiffer = (function () {
             // Figure out which is the next record to process
             // Order: remove, add, move
             var /** @type {?} */ record = !nextRemove ||
-                nextIt && /** @type {?} */ ((nextIt.currentIndex)) < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ?
-                /** @type {?} */ ((nextIt)) :
+                nextIt && /** @type {?} */ ((nextIt.currentIndex)) < getPreviousIndex(nextRemove, addRemoveOffset, moveOffsets) ? /** @type {?} */
+                ((nextIt)) :
                 nextRemove;
             var /** @type {?} */ adjPreviousIndex = getPreviousIndex(record, addRemoveOffset, moveOffsets);
             var /** @type {?} */ currentIndex = record.currentIndex;
@@ -7979,7 +8161,7 @@ var DefaultIterableDiffer = (function () {
 /**
  * \@stable
  */
-var IterableChangeRecord_ = (function () {
+var IterableChangeRecord_ = /** @class */ (function () {
     function IterableChangeRecord_(item, trackById) {
         this.item = item;
         this.trackById = trackById;
@@ -8028,7 +8210,7 @@ var IterableChangeRecord_ = (function () {
     }
     return IterableChangeRecord_;
 }());
-var _DuplicateItemRecordList = (function () {
+var _DuplicateItemRecordList = /** @class */ (function () {
     function _DuplicateItemRecordList() {
         /**
          * \@internal
@@ -8143,7 +8325,7 @@ var _DuplicateItemRecordList = (function () {
     };
     return _DuplicateItemRecordList;
 }());
-var _DuplicateMap = (function () {
+var _DuplicateMap = /** @class */ (function () {
     function _DuplicateMap() {
         this.map = new Map();
     }
@@ -8269,7 +8451,7 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var DefaultKeyValueDifferFactory = (function () {
+var DefaultKeyValueDifferFactory = /** @class */ (function () {
     function DefaultKeyValueDifferFactory() {
     }
     /**
@@ -8292,7 +8474,7 @@ var DefaultKeyValueDifferFactory = (function () {
     function () { return new DefaultKeyValueDiffer(); };
     return DefaultKeyValueDifferFactory;
 }());
-var DefaultKeyValueDiffer = (function () {
+var DefaultKeyValueDiffer = /** @class */ (function () {
     function DefaultKeyValueDiffer() {
         this._records = new Map();
         this._mapHead = null;
@@ -8654,7 +8836,7 @@ var DefaultKeyValueDiffer = (function () {
 /**
  * \@stable
  */
-var KeyValueChangeRecord_ = (function () {
+var KeyValueChangeRecord_ = /** @class */ (function () {
     function KeyValueChangeRecord_(key) {
         this.key = key;
         this.previousValue = null;
@@ -8745,7 +8927,7 @@ var KeyValueChangeRecord_ = (function () {
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  * \@stable
  */
-var IterableDiffers = (function () {
+var IterableDiffers = /** @class */ (function () {
     function IterableDiffers(factories) {
         this.factories = factories;
     }
@@ -8917,7 +9099,7 @@ function getTypeNameForDebugging(type) {
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
  * \@stable
  */
-var KeyValueDiffers = (function () {
+var KeyValueDiffers = /** @class */ (function () {
     function KeyValueDiffers(factories) {
         this.factories = factories;
     }
@@ -9169,7 +9351,7 @@ function _localeFactory(locale) {
  *
  * \@experimental
  */
-var ApplicationModule = (function () {
+var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
@@ -9201,6 +9383,13 @@ var ApplicationModule = (function () {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /** @enum {number} */
 var SecurityContext = {
     NONE: 0,
@@ -9222,7 +9411,7 @@ SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
  * \@stable
  * @abstract
  */
-var Sanitizer = (function () {
+var Sanitizer = /** @class */ (function () {
     function Sanitizer() {
     }
     return Sanitizer;
@@ -9231,6 +9420,13 @@ var Sanitizer = (function () {
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
@@ -9471,7 +9667,7 @@ function asQueryList(view, index) {
 /**
  * @abstract
  */
-var DebugContext = (function () {
+var DebugContext = /** @class */ (function () {
     function DebugContext() {
     }
     return DebugContext;
@@ -10143,6 +10339,13 @@ var EMPTY_MAP = {};
 /**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
  */
 /**
  * @param {?} flags
@@ -10905,6 +11108,13 @@ function removeFromArray(arr, index) {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var EMPTY_CONTEXT = new Object();
 /**
  * @param {?} selector
@@ -10925,7 +11135,7 @@ function createComponentFactory(selector, componentType, viewDefFactory, inputs,
 function getComponentViewDefinitionFactory(componentFactory) {
     return (/** @type {?} */ (componentFactory)).viewDefFactory;
 }
-var ComponentFactory_ = (function (_super) {
+var ComponentFactory_ = /** @class */ (function (_super) {
     __extends(ComponentFactory_, _super);
     function ComponentFactory_(selector, componentType, viewDefFactory, _inputs, _outputs, ngContentSelectors) {
         var _this = 
@@ -11005,7 +11215,7 @@ var ComponentFactory_ = (function (_super) {
     };
     return ComponentFactory_;
 }(ComponentFactory));
-var ComponentRef_ = (function (_super) {
+var ComponentRef_ = /** @class */ (function (_super) {
     __extends(ComponentRef_, _super);
     function ComponentRef_(_view, _viewRef, _component) {
         var _this = _super.call(this) || this;
@@ -11071,7 +11281,7 @@ var ComponentRef_ = (function (_super) {
 function createViewContainerData(view, elDef, elData) {
     return new ViewContainerRef_(view, elDef, elData);
 }
-var ViewContainerRef_ = (function () {
+var ViewContainerRef_ = /** @class */ (function () {
     function ViewContainerRef_(_view, _elDef, _data) {
         this._view = _view;
         this._elDef = _elDef;
@@ -11281,7 +11491,7 @@ var ViewContainerRef_ = (function () {
 function createChangeDetectorRef(view) {
     return new ViewRef_(view);
 }
-var ViewRef_ = (function () {
+var ViewRef_ = /** @class */ (function () {
     function ViewRef_(_view) {
         this._view = _view;
         this._viewContainerRef = null;
@@ -11433,7 +11643,7 @@ var ViewRef_ = (function () {
 function createTemplateData(view, def) {
     return new TemplateRef_(view, def);
 }
-var TemplateRef_ = (function (_super) {
+var TemplateRef_ = /** @class */ (function (_super) {
     __extends(TemplateRef_, _super);
     function TemplateRef_(_parentView, _def) {
         var _this = _super.call(this) || this;
@@ -11472,7 +11682,7 @@ var TemplateRef_ = (function (_super) {
 function createInjector(view, elDef) {
     return new Injector_(view, elDef);
 }
-var Injector_ = (function () {
+var Injector_ = /** @class */ (function () {
     function Injector_(view, elDef) {
         this.view = view;
         this.elDef = elDef;
@@ -11520,7 +11730,7 @@ function nodeValue(view, index) {
 function createRendererV1(view) {
     return new RendererAdapter(view.renderer);
 }
-var RendererAdapter = (function () {
+var RendererAdapter = /** @class */ (function () {
     function RendererAdapter(delegate) {
         this.delegate = delegate;
     }
@@ -11820,7 +12030,7 @@ var RendererAdapter = (function () {
 function createNgModuleRef(moduleType, parent, bootstrapComponents, def) {
     return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
 }
-var NgModuleRef_ = (function () {
+var NgModuleRef_ = /** @class */ (function () {
     function NgModuleRef_(_moduleType, _parent, _bootstrapComponents, _def) {
         this._moduleType = _moduleType;
         this._parent = _parent;
@@ -12698,6 +12908,13 @@ function getQueryValue(view, nodeDef, queryValueType) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * @param {?} ngContentIndex
  * @param {?} index
  * @return {?}
@@ -13192,6 +13409,13 @@ function _addInterpolationPart(value, binding) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * @param {?} flags
  * @param {?} nodes
  * @param {?=} updateDirectives
@@ -13299,7 +13523,7 @@ function viewDef(flags, nodes, updateDirectives, updateRenderer) {
             }
         }
     }
-    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return /** @type {?} */ ((/** @type {?} */ ((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
+    var /** @type {?} */ handleEvent = function (view, nodeIndex, eventName, event) { return ((/** @type {?} */ ((nodes[nodeIndex].element)).handleEvent))(view, eventName, event); };
     return {
         // Will be filled later...
         factory: null,
@@ -14589,7 +14813,7 @@ function nextRenderNodeWithBinding(view, nodeIndex) {
     }
     return null;
 }
-var DebugContext_ = (function () {
+var DebugContext_ = /** @class */ (function () {
     function DebugContext_(view, nodeIndex) {
         this.view = view;
         this.nodeIndex = nodeIndex;
@@ -14827,7 +15051,7 @@ function callWithDebugContext(action, fn, self, args) {
 function getCurrentDebugContext() {
     return _currentView ? new DebugContext_(_currentView, _currentNodeIndex) : null;
 }
-var DebugRendererFactory2 = (function () {
+var DebugRendererFactory2 = /** @class */ (function () {
     function DebugRendererFactory2(delegate) {
         this.delegate = delegate;
     }
@@ -14880,7 +15104,7 @@ var DebugRendererFactory2 = (function () {
     };
     return DebugRendererFactory2;
 }());
-var DebugRenderer2 = (function () {
+var DebugRenderer2 = /** @class */ (function () {
     function DebugRenderer2(delegate) {
         this.delegate = delegate;
     }
@@ -15270,7 +15494,7 @@ function clearOverrides() {
 function createNgModuleFactory(ngModuleType, bootstrapComponents, defFactory) {
     return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
-var NgModuleFactory_ = (function (_super) {
+var NgModuleFactory_ = /** @class */ (function (_super) {
     __extends(NgModuleFactory_, _super);
     function NgModuleFactory_(moduleType, _bootstrapComponents, _ngModuleDefFactory) {
         var _this = 

@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-beta.0-f8658cd
+ * @license Angular v5.1.0-beta.0-336041a
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -119,7 +119,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  *
  * @stable
  */
-var ComponentFixture = (function () {
+var ComponentFixture = /** @class */ (function () {
     function ComponentFixture(componentRef, ngZone, _autoDetect) {
         var _this = this;
         this.componentRef = componentRef;
@@ -493,7 +493,7 @@ function flushMicrotasks() {
 /**
  * Injectable completer that allows signaling completion of an asynchronous test. Used internally.
  */
-var AsyncTestCompleter = (function () {
+var AsyncTestCompleter = /** @class */ (function () {
     function AsyncTestCompleter() {
         var _this = this;
         this._promise = new Promise(function (res, rej) {
@@ -526,7 +526,7 @@ function unimplemented() {
  *
  * @experimental
  */
-var TestingCompiler = (function (_super) {
+var TestingCompiler = /** @class */ (function (_super) {
     __extends(TestingCompiler, _super);
     function TestingCompiler() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -597,7 +597,7 @@ var TestingCompiler = (function (_super) {
  *
  * @experimental
  */
-var TestingCompilerFactory = (function () {
+var TestingCompilerFactory = /** @class */ (function () {
     function TestingCompilerFactory() {
     }
     return TestingCompilerFactory;
@@ -616,7 +616,7 @@ var UNDEFINED = new Object();
  *
  * @experimental
  */
-var TestComponentRenderer = (function () {
+var TestComponentRenderer = /** @class */ (function () {
     function TestComponentRenderer() {
     }
     TestComponentRenderer.prototype.insertRootElement = function (rootElementId) { };
@@ -640,7 +640,7 @@ var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
  *
  * @stable
  */
-var TestBed = (function () {
+var TestBed = /** @class */ (function () {
     function TestBed() {
         this._instantiated = false;
         this._compiler = null;
@@ -1004,7 +1004,7 @@ var TestBed = (function () {
         var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var imports = [this.ngModule, this._imports];
         var schemas = this._schemas;
-        var DynamicTestModule = (function () {
+        var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
             DynamicTestModule.decorators = [
@@ -1108,7 +1108,7 @@ var TestBed = (function () {
     };
     TestBed.prototype.overrideTemplateUsingTestingModule = function (component, template) {
         this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
-        var OverrideComponent = (function () {
+        var OverrideComponent = /** @class */ (function () {
             function OverrideComponent() {
             }
             OverrideComponent.decorators = [
@@ -1197,7 +1197,7 @@ function inject(tokens, fn) {
 /**
  * @experimental
  */
-var InjectSetupWrapper = (function () {
+var InjectSetupWrapper = /** @class */ (function () {
     function InjectSetupWrapper(_moduleDef) {
         this._moduleDef = _moduleDef;
     }
