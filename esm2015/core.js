@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.0.3-65a40e6
+ * @license Angular v5.0.3-2a5b619
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -633,7 +633,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.0.3-65a40e6');
+const VERSION = new Version('5.0.3-2a5b619');
 
 /**
  * @fileoverview added by tsickle
@@ -3616,7 +3616,7 @@ class EventEmitter extends Subject {
  * import {NgIf} from '\@angular/common';
  *
  * \@Component({
- *   selector: 'ng-zone-demo'.
+ *   selector: 'ng-zone-demo',
  *   template: `
  *     <h2>Demo: NgZone</h2>
  *
@@ -3648,9 +3648,10 @@ class EventEmitter extends Subject {
  *     this.progress = 0;
  *     this._ngZone.runOutsideAngular(() => {
  *       this._increaseProgress(() => {
- *       // reenter the Angular zone and display done
- *       this._ngZone.run(() => {console.log('Outside Done!') });
- *     }}));
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
  *   }
  *
  *   _increaseProgress(doneCallback: () => void) {
@@ -3658,7 +3659,7 @@ class EventEmitter extends Subject {
  *     console.log(`Current progress: ${this.progress}%`);
  *
  *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback)), 10)
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
  *     } else {
  *       doneCallback();
  *     }
