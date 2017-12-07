@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-6727336
+ * @license Angular v5.1.0-9dd60a5
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.1.0-6727336');
+const VERSION = new Version('5.1.0-9dd60a5');
 
 /**
  * @fileoverview added by tsickle
@@ -1762,9 +1762,6 @@ class ReflectiveKey {
      */
     static get numberOfKeys() { return _globalKeyRegistry.numberOfKeys; }
 }
-/**
- * \@internal
- */
 class KeyRegistry {
     constructor() {
         this._allKeys = new Map();
@@ -4038,8 +4035,6 @@ function onLeave(zone) {
 /**
  * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
  * to framework to perform rendering.
- *
- * \@internal
  */
 class NoopNgZone {
     constructor() {
