@@ -8,15 +8,15 @@
 /**
  * Defines template and style encapsulation options available for Component's {@link Component}.
  *
- * See {@link Component#encapsulation}.
+ * See {@link Component#encapsulation encapsulation}.
  * @stable
  */
 export declare enum ViewEncapsulation {
     /**
      * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
-     * Element and pre-processing the style rules provided via
-     * {@link Component#styles} or {@link Component#styleUrls}, and adding the new Host Element
-     * attribute to all selectors.
+     * Element and pre-processing the style rules provided via {@link Component#styles styles} or
+     * {@link Component#styleUrls styleUrls}, and adding the new Host Element attribute to all
+     * selectors.
      *
      * This is the default option.
      */
