@@ -122,7 +122,7 @@ export interface AnimationStateMetadata extends AnimationMetadata {
  * @experimental Animation support is experimental.
  */
 export interface AnimationTransitionMetadata extends AnimationMetadata {
-    expr: string;
+    expr: string | ((fromState: string, toState: string) => boolean);
     animation: AnimationMetadata | AnimationMetadata[];
     options: AnimationOptions | null;
 }
@@ -813,7 +813,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *
  * @experimental Animation support is experimental.
  */
-export declare function transition(stateChangeExpr: string, steps: AnimationMetadata | AnimationMetadata[], options?: AnimationOptions | null): AnimationTransitionMetadata;
+export declare function transition(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata | AnimationMetadata[], options?: AnimationOptions | null): AnimationTransitionMetadata;
 /**
  * `animation` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language.
