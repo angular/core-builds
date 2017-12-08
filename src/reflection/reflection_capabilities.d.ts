@@ -26,6 +26,9 @@ export declare class ReflectionCapabilities implements PlatformReflectionCapabil
         [key: string]: any[];
     };
     hasLifecycleHook(type: any, lcProperty: string): boolean;
+    guards(type: any): {
+        [key: string]: any;
+    };
     getter(name: string): GetterFn;
     setter(name: string): SetterFn;
     method(name: string): MethodFn;
