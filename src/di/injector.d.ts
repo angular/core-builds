@@ -8,6 +8,7 @@
 import { Type } from '../type';
 import { InjectionToken } from './injection_token';
 import { StaticProvider } from './provider';
+export declare const SOURCE = "__source";
 export declare const THROW_IF_NOT_FOUND: Object;
 /**
  * @whatItDoes Injector interface
@@ -46,18 +47,20 @@ export declare abstract class Injector {
      */
     abstract get(token: any, notFoundValue?: any): any;
     /**
-     * Create a new Injector which is configure using `StaticProvider`s.
-     *
-     * ### Example
-     *
-     * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
+     * @deprecated from v5 use the new signature Injector.create(options)
      */
     static create(providers: StaticProvider[], parent?: Injector): Injector;
+    static create(options: {
+        providers: StaticProvider[];
+        parent?: Injector;
+        name?: string;
+    }): Injector;
 }
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
+    readonly source: string | null;
     private _records;
-    constructor(providers: StaticProvider[], parent?: Injector);
+    constructor(providers: StaticProvider[], parent?: Injector, source?: string | null);
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: T): T;
     get(token: any, notFoundValue?: any): any;
     toString(): string;

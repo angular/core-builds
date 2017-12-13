@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.0-8c52088
+ * @license Angular v5.1.0-b3eb1db
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -989,7 +989,12 @@ var TestBed = /** @class */ (function () {
             ɵoverrideComponentView(component, compFactory);
         }
         var ngZone = new NgZone({ enableLongStackTrace: true });
-        var ngZoneInjector = Injector.create([{ provide: NgZone, useValue: ngZone }], this.platform.injector);
+        var providers = [{ provide: NgZone, useValue: ngZone }];
+        var ngZoneInjector = Injector.create({
+            providers: providers,
+            parent: this.platform.injector,
+            name: this._moduleFactory.moduleType.name
+        });
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
