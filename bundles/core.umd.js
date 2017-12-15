@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.1.1-756dd34
+ * @license Angular v5.1.1-c011ffa
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.1.1-756dd34
+ * @license Angular v5.1.1-c011ffa
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.1.1-756dd34');
+var VERSION = new Version('5.1.1-c011ffa');
 
 /**
  * @fileoverview added by tsickle
