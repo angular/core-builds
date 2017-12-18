@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-beta.0-3846f19
+ * @license Angular v5.2.0-beta.0-0575135
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -378,7 +378,7 @@ var _inFakeAsyncCall = false;
  *
  * ## Example
  *
- * {@example core/testing/ts/fake_async.ts region='basic'}
+ * {@example testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
  * @returns The function wrapped to be executed in the fakeAsync zone
@@ -443,7 +443,7 @@ function _getFakeAsyncZoneSpec() {
  *
  * ## Example
  *
- * {@example core/testing/ts/fake_async.ts region='basic'}
+ * {@example testing/ts/fake_async.ts region='basic'}
  *
  * @experimental
  */
