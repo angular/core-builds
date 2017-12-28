@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-beta.1-d8abf70
+ * @license Angular v5.2.0-beta.1-9f538a6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.2.0-beta.1-d8abf70
+ * @license Angular v5.2.0-beta.1-9f538a6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-beta.1-d8abf70');
+var VERSION = new Version('5.2.0-beta.1-9f538a6');
 
 /**
  * @fileoverview added by tsickle
@@ -15714,6 +15714,12 @@ function assertNodeType(node, type) {
     assertEqual(node.flags & 3 /* TYPE_MASK */, type, 'Node.type', typeSerializer);
 }
 /**
+ * @param {?} node
+ * @param {...?} types
+ * @return {?}
+ */
+
+/**
  * @param {?} type
  * @return {?}
  */
@@ -16160,6 +16166,47 @@ function stringify$1(value) {
         return '';
     return '' + value;
 }
+/**
+ * Creates an ElementRef for a given node injector and stores it on the injector.
+ * Or, if the ElementRef already exists, retrieves the existing ElementRef.
+ *
+ * @param {?} di The node injector where we should store a created ElementRef
+ * @return {?} The ElementRef instance to use
+ */
+
+/**
+ * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
+ * exists, retrieves the existing TemplateRef.
+ *
+ * @template T
+ * @param {?} di The node injector where we should store a created TemplateRef
+ * @return {?} The TemplateRef instance to use
+ */
+
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @param {?} di
+ * @return {?} The ViewContainerRef instance to use
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A predicate which determines if a given element/directive should be included in the query
+ * @record
+ */
+
 var QueryList_ = /** @class */ (function () {
     function QueryList_() {
         this.dirty = false;
@@ -16434,7 +16481,7 @@ var domRendererFactory3 = {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * directive (D) sets a property on all component instances using this constant as a key and the
+ * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
  */
@@ -16944,7 +16991,7 @@ function createNodeStatic(tagName, attrs, containerStatic, localName) {
     return {
         tagName: tagName,
         attrs: attrs,
-        localName: localName,
+        localNames: localName ? [localName, -1] : null,
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
@@ -17089,9 +17136,10 @@ function textBinding(index, value) {
  * @param {?} index
  * @param {?=} directive
  * @param {?=} directiveDef
+ * @param {?=} localName
  * @return {?}
  */
-function directive(index, directive, directiveDef) {
+function directive(index, directive, directiveDef, localName) {
     var /** @type {?} */ instance;
     if (directive == null) {
         // return existing
@@ -17116,6 +17164,12 @@ function directive(index, directive, directiveDef) {
         data[index] = instance = directive;
         if (index >= ngStaticData.length) {
             ngStaticData[index] = /** @type {?} */ ((directiveDef));
+            if (localName) {
+                ngDevMode &&
+                    assertNotNull(previousOrParentNode.staticData, 'previousOrParentNode.staticData');
+                var /** @type {?} */ nodeStaticData = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).staticData));
+                (nodeStaticData.localNames || (nodeStaticData.localNames = [])).push(localName, index);
+            }
         }
         var /** @type {?} */ diPublic_1 = /** @type {?} */ ((directiveDef)).diPublic;
         if (diPublic_1) {
@@ -17739,6 +17793,7 @@ function defineComponent(componentDefinition) {
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
         r: componentDefinition.refresh ||
             function (d, e) { componentRefresh(d, e, componentDefinition.template); },
+        h: componentDefinition.hostBindings || noop$1,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
@@ -17761,6 +17816,10 @@ function defineComponent(componentDefinition) {
  */
 
 var EMPTY$1 = {};
+/**
+ * @return {?}
+ */
+function noop$1() { }
 /**
  * Swaps the keys and values of an object.
  * @param {?} obj

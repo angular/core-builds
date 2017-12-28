@@ -27,7 +27,7 @@ export declare const enum LifecycleHook {
     ON_CHANGES = 4,
 }
 /**
- * directive (D) sets a property on all component instances using this constant as a key and the
+ * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
  */
@@ -228,7 +228,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * @param directiveDef DirectiveDef object which contains information about the template.
  */
 export declare function directive<T>(index: number): T;
-export declare function directive<T>(index: number, directive: T, directiveDef: DirectiveDef<T>): T;
+export declare function directive<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localName?: string): T;
 /**
  * Accepts a lifecycle hook type and determines when and how the related lifecycle hook
  * callback should run.
@@ -462,4 +462,4 @@ export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: 
  */
 export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
-export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType): QueryList<T>;
+export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType | Type<T>): QueryList<T>;

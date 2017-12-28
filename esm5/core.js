@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-beta.1-d8abf70
+ * @license Angular v5.2.0-beta.1-9f538a6
  * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-beta.1-d8abf70');
+var VERSION = new Version('5.2.0-beta.1-9f538a6');
 
 /**
  * @fileoverview added by tsickle
@@ -15679,20 +15679,7 @@ function assertNodeType(node, type) {
  * @param {...?} types
  * @return {?}
  */
-function assertNodeOfPossibleTypes(node) {
-    var types = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        types[_i - 1] = arguments[_i];
-    }
-    assertNotEqual(node, null, 'node');
-    var /** @type {?} */ nodeType = (node.flags & 3 /* TYPE_MASK */);
-    for (var /** @type {?} */ i = 0; i < types.length; i++) {
-        if (nodeType === types[i]) {
-            return;
-        }
-    }
-    throw new Error("Expected node of possible types: " + types.map(typeSerializer).join(', ') + " but got " + typeSerializer(nodeType));
-}
+
 /**
  * @param {?} type
  * @return {?}
@@ -16146,9 +16133,6 @@ function stringify$1(value) {
  *
  * @return {?} Not implemented error
  */
-function notImplemented() {
-    return new Error('NotImplemented');
-}
 
 /**
  * @fileoverview added by tsickle
@@ -16188,29 +16172,7 @@ var BLOOM_SIZE = 128;
  * @param {?} node for which an injector should be retrieved / created.
  * @return {?} Node injector
  */
-function getOrCreateNodeInjectorForNode(node) {
-    var /** @type {?} */ nodeInjector = node.nodeInjector;
-    var /** @type {?} */ parentInjector = node.parent && node.parent.nodeInjector;
-    if (nodeInjector != parentInjector) {
-        return /** @type {?} */ ((nodeInjector));
-    }
-    return node.nodeInjector = {
-        parent: parentInjector,
-        node: node,
-        bf0: 0,
-        bf1: 0,
-        bf2: 0,
-        bf3: 0,
-        cbf0: parentInjector == null ? 0 : parentInjector.cbf0 | parentInjector.bf0,
-        cbf1: parentInjector == null ? 0 : parentInjector.cbf1 | parentInjector.bf1,
-        cbf2: parentInjector == null ? 0 : parentInjector.cbf2 | parentInjector.bf2,
-        cbf3: parentInjector == null ? 0 : parentInjector.cbf3 | parentInjector.bf3,
-        injector: null,
-        templateRef: null,
-        viewContainerRef: null,
-        elementRef: null
-    };
-}
+
 /**
  * Constructs an injection error with the given text and token.
  *
@@ -16319,18 +16281,7 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
  * @param {?} di The node injector where we should store a created ElementRef
  * @return {?} The ElementRef instance to use
  */
-function getOrCreateElementRef(di) {
-    return di.elementRef || (di.elementRef = new ElementRef$1(di.node.native));
-}
-/**
- * A ref to a node's native element.
- */
-var ElementRef$1 = /** @class */ (function () {
-    function ElementRef(nativeElement) {
-        this.nativeElement = nativeElement;
-    }
-    return ElementRef;
-}());
+
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
@@ -16339,30 +16290,7 @@ var ElementRef$1 = /** @class */ (function () {
  * @param {?} di The node injector where we should store a created TemplateRef
  * @return {?} The TemplateRef instance to use
  */
-function getOrCreateTemplateRef(di) {
-    ngDevMode && assertNodeType(di.node, 0 /* Container */);
-    var /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
-    return di.templateRef ||
-        (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), data.template));
-}
-/**
- * A ref to a particular template.
- */
-var TemplateRef$1 = /** @class */ (function () {
-    function TemplateRef(elementRef, template) {
-        this.elementRef = elementRef;
-    }
-    /**
-     * @param {?} context
-     * @return {?}
-     */
-    TemplateRef.prototype.createEmbeddedView = /**
-     * @param {?} context
-     * @return {?}
-     */
-    function (context) { throw notImplemented(); };
-    return TemplateRef;
-}());
+
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
@@ -16370,125 +16298,6 @@ var TemplateRef$1 = /** @class */ (function () {
  * @param {?} di
  * @return {?} The ViewContainerRef instance to use
  */
-function getOrCreateContainerRef(di) {
-    return di.viewContainerRef || (di.viewContainerRef = new ViewContainerRef$1(/** @type {?} */ (di.node)));
-}
-/**
- * A ref to a container that enables adding and removing views from that container
- * imperatively.
- */
-var ViewContainerRef$1 = /** @class */ (function () {
-    function ViewContainerRef(node) {
-    }
-    /**
-     * @return {?}
-     */
-    ViewContainerRef.prototype.clear = /**
-     * @return {?}
-     */
-    function () { throw notImplemented(); };
-    /**
-     * @param {?} index
-     * @return {?}
-     */
-    ViewContainerRef.prototype.get = /**
-     * @param {?} index
-     * @return {?}
-     */
-    function (index) { throw notImplemented(); };
-    /**
-     * @template C
-     * @param {?} templateRef
-     * @param {?=} context
-     * @param {?=} index
-     * @return {?}
-     */
-    ViewContainerRef.prototype.createEmbeddedView = /**
-     * @template C
-     * @param {?} templateRef
-     * @param {?=} context
-     * @param {?=} index
-     * @return {?}
-     */
-    function (templateRef, context, index) {
-        throw notImplemented();
-    };
-    /**
-     * @template C
-     * @param {?} componentFactory
-     * @param {?=} index
-     * @param {?=} injector
-     * @param {?=} projectableNodes
-     * @param {?=} ngModule
-     * @return {?}
-     */
-    ViewContainerRef.prototype.createComponent = /**
-     * @template C
-     * @param {?} componentFactory
-     * @param {?=} index
-     * @param {?=} injector
-     * @param {?=} projectableNodes
-     * @param {?=} ngModule
-     * @return {?}
-     */
-    function (componentFactory, index, injector, projectableNodes, ngModule) {
-        throw notImplemented();
-    };
-    /**
-     * @param {?} viewRef
-     * @param {?=} index
-     * @return {?}
-     */
-    ViewContainerRef.prototype.insert = /**
-     * @param {?} viewRef
-     * @param {?=} index
-     * @return {?}
-     */
-    function (viewRef, index) {
-        throw notImplemented();
-    };
-    /**
-     * @param {?} viewRef
-     * @param {?} currentIndex
-     * @return {?}
-     */
-    ViewContainerRef.prototype.move = /**
-     * @param {?} viewRef
-     * @param {?} currentIndex
-     * @return {?}
-     */
-    function (viewRef, currentIndex) {
-        throw notImplemented();
-    };
-    /**
-     * @param {?} viewRef
-     * @return {?}
-     */
-    ViewContainerRef.prototype.indexOf = /**
-     * @param {?} viewRef
-     * @return {?}
-     */
-    function (viewRef) { throw notImplemented(); };
-    /**
-     * @param {?=} index
-     * @return {?}
-     */
-    ViewContainerRef.prototype.remove = /**
-     * @param {?=} index
-     * @return {?}
-     */
-    function (index) { throw notImplemented(); };
-    /**
-     * @param {?=} index
-     * @return {?}
-     */
-    ViewContainerRef.prototype.detach = /**
-     * @param {?=} index
-     * @return {?}
-     */
-    function (index) { throw notImplemented(); };
-    return ViewContainerRef;
-}());
 
 /**
  * @fileoverview added by tsickle
@@ -16506,43 +16315,6 @@ var ViewContainerRef$1 = /** @class */ (function () {
  * @record
  */
 
-/**
- * @param {?} nodeInjector
- * @param {?} node
- * @return {?}
- */
-function readDefaultInjectable(nodeInjector, node) {
-    ngDevMode && assertNodeOfPossibleTypes(node, 0 /* Container */, 3 /* Element */);
-    if ((node.flags & 3 /* TYPE_MASK */) === 3 /* Element */) {
-        return getOrCreateElementRef(nodeInjector);
-    }
-    else if ((node.flags & 3 /* TYPE_MASK */) === 0 /* Container */) {
-        return getOrCreateTemplateRef(nodeInjector);
-    }
-}
-/**
- * @param {?} nodeInjector
- * @param {?} node
- * @param {?} read
- * @return {?}
- */
-function readFromNodeInjector(nodeInjector, node, read) {
-    if (read === null) {
-        return readDefaultInjectable(nodeInjector, node);
-    }
-    else if (read === 0 /* ElementRef */) {
-        return getOrCreateElementRef(nodeInjector);
-    }
-    else if (read === 1 /* ViewContainerRef */) {
-        return getOrCreateContainerRef(nodeInjector);
-    }
-    else if (read === 2 /* TemplateRef */) {
-        return getOrCreateTemplateRef(nodeInjector);
-    }
-    if (ngDevMode) {
-        throw new Error("Unrecognised read type for queries: " + read);
-    }
-}
 var QueryList_ = /** @class */ (function () {
     function QueryList_() {
         this.dirty = false;
@@ -16817,7 +16589,7 @@ var domRendererFactory3 = {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * directive (D) sets a property on all component instances using this constant as a key and the
+ * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
  */
@@ -17327,7 +17099,7 @@ function createNodeStatic(tagName, attrs, containerStatic, localName) {
     return {
         tagName: tagName,
         attrs: attrs,
-        localName: localName,
+        localNames: localName ? [localName, -1] : null,
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
@@ -17472,9 +17244,10 @@ function textBinding(index, value) {
  * @param {?} index
  * @param {?=} directive
  * @param {?=} directiveDef
+ * @param {?=} localName
  * @return {?}
  */
-function directive(index, directive, directiveDef) {
+function directive(index, directive, directiveDef, localName) {
     var /** @type {?} */ instance;
     if (directive == null) {
         // return existing
@@ -17499,6 +17272,12 @@ function directive(index, directive, directiveDef) {
         data[index] = instance = directive;
         if (index >= ngStaticData.length) {
             ngStaticData[index] = /** @type {?} */ ((directiveDef));
+            if (localName) {
+                ngDevMode &&
+                    assertNotNull(previousOrParentNode.staticData, 'previousOrParentNode.staticData');
+                var /** @type {?} */ nodeStaticData = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).staticData));
+                (nodeStaticData.localNames || (nodeStaticData.localNames = [])).push(localName, index);
+            }
         }
         var /** @type {?} */ diPublic_1 = /** @type {?} */ ((directiveDef)).diPublic;
         if (diPublic_1) {
@@ -18122,6 +17901,7 @@ function defineComponent(componentDefinition) {
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
         r: componentDefinition.refresh ||
             function (d, e) { componentRefresh(d, e, componentDefinition.template); },
+        h: componentDefinition.hostBindings || noop$1,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
@@ -18144,6 +17924,10 @@ function defineComponent(componentDefinition) {
  */
 
 var EMPTY$1 = {};
+/**
+ * @return {?}
+ */
+function noop$1() { }
 /**
  * Swaps the keys and values of an object.
  * @param {?} obj

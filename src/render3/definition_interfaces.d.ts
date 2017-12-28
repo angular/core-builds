@@ -66,23 +66,26 @@ export interface DirectiveDef<T> {
      */
     n(): T;
     /**
-     * Refresh method. Used by the containing component to signal
-     * to the directive that it should be refreshed. (Directives
-     * usually call life cycle methods at this point.)
+     * Refreshes the view of the component. Also calls lifecycle hooks like
+     * ngAfterViewInit, if they are defined on the component.
      *
-     * NOTE: this property is short (1 char) because it is used in
-     * component templates which is sensitive to size.
+     * NOTE: this property is short (1 char) because it is used in component
+     * templates which is sensitive to size.
      *
      * @param directiveIndex index of the directive in the containing template
      * @param elementIndex index of an host element for a given directive.
      */
     r(directiveIndex: number, elementIndex: number): void;
+    /**
+     * Refreshes host bindings on the associated directive. Also calls lifecycle hooks
+     * like ngOnInit and ngDoCheck, if they are defined on the directive.
+     */
+    h(directiveIndex: number, elementIndex: number): void;
 }
 export interface ComponentDef<T> extends DirectiveDef<T> {
     /**
-     * Refresh method. Used by the containing component to signal
-     * to the directive that it should be refreshed. (Directives
-     * usually call life cycle methods at this point.)
+     * Refreshes the view of the component. Also calls lifecycle hooks like
+     * ngAfterViewInit, if they are defined on the component.
      *
      * NOTE: this property is short (1 char) because it is used in
      * component templates which is sensitive to size.
@@ -129,6 +132,7 @@ export interface ComponentDefArgs<T> extends DirectiveDefArgs<T> {
     tag: string;
     template: ComponentTemplate<T>;
     refresh?: (directiveIndex: number, elementIndex: number) => void;
+    hostBindings?: (directiveIndex: number, elementIndex: number) => void;
     features?: ComponentDefFeature[];
     rendererType?: RendererType2;
 }
