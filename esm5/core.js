@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.2.0-rc.0-b5934fc
- * (c) 2010-2018 Google, Inc. https://angular.io/
+ * @license Angular v5.2.0-rc.0-03d16fc
+ * (c) 2010-2017 Google, Inc. https://angular.io/
  * License: MIT
  */
 import { __assign, __extends } from 'tslib';
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-rc.0-b5934fc');
+var VERSION = new Version('5.2.0-rc.0-03d16fc');
 
 /**
  * @fileoverview added by tsickle
