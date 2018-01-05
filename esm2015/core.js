@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-rc.0-fecf768
+ * @license Angular v5.2.0-rc.0-db55e86
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.0-rc.0-fecf768');
+const VERSION = new Version('5.2.0-rc.0-db55e86');
 
 /**
  * @fileoverview added by tsickle
@@ -14381,6 +14381,14 @@ function createLNode(index, type, native, state) {
     return node;
 }
 /**
+ * Resets the application state.
+ * @return {?}
+ */
+function resetApplicationState() {
+    isParent = false;
+    previousOrParentNode = /** @type {?} */ ((null));
+}
+/**
  *
  * @template T
  * @param {?} hostNode
@@ -14594,6 +14602,7 @@ function locateHostElement(factory, elementOrSelector) {
  * @return {?}
  */
 function hostElement(rNode, def) {
+    resetApplicationState();
     createLNode(0, 3 /* Element */, rNode, createViewState(-1, renderer, getTemplateStatic(def.template)));
 }
 /**
