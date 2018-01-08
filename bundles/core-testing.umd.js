@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.2.0-beta.0-057b357
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v5.2.0-rc.0-d2808aa
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
@@ -36,8 +36,8 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.2.0-beta.0-057b357
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v5.2.0-rc.0-d2808aa
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 /**
@@ -1276,11 +1276,6 @@ function withModule(moduleDef, fn) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.

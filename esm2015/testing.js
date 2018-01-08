@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.2.0-beta.0-057b357
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v5.2.0-rc.0-d2808aa
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 import { ApplicationInitStatus, Compiler, Component, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
@@ -998,11 +998,6 @@ function withModule(moduleDef, fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
- */
 const _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
@@ -1030,11 +1025,6 @@ const __core_private_testing_placeholder__ = '';
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of the core/testing package.
- */
 
 /**
  * @license
@@ -1042,11 +1032,6 @@ const __core_private_testing_placeholder__ = '';
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
  */
 
 // This file only reexports content of the `src` folder. Keep it that way.

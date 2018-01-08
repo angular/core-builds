@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.2.0-beta.0-057b357
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v5.2.0-rc.0-d2808aa
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 import { Observable } from 'rxjs/Observable';
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.0-beta.0-057b357');
+const VERSION = new Version('5.2.0-rc.0-d2808aa');
 
 /**
  * @fileoverview added by tsickle
@@ -4932,7 +4932,6 @@ function remove(list, el) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for Zone
 
 /**
  * @fileoverview added by tsickle
@@ -5037,7 +5036,6 @@ class Renderer2 {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for render
 
 /**
  * @fileoverview added by tsickle
@@ -5533,7 +5531,6 @@ class EmbeddedViewRef extends ViewRef {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for compiler
 
 /**
  * @fileoverview added by tsickle
@@ -7406,11 +7403,6 @@ const defaultKeyValueDiffers = new KeyValueDiffers(keyValDiff);
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Change detection enables data binding in Angular.
  */
 
 /**
@@ -13336,6 +13328,2266 @@ class NgModuleFactory_ extends NgModuleFactory {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// The functions in this file verify that the assumptions we are making
+// about state in an instruction are correct before implementing any logic.
+// They are meant only to be called in dev mode as sanity checks.
+/**
+ * Stringifies values such that strings are wrapped in explicit quotation marks and
+ * other types are stringified normally. Used in error messages (e.g. assertThrow)
+ * to make it clear that certain values are of the string type when comparing.
+ *
+ * e.g. `expected "3" to be 3` is easier to understand than `expected 3 to be 3`.
+ *
+ * @param {?} value The value to be stringified
+ * @return {?} The stringified value
+ */
+function stringifyValueForError(value) {
+    return typeof value === 'string' ? `"${value}"` : '' + value;
+}
+/**
+ * @param {?} actual
+ * @param {?} name
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} expected
+ * @param {?} name
+ * @param {?=} serializer
+ * @return {?}
+ */
+function assertEqual(actual, expected, name, serializer) {
+    (actual != expected) && assertThrow(actual, expected, name, '==', serializer);
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} expected
+ * @param {?} name
+ * @return {?}
+ */
+function assertLessThan(actual, expected, name) {
+    (actual < expected) && assertThrow(actual, expected, name, '>');
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} name
+ * @return {?}
+ */
+function assertNotNull(actual, name) {
+    assertNotEqual(actual, null, name);
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} expected
+ * @param {?} name
+ * @return {?}
+ */
+function assertNotEqual(actual, expected, name) {
+    (actual == expected) && assertThrow(actual, expected, name, '!=');
+}
+/**
+ * Throws an error with a message constructed from the arguments.
+ *
+ * @template T
+ * @param {?} actual The actual value (e.g. 3)
+ * @param {?} expected The expected value (e.g. 5)
+ * @param {?} name The name of the value being checked (e.g. attrs.length)
+ * @param {?} operator The comparison operator (e.g. <, >, ==)
+ * @param {?=} serializer Function that maps a value to its display value
+ * @return {?}
+ */
+function assertThrow(actual, expected, name, operator, serializer = stringifyValueForError) {
+    throw new Error(`ASSERT: expected ${name} ${operator} ${serializer(expected)} but was ${serializer(actual)}!`);
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+if (typeof ngDevMode == 'undefined') {
+    if (typeof window != 'undefined')
+        (/** @type {?} */ (window)).ngDevMode = true;
+    if (typeof self != 'undefined')
+        (/** @type {?} */ (self)).ngDevMode = true;
+    if (typeof global != 'undefined')
+        (/** @type {?} */ (global)).ngDevMode = true;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {?} node
+ * @param {?} type
+ * @return {?}
+ */
+function assertNodeType(node, type) {
+    assertNotEqual(node, null, 'node');
+    assertEqual(node.flags & 3 /* TYPE_MASK */, type, 'Node.type', typeSerializer);
+}
+/**
+ * @param {?} node
+ * @param {...?} types
+ * @return {?}
+ */
+
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function typeSerializer(type) {
+    if (type == 1 /* Projection */)
+        return 'Projection';
+    if (type == 0 /* Container */)
+        return 'Container';
+    if (type == 2 /* View */)
+        return 'View';
+    if (type == 3 /* Element */)
+        return 'Element';
+    return '??? ' + type + ' ???';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Finds the closest DOM node above a given container in the hierarchy.
+ *
+ * This is necessary to add or remove elements from the DOM when a view
+ * is added or removed from the container. e.g. parent.removeChild(...)
+ *
+ * @param {?} containerNode The container node whose parent must be found
+ * @return {?} Closest DOM node above the container
+ */
+function findNativeParent(containerNode) {
+    let /** @type {?} */ container = containerNode;
+    while (container) {
+        ngDevMode && assertNodeType(container, 0 /* Container */);
+        const /** @type {?} */ renderParent = container.data.renderParent;
+        if (renderParent !== null) {
+            return renderParent.native;
+        }
+        const /** @type {?} */ viewOrElement = /** @type {?} */ ((container.parent));
+        ngDevMode && assertNotNull(viewOrElement, 'container.parent');
+        if ((viewOrElement.flags & 3 /* TYPE_MASK */) === 3 /* Element */) {
+            // we are an LElement, which means we are past the last LContainer.
+            // This means than we have not been projected so just ignore.
+            return null;
+        }
+        ngDevMode && assertNodeType(viewOrElement, 2 /* View */);
+        container = (/** @type {?} */ (viewOrElement)).parent;
+    }
+    return null;
+}
+/**
+ * Finds the DOM element before which a certain view should be inserting its
+ * child elements.
+ *
+ * If the view has a next (e.g. for loop), elements should be inserted before
+ * the next view's first child element. Otherwise, the container's comment
+ * anchor is the marker.
+ *
+ * @param {?} index The index of the view to check
+ * @param {?} state ContainerState of the parent container
+ * @param {?} native Comment anchor for container
+ * @return {?} The DOM element for which the view should insert elements
+ */
+function findBeforeNode(index, state, native) {
+    const /** @type {?} */ views = state.views;
+    // Find the node to insert in front of
+    return index + 1 < views.length ?
+        (/** @type {?} */ (views[index + 1].child)).native :
+        native;
+}
+/**
+ * @param {?} container
+ * @param {?} rootNode
+ * @param {?} insertMode
+ * @param {?=} beforeNode
+ * @return {?}
+ */
+function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode) {
+    ngDevMode && assertNodeType(container, 0 /* Container */);
+    ngDevMode && assertNodeType(rootNode, 2 /* View */);
+    const /** @type {?} */ parent = findNativeParent(container);
+    let /** @type {?} */ node = rootNode.child;
+    if (parent) {
+        while (node) {
+            const /** @type {?} */ type = node.flags & 3;
+            let /** @type {?} */ nextNode = null;
+            const /** @type {?} */ renderer = container.view.renderer;
+            const /** @type {?} */ isFnRenderer = (/** @type {?} */ (renderer)).listen;
+            if (type === 3 /* Element */) {
+                insertMode ? (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
+                    .insertBefore))(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
+                    parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true)) :
+                    (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
+                        .removeChild))(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
+                        parent.removeChild(/** @type {?} */ ((node.native))));
+                nextNode = node.next;
+            }
+            else if (type === 0 /* Container */) {
+                // if we get to a container, it must be a root node of a view because we are only
+                // propagating down into child views / containers and not child elements
+                const /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
+                insertMode ? (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
+                    .appendChild))(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
+                    parent.appendChild(/** @type {?} */ ((node.native)))) :
+                    (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
+                        .removeChild))(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
+                        parent.removeChild(/** @type {?} */ ((node.native))));
+                nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
+            }
+            else if (type === 1 /* Projection */) {
+                nextNode = (/** @type {?} */ (node)).data[0];
+            }
+            else {
+                nextNode = (/** @type {?} */ (node)).child;
+            }
+            if (nextNode === null) {
+                while (node && !node.next) {
+                    node = node.parent;
+                    if (node === rootNode)
+                        node = null;
+                }
+                node = node && node.next;
+            }
+            else {
+                node = nextNode;
+            }
+        }
+    }
+}
+/**
+ * Traverses the tree of component views and containers to remove listeners and
+ * call onDestroy callbacks.
+ *
+ * Notes:
+ *  - Because it's used for onDestroy calls, it needs to be bottom-up.
+ *  - Must process containers instead of their views to avoid splicing
+ *  when views are destroyed and re-added.
+ *  - Using a while loop because it's faster than recursion
+ *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
+ *
+ *  \@param rootView The view to destroy
+ * @param {?} rootView
+ * @return {?}
+ */
+function destroyViewTree(rootView) {
+    let /** @type {?} */ viewOrContainerState = rootView;
+    while (viewOrContainerState) {
+        let /** @type {?} */ next = null;
+        if (viewOrContainerState.views && viewOrContainerState.views.length) {
+            next = viewOrContainerState.views[0].data;
+        }
+        else if (viewOrContainerState.child) {
+            next = viewOrContainerState.child;
+        }
+        else if (viewOrContainerState.next) {
+            cleanUpView(/** @type {?} */ (viewOrContainerState));
+            next = viewOrContainerState.next;
+        }
+        if (next == null) {
+            while (viewOrContainerState && !/** @type {?} */ ((viewOrContainerState)).next) {
+                cleanUpView(/** @type {?} */ (viewOrContainerState));
+                viewOrContainerState = getParentState(viewOrContainerState, rootView);
+            }
+            cleanUpView(/** @type {?} */ (viewOrContainerState) || rootView);
+            next = viewOrContainerState && viewOrContainerState.next;
+        }
+        viewOrContainerState = next;
+    }
+}
+/**
+ * Inserts a view into a container.
+ *
+ * This adds the view to the container's array of active views in the correct
+ * position. It also adds the view's elements to the DOM if the container isn't a
+ * root node of another view (in that case, the view's elements will be added when
+ * the container's parent view is added later).
+ *
+ * @param {?} container The container into which the view should be inserted
+ * @param {?} newView The view to insert
+ * @param {?} index The index at which to insert the view
+ * @return {?} The inserted view
+ */
+function insertView(container, newView, index) {
+    const /** @type {?} */ state = container.data;
+    const /** @type {?} */ views = state.views;
+    if (index > 0) {
+        // This is a new view, we need to add it to the children.
+        setViewNext(views[index - 1], newView);
+    }
+    if (index < views.length && views[index].data.id !== newView.data.id) {
+        // View ID change replace the view.
+        setViewNext(newView, views[index]);
+        views.splice(index, 0, newView);
+    }
+    else if (index >= views.length) {
+        views.push(newView);
+    }
+    if (state.nextIndex <= index) {
+        state.nextIndex++;
+    }
+    // If the container's renderParent is null, we know that it is a root node of its own parent view
+    // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
+    // nodes twice - once now and once when its parent inserts its views).
+    if (container.data.renderParent !== null) {
+        addRemoveViewFromContainer(container, newView, true, findBeforeNode(index, state, container.native));
+    }
+    // Notify query that view has been inserted
+    container.query && container.query.insertView(container, newView, index);
+    return newView;
+}
+/**
+ * Removes a view from a container.
+ *
+ * This method splices the view from the container's array of active views. It also
+ * removes the view's elements from the DOM and conducts cleanup (e.g. removing
+ * listeners, calling onDestroys).
+ *
+ * @param {?} container The container from which to remove a view
+ * @param {?} removeIndex The index of the view to remove
+ * @return {?} The removed view
+ */
+function removeView(container, removeIndex) {
+    const /** @type {?} */ views = container.data.views;
+    const /** @type {?} */ viewNode = views[removeIndex];
+    if (removeIndex > 0) {
+        setViewNext(views[removeIndex - 1], viewNode.next);
+    }
+    views.splice(removeIndex, 1);
+    destroyViewTree(viewNode.data);
+    addRemoveViewFromContainer(container, viewNode, false);
+    // Notify query that view has been removed
+    container.query && container.query.removeView(container, viewNode, removeIndex);
+    return viewNode;
+}
+/**
+ * Sets a next on the view node, so views in for loops can easily jump from
+ * one view to the next to add/remove elements. Also adds the ViewState (view.data)
+ * to the view tree for easy traversal when cleaning up the view.
+ *
+ * @param {?} view The view to set up
+ * @param {?} next The view's new next
+ * @return {?}
+ */
+function setViewNext(view, next) {
+    view.next = next;
+    view.data.next = next ? next.data : null;
+}
+/**
+ * Determines which ViewOrContainerState to jump to when traversing back up the
+ * tree in destroyViewTree.
+ *
+ * Normally, the view's parent ViewState should be checked, but in the case of
+ * embedded views, the container (which is the view node's parent, but not the
+ * ViewState's parent) needs to be checked for a possible next property.
+ *
+ * @param {?} state The ViewOrContainerState for which we need a parent state
+ * @param {?} rootView The rootView, so we don't propagate too far up the view tree
+ * @return {?} The correct parent ViewOrContainerState
+ */
+function getParentState(state, rootView) {
+    let /** @type {?} */ node;
+    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) &&
+        (node.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+        // if it's an embedded view, the state needs to go up to the container, in case the
+        // container has a next
+        return /** @type {?} */ (((node.parent)).data);
+    }
+    else {
+        // otherwise, use parent view for containers or component views
+        return state.parent === rootView ? null : state.parent;
+    }
+}
+/**
+ * Removes all listeners and call all onDestroys in a given view.
+ *
+ * @param {?} viewState The ViewState of the view to clean up
+ * @return {?}
+ */
+function cleanUpView(viewState) {
+    if (!viewState.cleanup)
+        return;
+    const /** @type {?} */ cleanup = /** @type {?} */ ((viewState.cleanup));
+    for (let /** @type {?} */ i = 0; i < cleanup.length - 1; i += 2) {
+        if (typeof cleanup[i] === 'string') {
+            /** @type {?} */ ((cleanup))[i + 1].removeEventListener(cleanup[i], cleanup[i + 2], cleanup[i + 3]);
+            i += 2;
+        }
+        else {
+            cleanup[i].call(cleanup[i + 1]);
+        }
+    }
+    viewState.cleanup = null;
+}
+/**
+ * Appends the provided child element to the provided parent, if appropriate.
+ *
+ * If the parent is a view, the element will be appended as part of viewEnd(), so
+ * the element should not be appended now. Similarly, if the child is a content child
+ * of a parent component, the child will be appended to the right position later by
+ * the content projection system. Otherwise, append normally.
+ *
+ * @param {?} parent The parent to which to append the child
+ * @param {?} child The child that should be appended
+ * @param {?} currentView The current view's ViewState
+ * @return {?} Whether or not the child was appended
+ */
+function appendChild(parent, child, currentView) {
+    // Only add native child element to parent element if the parent element is regular Element.
+    // If parent is:
+    // - Regular element => add child
+    // - Component host element =>
+    //    - Current View, and parent view same => content => don't add -> parent component will
+    //    re-project if needed.
+    //    - Current View, and parent view different => view => add Child
+    // - View element => View's get added separately.
+    if (child !== null && (parent.flags & 3 /* TYPE_MASK */) === 3 /* Element */ &&
+        (parent.view !==
+            currentView /* Crossing View Boundaries, it is Component, but add Element of View */
+            || parent.data === null /* Regular Element. */)) {
+        // We only add element if not in View or not projected.
+        const /** @type {?} */ renderer = currentView.renderer;
+        (/** @type {?} */ (renderer)).listen ? /** @type {?} */ (((/** @type {?} */ (renderer)).appendChild))(/** @type {?} */ (((parent.native))), child) : /** @type {?} */ ((parent.native)).appendChild(child);
+        return true;
+    }
+    return false;
+}
+/**
+ * Inserts the provided node before the correct element in the DOM, if appropriate.
+ *
+ * If the parent is a view, the element will be inserted as part of viewEnd(), so
+ * the element should not be inserted now. Similarly, if the child is a content child
+ * of a parent component, the child will be inserted to the right position later by
+ * the content projection system. Otherwise, insertBefore normally.
+ *
+ * @param {?} node Node to insert
+ * @param {?} currentView The current view's ViewState
+ * @return {?}
+ */
+function insertChild(node, currentView) {
+    const /** @type {?} */ parent = /** @type {?} */ ((node.parent));
+    // Only add child element to parent element if the parent element is regular Element.
+    // If parent is:
+    // - Normal element => add child
+    // - Component element =>
+    //    - Current View, and parent view same => content don't add -> parent component will
+    //    re-project if needed.
+    //    - Current View, and parent view different => view => add Child
+    // - View element => View's get added separately.
+    if ((parent.flags & 3 /* TYPE_MASK */) === 3 /* Element */ &&
+        (parent.view !==
+            currentView /* Crossing View Boundaries, its Component, but add Element of View */
+            || parent.data === null /* Regular Element. */)) {
+        // We only add element if not in View or not projected.
+        let /** @type {?} */ sibling = node.next;
+        let /** @type {?} */ nativeSibling = null;
+        while (sibling && (nativeSibling = sibling.native) === null) {
+            sibling = sibling.next;
+        }
+        const /** @type {?} */ renderer = currentView.renderer;
+        (/** @type {?} */ (renderer)).listen ? /** @type {?} */ (((/** @type {?} */ (renderer))
+            .insertBefore))(/** @type {?} */ ((parent.native)), /** @type {?} */ ((node.native)), nativeSibling) : /** @type {?} */ ((parent.native)).insertBefore(/** @type {?} */ ((node.native)), nativeSibling, false);
+    }
+}
+/**
+ * Appends a projected node to the DOM, or in the case of a projected container,
+ * appends the nodes from all of the container's active views to the DOM. Also stores the
+ * node in the given projectedNodes array.
+ *
+ * @param {?} projectedNodes Array to store the projected node
+ * @param {?} node The node to process
+ * @param {?} currentParent The last parent element to be processed
+ * @param {?} currentView The current view's ViewState
+ * @return {?}
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A utility function to match an Ivy node static data against a simple CSS selector
+ *
+ * @param {?} lNodeStaticData
+ * @param {?} selector
+ * @return {?} true if node matches the selector.
+ */
+
+/**
+ * @param {?} lNodeStaticData
+ * @param {?} selector
+ * @return {?}
+ */
+
+/**
+ * @param {?} lNodeStaticData
+ * @param {?} selector
+ * @return {?}
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Must use this method for CD (instead of === ) since NaN !== NaN
+ * @param {?} a
+ * @param {?} b
+ * @return {?}
+ */
+function isDifferent(a, b) {
+    // NaN is the only value that is not equal to itself so the first
+    // test checks if both a and b are not NaN
+    return !(a !== a && b !== b) && a !== b;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function stringify$1(value) {
+    if (typeof value == 'function')
+        return value.name || value;
+    if (typeof value == 'string')
+        return value;
+    if (value == null)
+        return '';
+    return '' + value;
+}
+/**
+ *  Function that throws a "not implemented" error so it's clear certain
+ *  behaviors/methods aren't yet ready.
+ *
+ * @return {?} Not implemented error
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * If a directive is diPublic, bloomAdd sets a property on the instance with this constant as
+ * the key and the directive's unique ID as the value. This allows us to map directives to their
+ * bloom filter bit for DI.
+ */
+const NG_ELEMENT_ID = '__NG_ELEMENT_ID__';
+/**
+ * The number of slots in each bloom filter (used by DI). The larger this number, the fewer
+ * directives that will share slots, and thus, the fewer false positives when checking for
+ * the existence of a directive.
+ */
+const BLOOM_SIZE = 128;
+/**
+ * Registers this directive as present in its node's injector by flipping the directive's
+ * corresponding bit in the injector's bloom filter.
+ *
+ * @param {?} injector The node injector in which the directive should be registered
+ * @param {?} type The directive to register
+ * @return {?}
+ */
+
+/**
+ * Creates (or gets an existing) injector for a given element or container.
+ *
+ * @param {?} node for which an injector should be retrieved / created.
+ * @return {?} Node injector
+ */
+
+/**
+ * Constructs an injection error with the given text and token.
+ *
+ * @param {?} text The text of the error
+ * @param {?} token The token associated with the error
+ * @return {?} The error that was created
+ */
+function createInjectionError(text, token) {
+    return new Error(`ElementInjector: ${text} [${stringify$1(token)}]`);
+}
+/**
+ * Makes a directive public to the DI system by adding it to an injector's bloom filter.
+ *
+ * @param {?} di The node injector in which a directive will be added
+ * @param {?} def The definition of the directive to be made public
+ * @return {?}
+ */
+
+/**
+ * Searches for an instance of the given directive type up the injector tree and returns
+ * that instance if found.
+ *
+ * Specifically, it gets the bloom filter bit associated with the directive (see bloomHashBit),
+ * checks that bit against the bloom filter structure to identify an injector that might have
+ * the directive (see bloomFindPossibleInjector), then searches the directives on that injector
+ * for a match.
+ *
+ * If not found, it will propagate up to the next parent injector until the token
+ * is found or the top is reached.
+ *
+ * @template T
+ * @param {?} di Node injector where the search should start
+ * @param {?} token The directive type to search for
+ * @param {?=} flags Injection flags (e.g. CheckParent)
+ * @return {?} The instance found
+ */
+
+/**
+ * Given a directive type, this function returns the bit in an injector's bloom filter
+ * that should be used to determine whether or not the directive is present.
+ *
+ * When the directive was added to the bloom filter, it was given a unique ID that can be
+ * retrieved on the class. Since there are only BLOOM_SIZE slots per bloom filter, the directive's
+ * ID must be modulo-ed by BLOOM_SIZE to get the correct bloom bit (directives share slots after
+ * BLOOM_SIZE is reached).
+ *
+ * @param {?} type The directive type
+ * @return {?} The bloom bit to check for the directive
+ */
+function bloomHashBit(type) {
+    let /** @type {?} */ id = (/** @type {?} */ (type))[NG_ELEMENT_ID];
+    return typeof id === 'number' ? id % BLOOM_SIZE : null;
+}
+/**
+ * Finds the closest injector that might have a certain directive.
+ *
+ * Each directive corresponds to a bit in an injector's bloom filter. Given the bloom bit to
+ * check and a starting injector, this function traverses up injectors until it finds an
+ * injector that contains a 1 for that bit in its bloom filter. A 1 indicates that the
+ * injector may have that directive. It only *may* have the directive because directives begin
+ * to share bloom filter bits after the BLOOM_SIZE is reached, and it could correspond to a
+ * different directive sharing the bit.
+ *
+ * Note: We can skip checking further injectors up the tree if an injector's cbf structure
+ * has a 0 for that bloom bit. Since cbf contains the merged value of all the parent
+ * injectors, a 0 in the bloom bit indicates that the parents definitely do not contain
+ * the directive and do not need to be checked.
+ *
+ * @param {?} startInjector
+ * @param {?} bloomBit The bit to check in each injector's bloom filter
+ * @return {?} An injector that might have the directive
+ */
+function bloomFindPossibleInjector(startInjector, bloomBit) {
+    // Create a mask that targets the specific bit associated with the directive we're looking for.
+    // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
+    // to bit positions 0 - 31 in a 32 bit integer.
+    const /** @type {?} */ mask = 1 << bloomBit;
+    // Traverse up the injector tree until we find a potential match or until we know there *isn't* a
+    // match.
+    let /** @type {?} */ injector = startInjector;
+    while (injector) {
+        // Our bloom filter size is 128 bits, which is four 32-bit bloom filter buckets:
+        // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127]
+        // Get the bloom filter value from the appropriate bucket based on the directive's bloomBit.
+        let /** @type {?} */ value = bloomBit < 64 ? (bloomBit < 32 ? injector.bf0 : injector.bf1) :
+            (bloomBit < 96 ? injector.bf2 : injector.bf3);
+        // If the bloom filter value has the bit corresponding to the directive's bloomBit flipped on,
+        // this injector is a potential match.
+        if ((value & mask) === mask) {
+            return injector;
+        }
+        // If the current injector does not have the directive, check the bloom filters for the ancestor
+        // injectors (cbf0 - cbf3). These filters capture *all* ancestor injectors.
+        value = bloomBit < 64 ? (bloomBit < 32 ? injector.cbf0 : injector.cbf1) :
+            (bloomBit < 96 ? injector.cbf2 : injector.cbf3);
+        // If the ancestor bloom filter value has the bit corresponding to the directive, traverse up to
+        // find the specific injector. If the ancestor bloom filter does not have the bit, we can abort.
+        injector = (value & mask) ? injector.parent : null;
+    }
+    return null;
+}
+/**
+ * Creates an ElementRef for a given node injector and stores it on the injector.
+ * Or, if the ElementRef already exists, retrieves the existing ElementRef.
+ *
+ * @param {?} di The node injector where we should store a created ElementRef
+ * @return {?} The ElementRef instance to use
+ */
+
+/**
+ * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
+ * exists, retrieves the existing TemplateRef.
+ *
+ * @template T
+ * @param {?} di The node injector where we should store a created TemplateRef
+ * @return {?} The TemplateRef instance to use
+ */
+
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @param {?} di
+ * @return {?} The ViewContainerRef instance to use
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A predicate which determines if a given element/directive should be included in the query
+ * @record
+ */
+
+
+
+/**
+ * @param {?} query
+ * @return {?}
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @enum {number} */
+const RendererStyleFlags3 = {
+    Important: 1,
+    DashCase: 2,
+};
+RendererStyleFlags3[RendererStyleFlags3.Important] = "Important";
+RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
+/**
+ * Object Oriented style of API needed to create elements and text nodes.
+ *
+ * This is the native browser API style, e.g. operations are methods on individual objects
+ * like HTMLElement. With this style, no additional code is needed as a facade
+ * (reducing payload size).
+ *
+ * @record
+ */
+
+/**
+ * Procedural style of API needed to create elements and text nodes.
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the
+ * facade that enables element manipulation. This also facilitates backwards compatibility
+ * with Renderer2.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+const domRendererFactory3 = {
+    createRenderer: (hostElement, rendererType) => { return document; }
+};
+/**
+ * Subset of API needed for appending elements and text nodes.
+ * @record
+ */
+
+/**
+ * Subset of API needed for writing attributes, properties, and setting up
+ * listeners on Element.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Directive (D) sets a property on all component instances using this constant as a key and the
+ * component's host node (LElement) as the value. This is used in methods like detectChanges to
+ * facilitate jumping from an instance to the host node.
+ */
+const NG_HOST_SYMBOL = '__ngHostLNode__';
+/**
+ * This property gets set before entering a template.
+ *
+ * This renderer can be one of two varieties of Renderer3:
+ *
+ * - ObjectedOrientedRenderer3
+ *
+ * This is the native browser API style, e.g. operations are methods on individual objects
+ * like HTMLElement. With this style, no additional code is needed as a facade (reducing payload
+ * size).
+ *
+ * - ProceduralRenderer3
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the facade
+ * that enables element manipulation. This also facilitates backwards compatibility with
+ * Renderer2.
+ */
+let renderer;
+let rendererFactory;
+/**
+ * Used to set the parent property when nodes are created.
+ */
+let previousOrParentNode;
+/**
+ * If `isParent` is:
+ *  - `true`: then `previousOrParentNode` points to a parent node.
+ *  - `false`: then `previousOrParentNode` points to previous node (sibling).
+ */
+let isParent;
+/**
+ * The current template's static data (shared between all templates of a
+ * given type).
+ *
+ * Each node's static data is stored at the same index that it's stored
+ * in the data array. Any nodes that do not have static data store a null
+ * value to avoid a sparse array.
+ */
+let ngStaticData;
+/**
+ * State of the current view being processed.
+ */
+let currentView;
+// The initialization has to be after the `let`, otherwise `createViewState` can't see `let`.
+currentView = createViewState(/** @type {?} */ ((null)), /** @type {?} */ ((null)), []);
+let currentQuery;
+/**
+ * This property gets set before entering a template.
+ */
+let creationMode;
+/**
+ * An array of nodes (text, element, container, etc), their bindings, and
+ * any local variables that need to be stored between invocations.
+ */
+let data;
+/**
+ * Points to the next binding index to read or write to.
+ */
+let bindingIndex;
+/**
+ * When a view is destroyed, listeners need to be released
+ * and onDestroy callbacks need to be called. This cleanup array
+ * stores both listener data (in chunks of 4) and onDestroy data
+ * (in chunks of 2), as they'll be processed at the same time.
+ *
+ * If it's a listener being stored:
+ * 1st index is: event name to remove
+ * 2nd index is: native element
+ * 3rd index is: listener function
+ * 4th index is: useCapture boolean
+ *
+ * If it's an onDestroy function:
+ * 1st index is: onDestroy function
+ * 2nd index is: context for function
+ */
+let cleanup;
+/**
+ * Swap the current state with a new state.
+ *
+ * For performance reasons we store the state in the top level of the module.
+ * This way we minimize the number of properties to read. Whenever a new view
+ * is entered we have to store the state for later, and when the view is
+ * exited the state has to be restored
+ *
+ * @param {?} newViewState New state to become active
+ * @param {?} host Element to which the View is a child of
+ * @return {?} the previous state;
+ */
+function enterView(newViewState, host) {
+    const /** @type {?} */ oldViewState = currentView;
+    data = newViewState.data;
+    bindingIndex = newViewState.bindingStartIndex || 0;
+    ngStaticData = newViewState.ngStaticData;
+    if (creationMode = !data) {
+        // Absence of data implies creationMode.
+        (/** @type {?} */ (newViewState)).data = data = [];
+    }
+    cleanup = newViewState.cleanup;
+    renderer = newViewState.renderer;
+    if (host != null) {
+        previousOrParentNode = host;
+        isParent = true;
+    }
+    currentView = newViewState;
+    return /** @type {?} */ ((oldViewState));
+}
+/**
+ * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
+ * the direction of traversal (up or down the view tree) a bit clearer.
+ */
+const leaveView = /** @type {?} */ (enterView);
+/**
+ * @param {?} viewId
+ * @param {?} renderer
+ * @param {?} ngStaticData
+ * @return {?}
+ */
+function createViewState(viewId, renderer, ngStaticData) {
+    const /** @type {?} */ newView = {
+        parent: currentView,
+        id: viewId,
+        // -1 for component views
+        node: /** @type {?} */ ((null)),
+        // until we initialize it in createNode.
+        data: /** @type {?} */ ((null)),
+        // Hack use as a marker for creationMode
+        ngStaticData: ngStaticData,
+        cleanup: null,
+        renderer: renderer,
+        child: null,
+        tail: null,
+        next: null,
+        bindingStartIndex: null
+    };
+    return newView;
+}
+/**
+ * @param {?} index
+ * @param {?} type
+ * @param {?} native
+ * @param {?=} state
+ * @return {?}
+ */
+function createLNode(index, type, native, state) {
+    const /** @type {?} */ parent = isParent ? previousOrParentNode :
+        previousOrParentNode && /** @type {?} */ (previousOrParentNode.parent);
+    let /** @type {?} */ query = (isParent ? currentQuery : previousOrParentNode && previousOrParentNode.query) ||
+        parent && parent.query && parent.query.child();
+    const /** @type {?} */ isState = state != null;
+    const /** @type {?} */ node = {
+        flags: type,
+        native: /** @type {?} */ (native),
+        view: currentView,
+        parent: /** @type {?} */ (parent),
+        child: null,
+        next: null,
+        nodeInjector: parent ? parent.nodeInjector : null,
+        data: isState ? /** @type {?} */ (state) : null,
+        query: query,
+        staticData: null
+    };
+    if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
+        // Bit of a hack to bust through the readonly because there is a circular dep between
+        // ViewState and LNode.
+        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'viewState.node');
+        (/** @type {?} */ ((state))).node = node;
+    }
+    if (index != null) {
+        // We are Element or Container
+        ngDevMode && assertEqual(data.length, index, 'data.length not in sequence');
+        data[index] = node;
+        // Every node adds a value to the static data array to avoid a sparse array
+        if (index >= ngStaticData.length) {
+            ngStaticData[index] = null;
+        }
+        else {
+            node.staticData = /** @type {?} */ (ngStaticData[index]);
+        }
+        // Now link ourselves into the tree.
+        if (isParent) {
+            currentQuery = null;
+            if (previousOrParentNode.view === currentView ||
+                (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+                // We are in the same view, which means we are adding content node to the parent View.
+                ngDevMode && assertEqual(previousOrParentNode.child, null, 'previousNode.child');
+                previousOrParentNode.child = node;
+            }
+            else {
+                // We are adding component view, so we don't link parent node child to this node.
+            }
+        }
+        else if (previousOrParentNode) {
+            ngDevMode && assertEqual(previousOrParentNode.next, null, 'previousNode.next');
+            previousOrParentNode.next = node;
+        }
+    }
+    previousOrParentNode = node;
+    isParent = true;
+    return node;
+}
+/**
+ * Resets the application state.
+ * @return {?}
+ */
+function resetApplicationState() {
+    isParent = false;
+    previousOrParentNode = /** @type {?} */ ((null));
+}
+/**
+ *
+ * @template T
+ * @param {?} hostNode
+ * @param {?} template Template function with the instructions.
+ * @param {?} context to pass into the template.
+ * @param {?} providedRendererFactory
+ * @param {?} host Existing node to render into.
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} node
+ * @param {?} viewState
+ * @param {?} componentOrContext
+ * @param {?=} template
+ * @return {?}
+ */
+function renderComponentOrTemplate(node, viewState, componentOrContext, template) {
+    const /** @type {?} */ oldView = enterView(viewState, node);
+    try {
+        if (rendererFactory.begin) {
+            rendererFactory.begin();
+        }
+        if (template) {
+            ngStaticData = template.ngStaticData || (template.ngStaticData = /** @type {?} */ ([]));
+            template(/** @type {?} */ ((componentOrContext)), creationMode);
+        }
+        else {
+            // Element was stored at 0 and directive was stored at 1 in renderComponent
+            // so to refresh the component, r() needs to be called with (1, 0)
+            (/** @type {?} */ (componentOrContext.constructor)).ngComponentDef.r(1, 0);
+        }
+    }
+    finally {
+        if (rendererFactory.end) {
+            rendererFactory.end();
+        }
+        leaveView(oldView);
+    }
+}
+/**
+ * @return {?}
+ */
+
+/**
+ * Makes a directive public to the DI system by adding it to an injector's bloom filter.
+ *
+ * @param {?} def The definition of the directive to be made public
+ * @return {?}
+ */
+
+/**
+ * Searches for an instance of the given directive type up the injector tree and returns
+ * that instance if found.
+ *
+ * If not found, it will propagate up to the next parent injector until the token
+ * is found or the top is reached.
+ *
+ * Usage example (in factory function):
+ *
+ * class SomeDirective {
+ *   constructor(directive: DirectiveA) {}
+ *
+ *   static ngDirectiveDef = defineDirective({
+ *     type: SomeDirective,
+ *     factory: () => new SomeDirective(inject(DirectiveA))
+ *   });
+ * }
+ *
+ * @template T
+ * @param {?} token The directive type to search for
+ * @param {?=} flags Injection flags (e.g. CheckParent)
+ * @return {?} The instance found
+ */
+
+/**
+ * Creates an ElementRef and stores it on the injector.
+ * Or, if the ElementRef already exists, retrieves the existing ElementRef.
+ *
+ * @return {?} The ElementRef instance to use
+ */
+
+/**
+ * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
+ * exists, retrieves the existing TemplateRef.
+ *
+ * @template T
+ * @return {?} The TemplateRef instance to use
+ */
+
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @return {?} The ViewContainerRef instance to use
+ */
+
+/**
+ * Create DOM element. The instruction must later be followed by `elementEnd()` call.
+ *
+ * @param {?} index Index of the element in the data array
+ * @param {?=} nameOrComponentDef Name of the DOM Node or `ComponentDef`.
+ * @param {?=} attrs Statically bound set of attributes to be written into the DOM element on creation.
+ * @param {?=} localName A name under which a given element is exported.
+ *
+ * Attributes are passed as an array of strings where elements with an even index hold an attribute
+ * name and elements with an odd index hold an attribute value, ex.:
+ * ['id', 'warning5', 'class', 'alert']
+ * @return {?}
+ */
+function elementStart(index, nameOrComponentDef, attrs, localName) {
+    let /** @type {?} */ node;
+    let /** @type {?} */ native;
+    if (nameOrComponentDef == null) {
+        // native node retrieval - used for exporting elements as tpl local variables (<div #foo>)
+        const /** @type {?} */ node = /** @type {?} */ ((data[index]));
+        native = node && (/** @type {?} */ (node)).native;
+    }
+    else {
+        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+        const /** @type {?} */ isHostElement = typeof nameOrComponentDef !== 'string';
+        const /** @type {?} */ name = isHostElement ? (/** @type {?} */ (nameOrComponentDef)).tag : /** @type {?} */ (nameOrComponentDef);
+        if (name === null) {
+            // TODO: future support for nameless components.
+            throw 'for now name is required';
+        }
+        else {
+            native = renderer.createElement(name);
+            let /** @type {?} */ componentView = null;
+            if (isHostElement) {
+                const /** @type {?} */ ngStaticData = getTemplateStatic((/** @type {?} */ (nameOrComponentDef)).template);
+                componentView = addToViewTree(createViewState(-1, rendererFactory.createRenderer(native, (/** @type {?} */ (nameOrComponentDef)).rendererType), ngStaticData));
+            }
+            // Only component views should be added to the view tree directly. Embedded views are
+            // accessed through their containers because they may be removed / re-added later.
+            node = createLNode(index, 3 /* Element */, native, componentView);
+            if (node.staticData == null) {
+                ngDevMode && assertDataInRange(index - 1);
+                node.staticData = ngStaticData[index] =
+                    createNodeStatic(name, attrs || null, null, localName || null);
+            }
+            if (attrs)
+                setUpAttributes(native, attrs);
+            appendChild(/** @type {?} */ ((node.parent)), native, currentView);
+        }
+    }
+    return native;
+}
+/**
+ * Gets static data from a template function or creates a new static
+ * data array if it doesn't already exist.
+ *
+ * @param {?} template The template from which to get static data
+ * @return {?} NgStaticData
+ */
+function getTemplateStatic(template) {
+    return template.ngStaticData || (template.ngStaticData = /** @type {?} */ ([]));
+}
+/**
+ * @param {?} native
+ * @param {?} attrs
+ * @return {?}
+ */
+function setUpAttributes(native, attrs) {
+    ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
+    const /** @type {?} */ isProceduralRenderer = (/** @type {?} */ (renderer)).setAttribute;
+    for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
+        isProceduralRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer)).setAttribute))(native, attrs[i], attrs[i | 1]) :
+            native.setAttribute(attrs[i], attrs[i | 1]);
+    }
+}
+/**
+ * @param {?} text
+ * @param {?} token
+ * @return {?}
+ */
+function createError(text, token) {
+    return new Error(`Renderer: ${text} [${stringify$1(token)}]`);
+}
+/**
+ * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
+ *
+ * @param {?} factory
+ * @param {?} elementOrSelector Render element or CSS selector to locate the element.
+ * @return {?}
+ */
+function locateHostElement(factory, elementOrSelector) {
+    ngDevMode && assertDataInRange(-1);
+    rendererFactory = factory;
+    const /** @type {?} */ defaultRenderer = factory.createRenderer(null, null);
+    const /** @type {?} */ rNode = typeof elementOrSelector === 'string' ?
+        ((/** @type {?} */ (defaultRenderer)).selectRootElement ?
+            (/** @type {?} */ (defaultRenderer)).selectRootElement(elementOrSelector) : /** @type {?} */ (((/** @type {?} */ (defaultRenderer)).querySelector))(elementOrSelector)) :
+        elementOrSelector;
+    if (ngDevMode && !rNode) {
+        if (typeof elementOrSelector === 'string') {
+            throw createError('Host node with selector not found:', elementOrSelector);
+        }
+        else {
+            throw createError('Host node is required:', elementOrSelector);
+        }
+    }
+    return rNode;
+}
+/**
+ * Creates the host LNode..
+ *
+ * @param {?} rNode Render host element.
+ * @param {?} def
+ * @return {?}
+ */
+function hostElement(rNode, def) {
+    resetApplicationState();
+    createLNode(0, 3 /* Element */, rNode, createViewState(-1, renderer, getTemplateStatic(def.template)));
+}
+/**
+ * Adds an event listener to the current node.
+ *
+ * If an output exists on one of the node's directives, it also subscribes to the output
+ * and saves the subscription for later cleanup.
+ *
+ * @param {?} eventName Name of the event
+ * @param {?} listener The function to be called when event emits
+ * @param {?=} useCapture Whether or not to use capture in event listener.
+ * @return {?}
+ */
+
+/**
+ * Mark the end of the element.
+ * @return {?}
+ */
+function elementEnd() {
+    if (isParent) {
+        isParent = false;
+    }
+    else {
+        ngDevMode && assertHasParent();
+        previousOrParentNode = /** @type {?} */ ((previousOrParentNode.parent));
+    }
+    ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
+    const /** @type {?} */ query = previousOrParentNode.query;
+    query && query.addNode(previousOrParentNode);
+}
+/**
+ * Update an attribute on an Element. This is used with a `bind` instruction.
+ *
+ * @param {?} index The index of the element to update in the data array
+ * @param {?} attrName Name of attribute. Because it is going to DOM, this is not subject to
+ *        renaming as port of minification.
+ * @param {?} value Value to write. This value will go through stringification.
+ * @return {?}
+ */
+
+/**
+ * Update a property on an Element.
+ *
+ * If the property name also exists as an input property on one of the element's directives,
+ * the component property will be set instead of the element property. This check must
+ * be conducted at runtime so child components that add new \@Inputs don't have to be re-compiled.
+ *
+ * @template T
+ * @param {?} index The index of the element to update in the data array
+ * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write.
+ * @return {?}
+ */
+function elementProperty(index, propName, value) {
+    if (value === NO_CHANGE)
+        return;
+    const /** @type {?} */ node = /** @type {?} */ (data[index]);
+    let /** @type {?} */ staticData = /** @type {?} */ ((node.staticData));
+    // if staticData.inputs is undefined, a listener has created output staticData, but inputs haven't
+    // yet been checked
+    if (staticData.inputs === undefined) {
+        // mark inputs as checked
+        staticData.inputs = null;
+        staticData = generatePropertyAliases(node.flags, staticData, true);
+    }
+    const /** @type {?} */ inputData = staticData.inputs;
+    let /** @type {?} */ dataValue;
+    if (inputData && (dataValue = inputData[propName])) {
+        setInputsForProperty(dataValue, value);
+    }
+    else {
+        const /** @type {?} */ native = node.native;
+        (/** @type {?} */ (renderer)).setProperty ?
+            (/** @type {?} */ (renderer)).setProperty(native, propName, value) :
+            native.setProperty ? native.setProperty(propName, value) :
+                (/** @type {?} */ (native))[propName] = value;
+    }
+}
+/**
+ * Constructs a LNodeStatic object from the arguments.
+ *
+ * @param {?} tagName
+ * @param {?} attrs
+ * @param {?} containerStatic
+ * @param {?} localName
+ * @return {?} the LNodeStatic object
+ */
+function createNodeStatic(tagName, attrs, containerStatic, localName) {
+    return {
+        tagName: tagName,
+        attrs: attrs,
+        localNames: localName ? [localName, -1] : null,
+        initialInputs: undefined,
+        inputs: undefined,
+        outputs: undefined,
+        containerStatic: containerStatic
+    };
+}
+/**
+ * Given a list of directive indices and minified input names, sets the
+ * input properties on the corresponding directives.
+ * @param {?} inputs
+ * @param {?} value
+ * @return {?}
+ */
+function setInputsForProperty(inputs, value) {
+    for (let /** @type {?} */ i = 0; i < inputs.length; i += 2) {
+        ngDevMode && assertDataInRange(/** @type {?} */ (inputs[i]));
+        data[/** @type {?} */ (inputs[i])][inputs[i | 1]] = value;
+    }
+}
+/**
+ * This function consolidates all the inputs or outputs defined by directives
+ * on this node into one object and stores it in ngStaticData so it can
+ * be shared between all templates of this type.
+ *
+ * @param {?} flags
+ * @param {?} data
+ * @param {?=} isInputData
+ * @return {?}
+ */
+function generatePropertyAliases(flags, data, isInputData = false) {
+    const /** @type {?} */ start = flags >> 12;
+    const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2;
+    for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+        const /** @type {?} */ directiveDef = /** @type {?} */ (((ngStaticData))[i]);
+        const /** @type {?} */ propertyAliasMap = isInputData ? directiveDef.inputs : directiveDef.outputs;
+        for (let /** @type {?} */ publicName in propertyAliasMap) {
+            if (propertyAliasMap.hasOwnProperty(publicName)) {
+                const /** @type {?} */ internalName = propertyAliasMap[publicName];
+                const /** @type {?} */ staticDirData = isInputData ? (data.inputs || (data.inputs = {})) :
+                    (data.outputs || (data.outputs = {}));
+                const /** @type {?} */ hasProperty = staticDirData.hasOwnProperty(publicName);
+                hasProperty ? staticDirData[publicName].push(i, internalName) :
+                    (staticDirData[publicName] = [i, internalName]);
+            }
+        }
+    }
+    return data;
+}
+/**
+ * Add or remove a class in a classList.
+ *
+ * This instruction is meant to handle the [class.foo]="exp" case
+ *
+ * @template T
+ * @param {?} index The index of the element to update in the data array
+ * @param {?} className Name of class to toggle. Because it is going to DOM, this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value A value indicating if a given class should be added or removed.
+ * @return {?}
+ */
+
+/**
+ * Update a given style on an Element.
+ *
+ * @template T
+ * @param {?} index Index of the element to change in the data array
+ * @param {?} styleName Name of property. Because it is going to DOM this is not subject to
+ *        renaming as part of minification.
+ * @param {?} value New value to write (null to remove).
+ * @param {?=} suffix Suffix to add to style's value (optional).
+ * @return {?}
+ */
+function elementStyle(index, styleName, value, suffix) {
+    if (value !== NO_CHANGE) {
+        const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
+        if (value == null) {
+            (/** @type {?} */ (renderer)).removeStyle ?
+                (/** @type {?} */ (renderer))
+                    .removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
+                lElement.native.style.removeProperty(styleName);
+        }
+        else {
+            (/** @type {?} */ (renderer)).setStyle ?
+                (/** @type {?} */ (renderer))
+                    .setStyle(lElement.native, styleName, suffix ? stringify$1(value) + suffix : stringify$1(value), RendererStyleFlags3.DashCase) :
+                lElement.native.style.setProperty(styleName, suffix ? stringify$1(value) + suffix : stringify$1(value));
+        }
+    }
+}
+/**
+ * Create static text node
+ *
+ * @param {?} index Index of the node in the data array.
+ * @param {?=} value Value to write. This value will be stringified.
+ *   If value is not provided than the actual creation of the text node is delayed.
+ * @return {?}
+ */
+function text(index, value) {
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    const /** @type {?} */ textNode = value != null ?
+        ((/** @type {?} */ (renderer)).createText ?
+            (/** @type {?} */ (renderer)).createText(stringify$1(value)) : /** @type {?} */ (((/** @type {?} */ (renderer)).createTextNode))(stringify$1(value))) :
+        null;
+    const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
+    // Text nodes are self closing.
+    isParent = false;
+    appendChild(/** @type {?} */ ((node.parent)), textNode, currentView);
+}
+/**
+ * Create text node with binding
+ * Bindings should be handled externally with the proper bind(1-8) method
+ *
+ * @template T
+ * @param {?} index Index of the node in the data array.
+ * @param {?} value Stringified value to write.
+ * @return {?}
+ */
+function textBinding(index, value) {
+    // TODO(misko): I don't think index < nodes.length check is needed here.
+    let /** @type {?} */ existingNode = index < data.length && /** @type {?} */ (data[index]);
+    if (existingNode && existingNode.native) {
+        // If DOM node exists and value changed, update textContent
+        value !== NO_CHANGE &&
+            ((/** @type {?} */ (renderer)).setValue ?
+                (/** @type {?} */ (renderer)).setValue(existingNode.native, stringify$1(value)) :
+                existingNode.native.textContent = stringify$1(value));
+    }
+    else if (existingNode) {
+        // Node was created but DOM node creation was delayed. Create and append now.
+        existingNode.native =
+            ((/** @type {?} */ (renderer)).createText ?
+                (/** @type {?} */ (renderer)).createText(stringify$1(value)) : /** @type {?} */ (((/** @type {?} */ (renderer)).createTextNode))(stringify$1(value)));
+        insertChild(existingNode, currentView);
+    }
+    else {
+        text(index, value);
+    }
+}
+/**
+ * @template T
+ * @param {?} index
+ * @param {?=} directive
+ * @param {?=} directiveDef
+ * @param {?=} localName
+ * @return {?}
+ */
+function directive(index, directive, directiveDef, localName) {
+    let /** @type {?} */ instance;
+    if (directive == null) {
+        // return existing
+        ngDevMode && assertDataInRange(index);
+        instance = data[index];
+    }
+    else {
+        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+        ngDevMode && assertPreviousIsParent();
+        let /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
+        let /** @type {?} */ size = flags & 4092;
+        if (size === 0) {
+            flags =
+                (index << 12 /* INDX_SHIFT */) | 4 /* SIZE_SKIP */ | flags & 3 /* TYPE_MASK */;
+        }
+        else {
+            flags += 4 /* SIZE_SKIP */;
+        } /** @type {?} */
+        ((previousOrParentNode)).flags = flags;
+        ngDevMode && assertDataInRange(index - 1);
+        Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
+        data[index] = instance = directive;
+        if (index >= ngStaticData.length) {
+            ngStaticData[index] = /** @type {?} */ ((directiveDef));
+            if (localName) {
+                ngDevMode &&
+                    assertNotNull(previousOrParentNode.staticData, 'previousOrParentNode.staticData');
+                const /** @type {?} */ nodeStaticData = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).staticData));
+                (nodeStaticData.localNames || (nodeStaticData.localNames = [])).push(localName, index);
+            }
+        }
+        const /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
+        if (diPublic) {
+            diPublic(/** @type {?} */ ((directiveDef)));
+        }
+        const /** @type {?} */ staticData = /** @type {?} */ ((previousOrParentNode.staticData));
+        if (staticData && staticData.attrs) {
+            setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, staticData);
+        }
+    }
+    return instance;
+}
+/**
+ * Sets initial input properties on directive instances from attribute data
+ *
+ * @template T
+ * @param {?} instance Instance of the directive on which to set the initial inputs
+ * @param {?} inputs The list of inputs from the directive def
+ * @param {?} staticData The static data for this node
+ * @return {?}
+ */
+function setInputsFromAttrs(instance, inputs, staticData) {
+    const /** @type {?} */ directiveIndex = ((previousOrParentNode.flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */) - 1;
+    let /** @type {?} */ initialInputData = /** @type {?} */ (staticData.initialInputs);
+    if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
+        initialInputData = generateInitialInputs(directiveIndex, inputs, staticData);
+    }
+    const /** @type {?} */ initialInputs = initialInputData[directiveIndex];
+    if (initialInputs) {
+        for (let /** @type {?} */ i = 0; i < initialInputs.length; i += 2) {
+            (/** @type {?} */ (instance))[initialInputs[i]] = initialInputs[i | 1];
+        }
+    }
+}
+/**
+ * Generates initialInputData for a node and stores it in the template's static storage
+ * so subsequent template invocations don't have to recalculate it.
+ *
+ * initialInputData is an array containing values that need to be set as input properties
+ * for directives on this node, but only once on creation. We need this array to support
+ * the case where you set an \@Input property of a directive using attribute-like syntax.
+ * e.g. if you have a `name` \@Input, you can set it once like this:
+ *
+ * <my-component name="Bess"></my-component>
+ *
+ * @param {?} directiveIndex Index to store the initial input data
+ * @param {?} inputs The list of inputs from the directive def
+ * @param {?} staticData The static data on this node
+ * @return {?}
+ */
+function generateInitialInputs(directiveIndex, inputs, staticData) {
+    const /** @type {?} */ initialInputData = staticData.initialInputs || (staticData.initialInputs = []);
+    initialInputData[directiveIndex] = null;
+    const /** @type {?} */ attrs = /** @type {?} */ ((staticData.attrs));
+    for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
+        const /** @type {?} */ attrName = attrs[i];
+        const /** @type {?} */ minifiedInputName = inputs[attrName];
+        if (minifiedInputName !== undefined) {
+            const /** @type {?} */ inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
+            inputsToStore.push(minifiedInputName, attrs[i | 1]);
+        }
+    }
+    return initialInputData;
+}
+/**
+ * @param {?} lifeCycle
+ * @param {?=} self
+ * @param {?=} method
+ * @return {?}
+ */
+
+/**
+ * Creates an LContainer.
+ *
+ * Only `LView`s can go into `LContainer`.
+ *
+ * @param {?} index The index of the container in the data array
+ * @param {?=} template Optional inline template
+ * @param {?=} tagName The name of the container element, if applicable
+ * @param {?=} attrs The attrs attached to the container, if applicable
+ * @param {?=} localName
+ * @return {?}
+ */
+function containerStart(index, template, tagName, attrs, localName) {
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    // If the direct parent of the container is a view, its views (including its comment)
+    // will need to be added through insertView() when its parent view is being inserted.
+    // For now, it is marked "headless" so we know to append its views later.
+    let /** @type {?} */ comment = renderer.createComment(ngDevMode ? 'container' : '');
+    let /** @type {?} */ renderParent = null;
+    const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
+    ngDevMode && assertNotEqual(currentParent, null, 'currentParent');
+    if (appendChild(currentParent, comment, currentView)) {
+        // we are adding to an Element which is either:
+        // - Not a component (will not be re-projected, just added)
+        // - View of the Component
+        renderParent = /** @type {?} */ (currentParent);
+    }
+    const /** @type {?} */ node = createLNode(index, 0 /* Container */, comment, /** @type {?} */ ({
+        views: [],
+        nextIndex: 0, renderParent,
+        template: template == null ? null : template,
+        next: null,
+        parent: currentView
+    }));
+    if (node.staticData == null) {
+        node.staticData = ngStaticData[index] =
+            createNodeStatic(tagName || null, attrs || null, [], localName || null);
+    }
+    // Containers are added to the current view tree instead of their embedded views
+    // because views can be removed and re-inserted.
+    addToViewTree(node.data);
+}
+/**
+ * @return {?}
+ */
+function containerEnd() {
+    if (isParent) {
+        isParent = false;
+    }
+    else {
+        ngDevMode && assertHasParent();
+        previousOrParentNode = /** @type {?} */ ((previousOrParentNode.parent));
+    }
+    ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
+    const /** @type {?} */ query = previousOrParentNode.query;
+    query && query.addNode(previousOrParentNode);
+}
+/**
+ * Sets a container up to receive views.
+ *
+ * @param {?} index The index of the container in the data array
+ * @return {?}
+ */
+function containerRefreshStart(index) {
+    ngDevMode && assertDataInRange(index);
+    previousOrParentNode = /** @type {?} */ (data[index]);
+    ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
+    isParent = true;
+    (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
+}
+/**
+ * Marks the end of the LContainer.
+ *
+ * Marking the end of ViewContainer is the time when to child Views get inserted or removed.
+ * @return {?}
+ */
+function containerRefreshEnd() {
+    if (isParent) {
+        isParent = false;
+    }
+    else {
+        ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
+        ngDevMode && assertHasParent();
+        previousOrParentNode = /** @type {?} */ ((previousOrParentNode.parent));
+    }
+    ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
+    const /** @type {?} */ container = /** @type {?} */ (previousOrParentNode);
+    ngDevMode && assertNodeType(container, 0 /* Container */);
+    const /** @type {?} */ nextIndex = container.data.nextIndex;
+    while (nextIndex < container.data.views.length) {
+        // remove extra view.
+        removeView(container, nextIndex);
+    }
+}
+/**
+ * Creates an LView.
+ *
+ * @param {?} viewBlockId The ID of this view
+ * @return {?} Whether or not this view is in creation mode
+ */
+function viewStart(viewBlockId) {
+    const /** @type {?} */ container = /** @type {?} */ ((isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent))));
+    ngDevMode && assertNodeType(container, 0 /* Container */);
+    const /** @type {?} */ containerState = container.data;
+    const /** @type {?} */ views = containerState.views;
+    const /** @type {?} */ existingView = !creationMode && containerState.nextIndex < views.length && views[containerState.nextIndex];
+    let /** @type {?} */ viewUpdateMode = existingView && viewBlockId === (/** @type {?} */ (existingView)).data.id;
+    if (viewUpdateMode) {
+        previousOrParentNode = views[containerState.nextIndex++];
+        ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
+        isParent = true;
+        enterView((/** @type {?} */ (existingView)).data, /** @type {?} */ (previousOrParentNode));
+    }
+    else {
+        // When we create a new View, we always reset the state of the instructions.
+        const /** @type {?} */ newViewState = createViewState(viewBlockId, renderer, initViewStaticData(viewBlockId, container));
+        enterView(newViewState, createLNode(null, 2 /* View */, null, newViewState));
+        containerState.nextIndex++;
+    }
+    return !viewUpdateMode;
+}
+/**
+ * Initialize the static data for the active view.
+ *
+ * Each embedded view needs to set the global ngStaticData variable to the static data for
+ * that view. Otherwise, the view's static data for a particular node would overwrite
+ * the staticdata for a node in the view above it with the same index (since it's in the
+ * same template).
+ *
+ * @param {?} viewIndex The index of the view's static data in containerStatic
+ * @param {?} parent The parent container in which to look for the view's static data
+ * @return {?} NgStaticData
+ */
+function initViewStaticData(viewIndex, parent) {
+    ngDevMode && assertNodeType(parent, 0 /* Container */);
+    const /** @type {?} */ containerStatic = (/** @type {?} */ (((parent)).staticData)).containerStatic;
+    if (viewIndex >= containerStatic.length || containerStatic[viewIndex] == null) {
+        containerStatic[viewIndex] = [];
+    }
+    return containerStatic[viewIndex];
+}
+/**
+ * Marks the end of the LView.
+ * @return {?}
+ */
+function viewEnd() {
+    isParent = false;
+    const /** @type {?} */ viewNode = previousOrParentNode = /** @type {?} */ (currentView.node);
+    const /** @type {?} */ container = /** @type {?} */ (previousOrParentNode.parent);
+    ngDevMode && assertNodeType(viewNode, 2 /* View */);
+    ngDevMode && assertNodeType(container, 0 /* Container */);
+    const /** @type {?} */ containerState = container.data;
+    const /** @type {?} */ previousView = containerState.nextIndex <= containerState.views.length ? /** @type {?} */ (containerState.views[containerState.nextIndex - 1]) :
+        null;
+    const /** @type {?} */ viewIdChanged = previousView == null ? true : previousView.data.id !== viewNode.data.id;
+    if (viewIdChanged) {
+        insertView(container, viewNode, containerState.nextIndex - 1);
+        creationMode = false;
+    }
+    leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
+    ngDevMode && assertEqual(isParent, false, 'isParent');
+    ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
+}
+/**
+ * Refreshes the component view.
+ *
+ * In other words, enters the component's view and processes it to update bindings, queries, etc.
+ *
+ * @param directiveIndex
+ * @param elementIndex
+ * @param template
+ */
+const componentRefresh = function (directiveIndex, elementIndex, template) {
+    ngDevMode && assertDataInRange(elementIndex);
+    const /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
+    ngDevMode && assertNodeType(element, 3 /* Element */);
+    ngDevMode && assertNotEqual(element.data, null, 'isComponent');
+    ngDevMode && assertDataInRange(directiveIndex);
+    const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
+    ngDevMode && assertNotEqual(hostView, null, 'hostView');
+    const /** @type {?} */ directive = data[directiveIndex];
+    const /** @type {?} */ oldView = enterView(hostView, element);
+    try {
+        template(directive, creationMode);
+    }
+    finally {
+        leaveView(oldView);
+    }
+};
+/**
+ * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
+ * It takes all the selectors from the entire component's template and decides where
+ * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
+ * backed by a selector).
+ *
+ * @param {?=} selectors
+ * @return {?}
+ */
+
+/**
+ * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
+ * to the projectionDef instruction.
+ *
+ * @param {?} nodeIndex
+ * @param {?} localIndex - index under which distribution of projected nodes was memorized
+ * @param {?=} selectorIndex - 0 means <ng-content> without any selector
+ * @return {?}
+ */
+
+/**
+ * Adds a ViewState or a ContainerState to the end of the current view tree.
+ *
+ * This structure will be used to traverse through nested views to remove listeners
+ * and call onDestroy callbacks.
+ *
+ * @template T
+ * @param {?} state The ViewState or ContainerState to add to the view tree
+ * @return {?} The state passed in
+ */
+function addToViewTree(state) {
+    currentView.tail ? (currentView.tail.next = state) : (currentView.child = state);
+    currentView.tail = state;
+    return state;
+}
+/**
+ * A special value which designates that a value has not changed.
+ */
+const NO_CHANGE = /** @type {?} */ ({});
+/**
+ * Create interpolation bindings with variable number of arguments.
+ *
+ * If any of the arguments change, then the interpolation is concatenated
+ * and causes an update.
+ *
+ * @param {?} values an array of values to diff.
+ * @return {?}
+ */
+
+/**
+ * Create a single value binding without interpolation.
+ *
+ * @template T
+ * @param {?} value Value to diff
+ * @return {?}
+ */
+function bind(value) {
+    let /** @type {?} */ different;
+    if (different = creationMode) {
+        if (typeof currentView.bindingStartIndex !== 'number') {
+            bindingIndex = currentView.bindingStartIndex = data.length;
+        }
+        data[bindingIndex++] = value;
+    }
+    else {
+        if (different = value !== NO_CHANGE && isDifferent(data[bindingIndex], value)) {
+            data[bindingIndex] = value;
+        }
+        bindingIndex++;
+    }
+    return different ? value : NO_CHANGE;
+}
+/**
+ * Create an interpolation bindings with 1 arguments.
+ *
+ * @param {?} prefix static value used for concatenation only.
+ * @param {?} value value checked for change.
+ * @param {?} suffix static value used for concatenation only.
+ * @return {?}
+ */
+function bind1(prefix, value, suffix) {
+    return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
+}
+/**
+ * Create an interpolation bindings with 2 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0 value checked for change
+ * @param {?} i0
+ * @param {?} v1 value checked for change
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation bindings with 3 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation binding with 4 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation binding with 5 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation binding with 6 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation binding with 7 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} i5
+ * @param {?} v6
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * Create an interpolation binding with 8 arguments.
+ *
+ * @param {?} prefix
+ * @param {?} v0
+ * @param {?} i0
+ * @param {?} v1
+ * @param {?} i1
+ * @param {?} v2
+ * @param {?} i2
+ * @param {?} v3
+ * @param {?} i3
+ * @param {?} v4
+ * @param {?} i4
+ * @param {?} v5
+ * @param {?} i5
+ * @param {?} v6
+ * @param {?} i6
+ * @param {?} v7
+ * @param {?} suffix
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} index
+ * @param {?=} value
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} predicate
+ * @param {?=} descend
+ * @param {?=} read
+ * @return {?}
+ */
+
+/**
+ * @return {?}
+ */
+function assertPreviousIsParent() {
+    assertEqual(isParent, true, 'isParent');
+}
+/**
+ * @return {?}
+ */
+function assertHasParent() {
+    assertNotEqual(previousOrParentNode.parent, null, 'isParent');
+}
+/**
+ * @param {?} index
+ * @param {?=} arr
+ * @return {?}
+ */
+function assertDataInRange(index, arr) {
+    if (arr == null)
+        arr = data;
+    assertLessThan(arr ? arr.length : 0, index, 'data.length');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Options that control how the component should be bootstrapped.
+ * @record
+ */
+
+/**
+ * Bootstraps a component, then creates and returns a `ComponentRef` for that component.
+ *
+ * @template T
+ * @param {?} componentType Component to bootstrap
+ * @param {?} opts
+ * @return {?}
+ */
+
+// TODO: A hack to not pull in the NullInjector from @angular/core.
+
+/**
+ * Bootstraps a Component into an existing host element and returns an instance
+ * of the component.
+ *
+ * @template T
+ * @param {?} componentType Component to bootstrap
+ * @param {?=} opts
+ * @return {?}
+ */
+function renderComponent(componentType, opts = {}) {
+    const /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
+    const /** @type {?} */ componentDef = componentType.ngComponentDef;
+    let /** @type {?} */ component;
+    const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
+    const /** @type {?} */ oldView = enterView(createViewState(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), []), /** @type {?} */ ((null)));
+    try {
+        // Create element node at index 0 in data array
+        hostElement(hostNode, componentDef);
+        // Create directive instance with n() and store at index 1 in data array (el is 0)
+        component = directive(1, componentDef.n(), componentDef);
+    }
+    finally {
+        leaveView(oldView);
+    }
+    opts.features && opts.features.forEach((feature) => feature(component, componentDef));
+    detectChanges(component);
+    return component;
+}
+/**
+ * @template T
+ * @param {?} component
+ * @return {?}
+ */
+function detectChanges(component) {
+    ngDevMode && assertNotNull(component, 'component');
+    const /** @type {?} */ hostNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
+    if (ngDevMode && !hostNode) {
+        createError('Not a directive instance', component);
+    }
+    ngDevMode && assertNotNull(hostNode.data, 'hostNode.data');
+    renderComponentOrTemplate(hostNode, hostNode.view, component);
+    isDirty = false;
+}
+let isDirty = false;
+/**
+ * @template T
+ * @param {?} component
+ * @param {?=} scheduler
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} component
+ * @return {?}
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Create a component definition object.
+ *
+ *
+ * # Example
+ * ```
+ * class MyDirective {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static [COMPONENT_DEF_SYMBOL] = defineComponent({
+ *     ...
+ *   });
+ * }
+ * ```
+ * @template T
+ * @param {?} componentDefinition
+ * @return {?}
+ */
+function defineComponent(componentDefinition) {
+    const /** @type {?} */ def = /** @type {?} */ ({
+        type: componentDefinition.type,
+        diPublic: null,
+        n: componentDefinition.factory,
+        tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
+        template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
+        r: componentDefinition.refresh ||
+            function (d, e) { componentRefresh(d, e, componentDefinition.template); },
+        h: componentDefinition.hostBindings || noop$1,
+        inputs: invertObject(componentDefinition.inputs),
+        outputs: invertObject(componentDefinition.outputs),
+        methods: invertObject(componentDefinition.methods),
+        rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
+    });
+    const /** @type {?} */ feature = componentDefinition.features;
+    feature && feature.forEach((fn) => fn(def));
+    return def;
+}
+/**
+ * @template T
+ * @param {?} definition
+ * @return {?}
+ */
+
+/**
+ * @template T
+ * @param {?} definition
+ * @return {?}
+ */
+
+const EMPTY$1 = {};
+/**
+ * @return {?}
+ */
+function noop$1() { }
+/**
+ * Swaps the keys and values of an object.
+ * @param {?} obj
+ * @return {?}
+ */
+function invertObject(obj) {
+    if (obj == null)
+        return EMPTY$1;
+    const /** @type {?} */ newObj = {};
+    for (let /** @type {?} */ minifiedKey in obj) {
+        newObj[obj[minifiedKey]] = minifiedKey;
+    }
+    return newObj;
+}
+/**
+ * Create a directive definition object.
+ *
+ * # Example
+ * ```
+ * class MyDirective {
+ *   // Generated by Angular Template Compiler
+ *   // [Symbol] syntax will not be supported by TypeScript until v2.7
+ *   static [DIRECTIVE_DEF_SYMBOL] = defineDirective({
+ *     ...
+ *   });
+ * }
+ * ```
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// clang-format on
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -14397,13 +16649,6 @@ function transition$1(stateChangeExpr, steps, options = null) {
  * @suppress {checkTypes} checked by tsc
  */
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
  * @deprecated This symbol has moved. Please Import from \@angular/animations instead!
  */
 const AUTO_STYLE = '*';
@@ -14569,5 +16814,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵw, group$1 as ɵx, keyframes$1 as ɵbb, sequence$1 as ɵy, state$1 as ɵba, style$1 as ɵz, transition$1 as ɵbc, trigger$1 as ɵv, _iterableDiffersFactory as ɵj, _keyValueDiffersFactory as ɵk, _localeFactory as ɵl, _appIdRandomProviderFactory as ɵe, defaultIterableDiffers as ɵf, defaultKeyValueDiffers as ɵg, DefaultIterableDifferFactory as ɵh, DefaultKeyValueDifferFactory as ɵi, ReflectiveInjector_ as ɵb, ReflectiveDependency as ɵc, resolveReflectiveProviders as ɵd, wtfEnabled as ɵm, createScope$1 as ɵo, detectWTF as ɵn, endTimeRange as ɵr, leave as ɵp, startTimeRange as ɵq, makeParamDecorator as ɵa, _def as ɵs, DebugContext as ɵt };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, containerStart as ɵC, directive as ɵD, elementStart as ɵE, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, containerEnd as ɵc, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbe, group$1 as ɵbf, keyframes$1 as ɵbj, sequence$1 as ɵbg, state$1 as ɵbi, style$1 as ɵbh, transition$1 as ɵbk, trigger$1 as ɵbd, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope$1 as ɵu, detectWTF as ɵr, endTimeRange as ɵy, leave as ɵw, startTimeRange as ɵx, stringify$1 as ɵbb, makeParamDecorator as ɵa, _def as ɵz, DebugContext as ɵba };
 //# sourceMappingURL=core.js.map
