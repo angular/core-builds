@@ -25,6 +25,8 @@ export declare const enum LifecycleHook {
     ON_INIT = 1,
     ON_DESTROY = 2,
     ON_CHANGES = 4,
+    AFTER_VIEW_INIT = 8,
+    AFTER_VIEW_CHECKED = 16,
 }
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -49,7 +51,7 @@ export declare function enterView(newViewState: ViewState, host: LElement | LVie
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
-export declare const leaveView: (newViewState: ViewState) => void;
+export declare function leaveView(newViewState: ViewState): void;
 export declare function createViewState(viewId: number, renderer: Renderer3, ngStaticData: NgStaticData): ViewState;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
@@ -244,12 +246,16 @@ export declare function directive<T>(index: number, directive: T, directiveDef: 
  *
  * e.g.  l(LifecycleHook.ON_DESTROY, ctx, ctx.onDestroy);
  *
- * @param lifeCycle
+ * @param lifecycle
  * @param self
  * @param method
  */
-export declare function lifecycle(lifeCycle: LifecycleHook.ON_DESTROY, self: any, method: Function): void;
-export declare function lifecycle(lifeCycle: LifecycleHook): boolean;
+export declare function lifecycle(lifecycle: LifecycleHook.ON_DESTROY, self: any, method: Function): void;
+export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_INIT, self: any, method: Function): void;
+export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_CHECKED, self: any, method: Function): void;
+export declare function lifecycle(lifecycle: LifecycleHook): boolean;
+/** Iterates over view hook functions and calls them. */
+export declare function executeViewHooks(): void;
 /**
  * Creates an LContainer.
  *

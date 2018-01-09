@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-rc.0-229b76c
+ * @license Angular v5.2.0-rc.0-3db91ff
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-rc.0-229b76c');
+var VERSION = new Version('5.2.0-rc.0-3db91ff');
 
 /**
  * @fileoverview added by tsickle
@@ -16670,6 +16670,10 @@ var bindingIndex;
  */
 var cleanup;
 /**
+ * Index in the data array at which view hooks begin to be stored.
+ */
+var viewHookStartIndex;
+/**
  * Swap the current state with a new state.
  *
  * For performance reasons we store the state in the top level of the module.
@@ -16686,10 +16690,8 @@ function enterView(newViewState, host) {
     data = newViewState.data;
     bindingIndex = newViewState.bindingStartIndex || 0;
     ngStaticData = newViewState.ngStaticData;
-    if (creationMode = !data) {
-        // Absence of data implies creationMode.
-        (/** @type {?} */ (newViewState)).data = data = [];
-    }
+    creationMode = newViewState.creationMode;
+    viewHookStartIndex = newViewState.viewHookStartIndex;
     cleanup = newViewState.cleanup;
     renderer = newViewState.renderer;
     if (host != null) {
@@ -16702,8 +16704,13 @@ function enterView(newViewState, host) {
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
+ * @param {?} newViewState
+ * @return {?}
  */
-var leaveView = /** @type {?} */ (enterView);
+function leaveView(newViewState) {
+    executeViewHooks();
+    enterView(newViewState, null);
+}
 /**
  * @param {?} viewId
  * @param {?} renderer
@@ -16717,15 +16724,16 @@ function createViewState(viewId, renderer, ngStaticData) {
         // -1 for component views
         node: /** @type {?} */ ((null)),
         // until we initialize it in createNode.
-        data: /** @type {?} */ ((null)),
-        // Hack use as a marker for creationMode
+        data: [],
         ngStaticData: ngStaticData,
         cleanup: null,
         renderer: renderer,
         child: null,
         tail: null,
         next: null,
-        bindingStartIndex: null
+        bindingStartIndex: null,
+        creationMode: true,
+        viewHookStartIndex: null
     };
     return newView;
 }
@@ -16840,6 +16848,7 @@ function renderComponentOrTemplate(node, viewState, componentOrContext, template
         if (rendererFactory.end) {
             rendererFactory.end();
         }
+        viewState.creationMode = false;
         leaveView(oldView);
     }
 }
@@ -17352,12 +17361,41 @@ function generateInitialInputs(directiveIndex, inputs, staticData) {
     return initialInputData;
 }
 /**
- * @param {?} lifeCycle
+ * @param {?} lifecycle
  * @param {?=} self
  * @param {?=} method
  * @return {?}
  */
 
+/**
+ * Iterates over view hook functions and calls them.
+ * @return {?}
+ */
+function executeViewHooks() {
+    if (viewHookStartIndex == null)
+        return;
+    // Instead of using splice to remove init hooks after their first run (expensive), we
+    // shift over the AFTER_CHECKED hooks as we call them and truncate once at the end.
+    var /** @type {?} */ checkIndex = /** @type {?} */ (viewHookStartIndex);
+    var /** @type {?} */ writeIndex = checkIndex;
+    while (checkIndex < data.length) {
+        // Call lifecycle hook with its context
+        data[checkIndex + 1].call(data[checkIndex + 2]);
+        if (data[checkIndex] === 16 /* AFTER_VIEW_CHECKED */) {
+            // We know if the writeIndex falls behind that there is an init that needs to
+            // be overwritten.
+            if (writeIndex < checkIndex) {
+                data[writeIndex] = data[checkIndex];
+                data[writeIndex + 1] = data[checkIndex + 1];
+                data[writeIndex + 2] = data[checkIndex + 2];
+            }
+            writeIndex += 3;
+        }
+        checkIndex += 3;
+    }
+    // Truncate once at the writeIndex
+    data.length = writeIndex;
+}
 /**
  * Creates an LContainer.
  *
@@ -17515,7 +17553,7 @@ function viewEnd() {
     var /** @type {?} */ viewIdChanged = previousView == null ? true : previousView.data.id !== viewNode.data.id;
     if (viewIdChanged) {
         insertView(container, viewNode, containerState.nextIndex - 1);
-        creationMode = false;
+        currentView.creationMode = false;
     }
     leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
     ngDevMode && assertEqual(isParent, false, 'isParent');
@@ -17544,6 +17582,7 @@ var componentRefresh = function (directiveIndex, elementIndex, template) {
         template(directive, creationMode);
     }
     finally {
+        hostView.creationMode = false;
         leaveView(oldView);
     }
 };
