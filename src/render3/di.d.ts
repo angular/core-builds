@@ -3,7 +3,7 @@ import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
 import { DirectiveDef } from './definition_interfaces';
-import { LContainer, LElement, LNodeInjector } from './interfaces';
+import { LContainerNode, LElementNode, LInjector } from './interfaces';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.
@@ -11,14 +11,14 @@ import { LContainer, LElement, LNodeInjector } from './interfaces';
  * @param injector The node injector in which the directive should be registered
  * @param type The directive to register
  */
-export declare function bloomAdd(injector: LNodeInjector, type: Type<any>): void;
+export declare function bloomAdd(injector: LInjector, type: Type<any>): void;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
  * @param node for which an injector should be retrieved / created.
  * @returns Node injector
  */
-export declare function getOrCreateNodeInjectorForNode(node: LElement | LContainer): LNodeInjector;
+export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LContainerNode): LInjector;
 /** Injection flags for DI. */
 export declare const enum InjectFlags {
     /** Dependency is not required. Null will be injected if there is no provider for the dependency.
@@ -37,7 +37,7 @@ export declare const enum InjectFlags {
  * @param di The node injector in which a directive will be added
  * @param def The definition of the directive to be made public
  */
-export declare function diPublicInInjector(di: LNodeInjector, def: DirectiveDef<any>): void;
+export declare function diPublicInInjector(di: LInjector, def: DirectiveDef<any>): void;
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.
@@ -55,7 +55,7 @@ export declare function diPublicInInjector(di: LNodeInjector, def: DirectiveDef<
  * @param flags Injection flags (e.g. CheckParent)
  * @returns The instance found
  */
-export declare function getOrCreateInjectable<T>(di: LNodeInjector, token: Type<T>, flags?: InjectFlags): T;
+export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags): T;
 /**
  * Finds the closest injector that might have a certain directive.
  *
@@ -75,7 +75,7 @@ export declare function getOrCreateInjectable<T>(di: LNodeInjector, token: Type<
  * @param  bloomBit The bit to check in each injector's bloom filter
  * @returns An injector that might have the directive
  */
-export declare function bloomFindPossibleInjector(startInjector: LNodeInjector, bloomBit: number): LNodeInjector | null;
+export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number): LInjector | null;
 /**
  * Creates an ElementRef for a given node injector and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
@@ -83,7 +83,7 @@ export declare function bloomFindPossibleInjector(startInjector: LNodeInjector, 
  * @param di The node injector where we should store a created ElementRef
  * @returns The ElementRef instance to use
  */
-export declare function getOrCreateElementRef(di: LNodeInjector): viewEngine_ElementRef;
+export declare function getOrCreateElementRef(di: LInjector): viewEngine_ElementRef;
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
@@ -91,11 +91,11 @@ export declare function getOrCreateElementRef(di: LNodeInjector): viewEngine_Ele
  * @param di The node injector where we should store a created TemplateRef
  * @returns The TemplateRef instance to use
  */
-export declare function getOrCreateTemplateRef<T>(di: LNodeInjector): viewEngine_TemplateRef<T>;
+export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
  *
  * @returns The ViewContainerRef instance to use
  */
-export declare function getOrCreateContainerRef(di: LNodeInjector): viewEngine_ViewContainerRef;
+export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;

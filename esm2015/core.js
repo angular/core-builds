@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-908129e
+ * @license Angular v5.2.0-fc3e7e0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.0-908129e');
+const VERSION = new Version('5.2.0-fc3e7e0');
 
 /**
  * @fileoverview added by tsickle
@@ -13516,12 +13516,12 @@ function findNativeParent(containerNode) {
  * anchor is the marker.
  *
  * @param {?} index The index of the view to check
- * @param {?} state ContainerState of the parent container
+ * @param {?} lContainer parent LContainer
  * @param {?} native Comment anchor for container
  * @return {?} The DOM element for which the view should insert elements
  */
-function findBeforeNode(index, state, native) {
-    const /** @type {?} */ views = state.views;
+function findBeforeNode(index, lContainer, native) {
+    const /** @type {?} */ views = lContainer.views;
     // Find the node to insert in front of
     return index + 1 < views.length ?
         (/** @type {?} */ (views[index + 1].child)).native :
@@ -13602,28 +13602,28 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
  * @return {?}
  */
 function destroyViewTree(rootView) {
-    let /** @type {?} */ viewOrContainerState = rootView;
-    while (viewOrContainerState) {
+    let /** @type {?} */ viewOrContainer = rootView;
+    while (viewOrContainer) {
         let /** @type {?} */ next = null;
-        if (viewOrContainerState.views && viewOrContainerState.views.length) {
-            next = viewOrContainerState.views[0].data;
+        if (viewOrContainer.views && viewOrContainer.views.length) {
+            next = viewOrContainer.views[0].data;
         }
-        else if (viewOrContainerState.child) {
-            next = viewOrContainerState.child;
+        else if (viewOrContainer.child) {
+            next = viewOrContainer.child;
         }
-        else if (viewOrContainerState.next) {
-            cleanUpView(/** @type {?} */ (viewOrContainerState));
-            next = viewOrContainerState.next;
+        else if (viewOrContainer.next) {
+            cleanUpView(/** @type {?} */ (viewOrContainer));
+            next = viewOrContainer.next;
         }
         if (next == null) {
-            while (viewOrContainerState && !/** @type {?} */ ((viewOrContainerState)).next) {
-                cleanUpView(/** @type {?} */ (viewOrContainerState));
-                viewOrContainerState = getParentState(viewOrContainerState, rootView);
+            while (viewOrContainer && !/** @type {?} */ ((viewOrContainer)).next) {
+                cleanUpView(/** @type {?} */ (viewOrContainer));
+                viewOrContainer = getParentState(viewOrContainer, rootView);
             }
-            cleanUpView(/** @type {?} */ (viewOrContainerState) || rootView);
-            next = viewOrContainerState && viewOrContainerState.next;
+            cleanUpView(/** @type {?} */ (viewOrContainer) || rootView);
+            next = viewOrContainer && viewOrContainer.next;
         }
-        viewOrContainerState = next;
+        viewOrContainer = next;
     }
 }
 /**
@@ -13693,7 +13693,7 @@ function removeView(container, removeIndex) {
 }
 /**
  * Sets a next on the view node, so views in for loops can easily jump from
- * one view to the next to add/remove elements. Also adds the ViewState (view.data)
+ * one view to the next to add/remove elements. Also adds the LView (view.data)
  * to the view tree for easy traversal when cleaning up the view.
  *
  * @param {?} view The view to set up
@@ -13705,21 +13705,20 @@ function setViewNext(view, next) {
     view.data.next = next ? next.data : null;
 }
 /**
- * Determines which ViewOrContainerState to jump to when traversing back up the
+ * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
  *
- * Normally, the view's parent ViewState should be checked, but in the case of
+ * Normally, the view's parent LView should be checked, but in the case of
  * embedded views, the container (which is the view node's parent, but not the
- * ViewState's parent) needs to be checked for a possible next property.
+ * LView's parent) needs to be checked for a possible next property.
  *
- * @param {?} state The ViewOrContainerState for which we need a parent state
+ * @param {?} state The LViewOrLContainer for which we need a parent state
  * @param {?} rootView The rootView, so we don't propagate too far up the view tree
- * @return {?} The correct parent ViewOrContainerState
+ * @return {?} The correct parent LViewOrLContainer
  */
 function getParentState(state, rootView) {
     let /** @type {?} */ node;
-    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) &&
-        (node.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) && (node.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
         return /** @type {?} */ (((node.parent)).data);
@@ -13732,13 +13731,13 @@ function getParentState(state, rootView) {
 /**
  * Removes all listeners and call all onDestroys in a given view.
  *
- * @param {?} viewState The ViewState of the view to clean up
+ * @param {?} view The LView to clean up
  * @return {?}
  */
-function cleanUpView(viewState) {
-    if (!viewState.cleanup)
+function cleanUpView(view) {
+    if (!view.cleanup)
         return;
-    const /** @type {?} */ cleanup = /** @type {?} */ ((viewState.cleanup));
+    const /** @type {?} */ cleanup = /** @type {?} */ ((view.cleanup));
     for (let /** @type {?} */ i = 0; i < cleanup.length - 1; i += 2) {
         if (typeof cleanup[i] === 'string') {
             /** @type {?} */ ((cleanup))[i + 1].removeEventListener(cleanup[i], cleanup[i + 2], cleanup[i + 3]);
@@ -13748,7 +13747,7 @@ function cleanUpView(viewState) {
             cleanup[i].call(cleanup[i + 1]);
         }
     }
-    viewState.cleanup = null;
+    view.cleanup = null;
 }
 /**
  * Appends the provided child element to the provided parent, if appropriate.
@@ -13760,7 +13759,7 @@ function cleanUpView(viewState) {
  *
  * @param {?} parent The parent to which to append the child
  * @param {?} child The child that should be appended
- * @param {?} currentView The current view's ViewState
+ * @param {?} currentView The current LView
  * @return {?} Whether or not the child was appended
  */
 function appendChild(parent, child, currentView) {
@@ -13792,7 +13791,7 @@ function appendChild(parent, child, currentView) {
  * the content projection system. Otherwise, insertBefore normally.
  *
  * @param {?} node Node to insert
- * @param {?} currentView The current view's ViewState
+ * @param {?} currentView Current LView
  * @return {?}
  */
 function insertChild(node, currentView) {
@@ -13828,7 +13827,7 @@ function insertChild(node, currentView) {
  * @param {?} projectedNodes Array to store the projected node
  * @param {?} node The node to process
  * @param {?} currentParent The last parent element to be processed
- * @param {?} currentView The current view's ViewState
+ * @param {?} currentView Current LView
  * @return {?}
  */
 
@@ -13846,19 +13845,19 @@ function insertChild(node, currentView) {
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
- * @param {?} lNodeStaticData
+ * @param {?} tNode
  * @param {?} selector
  * @return {?} true if node matches the selector.
  */
 
 /**
- * @param {?} lNodeStaticData
+ * @param {?} tNode
  * @param {?} selector
  * @return {?}
  */
 
 /**
- * @param {?} lNodeStaticData
+ * @param {?} tNode
  * @param {?} selector
  * @return {?}
  */
@@ -14223,8 +14222,8 @@ let ngStaticData;
  * State of the current view being processed.
  */
 let currentView;
-// The initialization has to be after the `let`, otherwise `createViewState` can't see `let`.
-currentView = createViewState(/** @type {?} */ ((null)), /** @type {?} */ ((null)), []);
+// The initialization has to be after the `let`, otherwise `createLView` can't see `let`.
+currentView = createLView(/** @type {?} */ ((null)), /** @type {?} */ ((null)), []);
 let currentQuery;
 /**
  * This property gets set before entering a template.
@@ -14268,35 +14267,35 @@ let viewHookStartIndex;
  * is entered we have to store the state for later, and when the view is
  * exited the state has to be restored
  *
- * @param {?} newViewState New state to become active
+ * @param {?} newView New state to become active
  * @param {?} host Element to which the View is a child of
  * @return {?} the previous state;
  */
-function enterView(newViewState, host) {
-    const /** @type {?} */ oldViewState = currentView;
-    data = newViewState.data;
-    bindingIndex = newViewState.bindingStartIndex || 0;
-    ngStaticData = newViewState.ngStaticData;
-    creationMode = newViewState.creationMode;
-    viewHookStartIndex = newViewState.viewHookStartIndex;
-    cleanup = newViewState.cleanup;
-    renderer = newViewState.renderer;
+function enterView(newView, host) {
+    const /** @type {?} */ oldView = currentView;
+    data = newView.data;
+    bindingIndex = newView.bindingStartIndex || 0;
+    ngStaticData = newView.ngStaticData;
+    creationMode = newView.creationMode;
+    viewHookStartIndex = newView.viewHookStartIndex;
+    cleanup = newView.cleanup;
+    renderer = newView.renderer;
     if (host != null) {
         previousOrParentNode = host;
         isParent = true;
     }
-    currentView = newViewState;
-    return /** @type {?} */ ((oldViewState));
+    currentView = newView;
+    return /** @type {?} */ ((oldView));
 }
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
- * @param {?} newViewState
+ * @param {?} newView
  * @return {?}
  */
-function leaveView(newViewState) {
+function leaveView(newView) {
     executeViewHooks();
-    enterView(newViewState, null);
+    enterView(newView, null);
 }
 /**
  * @param {?} viewId
@@ -14304,7 +14303,7 @@ function leaveView(newViewState) {
  * @param {?} ngStaticData
  * @return {?}
  */
-function createViewState(viewId, renderer, ngStaticData) {
+function createLView(viewId, renderer, ngStaticData) {
     const /** @type {?} */ newView = {
         parent: currentView,
         id: viewId,
@@ -14347,12 +14346,12 @@ function createLNode(index, type, native, state) {
         nodeInjector: parent ? parent.nodeInjector : null,
         data: isState ? /** @type {?} */ (state) : null,
         query: query,
-        staticData: null
+        tNode: null
     };
     if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
         // Bit of a hack to bust through the readonly because there is a circular dep between
-        // ViewState and LNode.
-        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'viewState.node');
+        // LView and LNode.
+        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'lView.node');
         (/** @type {?} */ ((state))).node = node;
     }
     if (index != null) {
@@ -14364,7 +14363,7 @@ function createLNode(index, type, native, state) {
             ngStaticData[index] = null;
         }
         else {
-            node.staticData = /** @type {?} */ (ngStaticData[index]);
+            node.tNode = /** @type {?} */ (ngStaticData[index]);
         }
         // Now link ourselves into the tree.
         if (isParent) {
@@ -14410,13 +14409,13 @@ function resetApplicationState() {
 /**
  * @template T
  * @param {?} node
- * @param {?} viewState
+ * @param {?} lView
  * @param {?} componentOrContext
  * @param {?=} template
  * @return {?}
  */
-function renderComponentOrTemplate(node, viewState, componentOrContext, template) {
-    const /** @type {?} */ oldView = enterView(viewState, node);
+function renderComponentOrTemplate(node, lView, componentOrContext, template) {
+    const /** @type {?} */ oldView = enterView(lView, node);
     try {
         if (rendererFactory.begin) {
             rendererFactory.begin();
@@ -14435,7 +14434,7 @@ function renderComponentOrTemplate(node, viewState, componentOrContext, template
         if (rendererFactory.end) {
             rendererFactory.end();
         }
-        viewState.creationMode = false;
+        lView.creationMode = false;
         leaveView(oldView);
     }
 }
@@ -14530,15 +14529,15 @@ function elementStart(index, nameOrComponentDef, attrs, localName) {
             let /** @type {?} */ componentView = null;
             if (isHostElement) {
                 const /** @type {?} */ ngStaticData = getTemplateStatic((/** @type {?} */ (nameOrComponentDef)).template);
-                componentView = addToViewTree(createViewState(-1, rendererFactory.createRenderer(native, (/** @type {?} */ (nameOrComponentDef)).rendererType), ngStaticData));
+                componentView = addToViewTree(createLView(-1, rendererFactory.createRenderer(native, (/** @type {?} */ (nameOrComponentDef)).rendererType), ngStaticData));
             }
             // Only component views should be added to the view tree directly. Embedded views are
             // accessed through their containers because they may be removed / re-added later.
             node = createLNode(index, 3 /* Element */, native, componentView);
-            if (node.staticData == null) {
+            if (node.tNode == null) {
                 ngDevMode && assertDataInRange(index - 1);
-                node.staticData = ngStaticData[index] =
-                    createNodeStatic(name, attrs || null, null, localName || null);
+                node.tNode = ngStaticData[index] =
+                    createTNode(name, attrs || null, null, localName || null);
             }
             if (attrs)
                 setUpAttributes(native, attrs);
@@ -14612,7 +14611,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(rNode, def) {
     resetApplicationState();
-    createLNode(0, 3 /* Element */, rNode, createViewState(-1, renderer, getTemplateStatic(def.template)));
+    createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getTemplateStatic(def.template)));
 }
 /**
  * Adds an event listener to the current node.
@@ -14670,15 +14669,15 @@ function elementProperty(index, propName, value) {
     if (value === NO_CHANGE)
         return;
     const /** @type {?} */ node = /** @type {?} */ (data[index]);
-    let /** @type {?} */ staticData = /** @type {?} */ ((node.staticData));
-    // if staticData.inputs is undefined, a listener has created output staticData, but inputs haven't
+    let /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
+    // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
     // yet been checked
-    if (staticData.inputs === undefined) {
+    if (tNode.inputs === undefined) {
         // mark inputs as checked
-        staticData.inputs = null;
-        staticData = generatePropertyAliases(node.flags, staticData, true);
+        tNode.inputs = null;
+        tNode = generatePropertyAliases(node.flags, tNode, true);
     }
-    const /** @type {?} */ inputData = staticData.inputs;
+    const /** @type {?} */ inputData = tNode.inputs;
     let /** @type {?} */ dataValue;
     if (inputData && (dataValue = inputData[propName])) {
         setInputsForProperty(dataValue, value);
@@ -14692,15 +14691,15 @@ function elementProperty(index, propName, value) {
     }
 }
 /**
- * Constructs a LNodeStatic object from the arguments.
+ * Constructs a TNode object from the arguments.
  *
  * @param {?} tagName
  * @param {?} attrs
  * @param {?} containerStatic
  * @param {?} localName
- * @return {?} the LNodeStatic object
+ * @return {?} the TNode object
  */
-function createNodeStatic(tagName, attrs, containerStatic, localName) {
+function createTNode(tagName, attrs, containerStatic, localName) {
     return {
         tagName: tagName,
         attrs: attrs,
@@ -14730,11 +14729,11 @@ function setInputsForProperty(inputs, value) {
  * be shared between all templates of this type.
  *
  * @param {?} flags
- * @param {?} data
+ * @param {?} tNode
  * @param {?=} isInputData
  * @return {?}
  */
-function generatePropertyAliases(flags, data, isInputData = false) {
+function generatePropertyAliases(flags, tNode, isInputData = false) {
     const /** @type {?} */ start = flags >> 12;
     const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2;
     for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
@@ -14743,15 +14742,16 @@ function generatePropertyAliases(flags, data, isInputData = false) {
         for (let /** @type {?} */ publicName in propertyAliasMap) {
             if (propertyAliasMap.hasOwnProperty(publicName)) {
                 const /** @type {?} */ internalName = propertyAliasMap[publicName];
-                const /** @type {?} */ staticDirData = isInputData ? (data.inputs || (data.inputs = {})) :
-                    (data.outputs || (data.outputs = {}));
+                const /** @type {?} */ staticDirData = isInputData ?
+                    (tNode.inputs || (tNode.inputs = {})) :
+                    (tNode.outputs || (tNode.outputs = {}));
                 const /** @type {?} */ hasProperty = staticDirData.hasOwnProperty(publicName);
                 hasProperty ? staticDirData[publicName].push(i, internalName) :
                     (staticDirData[publicName] = [i, internalName]);
             }
         }
     }
-    return data;
+    return tNode;
 }
 /**
  * Add or remove a class in a classList.
@@ -14877,19 +14877,18 @@ function directive(index, directive, directiveDef, localName) {
         if (index >= ngStaticData.length) {
             ngStaticData[index] = /** @type {?} */ ((directiveDef));
             if (localName) {
-                ngDevMode &&
-                    assertNotNull(previousOrParentNode.staticData, 'previousOrParentNode.staticData');
-                const /** @type {?} */ nodeStaticData = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).staticData));
-                (nodeStaticData.localNames || (nodeStaticData.localNames = [])).push(localName, index);
+                ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.staticData');
+                const /** @type {?} */ tNode = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).tNode));
+                (tNode.localNames || (tNode.localNames = [])).push(localName, index);
             }
         }
         const /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
         if (diPublic) {
             diPublic(/** @type {?} */ ((directiveDef)));
         }
-        const /** @type {?} */ staticData = /** @type {?} */ ((previousOrParentNode.staticData));
-        if (staticData && staticData.attrs) {
-            setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, staticData);
+        const /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
+        if (tNode && tNode.attrs) {
+            setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, tNode);
         }
     }
     return instance;
@@ -14900,14 +14899,14 @@ function directive(index, directive, directiveDef, localName) {
  * @template T
  * @param {?} instance Instance of the directive on which to set the initial inputs
  * @param {?} inputs The list of inputs from the directive def
- * @param {?} staticData The static data for this node
+ * @param {?} tNode The static data for this node
  * @return {?}
  */
-function setInputsFromAttrs(instance, inputs, staticData) {
+function setInputsFromAttrs(instance, inputs, tNode) {
     const /** @type {?} */ directiveIndex = ((previousOrParentNode.flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */) - 1;
-    let /** @type {?} */ initialInputData = /** @type {?} */ (staticData.initialInputs);
+    let /** @type {?} */ initialInputData = /** @type {?} */ (tNode.initialInputs);
     if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
-        initialInputData = generateInitialInputs(directiveIndex, inputs, staticData);
+        initialInputData = generateInitialInputs(directiveIndex, inputs, tNode);
     }
     const /** @type {?} */ initialInputs = initialInputData[directiveIndex];
     if (initialInputs) {
@@ -14929,13 +14928,13 @@ function setInputsFromAttrs(instance, inputs, staticData) {
  *
  * @param {?} directiveIndex Index to store the initial input data
  * @param {?} inputs The list of inputs from the directive def
- * @param {?} staticData The static data on this node
+ * @param {?} tNode The static data on this node
  * @return {?}
  */
-function generateInitialInputs(directiveIndex, inputs, staticData) {
-    const /** @type {?} */ initialInputData = staticData.initialInputs || (staticData.initialInputs = []);
+function generateInitialInputs(directiveIndex, inputs, tNode) {
+    const /** @type {?} */ initialInputData = tNode.initialInputs || (tNode.initialInputs = []);
     initialInputData[directiveIndex] = null;
-    const /** @type {?} */ attrs = /** @type {?} */ ((staticData.attrs));
+    const /** @type {?} */ attrs = /** @type {?} */ ((tNode.attrs));
     for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
         const /** @type {?} */ attrName = attrs[i];
         const /** @type {?} */ minifiedInputName = inputs[attrName];
@@ -14983,9 +14982,9 @@ function executeViewHooks() {
     data.length = writeIndex;
 }
 /**
- * Creates an LContainer.
+ * Creates an LContainerNode.
  *
- * Only `LView`s can go into `LContainer`.
+ * Only `LViewNodes` can go into `LContainerNodes`.
  *
  * @param {?} index The index of the container in the data array
  * @param {?=} template Optional inline template
@@ -15016,9 +15015,9 @@ function containerStart(index, template, tagName, attrs, localName) {
         next: null,
         parent: currentView
     }));
-    if (node.staticData == null) {
-        node.staticData = ngStaticData[index] =
-            createNodeStatic(tagName || null, attrs || null, [], localName || null);
+    if (node.tNode == null) {
+        node.tNode = ngStaticData[index] =
+            createTNode(tagName || null, attrs || null, [], localName || null);
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
@@ -15053,9 +15052,9 @@ function containerRefreshStart(index) {
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
 }
 /**
- * Marks the end of the LContainer.
+ * Marks the end of the LContainerNode.
  *
- * Marking the end of ViewContainer is the time when to child Views get inserted or removed.
+ * Marking the end of LContainerNode is the time when to child Views get inserted or removed.
  * @return {?}
  */
 function containerRefreshEnd() {
@@ -15077,7 +15076,7 @@ function containerRefreshEnd() {
     }
 }
 /**
- * Creates an LView.
+ * Creates an LViewNode.
  *
  * @param {?} viewBlockId The ID of this view
  * @return {?} Whether or not this view is in creation mode
@@ -15085,21 +15084,21 @@ function containerRefreshEnd() {
 function viewStart(viewBlockId) {
     const /** @type {?} */ container = /** @type {?} */ ((isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent))));
     ngDevMode && assertNodeType(container, 0 /* Container */);
-    const /** @type {?} */ containerState = container.data;
-    const /** @type {?} */ views = containerState.views;
-    const /** @type {?} */ existingView = !creationMode && containerState.nextIndex < views.length && views[containerState.nextIndex];
+    const /** @type {?} */ lContainer = container.data;
+    const /** @type {?} */ views = lContainer.views;
+    const /** @type {?} */ existingView = !creationMode && lContainer.nextIndex < views.length && views[lContainer.nextIndex];
     let /** @type {?} */ viewUpdateMode = existingView && viewBlockId === (/** @type {?} */ (existingView)).data.id;
     if (viewUpdateMode) {
-        previousOrParentNode = views[containerState.nextIndex++];
+        previousOrParentNode = views[lContainer.nextIndex++];
         ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
         isParent = true;
         enterView((/** @type {?} */ (existingView)).data, /** @type {?} */ (previousOrParentNode));
     }
     else {
-        // When we create a new View, we always reset the state of the instructions.
-        const /** @type {?} */ newViewState = createViewState(viewBlockId, renderer, initViewStaticData(viewBlockId, container));
-        enterView(newViewState, createLNode(null, 2 /* View */, null, newViewState));
-        containerState.nextIndex++;
+        // When we create a new LView, we always reset the state of the instructions.
+        const /** @type {?} */ newView = createLView(viewBlockId, renderer, initViewStaticData(viewBlockId, container));
+        enterView(newView, createLNode(null, 2 /* View */, null, newView));
+        lContainer.nextIndex++;
     }
     return !viewUpdateMode;
 }
@@ -15117,14 +15116,14 @@ function viewStart(viewBlockId) {
  */
 function initViewStaticData(viewIndex, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
-    const /** @type {?} */ containerStatic = (/** @type {?} */ (((parent)).staticData)).containerStatic;
+    const /** @type {?} */ containerStatic = (/** @type {?} */ (((parent)).tNode)).containerStatic;
     if (viewIndex >= containerStatic.length || containerStatic[viewIndex] == null) {
         containerStatic[viewIndex] = [];
     }
     return containerStatic[viewIndex];
 }
 /**
- * Marks the end of the LView.
+ * Marks the end of the LViewNode.
  * @return {?}
  */
 function viewEnd() {
@@ -15133,12 +15132,12 @@ function viewEnd() {
     const /** @type {?} */ container = /** @type {?} */ (previousOrParentNode.parent);
     ngDevMode && assertNodeType(viewNode, 2 /* View */);
     ngDevMode && assertNodeType(container, 0 /* Container */);
-    const /** @type {?} */ containerState = container.data;
-    const /** @type {?} */ previousView = containerState.nextIndex <= containerState.views.length ? /** @type {?} */ (containerState.views[containerState.nextIndex - 1]) :
+    const /** @type {?} */ lContainer = container.data;
+    const /** @type {?} */ previousView = lContainer.nextIndex <= lContainer.views.length ? /** @type {?} */ (lContainer.views[lContainer.nextIndex - 1]) :
         null;
     const /** @type {?} */ viewIdChanged = previousView == null ? true : previousView.data.id !== viewNode.data.id;
     if (viewIdChanged) {
-        insertView(container, viewNode, containerState.nextIndex - 1);
+        insertView(container, viewNode, lContainer.nextIndex - 1);
         currentView.creationMode = false;
     }
     leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
@@ -15193,13 +15192,13 @@ const componentRefresh = function (directiveIndex, elementIndex, template) {
  */
 
 /**
- * Adds a ViewState or a ContainerState to the end of the current view tree.
+ * Adds a LView or a LContainer to the end of the current view tree.
  *
  * This structure will be used to traverse through nested views to remove listeners
  * and call onDestroy callbacks.
  *
  * @template T
- * @param {?} state The ViewState or ContainerState to add to the view tree
+ * @param {?} state The LView or LContainer to add to the view tree
  * @return {?} The state passed in
  */
 function addToViewTree(state) {
@@ -15453,7 +15452,7 @@ function renderComponent(componentType, opts = {}) {
     const /** @type {?} */ componentDef = componentType.ngComponentDef;
     let /** @type {?} */ component;
     const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
-    const /** @type {?} */ oldView = enterView(createViewState(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), []), /** @type {?} */ ((null)));
+    const /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), []), /** @type {?} */ ((null)));
     try {
         // Create element node at index 0 in data array
         hostElement(hostNode, componentDef);

@@ -10,8 +10,8 @@ import { ElementRef } from '../linker/element_ref';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { ContainerState, CssSelector, LContainer, LElement, LNode, LNodeFlags, LNodeInjector, LProjection, LView, ProjectionState, QueryReadType, ViewState } from './interfaces';
-import { NgStaticData } from './l_node_static';
+import { CssSelector, LContainer, LContainerNode, LElementNode, LInjector, LNode, LNodeFlags, LProjection, LProjectionNode, LView, LViewNode, QueryReadType } from './interfaces';
+import { NgStaticData } from './t_node';
 import { ComponentDef, ComponentTemplate, DirectiveDef } from './definition_interfaces';
 import { InjectFlags } from './di';
 import { QueryList } from './query';
@@ -42,34 +42,34 @@ export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
  * is entered we have to store the state for later, and when the view is
  * exited the state has to be restored
  *
- * @param newViewState New state to become active
+ * @param newView New state to become active
  * @param host Element to which the View is a child of
  * @returns the previous state;
  */
-export declare function enterView(newViewState: ViewState, host: LElement | LView | null): ViewState;
+export declare function enterView(newView: LView, host: LElementNode | LViewNode | null): LView;
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
-export declare function leaveView(newViewState: ViewState): void;
-export declare function createViewState(viewId: number, renderer: Renderer3, ngStaticData: NgStaticData): ViewState;
+export declare function leaveView(newView: LView): void;
+export declare function createLView(viewId: number, renderer: Renderer3, ngStaticData: NgStaticData): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
  */
-export declare function createLNode(index: number | null, type: LNodeFlags.Element, native: RElement | RText | null, viewState?: ViewState | null): LElement;
-export declare function createLNode(index: null, type: LNodeFlags.View, native: null, viewState: ViewState): LView;
-export declare function createLNode(index: number, type: LNodeFlags.Container, native: RComment, containerState: ContainerState): LContainer;
-export declare function createLNode(index: number, type: LNodeFlags.Projection, native: null, projectionState: ProjectionState): LProjection;
+export declare function createLNode(index: number | null, type: LNodeFlags.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: null, type: LNodeFlags.View, native: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: LNodeFlags.Container, native: RComment, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeFlags.Projection, native: null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param host Existing node to render into.
  * @param template Template function with the instructions.
  * @param context to pass into the template.
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElement | null): LElement;
-export declare function renderComponentOrTemplate<T>(node: LElement, viewState: ViewState, componentOrContext: T, template?: ComponentTemplate<T>): void;
-export declare function getOrCreateNodeInjector(): LNodeInjector;
+export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null): LElementNode;
+export declare function renderComponentOrTemplate<T>(node: LElementNode, lView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
+export declare function getOrCreateNodeInjector(): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
@@ -257,9 +257,9 @@ export declare function lifecycle(lifecycle: LifecycleHook): boolean;
 /** Iterates over view hook functions and calls them. */
 export declare function executeViewHooks(): void;
 /**
- * Creates an LContainer.
+ * Creates an LContainerNode.
  *
- * Only `LView`s can go into `LContainer`.
+ * Only `LViewNodes` can go into `LContainerNodes`.
  *
  * @param index The index of the container in the data array
  * @param template Optional inline template
@@ -275,19 +275,19 @@ export declare function containerEnd(): void;
  */
 export declare function containerRefreshStart(index: number): void;
 /**
- * Marks the end of the LContainer.
+ * Marks the end of the LContainerNode.
  *
- * Marking the end of ViewContainer is the time when to child Views get inserted or removed.
+ * Marking the end of LContainerNode is the time when to child Views get inserted or removed.
  */
 export declare function containerRefreshEnd(): void;
 /**
- * Creates an LView.
+ * Creates an LViewNode.
  *
  * @param viewBlockId The ID of this view
  * @return Whether or not this view is in creation mode
  */
 export declare function viewStart(viewBlockId: number): boolean;
-/** Marks the end of the LView. */
+/** Marks the end of the LViewNode. */
 export declare function viewEnd(): void;
 /**
  * Refreshes the component view.
@@ -318,15 +318,15 @@ export declare function projectionDef(selectors?: CssSelector[]): LNode[][];
  */
 export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number): void;
 /**
- * Adds a ViewState or a ContainerState to the end of the current view tree.
+ * Adds a LView or a LContainer to the end of the current view tree.
  *
  * This structure will be used to traverse through nested views to remove listeners
  * and call onDestroy callbacks.
  *
- * @param state The ViewState or ContainerState to add to the view tree
+ * @param state The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-export declare function addToViewTree<T extends ViewState | ContainerState>(state: T): T;
+export declare function addToViewTree<T extends LView | LContainer>(state: T): T;
 export interface NO_CHANGE {
     brand: 'NO_CHANGE';
 }

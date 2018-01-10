@@ -1,4 +1,4 @@
-import { LContainer, LElement, LNode, LText, LView, ProjectionState, ViewOrContainerState, ViewState } from './interfaces';
+import { LContainerNode, LElementNode, LNode, LProjection, LTextNode, LView, LViewNode, LViewOrLContainer } from './interfaces';
 import { RNode } from './renderer';
 /**
  * Finds the closest DOM node above a given container in the hierarchy.
@@ -9,7 +9,7 @@ import { RNode } from './renderer';
  * @param containerNode The container node whose parent must be found
  * @returns Closest DOM node above the container
  */
-export declare function findNativeParent(containerNode: LContainer): RNode | null;
+export declare function findNativeParent(containerNode: LContainerNode): RNode | null;
 /**
  * Adds or removes all DOM elements associated with a view.
  *
@@ -22,8 +22,8 @@ export declare function findNativeParent(containerNode: LContainer): RNode | nul
  * @param insertMode Whether or not elements should be added (if false, removing)
  * @param beforeNode The node before which elements should be added, if insert mode
  */
-export declare function addRemoveViewFromContainer(container: LContainer, rootNode: LView, insertMode: true, beforeNode: RNode | null): void;
-export declare function addRemoveViewFromContainer(container: LContainer, rootNode: LView, insertMode: false): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: true, beforeNode: RNode | null): void;
+export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: false): void;
 /**
  * Traverses the tree of component views and containers to remove listeners and
  * call onDestroy callbacks.
@@ -37,7 +37,7 @@ export declare function addRemoveViewFromContainer(container: LContainer, rootNo
  *
  *  @param rootView The view to destroy
  */
-export declare function destroyViewTree(rootView: ViewState): void;
+export declare function destroyViewTree(rootView: LView): void;
 /**
  * Inserts a view into a container.
  *
@@ -51,7 +51,7 @@ export declare function destroyViewTree(rootView: ViewState): void;
  * @param index The index at which to insert the view
  * @returns The inserted view
  */
-export declare function insertView(container: LContainer, newView: LView, index: number): LView;
+export declare function insertView(container: LContainerNode, newView: LViewNode, index: number): LViewNode;
 /**
  * Removes a view from a container.
  *
@@ -63,29 +63,29 @@ export declare function insertView(container: LContainer, newView: LView, index:
  * @param removeIndex The index of the view to remove
  * @returns The removed view
  */
-export declare function removeView(container: LContainer, removeIndex: number): LView;
+export declare function removeView(container: LContainerNode, removeIndex: number): LViewNode;
 /**
  * Sets a next on the view node, so views in for loops can easily jump from
- * one view to the next to add/remove elements. Also adds the ViewState (view.data)
+ * one view to the next to add/remove elements. Also adds the LView (view.data)
  * to the view tree for easy traversal when cleaning up the view.
  *
  * @param view The view to set up
  * @param next The view's new next
  */
-export declare function setViewNext(view: LView, next: LView | null): void;
+export declare function setViewNext(view: LViewNode, next: LViewNode | null): void;
 /**
- * Determines which ViewOrContainerState to jump to when traversing back up the
+ * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
  *
- * Normally, the view's parent ViewState should be checked, but in the case of
+ * Normally, the view's parent LView should be checked, but in the case of
  * embedded views, the container (which is the view node's parent, but not the
- * ViewState's parent) needs to be checked for a possible next property.
+ * LView's parent) needs to be checked for a possible next property.
  *
- * @param state The ViewOrContainerState for which we need a parent state
+ * @param state The LViewOrLContainer for which we need a parent state
  * @param rootView The rootView, so we don't propagate too far up the view tree
- * @returns The correct parent ViewOrContainerState
+ * @returns The correct parent LViewOrLContainer
  */
-export declare function getParentState(state: ViewOrContainerState, rootView: ViewState): ViewOrContainerState | null;
+export declare function getParentState(state: LViewOrLContainer, rootView: LView): LViewOrLContainer | null;
 /**
  * Appends the provided child element to the provided parent, if appropriate.
  *
@@ -96,10 +96,10 @@ export declare function getParentState(state: ViewOrContainerState, rootView: Vi
  *
  * @param parent The parent to which to append the child
  * @param child The child that should be appended
- * @param currentView The current view's ViewState
+ * @param currentView The current LView
  * @returns Whether or not the child was appended
  */
-export declare function appendChild(parent: LNode, child: RNode | null, currentView: ViewState): boolean;
+export declare function appendChild(parent: LNode, child: RNode | null, currentView: LView): boolean;
 /**
  * Inserts the provided node before the correct element in the DOM, if appropriate.
  *
@@ -109,9 +109,9 @@ export declare function appendChild(parent: LNode, child: RNode | null, currentV
  * the content projection system. Otherwise, insertBefore normally.
  *
  * @param node Node to insert
- * @param currentView The current view's ViewState
+ * @param currentView Current LView
  */
-export declare function insertChild(node: LNode, currentView: ViewState): void;
+export declare function insertChild(node: LNode, currentView: LView): void;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM. Also stores the
@@ -120,6 +120,6 @@ export declare function insertChild(node: LNode, currentView: ViewState): void;
  * @param projectedNodes Array to store the projected node
  * @param node The node to process
  * @param currentParent The last parent element to be processed
- * @param currentView The current view's ViewState
+ * @param currentView Current LView
  */
-export declare function processProjectedNode(projectedNodes: ProjectionState, node: LElement | LText | LContainer, currentParent: LView | LElement, currentView: ViewState): void;
+export declare function processProjectedNode(projectedNodes: LProjection, node: LElementNode | LTextNode | LContainerNode, currentParent: LViewNode | LElementNode, currentView: LView): void;

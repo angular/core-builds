@@ -7,7 +7,7 @@
  */
 import './ng_dev_mode';
 import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './interfaces';
-import { LNodeStatic } from './l_node_static';
+import { TNode } from './t_node';
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
@@ -15,6 +15,6 @@ import { LNodeStatic } from './l_node_static';
  * @param selector
  * @returns true if node matches the selector.
  */
-export declare function isNodeMatchingSimpleSelector(lNodeStaticData: LNodeStatic, selector: SimpleCssSelector): boolean;
-export declare function isNodeMatchingSelectorWithNegations(lNodeStaticData: LNodeStatic, selector: CssSelectorWithNegations): boolean;
-export declare function isNodeMatchingSelector(lNodeStaticData: LNodeStatic, selector: CssSelector): boolean;
+export declare function isNodeMatchingSimpleSelector(tNode: TNode, selector: SimpleCssSelector): boolean;
+export declare function isNodeMatchingSelectorWithNegations(tNode: TNode, selector: CssSelectorWithNegations): boolean;
+export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector): boolean;

@@ -1,6 +1,6 @@
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
-import { LContainer, LNode, LView, QueryReadType, QueryState } from './interfaces';
+import { LContainerNode, LNode, LQuery, LViewNode, QueryReadType } from './interfaces';
 /**
  * A predicate which determines if a given element/directive should be included in the query
  */
@@ -14,7 +14,7 @@ export interface QueryPredicate<T> {
      */
     list: QueryList<T>;
     /**
-     * If looking for directives than it contains the directive type.
+     * If looking for directives then it contains the directive type.
      */
     type: Type<T> | null;
     /**
@@ -32,15 +32,15 @@ export interface QueryPredicate<T> {
      */
     values: any[];
 }
-export declare class QueryState_ implements QueryState {
+export declare class LQuery_ implements LQuery {
     shallow: QueryPredicate<any> | null;
     deep: QueryPredicate<any> | null;
     constructor(deep?: QueryPredicate<any>);
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType): void;
-    child(): QueryState | null;
+    child(): LQuery | null;
     addNode(node: LNode): void;
-    insertView(container: LContainer, view: LView, index: number): void;
-    removeView(container: LContainer, view: LView, index: number): void;
+    insertView(container: LContainerNode, view: LViewNode, index: number): void;
+    removeView(container: LContainerNode, view: LViewNode, index: number): void;
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;
 export declare const QueryList: typeof viewEngine_QueryList;
