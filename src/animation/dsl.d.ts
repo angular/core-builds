@@ -765,9 +765,9 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *     <button (click)="next()">Next</button>
  *     <hr>
  *     <div [@bannerAnimation]="selectedIndex" class="banner-container">
- *       <div class="banner"> {{ banner }} </div>
+ *       <div class="banner" *ngFor="let banner of banners"> {{ banner }} </div>
  *     </div>
- *   `
+ *   `,
  *   animations: [
  *     trigger('bannerAnimation', [
  *       transition(":increment", group([
@@ -787,7 +787,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *         query(':leave', [
  *           animate('0.5s ease-out', style({ left: '100%' }))
  *         ])
- *       ])),
+ *       ]))
  *     ])
  *   ]
  * })
