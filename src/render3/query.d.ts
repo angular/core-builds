@@ -1,6 +1,7 @@
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
-import { LContainerNode, LNode, LQuery, LViewNode, QueryReadType } from './interfaces';
+import { LContainerNode, LNode, LViewNode } from './interfaces/node';
+import { LQuery, QueryReadType } from './interfaces/query';
 /**
  * A predicate which determines if a given element/directive should be included in the query
  */

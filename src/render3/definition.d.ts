@@ -1,4 +1,4 @@
-import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs } from './definition_interfaces';
+import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs } from './interfaces/definition';
 /**
  * Create a component definition object.
  *

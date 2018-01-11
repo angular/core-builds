@@ -6,8 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
-import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './interfaces';
-import { TNode } from './t_node';
+import { TNode } from './interfaces/node';
+import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './interfaces/projection';
 /**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *

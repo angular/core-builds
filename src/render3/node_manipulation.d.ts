@@ -1,5 +1,7 @@
-import { LContainerNode, LElementNode, LNode, LProjection, LTextNode, LView, LViewNode, LViewOrLContainer } from './interfaces';
-import { RNode } from './renderer';
+import { LContainerNode, LElementNode, LNode, LTextNode, LViewNode } from './interfaces/node';
+import { LProjection } from './interfaces/projection';
+import { RNode } from './interfaces/renderer';
+import { LView, LViewOrLContainer } from './interfaces/view';
 /**
  * Finds the closest DOM node above a given container in the hierarchy.
  *

@@ -7,8 +7,8 @@
  */
 import { Injector } from '../di/injector';
 import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
-import { ComponentDef, ComponentType } from './definition_interfaces';
-import { RElement, RendererFactory3 } from './renderer';
+import { ComponentDef, ComponentType } from './interfaces/definition';
+import { RElement, RendererFactory3 } from './interfaces/renderer';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */

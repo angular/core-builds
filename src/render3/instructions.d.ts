@@ -10,12 +10,16 @@ import { ElementRef } from '../linker/element_ref';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { CssSelector, LContainer, LContainerNode, LElementNode, LInjector, LNode, LNodeFlags, LProjection, LProjectionNode, LView, LViewNode, QueryReadType } from './interfaces';
-import { NgStaticData } from './t_node';
-import { ComponentDef, ComponentTemplate, DirectiveDef } from './definition_interfaces';
+import { LContainer } from './interfaces/container';
+import { LInjector } from './interfaces/injector';
+import { CssSelector, LProjection } from './interfaces/projection';
+import { QueryReadType } from './interfaces/query';
+import { LView } from './interfaces/view';
+import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode, NgStaticData } from './interfaces/node';
+import { ComponentDef, ComponentTemplate, DirectiveDef } from './interfaces/definition';
 import { InjectFlags } from './di';
 import { QueryList } from './query';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './renderer';
+import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 export { queryRefresh } from './query';
 /**
  * Enum used by the lifecycle (l) instruction to determine which lifecycle hook is requesting

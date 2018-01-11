@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-a33ff2c
+ * @license Angular v5.2.0-6be9c04
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-a33ff2c');
+var VERSION = new Version('5.2.0-6be9c04');
 
 /**
  * @fileoverview added by tsickle
@@ -16575,6 +16575,9 @@ var domRendererFactory3 = {
 /**
  * @record
  */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
 
 /**
  * @fileoverview added by tsickle

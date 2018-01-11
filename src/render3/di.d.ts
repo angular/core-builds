@@ -2,8 +2,9 @@ import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { DirectiveDef } from './definition_interfaces';
-import { LContainerNode, LElementNode, LInjector } from './interfaces';
+import { DirectiveDef } from './interfaces/definition';
+import { LInjector } from './interfaces/injector';
+import { LContainerNode, LElementNode } from './interfaces/node';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.

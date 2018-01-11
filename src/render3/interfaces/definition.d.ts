@@ -5,8 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { RendererType2 } from '../render/api';
-import { Type } from '../type';
+import { RendererType2 } from '../../render/api';
+import { Type } from '../../type';
 /**
  * Definition of what a template rendering function should look like.
  */
@@ -138,3 +138,4 @@ export interface ComponentDefArgs<T> extends DirectiveDefArgs<T> {
 }
 export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
 export declare type ComponentDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
+export declare const unusedValueExportToPlacateAjd = 1;

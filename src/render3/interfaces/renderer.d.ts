@@ -1,4 +1,4 @@
-import { RendererStyleFlags2, RendererType2 } from '../render/api';
+import { RendererStyleFlags2, RendererType2 } from '../../render/api';
 export declare enum RendererStyleFlags3 {
     Important = 1,
     DashCase = 2,
@@ -98,3 +98,4 @@ export interface RText extends RNode {
 }
 export interface RComment extends RNode {
 }
+export declare const unusedValueExportToPlacateAjd = 1;
