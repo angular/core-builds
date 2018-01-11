@@ -16,7 +16,7 @@ import { CssSelector, LProjection } from './interfaces/projection';
 import { QueryReadType } from './interfaces/query';
 import { LView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode, NgStaticData } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, TypedDirectiveDef } from './interfaces/definition';
 import { InjectFlags } from './di';
 import { QueryList } from './query';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -79,7 +79,7 @@ export declare function getOrCreateNodeInjector(): LInjector;
  *
  * @param def The definition of the directive to be made public
  */
-export declare function diPublic(def: DirectiveDef<any>): void;
+export declare function diPublic(def: TypedDirectiveDef<any>): void;
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.
@@ -128,15 +128,16 @@ export declare function injectViewContainerRef(): ViewContainerRef;
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the data array
- * @param nameOrComponentDef Name of the DOM Node or `ComponentDef`.
+ * @param nameOrComponentType Name of the DOM Node or `ComponentType` to create.
  * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
- * @param localName A name under which a given element is exported.
+ * @param directiveTypes A set of directives declared on this element.
+ * @param localRefs A set of local reference bindings on the element.
  *
- * Attributes are passed as an array of strings where elements with an even index hold an attribute
- * name and elements with an odd index hold an attribute value, ex.:
+ * Attributes and localRefs are passed as an array of strings where elements with an even index
+ * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, nameOrComponentDef?: string | ComponentDef<any>, attrs?: string[] | null, localName?: string): RElement;
+export declare function elementStart(index: number, nameOrComponentType?: string | ComponentType<any>, attrs?: string[] | null, directiveTypes?: DirectiveType<any>[] | null, localRefs?: string[] | null): RElement;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -223,7 +224,17 @@ export declare function text(index: number, value?: any): void;
  */
 export declare function textBinding<T>(index: number, value: T | NO_CHANGE): void;
 /**
- * Create or retrieve the directive.
+ * Retrieve a directive.
+ *
+ * NOTE: directives can be created in order other than the index order. They can also
+ *       be retrieved before they are created in which case the value will be null.
+ *
+ * @param index Each directive in a `View` will have a unique index. Directives can
+ *        be created or retrieved out of order.
+ */
+export declare function directive<T>(index: number): T;
+/**
+ * Create a directive.
  *
  * NOTE: directives can be created in order other than the index order. They can also
  *       be retrieved before they are created in which case the value will be null.
@@ -232,9 +243,9 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  *        be created or retrieved out of order.
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
+ * @param queryName Name under which the query can retrieve the directive instance.
  */
-export declare function directive<T>(index: number): T;
-export declare function directive<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localName?: string): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, queryName?: string | null): T;
 /**
  * Accepts a lifecycle hook type and determines when and how the related lifecycle hook
  * callback should run.
@@ -269,9 +280,9 @@ export declare function executeViewHooks(): void;
  * @param template Optional inline template
  * @param tagName The name of the container element, if applicable
  * @param attrs The attrs attached to the container, if applicable
+ * @param localRefs A set of local reference bindings on the element.
  */
-export declare function containerStart(index: number, template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localName?: string): void;
-export declare function containerEnd(): void;
+export declare function container(index: number, directiveTypes?: DirectiveType<any>[], template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *

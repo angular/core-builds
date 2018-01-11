@@ -2,7 +2,7 @@ import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { DirectiveDef } from './interfaces/definition';
+import { TypedDirectiveDef } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
 import { LContainerNode, LElementNode } from './interfaces/node';
 /**
@@ -38,7 +38,7 @@ export declare const enum InjectFlags {
  * @param di The node injector in which a directive will be added
  * @param def The definition of the directive to be made public
  */
-export declare function diPublicInInjector(di: LInjector, def: DirectiveDef<any>): void;
+export declare function diPublicInInjector(di: LInjector, def: TypedDirectiveDef<any>): void;
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.

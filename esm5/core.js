@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-c0080d7
+ * @license Angular v5.2.0-5eaaac3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-c0080d7');
+var VERSION = new Version('5.2.0-5eaaac3');
 
 /**
  * @fileoverview added by tsickle
@@ -15570,7 +15570,10 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
  * @return {?} The stringified value
  */
 function stringifyValueForError(value) {
-    return typeof value === 'string' ? "\"" + value + "\"" : '' + value;
+    if (value && value.native && value.native.outerHTML) {
+        return value.native.outerHTML;
+    }
+    return typeof value === 'string' ? "\"" + value + "\"" : value;
 }
 /**
  * @param {?} actual
@@ -15631,7 +15634,9 @@ function assertNotEqual(actual, expected, name) {
  */
 function assertThrow(actual, expected, name, operator, serializer) {
     if (serializer === void 0) { serializer = stringifyValueForError; }
-    throw new Error("ASSERT: expected " + name + " " + operator + " " + serializer(expected) + " but was " + serializer(actual) + "!");
+    var /** @type {?} */ error = "ASSERT: expected " + name + " " + operator + " " + serializer(expected) + " but was " + serializer(actual) + "!";
+    debugger; // leave `debugger` here to aid in debugging.
+    throw new Error(error);
 }
 
 /**
@@ -16915,27 +16920,35 @@ function renderComponentOrTemplate(node, lView, componentOrContext, template) {
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param {?} index Index of the element in the data array
- * @param {?=} nameOrComponentDef Name of the DOM Node or `ComponentDef`.
+ * @param {?=} nameOrComponentType Name of the DOM Node or `ComponentType` to create.
  * @param {?=} attrs Statically bound set of attributes to be written into the DOM element on creation.
- * @param {?=} localName A name under which a given element is exported.
+ * @param {?=} directiveTypes A set of directives declared on this element.
+ * @param {?=} localRefs A set of local reference bindings on the element.
  *
- * Attributes are passed as an array of strings where elements with an even index hold an attribute
- * name and elements with an odd index hold an attribute value, ex.:
+ * Attributes and localRefs are passed as an array of strings where elements with an even index
+ * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  * @return {?}
  */
-function elementStart(index, nameOrComponentDef, attrs, localName) {
+function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRefs) {
     var /** @type {?} */ node;
     var /** @type {?} */ native;
-    if (nameOrComponentDef == null) {
+    if (nameOrComponentType == null) {
         // native node retrieval - used for exporting elements as tpl local variables (<div #foo>)
         var /** @type {?} */ node_1 = /** @type {?} */ ((data[index]));
         native = node_1 && (/** @type {?} */ (node_1)).native;
     }
     else {
         ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
-        var /** @type {?} */ isHostElement = typeof nameOrComponentDef !== 'string';
-        var /** @type {?} */ name_1 = isHostElement ? (/** @type {?} */ (nameOrComponentDef)).tag : /** @type {?} */ (nameOrComponentDef);
+        var /** @type {?} */ isHostElement = typeof nameOrComponentType !== 'string';
+        // MEGAMORPHIC: `ngComponentDef` is a megamorphic property access here.
+        // This is OK, since we will refactor this code and store the result in `TView.data`
+        // which means that we will be reading this value only once. We are trading clean/simple
+        // template
+        // code for slight startup(first run) performance. (No impact on subsequent runs)
+        // TODO(misko): refactor this to store the `ComponentDef` in `TView.data`.
+        var /** @type {?} */ hostComponentDef = isHostElement ? (/** @type {?} */ (nameOrComponentType)).ngComponentDef : null;
+        var /** @type {?} */ name_1 = isHostElement ? /** @type {?} */ ((hostComponentDef)).tag : /** @type {?} */ (nameOrComponentType);
         if (name_1 === null) {
             // TODO: future support for nameless components.
             throw 'for now name is required';
@@ -16944,23 +16957,79 @@ function elementStart(index, nameOrComponentDef, attrs, localName) {
             native = renderer.createElement(name_1);
             var /** @type {?} */ componentView = null;
             if (isHostElement) {
-                var /** @type {?} */ ngStaticData_1 = getTemplateStatic((/** @type {?} */ (nameOrComponentDef)).template);
-                componentView = addToViewTree(createLView(-1, rendererFactory.createRenderer(native, (/** @type {?} */ (nameOrComponentDef)).rendererType), ngStaticData_1));
+                var /** @type {?} */ ngStaticData_1 = getTemplateStatic(/** @type {?} */ ((hostComponentDef)).template);
+                componentView = addToViewTree(createLView(-1, rendererFactory.createRenderer(native, /** @type {?} */ ((hostComponentDef)).rendererType), ngStaticData_1));
             }
             // Only component views should be added to the view tree directly. Embedded views are
             // accessed through their containers because they may be removed / re-added later.
             node = createLNode(index, 3 /* Element */, native, componentView);
+            // TODO(misko): implement code which caches the local reference resolution
+            var /** @type {?} */ queryName = hack_findQueryName(hostComponentDef, localRefs, '');
             if (node.tNode == null) {
                 ngDevMode && assertDataInRange(index - 1);
                 node.tNode = ngStaticData[index] =
-                    createTNode(name_1, attrs || null, null, localName || null);
+                    createTNode(name_1, attrs || null, null, hostComponentDef ? null : queryName);
             }
             if (attrs)
                 setUpAttributes(native, attrs);
             appendChild(/** @type {?} */ ((node.parent)), native, currentView);
+            if (hostComponentDef) {
+                // TODO(mhevery): This assumes that the directives come in correct order, which
+                // is not guaranteed. Must be refactored to take it into account.
+                (/** @type {?} */ (hostComponentDef)).type = /** @type {?} */ (nameOrComponentType);
+                directiveCreate(++index, hostComponentDef.n(), hostComponentDef, queryName);
+            }
+            hack_declareDirectives(index, directiveTypes, localRefs);
         }
     }
     return native;
+}
+/**
+ * This function instantiates a directive with a correct queryName. It is a hack since we should
+ * compute the query value only once and store it with the template (rather than on each invocation)
+ * @param {?} index
+ * @param {?} directiveTypes
+ * @param {?} localRefs
+ * @return {?}
+ */
+function hack_declareDirectives(index, directiveTypes, localRefs) {
+    if (directiveTypes) {
+        // TODO(mhevery): This assumes that the directives come in correct order, which
+        // is not guaranteed. Must be refactored to take it into account.
+        for (var /** @type {?} */ i = 0; i < directiveTypes.length; i++) {
+            // MEGAMORPHIC: `ngDirectiveDef` is a megamorphic property access here.
+            // This is OK, since we will refactor this code and store the result in `TView.data`
+            // which means that we will be reading this value only once. We are trading clean/simple
+            // template
+            // code for slight startup(first run) performance. (No impact on subsequent runs)
+            // TODO(misko): refactor this to store the `DirectiveDef` in `TView.data`.
+            var /** @type {?} */ directiveType = directiveTypes[i];
+            var /** @type {?} */ directiveDef = directiveType.ngDirectiveDef;
+            (/** @type {?} */ (directiveDef)).type = directiveType;
+            directiveCreate(++index, directiveDef.n(), directiveDef, hack_findQueryName(directiveDef, localRefs));
+        }
+    }
+}
+/**
+ * This function returns the queryName for a directive. It is a hack since we should
+ * compute the query value only once and store it with the template (rather than on each invocation)
+ * @param {?} directiveDef
+ * @param {?} localRefs
+ * @param {?=} defaultExport
+ * @return {?}
+ */
+function hack_findQueryName(directiveDef, localRefs, defaultExport) {
+    var /** @type {?} */ exportAs = directiveDef && directiveDef.exportAs || defaultExport;
+    if (exportAs != null && localRefs) {
+        for (var /** @type {?} */ i = 0; i < localRefs.length; i = i + 2) {
+            var /** @type {?} */ local = localRefs[i];
+            var /** @type {?} */ toExportAs = localRefs[i | 1];
+            if (toExportAs === exportAs || toExportAs === defaultExport) {
+                return local;
+            }
+        }
+    }
+    return null;
 }
 /**
  * Gets static data from a template function or creates a new static
@@ -17261,52 +17330,65 @@ function textBinding(index, value) {
     }
 }
 /**
+ * Retrieve a directive.
+ *
+ * NOTE: directives can be created in order other than the index order. They can also
+ *       be retrieved before they are created in which case the value will be null.
+ *
  * @template T
- * @param {?} index
- * @param {?=} directive
- * @param {?=} directiveDef
- * @param {?=} localName
+ * @param {?} index Each directive in a `View` will have a unique index. Directives can
+ *        be created or retrieved out of order.
  * @return {?}
  */
-function directive(index, directive, directiveDef, localName) {
+function directive(index) {
+    ngDevMode && assertDataInRange(index);
+    return data[index];
+}
+/**
+ * Create a directive.
+ *
+ * NOTE: directives can be created in order other than the index order. They can also
+ *       be retrieved before they are created in which case the value will be null.
+ *
+ * @template T
+ * @param {?} index Each directive in a `View` will have a unique index. Directives can
+ *        be created or retrieved out of order.
+ * @param {?} directive The directive instance.
+ * @param {?} directiveDef DirectiveDef object which contains information about the template.
+ * @param {?=} queryName Name under which the query can retrieve the directive instance.
+ * @return {?}
+ */
+function directiveCreate(index, directive, directiveDef, queryName) {
     var /** @type {?} */ instance;
-    if (directive == null) {
-        // return existing
-        ngDevMode && assertDataInRange(index);
-        instance = data[index];
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode && assertPreviousIsParent();
+    var /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
+    var /** @type {?} */ size = flags & 4092;
+    if (size === 0) {
+        flags = (index << 12 /* INDX_SHIFT */) | 4 /* SIZE_SKIP */ | flags & 3 /* TYPE_MASK */;
     }
     else {
-        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
-        ngDevMode && assertPreviousIsParent();
-        var /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
-        var /** @type {?} */ size = flags & 4092;
-        if (size === 0) {
-            flags =
-                (index << 12 /* INDX_SHIFT */) | 4 /* SIZE_SKIP */ | flags & 3 /* TYPE_MASK */;
+        flags += 4 /* SIZE_SKIP */;
+    } /** @type {?} */
+    ((previousOrParentNode)).flags = flags;
+    ngDevMode && assertDataInRange(index - 1);
+    Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
+    data[index] = instance = directive;
+    if (index >= ngStaticData.length) {
+        ngStaticData[index] = /** @type {?} */ ((directiveDef));
+        if (queryName) {
+            ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.staticData');
+            var /** @type {?} */ nodeStaticData = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).tNode));
+            (nodeStaticData.localNames || (nodeStaticData.localNames = [])).push(queryName, index);
         }
-        else {
-            flags += 4 /* SIZE_SKIP */;
-        } /** @type {?} */
-        ((previousOrParentNode)).flags = flags;
-        ngDevMode && assertDataInRange(index - 1);
-        Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
-        data[index] = instance = directive;
-        if (index >= ngStaticData.length) {
-            ngStaticData[index] = /** @type {?} */ ((directiveDef));
-            if (localName) {
-                ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.staticData');
-                var /** @type {?} */ tNode_1 = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).tNode));
-                (tNode_1.localNames || (tNode_1.localNames = [])).push(localName, index);
-            }
-        }
-        var /** @type {?} */ diPublic_1 = /** @type {?} */ ((directiveDef)).diPublic;
-        if (diPublic_1) {
-            diPublic_1(/** @type {?} */ ((directiveDef)));
-        }
-        var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
-        if (tNode && tNode.attrs) {
-            setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, tNode);
-        }
+    }
+    var /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
+    if (diPublic) {
+        diPublic(/** @type {?} */ ((directiveDef)));
+    }
+    var /** @type {?} */ staticData = /** @type {?} */ ((previousOrParentNode.tNode));
+    if (staticData && staticData.attrs) {
+        setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, staticData);
     }
     return instance;
 }
@@ -17404,13 +17486,14 @@ function executeViewHooks() {
  * Only `LViewNodes` can go into `LContainerNodes`.
  *
  * @param {?} index The index of the container in the data array
+ * @param {?=} directiveTypes
  * @param {?=} template Optional inline template
  * @param {?=} tagName The name of the container element, if applicable
  * @param {?=} attrs The attrs attached to the container, if applicable
- * @param {?=} localName
+ * @param {?=} localRefs A set of local reference bindings on the element.
  * @return {?}
  */
-function containerStart(index, template, tagName, attrs, localName) {
+function container(index, directiveTypes, template, tagName, attrs, localRefs) {
     ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
     // If the direct parent of the container is a view, its views (including its comment)
     // will need to be added through insertView() when its parent view is being inserted.
@@ -17433,24 +17516,16 @@ function containerStart(index, template, tagName, attrs, localName) {
         parent: currentView
     }));
     if (node.tNode == null) {
+        // TODO(misko): implement queryName caching
+        var /** @type {?} */ queryName = hack_findQueryName(null, localRefs, '');
         node.tNode = ngStaticData[index] =
-            createTNode(tagName || null, attrs || null, [], localName || null);
+            createTNode(tagName || null, attrs || null, [], queryName || null);
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(node.data);
-}
-/**
- * @return {?}
- */
-function containerEnd() {
-    if (isParent) {
-        isParent = false;
-    }
-    else {
-        ngDevMode && assertHasParent();
-        previousOrParentNode = /** @type {?} */ ((previousOrParentNode.parent));
-    }
+    hack_declareDirectives(index, directiveTypes, localRefs);
+    isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     var /** @type {?} */ query = previousOrParentNode.query;
     query && query.addNode(previousOrParentNode);
@@ -17867,7 +17942,9 @@ function assertDataInRange(index, arr) {
 function renderComponent(componentType, opts) {
     if (opts === void 0) { opts = {}; }
     var /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
-    var /** @type {?} */ componentDef = componentType.ngComponentDef;
+    var /** @type {?} */ componentDef = /** @type {?} */ (componentType.ngComponentDef);
+    if (componentDef.type != componentType)
+        componentDef.type = componentType;
     var /** @type {?} */ component;
     var /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
     var /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), []), /** @type {?} */ ((null)));
@@ -17875,7 +17952,7 @@ function renderComponent(componentType, opts) {
         // Create element node at index 0 in data array
         hostElement(hostNode, componentDef);
         // Create directive instance with n() and store at index 1 in data array (el is 0)
-        component = directive(1, componentDef.n(), componentDef);
+        component = directiveCreate(1, componentDef.n(), componentDef);
     }
     finally {
         leaveView(oldView);
@@ -17944,7 +18021,6 @@ var isDirty = false;
  */
 function defineComponent(componentDefinition) {
     var /** @type {?} */ def = /** @type {?} */ ({
-        type: componentDefinition.type,
         diPublic: null,
         n: componentDefinition.factory,
         tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
@@ -17956,6 +18032,7 @@ function defineComponent(componentDefinition) {
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
+        exportAs: componentDefinition.exportAs,
     });
     var /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });
@@ -19274,5 +19351,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, containerStart as ɵC, directive as ɵD, elementStart as ɵE, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, containerEnd as ɵc, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbe, group$1 as ɵbf, keyframes$1 as ɵbj, sequence$1 as ɵbg, state$1 as ɵbi, style$1 as ɵbh, transition$1 as ɵbk, trigger$1 as ɵbd, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope as ɵu, detectWTF as ɵr, endTimeRange as ɵy, leave as ɵw, startTimeRange as ɵx, stringify$1 as ɵbb, makeParamDecorator as ɵa, _def as ɵz, DebugContext as ɵba };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, ValueUnwrapper as ɵValueUnwrapper, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, directive as ɵD, elementStart as ɵE, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbd, group$1 as ɵbe, keyframes$1 as ɵbi, sequence$1 as ɵbf, state$1 as ɵbh, style$1 as ɵbg, transition$1 as ɵbj, trigger$1 as ɵbc, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn, _appIdRandomProviderFactory as ɵg, defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi, DefaultIterableDifferFactory as ɵj, DefaultKeyValueDifferFactory as ɵk, ReflectiveInjector_ as ɵc, ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵf, wtfEnabled as ɵo, createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵx, leave as ɵu, startTimeRange as ɵw, stringify$1 as ɵba, makeParamDecorator as ɵa, _def as ɵy, DebugContext as ɵz };
 //# sourceMappingURL=core.js.map
