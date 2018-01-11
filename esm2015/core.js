@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-9b84a32
+ * @license Angular v5.2.0-6af3672
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.0-9b84a32');
+const VERSION = new Version('5.2.0-6af3672');
 
 /**
  * @fileoverview added by tsickle
@@ -13484,6 +13484,224 @@ function typeSerializer(type) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * The state associated with an LContainer
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @enum {number} */
+/**
+ * LNode is an internal data structure which is used for the incremental DOM algorithm.
+ * The "L" stands for "Logical" to differentiate between `RNodes` (actual rendered DOM
+ * node) and our logical representation of DOM nodes, `LNodes`.
+ *
+ * The data structure is optimized for speed and size.
+ *
+ * In order to be fast, all subtypes of `LNode` should have the same shape.
+ * Because size of the `LNode` matters, many fields have multiple roles depending
+ * on the `LNode` subtype.
+ *
+ * See: https://en.wikipedia.org/wiki/Inline_caching#Monomorphic_inline_caching
+ *
+ * NOTE: This is a private data structure and should not be exported by any of the
+ * instructions.
+ * @record
+ */
+
+/**
+ * LNode representing an element.
+ * @record
+ */
+
+/**
+ * LNode representing a #text node.
+ * @record
+ */
+
+/**
+ * Abstract node which contains root nodes of a view.
+ * @record
+ */
+
+/**
+ * Abstract node container which contains other views.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * LNode binding data (flyweight) for a particular node that is shared between all templates
+ * of a specific type.
+ *
+ * If a property is:
+ *    - PropertyAliases: that property's data was generated and this is it
+ *    - Null: that property's data was already generated and nothing was found.
+ *    - Undefined: that property's data has not yet been generated
+ *
+ * see: https://en.wikipedia.org/wiki/Flyweight_pattern for more on the Flyweight pattern
+ * @record
+ */
+
+/**
+ * Static data for an LElementNode
+ * @record
+ */
+
+/**
+ * Static data for an LContainerNode
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/** @enum {number} */
+const RendererStyleFlags3 = {
+    Important: 1,
+    DashCase: 2,
+};
+RendererStyleFlags3[RendererStyleFlags3.Important] = "Important";
+RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
+/**
+ * Object Oriented style of API needed to create elements and text nodes.
+ *
+ * This is the native browser API style, e.g. operations are methods on individual objects
+ * like HTMLElement. With this style, no additional code is needed as a facade
+ * (reducing payload size).
+ *
+ * @record
+ */
+
+/**
+ * Procedural style of API needed to create elements and text nodes.
+ *
+ * In non-native browser environments (e.g. platforms such as web-workers), this is the
+ * facade that enables element manipulation. This also facilitates backwards compatibility
+ * with Renderer2.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+const domRendererFactory3 = {
+    createRenderer: (hostElement, rendererType) => { return document; }
+};
+/**
+ * Subset of API needed for appending elements and text nodes.
+ * @record
+ */
+
+/**
+ * Subset of API needed for writing attributes, properties, and setting up
+ * listeners on Element.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * `LView` stores all of the information needed to process the instructions as
+ * they are invoked from the template. Each embedded view and component view has its
+ * own `LView`. When processing a particular view, we set the `currentView` to that
+ * `LView`. When that view is done processing, the `currentView` is set back to
+ * whatever the original `currentView` was before(the parent `LView`).
+ *
+ * Keeping separate state for each view facilities view insertion / deletion, so we
+ * don't have to edit the data array based on which views are present.
+ * @record
+ */
+
+/**
+ * Interface necessary to work with view tree traversal
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Finds the closest DOM node above a given container in the hierarchy.
  *
  * This is necessary to add or remove elements from the DOM when a view
@@ -14086,69 +14304,6 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * A predicate which determines if a given element/directive should be included in the query
- * @record
- */
-
-
-
-/**
- * @param {?} query
- * @return {?}
- */
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/** @enum {number} */
-const RendererStyleFlags3 = {
-    Important: 1,
-    DashCase: 2,
-};
-RendererStyleFlags3[RendererStyleFlags3.Important] = "Important";
-RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
-/**
- * Object Oriented style of API needed to create elements and text nodes.
- *
- * This is the native browser API style, e.g. operations are methods on individual objects
- * like HTMLElement. With this style, no additional code is needed as a facade
- * (reducing payload size).
- *
- * @record
- */
-
-/**
- * Procedural style of API needed to create elements and text nodes.
- *
- * In non-native browser environments (e.g. platforms such as web-workers), this is the
- * facade that enables element manipulation. This also facilitates backwards compatibility
- * with Renderer2.
- * @record
- */
-
-/**
- * @record
- */
-
-const domRendererFactory3 = {
-    createRenderer: (hostElement, rendererType) => { return document; }
-};
-/**
- * Subset of API needed for appending elements and text nodes.
- * @record
- */
-
-/**
- * Subset of API needed for writing attributes, properties, and setting up
- * listeners on Element.
  * @record
  */
 
@@ -14157,6 +14312,21 @@ const domRendererFactory3 = {
  */
 
 /**
+ * `DirectiveDef` is a compiled version of the Directive used by the renderer instructions.
+ * @record
+ */
+
+/**
+ * @record
+ */
+
+/**
+ * Private: do not export
+ * @record
+ */
+
+/**
+ * Private: do not export
  * @record
  */
 
@@ -14170,6 +14340,66 @@ const domRendererFactory3 = {
 
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used for tracking queries (e.g. ViewChild, ContentChild).
+ * @record
+ */
+
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A predicate which determines if a given element/directive should be included in the query
+ * @record
+ */
+
+
+
+/**
+ * @param {?} query
+ * @return {?}
+ */
 
 /**
  * @fileoverview added by tsickle
