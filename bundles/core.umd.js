@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.0-d6ba9f9
+ * @license Angular v5.2.0-3bcc0e6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.2.0-d6ba9f9
+ * @license Angular v5.2.0-3bcc0e6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.0-d6ba9f9');
+var VERSION = new Version('5.2.0-3bcc0e6');
 
 /**
  * @fileoverview added by tsickle
@@ -7157,10 +7157,10 @@ function devModeEqual(a, b) {
 }
 /**
  * Indicates that the result of a {\@link Pipe} transformation has changed even though the
- * reference
- * has not changed.
+ * reference has not changed.
  *
- * The wrapped value will be unwrapped by change detection, and the unwrapped value will be stored.
+ * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
+ * is stored.
  *
  * Example:
  *
@@ -7175,50 +7175,53 @@ function devModeEqual(a, b) {
  * \@stable
  */
 var WrappedValue = /** @class */ (function () {
-    function WrappedValue(wrapped) {
-        this.wrapped = wrapped;
+    function WrappedValue(value) {
+        this.wrapped = value;
     }
+    /** Creates a wrapped value. */
     /**
+     * Creates a wrapped value.
      * @param {?} value
      * @return {?}
      */
     WrappedValue.wrap = /**
+     * Creates a wrapped value.
      * @param {?} value
      * @return {?}
      */
     function (value) { return new WrappedValue(value); };
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     **/
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     *
+     * @param {?} value
+     * @return {?}
+     */
+    WrappedValue.unwrap = /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     *
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) { return WrappedValue.isWrapped(value) ? value.wrapped : value; };
+    /** Returns true if `value` is a wrapped value. */
+    /**
+     * Returns true if `value` is a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    WrappedValue.isWrapped = /**
+     * Returns true if `value` is a wrapped value.
+     * @param {?} value
+     * @return {?}
+     */
+    function (value) { return value instanceof WrappedValue; };
     return WrappedValue;
-}());
-/**
- * Helper class for unwrapping WrappedValue s
- */
-var ValueUnwrapper = /** @class */ (function () {
-    function ValueUnwrapper() {
-        this.hasWrappedValue = false;
-    }
-    /**
-     * @param {?} value
-     * @return {?}
-     */
-    ValueUnwrapper.prototype.unwrap = /**
-     * @param {?} value
-     * @return {?}
-     */
-    function (value) {
-        if (value instanceof WrappedValue) {
-            this.hasWrappedValue = true;
-            return value.wrapped;
-        }
-        return value;
-    };
-    /**
-     * @return {?}
-     */
-    ValueUnwrapper.prototype.reset = /**
-     * @return {?}
-     */
-    function () { this.hasWrappedValue = false; };
-    return ValueUnwrapper;
 }());
 /**
  * Represents a basic change from a previous to a new value.
@@ -9852,13 +9855,10 @@ function tokenKey(token) {
  * @return {?}
  */
 function unwrapValue(view, nodeIdx, bindingIdx, value) {
-    if (value instanceof WrappedValue) {
-        value = value.wrapped;
+    if (WrappedValue.isWrapped(value)) {
+        value = WrappedValue.unwrap(value);
         var /** @type {?} */ globalBindingIdx = view.def.nodes[nodeIdx].bindingIndex + bindingIdx;
-        var /** @type {?} */ oldValue = view.oldValues[globalBindingIdx];
-        if (oldValue instanceof WrappedValue) {
-            oldValue = oldValue.wrapped;
-        }
+        var /** @type {?} */ oldValue = WrappedValue.unwrap(view.oldValues[globalBindingIdx]);
         view.oldValues[globalBindingIdx] = new WrappedValue(oldValue);
     }
     return value;
@@ -12640,10 +12640,7 @@ function updateProp(view, providerData, def, bindingIdx, value, changes) {
     providerData.instance[propName] = value;
     if (def.flags & 524288 /* OnChanges */) {
         changes = changes || {};
-        var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
-        if (oldValue instanceof WrappedValue) {
-            oldValue = oldValue.wrapped;
-        }
+        var /** @type {?} */ oldValue = WrappedValue.unwrap(view.oldValues[def.bindingIndex + bindingIdx]);
         var /** @type {?} */ binding_1 = def.bindings[bindingIdx];
         changes[/** @type {?} */ ((binding_1.nonMinifiedName))] =
             new SimpleChange(oldValue, value, (view.state & 2 /* FirstCheck */) !== 0);
@@ -19532,7 +19529,6 @@ exports.WrappedValue = WrappedValue;
 exports.platformCore = platformCore;
 exports.ɵALLOW_MULTIPLE_PLATFORMS = ALLOW_MULTIPLE_PLATFORMS;
 exports.ɵAPP_ID_RANDOM_PROVIDER = APP_ID_RANDOM_PROVIDER;
-exports.ɵValueUnwrapper = ValueUnwrapper;
 exports.ɵdevModeEqual = devModeEqual;
 exports.ɵisListLikeIterable = isListLikeIterable;
 exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
