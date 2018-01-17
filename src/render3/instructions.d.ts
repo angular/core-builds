@@ -14,8 +14,8 @@ import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
 import { QueryReadType } from './interfaces/query';
-import { LView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode, NgStaticData } from './interfaces/node';
+import { LView, TView } from './interfaces/view';
+import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, TypedDirectiveDef } from './interfaces/definition';
 import { InjectFlags } from './di';
 import { QueryList } from './query';
@@ -56,7 +56,7 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
-export declare function createLView(viewId: number, renderer: Renderer3, ngStaticData: NgStaticData): LView;
+export declare function createLView(viewId: number, renderer: Renderer3, tView: TView): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -72,7 +72,7 @@ export declare function createLNode(index: number, type: LNodeFlags.Projection, 
  * @param context to pass into the template.
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null): LElementNode;
-export declare function renderComponentOrTemplate<T>(node: LElementNode, lView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
+export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function getOrCreateNodeInjector(): LInjector;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
@@ -146,9 +146,10 @@ export declare function createError(text: string, token: any): Error;
  */
 export declare function locateHostElement(factory: RendererFactory3, elementOrSelector: RElement | string): RElement | null;
 /**
- * Creates the host LNode..
+ * Creates the host LNode.
  *
  * @param rNode Render host element.
+ * @param def ComponentDef
  */
 export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): void;
 /**
