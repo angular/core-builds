@@ -17,7 +17,7 @@ export declare function checkAndUpdateBinding(view: ViewData, def: NodeDef, bind
 export declare function checkBindingNoChanges(view: ViewData, def: NodeDef, bindingIdx: number, value: any): void;
 export declare function markParentViewsForCheck(view: ViewData): void;
 export declare function markParentViewsForCheckProjectedViews(view: ViewData, endView: ViewData): void;
-export declare function dispatchEvent(view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
+export declare function dispatchEvent(view: ViewData, nodeIndex: number, eventName: string, event: any): boolean | undefined;
 export declare function declaredViewContainer(view: ViewData): ElementData | null;
 /**
  * for component views, this is the host element.
@@ -39,7 +39,7 @@ export declare function splitMatchedQueriesDsl(matchedQueriesDsl: [string | numb
     };
     matchedQueryIds: number;
 };
-export declare function splitDepsDsl(deps: ([DepFlags, any] | any)[]): DepDef[];
+export declare function splitDepsDsl(deps: ([DepFlags, any] | any)[], sourceName?: string): DepDef[];
 export declare function getParentRenderElement(view: ViewData, renderHost: any, def: NodeDef): any;
 export declare function resolveDefinition<D extends Definition<any>>(factory: DefinitionFactory<D>): D;
 export declare function rootRenderNodes(view: ViewData): any[];

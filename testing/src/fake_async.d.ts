@@ -16,10 +16,10 @@ export declare function resetFakeAsyncZone(): void;
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
- * @returns {Function} The function wrapped to be executed in the fakeAsync zone
+ * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
@@ -32,7 +32,7 @@ export declare function fakeAsync(fn: Function): (...args: any[]) => any;
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @experimental
  */
@@ -43,7 +43,7 @@ export declare function tick(millis?: number): void;
  * of time that would have been elapsed.
  *
  * @param maxTurns
- * @returns {number} The simulated time elapsed, in millis.
+ * @returns The simulated time elapsed, in millis.
  *
  * @experimental
  */
