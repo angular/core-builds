@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.9.9-6-beta.0-0eabd07
+ * @license Angular v5.9.9-6-beta.0-47b7898
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.9.9-6-beta.0-0eabd07');
+const VERSION = new Version('5.9.9-6-beta.0-47b7898');
 
 /**
  * @fileoverview added by tsickle
@@ -4169,23 +4169,13 @@ class Testability {
      */
     _runCallbacksIfReady() {
         if (this.isStable()) {
-            if (this._callbacks.length !== 0) {
-                // Schedules the call backs after a macro task run outside of the angular zone to make sure
-                // no new task are added
-                this._ngZone.runOutsideAngular(() => {
-                    setTimeout(() => {
-                        if (this.isStable()) {
-                            while (this._callbacks.length !== 0) {
-                                (/** @type {?} */ ((this._callbacks.pop())))(this._didWork);
-                            }
-                            this._didWork = false;
-                        }
-                    });
-                });
-            }
-            else {
+            // Schedules the call backs in a new frame so that it is always async.
+            scheduleMicroTask(() => {
+                while (this._callbacks.length !== 0) {
+                    (/** @type {?} */ ((this._callbacks.pop())))(this._didWork);
+                }
                 this._didWork = false;
-            }
+            });
         }
         else {
             // Not Ready
