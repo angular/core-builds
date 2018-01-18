@@ -17,7 +17,7 @@
  *
  * @stable
  */
-export declare class ElementRef {
+export declare class ElementRef<T = any> {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).
@@ -39,6 +39,6 @@ export declare class ElementRef {
      * </div>
      * @stable
      */
-    nativeElement: any;
-    constructor(nativeElement: any);
+    nativeElement: T;
+    constructor(nativeElement: T);
 }
