@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.1-af4eb00
+ * @license Angular v5.2.1-c828e56
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.1-af4eb00');
+var VERSION = new Version('5.2.1-c828e56');
 
 /**
  * @fileoverview added by tsickle
@@ -4962,23 +4962,13 @@ var Testability = /** @class */ (function () {
     function () {
         var _this = this;
         if (this.isStable()) {
-            if (this._callbacks.length !== 0) {
-                // Schedules the call backs after a macro task run outside of the angular zone to make sure
-                // no new task are added
-                this._ngZone.runOutsideAngular(function () {
-                    setTimeout(function () {
-                        if (_this.isStable()) {
-                            while (_this._callbacks.length !== 0) {
-                                (/** @type {?} */ ((_this._callbacks.pop())))(_this._didWork);
-                            }
-                            _this._didWork = false;
-                        }
-                    });
-                });
-            }
-            else {
-                this._didWork = false;
-            }
+            // Schedules the call backs in a new frame so that it is always async.
+            scheduleMicroTask(function () {
+                while (_this._callbacks.length !== 0) {
+                    (/** @type {?} */ ((_this._callbacks.pop())))(_this._didWork);
+                }
+                _this._didWork = false;
+            });
         }
         else {
             // Not Ready
