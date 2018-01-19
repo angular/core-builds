@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.9.9-6-beta.0-1104d17
+ * @license Angular v5.9.9-6-beta.0-21e37e4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.9.9-6-beta.0-1104d17');
+var VERSION = new Version('5.9.9-6-beta.0-21e37e4');
 
 /**
  * @fileoverview added by tsickle
@@ -18256,8 +18256,11 @@ function defineComponent(componentDefinition) {
         n: componentDefinition.factory,
         tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
-        r: componentDefinition.refresh ||
-            function (d, e) { componentRefresh(d, e, componentDefinition.template); },
+        r: componentDefinition.refresh || (componentDefinition.template ?
+            function (d, e) {
+                componentRefresh(d, e, componentDefinition.template);
+            } :
+            noop$1),
         h: componentDefinition.hostBindings || noop$1,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
