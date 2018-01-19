@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.9.9-6-beta.0-21e37e4
+ * @license Angular v5.9.9-6-beta.0-0b38a03
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.9.9-6-beta.0-21e37e4
+ * @license Angular v5.9.9-6-beta.0-0b38a03
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.9.9-6-beta.0-21e37e4');
+var VERSION = new Version('5.9.9-6-beta.0-0b38a03');
 
 /**
  * @fileoverview added by tsickle
@@ -17233,7 +17233,48 @@ function hostElement(rNode, def) {
  * @param {?=} useCapture Whether or not to use capture in event listener.
  * @return {?}
  */
-
+function listener(eventName, listener, useCapture) {
+    if (useCapture === void 0) { useCapture = false; }
+    ngDevMode && assertPreviousIsParent();
+    var /** @type {?} */ node = previousOrParentNode;
+    var /** @type {?} */ native = /** @type {?} */ (node.native);
+    // In order to match current behavior, native DOM event listeners must be added for all
+    // events (including outputs).
+    if ((/** @type {?} */ (renderer)).listen) {
+        var /** @type {?} */ cleanupFn = (/** @type {?} */ (renderer)).listen(native, eventName, listener);
+        (cleanup || (cleanup = currentView.cleanup = [])).push(cleanupFn, null);
+    }
+    else {
+        native.addEventListener(eventName, listener, useCapture);
+        (cleanup || (cleanup = currentView.cleanup = [])).push(eventName, native, listener, useCapture);
+    }
+    var /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
+    if (tNode.outputs === undefined) {
+        // if we create TNode here, inputs must be undefined so we know they still need to be
+        // checked
+        tNode.outputs = null;
+        tNode = generatePropertyAliases(node.flags, tNode);
+    }
+    var /** @type {?} */ outputs = tNode.outputs;
+    var /** @type {?} */ outputData;
+    if (outputs && (outputData = outputs[eventName])) {
+        createOutput(outputData, listener);
+    }
+}
+/**
+ * Iterates through the outputs associated with a particular event name and subscribes to
+ * each output.
+ * @param {?} outputs
+ * @param {?} listener
+ * @return {?}
+ */
+function createOutput(outputs, listener) {
+    for (var /** @type {?} */ i = 0; i < outputs.length; i += 2) {
+        ngDevMode && assertDataInRange(/** @type {?} */ (outputs[i]));
+        var /** @type {?} */ subscription = data[/** @type {?} */ (outputs[i])][outputs[i | 1]].subscribe(listener); /** @type {?} */
+        ((cleanup)).push(subscription.unsubscribe, subscription);
+    }
+}
 /**
  * Mark the end of the element.
  * @return {?}
@@ -17452,21 +17493,6 @@ function textBinding(index, value) {
     else {
         text(index, value);
     }
-}
-/**
- * Retrieve a directive.
- *
- * NOTE: directives can be created in order other than the index order. They can also
- *       be retrieved before they are created in which case the value will be null.
- *
- * @template T
- * @param {?} index Each directive in a `View` will have a unique index. Directives can
- *        be created or retrieved out of order.
- * @return {?}
- */
-function directive(index) {
-    ngDevMode && assertDataInRange(index);
-    return data[index];
 }
 /**
  * Create a directive.
@@ -19559,8 +19585,8 @@ exports.ɵdefineComponent = defineComponent;
 exports.ɵdetectChanges = detectChanges;
 exports.ɵrenderComponent = renderComponent;
 exports.ɵC = container;
-exports.ɵD = directive;
 exports.ɵE = elementStart;
+exports.ɵL = listener;
 exports.ɵT = text;
 exports.ɵV = viewStart;
 exports.ɵb = bind;
