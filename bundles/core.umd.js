@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.1-21f7669
+ * @license Angular v5.2.1-52970c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.2.1-21f7669
+ * @license Angular v5.2.1-52970c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.1-21f7669');
+var VERSION = new Version('5.2.1-52970c0');
 
 /**
  * @fileoverview added by tsickle
@@ -19293,35 +19293,36 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵbe = animate$1;
-exports.ɵbf = group$1;
-exports.ɵbj = keyframes$1;
-exports.ɵbg = sequence$1;
-exports.ɵbi = state$1;
-exports.ɵbh = style$1;
-exports.ɵbk = transition$1;
-exports.ɵbd = trigger$1;
-exports.ɵm = _iterableDiffersFactory;
-exports.ɵn = _keyValueDiffersFactory;
-exports.ɵo = _localeFactory;
-exports.ɵh = _appIdRandomProviderFactory;
-exports.ɵi = defaultIterableDiffers;
-exports.ɵj = defaultKeyValueDiffers;
-exports.ɵk = DefaultIterableDifferFactory;
-exports.ɵl = DefaultKeyValueDifferFactory;
-exports.ɵd = ReflectiveInjector_;
-exports.ɵf = ReflectiveDependency;
-exports.ɵg = resolveReflectiveProviders;
-exports.ɵq = wtfEnabled;
-exports.ɵu = createScope;
-exports.ɵr = detectWTF;
-exports.ɵy = endTimeRange;
-exports.ɵw = leave;
-exports.ɵx = startTimeRange;
-exports.ɵbb = stringify$1;
+exports.ɵbf = animate$1;
+exports.ɵbg = group$1;
+exports.ɵbk = keyframes$1;
+exports.ɵbh = sequence$1;
+exports.ɵbj = state$1;
+exports.ɵbi = style$1;
+exports.ɵbl = transition$1;
+exports.ɵbe = trigger$1;
+exports.ɵn = _iterableDiffersFactory;
+exports.ɵo = _keyValueDiffersFactory;
+exports.ɵq = _localeFactory;
+exports.ɵi = _appIdRandomProviderFactory;
+exports.ɵj = defaultIterableDiffers;
+exports.ɵk = defaultKeyValueDiffers;
+exports.ɵl = DefaultIterableDifferFactory;
+exports.ɵm = DefaultKeyValueDifferFactory;
+exports.ɵf = ReflectiveInjector_;
+exports.ɵg = ReflectiveDependency;
+exports.ɵh = resolveReflectiveProviders;
+exports.ɵr = wtfEnabled;
+exports.ɵw = createScope;
+exports.ɵu = detectWTF;
+exports.ɵz = endTimeRange;
+exports.ɵx = leave;
+exports.ɵy = startTimeRange;
+exports.ɵbc = stringify$1;
 exports.ɵa = makeParamDecorator;
-exports.ɵz = _def;
-exports.ɵba = DebugContext;
+exports.ɵd = makePropDecorator;
+exports.ɵba = _def;
+exports.ɵbb = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
