@@ -58,6 +58,11 @@ export interface LContainer {
      * The template extracted from the location of the Container.
      */
     readonly template: ComponentTemplate<any> | null;
+    /**
+     * A count of dynamic views rendered into this container. If this is non-zero, the `views` array
+     * will be traversed when refreshing dynamic views on this container.
+     */
+    dynamicViewCount: number;
 }
 /**
  * The static equivalent of LContainer, used in TContainerNode.

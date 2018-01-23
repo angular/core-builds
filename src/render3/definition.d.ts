@@ -1,3 +1,4 @@
+import { Type } from '../type';
 import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs } from './interfaces/definition';
 /**
  * Create a component definition object.
@@ -15,7 +16,7 @@ import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs } from '
  * ```
  */
 export declare function defineComponent<T>(componentDefinition: ComponentDefArgs<T>): ComponentDef<T>;
-export declare function NgOnChangesFeature<T>(definition: DirectiveDef<T>): void;
+export declare function NgOnChangesFeature<T>(type: Type<T>): (definition: DirectiveDef<any>) => void;
 export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
 /**
  * Create a directive definition object.

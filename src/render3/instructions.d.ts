@@ -6,21 +6,13 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
-import { ElementRef } from '../linker/element_ref';
-import { TemplateRef } from '../linker/template_ref';
-import { ViewContainerRef } from '../linker/view_container_ref';
-import { Type } from '../type';
 import { LContainer } from './interfaces/container';
-import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
-import { QueryReadType } from './interfaces/query';
+import { LQuery } from './interfaces/query';
 import { LView, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, TypedDirectiveDef } from './interfaces/definition';
-import { InjectFlags } from './di';
-import { QueryList } from './query';
+import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-export { queryRefresh } from './query';
 /**
  * Enum used by the lifecycle (l) instruction to determine which lifecycle hook is requesting
  * processing.
@@ -56,7 +48,7 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
-export declare function createLView(viewId: number, renderer: Renderer3, tView: TView): LView;
+export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template?: ComponentTemplate<any> | null, context?: any | null): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -72,58 +64,8 @@ export declare function createLNode(index: number, type: LNodeFlags.Projection, 
  * @param context to pass into the template.
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null): LElementNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
-export declare function getOrCreateNodeInjector(): LInjector;
-/**
- * Makes a directive public to the DI system by adding it to an injector's bloom filter.
- *
- * @param def The definition of the directive to be made public
- */
-export declare function diPublic(def: TypedDirectiveDef<any>): void;
-/**
- * Searches for an instance of the given directive type up the injector tree and returns
- * that instance if found.
- *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
- *
- * Usage example (in factory function):
- *
- * class SomeDirective {
- *   constructor(directive: DirectiveA) {}
- *
- *   static ngDirectiveDef = defineDirective({
- *     type: SomeDirective,
- *     factory: () => new SomeDirective(inject(DirectiveA))
- *   });
- * }
- *
- * @param token The directive type to search for
- * @param flags Injection flags (e.g. CheckParent)
- * @returns The instance found
- */
-export declare function inject<T>(token: Type<T>, flags?: InjectFlags): T;
-/**
- * Creates an ElementRef and stores it on the injector.
- * Or, if the ElementRef already exists, retrieves the existing ElementRef.
- *
- * @returns The ElementRef instance to use
- */
-export declare function injectElementRef(): ElementRef;
-/**
- * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
- * exists, retrieves the existing TemplateRef.
- *
- * @returns The TemplateRef instance to use
- */
-export declare function injectTemplateRef<T>(): TemplateRef<T>;
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-export declare function injectViewContainerRef(): ViewContainerRef;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -474,4 +416,9 @@ export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: 
  */
 export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
-export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType | Type<T>): QueryList<T>;
+export declare function getCurrentQuery(QueryType: {
+    new (): LQuery;
+}): LQuery;
+export declare function getPreviousOrParentNode(): LNode;
+export declare function getRenderer(): Renderer3;
+export declare function assertPreviousIsParent(): void;

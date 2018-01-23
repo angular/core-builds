@@ -14,7 +14,6 @@ export declare type ComponentTemplate<T> = {
     (ctx: T, creationMode: boolean): void;
     ngPrivateData?: never;
 };
-export declare type EmbeddedTemplate<T> = (ctx: T) => void;
 export interface ComponentType<T> extends Type<T> {
     ngComponentDef: ComponentDef<T>;
 }

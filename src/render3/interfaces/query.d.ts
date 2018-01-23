@@ -38,12 +38,9 @@ export interface LQuery {
      * @param descend If true the query will recursively apply to the children.
      * @param read Indicates which token should be read from DI for this query.
      */
-    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType | Type<T>): void;
+    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
 }
-/** An enum representing possible values of the "read" option for queries. */
-export declare const enum QueryReadType {
-    ElementRef = 0,
-    ViewContainerRef = 1,
-    TemplateRef = 2,
+export declare class QueryReadType<T> {
+    private defeatStructuralTyping;
 }
 export declare const unusedValueExportToPlacateAjd = 1;
