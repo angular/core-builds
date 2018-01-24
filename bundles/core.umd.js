@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.9.9-6-beta.0-acf381b
+ * @license Angular v5.9.9-6-beta.0-1e9cd95
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.9.9-6-beta.0-acf381b
+ * @license Angular v5.9.9-6-beta.0-1e9cd95
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.9.9-6-beta.0-acf381b');
+var VERSION = new Version('5.9.9-6-beta.0-1e9cd95');
 
 /**
  * @fileoverview added by tsickle
@@ -16614,7 +16614,7 @@ function createLNode(index, type, native, state) {
     }
     if (index != null) {
         // We are Element or Container
-        ngDevMode && assertEqual(data.length, index, 'data.length not in sequence');
+        ngDevMode && assertDataNext(index);
         data[index] = node;
         // Every node adds a value to the static data array to avoid a sparse array
         if (index >= tData.length) {
@@ -17522,6 +17522,7 @@ var componentRefresh = function (directiveIndex, elementIndex, template) {
  * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
  * backed by a selector).
  *
+ * @param {?} index
  * @param {?=} selectors
  * @return {?}
  */
@@ -18078,6 +18079,13 @@ function assertDataInRange(index, arr) {
     if (arr == null)
         arr = data;
     assertLessThan(index, arr ? arr.length : 0, 'data.length');
+}
+/**
+ * @param {?} index
+ * @return {?}
+ */
+function assertDataNext(index) {
+    assertEqual(data.length, index, 'data.length not in sequence');
 }
 
 /**

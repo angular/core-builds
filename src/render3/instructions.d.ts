@@ -255,7 +255,7 @@ export declare const componentRefresh: <T>(directiveIndex: number, elementIndex:
  *
  * @param selectors
  */
-export declare function projectionDef(selectors?: CssSelector[]): LNode[][];
+export declare function projectionDef(index: number, selectors?: CssSelector[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.

@@ -13,3 +13,4 @@ export { LifecycleHook, NO_CHANGE as NC, bind as b, bind1 as b1, bind2 as b2, bi
 export { QueryList, query as Q, queryRefresh as qR } from './query';
 export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, defineComponent, defineDirective };
 export { createComponentRef, detectChanges, getHostElement, markDirty, renderComponent };
+export { CssSelector } from './interfaces/projection';
