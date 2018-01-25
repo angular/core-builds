@@ -14,17 +14,6 @@ import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LView
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
- * Enum used by the lifecycle (l) instruction to determine which lifecycle hook is requesting
- * processing.
- */
-export declare const enum LifecycleHook {
-    ON_INIT = 1,
-    ON_DESTROY = 2,
-    ON_CHANGES = 4,
-    AFTER_VIEW_INIT = 8,
-    AFTER_VIEW_CHECKED = 16,
-}
-/**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
@@ -80,6 +69,8 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, nameOrComponentType?: string | ComponentType<any>, attrs?: string[] | null, directiveTypes?: DirectiveType<any>[] | null, localRefs?: string[] | null): RElement;
+/** Creates a TView instance */
+export declare function createTView(): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -180,31 +171,6 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  */
 export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, queryName?: string | null): T;
 /**
- * Accepts a lifecycle hook type and determines when and how the related lifecycle hook
- * callback should run.
- *
- * For the onInit lifecycle hook, it will return whether or not the ngOnInit() function
- * should run. If so, ngOnInit() will be called outside of this function.
- *
- * e.g. l(LifecycleHook.ON_INIT) && ctx.ngOnInit();
- *
- * For the onDestroy lifecycle hook, this instruction also accepts an onDestroy
- * method that should be stored and called internally when the parent view is being
- * cleaned up.
- *
- * e.g.  l(LifecycleHook.ON_DESTROY, ctx, ctx.onDestroy);
- *
- * @param lifecycle
- * @param self
- * @param method
- */
-export declare function lifecycle(lifecycle: LifecycleHook.ON_DESTROY, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_INIT, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_CHECKED, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook): boolean;
-/** Iterates over view hook functions and calls them. */
-export declare function executeViewHooks(): void;
-/**
  * Creates an LContainerNode.
  *
  * Only `LViewNodes` can go into `LContainerNodes`.
@@ -244,9 +210,8 @@ export declare function viewEnd(): void;
  *
  * @param directiveIndex
  * @param elementIndex
- * @param template
  */
-export declare const componentRefresh: <T>(directiveIndex: number, elementIndex: number, template: ComponentTemplate<T>) => void;
+export declare function componentRefresh<T>(directiveIndex: number, elementIndex: number): void;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where

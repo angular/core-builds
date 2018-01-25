@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.1-d08785d
+ * @license Angular v6.0.0-beta.1-3e03dbe
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.1-d08785d');
+const VERSION = new Version('6.0.0-beta.1-3e03dbe');
 
 /**
  * @fileoverview added by tsickle
@@ -13957,19 +13957,43 @@ function getParentState(state, rootView) {
  * @return {?}
  */
 function cleanUpView(view) {
-    if (!view.cleanup)
-        return;
+    removeListeners(view);
+    executeOnDestroys(view);
+}
+/**
+ * Removes listeners and unsubscribes from output subscriptions
+ * @param {?} view
+ * @return {?}
+ */
+function removeListeners(view) {
     const /** @type {?} */ cleanup = /** @type {?} */ ((view.cleanup));
-    for (let /** @type {?} */ i = 0; i < cleanup.length - 1; i += 2) {
-        if (typeof cleanup[i] === 'string') {
-            /** @type {?} */ ((cleanup))[i + 1].removeEventListener(cleanup[i], cleanup[i + 2], cleanup[i + 3]);
-            i += 2;
+    if (cleanup != null) {
+        for (let /** @type {?} */ i = 0; i < cleanup.length - 1; i += 2) {
+            if (typeof cleanup[i] === 'string') {
+                /** @type {?} */ ((cleanup))[i + 1].removeEventListener(cleanup[i], cleanup[i + 2], cleanup[i + 3]);
+                i += 2;
+            }
+            else {
+                cleanup[i].call(cleanup[i + 1]);
+            }
         }
-        else {
-            cleanup[i].call(cleanup[i + 1]);
+        view.cleanup = null;
+    }
+}
+/**
+ * Calls onDestroy hooks for this view
+ * @param {?} view
+ * @return {?}
+ */
+function executeOnDestroys(view) {
+    const /** @type {?} */ tView = view.tView;
+    let /** @type {?} */ destroyHooks;
+    if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
+        for (let /** @type {?} */ i = 0; i < destroyHooks.length; i += 2) {
+            const /** @type {?} */ instance = view.data[/** @type {?} */ (destroyHooks[i])];
+            (/** @type {?} */ (destroyHooks[i | 1])).call(instance);
         }
     }
-    view.cleanup = null;
 }
 /**
  * Appends the provided child element to the provided parent, if appropriate.
@@ -14140,6 +14164,182 @@ function notImplemented() {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @enum {number} */
+/**
+ * If this is the first template pass, any ngOnInit or ngDoCheck hooks will be queued into
+ * TView.initHooks during directiveCreate.
+ *
+ * The directive index and hook type are encoded into one number (1st bit: type, remaining bits:
+ * directive index), then saved in the even indices of the initHooks array. The odd indices
+ * hold the hook functions themselves.
+ *
+ * @param {?} index The index of the directive in LView.data
+ * @param {?} onInit
+ * @param {?} doCheck
+ * @param {?} tView The current TView
+ * @return {?}
+ */
+function queueInitHooks(index, onInit, doCheck, tView) {
+    if (tView.firstTemplatePass === true) {
+        if (onInit != null) {
+            (tView.initHooks || (tView.initHooks = [])).push(getInitFlags(index), onInit);
+        }
+        if (doCheck != null) {
+            (tView.initHooks || (tView.initHooks = [])).push(getCheckFlags(index), doCheck);
+        }
+    }
+}
+/**
+ * Loops through the directives on a node and queues all their hooks except ngOnInit
+ * and ngDoCheck, which are queued separately in directiveCreate.
+ * @param {?} flags
+ * @param {?} currentView
+ * @return {?}
+ */
+function queueLifecycleHooks(flags, currentView) {
+    const /** @type {?} */ tView = currentView.tView;
+    if (tView.firstTemplatePass === true) {
+        const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2;
+        const /** @type {?} */ start = flags >> 12;
+        // It's necessary to loop through the directives at elementEnd() (rather than processing in
+        // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
+        // hooks for projected components and directives must be called *before* their hosts.
+        for (let /** @type {?} */ i = start, /** @type {?} */ end = start + size; i < end; i++) {
+            const /** @type {?} */ def = (/** @type {?} */ (tView.data[i]));
+            queueContentHooks(def, tView, i);
+            queueViewHooks(def, tView, i);
+            queueDestroyHooks(def, tView, i);
+        }
+    }
+}
+/**
+ * Queues afterContentInit and afterContentChecked hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueContentHooks(def, tView, i) {
+    if (def.afterContentInit != null) {
+        (tView.contentHooks || (tView.contentHooks = [])).push(getInitFlags(i), def.afterContentInit);
+    }
+    if (def.afterContentChecked != null) {
+        (tView.contentHooks || (tView.contentHooks = [])).push(getCheckFlags(i), def.afterContentChecked);
+    }
+}
+/**
+ * Queues afterViewInit and afterViewChecked hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueViewHooks(def, tView, i) {
+    if (def.afterViewInit != null) {
+        (tView.viewHooks || (tView.viewHooks = [])).push(getInitFlags(i), def.afterViewInit);
+    }
+    if (def.afterViewChecked != null) {
+        (tView.viewHooks || (tView.viewHooks = [])).push(getCheckFlags(i), def.afterViewChecked);
+    }
+}
+/**
+ * Queues onDestroy hooks on TView
+ * @param {?} def
+ * @param {?} tView
+ * @param {?} i
+ * @return {?}
+ */
+function queueDestroyHooks(def, tView, i) {
+    if (def.onDestroy != null) {
+        (tView.destroyHooks || (tView.destroyHooks = [])).push(i, def.onDestroy);
+    }
+}
+/**
+ * Generates flags for init-only hooks
+ * @param {?} index
+ * @return {?}
+ */
+function getInitFlags(index) {
+    return index << 1 /* INDX_SHIFT */;
+}
+/**
+ * Generates flags for hooks called every change detection run
+ * @param {?} index
+ * @return {?}
+ */
+function getCheckFlags(index) {
+    return (index << 1 /* INDX_SHIFT */) | 1 /* ON_CHECK */;
+}
+/**
+ * Calls onInit and doCheck calls if they haven't already been called.
+ *
+ * @param {?} currentView The current view
+ * @return {?}
+ */
+function executeInitHooks(currentView) {
+    const /** @type {?} */ initHooks = currentView.tView.initHooks;
+    if (currentView.lifecycleStage === 1 /* INIT */ && initHooks != null) {
+        executeLifecycleHooks(currentView, initHooks);
+        currentView.lifecycleStage = 2 /* CONTENT_INIT */;
+    }
+}
+/**
+ * Calls all afterContentInit and afterContentChecked hooks for the view, then splices
+ * out afterContentInit hooks to prep for the next run in update mode.
+ *
+ * @param {?} currentView The current view
+ * @return {?}
+ */
+function executeContentHooks(currentView) {
+    const /** @type {?} */ contentHooks = currentView.tView.contentHooks;
+    if (currentView.lifecycleStage < 3 /* VIEW_INIT */ && contentHooks != null) {
+        executeLifecycleHooks(currentView, contentHooks);
+        currentView.lifecycleStage = 3 /* VIEW_INIT */;
+    }
+}
+/**
+ * Iterates over afterViewInit and afterViewChecked functions and calls them.
+ *
+ * @param {?} currentView The current view
+ * @return {?}
+ */
+function executeViewHooks(currentView) {
+    const /** @type {?} */ viewHooks = currentView.tView.viewHooks;
+    if (viewHooks != null) {
+        executeLifecycleHooks(currentView, viewHooks);
+    }
+}
+/**
+ * Calls lifecycle hooks with their contexts, skipping init hooks if it's not
+ * creation mode.
+ *
+ * @param {?} currentView The current view
+ * @param {?} arr The array in which the hooks are found
+ * @return {?}
+ */
+function executeLifecycleHooks(currentView, arr) {
+    const /** @type {?} */ data = currentView.data;
+    const /** @type {?} */ creationMode = currentView.creationMode;
+    for (let /** @type {?} */ i = 0; i < arr.length; i += 2) {
+        const /** @type {?} */ flags = /** @type {?} */ (arr[i]);
+        const /** @type {?} */ initOnly = (flags & 1 /* TYPE_MASK */) === 0;
+        if (initOnly === false || creationMode) {
+            (/** @type {?} */ (arr[i | 1])).call(data[flags >> 1 /* INDX_SHIFT */]);
+        }
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -14189,7 +14389,7 @@ let tData;
  */
 let currentView;
 // The initialization has to be after the `let`, otherwise `createLView` can't see `let`.
-currentView = createLView(/** @type {?} */ ((null)), /** @type {?} */ ((null)), { data: [] });
+currentView = createLView(/** @type {?} */ ((null)), /** @type {?} */ ((null)), createTView());
 let currentQuery;
 /**
  * This property gets set before entering a template.
@@ -14205,10 +14405,11 @@ let data;
  */
 let bindingIndex;
 /**
- * When a view is destroyed, listeners need to be released
- * and onDestroy callbacks need to be called. This cleanup array
- * stores both listener data (in chunks of 4) and onDestroy data
- * (in chunks of 2), as they'll be processed at the same time.
+ * When a view is destroyed, listeners need to be released and outputs need to be
+ * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
+ * and output data (in chunks of 2) for a particular view. Combining the arrays
+ * saves on memory (70 bytes per array) and on a few bytes of code size (for two
+ * separate for loops).
  *
  * If it's a listener being stored:
  * 1st index is: event name to remove
@@ -14216,15 +14417,11 @@ let bindingIndex;
  * 3rd index is: listener function
  * 4th index is: useCapture boolean
  *
- * If it's an onDestroy function:
- * 1st index is: onDestroy function
+ * If it's an output subscription:
+ * 1st index is: unsubscribe function
  * 2nd index is: context for function
  */
 let cleanup;
-/**
- * Index in the data array at which view hooks begin to be stored.
- */
-let viewHookStartIndex;
 /**
  * Swap the current state with a new state.
  *
@@ -14243,7 +14440,6 @@ function enterView(newView, host) {
     bindingIndex = newView.bindingStartIndex || 0;
     tData = newView.tView.data;
     creationMode = newView.creationMode;
-    viewHookStartIndex = newView.viewHookStartIndex;
     cleanup = newView.cleanup;
     renderer = newView.renderer;
     if (host != null) {
@@ -14260,7 +14456,10 @@ function enterView(newView, host) {
  * @return {?}
  */
 function leaveView(newView) {
-    executeViewHooks();
+    executeViewHooks(currentView);
+    currentView.creationMode = false;
+    currentView.lifecycleStage = 1 /* INIT */;
+    currentView.tView.firstTemplatePass = false;
     enterView(newView, null);
 }
 /**
@@ -14287,10 +14486,10 @@ function createLView(viewId, renderer, tView, template = null, context = null) {
         next: null,
         bindingStartIndex: null,
         creationMode: true,
-        viewHookStartIndex: null,
         template: template,
         context: context,
         dynamicViewCount: 0,
+        lifecycleStage: 1 /* INIT */
     };
     return newView;
 }
@@ -14393,7 +14592,7 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         previousOrParentNode = /** @type {?} */ ((null));
         let /** @type {?} */ cm = false;
         if (viewNode == null) {
-            const /** @type {?} */ view = createLView(-1, renderer, { data: [] }, template, context);
+            const /** @type {?} */ view = createLView(-1, renderer, createTView(), template, context);
             viewNode = createLNode(null, 2 /* View */, null, view);
             cm = true;
         }
@@ -14427,15 +14626,14 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
         }
         else {
             // Element was stored at 0 and directive was stored at 1 in renderComponent
-            // so to refresh the component, r() needs to be called with (1, 0)
-            (/** @type {?} */ (componentOrContext.constructor)).ngComponentDef.r(1, 0);
+            // so to refresh the component, refresh() needs to be called with (1, 0)
+            componentRefresh(1, 0);
         }
     }
     finally {
         if (rendererFactory.end) {
             rendererFactory.end();
         }
-        hostView.creationMode = false;
         leaveView(oldView);
     }
 }
@@ -14499,7 +14697,6 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
             if (hostComponentDef) {
                 // TODO(mhevery): This assumes that the directives come in correct order, which
                 // is not guaranteed. Must be refactored to take it into account.
-                (/** @type {?} */ (hostComponentDef)).type = /** @type {?} */ (nameOrComponentType);
                 directiveCreate(++index, hostComponentDef.n(), hostComponentDef, queryName);
             }
             hack_declareDirectives(index, directiveTypes, localRefs);
@@ -14528,7 +14725,6 @@ function hack_declareDirectives(index, directiveTypes, localRefs) {
             // TODO(misko): refactor this to store the `DirectiveDef` in `TView.data`.
             const /** @type {?} */ directiveType = directiveTypes[i];
             const /** @type {?} */ directiveDef = directiveType.ngDirectiveDef;
-            (/** @type {?} */ (directiveDef)).type = directiveType;
             directiveCreate(++index, directiveDef.n(), directiveDef, hack_findQueryName(directiveDef, localRefs));
         }
     }
@@ -14562,7 +14758,21 @@ function hack_findQueryName(directiveDef, localRefs, defaultExport) {
  * @return {?} TView
  */
 function getOrCreateTView(template) {
-    return template.ngPrivateData || (template.ngPrivateData = /** @type {?} */ ({ data: [] }));
+    return template.ngPrivateData || (template.ngPrivateData = /** @type {?} */ (createTView()));
+}
+/**
+ * Creates a TView instance
+ * @return {?}
+ */
+function createTView() {
+    return {
+        data: [],
+        firstTemplatePass: true,
+        initHooks: null,
+        contentHooks: null,
+        viewHooks: null,
+        destroyHooks: null
+    };
 }
 /**
  * @param {?} native
@@ -14688,6 +14898,7 @@ function elementEnd() {
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
     const /** @type {?} */ query = previousOrParentNode.query;
     query && query.addNode(previousOrParentNode);
+    queueLifecycleHooks(previousOrParentNode.flags, currentView);
 }
 /**
  * Update an attribute on an Element. This is used with a `bind` instruction.
@@ -14871,24 +15082,22 @@ function text(index, value) {
  * @return {?}
  */
 function textBinding(index, value) {
-    // TODO(misko): I don't think index < nodes.length check is needed here.
-    let /** @type {?} */ existingNode = index < data.length && /** @type {?} */ (data[index]);
-    if (existingNode && existingNode.native) {
+    ngDevMode && assertDataInRange(index);
+    let /** @type {?} */ existingNode = /** @type {?} */ (data[index]);
+    ngDevMode && assertNotNull(existingNode, 'existing node');
+    if (existingNode.native) {
         // If DOM node exists and value changed, update textContent
         value !== NO_CHANGE &&
             ((/** @type {?} */ (renderer)).setValue ?
                 (/** @type {?} */ (renderer)).setValue(existingNode.native, stringify$1(value)) :
                 existingNode.native.textContent = stringify$1(value));
     }
-    else if (existingNode) {
+    else {
         // Node was created but DOM node creation was delayed. Create and append now.
         existingNode.native =
             ((/** @type {?} */ (renderer)).createText ?
                 (/** @type {?} */ (renderer)).createText(stringify$1(value)) : /** @type {?} */ (((/** @type {?} */ (renderer)).createTextNode))(stringify$1(value)));
         insertChild(existingNode, currentView);
-    }
-    else {
-        text(index, value);
     }
 }
 /**
@@ -14937,6 +15146,9 @@ function directiveCreate(index, directive, directiveDef, queryName) {
     if (tNode && tNode.attrs) {
         setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, tNode);
     }
+    // Init hooks are queued now so ngOnInit is called in host components before
+    // any projected components.
+    queueInitHooks(index, directiveDef.onInit, directiveDef.doCheck, currentView.tView);
     return instance;
 }
 /**
@@ -14990,42 +15202,6 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         }
     }
     return initialInputData;
-}
-/**
- * @param {?} lifecycle
- * @param {?=} self
- * @param {?=} method
- * @return {?}
- */
-
-/**
- * Iterates over view hook functions and calls them.
- * @return {?}
- */
-function executeViewHooks() {
-    if (viewHookStartIndex == null)
-        return;
-    // Instead of using splice to remove init hooks after their first run (expensive), we
-    // shift over the AFTER_CHECKED hooks as we call them and truncate once at the end.
-    let /** @type {?} */ checkIndex = /** @type {?} */ (viewHookStartIndex);
-    let /** @type {?} */ writeIndex = checkIndex;
-    while (checkIndex < data.length) {
-        // Call lifecycle hook with its context
-        data[checkIndex + 1].call(data[checkIndex + 2]);
-        if (data[checkIndex] === 16 /* AFTER_VIEW_CHECKED */) {
-            // We know if the writeIndex falls behind that there is an init that needs to
-            // be overwritten.
-            if (writeIndex < checkIndex) {
-                data[writeIndex] = data[checkIndex];
-                data[writeIndex + 1] = data[checkIndex + 1];
-                data[writeIndex + 2] = data[checkIndex + 2];
-            }
-            writeIndex += 3;
-        }
-        checkIndex += 3;
-    }
-    // Truncate once at the writeIndex
-    data.length = writeIndex;
 }
 /**
  * Creates an LContainerNode.
@@ -15089,6 +15265,9 @@ function containerRefreshStart(index) {
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     isParent = true;
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
+    // We need to execute init hooks here so ngOnInit hooks are called in top level views
+    // before they are called in embedded views (for backwards compatibility).
+    executeInitHooks(currentView);
 }
 /**
  * Marks the end of the LContainerNode.
@@ -15171,7 +15350,7 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
     const /** @type {?} */ tContainer = (/** @type {?} */ (((parent)).tNode)).data;
     if (viewIndex >= tContainer.length || tContainer[viewIndex] == null) {
-        tContainer[viewIndex] = /** @type {?} */ ({ data: [] });
+        tContainer[viewIndex] = createTView();
     }
     return tContainer[viewIndex];
 }
@@ -15192,7 +15371,6 @@ function viewEnd() {
         const /** @type {?} */ viewIdChanged = previousView == null ? true : previousView.data.id !== viewNode.data.id;
         if (viewIdChanged) {
             insertView(container, viewNode, containerState.nextIndex - 1);
-            currentView.creationMode = false;
         }
     }
     leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
@@ -15204,29 +15382,34 @@ function viewEnd() {
  *
  * In other words, enters the component's view and processes it to update bindings, queries, etc.
  *
- * @param directiveIndex
- * @param elementIndex
- * @param template
+ * @template T
+ * @param {?} directiveIndex
+ * @param {?} elementIndex
+ * @return {?}
  */
-const componentRefresh = function (directiveIndex, elementIndex, template) {
-    ngDevMode && assertDataInRange(elementIndex);
-    const /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
-    ngDevMode && assertNodeOfPossibleTypes(element, 3 /* Element */, 0 /* Container */);
-    ngDevMode && assertNotEqual(element.data, null, 'isComponent');
-    ngDevMode && assertDataInRange(directiveIndex);
-    const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
-    ngDevMode && assertNotEqual(hostView, null, 'hostView');
-    const /** @type {?} */ directive = data[directiveIndex];
-    const /** @type {?} */ oldView = enterView(hostView, element);
-    try {
-        template(directive, creationMode);
+function componentRefresh(directiveIndex, elementIndex) {
+    executeInitHooks(currentView);
+    executeContentHooks(currentView);
+    const /** @type {?} */ template = (/** @type {?} */ (tData[directiveIndex])).template;
+    if (template != null) {
+        ngDevMode && assertDataInRange(elementIndex);
+        const /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
+        ngDevMode && assertNodeType(element, 3 /* Element */);
+        ngDevMode && assertNotEqual(element.data, null, 'isComponent');
+        ngDevMode && assertDataInRange(directiveIndex);
+        const /** @type {?} */ directive = data[directiveIndex];
+        const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
+        ngDevMode && assertNotEqual(hostView, null, 'hostView');
+        const /** @type {?} */ oldView = enterView(hostView, element);
+        try {
+            template(directive, creationMode);
+        }
+        finally {
+            refreshDynamicChildren();
+            leaveView(oldView);
+        }
     }
-    finally {
-        hostView.creationMode = false;
-        refreshDynamicChildren();
-        leaveView(oldView);
-    }
-};
+}
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
@@ -15842,7 +16025,7 @@ function renderComponent(componentType, opts = {}) {
         componentDef.type = componentType;
     let /** @type {?} */ component;
     const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
-    const /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), { data: [] }), /** @type {?} */ ((null)));
+    const /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView()), /** @type {?} */ ((null)));
     try {
         // Create element node at index 0 in data array
         hostElement(hostNode, componentDef);
@@ -16339,22 +16522,26 @@ class EmbeddedViewRef$2 {
  * @return {?}
  */
 function defineComponent(componentDefinition) {
+    const /** @type {?} */ type = componentDefinition.type;
     const /** @type {?} */ def = /** @type {?} */ ({
+        type: type,
         diPublic: null,
         n: componentDefinition.factory,
         tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
-        r: componentDefinition.refresh || (componentDefinition.template ?
-            function (d, e) {
-                componentRefresh(d, e, componentDefinition.template);
-            } :
-            noop$1),
         h: componentDefinition.hostBindings || noop$1,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
         exportAs: componentDefinition.exportAs,
+        onInit: type.prototype.ngOnInit || null,
+        doCheck: type.prototype.ngDoCheck || null,
+        afterContentInit: type.prototype.ngAfterContentInit || null,
+        afterContentChecked: type.prototype.ngAfterContentChecked || null,
+        afterViewInit: type.prototype.ngAfterViewInit || null,
+        afterViewChecked: type.prototype.ngAfterViewChecked || null,
+        onDestroy: type.prototype.ngOnDestroy || null
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
@@ -16431,16 +16618,6 @@ function invertObject(obj) {
  */
 
 /**
- * @record
- */
-
-/**
- * Private: do not export
- * @record
- */
-
-/**
- * Private: do not export
  * @record
  */
 
@@ -17785,5 +17962,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbe, group$1 as ɵbf, keyframes$1 as ɵbj, sequence$1 as ɵbg, state$1 as ɵbi, style$1 as ɵbh, transition$1 as ɵbk, trigger$1 as ɵbd, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope$1 as ɵu, detectWTF as ɵr, endTimeRange as ɵy, leave as ɵw, startTimeRange as ɵx, stringify$1 as ɵbb, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵz, DebugContext as ɵba };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, componentRefresh as ɵr, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbf, group$1 as ɵbg, keyframes$1 as ɵbk, sequence$1 as ɵbh, state$1 as ɵbj, style$1 as ɵbi, transition$1 as ɵbl, trigger$1 as ɵbe, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope$1 as ɵw, detectWTF as ɵu, endTimeRange as ɵz, leave as ɵx, startTimeRange as ɵy, stringify$1 as ɵbc, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵba, DebugContext as ɵbb };
 //# sourceMappingURL=core.js.map
