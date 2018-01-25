@@ -1,9 +1,7 @@
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
-import { LContainerNode, LNode, LViewNode } from './interfaces/node';
+import { LNode } from './interfaces/node';
 import { LQuery, QueryReadType } from './interfaces/query';
-export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): QueryList<T>;
-export declare function queryRefresh(query: QueryList<any>): boolean;
 /**
  * A predicate which determines if a given element/directive should be included in the query
  */
@@ -41,9 +39,23 @@ export declare class LQuery_ implements LQuery {
     constructor(deep?: QueryPredicate<any>);
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
     child(): LQuery | null;
+    container(): LQuery | null;
+    enterView(index: number): LQuery | null;
     addNode(node: LNode): void;
-    insertView(container: LContainerNode, view: LViewNode, index: number): void;
-    removeView(container: LContainerNode, view: LViewNode, index: number): void;
+    removeView(index: number): void;
+    /**
+     * Clone LQuery by taking all the deep query predicates and cloning those using a provided clone
+     * function.
+     * Shallow predicates are ignored.
+     */
+    private _clonePredicates(predicateCloneFn);
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;
 export declare const QueryList: typeof viewEngine_QueryList;
+export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): QueryList<T>;
+/**
+ * Refreshes a query by combining matches from all active views and removing matches from deleted
+ * views.
+ * Returns true if a query got dirty during change detection, false otherwise.
+ */
+export declare function queryRefresh(query: QueryList<any>): boolean;

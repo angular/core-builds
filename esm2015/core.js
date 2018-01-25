@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.1-3e03dbe
+ * @license Angular v6.0.0-beta.1-5269ce2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.1-3e03dbe');
+const VERSION = new Version('6.0.0-beta.1-5269ce2');
 
 /**
  * @fileoverview added by tsickle
@@ -13885,8 +13885,6 @@ function insertView(container, newView, index) {
     if (container.data.renderParent !== null) {
         addRemoveViewFromContainer(container, newView, true, findBeforeNode(index, state, container.native));
     }
-    // Notify query that view has been inserted
-    container.query && container.query.insertView(container, newView, index);
     return newView;
 }
 /**
@@ -13910,7 +13908,7 @@ function removeView(container, removeIndex) {
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
-    container.query && container.query.removeView(container, viewNode, removeIndex);
+    container.data.query && container.data.query.removeView(removeIndex);
     return viewNode;
 }
 /**
@@ -14152,6 +14150,11 @@ function stringify$1(value) {
 function notImplemented() {
     return new Error('NotImplemented');
 }
+/**
+ * Flattens an array in non-recursive way. Input arrays are not modified.
+ * @param {?} list
+ * @return {?}
+ */
 
 /**
  * @fileoverview added by tsickle
@@ -14447,6 +14450,7 @@ function enterView(newView, host) {
         isParent = true;
     }
     currentView = newView;
+    currentQuery = newView.query;
     return /** @type {?} */ ((oldView));
 }
 /**
@@ -14489,7 +14493,8 @@ function createLView(viewId, renderer, tView, template = null, context = null) {
         template: template,
         context: context,
         dynamicViewCount: 0,
-        lifecycleStage: 1 /* INIT */
+        lifecycleStage: 1 /* INIT */,
+        query: null,
     };
     return newView;
 }
@@ -15231,14 +15236,16 @@ function container(index, directiveTypes, template, tagName, attrs, localRefs) {
         // - View of the Component
         renderParent = /** @type {?} */ (currentParent);
     }
-    const /** @type {?} */ node = createLNode(index, 0 /* Container */, comment, /** @type {?} */ ({
+    const /** @type {?} */ lContainer = /** @type {?} */ ({
         views: [],
         nextIndex: 0, renderParent,
         template: template == null ? null : template,
         next: null,
         parent: currentView,
         dynamicViewCount: 0,
-    }));
+        query: null
+    });
+    const /** @type {?} */ node = createLNode(index, 0 /* Container */, comment, lContainer);
     if (node.tNode == null) {
         // TODO(misko): implement queryName caching
         const /** @type {?} */ queryName = hack_findQueryName(null, localRefs, '');
@@ -15250,8 +15257,13 @@ function container(index, directiveTypes, template, tagName, attrs, localRefs) {
     hack_declareDirectives(index, directiveTypes, localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    const /** @type {?} */ query = previousOrParentNode.query;
-    query && query.addNode(previousOrParentNode);
+    const /** @type {?} */ query = node.query;
+    if (query) {
+        // check if a given container node matches
+        query.addNode(node);
+        // prepare place for matching nodes from views inserted into a given container
+        lContainer.query = query.container();
+    }
 }
 /**
  * Sets a container up to receive views.
@@ -15329,6 +15341,9 @@ function viewStart(viewBlockId) {
     else {
         // When we create a new LView, we always reset the state of the instructions.
         const /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container));
+        if (lContainer.query) {
+            newView.query = lContainer.query.enterView(lContainer.nextIndex);
+        }
         enterView(newView, createLNode(null, 2 /* View */, null, newView));
         lContainer.nextIndex++;
     }
@@ -16682,6 +16697,13 @@ function invertObject(obj) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * A predicate which determines if a given element/directive should be included in the query
+ * @record
+ */
+
+
+
+/**
  * @template T
  * @param {?} predicate
  * @param {?=} descend
@@ -16690,13 +16712,11 @@ function invertObject(obj) {
  */
 
 /**
+ * Refreshes a query by combining matches from all active views and removing matches from deleted
+ * views.
+ * Returns true if a query got dirty during change detection, false otherwise.
  * @param {?} query
  * @return {?}
- */
-
-/**
- * A predicate which determines if a given element/directive should be included in the query
- * @record
  */
 
 /**
