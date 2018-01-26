@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.2-7410941
+ * @license Angular v5.2.2-81d64d6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.2-7410941');
+var VERSION = new Version('5.2.2-81d64d6');
 
 /**
  * @fileoverview added by tsickle
@@ -9899,7 +9899,7 @@ function checkAndUpdateBinding(view, def, bindingIdx, value) {
 function checkBindingNoChanges(view, def, bindingIdx, value) {
     var /** @type {?} */ oldValue = view.oldValues[def.bindingIndex + bindingIdx];
     if ((view.state & 1 /* BeforeFirstCheck */) || !devModeEqual(oldValue, value)) {
-        var /** @type {?} */ bindingName = def.bindings[def.bindingIndex].name;
+        var /** @type {?} */ bindingName = def.bindings[bindingIdx].name;
         throw expressionChangedAfterItHasBeenCheckedError(Services.createDebugContext(view, def.nodeIndex), bindingName + ": " + oldValue, bindingName + ": " + value, (view.state & 1 /* BeforeFirstCheck */) !== 0);
     }
 }
