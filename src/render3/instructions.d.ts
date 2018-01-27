@@ -12,7 +12,7 @@ import { LQuery } from './interfaces/query';
 import { LView, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -44,7 +44,7 @@ export declare function createLView(viewId: number, renderer: Renderer3, tView: 
  */
 export declare function createLNode(index: number | null, type: LNodeFlags.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
 export declare function createLNode(index: null, type: LNodeFlags.View, native: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeFlags.Container, native: RComment, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeFlags.Container, native: undefined, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: LNodeFlags.Projection, native: null, lProjection: LProjection): LProjectionNode;
 /**
  *

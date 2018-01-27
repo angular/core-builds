@@ -12,7 +12,6 @@ export declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
  * (reducing payload size).
  * */
 export interface ObjectOrientedRenderer3 {
-    createComment(data: string): RComment;
     createElement(tagName: string): RElement;
     createTextNode(data: string): RText;
     querySelector(selectors: string): RElement | null;
@@ -27,7 +26,6 @@ export interface ObjectOrientedRenderer3 {
 export interface ProceduralRenderer3 {
     destroy(): void;
     createElement(name: string, namespace?: string | null): RElement;
-    createComment(value: string): RComment;
     createText(value: string): RText;
     /**
      * This property is allowed to be null / undefined,
@@ -95,7 +93,5 @@ export interface RDomTokenList {
 }
 export interface RText extends RNode {
     textContent: string | null;
-}
-export interface RComment extends RNode {
 }
 export declare const unusedValueExportToPlacateAjd = 1;
