@@ -12,7 +12,7 @@
  */
 export * from './metadata';
 export * from './version';
-export { Class, ClassDefinition, TypeDecorator } from './util/decorators';
+export { TypeDecorator } from './util/decorators';
 export * from './di';
 export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken } from './application_ref';
 export { APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER } from './application_tokens';
@@ -31,6 +31,7 @@ export { Type } from './type';
 export { EventEmitter } from './event_emitter';
 export { ErrorHandler } from './error_handler';
 export * from './core_private_export';
+export * from './core_render3_private_export';
 export { Sanitizer, SecurityContext } from './security';
 export * from './codegen_private_exports';
 export * from './animation/animation_metadata_wrapped';

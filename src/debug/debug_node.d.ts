@@ -19,8 +19,8 @@ export declare class DebugNode {
     private _debugContext;
     nativeNode: any;
     listeners: EventListener[];
-    parent: DebugElement;
-    constructor(nativeNode: any, parent: DebugNode, _debugContext: DebugContext);
+    parent: DebugElement | null;
+    constructor(nativeNode: any, parent: DebugNode | null, _debugContext: DebugContext);
     readonly injector: Injector;
     readonly componentInstance: any;
     readonly context: any;
@@ -28,10 +28,6 @@ export declare class DebugNode {
         [key: string]: any;
     };
     readonly providerTokens: any[];
-    /**
-     * @deprecated since v4
-     */
-    readonly source: string;
 }
 /**
  * @experimental All debugging apis are currently experimental.
@@ -42,13 +38,13 @@ export declare class DebugElement extends DebugNode {
         [key: string]: any;
     };
     attributes: {
-        [key: string]: string;
+        [key: string]: string | null;
     };
     classes: {
         [key: string]: boolean;
     };
     styles: {
-        [key: string]: string;
+        [key: string]: string | null;
     };
     childNodes: DebugNode[];
     nativeElement: any;
@@ -70,7 +66,7 @@ export declare function asNativeElements(debugEls: DebugElement[]): any;
 /**
  * @experimental
  */
-export declare function getDebugNode(nativeNode: any): DebugNode;
+export declare function getDebugNode(nativeNode: any): DebugNode | null;
 export declare function getAllDebugNodes(): DebugNode[];
 export declare function indexDebugNode(node: DebugNode): void;
 export declare function removeDebugNodeFromIndex(node: DebugNode): void;
@@ -81,5 +77,5 @@ export declare function removeDebugNodeFromIndex(node: DebugNode): void;
  * @experimental All debugging apis are currently experimental.
  */
 export interface Predicate<T> {
-    (value: T, index?: number, array?: T[]): boolean;
+    (value: T): boolean;
 }

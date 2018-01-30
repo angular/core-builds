@@ -1,10 +1,10 @@
 export declare function devModeEqual(a: any, b: any): boolean;
 /**
  * Indicates that the result of a {@link Pipe} transformation has changed even though the
- * reference
- * has not changed.
+ * reference has not changed.
  *
- * The wrapped value will be unwrapped by change detection, and the unwrapped value will be stored.
+ * Wrapped values are unwrapped automatically during the change detection, and the unwrapped value
+ * is stored.
  *
  * Example:
  *
@@ -19,17 +19,18 @@ export declare function devModeEqual(a: any, b: any): boolean;
  * @stable
  */
 export declare class WrappedValue {
+    /** @deprecated from 5.3, use `unwrap()` instead - will switch to protected */
     wrapped: any;
-    constructor(wrapped: any);
+    constructor(value: any);
+    /** Creates a wrapped value. */
     static wrap(value: any): WrappedValue;
-}
-/**
- * Helper class for unwrapping WrappedValue s
- */
-export declare class ValueUnwrapper {
-    hasWrappedValue: boolean;
-    unwrap(value: any): any;
-    reset(): void;
+    /**
+     * Returns the underlying value of a wrapped value.
+     * Returns the given `value` when it is not wrapped.
+     **/
+    static unwrap(value: any): any;
+    /** Returns true if `value` is a wrapped value. */
+    static isWrapped(value: any): value is WrappedValue;
 }
 /**
  * Represents a basic change from a previous to a new value.

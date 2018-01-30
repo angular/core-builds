@@ -41,7 +41,7 @@ import { ResolvedReflectiveProvider } from './reflective_provider';
  * Notice, we don't use the `new` operator because we explicitly want to have the `Injector`
  * resolve all of the object's dependencies automatically.
  *
- * @stable
+ * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  */
 export declare abstract class ReflectiveInjector implements Injector {
     /**
@@ -75,7 +75,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * });
      * ```
      *
-     * See {@link ReflectiveInjector#fromResolvedProviders} for more info.
+     * See {@link ReflectiveInjector#fromResolvedProviders fromResolvedProviders} for more info.
      */
     static resolve(providers: Provider[]): ResolvedReflectiveProvider[];
     /**
@@ -102,7 +102,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This function is slower than the corresponding `fromResolvedProviders`
      * because it needs to resolve the passed-in providers first.
-     * See {@link Injector#resolve} and {@link Injector#fromResolvedProviders}.
+     * See {@link ReflectiveInjector#resolve resolve} and
+     * {@link ReflectiveInjector#fromResolvedProviders fromResolvedProviders}.
      */
     static resolveAndCreate(providers: Provider[], parent?: Injector): ReflectiveInjector;
     /**
@@ -143,7 +144,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(child.parent).toBe(parent);
      * ```
      */
-    readonly abstract parent: Injector;
+    readonly abstract parent: Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -169,7 +170,8 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This function is slower than the corresponding `createChildFromResolved`
      * because it needs to resolve the passed-in providers first.
-     * See {@link Injector#resolve} and {@link Injector#createChildFromResolved}.
+     * See {@link ReflectiveInjector#resolve resolve} and
+     * {@link ReflectiveInjector#createChildFromResolved createChildFromResolved}.
      */
     abstract resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     /**
@@ -251,6 +253,8 @@ export declare abstract class ReflectiveInjector implements Injector {
     abstract get(token: any, notFoundValue?: any): any;
 }
 export declare class ReflectiveInjector_ implements ReflectiveInjector {
+    private static INJECTOR_KEY;
+    readonly parent: Injector | null;
     keyIds: number[];
     objs: any[];
     /**
@@ -258,7 +262,6 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
      */
     constructor(_providers: ResolvedReflectiveProvider[], _parent?: Injector);
     get(token: any, notFoundValue?: any): any;
-    readonly parent: Injector;
     resolveAndCreateChild(providers: Provider[]): ReflectiveInjector;
     createChildFromResolved(providers: ResolvedReflectiveProvider[]): ReflectiveInjector;
     resolveAndInstantiate(provider: Provider): any;

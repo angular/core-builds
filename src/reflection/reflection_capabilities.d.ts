@@ -26,10 +26,14 @@ export declare class ReflectionCapabilities implements PlatformReflectionCapabil
         [key: string]: any[];
     };
     hasLifecycleHook(type: any, lcProperty: string): boolean;
+    guards(type: any): {
+        [key: string]: any;
+    };
     getter(name: string): GetterFn;
     setter(name: string): SetterFn;
     method(name: string): MethodFn;
     importUri(type: any): string;
+    resourceUri(type: any): string;
     resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
     resolveEnum(enumIdentifier: any, name: string): any;
 }
