@@ -8,7 +8,7 @@
 import { LContainer, TContainer } from './container';
 import { LInjector } from './injector';
 import { LProjection } from './projection';
-import { LQuery } from './query';
+import { LQueries } from './query';
 import { RElement, RText } from './renderer';
 import { LView } from './view';
 /**
@@ -101,11 +101,11 @@ export interface LNode {
     /** The injector associated with this node. Necessary for DI. */
     nodeInjector: LInjector | null;
     /**
-     * Optional `QueryState` used for tracking queries.
+     * Optional set of queries that track query-related events for this node.
      *
-     * If present the node creation/updates are reported to the `QueryState`.
+     * If present the node creation/updates are reported to the `LQueries`.
      */
-    query: LQuery | null;
+    queries: LQueries | null;
     /**
      * If this node is projected, pointer to the next node in the same projection parent
      * (which is a container, an element, or a text node), or to the parent projection node

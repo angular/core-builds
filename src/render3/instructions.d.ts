@@ -8,7 +8,7 @@
 import './ng_dev_mode';
 import { LContainer } from './interfaces/container';
 import { CssSelector, LProjection } from './interfaces/projection';
-import { LQuery } from './interfaces/query';
+import { LQueries } from './interfaces/query';
 import { LView, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
@@ -381,9 +381,9 @@ export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: 
  */
 export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
-export declare function getCurrentQuery(QueryType: {
-    new (): LQuery;
-}): LQuery;
+export declare function getCurrentQueries(QueryType: {
+    new (): LQueries;
+}): LQueries;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getRenderer(): Renderer3;
 export declare function assertPreviousIsParent(): void;

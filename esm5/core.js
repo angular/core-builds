@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.1-285dd6b
+ * @license Angular v6.0.0-beta.1-407b5cf
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -716,7 +716,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.1-285dd6b');
+var VERSION = new Version('6.0.0-beta.1-407b5cf');
 
 /**
  * @fileoverview added by tsickle
@@ -16230,7 +16230,7 @@ function removeView(container, removeIndex) {
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
-    container.data.query && container.data.query.removeView(removeIndex);
+    container.data.queries && container.data.queries.removeView(removeIndex);
     return viewNode;
 }
 /**
@@ -16744,7 +16744,7 @@ var tData;
 var currentView;
 // The initialization has to be after the `let`, otherwise `createLView` can't see `let`.
 currentView = createLView(/** @type {?} */ ((null)), /** @type {?} */ ((null)), createTView());
-var currentQuery;
+var currentQueries;
 /**
  * This property gets set before entering a template.
  */
@@ -16801,7 +16801,7 @@ function enterView(newView, host) {
         isParent = true;
     }
     currentView = newView;
-    currentQuery = newView.query;
+    currentQueries = newView.queries;
     return /** @type {?} */ ((oldView));
 }
 /**
@@ -16847,7 +16847,7 @@ function createLView(viewId, renderer, tView, template, context) {
         context: context,
         dynamicViewCount: 0,
         lifecycleStage: 1 /* INIT */,
-        query: null,
+        queries: null,
     };
     return newView;
 }
@@ -16861,8 +16861,8 @@ function createLView(viewId, renderer, tView, template, context) {
 function createLNode(index, type, native, state) {
     var /** @type {?} */ parent = isParent ? previousOrParentNode :
         previousOrParentNode && /** @type {?} */ (previousOrParentNode.parent);
-    var /** @type {?} */ query = (isParent ? currentQuery : previousOrParentNode && previousOrParentNode.query) ||
-        parent && parent.query && parent.query.child();
+    var /** @type {?} */ queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
+        parent && parent.queries && parent.queries.child();
     var /** @type {?} */ isState = state != null;
     var /** @type {?} */ node = {
         flags: type,
@@ -16873,7 +16873,7 @@ function createLNode(index, type, native, state) {
         next: null,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: isState ? /** @type {?} */ (state) : null,
-        query: query,
+        queries: queries,
         tNode: null,
         pNextOrParent: null
     };
@@ -16896,7 +16896,7 @@ function createLNode(index, type, native, state) {
         }
         // Now link ourselves into the tree.
         if (isParent) {
-            currentQuery = null;
+            currentQueries = null;
             if (previousOrParentNode.view === currentView ||
                 (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
@@ -17256,8 +17256,8 @@ function elementEnd() {
         previousOrParentNode = /** @type {?} */ ((previousOrParentNode.parent));
     }
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
-    var /** @type {?} */ query = previousOrParentNode.query;
-    query && query.addNode(previousOrParentNode);
+    var /** @type {?} */ queries = previousOrParentNode.queries;
+    queries && queries.addNode(previousOrParentNode);
     queueLifecycleHooks(previousOrParentNode.flags, currentView);
 }
 /**
@@ -17591,7 +17591,7 @@ function container(index, directiveTypes, template, tagName, attrs, localRefs) {
         next: null,
         parent: currentView,
         dynamicViewCount: 0,
-        query: null
+        queries: null
     });
     var /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
     if (node.tNode == null) {
@@ -17605,12 +17605,12 @@ function container(index, directiveTypes, template, tagName, attrs, localRefs) {
     hack_declareDirectives(index, directiveTypes, localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    var /** @type {?} */ query = node.query;
-    if (query) {
+    var /** @type {?} */ queries = node.queries;
+    if (queries) {
         // check if a given container node matches
-        query.addNode(node);
+        queries.addNode(node);
         // prepare place for matching nodes from views inserted into a given container
-        lContainer.query = query.container();
+        lContainer.queries = queries.container();
     }
 }
 /**
@@ -17691,8 +17691,8 @@ function viewStart(viewBlockId) {
     else {
         // When we create a new LView, we always reset the state of the instructions.
         var /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container));
-        if (lContainer.query) {
-            newView.query = lContainer.query.enterView(lContainer.nextIndex);
+        if (lContainer.queries) {
+            newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
         enterView(newView, createLNode(null, 2 /* View */, null, newView));
         lContainer.nextIndex++;
@@ -19109,6 +19109,15 @@ function invertObject(obj) {
  */
 /**
  * A predicate which determines if a given element/directive should be included in the query
+ * results.
+ * @record
+ */
+
+/**
+ * An object representing a query, which is a combination of:
+ * - query predicate to determines if a given element/directive should be included in the query
+ * - values collected based on a predicate
+ * - `QueryList` to which collected values should be reported
  * @record
  */
 
@@ -19340,7 +19349,7 @@ var QueryList_ = /** @class */ (function () {
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
  * Returns true if a query got dirty during change detection, false otherwise.
- * @param {?} query
+ * @param {?} queryList
  * @return {?}
  */
 

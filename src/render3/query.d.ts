@@ -1,19 +1,12 @@
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
 import { LNode } from './interfaces/node';
-import { LQuery, QueryReadType } from './interfaces/query';
+import { LQueries, QueryReadType } from './interfaces/query';
 /**
  * A predicate which determines if a given element/directive should be included in the query
+ * results.
  */
 export interface QueryPredicate<T> {
-    /**
-     * Next predicate
-     */
-    next: QueryPredicate<any> | null;
-    /**
-     * Destination to which the value should be added.
-     */
-    list: QueryList<T>;
     /**
      * If looking for directives then it contains the directive type.
      */
@@ -26,29 +19,44 @@ export interface QueryPredicate<T> {
      * Indicates which token should be read from DI for this query.
      */
     read: QueryReadType<T> | Type<T> | null;
+}
+/**
+ * An object representing a query, which is a combination of:
+ * - query predicate to determines if a given element/directive should be included in the query
+ * - values collected based on a predicate
+ * - `QueryList` to which collected values should be reported
+ */
+export interface LQuery<T> {
+    /**
+     * Next query. Used when queries are stored as a linked list in `LQueries`.
+     */
+    next: LQuery<any> | null;
+    /**
+     * Destination to which the value should be added.
+     */
+    list: QueryList<T>;
+    /**
+     * A predicate which determines if a given element/directive should be included in the query
+     * results.
+     */
+    predicate: QueryPredicate<T>;
     /**
      * Values which have been located.
      *
-     * this is what builds up the `QueryList._valuesTree`.
+     * This is what builds up the `QueryList._valuesTree`.
      */
     values: any[];
 }
-export declare class LQuery_ implements LQuery {
-    shallow: QueryPredicate<any> | null;
-    deep: QueryPredicate<any> | null;
-    constructor(deep?: QueryPredicate<any>);
+export declare class LQueries_ implements LQueries {
+    shallow: LQuery<any> | null;
+    deep: LQuery<any> | null;
+    constructor(deep?: LQuery<any>);
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
-    child(): LQuery | null;
-    container(): LQuery | null;
-    enterView(index: number): LQuery | null;
+    child(): LQueries | null;
+    container(): LQueries | null;
+    enterView(index: number): LQueries | null;
     addNode(node: LNode): void;
     removeView(index: number): void;
-    /**
-     * Clone LQuery by taking all the deep query predicates and cloning those using a provided clone
-     * function.
-     * Shallow predicates are ignored.
-     */
-    private _clonePredicates(predicateCloneFn);
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;
 export declare const QueryList: typeof viewEngine_QueryList;
@@ -58,4 +66,4 @@ export declare function query<T>(predicate: Type<any> | string[], descend?: bool
  * views.
  * Returns true if a query got dirty during change detection, false otherwise.
  */
-export declare function queryRefresh(query: QueryList<any>): boolean;
+export declare function queryRefresh(queryList: QueryList<any>): boolean;
