@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "5.2.2-fad99cc",
+  "version": "5.2.2-ed2b717",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./esm5/core.js",
