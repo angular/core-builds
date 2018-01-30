@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.1-b10540a
+ * @license Angular v6.0.0-beta.1-285dd6b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.1-b10540a
+ * @license Angular v6.0.0-beta.1-285dd6b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -755,7 +755,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.1-b10540a');
+var VERSION = new Version('6.0.0-beta.1-285dd6b');
 
 /**
  * @fileoverview added by tsickle
@@ -18942,6 +18942,7 @@ function invertObject(obj) {
 var QueryList_ = /** @class */ (function () {
     function QueryList_() {
         this.dirty = true;
+        this.changes = new EventEmitter();
         this._values = [];
         /**
          * \@internal
@@ -19133,7 +19134,7 @@ var QueryList_ = /** @class */ (function () {
     QueryList_.prototype.notifyOnChanges = /**
      * @return {?}
      */
-    function () { throw new Error('Method not implemented.'); };
+    function () { (/** @type {?} */ (this.changes)).emit(this); };
     /**
      * @return {?}
      */
@@ -19147,7 +19148,10 @@ var QueryList_ = /** @class */ (function () {
     QueryList_.prototype.destroy = /**
      * @return {?}
      */
-    function () { throw new Error('Method not implemented.'); };
+    function () {
+        (/** @type {?} */ (this.changes)).complete();
+        (/** @type {?} */ (this.changes)).unsubscribe();
+    };
     return QueryList_;
 }());
 
