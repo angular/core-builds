@@ -60,7 +60,17 @@ export declare class LQueries_ implements LQueries {
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;
 export declare const QueryList: typeof viewEngine_QueryList;
-export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): QueryList<T>;
+/**
+ * Creates and returns a QueryList.
+ *
+ * @param memoryIndex The index in memory where the QueryList should be saved. If null,
+ * this is is a content query and the QueryList will be saved later through directiveCreate.
+ * @param predicate The type for which the query will search
+ * @param descend Whether or not to descend into children
+ * @param read What to save in the query
+ * @returns QueryList<T>
+ */
+export declare function query<T>(memoryIndex: number | null, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): QueryList<T>;
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
