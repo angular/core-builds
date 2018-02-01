@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.2-61abba4
+ * @license Angular v6.0.0-beta.2-1aa2947
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.2-61abba4');
+const VERSION = new Version('6.0.0-beta.2-1aa2947');
 
 /**
  * @fileoverview added by tsickle
@@ -14349,6 +14349,14 @@ function insertChild(node, currentView) {
  */
 
 /**
+ * Checks a given node against matching selectors and returns
+ * selector index (or 0 if none matched);
+ * @param {?} tNode
+ * @param {?} selectors
+ * @return {?}
+ */
+
+/**
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
@@ -15507,6 +15515,7 @@ function componentRefresh(directiveIndex, elementIndex) {
  * @param {?} nodeIndex
  * @param {?} localIndex - index under which distribution of projected nodes was memorized
  * @param {?=} selectorIndex - 0 means <ng-content> without any selector
+ * @param {?=} attrs - attributes attached to the ng-content node, if present
  * @return {?}
  */
 

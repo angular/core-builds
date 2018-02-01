@@ -228,8 +228,9 @@ export declare function projectionDef(index: number, selectors?: CssSelector[]):
  * @param nodeIndex
  * @param localIndex - index under which distribution of projected nodes was memorized
  * @param selectorIndex - 0 means <ng-content> without any selector
+ * @param attrs - attributes attached to the ng-content node, if present
  */
-export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number): void;
+export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number, attrs?: string[]): void;
 /**
  * Adds a LView or a LContainer to the end of the current view tree.
  *
