@@ -6,11 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { createComponentRef, detectChanges, getHostElement, markDirty, renderComponent } from './component';
-import { NgOnChangesFeature, PublicFeature, defineComponent, defineDirective } from './definition';
+import { NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe } from './definition';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType } from './interfaces/definition';
 export { InjectFlags, QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF, inject, injectElementRef, injectTemplateRef, injectViewContainerRef } from './di';
 export { NO_CHANGE as NC, bind as b, bind1 as b1, bind2 as b2, bind3 as b3, bind4 as b4, bind5 as b5, bind6 as b6, bind7 as b7, bind8 as b8, bindV as bV, componentRefresh as r, container as C, containerRefreshStart as cR, containerRefreshEnd as cr, elementAttribute as a, elementClass as k, elementEnd as e, elementProperty as p, elementStart as E, elementStyle as s, listener as L, memory as m, projection as P, projectionDef as pD, text as T, textBinding as t, viewStart as V, viewEnd as v } from './instructions';
+export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR } from './query';
-export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, defineComponent, defineDirective };
+export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe };
 export { createComponentRef, detectChanges, getHostElement, markDirty, renderComponent };
 export { CssSelector } from './interfaces/projection';
