@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.2-0c9ec37
+ * @license Angular v6.0.0-beta.2-0846784
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.2-0c9ec37
+ * @license Angular v6.0.0-beta.2-0846784
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.2-0c9ec37');
+var VERSION = new Version('6.0.0-beta.2-0846784');
 
 /**
  * @fileoverview added by tsickle
@@ -17865,65 +17865,73 @@ var NO_CHANGE = /** @type {?} */ ({});
  * If any of the arguments change, then the interpolation is concatenated
  * and causes an update.
  *
- * @param {?} values an array of values to diff.
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ * @param {?} values
  * @return {?}
  */
 function bindV(values) {
-    var /** @type {?} */ different;
-    var /** @type {?} */ parts;
-    if (different = creationMode) {
-        // make a copy of the array.
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
+    ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
+    ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
+    // TODO(vicb): Add proper unit tests when there is a place to add them
+    if (creationMode) {
+        initBindings();
+        // Only the bindings (odd indexes) are stored as texts are constant.
+        var /** @type {?} */ bindings_1 = [];
+        data[bindingIndex++] = bindings_1;
+        var /** @type {?} */ content = values[0];
+        for (var /** @type {?} */ i = 1; i < values.length; i += 2) {
+            content += stringify$1(values[i]) + values[i + 1];
+            bindings_1.push(values[i]);
         }
-        data[bindingIndex++] = parts = values.slice();
+        return content;
     }
-    else {
-        parts = data[bindingIndex++];
-        different = false;
-        for (var /** @type {?} */ i = 0; i < values.length; i++) {
-            different = different || values[i] !== NO_CHANGE && isDifferent(values[i], parts[i]);
-            if (different && values[i] !== NO_CHANGE) {
-                parts[i] = values[i];
+    var /** @type {?} */ bindings = data[bindingIndex++];
+    // `bIdx` is the index in the `bindings` array, `vIdx` in the `values` array
+    for (var /** @type {?} */ bIdx = 0, /** @type {?} */ vIdx = 1; bIdx < bindings.length; bIdx++, vIdx += 2) {
+        if (values[vIdx] !== NO_CHANGE && isDifferent(values[vIdx], bindings[bIdx])) {
+            var /** @type {?} */ content = values[0];
+            for (bIdx = 0, vIdx = 1; bIdx < bindings.length; vIdx += 2, bIdx++) {
+                if (values[vIdx] !== NO_CHANGE) {
+                    bindings[bIdx] = values[vIdx];
+                }
+                content += stringify$1(bindings[bIdx]) + values[vIdx + 1];
             }
+            return content;
         }
     }
-    if (different) {
-        var /** @type {?} */ str = stringify$1(parts[0]);
-        for (var /** @type {?} */ i = 1; i < parts.length; i++) {
-            str += stringify$1(parts[i]);
-        }
-        return str;
-    }
-    else {
-        return NO_CHANGE;
+    return NO_CHANGE;
+}
+/**
+ * @return {?}
+ */
+function initBindings() {
+    if (currentView.bindingStartIndex == null) {
+        bindingIndex = currentView.bindingStartIndex = data.length;
     }
 }
 /**
- * Create a single value binding without interpolation.
+ * Creates a single value binding without interpolation.
  *
  * @template T
  * @param {?} value Value to diff
  * @return {?}
  */
 function bind(value) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
-        data[bindingIndex++] = value;
+    if (creationMode) {
+        initBindings();
+        return data[bindingIndex++] = value;
     }
-    else {
-        if (different = value !== NO_CHANGE && isDifferent(data[bindingIndex], value)) {
-            data[bindingIndex] = value;
-        }
-        bindingIndex++;
+    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
+    if (changed) {
+        data[bindingIndex] = value;
     }
-    return different ? value : NO_CHANGE;
+    bindingIndex++;
+    return changed ? value : NO_CHANGE;
 }
 /**
- * Create an interpolation bindings with 1 arguments.
+ * Creates an interpolation bindings with 1 argument.
  *
  * @param {?} prefix static value used for concatenation only.
  * @param {?} value value checked for change.
@@ -17934,21 +17942,18 @@ function bind1(prefix, value, suffix) {
     return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
 }
 /**
- * Create an interpolation bindings with 2 arguments.
- *
+ * Creates an interpolation bindings with 2 arguments.
  * @param {?} prefix
- * @param {?} v0 value checked for change
+ * @param {?} v0
  * @param {?} i0
- * @param {?} v1 value checked for change
+ * @param {?} v1
  * @param {?} suffix
  * @return {?}
  */
 function bind2(prefix, v0, i0, v1, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
     }
@@ -17967,8 +17972,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
- * Create an interpolation bindings with 3 arguments.
- *
+ * Creates an interpolation bindings with 3 arguments.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -17981,9 +17985,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
 function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;
@@ -18009,7 +18011,6 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
 }
 /**
  * Create an interpolation binding with 4 arguments.
- *
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18024,9 +18025,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
 function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;
@@ -18060,8 +18059,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 5 arguments.
- *
+ * Creates an interpolation binding with 5 arguments.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18078,9 +18076,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
 function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;
@@ -18119,8 +18115,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 6 arguments.
- *
+ * Creates an interpolation binding with 6 arguments.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18139,9 +18134,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
 function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;
@@ -18185,8 +18178,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 7 arguments.
- *
+ * Creates an interpolation binding with 7 arguments.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18207,9 +18199,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
 function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;
@@ -18259,8 +18249,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 8 arguments.
- *
+ * Creates an interpolation binding with 8 arguments.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18283,9 +18272,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
 function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
-        if (typeof currentView.bindingStartIndex !== 'number') {
-            bindingIndex = currentView.bindingStartIndex = data.length;
-        }
+        initBindings();
         data[bindingIndex++] = v0;
         data[bindingIndex++] = v1;
         data[bindingIndex++] = v2;

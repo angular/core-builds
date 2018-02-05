@@ -252,134 +252,38 @@ export declare const NO_CHANGE: NO_CHANGE;
  * If any of the arguments change, then the interpolation is concatenated
  * and causes an update.
  *
- * @param values an array of values to diff.
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes (could be NO_CHANGE).
  */
 export declare function bindV(values: any[]): string | NO_CHANGE;
 /**
- * Create a single value binding without interpolation.
+ * Creates a single value binding without interpolation.
  *
  * @param value Value to diff
  */
 export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
- * Create an interpolation bindings with 1 arguments.
+ * Creates an interpolation bindings with 1 argument.
  *
  * @param prefix static value used for concatenation only.
  * @param value value checked for change.
  * @param suffix static value used for concatenation only.
  */
 export declare function bind1(prefix: string, value: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation bindings with 2 arguments.
- *
- * @param prefix
- * @param v0 value checked for change
- * @param i0
- * @param v1 value checked for change
- * @param suffix
- */
+/** Creates an interpolation bindings with 2 arguments. */
 export declare function bind2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation bindings with 3 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param suffix
- */
+/** Creates an interpolation bindings with 3 arguments. */
 export declare function bind3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 4 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param suffix
- */
+/** Create an interpolation binding with 4 arguments. */
 export declare function bind4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 5 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param suffix
- */
+/** Creates an interpolation binding with 5 arguments. */
 export declare function bind5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 6 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param suffix
- */
+/** Creates an interpolation binding with 6 arguments. */
 export declare function bind6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 7 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param i5
- * @param v6
- * @param suffix
- */
+/** Creates an interpolation binding with 7 arguments. */
 export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 8 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param i5
- * @param v6
- * @param i6
- * @param v7
- * @param suffix
- */
+/** Creates an interpolation binding with 8 arguments. */
 export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
 export declare function getCurrentQueries(QueryType: {
