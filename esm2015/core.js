@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.3-102d06b
+ * @license Angular v5.2.3-ce51ea9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -682,7 +682,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.3-102d06b');
+const VERSION = new Version('5.2.3-ce51ea9');
 
 /**
  * @fileoverview added by tsickle
@@ -796,6 +796,7 @@ const __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'unde
     self instanceof WorkerGlobalScope && self;
 const __global = typeof global !== 'undefined' && global;
 const _global = __window || __global || __self;
+const promise = Promise.resolve(0);
 let _symbolIterator = null;
 /**
  * @return {?}
@@ -825,7 +826,13 @@ function getSymbolIterator() {
  * @return {?}
  */
 function scheduleMicroTask(fn) {
-    Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+    if (typeof Zone === 'undefined') {
+        // use promise to schedule microTask instead of use Zone
+        promise.then(() => { fn && fn.apply(null, null); });
+    }
+    else {
+        Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
+    }
 }
 /**
  * @param {?} a
