@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.2-f791e9f
+ * @license Angular v6.0.0-beta.2-e81606c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { merge } from 'rxjs/observable/merge';
 import { share } from 'rxjs/operator/share';
 import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
 
 /**
  * @fileoverview added by tsickle
@@ -688,7 +689,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.2-f791e9f');
+const VERSION = new Version('6.0.0-beta.2-e81606c');
 
 /**
  * @fileoverview added by tsickle
@@ -3716,7 +3717,11 @@ class EventEmitter extends Subject {
                     this.__isAsync ? () => { setTimeout(() => complete()); } : () => { complete(); };
             }
         }
-        return super.subscribe(schedulerFn, errorFn, completeFn);
+        const /** @type {?} */ sink = super.subscribe(schedulerFn, errorFn, completeFn);
+        if (generatorOrNext instanceof Subscription) {
+            generatorOrNext.add(sink);
+        }
+        return sink;
     }
 }
 

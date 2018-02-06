@@ -1,13 +1,13 @@
 /**
- * @license Angular v6.0.0-beta.2-f791e9f
+ * @license Angular v6.0.0-beta.2-e81606c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/Subject')) :
-	typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/Subject'], factory) :
-	(factory((global.ng = global.ng || {}, global.ng.core = {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx));
-}(this, (function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/Subject'), require('rxjs/Subscription')) :
+	typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/Subject', 'rxjs/Subscription'], factory) :
+	(factory((global.ng = global.ng || {}, global.ng.core = {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx,global.Rx));
+}(this, (function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject,rxjs_Subscription) { 'use strict';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.2-f791e9f
+ * @license Angular v6.0.0-beta.2-e81606c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.2-f791e9f');
+var VERSION = new Version('6.0.0-beta.2-e81606c');
 
 /**
  * @fileoverview added by tsickle
@@ -4390,7 +4390,11 @@ var EventEmitter = /** @class */ (function (_super) {
                     this.__isAsync ? function () { setTimeout(function () { return complete(); }); } : function () { complete(); };
             }
         }
-        return _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
+        var /** @type {?} */ sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
+        if (generatorOrNext instanceof rxjs_Subscription.Subscription) {
+            generatorOrNext.add(sink);
+        }
+        return sink;
     };
     return EventEmitter;
 }(rxjs_Subject.Subject));
