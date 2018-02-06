@@ -291,5 +291,6 @@ export declare function getCurrentQueries(QueryType: {
 }): LQueries;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getRenderer(): Renderer3;
+export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;

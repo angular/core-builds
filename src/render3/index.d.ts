@@ -12,6 +12,7 @@ export { InjectFlags, QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_RE
 export { NO_CHANGE as NC, bind as b, bind1 as b1, bind2 as b2, bind3 as b3, bind4 as b4, bind5 as b5, bind6 as b6, bind7 as b7, bind8 as b8, bindV as bV, componentRefresh as r, container as C, containerRefreshStart as cR, containerRefreshEnd as cr, elementAttribute as a, elementClass as k, elementEnd as e, elementProperty as p, elementStart as E, elementStyle as s, listener as L, memory as m, projection as P, projectionDef as pD, text as T, textBinding as t, viewStart as V, viewEnd as v } from './instructions';
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR } from './query';
+export { objectLiteral1 as o1, objectLiteral2 as o2, objectLiteral3 as o3, objectLiteral4 as o4, objectLiteral5 as o5, objectLiteral6 as o6, objectLiteral7 as o7, objectLiteral8 as o8 } from './object_literal';
 export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe };
 export { createComponentRef, detectChanges, getHostElement, markDirty, renderComponent };
 export { CssSelector } from './interfaces/projection';

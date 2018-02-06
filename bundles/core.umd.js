@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.2-7e51e52
+ * @license Angular v6.0.0-beta.2-2707012
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.2-7e51e52
+ * @license Angular v6.0.0-beta.2-2707012
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.2-7e51e52');
+var VERSION = new Version('6.0.0-beta.2-2707012');
 
 /**
  * @fileoverview added by tsickle
@@ -17177,7 +17177,8 @@ function createTView() {
         contentCheckHooks: null,
         viewHooks: null,
         viewCheckHooks: null,
-        destroyHooks: null
+        destroyHooks: null,
+        objectLiterals: null
     };
 }
 /**
@@ -18353,6 +18354,10 @@ function getRenderer() {
     return renderer;
 }
 /**
+ * @return {?}
+ */
+
+/**
  * @template T
  * @param {?} instanceOrArray
  * @return {?}
@@ -19295,6 +19300,168 @@ var QueryList_ = /** @class */ (function () {
  * Returns true if a query got dirty during change detection, false otherwise.
  * @param {?} queryList
  * @return {?}
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Updates the expression in the given object if it has changed and returns a copy of the object.
+ * Or if the expression hasn't changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex Index of object blueprint in objectLiterals
+ * @param {?} obj Object to update
+ * @param {?} key Key to set in object
+ * @param {?} exp Expression to set at key
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @return {?} A copy of the array or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @param {?} key4
+ * @param {?} exp4
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @param {?} key4
+ * @param {?} exp4
+ * @param {?} key5
+ * @param {?} exp5
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @param {?} key4
+ * @param {?} exp4
+ * @param {?} key5
+ * @param {?} exp5
+ * @param {?} key6
+ * @param {?} exp6
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @param {?} key4
+ * @param {?} exp4
+ * @param {?} key5
+ * @param {?} exp5
+ * @param {?} key6
+ * @param {?} exp6
+ * @param {?} key7
+ * @param {?} exp7
+ * @return {?} A copy of the object or NO_CHANGE
+ */
+
+/**
+ * Updates the expressions in the given object if they have changed and returns a copy of the
+ * object.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} objIndex
+ * @param {?} obj
+ * @param {?} key1
+ * @param {?} exp1
+ * @param {?} key2
+ * @param {?} exp2
+ * @param {?} key3
+ * @param {?} exp3
+ * @param {?} key4
+ * @param {?} exp4
+ * @param {?} key5
+ * @param {?} exp5
+ * @param {?} key6
+ * @param {?} exp6
+ * @param {?} key7
+ * @param {?} exp7
+ * @param {?} key8
+ * @param {?} exp8
+ * @return {?} A copy of the object or NO_CHANGE
  */
 
 /**
