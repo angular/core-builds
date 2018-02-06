@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.2-e81606c
+ * @license Angular v6.0.0-beta.2-7e51e52
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.2-e81606c
+ * @license Angular v6.0.0-beta.2-7e51e52
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.2-e81606c');
+var VERSION = new Version('6.0.0-beta.2-7e51e52');
 
 /**
  * @fileoverview added by tsickle
