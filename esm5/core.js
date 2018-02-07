@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-7a406a3
+ * @license Angular v6.0.0-beta.3-efc67ee
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -723,7 +723,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.3-7a406a3');
+var VERSION = new Version('6.0.0-beta.3-efc67ee');
 
 /**
  * @fileoverview added by tsickle
@@ -19071,7 +19071,7 @@ function invertObject(obj) {
  */
 
 /**
- * Invokes a pure pipe with 4 arguments.
+ * Invokes a pipe with 1 arguments.
  *
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
@@ -19082,7 +19082,7 @@ function invertObject(obj) {
  */
 
 /**
- * Invokes a pure pipe with 4 arguments.
+ * Invokes a pipe with 2 arguments.
  *
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
@@ -19094,7 +19094,7 @@ function invertObject(obj) {
  */
 
 /**
- * Invokes a pure pipe with 4 arguments.
+ * Invokes a pipe with 3 arguments.
  *
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
@@ -19107,7 +19107,7 @@ function invertObject(obj) {
  */
 
 /**
- * Invokes a pure pipe with 4 arguments.
+ * Invokes a pipe with 4 arguments.
  *
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
@@ -19121,7 +19121,7 @@ function invertObject(obj) {
  */
 
 /**
- * Invokes a pure pipe with variable number of arguments.
+ * Invokes a pipe with variable number of arguments.
  *
  * This instruction acts as a guard to {\@link PipeTransform#transform} invoking
  * the pipe only when an input to the pipe changes.
