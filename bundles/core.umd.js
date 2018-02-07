@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-efc67ee
+ * @license Angular v6.0.0-beta.3-b58c352
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.3-efc67ee
+ * @license Angular v6.0.0-beta.3-b58c352
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -761,7 +761,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.3-efc67ee');
+var VERSION = new Version('6.0.0-beta.3-b58c352');
 
 /**
  * @fileoverview added by tsickle
@@ -19315,7 +19315,7 @@ var QueryList_ = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Updates the expression in the given object if it has changed and returns a copy of the object.
+ * Updates the expression in the given object or array if it has changed and returns a copy.
  * Or if the expression hasn't changed, returns NO_CHANGE.
  *
  * @param {?} objIndex Index of object blueprint in objectLiterals
@@ -19326,8 +19326,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19340,8 +19339,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19356,8 +19354,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19374,8 +19371,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19394,8 +19390,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19416,8 +19411,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
@@ -19440,8 +19434,7 @@ var QueryList_ = /** @class */ (function () {
  */
 
 /**
- * Updates the expressions in the given object if they have changed and returns a copy of the
- * object.
+ * Updates the expressions in the given object or array if they have changed and returns a copy.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
  * @param {?} objIndex
