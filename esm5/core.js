@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-9744a1c
+ * @license Angular v6.0.0-beta.3-7e95802
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -723,7 +723,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.3-9744a1c');
+var VERSION = new Version('6.0.0-beta.3-7e95802');
 
 /**
  * @fileoverview added by tsickle
@@ -19880,7 +19880,7 @@ var QueryList_ = /** @class */ (function () {
  * The `\@childAnimation` trigger will not animate because `\@.disabled` prevents it from happening
  * (when true).
  *
- * Note that `\@.disbled` will only disable all animations (this means any animations running on
+ * Note that `\@.disabled` will only disable all animations (this means any animations running on
  * the same element will also be disabled).
  *
  * ### Disabling Animations Application-wide
