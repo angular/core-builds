@@ -195,14 +195,14 @@ export declare function containerRefreshStart(index: number): void;
  */
 export declare function containerRefreshEnd(): void;
 /**
- * Creates an LViewNode.
+ * Marks the start of an embedded view.
  *
  * @param viewBlockId The ID of this view
- * @return Whether or not this view is in creation mode
+ * @return boolean Whether or not this view is in creation mode
  */
-export declare function viewStart(viewBlockId: number): boolean;
-/** Marks the end of the LViewNode. */
-export declare function viewEnd(): void;
+export declare function embeddedViewStart(viewBlockId: number): boolean;
+/** Marks the end of an embedded view. */
+export declare function embeddedViewEnd(): void;
 /**
  * Refreshes the component view.
  *

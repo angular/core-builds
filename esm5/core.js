@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-67cf712
+ * @license Angular v6.0.0-beta.3-3f5a3d6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -723,7 +723,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.3-67cf712');
+var VERSION = new Version('6.0.0-beta.3-3f5a3d6');
 
 /**
  * @fileoverview added by tsickle
@@ -16036,6 +16036,14 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
  */
 
 /**
+ * Returns wether the `renderer` is a `ProceduralRenderer3`
+ * @param {?} renderer
+ * @return {?}
+ */
+function isProceduralRenderer(renderer) {
+    return !!((/** @type {?} */ (renderer)).listen);
+}
+/**
  * Procedural style of API needed to create elements and text nodes.
  *
  * In non-native browser environments (e.g. platforms such as web-workers), this is the
@@ -16268,14 +16276,16 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
             var /** @type {?} */ type = node.flags & 3;
             var /** @type {?} */ nextNode = null;
             var /** @type {?} */ renderer = container.view.renderer;
-            var /** @type {?} */ isFnRenderer = (/** @type {?} */ (renderer)).listen;
             if (type === 3 /* Element */) {
-                insertMode ? (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
-                    .insertBefore))(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
-                    parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true)) :
-                    (isFnRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer))
-                        .removeChild))(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
-                        parent.removeChild(/** @type {?} */ ((node.native))));
+                if (insertMode) {
+                    isProceduralRenderer(renderer) ?
+                        renderer.insertBefore(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
+                        parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true);
+                }
+                else {
+                    isProceduralRenderer(renderer) ? renderer.removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
+                        parent.removeChild(/** @type {?} */ ((node.native)));
+                }
                 nextNode = node.next;
             }
             else if (type === 0 /* Container */) {
@@ -16491,40 +16501,31 @@ function executeOnDestroys(view) {
     }
 }
 /**
- * Returns whether a child native element should be inserted now in the given parent.
+ * Returns whether a native element should be inserted in the given parent.
  *
- * If the parent is a view, the element will be appended as part of viewEnd(), so
- * the element should not be appended now. Similarly, if the child is a content child
- * of a parent component, the child will be appended to the right position later by
- * the content projection system.
+ * The native node can be inserted when its parent is:
+ * - A regular element => Yes
+ * - A component host element =>
+ *    - if the `currentView` === the parent `view`: The element is in the content (vs the
+ *      template)
+ *      => don't add as the parent component will project if needed.
+ *    - `currentView` !== the parent `view` => The element is in the template (vs the content),
+ *      add it
+ * - View element => delay insertion, will be done on `viewEnd()`
  *
  * @param {?} parent The parent in which to insert the child
- * @param {?} view
- * @return {?} Whether the child element should be inserted now.
+ * @param {?} currentView The LView being processed
+ * @return {?} boolean Whether the child element should be inserted.
  */
-function canInsertNativeNode(parent, view) {
-    // Only add native child element to parent element if the parent element is regular Element.
-    // If parent is:
-    // - Regular element => add child
-    // - Component host element =>
-    //    - Current View, and parent view same => content => don't add -> parent component will
-    //    re-project if needed.
-    //    - Current View, and parent view different => view => add Child
-    // - View element => View's get added separately.
-    return ((parent.flags & 3 /* TYPE_MASK */) === 3 /* Element */ &&
-        (parent.view !== view /* Crossing View Boundaries, it is Component, but add Element of View */
-            || parent.data === null /* Regular Element. */));
-    // we are adding to an Element which is either:
-    // - Not a component (will not be re-projected, just added)
-    // - View of the Component
+function canInsertNativeNode(parent, currentView) {
+    var /** @type {?} */ parentIsElement = (parent.flags & 3 /* TYPE_MASK */) === 3;
+    return parentIsElement &&
+        (parent.view !== currentView || parent.data === null /* Regular Element. */);
 }
 /**
- * Appends the provided child element to the provided parent, if appropriate.
+ * Appends the `child` element to the `parent`.
  *
- * If the parent is a view, the element will be appended as part of viewEnd(), so
- * the element should not be appended now. Similarly, if the child is a content child
- * of a parent component, the child will be appended to the right position later by
- * the content projection system. Otherwise, append normally.
+ * The element insertion might be delayed {\@link canInsertNativeNode}
  *
  * @param {?} parent The parent to which to append the child
  * @param {?} child The child that should be appended
@@ -16535,18 +16536,15 @@ function appendChild(parent, child, currentView) {
     if (child !== null && canInsertNativeNode(parent, currentView)) {
         // We only add element if not in View or not projected.
         var /** @type {?} */ renderer = currentView.renderer;
-        (/** @type {?} */ (renderer)).listen ? /** @type {?} */ (((/** @type {?} */ (renderer)).appendChild))(/** @type {?} */ (((parent.native))), child) : /** @type {?} */ ((parent.native)).appendChild(child);
+        isProceduralRenderer(renderer) ? renderer.appendChild(/** @type {?} */ (((parent.native))), child) : /** @type {?} */ ((parent.native)).appendChild(child);
         return true;
     }
     return false;
 }
 /**
- * Inserts the provided node before the correct element in the DOM, if appropriate.
+ * Inserts the provided node before the correct element in the DOM.
  *
- * If the parent is a view, the element will be inserted as part of viewEnd(), so
- * the element should not be inserted now. Similarly, if the child is a content child
- * of a parent component, the child will be inserted to the right position later by
- * the content projection system. Otherwise, insertBefore normally.
+ * The element insertion might be delayed {\@link canInsertNativeNode}
  *
  * @param {?} node Node to insert
  * @param {?} currentView Current LView
@@ -16554,20 +16552,11 @@ function appendChild(parent, child, currentView) {
  */
 function insertChild(node, currentView) {
     var /** @type {?} */ parent = /** @type {?} */ ((node.parent));
-    // Only add child element to parent element if the parent element is regular Element.
-    // If parent is:
-    // - Normal element => add child
-    // - Component element =>
-    //    - Current View, and parent view same => content don't add -> parent component will
-    //    re-project if needed.
-    //    - Current View, and parent view different => view => add Child
-    // - View element => View's get added separately.
     if (canInsertNativeNode(parent, currentView)) {
-        // We only add element if not in View or not projected.
         var /** @type {?} */ nativeSibling = findNextRNodeSibling(node, null);
         var /** @type {?} */ renderer = currentView.renderer;
-        (/** @type {?} */ (renderer)).listen ? /** @type {?} */ (((/** @type {?} */ (renderer))
-            .insertBefore))(/** @type {?} */ ((parent.native)), /** @type {?} */ ((node.native)), nativeSibling) : /** @type {?} */ ((parent.native)).insertBefore(/** @type {?} */ ((node.native)), nativeSibling, false);
+        isProceduralRenderer(renderer) ?
+            renderer.insertBefore(/** @type {?} */ ((parent.native)), /** @type {?} */ ((node.native)), nativeSibling) : /** @type {?} */ ((parent.native)).insertBefore(/** @type {?} */ ((node.native)), nativeSibling, false);
     }
 }
 /**
@@ -17151,9 +17140,9 @@ function createTView() {
  */
 function setUpAttributes(native, attrs) {
     ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
-    var /** @type {?} */ isProceduralRenderer = (/** @type {?} */ (renderer)).setAttribute;
+    var /** @type {?} */ isProceduralRenderer$$1 = (/** @type {?} */ (renderer)).setAttribute;
     for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
-        isProceduralRenderer ? /** @type {?} */ (((/** @type {?} */ (renderer)).setAttribute))(native, attrs[i], attrs[i | 1]) :
+        isProceduralRenderer$$1 ? /** @type {?} */ (((/** @type {?} */ (renderer)).setAttribute))(native, attrs[i], attrs[i | 1]) :
             native.setAttribute(attrs[i], attrs[i | 1]);
     }
 }
@@ -17219,8 +17208,8 @@ function listener(eventName, listener, useCapture) {
     var /** @type {?} */ native = /** @type {?} */ (node.native);
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
-    if ((/** @type {?} */ (renderer)).listen) {
-        var /** @type {?} */ cleanupFn = (/** @type {?} */ (renderer)).listen(native, eventName, listener);
+    if (isProceduralRenderer(renderer)) {
+        var /** @type {?} */ cleanupFn = renderer.listen(native, eventName, listener);
         (cleanup || (cleanup = currentView.cleanup = [])).push(cleanupFn, null);
     }
     else {
@@ -17681,12 +17670,12 @@ function refreshDynamicChildren() {
     }
 }
 /**
- * Creates an LViewNode.
+ * Marks the start of an embedded view.
  *
  * @param {?} viewBlockId The ID of this view
- * @return {?} Whether or not this view is in creation mode
+ * @return {?} boolean Whether or not this view is in creation mode
  */
-function viewStart(viewBlockId) {
+function embeddedViewStart(viewBlockId) {
     var /** @type {?} */ container = /** @type {?} */ ((isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent))));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     var /** @type {?} */ lContainer = container.data;
@@ -17731,10 +17720,10 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     return tContainer[viewIndex];
 }
 /**
- * Marks the end of the LViewNode.
+ * Marks the end of an embedded view.
  * @return {?}
  */
-function viewEnd() {
+function embeddedViewEnd() {
     isParent = false;
     var /** @type {?} */ viewNode = previousOrParentNode = /** @type {?} */ (currentView.node);
     var /** @type {?} */ container = /** @type {?} */ (previousOrParentNode.parent);
@@ -20899,5 +20888,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, viewStart as ɵV, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, viewEnd as ɵv, componentRefresh as ɵr, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbf, group$1 as ɵbg, keyframes$1 as ɵbk, sequence$1 as ɵbh, state$1 as ɵbj, style$1 as ɵbi, transition$1 as ɵbl, trigger$1 as ɵbe, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope as ɵw, detectWTF as ɵu, endTimeRange as ɵz, leave as ɵx, startTimeRange as ɵy, stringify$1 as ɵbc, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵba, DebugContext as ɵbb };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Injectable, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbf, group$1 as ɵbg, keyframes$1 as ɵbk, sequence$1 as ɵbh, state$1 as ɵbj, style$1 as ɵbi, transition$1 as ɵbl, trigger$1 as ɵbe, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope as ɵw, detectWTF as ɵu, endTimeRange as ɵz, leave as ɵx, startTimeRange as ɵy, stringify$1 as ɵbc, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵba, DebugContext as ɵbb };
 //# sourceMappingURL=core.js.map
