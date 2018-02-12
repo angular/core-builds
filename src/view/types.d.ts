@@ -40,6 +40,7 @@ export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory
     providersByKey: {
         [tokenKey: string]: NgModuleProviderDef;
     };
+    modules: any[];
 }
 export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
 }
@@ -182,6 +183,7 @@ export declare const enum NodeFlags {
     TypeViewQuery = 134217728,
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
+    TypeNgModule = 1073741824,
     CatQuery = 201326592,
     Types = 201347067,
 }
@@ -272,7 +274,12 @@ export declare const enum DepFlags {
     None = 0,
     SkipSelf = 1,
     Optional = 2,
+    Self = 4,
     Value = 8,
+}
+export interface InjectableDef {
+    scope: any;
+    factory: () => any;
 }
 export interface TextDef {
     prefix: string;
