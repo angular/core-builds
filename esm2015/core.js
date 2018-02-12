@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-a57df4e
+ * @license Angular v6.0.0-beta.3-88bec23
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -689,7 +689,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.3-a57df4e');
+const VERSION = new Version('6.0.0-beta.3-88bec23');
 
 /**
  * @fileoverview added by tsickle
@@ -14871,9 +14871,9 @@ function createTView() {
  */
 function setUpAttributes(native, attrs) {
     ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
-    const /** @type {?} */ isProceduralRenderer$$1 = (/** @type {?} */ (renderer)).setAttribute;
+    const /** @type {?} */ isProc = isProceduralRenderer(renderer);
     for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
-        isProceduralRenderer$$1 ? /** @type {?} */ (((/** @type {?} */ (renderer)).setAttribute))(native, attrs[i], attrs[i | 1]) :
+        isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrs[i], attrs[i | 1]) :
             native.setAttribute(attrs[i], attrs[i | 1]);
     }
 }
@@ -14897,8 +14897,9 @@ function locateHostElement(factory, elementOrSelector) {
     rendererFactory = factory;
     const /** @type {?} */ defaultRenderer = factory.createRenderer(null, null);
     const /** @type {?} */ rNode = typeof elementOrSelector === 'string' ?
-        ((/** @type {?} */ (defaultRenderer)).selectRootElement ?
-            (/** @type {?} */ (defaultRenderer)).selectRootElement(elementOrSelector) : /** @type {?} */ (((/** @type {?} */ (defaultRenderer)).querySelector))(elementOrSelector)) :
+        (isProceduralRenderer(defaultRenderer) ?
+            defaultRenderer.selectRootElement(elementOrSelector) :
+            defaultRenderer.querySelector(elementOrSelector)) :
         elementOrSelector;
     if (ngDevMode && !rNode) {
         if (typeof elementOrSelector === 'string') {
@@ -14950,8 +14951,7 @@ function listener(eventName, listener, useCapture = false) {
     if (tNode.outputs === undefined) {
         // if we create TNode here, inputs must be undefined so we know they still need to be
         // checked
-        tNode.outputs = null;
-        tNode = generatePropertyAliases(node.flags, tNode);
+        tNode.outputs = generatePropertyAliases(node.flags, 1 /* Output */);
     }
     const /** @type {?} */ outputs = tNode.outputs;
     let /** @type {?} */ outputData;
@@ -15018,13 +15018,12 @@ function elementProperty(index, propName, value) {
     if (value === NO_CHANGE)
         return;
     const /** @type {?} */ node = /** @type {?} */ (data[index]);
-    let /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
+    const /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
     // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
     // yet been checked
     if (tNode.inputs === undefined) {
         // mark inputs as checked
-        tNode.inputs = null;
-        tNode = generatePropertyAliases(node.flags, tNode, true);
+        tNode.inputs = generatePropertyAliases(node.flags, 0 /* Input */);
     }
     const /** @type {?} */ inputData = tNode.inputs;
     let /** @type {?} */ dataValue;
@@ -15033,10 +15032,9 @@ function elementProperty(index, propName, value) {
     }
     else {
         const /** @type {?} */ native = node.native;
-        (/** @type {?} */ (renderer)).setProperty ?
-            (/** @type {?} */ (renderer)).setProperty(native, propName, value) :
-            native.setProperty ? native.setProperty(propName, value) :
-                (/** @type {?} */ (native))[propName] = value;
+        isProceduralRenderer(renderer) ? renderer.setProperty(native, propName, value) :
+            (native.setProperty ? native.setProperty(propName, value) :
+                (/** @type {?} */ (native))[propName] = value);
     }
 }
 /**
@@ -15073,34 +15071,33 @@ function setInputsForProperty(inputs, value) {
     }
 }
 /**
- * This function consolidates all the inputs or outputs defined by directives
- * on this node into one object and stores it in tData so it can
- * be shared between all templates of this type.
+ * Consolidates all inputs or outputs of all directives on this logical node.
  *
- * @param {?} flags
- * @param {?} tNode
- * @param {?=} isInputData
- * @return {?}
+ * @param {?} lNodeFlags
+ * @param {?} direction
+ * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
-function generatePropertyAliases(flags, tNode, isInputData = false) {
-    const /** @type {?} */ start = flags >> 12;
-    const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2;
-    for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
-        const /** @type {?} */ directiveDef = /** @type {?} */ (((tData))[i]);
-        const /** @type {?} */ propertyAliasMap = isInputData ? directiveDef.inputs : directiveDef.outputs;
-        for (let /** @type {?} */ publicName in propertyAliasMap) {
-            if (propertyAliasMap.hasOwnProperty(publicName)) {
-                const /** @type {?} */ internalName = propertyAliasMap[publicName];
-                const /** @type {?} */ staticDirData = isInputData ?
-                    (tNode.inputs || (tNode.inputs = {})) :
-                    (tNode.outputs || (tNode.outputs = {}));
-                const /** @type {?} */ hasProperty = staticDirData.hasOwnProperty(publicName);
-                hasProperty ? staticDirData[publicName].push(i, internalName) :
-                    (staticDirData[publicName] = [i, internalName]);
+function generatePropertyAliases(lNodeFlags, direction) {
+    const /** @type {?} */ size = (lNodeFlags & 4092 /* SIZE_MASK */) >> 2;
+    let /** @type {?} */ propStore = null;
+    if (size > 0) {
+        const /** @type {?} */ start = lNodeFlags >> 12;
+        const /** @type {?} */ isInput = direction === 0;
+        for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+            const /** @type {?} */ directiveDef = /** @type {?} */ (((tData))[i]);
+            const /** @type {?} */ propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
+            for (let /** @type {?} */ publicName in propertyAliasMap) {
+                if (propertyAliasMap.hasOwnProperty(publicName)) {
+                    propStore = propStore || {};
+                    const /** @type {?} */ internalName = propertyAliasMap[publicName];
+                    const /** @type {?} */ hasProperty = propStore.hasOwnProperty(publicName);
+                    hasProperty ? propStore[publicName].push(i, internalName) :
+                        (propStore[publicName] = [i, internalName]);
+                }
             }
         }
     }
-    return tNode;
+    return propStore;
 }
 /**
  * Add or remove a class in a classList.
@@ -15130,16 +15127,15 @@ function elementStyle(index, styleName, value, suffix) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (value == null) {
-            (/** @type {?} */ (renderer)).removeStyle ?
-                (/** @type {?} */ (renderer))
-                    .removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
+            isProceduralRenderer(renderer) ?
+                renderer.removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
                 lElement.native.style.removeProperty(styleName);
         }
         else {
-            (/** @type {?} */ (renderer)).setStyle ?
-                (/** @type {?} */ (renderer))
-                    .setStyle(lElement.native, styleName, suffix ? stringify$1(value) + suffix : stringify$1(value), RendererStyleFlags3.DashCase) :
-                lElement.native.style.setProperty(styleName, suffix ? stringify$1(value) + suffix : stringify$1(value));
+            const /** @type {?} */ strValue = suffix ? stringify$1(value) + suffix : stringify$1(value);
+            isProceduralRenderer(renderer) ?
+                renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
+                lElement.native.style.setProperty(styleName, strValue);
         }
     }
 }
@@ -15154,8 +15150,8 @@ function elementStyle(index, styleName, value, suffix) {
 function text(index, value) {
     ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
     const /** @type {?} */ textNode = value != null ?
-        ((/** @type {?} */ (renderer)).createText ?
-            (/** @type {?} */ (renderer)).createText(stringify$1(value)) : /** @type {?} */ (((/** @type {?} */ (renderer)).createTextNode))(stringify$1(value))) :
+        (isProceduralRenderer(renderer) ? renderer.createText(stringify$1(value)) :
+            renderer.createTextNode(stringify$1(value))) :
         null;
     const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
     // Text nodes are self closing.
@@ -15178,15 +15174,14 @@ function textBinding(index, value) {
     if (existingNode.native) {
         // If DOM node exists and value changed, update textContent
         value !== NO_CHANGE &&
-            ((/** @type {?} */ (renderer)).setValue ?
-                (/** @type {?} */ (renderer)).setValue(existingNode.native, stringify$1(value)) :
+            (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
                 existingNode.native.textContent = stringify$1(value));
     }
     else {
         // Node was created but DOM node creation was delayed. Create and append now.
-        existingNode.native =
-            ((/** @type {?} */ (renderer)).createText ?
-                (/** @type {?} */ (renderer)).createText(stringify$1(value)) : /** @type {?} */ (((/** @type {?} */ (renderer)).createTextNode))(stringify$1(value)));
+        existingNode.native = isProceduralRenderer(renderer) ?
+            renderer.createText(stringify$1(value)) :
+            renderer.createTextNode(stringify$1(value));
         insertChild(existingNode, currentView);
     }
 }
