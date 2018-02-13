@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-72f8abd
+ * @license Angular v6.0.0-beta.3-a589ca0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1858,7 +1858,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.3-72f8abd');
+const VERSION = new Version('6.0.0-beta.3-a589ca0');
 
 /**
  * @fileoverview added by tsickle
@@ -14563,6 +14563,24 @@ function insertChild(node, currentView) {
  * @param {?} currentView Current LView
  * @return {?}
  */
+function appendProjectedNode(node, currentParent, currentView) {
+    if ((node.flags & 3 /* TYPE_MASK */) !== 0 /* Container */) {
+        appendChild(currentParent, (/** @type {?} */ (node)).native, currentView);
+    }
+    else if (canInsertNativeNode(currentParent, currentView)) {
+        // The node we are adding is a Container and we are adding it to Element which
+        // is not a component (no more re-projection).
+        // Alternatively a container is projected at the root of a component's template
+        // and can't be re-projected (as not content of any component).
+        // Assignee the final projection location in those cases.
+        const /** @type {?} */ lContainer = (/** @type {?} */ (node)).data;
+        lContainer.renderParent = /** @type {?} */ (currentParent);
+        const /** @type {?} */ views = lContainer.views;
+        for (let /** @type {?} */ i = 0; i < views.length; i++) {
+            addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
+        }
+    }
+}
 
 /**
  * @fileoverview added by tsickle
@@ -14576,25 +14594,109 @@ function insertChild(node, currentView) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * @param {?} nodeClassAttrVal
+ * @param {?} cssClassToMatch
+ * @return {?}
+ */
+function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
+    const /** @type {?} */ nodeClassesLen = nodeClassAttrVal.length;
+    const /** @type {?} */ matchIndex = /** @type {?} */ ((nodeClassAttrVal)).indexOf(cssClassToMatch);
+    const /** @type {?} */ matchEndIdx = matchIndex + cssClassToMatch.length;
+    if (matchIndex === -1 // no match
+        || (matchIndex > 0 && /** @type {?} */ ((nodeClassAttrVal))[matchIndex - 1] !== ' ') // no space before
+        ||
+            (matchEndIdx < nodeClassesLen && /** @type {?} */ ((nodeClassAttrVal))[matchEndIdx] !== ' ')) {
+        return false;
+    }
+    return true;
+}
+/**
  * A utility function to match an Ivy node static data against a simple CSS selector
  *
  * @param {?} tNode
  * @param {?} selector
  * @return {?} true if node matches the selector.
  */
-
+function isNodeMatchingSimpleSelector(tNode, selector) {
+    const /** @type {?} */ noOfSelectorParts = selector.length;
+    ngDevMode && assertNotNull(selector[0], 'selector[0]');
+    const /** @type {?} */ tagNameInSelector = selector[0];
+    // check tag tame
+    if (tagNameInSelector !== '' && tagNameInSelector !== tNode.tagName) {
+        return false;
+    }
+    // short-circuit case where we are only matching on element's tag name
+    if (noOfSelectorParts === 1) {
+        return true;
+    }
+    // short-circuit case where an element has no attrs but a selector tries to match some
+    if (noOfSelectorParts > 1 && !tNode.attrs) {
+        return false;
+    }
+    const /** @type {?} */ attrsInNode = /** @type {?} */ ((tNode.attrs));
+    for (let /** @type {?} */ i = 1; i < noOfSelectorParts; i += 2) {
+        const /** @type {?} */ attrNameInSelector = selector[i];
+        const /** @type {?} */ attrIdxInNode = attrsInNode.indexOf(attrNameInSelector);
+        if (attrIdxInNode % 2 !== 0) {
+            // attribute names are stored at even indexes
+            return false;
+        }
+        else {
+            const /** @type {?} */ attrValInSelector = selector[i + 1];
+            if (attrValInSelector !== '') {
+                // selector should also match on an attribute value
+                const /** @type {?} */ attrValInNode = attrsInNode[attrIdxInNode + 1];
+                if (attrNameInSelector === 'class') {
+                    // iterate over all the remaining items in the selector selector array = class names
+                    for (i++; i < noOfSelectorParts; i++) {
+                        if (!isCssClassMatching(attrValInNode, selector[i])) {
+                            return false;
+                        }
+                    }
+                }
+                else if (attrValInSelector !== attrValInNode) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 /**
  * @param {?} tNode
  * @param {?} selector
  * @return {?}
  */
-
+function isNodeMatchingSelectorWithNegations(tNode, selector) {
+    const /** @type {?} */ positiveSelector = selector[0];
+    if (positiveSelector != null && !isNodeMatchingSimpleSelector(tNode, positiveSelector)) {
+        return false;
+    }
+    // do we have any negation parts in this selector?
+    const /** @type {?} */ negativeSelectors = selector[1];
+    if (negativeSelectors) {
+        for (let /** @type {?} */ i = 0; i < negativeSelectors.length; i++) {
+            // if one of negative selectors matched than the whole selector doesn't match
+            if (isNodeMatchingSimpleSelector(tNode, negativeSelectors[i])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 /**
  * @param {?} tNode
  * @param {?} selector
  * @return {?}
  */
-
+function isNodeMatchingSelector(tNode, selector) {
+    for (let /** @type {?} */ i = 0; i < selector.length; i++) {
+        if (isNodeMatchingSelectorWithNegations(tNode, selector[i])) {
+            return true;
+        }
+    }
+    return false;
+}
 /**
  * Checks a given node against matching selectors and returns
  * selector index (or 0 if none matched);
@@ -14602,6 +14704,14 @@ function insertChild(node, currentView) {
  * @param {?} selectors
  * @return {?}
  */
+function matchingSelectorIndex(tNode, selectors) {
+    for (let /** @type {?} */ i = 0; i < selectors.length; i++) {
+        if (isNodeMatchingSelector(tNode, selectors[i])) {
+            return i + 1; // first matching selector "captures" a given node
+        }
+    }
+    return 0;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -14652,6 +14762,27 @@ function notImplemented() {
  * @param {?} list
  * @return {?}
  */
+function flatten$1(list) {
+    const /** @type {?} */ result = [];
+    let /** @type {?} */ i = 0;
+    while (i < list.length) {
+        const /** @type {?} */ item = list[i];
+        if (Array.isArray(item)) {
+            if (item.length > 0) {
+                list = item.concat(list.slice(i + 1));
+                i = 0;
+            }
+            else {
+                i++;
+            }
+        }
+        else {
+            result.push(item);
+            i++;
+        }
+    }
+    return result;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -15749,7 +15880,56 @@ function componentRefresh(directiveIndex, elementIndex) {
  * @param {?=} selectors
  * @return {?}
  */
-
+function projectionDef(index, selectors) {
+    const /** @type {?} */ noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
+    const /** @type {?} */ distributedNodes = new Array(noOfNodeBuckets);
+    for (let /** @type {?} */ i = 0; i < noOfNodeBuckets; i++) {
+        distributedNodes[i] = [];
+    }
+    const /** @type {?} */ componentNode = findComponentHost(currentView);
+    let /** @type {?} */ componentChild = componentNode.child;
+    while (componentChild !== null) {
+        // execute selector matching logic if and only if:
+        // - there are selectors defined
+        // - a node has a tag name / attributes that can be matched
+        if (selectors && componentChild.tNode) {
+            const /** @type {?} */ matchedIdx = matchingSelectorIndex(componentChild.tNode, /** @type {?} */ ((selectors)));
+            distributedNodes[matchedIdx].push(componentChild);
+        }
+        else {
+            distributedNodes[0].push(componentChild);
+        }
+        componentChild = componentChild.next;
+    }
+    ngDevMode && assertDataNext(index);
+    data[index] = distributedNodes;
+}
+/**
+ * Updates the linked list of a projection node, by appending another linked list.
+ *
+ * @param {?} projectionNode Projection node whose projected nodes linked list has to be updated
+ * @param {?} appendedFirst First node of the linked list to append.
+ * @param {?} appendedLast Last node of the linked list to append.
+ * @return {?}
+ */
+function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
+    // appendedFirst can be null if and only if appendedLast is also null
+    ngDevMode &&
+        assertEqual(!appendedFirst === !appendedLast, true, '!appendedFirst === !appendedLast');
+    if (!appendedLast) {
+        // nothing to append
+        return;
+    }
+    const /** @type {?} */ projectionNodeData = projectionNode.data;
+    if (projectionNodeData.tail) {
+        projectionNodeData.tail.pNextOrParent = appendedFirst;
+    }
+    else {
+        projectionNodeData.head = appendedFirst;
+    }
+    projectionNodeData.tail = appendedLast;
+    appendedLast.pNextOrParent = projectionNode;
+}
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -15760,7 +15940,55 @@ function componentRefresh(directiveIndex, elementIndex) {
  * @param {?=} attrs - attributes attached to the ng-content node, if present
  * @return {?}
  */
-
+function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
+    const /** @type {?} */ node = createLNode(nodeIndex, 1 /* Projection */, null, { head: null, tail: null });
+    if (node.tNode == null) {
+        node.tNode = createTNode(null, attrs || null, null, null);
+    }
+    isParent = false; // self closing
+    const /** @type {?} */ currentParent = node.parent;
+    // re-distribution of projectable nodes is memorized on a component's view level
+    const /** @type {?} */ componentNode = findComponentHost(currentView);
+    // make sure that nodes to project were memorized
+    const /** @type {?} */ nodesForSelector = valueInData(/** @type {?} */ ((/** @type {?} */ ((componentNode.data)).data)), localIndex)[selectorIndex];
+    // build the linked list of projected nodes:
+    for (let /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
+        const /** @type {?} */ nodeToProject = nodesForSelector[i];
+        if ((nodeToProject.flags & 3 /* TYPE_MASK */) === 1 /* Projection */) {
+            const /** @type {?} */ previouslyProjected = (/** @type {?} */ (nodeToProject)).data;
+            appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
+        }
+        else {
+            appendToProjectionNode(node, /** @type {?} */ (nodeToProject), /** @type {?} */ (nodeToProject));
+        }
+    }
+    if (canInsertNativeNode(currentParent, currentView)) {
+        // process each node in the list of projected nodes:
+        let /** @type {?} */ nodeToProject = node.data.head;
+        const /** @type {?} */ lastNodeToProject = node.data.tail;
+        while (nodeToProject) {
+            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, currentView);
+            nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
+        }
+    }
+}
+/**
+ * Given a current view, finds the nearest component's host (LElement).
+ *
+ * @param {?} lView LView for which we want a host element node
+ * @return {?} The host node
+ */
+function findComponentHost(lView) {
+    let /** @type {?} */ viewRootLNode = lView.node;
+    while ((viewRootLNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+        ngDevMode && assertNotNull(lView.parent, 'lView.parent');
+        lView = /** @type {?} */ ((lView.parent));
+        viewRootLNode = lView.node;
+    }
+    ngDevMode && assertNodeType(viewRootLNode, 3 /* Element */);
+    ngDevMode && assertNotNull(viewRootLNode.data, 'node.data');
+    return /** @type {?} */ (viewRootLNode);
+}
 /**
  * Adds a LView or a LContainer to the end of the current view tree.
  *
@@ -16253,21 +16481,52 @@ function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v
  * @param {?=} value
  * @return {?}
  */
-
+function memory(index, value) {
+    return valueInData(data, index, value);
+}
+/**
+ * @template T
+ * @param {?} data
+ * @param {?} index
+ * @param {?=} value
+ * @return {?}
+ */
+function valueInData(data, index, value) {
+    if (value === undefined) {
+        ngDevMode && assertDataInRange(index, data);
+        value = data[index];
+    }
+    else {
+        // We don't store any static data for local variables, so the first time
+        // we see the template, we should store as null to avoid a sparse array
+        if (index >= tData.length) {
+            tData[index] = null;
+        }
+        data[index] = value;
+    }
+    return /** @type {?} */ ((value));
+}
 /**
  * Gets the binding at the current bindingIndex
  * @return {?}
  */
-
+function peekBinding() {
+    ngDevMode && assertNotEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    return data[bindingIndex];
+}
 /**
  * @param {?} QueryType
  * @return {?}
  */
-
+function getCurrentQueries(QueryType) {
+    return currentQueries || (currentQueries = new QueryType());
+}
 /**
  * @return {?}
  */
-
+function getPreviousOrParentNode() {
+    return previousOrParentNode;
+}
 /**
  * @return {?}
  */
@@ -16424,6 +16683,10 @@ const NG_ELEMENT_ID = '__NG_ELEMENT_ID__';
  */
 const BLOOM_SIZE = 128;
 /**
+ * Counter used to generate unique IDs for directives.
+ */
+let nextNgElementId = 0;
+/**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.
  *
@@ -16431,18 +16694,78 @@ const BLOOM_SIZE = 128;
  * @param {?} type The directive to register
  * @return {?}
  */
-
+function bloomAdd(injector, type) {
+    let /** @type {?} */ id = (/** @type {?} */ (type))[NG_ELEMENT_ID];
+    // Set a unique ID on the directive type, so if something tries to inject the directive,
+    // we can easily retrieve the ID and hash it into the bloom bit that should be checked.
+    if (id == null) {
+        id = (/** @type {?} */ (type))[NG_ELEMENT_ID] = nextNgElementId++;
+    }
+    // We only have BLOOM_SIZE (128) slots in our bloom filter (4 buckets * 32 bits each),
+    // so all unique IDs must be modulo-ed into a number from 0 - 127 to fit into the filter.
+    // This means that after 128, some directives will share slots, leading to some false positives
+    // when checking for a directive's presence.
+    const /** @type {?} */ bloomBit = id % BLOOM_SIZE;
+    // Create a mask that targets the specific bit associated with the directive.
+    // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
+    // to bit positions 0 - 31 in a 32 bit integer.
+    const /** @type {?} */ mask = 1 << bloomBit;
+    // Use the raw bloomBit number to determine which bloom filter bucket we should check
+    // e.g: bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127]
+    if (bloomBit < 64) {
+        if (bloomBit < 32) {
+            // Then use the mask to flip on the bit (0-31) associated with the directive in that bucket
+            injector.bf0 |= mask;
+        }
+        else {
+            injector.bf1 |= mask;
+        }
+    }
+    else {
+        if (bloomBit < 96) {
+            injector.bf2 |= mask;
+        }
+        else {
+            injector.bf3 |= mask;
+        }
+    }
+}
 /**
  * @return {?}
  */
-
+function getOrCreateNodeInjector() {
+    ngDevMode && assertPreviousIsParent();
+    return getOrCreateNodeInjectorForNode(/** @type {?} */ (getPreviousOrParentNode()));
+}
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
  * @param {?} node for which an injector should be retrieved / created.
  * @return {?} Node injector
  */
-
+function getOrCreateNodeInjectorForNode(node) {
+    const /** @type {?} */ nodeInjector = node.nodeInjector;
+    const /** @type {?} */ parentInjector = node.parent && node.parent.nodeInjector;
+    if (nodeInjector != parentInjector) {
+        return /** @type {?} */ ((nodeInjector));
+    }
+    return node.nodeInjector = {
+        parent: parentInjector,
+        node: node,
+        bf0: 0,
+        bf1: 0,
+        bf2: 0,
+        bf3: 0,
+        cbf0: parentInjector == null ? 0 : parentInjector.cbf0 | parentInjector.bf0,
+        cbf1: parentInjector == null ? 0 : parentInjector.cbf1 | parentInjector.bf1,
+        cbf2: parentInjector == null ? 0 : parentInjector.cbf2 | parentInjector.bf2,
+        cbf3: parentInjector == null ? 0 : parentInjector.cbf3 | parentInjector.bf3,
+        injector: null,
+        templateRef: null,
+        viewContainerRef: null,
+        elementRef: null
+    };
+}
 /**
  * Constructs an injection error with the given text and token.
  *
@@ -16460,14 +16783,18 @@ function createInjectionError(text$$1, token) {
  * @param {?} def The definition of the directive to be made public
  * @return {?}
  */
-
+function diPublicInInjector(di, def) {
+    bloomAdd(di, def.type);
+}
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
  * @param {?} def The definition of the directive to be made public
  * @return {?}
  */
-
+function diPublic(def) {
+    diPublicInInjector(getOrCreateNodeInjector(), def);
+}
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.
@@ -16492,7 +16819,9 @@ function createInjectionError(text$$1, token) {
  * @param {?=} defaultValue
  * @return {?} The instance found
  */
-
+function inject$1(token, flags, defaultValue) {
+    return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags, defaultValue);
+}
 /**
  * Creates an ElementRef and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
@@ -16507,14 +16836,18 @@ function createInjectionError(text$$1, token) {
  * @template T
  * @return {?} The TemplateRef instance to use
  */
-
+function injectTemplateRef() {
+    return getOrCreateTemplateRef(getOrCreateNodeInjector());
+}
 /**
  * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
  * already exists, retrieves the existing ViewContainerRef.
  *
  * @return {?} The ViewContainerRef instance to use
  */
-
+function injectViewContainerRef() {
+    return getOrCreateContainerRef(getOrCreateNodeInjector());
+}
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.
@@ -16534,7 +16867,61 @@ function createInjectionError(text$$1, token) {
  * @param {?=} defaultValue
  * @return {?} The instance found
  */
-
+function getOrCreateInjectable(di, token, flags, defaultValue) {
+    const /** @type {?} */ bloomHash = bloomHashBit(token);
+    // If the token has a bloom hash, then it is a directive that is public to the injection system
+    // (diPublic). If there is no hash, fall back to the module injector.
+    if (bloomHash === null) {
+        const /** @type {?} */ moduleInjector = di.injector;
+        if (!moduleInjector) {
+            if (defaultValue != null) {
+                return defaultValue;
+            }
+            throw createInjectionError('NotFound', token);
+        }
+        moduleInjector.get(token);
+    }
+    else {
+        let /** @type {?} */ injector = di;
+        while (injector) {
+            // Get the closest potential matching injector (upwards in the injector tree) that
+            // *potentially* has the token.
+            injector = bloomFindPossibleInjector(injector, bloomHash);
+            // If no injector is found, we *know* that there is no ancestor injector that contains the
+            // token, so we abort.
+            if (!injector) {
+                break;
+            }
+            // At this point, we have an injector which *may* contain the token, so we step through the
+            // directives associated with the injector's corresponding node to get the directive instance.
+            const /** @type {?} */ node = injector.node;
+            // The size of the node's directive's list is stored in certain bits of the node's flags,
+            // so exact it with a mask and shift it back such that the bits reflect the real value.
+            const /** @type {?} */ flags = node.flags;
+            const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2;
+            if (size !== 0) {
+                // The start index of the directives list is also part of the node's flags, but there is
+                // nothing to the "left" of it so it doesn't need a mask.
+                const /** @type {?} */ start = flags >> 12;
+                const /** @type {?} */ tData = node.view.tView.data;
+                for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+                    // Get the definition for the directive at this index and, if it is injectable (diPublic),
+                    // and matches the given token, return the directive instance.
+                    const /** @type {?} */ directiveDef = /** @type {?} */ (tData[i]);
+                    if (directiveDef.diPublic && directiveDef.type == token) {
+                        return getDirectiveInstance(node.view.data[i]);
+                    }
+                }
+            }
+            // If we *didn't* find the directive for the token from the candidate injector, we had a false
+            // positive. Traverse up the tree and continue.
+            injector = injector.parent;
+        }
+    }
+    // No directive was found for the given token.
+    // TODO: implement optional, check-self, and check-parent.
+    throw createInjectionError('Not found', token);
+}
 /**
  * Given a directive type, this function returns the bit in an injector's bloom filter
  * that should be used to determine whether or not the directive is present.
@@ -16881,17 +17268,70 @@ function defineComponent(componentDefinition) {
     feature && feature.forEach((fn) => fn(def));
     return def;
 }
+const PRIVATE_PREFIX = '__ngOnChanges_';
 /**
  * @param {?} definition
  * @return {?}
  */
-
+function NgOnChangesFeature(definition) {
+    const /** @type {?} */ inputs = definition.inputs;
+    const /** @type {?} */ proto = definition.type.prototype;
+    // Place where we will store SimpleChanges if there is a change
+    Object.defineProperty(proto, PRIVATE_PREFIX, { value: undefined, writable: true });
+    for (let /** @type {?} */ pubKey in inputs) {
+        const /** @type {?} */ minKey = inputs[pubKey];
+        const /** @type {?} */ privateMinKey = PRIVATE_PREFIX + minKey;
+        // Create a place where the actual value will be stored and make it non-enumerable
+        Object.defineProperty(proto, privateMinKey, { value: undefined, writable: true });
+        const /** @type {?} */ existingDesc = Object.getOwnPropertyDescriptor(proto, minKey);
+        // create a getter and setter for property
+        Object.defineProperty(proto, minKey, {
+            get: function () {
+                return (existingDesc && existingDesc.get) ? existingDesc.get.call(this) :
+                    this[privateMinKey];
+            },
+            set: function (value) {
+                let /** @type {?} */ simpleChanges = this[PRIVATE_PREFIX];
+                let /** @type {?} */ isFirstChange = simpleChanges === undefined;
+                if (simpleChanges == null) {
+                    simpleChanges = this[PRIVATE_PREFIX] = {};
+                }
+                simpleChanges[pubKey] = new SimpleChange(this[privateMinKey], value, isFirstChange);
+                (existingDesc && existingDesc.set) ? existingDesc.set.call(this, value) :
+                    this[privateMinKey] = value;
+            }
+        });
+    }
+    // If an onInit hook is defined, it will need to wrap the ngOnChanges call
+    // so the call order is changes-init-check in creation mode. In subsequent
+    // change detection runs, only the check wrapper will be called.
+    if (definition.onInit != null) {
+        definition.onInit = onChangesWrapper(definition.onInit);
+    }
+    definition.doCheck = onChangesWrapper(definition.doCheck);
+    /**
+     * @param {?} delegateHook
+     * @return {?}
+     */
+    function onChangesWrapper(delegateHook) {
+        return function () {
+            let /** @type {?} */ simpleChanges = this[PRIVATE_PREFIX];
+            if (simpleChanges != null) {
+                this.ngOnChanges(simpleChanges);
+                this[PRIVATE_PREFIX] = null;
+            }
+            delegateHook && delegateHook.apply(this);
+        };
+    }
+}
 /**
  * @template T
  * @param {?} definition
  * @return {?}
  */
-
+function PublicFeature(definition) {
+    definition.diPublic = diPublic;
+}
 const EMPTY$1 = {};
 /**
  * @return {?}
@@ -16925,7 +17365,7 @@ function invertObject(obj) {
  * }
  * ```
  */
-
+const defineDirective = /** @type {?} */ (defineComponent);
 /**
  * Create a pipe definition object.
  *
@@ -16942,6 +17382,9 @@ function invertObject(obj) {
  * @param {?} __0
  * @return {?}
  */
+function definePipe({ type, factory, pure }) {
+    throw new Error('TODO: implement!');
+}
 
 /**
  * @fileoverview added by tsickle
@@ -16963,7 +17406,9 @@ function invertObject(obj) {
  * @param {?} pipe A Pipe instance.
  * @return {?}
  */
-
+function pipe(index, pipeDef, pipe) {
+    throw new Error('TODO: implement!');
+}
 /**
  * Invokes a pipe with 1 arguments.
  *
@@ -16974,7 +17419,9 @@ function invertObject(obj) {
  * @param {?} v1 1st argument to {\@link PipeTransform#transform}.
  * @return {?}
  */
-
+function pipeBind1(index, v1) {
+    throw new Error('TODO: implement!');
+}
 /**
  * Invokes a pipe with 2 arguments.
  *
@@ -16986,7 +17433,9 @@ function invertObject(obj) {
  * @param {?} v2 2nd argument to {\@link PipeTransform#transform}.
  * @return {?}
  */
-
+function pipeBind2(index, v1, v2) {
+    throw new Error('TODO: implement!');
+}
 /**
  * Invokes a pipe with 3 arguments.
  *
@@ -16999,7 +17448,9 @@ function invertObject(obj) {
  * @param {?} v3 4rd argument to {\@link PipeTransform#transform}.
  * @return {?}
  */
-
+function pipeBind3(index, v1, v2, v3) {
+    throw new Error('TODO: implement!');
+}
 /**
  * Invokes a pipe with 4 arguments.
  *
@@ -17013,7 +17464,9 @@ function invertObject(obj) {
  * @param {?} v4 4th argument to {\@link PipeTransform#transform}.
  * @return {?}
  */
-
+function pipeBind4(index, v1, v2, v3, v4) {
+    throw new Error('TODO: implement!');
+}
 /**
  * Invokes a pipe with variable number of arguments.
  *
@@ -17024,6 +17477,9 @@ function invertObject(obj) {
  * @param {?} values Array of arguments to pass to {\@link PipeTransform#transform} method.
  * @return {?}
  */
+function pipeBindV(index, values) {
+    throw new Error('TODO: implement!');
+}
 
 /**
  * @fileoverview added by tsickle
@@ -17136,8 +17592,363 @@ function invertObject(obj) {
  * @record
  */
 
-
-
+class LQueries_ {
+    /**
+     * @param {?=} deep
+     */
+    constructor(deep) {
+        this.shallow = null;
+        this.deep = null;
+        this.deep = deep == null ? null : deep;
+    }
+    /**
+     * @template T
+     * @param {?} queryList
+     * @param {?} predicate
+     * @param {?=} descend
+     * @param {?=} read
+     * @return {?}
+     */
+    track(queryList, predicate, descend, read) {
+        // TODO(misko): This is not right. In case of inherited state, a calling track will incorrectly
+        // mutate parent.
+        if (descend) {
+            this.deep = createQuery$1(this.deep, queryList, predicate, read != null ? read : null);
+        }
+        else {
+            this.shallow = createQuery$1(this.shallow, queryList, predicate, read != null ? read : null);
+        }
+    }
+    /**
+     * @return {?}
+     */
+    child() {
+        if (this.deep === null) {
+            // if we don't have any deep queries then no need to track anything more.
+            return null;
+        }
+        if (this.shallow === null) {
+            // DeepQuery: We can reuse the current state if the child state would be same as current
+            // state.
+            return this;
+        }
+        else {
+            // We need to create new state
+            return new LQueries_(this.deep);
+        }
+    }
+    /**
+     * @return {?}
+     */
+    container() {
+        let /** @type {?} */ result = null;
+        let /** @type {?} */ query = this.deep;
+        while (query) {
+            const /** @type {?} */ containerValues = []; // prepare room for views
+            query.values.push(containerValues);
+            const /** @type {?} */ clonedQuery = { next: null, list: query.list, predicate: query.predicate, values: containerValues };
+            clonedQuery.next = result;
+            result = clonedQuery;
+            query = query.next;
+        }
+        return result ? new LQueries_(result) : null;
+    }
+    /**
+     * @param {?} index
+     * @return {?}
+     */
+    enterView(index) {
+        let /** @type {?} */ result = null;
+        let /** @type {?} */ query = this.deep;
+        while (query) {
+            const /** @type {?} */ viewValues = []; // prepare room for view nodes
+            query.values.splice(index, 0, viewValues);
+            const /** @type {?} */ clonedQuery = { next: null, list: query.list, predicate: query.predicate, values: viewValues };
+            clonedQuery.next = result;
+            result = clonedQuery;
+            query = query.next;
+        }
+        return result ? new LQueries_(result) : null;
+    }
+    /**
+     * @param {?} node
+     * @return {?}
+     */
+    addNode(node) {
+        add(this.shallow, node);
+        add(this.deep, node);
+    }
+    /**
+     * @param {?} index
+     * @return {?}
+     */
+    removeView(index) {
+        let /** @type {?} */ query = this.deep;
+        while (query) {
+            const /** @type {?} */ removed = query.values.splice(index, 1);
+            // mark a query as dirty only when removed view had matching modes
+            ngDevMode && assertEqual(removed.length, 1, 'removed.length');
+            if (removed[0].length) {
+                query.list.setDirty();
+            }
+            query = query.next;
+        }
+    }
+}
+/**
+ * Iterates over local names for a given node and returns directive index
+ * (or -1 if a local name points to an element).
+ *
+ * @param {?} tNode static data of a node to check
+ * @param {?} selector selector to match
+ * @return {?} directive index, -1 or null if a selector didn't match any of the local names
+ */
+function getIdxOfMatchingSelector(tNode, selector) {
+    const /** @type {?} */ localNames = tNode.localNames;
+    if (localNames) {
+        for (let /** @type {?} */ i = 0; i < localNames.length; i += 2) {
+            if (localNames[i] === selector) {
+                return /** @type {?} */ (localNames[i + 1]);
+            }
+        }
+    }
+    return null;
+}
+/**
+ * Iterates over all the directives for a node and returns index of a directive for a given type.
+ *
+ * @param {?} node Node on which directives are present.
+ * @param {?} type Type of a directive to look for.
+ * @return {?} Index of a found directive or null when none found.
+ */
+function geIdxOfMatchingDirective(node, type) {
+    const /** @type {?} */ tData = node.view.tView.data;
+    const /** @type {?} */ flags = node.flags;
+    for (let /** @type {?} */ i = flags >> 12 /* INDX_SHIFT */, /** @type {?} */
+    ii = i + ((flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */); i < ii; i++) {
+        const /** @type {?} */ def = /** @type {?} */ (tData[i]);
+        if (def.diPublic && def.type === type) {
+            return i;
+        }
+    }
+    return null;
+}
+/**
+ * @param {?} nodeInjector
+ * @param {?} node
+ * @param {?} read
+ * @param {?} directiveIdx
+ * @return {?}
+ */
+function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
+    if (read instanceof ReadFromInjectorFn) {
+        return read.read(nodeInjector, node, directiveIdx);
+    }
+    else {
+        const /** @type {?} */ matchingIdx = geIdxOfMatchingDirective(node, /** @type {?} */ (read));
+        if (matchingIdx !== null) {
+            return node.view.data[matchingIdx];
+        }
+    }
+    return null;
+}
+/**
+ * @param {?} query
+ * @param {?} node
+ * @return {?}
+ */
+function add(query, node) {
+    const /** @type {?} */ nodeInjector = getOrCreateNodeInjectorForNode(/** @type {?} */ (node));
+    while (query) {
+        const /** @type {?} */ predicate = query.predicate;
+        const /** @type {?} */ type = predicate.type;
+        if (type) {
+            const /** @type {?} */ directiveIdx = geIdxOfMatchingDirective(node, type);
+            if (directiveIdx !== null) {
+                // a node is matching a predicate - determine what to read
+                // if read token and / or strategy is not specified, use type as read token
+                const /** @type {?} */ result = readFromNodeInjector(nodeInjector, node, predicate.read || type, directiveIdx);
+                if (result !== null) {
+                    addMatch(query, result);
+                }
+            }
+        }
+        else {
+            const /** @type {?} */ selector = /** @type {?} */ ((predicate.selector));
+            for (let /** @type {?} */ i = 0; i < selector.length; i++) {
+                ngDevMode && assertNotNull(node.tNode, 'node.tNode');
+                const /** @type {?} */ directiveIdx = getIdxOfMatchingSelector(/** @type {?} */ ((node.tNode)), selector[i]);
+                if (directiveIdx !== null) {
+                    // a node is matching a predicate - determine what to read
+                    // note that queries using name selector must specify read strategy
+                    ngDevMode && assertNotNull(predicate.read, 'predicate.read');
+                    const /** @type {?} */ result = readFromNodeInjector(nodeInjector, node, /** @type {?} */ ((predicate.read)), directiveIdx);
+                    if (result !== null) {
+                        addMatch(query, result);
+                    }
+                }
+            }
+        }
+        query = query.next;
+    }
+}
+/**
+ * @param {?} query
+ * @param {?} matchingValue
+ * @return {?}
+ */
+function addMatch(query, matchingValue) {
+    query.values.push(matchingValue);
+    query.list.setDirty();
+}
+/**
+ * @template T
+ * @param {?} predicate
+ * @param {?} read
+ * @return {?}
+ */
+function createPredicate(predicate, read) {
+    const /** @type {?} */ isArray = Array.isArray(predicate);
+    return {
+        type: isArray ? null : /** @type {?} */ (predicate),
+        selector: isArray ? /** @type {?} */ (predicate) : null,
+        read: read
+    };
+}
+/**
+ * @template T
+ * @param {?} previous
+ * @param {?} queryList
+ * @param {?} predicate
+ * @param {?} read
+ * @return {?}
+ */
+function createQuery$1(previous, queryList, predicate, read) {
+    return {
+        next: previous,
+        list: queryList,
+        predicate: createPredicate(predicate, read),
+        values: (/** @type {?} */ ((queryList)))._valuesTree
+    };
+}
+class QueryList_ {
+    constructor() {
+        this.dirty = true;
+        this.changes = new EventEmitter();
+        this._values = [];
+        /**
+         * \@internal
+         */
+        this._valuesTree = [];
+    }
+    /**
+     * @return {?}
+     */
+    get length() { return this._values.length; }
+    /**
+     * @return {?}
+     */
+    get first() {
+        let /** @type {?} */ values = this._values;
+        return values.length ? values[0] : null;
+    }
+    /**
+     * @return {?}
+     */
+    get last() {
+        let /** @type {?} */ values = this._values;
+        return values.length ? values[values.length - 1] : null;
+    }
+    /**
+     * See
+     * [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+     * @template U
+     * @param {?} fn
+     * @return {?}
+     */
+    map(fn) { return this._values.map(fn); }
+    /**
+     * See
+     * [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+     * @param {?} fn
+     * @return {?}
+     */
+    filter(fn) {
+        return this._values.filter(fn);
+    }
+    /**
+     * See
+     * [Array.find](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+     * @param {?} fn
+     * @return {?}
+     */
+    find(fn) {
+        return this._values.find(fn);
+    }
+    /**
+     * See
+     * [Array.reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+     * @template U
+     * @param {?} fn
+     * @param {?} init
+     * @return {?}
+     */
+    reduce(fn, init) {
+        return this._values.reduce(fn, init);
+    }
+    /**
+     * See
+     * [Array.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+     * @param {?} fn
+     * @return {?}
+     */
+    forEach(fn) { this._values.forEach(fn); }
+    /**
+     * See
+     * [Array.some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+     * @param {?} fn
+     * @return {?}
+     */
+    some(fn) {
+        return this._values.some(fn);
+    }
+    /**
+     * @return {?}
+     */
+    toArray() { return this._values.slice(0); }
+    /**
+     * @return {?}
+     */
+    [getSymbolIterator()]() { return (/** @type {?} */ (this._values))[getSymbolIterator()](); }
+    /**
+     * @return {?}
+     */
+    toString() { return this._values.toString(); }
+    /**
+     * @param {?} res
+     * @return {?}
+     */
+    reset(res) {
+        this._values = flatten$1(res);
+        (/** @type {?} */ (this)).dirty = false;
+    }
+    /**
+     * @return {?}
+     */
+    notifyOnChanges() { (/** @type {?} */ (this.changes)).emit(this); }
+    /**
+     * @return {?}
+     */
+    setDirty() { (/** @type {?} */ (this)).dirty = true; }
+    /**
+     * @return {?}
+     */
+    destroy() {
+        (/** @type {?} */ (this.changes)).complete();
+        (/** @type {?} */ (this.changes)).unsubscribe();
+    }
+}
+const QueryList$1 = /** @type {?} */ (QueryList_);
 /**
  * Creates and returns a QueryList.
  *
@@ -17149,7 +17960,16 @@ function invertObject(obj) {
  * @param {?=} read What to save in the query
  * @return {?} QueryList<T>
  */
-
+function query(memoryIndex, predicate, descend, read) {
+    ngDevMode && assertPreviousIsParent();
+    const /** @type {?} */ queryList = new QueryList$1();
+    const /** @type {?} */ queries = getCurrentQueries(LQueries_);
+    queries.track(queryList, predicate, descend, read);
+    if (memoryIndex != null) {
+        memory(memoryIndex, queryList);
+    }
+    return queryList;
+}
 /**
  * Refreshes a query by combining matches from all active views and removing matches from deleted
  * views.
@@ -17157,6 +17977,15 @@ function invertObject(obj) {
  * @param {?} queryList
  * @return {?}
  */
+function queryRefresh(queryList) {
+    const /** @type {?} */ queryListImpl = (/** @type {?} */ ((queryList)));
+    if (queryList.dirty) {
+        queryList.reset(queryListImpl._valuesTree);
+        queryList.notifyOnChanges();
+        return true;
+    }
+    return false;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -17177,7 +18006,13 @@ function invertObject(obj) {
  * @param {?} exp Updated expression value
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral1(factoryFn, exp) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestValue = exp === NO_CHANGE ? peekBinding() : exp;
+    if (bind(exp) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestValue) : NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17187,7 +18022,16 @@ function invertObject(obj) {
  * @param {?} exp2
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral2(factoryFn, exp1, exp2) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestVal1, latestVal2) : NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17198,7 +18042,19 @@ function invertObject(obj) {
  * @param {?} exp3
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral3(factoryFn, exp1, exp2, exp3) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestVal1, latestVal2, latestVal3) : NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17210,7 +18066,22 @@ function invertObject(obj) {
  * @param {?} exp4
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral4(factoryFn, exp1, exp2, exp3, exp4) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
+    if (bind(exp4) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4) : NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17223,7 +18094,26 @@ function invertObject(obj) {
  * @param {?} exp5
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral5(factoryFn, exp1, exp2, exp3, exp4, exp5) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
+    if (bind(exp4) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
+    if (bind(exp5) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5) :
+        NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17237,7 +18127,30 @@ function invertObject(obj) {
  * @param {?} exp6
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral6(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
+    if (bind(exp4) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
+    if (bind(exp5) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
+    if (bind(exp6) !== NO_CHANGE)
+        different = true;
+    return different ?
+        factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6) :
+        NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17252,7 +18165,33 @@ function invertObject(obj) {
  * @param {?} exp7
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral7(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
+    if (bind(exp4) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
+    if (bind(exp5) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
+    if (bind(exp6) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal7 = exp7 === NO_CHANGE ? peekBinding() : exp7;
+    if (bind(exp7) !== NO_CHANGE)
+        different = true;
+    return different ?
+        factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6, latestVal7) :
+        NO_CHANGE;
+}
 /**
  * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
@@ -17268,7 +18207,35 @@ function invertObject(obj) {
  * @param {?} exp8
  * @return {?} A copy of the object/array or NO_CHANGE
  */
-
+function objectLiteral8(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) {
+    let /** @type {?} */ different = false;
+    const /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
+    if (bind(exp1) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
+    if (bind(exp2) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
+    if (bind(exp3) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
+    if (bind(exp4) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
+    if (bind(exp5) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
+    if (bind(exp6) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal7 = exp7 === NO_CHANGE ? peekBinding() : exp7;
+    if (bind(exp7) !== NO_CHANGE)
+        different = true;
+    const /** @type {?} */ latestVal8 = exp8 === NO_CHANGE ? peekBinding() : exp8;
+    if (bind(exp8) !== NO_CHANGE)
+        different = true;
+    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6, latestVal7, latestVal8) :
+        NO_CHANGE;
+}
 /**
  * objectLiteral instruction that can support any number of bindings.
  *
@@ -17280,6 +18247,17 @@ function invertObject(obj) {
  * @param {?} exps
  * @return {?} A copy of the object/array or NO_CHANGE
  */
+function objectLiteralV(factoryFn, exps) {
+    let /** @type {?} */ different = false;
+    for (let /** @type {?} */ i = 0; i < exps.length; i++) {
+        const /** @type {?} */ exp = exps[i];
+        if (exp === NO_CHANGE)
+            exps[i] = peekBinding();
+        if (bind(exp) !== NO_CHANGE)
+            different = true;
+    }
+    return different ? factoryFn(exps) : NO_CHANGE;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -18544,5 +19522,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, elementEnd as ɵe, elementProperty as ɵp, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbf, group$1 as ɵbg, keyframes$1 as ɵbk, sequence$1 as ɵbh, state$1 as ɵbj, style$1 as ɵbi, transition$1 as ɵbl, trigger$1 as ɵbe, _iterableDiffersFactory as ɵm, _keyValueDiffersFactory as ɵn, _localeFactory as ɵo, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵq, createScope$1 as ɵw, detectWTF as ɵu, endTimeRange as ɵz, leave as ɵx, startTimeRange as ɵy, stringify$1 as ɵbc, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵba, DebugContext as ɵbb };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, objectLiteral1 as ɵo1, objectLiteral2 as ɵo2, objectLiteral3 as ɵo3, objectLiteral4 as ɵo4, objectLiteral5 as ɵo5, objectLiteral6 as ɵo6, objectLiteral7 as ɵo7, objectLiteral8 as ɵo8, objectLiteralV as ɵoV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, memory as ɵm, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbk, group$1 as ɵbl, keyframes$1 as ɵbp, sequence$1 as ɵbm, state$1 as ɵbo, style$1 as ɵbn, transition$1 as ɵbq, trigger$1 as ɵbj, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateContainerRef as ɵbf, getOrCreateInjectable as ɵbe, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbg, stringify$1 as ɵbh, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵbb, DebugContext as ɵbc };
 //# sourceMappingURL=core.js.map
