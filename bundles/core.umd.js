@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.3-8ec21fc
+ * @license Angular v6.0.0-beta.3-2de0d4c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.3-8ec21fc
+ * @license Angular v6.0.0-beta.3-2de0d4c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.3-8ec21fc');
+var VERSION = new Version('6.0.0-beta.3-2de0d4c');
 
 /**
  * @fileoverview added by tsickle
@@ -17420,8 +17420,7 @@ function createTView() {
         contentCheckHooks: null,
         viewHooks: null,
         viewCheckHooks: null,
-        destroyHooks: null,
-        objectLiterals: null
+        destroyHooks: null
     };
 }
 /**
@@ -18576,6 +18575,11 @@ function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v
  */
 
 /**
+ * Gets the binding at the current bindingIndex
+ * @return {?}
+ */
+
+/**
  * @param {?} QueryType
  * @return {?}
  */
@@ -18590,10 +18594,6 @@ function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v
 function getRenderer() {
     return renderer;
 }
-/**
- * @return {?}
- */
-
 /**
  * @template T
  * @param {?} instanceOrArray
@@ -19551,147 +19551,115 @@ var QueryList_ = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Updates the expression in the given object or array if it has changed and returns a copy.
+ * If the object or array has changed, returns a copy with the updated expression.
  * Or if the expression hasn't changed, returns NO_CHANGE.
  *
- * @param {?} objIndex Index of object blueprint in objectLiterals
- * @param {?} obj Object to update
- * @param {?} key Key to set in object
- * @param {?} exp Expression to set at key
- * @return {?} A copy of the object or NO_CHANGE
+ * @param {?} factoryFn Function that returns an updated instance of the object/array
+ * @param {?} exp Updated expression value
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @return {?} A copy of the array or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @param {?} key4
  * @param {?} exp4
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @param {?} key4
  * @param {?} exp4
- * @param {?} key5
  * @param {?} exp5
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @param {?} key4
  * @param {?} exp4
- * @param {?} key5
  * @param {?} exp5
- * @param {?} key6
  * @param {?} exp6
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @param {?} key4
  * @param {?} exp4
- * @param {?} key5
  * @param {?} exp5
- * @param {?} key6
  * @param {?} exp6
- * @param {?} key7
  * @param {?} exp7
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**
- * Updates the expressions in the given object or array if they have changed and returns a copy.
+ * If the object or array has changed, returns a copy with all updated expressions.
  * Or if no expressions have changed, returns NO_CHANGE.
  *
- * @param {?} objIndex
- * @param {?} obj
- * @param {?} key1
+ * @param {?} factoryFn
  * @param {?} exp1
- * @param {?} key2
  * @param {?} exp2
- * @param {?} key3
  * @param {?} exp3
- * @param {?} key4
  * @param {?} exp4
- * @param {?} key5
  * @param {?} exp5
- * @param {?} key6
  * @param {?} exp6
- * @param {?} key7
  * @param {?} exp7
- * @param {?} key8
  * @param {?} exp8
- * @return {?} A copy of the object or NO_CHANGE
+ * @return {?} A copy of the object/array or NO_CHANGE
+ */
+
+/**
+ * objectLiteral instruction that can support any number of bindings.
+ *
+ * If the object or array has changed, returns a copy with all updated expressions.
+ * Or if no expressions have changed, returns NO_CHANGE.
+ *
+ * @param {?} factoryFn A factory function that takes binding values and builds an object or array
+ * containing those values.
+ * @param {?} exps
+ * @return {?} A copy of the object/array or NO_CHANGE
  */
 
 /**

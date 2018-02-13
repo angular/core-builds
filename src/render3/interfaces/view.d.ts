@@ -230,8 +230,6 @@ export interface TView {
      * Odd indices: Hook function
      */
     destroyHooks: HookData | null;
-    /** Contains copies of object literals that were passed as bindings in this view. */
-    objectLiterals: any[] | null;
 }
 /**
  * Array of hooks that should be executed for a view and their directive indices.

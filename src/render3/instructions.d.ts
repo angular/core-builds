@@ -286,11 +286,12 @@ export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: 
 /** Creates an interpolation binding with 8 arguments. */
 export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
+/** Gets the binding at the current bindingIndex */
+export declare function peekBinding(): any;
 export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getRenderer(): Renderer3;
-export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
