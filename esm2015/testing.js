@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.4-e576b69
+ * @license Angular v5.2.4-da6ab91
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -696,7 +696,10 @@ class TestBed {
                 fixture.destroy();
             }
             catch (e) {
-                console.error('Error during cleanup of component', fixture.componentInstance);
+                console.error('Error during cleanup of component', {
+                    component: fixture.componentInstance,
+                    stacktrace: e,
+                });
             }
         });
         this._activeFixtures = [];
