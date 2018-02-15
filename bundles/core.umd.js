@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-7ac34e4
+ * @license Angular v6.0.0-beta.4-5dd2b51
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-7ac34e4
+ * @license Angular v6.0.0-beta.4-5dd2b51
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-7ac34e4');
+var VERSION = new Version('6.0.0-beta.4-5dd2b51');
 
 /**
  * @fileoverview added by tsickle
@@ -18349,18 +18349,54 @@ function addToViewTree(state) {
  */
 var NO_CHANGE = /** @type {?} */ ({});
 /**
- * Create interpolation bindings with variable number of arguments.
+ *  Initializes the binding start index. Will get inlined.
  *
- * If any of the arguments change, then the interpolation is concatenated
- * and causes an update.
+ *  This function must be called before any binding related function is called
+ *  (ie `bind()`, `interpolationX()`, `pureFunctionX()`)
+ * @return {?}
+ */
+function initBindings() {
+    // `bindingIndex` is initialized when the view is first entered when not in creation mode
+    ngDevMode &&
+        assertEqual(creationMode, true, 'should only be called in creationMode for performance reasons');
+    if (currentView.bindingStartIndex == null) {
+        bindingIndex = currentView.bindingStartIndex = data.length;
+    }
+}
+/**
+ * Creates a single value binding.
+ *
+ * @template T
+ * @param {?} value Value to diff
+ * @return {?}
+ */
+function bind(value) {
+    if (creationMode) {
+        initBindings();
+        return data[bindingIndex++] = value;
+    }
+    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
+    if (changed) {
+        data[bindingIndex] = value;
+    }
+    bindingIndex++;
+    return changed ? value : NO_CHANGE;
+}
+/**
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and loop over it.
  *
  * `values`:
  * - has static text at even indexes,
  * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  * @param {?} values
  * @return {?}
  */
-function bindV(values) {
+function interpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     // TODO(vicb): Add proper unit tests when there is a place to add them
@@ -18393,45 +18429,18 @@ function bindV(values) {
     return NO_CHANGE;
 }
 /**
- * @return {?}
- */
-function initBindings() {
-    if (currentView.bindingStartIndex == null) {
-        bindingIndex = currentView.bindingStartIndex = data.length;
-    }
-}
-/**
- * Creates a single value binding without interpolation.
- *
- * @template T
- * @param {?} value Value to diff
- * @return {?}
- */
-function bind(value) {
-    if (creationMode) {
-        initBindings();
-        return data[bindingIndex++] = value;
-    }
-    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
-    if (changed) {
-        data[bindingIndex] = value;
-    }
-    bindingIndex++;
-    return changed ? value : NO_CHANGE;
-}
-/**
- * Creates an interpolation bindings with 1 argument.
+ * Creates an interpolation binding with 1 expression.
  *
  * @param {?} prefix static value used for concatenation only.
  * @param {?} value value checked for change.
  * @param {?} suffix static value used for concatenation only.
  * @return {?}
  */
-function bind1(prefix, value, suffix) {
+function interpolation1(prefix, value, suffix) {
     return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
 }
 /**
- * Creates an interpolation bindings with 2 arguments.
+ * Creates an interpolation binding with 2 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18439,7 +18448,7 @@ function bind1(prefix, value, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind2(prefix, v0, i0, v1, suffix) {
+function interpolation2(prefix, v0, i0, v1, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18461,7 +18470,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
- * Creates an interpolation bindings with 3 arguments.
+ * Creates an interpolation bindings with 3 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18471,7 +18480,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
+function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18499,7 +18508,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 4 arguments.
+ * Create an interpolation binding with 4 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18511,7 +18520,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18548,7 +18557,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 5 arguments.
+ * Creates an interpolation binding with 5 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18562,7 +18571,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18604,7 +18613,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 6 arguments.
+ * Creates an interpolation binding with 6 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18620,7 +18629,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18667,7 +18676,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 7 arguments.
+ * Creates an interpolation binding with 7 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18685,7 +18694,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18738,7 +18747,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 8 arguments.
+ * Creates an interpolation binding with 8 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18758,7 +18767,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
  * @param {?} suffix
  * @return {?}
  */
-function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -22149,15 +22158,15 @@ exports.ɵV = embeddedViewStart;
 exports.ɵQ = query;
 exports.ɵP = projection;
 exports.ɵb = bind;
-exports.ɵb1 = bind1;
-exports.ɵb2 = bind2;
-exports.ɵb3 = bind3;
-exports.ɵb4 = bind4;
-exports.ɵb5 = bind5;
-exports.ɵb6 = bind6;
-exports.ɵb7 = bind7;
-exports.ɵb8 = bind8;
-exports.ɵbV = bindV;
+exports.ɵi1 = interpolation1;
+exports.ɵi2 = interpolation2;
+exports.ɵi3 = interpolation3;
+exports.ɵi4 = interpolation4;
+exports.ɵi5 = interpolation5;
+exports.ɵi6 = interpolation6;
+exports.ɵi7 = interpolation7;
+exports.ɵi8 = interpolation8;
+exports.ɵiV = interpolationV;
 exports.ɵpb1 = pipeBind1;
 exports.ɵpb2 = pipeBind2;
 exports.ɵpb3 = pipeBind3;
