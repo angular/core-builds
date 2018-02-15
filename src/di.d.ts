@@ -19,3 +19,4 @@ export { StaticProvider, ValueProvider, ExistingProvider, FactoryProvider, Provi
 export { ResolvedReflectiveFactory, ResolvedReflectiveProvider } from './di/reflective_provider';
 export { ReflectiveKey } from './di/reflective_key';
 export { InjectionToken } from './di/injection_token';
+export { APP_ROOT_SCOPE } from './di/scope';

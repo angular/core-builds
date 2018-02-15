@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-029dbf0
+ * @license Angular v6.0.0-beta.4-7ac34e4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-029dbf0
+ * @license Angular v6.0.0-beta.4-7ac34e4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-029dbf0');
+var VERSION = new Version('6.0.0-beta.4-7ac34e4');
 
 /**
  * @fileoverview added by tsickle
@@ -3704,6 +3704,30 @@ function _mapProviders(injector, fn) {
     }
     return res;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A scope which targets the root injector.
+ *
+ * When specified as the `scope` parameter to `\@Injectable` or `InjectionToken`, this special
+ * scope indicates the provider for the service or token being configured belongs in the root
+ * injector. This is loosely equivalent to the convention of having a `forRoot()` static
+ * function within a module that configures the provider, and expecting users to only import that
+ * module via its `forRoot()` function in the root injector.
+ *
+ * \@experimental
+ */
+var APP_ROOT_SCOPE = /** @type {?} */ (new InjectionToken('The presence of this token marks an injector as being the root injector.'));
 
 /**
  * @fileoverview added by tsickle
@@ -11037,8 +11061,12 @@ function moduleProvideDef(flags, token, value, deps) {
 function moduleDef(providers) {
     var /** @type {?} */ providersByKey = {};
     var /** @type {?} */ modules = [];
+    var /** @type {?} */ isRoot = false;
     for (var /** @type {?} */ i = 0; i < providers.length; i++) {
         var /** @type {?} */ provider = providers[i];
+        if (provider.token === APP_ROOT_SCOPE) {
+            isRoot = true;
+        }
         if (provider.flags & 1073741824 /* TypeNgModule */) {
             modules.push(provider.token);
         }
@@ -11051,6 +11079,7 @@ function moduleDef(providers) {
         providersByKey: providersByKey,
         providers: providers,
         modules: modules,
+        isRoot: isRoot,
     };
 }
 /**
@@ -11123,11 +11152,20 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
 }
 /**
  * @param {?} ngModule
+ * @param {?} scope
+ * @return {?}
+ */
+function moduleTransitivelyPresent(ngModule, scope) {
+    return ngModule._def.modules.indexOf(scope) > -1;
+}
+/**
+ * @param {?} ngModule
  * @param {?} def
  * @return {?}
  */
 function targetsModule(ngModule, def) {
-    return def.scope != null && ngModule._def.modules.indexOf(def.scope) > -1;
+    return def.scope != null && (moduleTransitivelyPresent(ngModule, def.scope) ||
+        def.scope === APP_ROOT_SCOPE && ngModule._def.isRoot);
 }
 /**
  * @param {?} ngModule
@@ -22032,6 +22070,7 @@ exports.ReflectiveInjector = ReflectiveInjector;
 exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
 exports.ReflectiveKey = ReflectiveKey;
 exports.InjectionToken = InjectionToken;
+exports.APP_ROOT_SCOPE = APP_ROOT_SCOPE;
 exports.Inject = Inject;
 exports.Optional = Optional;
 exports.Self = Self;
