@@ -1,9 +1,9 @@
 /**
- * @license Angular v5.2.5-6a57264
+ * @license Angular v5.2.5-5f52ea3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, Component, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 import { __extends } from 'tslib';
 
 /**
@@ -590,6 +590,11 @@ var TestingCompiler = /** @class */ (function (_super) {
        * This can be used for errors created by compileModule...
        */
     function (error) { throw unimplemented(); };
+    TestingCompiler.decorators = [
+        { type: Injectable },
+    ];
+    /** @nocollapse */
+    TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
 }(Compiler));
 /**

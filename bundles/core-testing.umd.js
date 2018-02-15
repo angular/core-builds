@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.5-6a57264
+ * @license Angular v5.2.5-5f52ea3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.2.5-6a57264
+ * @license Angular v5.2.5-5f52ea3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -624,6 +624,11 @@ var TestingCompiler = /** @class */ (function (_super) {
        * This can be used for errors created by compileModule...
        */
     function (error) { throw unimplemented(); };
+    TestingCompiler.decorators = [
+        { type: _angular_core.Injectable },
+    ];
+    /** @nocollapse */
+    TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
 }(_angular_core.Compiler));
 /**
