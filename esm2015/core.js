@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-b54ad05
+ * @license Angular v6.0.0-beta.4-831592c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1858,7 +1858,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.4-b54ad05');
+const VERSION = new Version('6.0.0-beta.4-831592c');
 
 /**
  * @fileoverview added by tsickle
@@ -13574,8 +13574,24 @@ class NgModuleFactory_ extends NgModuleFactory {
 // about state in an instruction are correct before implementing any logic.
 // They are meant only to be called in dev mode as sanity checks.
 /**
+ * Stringifies values such that strings are wrapped in explicit quotation marks and
+ * other types are stringified normally. Used in error messages (e.g. assertThrow)
+ * to make it clear that certain values are of the string type when comparing.
+ *
+ * e.g. `expected "3" to be 3` is easier to understand than `expected 3 to be 3`.
+ *
+ * @param {?} value The value to be stringified
+ * @return {?} The stringified value
+ */
+function stringifyValueForError(value) {
+    if (value && value.native && value.native.outerHTML) {
+        return value.native.outerHTML;
+    }
+    return typeof value === 'string' ? `"${value}"` : value;
+}
+/**
  * @param {?} actual
- * @param {?} msg
+ * @param {?} name
  * @return {?}
  */
 
@@ -13583,78 +13599,57 @@ class NgModuleFactory_ extends NgModuleFactory {
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} msg
+ * @param {?} name
+ * @param {?=} serializer
  * @return {?}
  */
-function assertEqual(actual, expected, msg) {
-    if (actual != expected) {
-        throwError(msg);
-    }
+function assertEqual(actual, expected, name, serializer) {
+    (actual != expected) && assertThrow(actual, expected, name, '==', serializer);
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} msg
+ * @param {?} name
  * @return {?}
  */
-function assertNotEqual(actual, expected, msg) {
-    if (actual == expected) {
-        throwError(msg);
-    }
+function assertLessThan(actual, expected, name) {
+    (actual >= expected) && assertThrow(actual, expected, name, '<');
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} name
+ * @return {?}
+ */
+function assertNotNull(actual, name) {
+    assertNotEqual(actual, null, name);
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} msg
+ * @param {?} name
  * @return {?}
  */
-function assertSame(actual, expected, msg) {
-    if (actual !== expected) {
-        throwError(msg);
-    }
+function assertNotEqual(actual, expected, name) {
+    (actual == expected) && assertThrow(actual, expected, name, '!=');
 }
 /**
+ * Throws an error with a message constructed from the arguments.
+ *
  * @template T
- * @param {?} actual
- * @param {?} expected
- * @param {?} msg
+ * @param {?} actual The actual value (e.g. 3)
+ * @param {?} expected The expected value (e.g. 5)
+ * @param {?} name The name of the value being checked (e.g. attrs.length)
+ * @param {?} operator The comparison operator (e.g. <, >, ==)
+ * @param {?=} serializer Function that maps a value to its display value
  * @return {?}
  */
-function assertLessThan(actual, expected, msg) {
-    if (actual >= expected) {
-        throwError(msg);
-    }
-}
-/**
- * @template T
- * @param {?} actual
- * @param {?} msg
- * @return {?}
- */
-function assertNull(actual, msg) {
-    if (actual != null) {
-        throwError(msg);
-    }
-}
-/**
- * @template T
- * @param {?} actual
- * @param {?} msg
- * @return {?}
- */
-function assertNotNull(actual, msg) {
-    if (actual == null) {
-        throwError(msg);
-    }
-}
-/**
- * @param {?} msg
- * @return {?}
- */
-function throwError(msg) {
-    throw new Error(`ASSERTION ERROR: ${msg}`);
+function assertThrow(actual, expected, name, operator, serializer = stringifyValueForError) {
+    const /** @type {?} */ error = `ASSERT: expected ${name} ${operator} ${serializer(expected)} but was ${serializer(actual)}!`;
+    debugger; // leave `debugger` here to aid in debugging.
+    throw new Error(error);
 }
 
 /**
@@ -13694,8 +13689,8 @@ if (typeof ngDevMode == 'undefined') {
  * @return {?}
  */
 function assertNodeType(node, type) {
-    assertNotNull(node, 'should be called with a node');
-    assertEqual(node.flags & 3 /* TYPE_MASK */, type, `should be a ${typeName(type)}`);
+    assertNotEqual(node, null, 'node');
+    assertEqual(node.flags & 3 /* TYPE_MASK */, type, 'Node.type', typeSerializer);
 }
 /**
  * @param {?} node
@@ -13703,16 +13698,20 @@ function assertNodeType(node, type) {
  * @return {?}
  */
 function assertNodeOfPossibleTypes(node, ...types) {
-    assertNotNull(node, 'should be called with a node');
-    const /** @type {?} */ nodeType = node.flags & 3;
-    const /** @type {?} */ found = types.some(type => nodeType === type);
-    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')}`);
+    assertNotEqual(node, null, 'node');
+    const /** @type {?} */ nodeType = (node.flags & 3 /* TYPE_MASK */);
+    for (let /** @type {?} */ i = 0; i < types.length; i++) {
+        if (nodeType === types[i]) {
+            return;
+        }
+    }
+    throw new Error(`Expected node of possible types: ${types.map(typeSerializer).join(', ')} but got ${typeSerializer(nodeType)}`);
 }
 /**
  * @param {?} type
  * @return {?}
  */
-function typeName(type) {
+function typeSerializer(type) {
     if (type == 1 /* Projection */)
         return 'Projection';
     if (type == 0 /* Container */)
@@ -13721,7 +13720,7 @@ function typeName(type) {
         return 'View';
     if (type == 3 /* Element */)
         return 'Element';
-    return '<unknown>';
+    return '??? ' + type + ' ???';
 }
 
 /**
@@ -14620,7 +14619,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  */
 function isNodeMatchingSimpleSelector(tNode, selector) {
     const /** @type {?} */ noOfSelectorParts = selector.length;
-    ngDevMode && assertNotNull(selector[0], 'the selector should have a tag name');
+    ngDevMode && assertNotNull(selector[0], 'selector[0]');
     const /** @type {?} */ tagNameInSelector = selector[0];
     // check tag tame
     if (tagNameInSelector !== '' && tagNameInSelector !== tNode.tagName) {
@@ -14980,7 +14979,7 @@ function createLNode(index, type, native, state) {
     if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
         // Bit of a hack to bust through the readonly because there is a circular dep between
         // LView and LNode.
-        ngDevMode && assertNull((/** @type {?} */ (state)).node, 'LView.node should not have been initialized');
+        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'lView.node');
         (/** @type {?} */ ((state))).node = node;
     }
     if (index != null) {
@@ -15000,7 +14999,7 @@ function createLNode(index, type, native, state) {
             if (previousOrParentNode.view === currentView ||
                 (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
-                ngDevMode && assertNull(previousOrParentNode.child, `previousOrParentNode's child should not have been set.`);
+                ngDevMode && assertEqual(previousOrParentNode.child, null, 'previousNode.child');
                 previousOrParentNode.child = node;
             }
             else {
@@ -15008,7 +15007,7 @@ function createLNode(index, type, native, state) {
             }
         }
         else if (previousOrParentNode) {
-            ngDevMode && assertNull(previousOrParentNode.next, `previousOrParentNode's next property should not have been set.`);
+            ngDevMode && assertEqual(previousOrParentNode.next, null, 'previousNode.next');
             previousOrParentNode.next = node;
         }
     }
@@ -15119,8 +15118,7 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
         native = node && (/** @type {?} */ (node)).native;
     }
     else {
-        ngDevMode &&
-            assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
+        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
         const /** @type {?} */ isHostElement = typeof nameOrComponentType !== 'string';
         // MEGAMORPHIC: `ngComponentDef` is a megamorphic property access here.
         // This is OK, since we will refactor this code and store the result in `TView.data`
@@ -15243,7 +15241,7 @@ function createTView() {
  * @return {?}
  */
 function setUpAttributes(native, attrs) {
-    ngDevMode && assertEqual(attrs.length % 2, 0, 'each attribute should have a key and a value');
+    ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
     const /** @type {?} */ isProc = isProceduralRenderer(renderer);
     for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
         isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrs[i], attrs[i | 1]) :
@@ -15521,8 +15519,7 @@ function elementStyle(index, styleName, value, suffix) {
  * @return {?}
  */
 function text(index, value) {
-    ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'text nodes should be created before bindings');
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
     const /** @type {?} */ textNode = value != null ?
         (isProceduralRenderer(renderer) ? renderer.createText(stringify$1(value)) :
             renderer.createTextNode(stringify$1(value))) :
@@ -15575,8 +15572,7 @@ function textBinding(index, value) {
  */
 function directiveCreate(index, directive, directiveDef, queryName) {
     let /** @type {?} */ instance;
-    ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
     ngDevMode && assertPreviousIsParent();
     let /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
     let /** @type {?} */ size = flags & 4092;
@@ -15677,10 +15673,9 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @return {?}
  */
 function container(index, directiveTypes, template, tagName, attrs, localRefs) {
-    ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'container nodes should be created before any bindings');
+    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
     const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
-    ngDevMode && assertNotNull(currentParent, 'containers should have a parent');
+    ngDevMode && assertNotEqual(currentParent, null, 'currentParent');
     const /** @type {?} */ lContainer = /** @type {?} */ ({
         views: [],
         nextIndex: 0,
@@ -15725,7 +15720,7 @@ function containerRefreshStart(index) {
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     isParent = true;
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
-    ngDevMode && assertSame((/** @type {?} */ (previousOrParentNode)).native, undefined, `the container's native element should not have been set yet.`);
+    ngDevMode && assertEqual((/** @type {?} */ (previousOrParentNode)).native === undefined, true, 'previousOrParentNode.native === undefined');
     // We need to execute init hooks here so ngOnInit hooks are called in top level views
     // before they are called in embedded views (for backwards compatibility).
     executeInitHooks(currentView, currentView.tView, creationMode);
@@ -15860,11 +15855,11 @@ function componentRefresh(directiveIndex, elementIndex) {
         ngDevMode && assertDataInRange(elementIndex);
         const /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
         ngDevMode && assertNodeType(element, 3 /* Element */);
-        ngDevMode &&
-            assertNotNull(element.data, `Component's host node should have an LView attached.`);
+        ngDevMode && assertNotEqual(element.data, null, 'isComponent');
         ngDevMode && assertDataInRange(directiveIndex);
         const /** @type {?} */ directive = getDirectiveInstance(data[directiveIndex]);
         const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
+        ngDevMode && assertNotEqual(hostView, null, 'hostView');
         const /** @type {?} */ oldView = enterView(hostView, element);
         try {
             template(directive, creationMode);
@@ -15918,7 +15913,9 @@ function projectionDef(index, selectors) {
  * @return {?}
  */
 function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
-    ngDevMode && assertEqual(!!appendedFirst, !!appendedLast, 'appendedFirst can be null if and only if appendedLast is also null');
+    // appendedFirst can be null if and only if appendedLast is also null
+    ngDevMode &&
+        assertEqual(!appendedFirst === !appendedLast, true, '!appendedFirst === !appendedLast');
     if (!appendedLast) {
         // nothing to append
         return;
@@ -16550,13 +16547,13 @@ function getDirectiveInstance(instanceOrArray) {
  * @return {?}
  */
 function assertPreviousIsParent() {
-    assertEqual(isParent, true, 'previousOrParentNode should be a parent');
+    assertEqual(isParent, true, 'isParent');
 }
 /**
  * @return {?}
  */
 function assertHasParent() {
-    assertNotNull(previousOrParentNode.parent, 'previousOrParentNode should have a parent');
+    assertNotEqual(previousOrParentNode.parent, null, 'isParent');
 }
 /**
  * @param {?} index
@@ -16566,14 +16563,14 @@ function assertHasParent() {
 function assertDataInRange(index, arr) {
     if (arr == null)
         arr = data;
-    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
+    assertLessThan(index, arr ? arr.length : 0, 'data.length');
 }
 /**
  * @param {?} index
  * @return {?}
  */
 function assertDataNext(index) {
-    assertEqual(data.length, index, 'index expected to be at the end of data');
+    assertEqual(data.length, index, 'data.length not in sequence');
 }
 
 /**
@@ -16639,12 +16636,12 @@ function renderComponent(componentType, opts = {}) {
  * @return {?}
  */
 function detectChanges(component) {
-    ngDevMode && assertNotNull(component, 'detectChanges should be called with a component');
+    ngDevMode && assertNotNull(component, 'component');
     const /** @type {?} */ hostNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
     if (ngDevMode && !hostNode) {
         createError('Not a directive instance', component);
     }
-    ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
+    ngDevMode && assertNotNull(hostNode.data, 'hostNode.data');
     renderComponentOrTemplate(hostNode, hostNode.view, component);
     isDirty = false;
 }
@@ -17784,7 +17781,7 @@ function add(query, node) {
                 if (directiveIdx !== null) {
                     // a node is matching a predicate - determine what to read
                     // note that queries using name selector must specify read strategy
-                    ngDevMode && assertNotNull(predicate.read, 'the node should have a predicate');
+                    ngDevMode && assertNotNull(predicate.read, 'predicate.read');
                     const /** @type {?} */ result = readFromNodeInjector(nodeInjector, node, /** @type {?} */ ((predicate.read)), directiveIdx);
                     if (result !== null) {
                         addMatch(query, result);
