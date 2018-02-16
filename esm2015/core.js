@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-f628797
+ * @license Angular v6.0.0-beta.4-f755db7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1383,7 +1383,7 @@ class InjectionToken {
         if (options !== undefined) {
             this.ngInjectableDef = defineInjectable({
                 scope: options.scope,
-                factory: convertInjectableProviderToFactory(/** @type {?} */ (this), options),
+                factory: options.factory,
             });
         }
         else {
@@ -1858,7 +1858,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.4-f628797');
+const VERSION = new Version('6.0.0-beta.4-f755db7');
 
 /**
  * @fileoverview added by tsickle
@@ -3138,6 +3138,30 @@ function _mapProviders(injector, fn) {
     }
     return res;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A scope which targets the root injector.
+ *
+ * When specified as the `scope` parameter to `\@Injectable` or `InjectionToken`, this special
+ * scope indicates the provider for the service or token being configured belongs in the root
+ * injector. This is loosely equivalent to the convention of having a `forRoot()` static
+ * function within a module that configures the provider, and expecting users to only import that
+ * module via its `forRoot()` function in the root injector.
+ *
+ * \@experimental
+ */
+const APP_ROOT_SCOPE = /** @type {?} */ (new InjectionToken('The presence of this token marks an injector as being the root injector.'));
 
 /**
  * @fileoverview added by tsickle
@@ -9176,8 +9200,12 @@ function moduleProvideDef(flags, token, value, deps) {
 function moduleDef(providers) {
     const /** @type {?} */ providersByKey = {};
     const /** @type {?} */ modules = [];
+    let /** @type {?} */ isRoot = false;
     for (let /** @type {?} */ i = 0; i < providers.length; i++) {
         const /** @type {?} */ provider = providers[i];
+        if (provider.token === APP_ROOT_SCOPE) {
+            isRoot = true;
+        }
         if (provider.flags & 1073741824 /* TypeNgModule */) {
             modules.push(provider.token);
         }
@@ -9190,6 +9218,7 @@ function moduleDef(providers) {
         providersByKey,
         providers,
         modules,
+        isRoot,
     };
 }
 /**
@@ -9261,11 +9290,20 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
 }
 /**
  * @param {?} ngModule
+ * @param {?} scope
+ * @return {?}
+ */
+function moduleTransitivelyPresent(ngModule, scope) {
+    return ngModule._def.modules.indexOf(scope) > -1;
+}
+/**
+ * @param {?} ngModule
  * @param {?} def
  * @return {?}
  */
 function targetsModule(ngModule, def) {
-    return def.scope != null && ngModule._def.modules.indexOf(def.scope) > -1;
+    return def.scope != null && (moduleTransitivelyPresent(ngModule, def.scope) ||
+        def.scope === APP_ROOT_SCOPE && ngModule._def.isRoot);
 }
 /**
  * @param {?} ngModule
@@ -13574,24 +13612,8 @@ class NgModuleFactory_ extends NgModuleFactory {
 // about state in an instruction are correct before implementing any logic.
 // They are meant only to be called in dev mode as sanity checks.
 /**
- * Stringifies values such that strings are wrapped in explicit quotation marks and
- * other types are stringified normally. Used in error messages (e.g. assertThrow)
- * to make it clear that certain values are of the string type when comparing.
- *
- * e.g. `expected "3" to be 3` is easier to understand than `expected 3 to be 3`.
- *
- * @param {?} value The value to be stringified
- * @return {?} The stringified value
- */
-function stringifyValueForError(value) {
-    if (value && value.native && value.native.outerHTML) {
-        return value.native.outerHTML;
-    }
-    return typeof value === 'string' ? `"${value}"` : value;
-}
-/**
  * @param {?} actual
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
 
@@ -13599,57 +13621,78 @@ function stringifyValueForError(value) {
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
- * @param {?=} serializer
+ * @param {?} msg
  * @return {?}
  */
-function assertEqual(actual, expected, name, serializer) {
-    (actual != expected) && assertThrow(actual, expected, name, '==', serializer);
+function assertEqual(actual, expected, msg) {
+    if (actual != expected) {
+        throwError(msg);
+    }
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
-function assertLessThan(actual, expected, name) {
-    (actual >= expected) && assertThrow(actual, expected, name, '<');
-}
-/**
- * @template T
- * @param {?} actual
- * @param {?} name
- * @return {?}
- */
-function assertNotNull(actual, name) {
-    assertNotEqual(actual, null, name);
+function assertNotEqual(actual, expected, msg) {
+    if (actual == expected) {
+        throwError(msg);
+    }
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
-function assertNotEqual(actual, expected, name) {
-    (actual == expected) && assertThrow(actual, expected, name, '!=');
+function assertSame(actual, expected, msg) {
+    if (actual !== expected) {
+        throwError(msg);
+    }
 }
 /**
- * Throws an error with a message constructed from the arguments.
- *
  * @template T
- * @param {?} actual The actual value (e.g. 3)
- * @param {?} expected The expected value (e.g. 5)
- * @param {?} name The name of the value being checked (e.g. attrs.length)
- * @param {?} operator The comparison operator (e.g. <, >, ==)
- * @param {?=} serializer Function that maps a value to its display value
+ * @param {?} actual
+ * @param {?} expected
+ * @param {?} msg
  * @return {?}
  */
-function assertThrow(actual, expected, name, operator, serializer = stringifyValueForError) {
-    const /** @type {?} */ error = `ASSERT: expected ${name} ${operator} ${serializer(expected)} but was ${serializer(actual)}!`;
-    debugger; // leave `debugger` here to aid in debugging.
-    throw new Error(error);
+function assertLessThan(actual, expected, msg) {
+    if (actual >= expected) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} msg
+ * @return {?}
+ */
+function assertNull(actual, msg) {
+    if (actual != null) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} msg
+ * @return {?}
+ */
+function assertNotNull(actual, msg) {
+    if (actual == null) {
+        throwError(msg);
+    }
+}
+/**
+ * @param {?} msg
+ * @return {?}
+ */
+function throwError(msg) {
+    throw new Error(`ASSERTION ERROR: ${msg}`);
 }
 
 /**
@@ -13689,8 +13732,8 @@ if (typeof ngDevMode == 'undefined') {
  * @return {?}
  */
 function assertNodeType(node, type) {
-    assertNotEqual(node, null, 'node');
-    assertEqual(node.flags & 3 /* TYPE_MASK */, type, 'Node.type', typeSerializer);
+    assertNotNull(node, 'should be called with a node');
+    assertEqual(node.flags & 3 /* TYPE_MASK */, type, `should be a ${typeName(type)}`);
 }
 /**
  * @param {?} node
@@ -13698,20 +13741,16 @@ function assertNodeType(node, type) {
  * @return {?}
  */
 function assertNodeOfPossibleTypes(node, ...types) {
-    assertNotEqual(node, null, 'node');
-    const /** @type {?} */ nodeType = (node.flags & 3 /* TYPE_MASK */);
-    for (let /** @type {?} */ i = 0; i < types.length; i++) {
-        if (nodeType === types[i]) {
-            return;
-        }
-    }
-    throw new Error(`Expected node of possible types: ${types.map(typeSerializer).join(', ')} but got ${typeSerializer(nodeType)}`);
+    assertNotNull(node, 'should be called with a node');
+    const /** @type {?} */ nodeType = node.flags & 3;
+    const /** @type {?} */ found = types.some(type => nodeType === type);
+    assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')}`);
 }
 /**
  * @param {?} type
  * @return {?}
  */
-function typeSerializer(type) {
+function typeName(type) {
     if (type == 1 /* Projection */)
         return 'Projection';
     if (type == 0 /* Container */)
@@ -13720,7 +13759,7 @@ function typeSerializer(type) {
         return 'View';
     if (type == 3 /* Element */)
         return 'Element';
-    return '??? ' + type + ' ???';
+    return '<unknown>';
 }
 
 /**
@@ -14619,7 +14658,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  */
 function isNodeMatchingSimpleSelector(tNode, selector) {
     const /** @type {?} */ noOfSelectorParts = selector.length;
-    ngDevMode && assertNotNull(selector[0], 'selector[0]');
+    ngDevMode && assertNotNull(selector[0], 'the selector should have a tag name');
     const /** @type {?} */ tagNameInSelector = selector[0];
     // check tag tame
     if (tagNameInSelector !== '' && tagNameInSelector !== tNode.tagName) {
@@ -14979,7 +15018,7 @@ function createLNode(index, type, native, state) {
     if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
         // Bit of a hack to bust through the readonly because there is a circular dep between
         // LView and LNode.
-        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'lView.node');
+        ngDevMode && assertNull((/** @type {?} */ (state)).node, 'LView.node should not have been initialized');
         (/** @type {?} */ ((state))).node = node;
     }
     if (index != null) {
@@ -14999,7 +15038,7 @@ function createLNode(index, type, native, state) {
             if (previousOrParentNode.view === currentView ||
                 (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
-                ngDevMode && assertEqual(previousOrParentNode.child, null, 'previousNode.child');
+                ngDevMode && assertNull(previousOrParentNode.child, `previousOrParentNode's child should not have been set.`);
                 previousOrParentNode.child = node;
             }
             else {
@@ -15007,7 +15046,7 @@ function createLNode(index, type, native, state) {
             }
         }
         else if (previousOrParentNode) {
-            ngDevMode && assertEqual(previousOrParentNode.next, null, 'previousNode.next');
+            ngDevMode && assertNull(previousOrParentNode.next, `previousOrParentNode's next property should not have been set.`);
             previousOrParentNode.next = node;
         }
     }
@@ -15118,7 +15157,8 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
         native = node && (/** @type {?} */ (node)).native;
     }
     else {
-        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+        ngDevMode &&
+            assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
         const /** @type {?} */ isHostElement = typeof nameOrComponentType !== 'string';
         // MEGAMORPHIC: `ngComponentDef` is a megamorphic property access here.
         // This is OK, since we will refactor this code and store the result in `TView.data`
@@ -15241,7 +15281,7 @@ function createTView() {
  * @return {?}
  */
 function setUpAttributes(native, attrs) {
-    ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
+    ngDevMode && assertEqual(attrs.length % 2, 0, 'each attribute should have a key and a value');
     const /** @type {?} */ isProc = isProceduralRenderer(renderer);
     for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
         isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrs[i], attrs[i | 1]) :
@@ -15519,7 +15559,8 @@ function elementStyle(index, styleName, value, suffix) {
  * @return {?}
  */
 function text(index, value) {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'text nodes should be created before bindings');
     const /** @type {?} */ textNode = value != null ?
         (isProceduralRenderer(renderer) ? renderer.createText(stringify$1(value)) :
             renderer.createTextNode(stringify$1(value))) :
@@ -15572,7 +15613,8 @@ function textBinding(index, value) {
  */
 function directiveCreate(index, directive, directiveDef, queryName) {
     let /** @type {?} */ instance;
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     let /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
     let /** @type {?} */ size = flags & 4092;
@@ -15673,9 +15715,10 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @return {?}
  */
 function container(index, directiveTypes, template, tagName, attrs, localRefs) {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'container nodes should be created before any bindings');
     const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
-    ngDevMode && assertNotEqual(currentParent, null, 'currentParent');
+    ngDevMode && assertNotNull(currentParent, 'containers should have a parent');
     const /** @type {?} */ lContainer = /** @type {?} */ ({
         views: [],
         nextIndex: 0,
@@ -15720,7 +15763,7 @@ function containerRefreshStart(index) {
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     isParent = true;
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
-    ngDevMode && assertEqual((/** @type {?} */ (previousOrParentNode)).native === undefined, true, 'previousOrParentNode.native === undefined');
+    ngDevMode && assertSame((/** @type {?} */ (previousOrParentNode)).native, undefined, `the container's native element should not have been set yet.`);
     // We need to execute init hooks here so ngOnInit hooks are called in top level views
     // before they are called in embedded views (for backwards compatibility).
     executeInitHooks(currentView, currentView.tView, creationMode);
@@ -15855,11 +15898,11 @@ function componentRefresh(directiveIndex, elementIndex) {
         ngDevMode && assertDataInRange(elementIndex);
         const /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
         ngDevMode && assertNodeType(element, 3 /* Element */);
-        ngDevMode && assertNotEqual(element.data, null, 'isComponent');
+        ngDevMode &&
+            assertNotNull(element.data, `Component's host node should have an LView attached.`);
         ngDevMode && assertDataInRange(directiveIndex);
         const /** @type {?} */ directive = getDirectiveInstance(data[directiveIndex]);
         const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
-        ngDevMode && assertNotEqual(hostView, null, 'hostView');
         const /** @type {?} */ oldView = enterView(hostView, element);
         try {
             template(directive, creationMode);
@@ -15913,9 +15956,7 @@ function projectionDef(index, selectors) {
  * @return {?}
  */
 function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
-    // appendedFirst can be null if and only if appendedLast is also null
-    ngDevMode &&
-        assertEqual(!appendedFirst === !appendedLast, true, '!appendedFirst === !appendedLast');
+    ngDevMode && assertEqual(!!appendedFirst, !!appendedLast, 'appendedFirst can be null if and only if appendedLast is also null');
     if (!appendedLast) {
         // nothing to append
         return;
@@ -16009,18 +16050,54 @@ function addToViewTree(state) {
  */
 const NO_CHANGE = /** @type {?} */ ({});
 /**
- * Create interpolation bindings with variable number of arguments.
+ *  Initializes the binding start index. Will get inlined.
  *
- * If any of the arguments change, then the interpolation is concatenated
- * and causes an update.
+ *  This function must be called before any binding related function is called
+ *  (ie `bind()`, `interpolationX()`, `pureFunctionX()`)
+ * @return {?}
+ */
+function initBindings() {
+    // `bindingIndex` is initialized when the view is first entered when not in creation mode
+    ngDevMode &&
+        assertEqual(creationMode, true, 'should only be called in creationMode for performance reasons');
+    if (currentView.bindingStartIndex == null) {
+        bindingIndex = currentView.bindingStartIndex = data.length;
+    }
+}
+/**
+ * Creates a single value binding.
+ *
+ * @template T
+ * @param {?} value Value to diff
+ * @return {?}
+ */
+function bind(value) {
+    if (creationMode) {
+        initBindings();
+        return data[bindingIndex++] = value;
+    }
+    const /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
+    if (changed) {
+        data[bindingIndex] = value;
+    }
+    bindingIndex++;
+    return changed ? value : NO_CHANGE;
+}
+/**
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and loop over it.
  *
  * `values`:
  * - has static text at even indexes,
  * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  * @param {?} values
  * @return {?}
  */
-function bindV(values) {
+function interpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     // TODO(vicb): Add proper unit tests when there is a place to add them
@@ -16053,45 +16130,18 @@ function bindV(values) {
     return NO_CHANGE;
 }
 /**
- * @return {?}
- */
-function initBindings() {
-    if (currentView.bindingStartIndex == null) {
-        bindingIndex = currentView.bindingStartIndex = data.length;
-    }
-}
-/**
- * Creates a single value binding without interpolation.
- *
- * @template T
- * @param {?} value Value to diff
- * @return {?}
- */
-function bind(value) {
-    if (creationMode) {
-        initBindings();
-        return data[bindingIndex++] = value;
-    }
-    const /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
-    if (changed) {
-        data[bindingIndex] = value;
-    }
-    bindingIndex++;
-    return changed ? value : NO_CHANGE;
-}
-/**
- * Creates an interpolation bindings with 1 argument.
+ * Creates an interpolation binding with 1 expression.
  *
  * @param {?} prefix static value used for concatenation only.
  * @param {?} value value checked for change.
  * @param {?} suffix static value used for concatenation only.
  * @return {?}
  */
-function bind1(prefix, value, suffix) {
+function interpolation1(prefix, value, suffix) {
     return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
 }
 /**
- * Creates an interpolation bindings with 2 arguments.
+ * Creates an interpolation binding with 2 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16099,7 +16149,7 @@ function bind1(prefix, value, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind2(prefix, v0, i0, v1, suffix) {
+function interpolation2(prefix, v0, i0, v1, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16121,7 +16171,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
- * Creates an interpolation bindings with 3 arguments.
+ * Creates an interpolation bindings with 3 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16131,7 +16181,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
+function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16159,7 +16209,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 4 arguments.
+ * Create an interpolation binding with 4 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16171,7 +16221,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16208,7 +16258,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 5 arguments.
+ * Creates an interpolation binding with 5 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16222,7 +16272,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16264,7 +16314,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 6 arguments.
+ * Creates an interpolation binding with 6 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16280,7 +16330,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16327,7 +16377,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 7 arguments.
+ * Creates an interpolation binding with 7 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16345,7 +16395,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16398,7 +16448,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 8 arguments.
+ * Creates an interpolation binding with 8 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -16418,7 +16468,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
  * @param {?} suffix
  * @return {?}
  */
-function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     let /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -16547,13 +16597,13 @@ function getDirectiveInstance(instanceOrArray) {
  * @return {?}
  */
 function assertPreviousIsParent() {
-    assertEqual(isParent, true, 'isParent');
+    assertEqual(isParent, true, 'previousOrParentNode should be a parent');
 }
 /**
  * @return {?}
  */
 function assertHasParent() {
-    assertNotEqual(previousOrParentNode.parent, null, 'isParent');
+    assertNotNull(previousOrParentNode.parent, 'previousOrParentNode should have a parent');
 }
 /**
  * @param {?} index
@@ -16563,14 +16613,14 @@ function assertHasParent() {
 function assertDataInRange(index, arr) {
     if (arr == null)
         arr = data;
-    assertLessThan(index, arr ? arr.length : 0, 'data.length');
+    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
 }
 /**
  * @param {?} index
  * @return {?}
  */
 function assertDataNext(index) {
-    assertEqual(data.length, index, 'data.length not in sequence');
+    assertEqual(data.length, index, 'index expected to be at the end of data');
 }
 
 /**
@@ -16636,12 +16686,12 @@ function renderComponent(componentType, opts = {}) {
  * @return {?}
  */
 function detectChanges(component) {
-    ngDevMode && assertNotNull(component, 'component');
+    ngDevMode && assertNotNull(component, 'detectChanges should be called with a component');
     const /** @type {?} */ hostNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
     if (ngDevMode && !hostNode) {
         createError('Not a directive instance', component);
     }
-    ngDevMode && assertNotNull(hostNode.data, 'hostNode.data');
+    ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
     renderComponentOrTemplate(hostNode, hostNode.view, component);
     isDirty = false;
 }
@@ -17781,7 +17831,7 @@ function add(query, node) {
                 if (directiveIdx !== null) {
                     // a node is matching a predicate - determine what to read
                     // note that queries using name selector must specify read strategy
-                    ngDevMode && assertNotNull(predicate.read, 'predicate.read');
+                    ngDevMode && assertNotNull(predicate.read, 'the node should have a predicate');
                     const /** @type {?} */ result = readFromNodeInjector(nodeInjector, node, /** @type {?} */ ((predicate.read)), directiveIdx);
                     if (result !== null) {
                         addMatch(query, result);
@@ -19522,5 +19572,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, bind1 as ɵb1, bind2 as ɵb2, bind3 as ɵb3, bind4 as ɵb4, bind5 as ɵb5, bind6 as ɵb6, bind7 as ɵb7, bind8 as ɵb8, bindV as ɵbV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, objectLiteral1 as ɵo1, objectLiteral2 as ɵo2, objectLiteral3 as ɵo3, objectLiteral4 as ɵo4, objectLiteral5 as ɵo5, objectLiteral6 as ɵo6, objectLiteral7 as ɵo7, objectLiteral8 as ɵo8, objectLiteralV as ɵoV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, memory as ɵm, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbk, group$1 as ɵbl, keyframes$1 as ɵbp, sequence$1 as ɵbm, state$1 as ɵbo, style$1 as ɵbn, transition$1 as ɵbq, trigger$1 as ɵbj, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateContainerRef as ɵbf, getOrCreateInjectable as ɵbe, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbg, stringify$1 as ɵbh, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵbb, DebugContext as ɵbc };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, APP_ROOT_SCOPE, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, objectLiteral1 as ɵo1, objectLiteral2 as ɵo2, objectLiteral3 as ɵo3, objectLiteral4 as ɵo4, objectLiteral5 as ɵo5, objectLiteral6 as ɵo6, objectLiteral7 as ɵo7, objectLiteral8 as ɵo8, objectLiteralV as ɵoV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, memory as ɵm, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbk, group$1 as ɵbl, keyframes$1 as ɵbp, sequence$1 as ɵbm, state$1 as ɵbo, style$1 as ɵbn, transition$1 as ɵbq, trigger$1 as ɵbj, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵh, defaultIterableDiffers as ɵi, defaultKeyValueDiffers as ɵj, DefaultIterableDifferFactory as ɵk, DefaultKeyValueDifferFactory as ɵl, ReflectiveInjector_ as ɵd, ReflectiveDependency as ɵf, resolveReflectiveProviders as ɵg, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateContainerRef as ɵbf, getOrCreateInjectable as ɵbe, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbg, stringify$1 as ɵbh, makeParamDecorator as ɵa, makePropDecorator as ɵc, _def as ɵbb, DebugContext as ɵbc };
 //# sourceMappingURL=core.js.map

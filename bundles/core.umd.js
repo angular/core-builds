@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-f628797
+ * @license Angular v6.0.0-beta.4-f755db7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-f628797
+ * @license Angular v6.0.0-beta.4-f755db7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1571,7 +1571,7 @@ var InjectionToken = /** @class */ (function () {
         if (options !== undefined) {
             this.ngInjectableDef = defineInjectable({
                 scope: options.scope,
-                factory: convertInjectableProviderToFactory(/** @type {?} */ (this), options),
+                factory: options.factory,
             });
         }
         else {
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-f628797');
+var VERSION = new Version('6.0.0-beta.4-f755db7');
 
 /**
  * @fileoverview added by tsickle
@@ -3704,6 +3704,30 @@ function _mapProviders(injector, fn) {
     }
     return res;
 }
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A scope which targets the root injector.
+ *
+ * When specified as the `scope` parameter to `\@Injectable` or `InjectionToken`, this special
+ * scope indicates the provider for the service or token being configured belongs in the root
+ * injector. This is loosely equivalent to the convention of having a `forRoot()` static
+ * function within a module that configures the provider, and expecting users to only import that
+ * module via its `forRoot()` function in the root injector.
+ *
+ * \@experimental
+ */
+var APP_ROOT_SCOPE = /** @type {?} */ (new InjectionToken('The presence of this token marks an injector as being the root injector.'));
 
 /**
  * @fileoverview added by tsickle
@@ -11037,8 +11061,12 @@ function moduleProvideDef(flags, token, value, deps) {
 function moduleDef(providers) {
     var /** @type {?} */ providersByKey = {};
     var /** @type {?} */ modules = [];
+    var /** @type {?} */ isRoot = false;
     for (var /** @type {?} */ i = 0; i < providers.length; i++) {
         var /** @type {?} */ provider = providers[i];
+        if (provider.token === APP_ROOT_SCOPE) {
+            isRoot = true;
+        }
         if (provider.flags & 1073741824 /* TypeNgModule */) {
             modules.push(provider.token);
         }
@@ -11051,6 +11079,7 @@ function moduleDef(providers) {
         providersByKey: providersByKey,
         providers: providers,
         modules: modules,
+        isRoot: isRoot,
     };
 }
 /**
@@ -11123,11 +11152,20 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
 }
 /**
  * @param {?} ngModule
+ * @param {?} scope
+ * @return {?}
+ */
+function moduleTransitivelyPresent(ngModule, scope) {
+    return ngModule._def.modules.indexOf(scope) > -1;
+}
+/**
+ * @param {?} ngModule
  * @param {?} def
  * @return {?}
  */
 function targetsModule(ngModule, def) {
-    return def.scope != null && ngModule._def.modules.indexOf(def.scope) > -1;
+    return def.scope != null && (moduleTransitivelyPresent(ngModule, def.scope) ||
+        def.scope === APP_ROOT_SCOPE && ngModule._def.isRoot);
 }
 /**
  * @param {?} ngModule
@@ -15865,24 +15903,8 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
 // about state in an instruction are correct before implementing any logic.
 // They are meant only to be called in dev mode as sanity checks.
 /**
- * Stringifies values such that strings are wrapped in explicit quotation marks and
- * other types are stringified normally. Used in error messages (e.g. assertThrow)
- * to make it clear that certain values are of the string type when comparing.
- *
- * e.g. `expected "3" to be 3` is easier to understand than `expected 3 to be 3`.
- *
- * @param {?} value The value to be stringified
- * @return {?} The stringified value
- */
-function stringifyValueForError(value) {
-    if (value && value.native && value.native.outerHTML) {
-        return value.native.outerHTML;
-    }
-    return typeof value === 'string' ? "\"" + value + "\"" : value;
-}
-/**
  * @param {?} actual
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
 
@@ -15890,58 +15912,78 @@ function stringifyValueForError(value) {
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
- * @param {?=} serializer
+ * @param {?} msg
  * @return {?}
  */
-function assertEqual(actual, expected, name, serializer) {
-    (actual != expected) && assertThrow(actual, expected, name, '==', serializer);
+function assertEqual(actual, expected, msg) {
+    if (actual != expected) {
+        throwError(msg);
+    }
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
-function assertLessThan(actual, expected, name) {
-    (actual >= expected) && assertThrow(actual, expected, name, '<');
-}
-/**
- * @template T
- * @param {?} actual
- * @param {?} name
- * @return {?}
- */
-function assertNotNull(actual, name) {
-    assertNotEqual(actual, null, name);
+function assertNotEqual(actual, expected, msg) {
+    if (actual == expected) {
+        throwError(msg);
+    }
 }
 /**
  * @template T
  * @param {?} actual
  * @param {?} expected
- * @param {?} name
+ * @param {?} msg
  * @return {?}
  */
-function assertNotEqual(actual, expected, name) {
-    (actual == expected) && assertThrow(actual, expected, name, '!=');
+function assertSame(actual, expected, msg) {
+    if (actual !== expected) {
+        throwError(msg);
+    }
 }
 /**
- * Throws an error with a message constructed from the arguments.
- *
  * @template T
- * @param {?} actual The actual value (e.g. 3)
- * @param {?} expected The expected value (e.g. 5)
- * @param {?} name The name of the value being checked (e.g. attrs.length)
- * @param {?} operator The comparison operator (e.g. <, >, ==)
- * @param {?=} serializer Function that maps a value to its display value
+ * @param {?} actual
+ * @param {?} expected
+ * @param {?} msg
  * @return {?}
  */
-function assertThrow(actual, expected, name, operator, serializer) {
-    if (serializer === void 0) { serializer = stringifyValueForError; }
-    var /** @type {?} */ error = "ASSERT: expected " + name + " " + operator + " " + serializer(expected) + " but was " + serializer(actual) + "!";
-    debugger; // leave `debugger` here to aid in debugging.
-    throw new Error(error);
+function assertLessThan(actual, expected, msg) {
+    if (actual >= expected) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} msg
+ * @return {?}
+ */
+function assertNull(actual, msg) {
+    if (actual != null) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
+ * @param {?} msg
+ * @return {?}
+ */
+function assertNotNull(actual, msg) {
+    if (actual == null) {
+        throwError(msg);
+    }
+}
+/**
+ * @param {?} msg
+ * @return {?}
+ */
+function throwError(msg) {
+    throw new Error("ASSERTION ERROR: " + msg);
 }
 
 /**
@@ -15981,8 +16023,8 @@ if (typeof ngDevMode == 'undefined') {
  * @return {?}
  */
 function assertNodeType(node, type) {
-    assertNotEqual(node, null, 'node');
-    assertEqual(node.flags & 3 /* TYPE_MASK */, type, 'Node.type', typeSerializer);
+    assertNotNull(node, 'should be called with a node');
+    assertEqual(node.flags & 3 /* TYPE_MASK */, type, "should be a " + typeName(type));
 }
 /**
  * @param {?} node
@@ -15994,20 +16036,16 @@ function assertNodeOfPossibleTypes(node) {
     for (var _i = 1; _i < arguments.length; _i++) {
         types[_i - 1] = arguments[_i];
     }
-    assertNotEqual(node, null, 'node');
-    var /** @type {?} */ nodeType = (node.flags & 3 /* TYPE_MASK */);
-    for (var /** @type {?} */ i = 0; i < types.length; i++) {
-        if (nodeType === types[i]) {
-            return;
-        }
-    }
-    throw new Error("Expected node of possible types: " + types.map(typeSerializer).join(', ') + " but got " + typeSerializer(nodeType));
+    assertNotNull(node, 'should be called with a node');
+    var /** @type {?} */ nodeType = node.flags & 3;
+    var /** @type {?} */ found = types.some(function (type) { return nodeType === type; });
+    assertEqual(found, true, "Should be one of " + types.map(typeName).join(', '));
 }
 /**
  * @param {?} type
  * @return {?}
  */
-function typeSerializer(type) {
+function typeName(type) {
     if (type == 1 /* Projection */)
         return 'Projection';
     if (type == 0 /* Container */)
@@ -16016,7 +16054,7 @@ function typeSerializer(type) {
         return 'View';
     if (type == 3 /* Element */)
         return 'Element';
-    return '??? ' + type + ' ???';
+    return '<unknown>';
 }
 
 /**
@@ -16915,7 +16953,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  */
 function isNodeMatchingSimpleSelector(tNode, selector) {
     var /** @type {?} */ noOfSelectorParts = selector.length;
-    ngDevMode && assertNotNull(selector[0], 'selector[0]');
+    ngDevMode && assertNotNull(selector[0], 'the selector should have a tag name');
     var /** @type {?} */ tagNameInSelector = selector[0];
     // check tag tame
     if (tagNameInSelector !== '' && tagNameInSelector !== tNode.tagName) {
@@ -17277,7 +17315,7 @@ function createLNode(index, type, native, state) {
     if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
         // Bit of a hack to bust through the readonly because there is a circular dep between
         // LView and LNode.
-        ngDevMode && assertEqual((/** @type {?} */ (state)).node, null, 'lView.node');
+        ngDevMode && assertNull((/** @type {?} */ (state)).node, 'LView.node should not have been initialized');
         (/** @type {?} */ ((state))).node = node;
     }
     if (index != null) {
@@ -17297,7 +17335,7 @@ function createLNode(index, type, native, state) {
             if (previousOrParentNode.view === currentView ||
                 (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
-                ngDevMode && assertEqual(previousOrParentNode.child, null, 'previousNode.child');
+                ngDevMode && assertNull(previousOrParentNode.child, "previousOrParentNode's child should not have been set.");
                 previousOrParentNode.child = node;
             }
             else {
@@ -17305,7 +17343,7 @@ function createLNode(index, type, native, state) {
             }
         }
         else if (previousOrParentNode) {
-            ngDevMode && assertEqual(previousOrParentNode.next, null, 'previousNode.next');
+            ngDevMode && assertNull(previousOrParentNode.next, "previousOrParentNode's next property should not have been set.");
             previousOrParentNode.next = node;
         }
     }
@@ -17416,7 +17454,8 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
         native = node_1 && (/** @type {?} */ (node_1)).native;
     }
     else {
-        ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+        ngDevMode &&
+            assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
         var /** @type {?} */ isHostElement = typeof nameOrComponentType !== 'string';
         // MEGAMORPHIC: `ngComponentDef` is a megamorphic property access here.
         // This is OK, since we will refactor this code and store the result in `TView.data`
@@ -17539,7 +17578,7 @@ function createTView() {
  * @return {?}
  */
 function setUpAttributes(native, attrs) {
-    ngDevMode && assertEqual(attrs.length % 2, 0, 'attrs.length % 2');
+    ngDevMode && assertEqual(attrs.length % 2, 0, 'each attribute should have a key and a value');
     var /** @type {?} */ isProc = isProceduralRenderer(renderer);
     for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
         isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrs[i], attrs[i | 1]) :
@@ -17818,7 +17857,8 @@ function elementStyle(index, styleName, value, suffix) {
  * @return {?}
  */
 function text(index, value) {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'text nodes should be created before bindings');
     var /** @type {?} */ textNode = value != null ?
         (isProceduralRenderer(renderer) ? renderer.createText(stringify$1(value)) :
             renderer.createTextNode(stringify$1(value))) :
@@ -17871,7 +17911,8 @@ function textBinding(index, value) {
  */
 function directiveCreate(index, directive, directiveDef, queryName) {
     var /** @type {?} */ instance;
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     var /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
     var /** @type {?} */ size = flags & 4092;
@@ -17972,9 +18013,10 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @return {?}
  */
 function container(index, directiveTypes, template, tagName, attrs, localRefs) {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'container nodes should be created before any bindings');
     var /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
-    ngDevMode && assertNotEqual(currentParent, null, 'currentParent');
+    ngDevMode && assertNotNull(currentParent, 'containers should have a parent');
     var /** @type {?} */ lContainer = /** @type {?} */ ({
         views: [],
         nextIndex: 0,
@@ -18019,7 +18061,7 @@ function containerRefreshStart(index) {
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     isParent = true;
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
-    ngDevMode && assertEqual((/** @type {?} */ (previousOrParentNode)).native === undefined, true, 'previousOrParentNode.native === undefined');
+    ngDevMode && assertSame((/** @type {?} */ (previousOrParentNode)).native, undefined, "the container's native element should not have been set yet.");
     // We need to execute init hooks here so ngOnInit hooks are called in top level views
     // before they are called in embedded views (for backwards compatibility).
     executeInitHooks(currentView, currentView.tView, creationMode);
@@ -18154,11 +18196,11 @@ function componentRefresh(directiveIndex, elementIndex) {
         ngDevMode && assertDataInRange(elementIndex);
         var /** @type {?} */ element = /** @type {?} */ (((data))[elementIndex]);
         ngDevMode && assertNodeType(element, 3 /* Element */);
-        ngDevMode && assertNotEqual(element.data, null, 'isComponent');
+        ngDevMode &&
+            assertNotNull(element.data, "Component's host node should have an LView attached.");
         ngDevMode && assertDataInRange(directiveIndex);
         var /** @type {?} */ directive = getDirectiveInstance(data[directiveIndex]);
         var /** @type {?} */ hostView = /** @type {?} */ ((element.data));
-        ngDevMode && assertNotEqual(hostView, null, 'hostView');
         var /** @type {?} */ oldView = enterView(hostView, element);
         try {
             template(directive, creationMode);
@@ -18212,9 +18254,7 @@ function projectionDef(index, selectors) {
  * @return {?}
  */
 function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
-    // appendedFirst can be null if and only if appendedLast is also null
-    ngDevMode &&
-        assertEqual(!appendedFirst === !appendedLast, true, '!appendedFirst === !appendedLast');
+    ngDevMode && assertEqual(!!appendedFirst, !!appendedLast, 'appendedFirst can be null if and only if appendedLast is also null');
     if (!appendedLast) {
         // nothing to append
         return;
@@ -18309,18 +18349,54 @@ function addToViewTree(state) {
  */
 var NO_CHANGE = /** @type {?} */ ({});
 /**
- * Create interpolation bindings with variable number of arguments.
+ *  Initializes the binding start index. Will get inlined.
  *
- * If any of the arguments change, then the interpolation is concatenated
- * and causes an update.
+ *  This function must be called before any binding related function is called
+ *  (ie `bind()`, `interpolationX()`, `pureFunctionX()`)
+ * @return {?}
+ */
+function initBindings() {
+    // `bindingIndex` is initialized when the view is first entered when not in creation mode
+    ngDevMode &&
+        assertEqual(creationMode, true, 'should only be called in creationMode for performance reasons');
+    if (currentView.bindingStartIndex == null) {
+        bindingIndex = currentView.bindingStartIndex = data.length;
+    }
+}
+/**
+ * Creates a single value binding.
+ *
+ * @template T
+ * @param {?} value Value to diff
+ * @return {?}
+ */
+function bind(value) {
+    if (creationMode) {
+        initBindings();
+        return data[bindingIndex++] = value;
+    }
+    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
+    if (changed) {
+        data[bindingIndex] = value;
+    }
+    bindingIndex++;
+    return changed ? value : NO_CHANGE;
+}
+/**
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and loop over it.
  *
  * `values`:
  * - has static text at even indexes,
  * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  * @param {?} values
  * @return {?}
  */
-function bindV(values) {
+function interpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
     // TODO(vicb): Add proper unit tests when there is a place to add them
@@ -18353,45 +18429,18 @@ function bindV(values) {
     return NO_CHANGE;
 }
 /**
- * @return {?}
- */
-function initBindings() {
-    if (currentView.bindingStartIndex == null) {
-        bindingIndex = currentView.bindingStartIndex = data.length;
-    }
-}
-/**
- * Creates a single value binding without interpolation.
- *
- * @template T
- * @param {?} value Value to diff
- * @return {?}
- */
-function bind(value) {
-    if (creationMode) {
-        initBindings();
-        return data[bindingIndex++] = value;
-    }
-    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
-    if (changed) {
-        data[bindingIndex] = value;
-    }
-    bindingIndex++;
-    return changed ? value : NO_CHANGE;
-}
-/**
- * Creates an interpolation bindings with 1 argument.
+ * Creates an interpolation binding with 1 expression.
  *
  * @param {?} prefix static value used for concatenation only.
  * @param {?} value value checked for change.
  * @param {?} suffix static value used for concatenation only.
  * @return {?}
  */
-function bind1(prefix, value, suffix) {
+function interpolation1(prefix, value, suffix) {
     return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
 }
 /**
- * Creates an interpolation bindings with 2 arguments.
+ * Creates an interpolation binding with 2 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18399,7 +18448,7 @@ function bind1(prefix, value, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind2(prefix, v0, i0, v1, suffix) {
+function interpolation2(prefix, v0, i0, v1, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18421,7 +18470,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
- * Creates an interpolation bindings with 3 arguments.
+ * Creates an interpolation bindings with 3 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18431,7 +18480,7 @@ function bind2(prefix, v0, i0, v1, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
+function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18459,7 +18508,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
         NO_CHANGE;
 }
 /**
- * Create an interpolation binding with 4 arguments.
+ * Create an interpolation binding with 4 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18471,7 +18520,7 @@ function bind3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
+function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18508,7 +18557,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 5 arguments.
+ * Creates an interpolation binding with 5 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18522,7 +18571,7 @@ function bind4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
+function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18564,7 +18613,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 6 arguments.
+ * Creates an interpolation binding with 6 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18580,7 +18629,7 @@ function bind5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
+function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18627,7 +18676,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 7 arguments.
+ * Creates an interpolation binding with 7 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18645,7 +18694,7 @@ function bind6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
  * @param {?} suffix
  * @return {?}
  */
-function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
+function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18698,7 +18747,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
         NO_CHANGE;
 }
 /**
- * Creates an interpolation binding with 8 arguments.
+ * Creates an interpolation binding with 8 expressions.
  * @param {?} prefix
  * @param {?} v0
  * @param {?} i0
@@ -18718,7 +18767,7 @@ function bind7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffi
  * @param {?} suffix
  * @return {?}
  */
-function bind8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
+function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
     var /** @type {?} */ different;
     if (different = creationMode) {
         initBindings();
@@ -18847,13 +18896,13 @@ function getDirectiveInstance(instanceOrArray) {
  * @return {?}
  */
 function assertPreviousIsParent() {
-    assertEqual(isParent, true, 'isParent');
+    assertEqual(isParent, true, 'previousOrParentNode should be a parent');
 }
 /**
  * @return {?}
  */
 function assertHasParent() {
-    assertNotEqual(previousOrParentNode.parent, null, 'isParent');
+    assertNotNull(previousOrParentNode.parent, 'previousOrParentNode should have a parent');
 }
 /**
  * @param {?} index
@@ -18863,14 +18912,14 @@ function assertHasParent() {
 function assertDataInRange(index, arr) {
     if (arr == null)
         arr = data;
-    assertLessThan(index, arr ? arr.length : 0, 'data.length');
+    assertLessThan(index, arr ? arr.length : 0, 'index expected to be a valid data index');
 }
 /**
  * @param {?} index
  * @return {?}
  */
 function assertDataNext(index) {
-    assertEqual(data.length, index, 'data.length not in sequence');
+    assertEqual(data.length, index, 'index expected to be at the end of data');
 }
 
 /**
@@ -18937,12 +18986,12 @@ function renderComponent(componentType, opts) {
  * @return {?}
  */
 function detectChanges(component) {
-    ngDevMode && assertNotNull(component, 'component');
+    ngDevMode && assertNotNull(component, 'detectChanges should be called with a component');
     var /** @type {?} */ hostNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
     if (ngDevMode && !hostNode) {
         createError('Not a directive instance', component);
     }
-    ngDevMode && assertNotNull(hostNode.data, 'hostNode.data');
+    ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
     renderComponentOrTemplate(hostNode, hostNode.view, component);
     isDirty = false;
 }
@@ -20168,7 +20217,7 @@ function add(query, node) {
                 if (directiveIdx !== null) {
                     // a node is matching a predicate - determine what to read
                     // note that queries using name selector must specify read strategy
-                    ngDevMode && assertNotNull(predicate.read, 'predicate.read');
+                    ngDevMode && assertNotNull(predicate.read, 'the node should have a predicate');
                     var /** @type {?} */ result = readFromNodeInjector(nodeInjector, node, /** @type {?} */ ((predicate.read)), directiveIdx);
                     if (result !== null) {
                         addMatch(query, result);
@@ -22030,6 +22079,7 @@ exports.ReflectiveInjector = ReflectiveInjector;
 exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
 exports.ReflectiveKey = ReflectiveKey;
 exports.InjectionToken = InjectionToken;
+exports.APP_ROOT_SCOPE = APP_ROOT_SCOPE;
 exports.Inject = Inject;
 exports.Optional = Optional;
 exports.Self = Self;
@@ -22108,15 +22158,15 @@ exports.ɵV = embeddedViewStart;
 exports.ɵQ = query;
 exports.ɵP = projection;
 exports.ɵb = bind;
-exports.ɵb1 = bind1;
-exports.ɵb2 = bind2;
-exports.ɵb3 = bind3;
-exports.ɵb4 = bind4;
-exports.ɵb5 = bind5;
-exports.ɵb6 = bind6;
-exports.ɵb7 = bind7;
-exports.ɵb8 = bind8;
-exports.ɵbV = bindV;
+exports.ɵi1 = interpolation1;
+exports.ɵi2 = interpolation2;
+exports.ɵi3 = interpolation3;
+exports.ɵi4 = interpolation4;
+exports.ɵi5 = interpolation5;
+exports.ɵi6 = interpolation6;
+exports.ɵi7 = interpolation7;
+exports.ɵi8 = interpolation8;
+exports.ɵiV = interpolationV;
 exports.ɵpb1 = pipeBind1;
 exports.ɵpb2 = pipeBind2;
 exports.ɵpb3 = pipeBind3;

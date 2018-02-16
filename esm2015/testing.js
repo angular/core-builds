@@ -1,9 +1,9 @@
 /**
- * @license Angular v6.0.0-beta.4-f628797
+ * @license Angular v6.0.0-beta.4-f755db7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, Component, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -482,6 +482,11 @@ class TestingCompiler extends Compiler {
        */
     getComponentFromError(error) { throw unimplemented(); }
 }
+TestingCompiler.decorators = [
+    { type: Injectable },
+];
+/** @nocollapse */
+TestingCompiler.ctorParameters = () => [];
 /**
  * A factory for creating a Compiler
  *

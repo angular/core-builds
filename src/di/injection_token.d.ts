@@ -7,8 +7,6 @@
  */
 import { Type } from '../type';
 import { Injectable } from './injectable';
-import { ClassSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
-export declare type InjectionTokenProvider = ValueSansProvider | ExistingSansProvider | FactorySansProvider | ClassSansProvider | StaticClassSansProvider;
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -36,6 +34,7 @@ export declare class InjectionToken<T> {
     readonly ngInjectableDef: Injectable | undefined;
     constructor(_desc: string, options?: {
         scope: Type<any>;
-    } & InjectionTokenProvider);
+        factory: () => T;
+    });
     toString(): string;
 }

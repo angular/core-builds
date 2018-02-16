@@ -247,44 +247,46 @@ export interface NO_CHANGE {
 /** A special value which designates that a value has not changed. */
 export declare const NO_CHANGE: NO_CHANGE;
 /**
- * Create interpolation bindings with variable number of arguments.
- *
- * If any of the arguments change, then the interpolation is concatenated
- * and causes an update.
- *
- * `values`:
- * - has static text at even indexes,
- * - has evaluated expressions at odd indexes (could be NO_CHANGE).
- */
-export declare function bindV(values: any[]): string | NO_CHANGE;
-/**
- * Creates a single value binding without interpolation.
+ * Creates a single value binding.
  *
  * @param value Value to diff
  */
 export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
- * Creates an interpolation bindings with 1 argument.
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and loop over it.
+ *
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function interpolationV(values: any[]): string | NO_CHANGE;
+/**
+ * Creates an interpolation binding with 1 expression.
  *
  * @param prefix static value used for concatenation only.
  * @param value value checked for change.
  * @param suffix static value used for concatenation only.
  */
-export declare function bind1(prefix: string, value: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation bindings with 2 arguments. */
-export declare function bind2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation bindings with 3 arguments. */
-export declare function bind3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
-/** Create an interpolation binding with 4 arguments. */
-export declare function bind4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation binding with 5 arguments. */
-export declare function bind5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation binding with 6 arguments. */
-export declare function bind6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation binding with 7 arguments. */
-export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
-/** Creates an interpolation binding with 8 arguments. */
-export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
+export declare function interpolation1(prefix: string, value: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 2 expressions. */
+export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation bindings with 3 expressions. */
+export declare function interpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
+/** Create an interpolation binding with 4 expressions. */
+export declare function interpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 5 expressions. */
+export declare function interpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 6 expressions. */
+export declare function interpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 7 expressions. */
+export declare function interpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 8 expressions. */
+export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
 /** Gets the binding at the current bindingIndex */
 export declare function peekBinding(): any;
