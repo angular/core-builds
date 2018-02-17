@@ -12,7 +12,7 @@ export { InjectFlags, QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_RE
 export { NO_CHANGE as NC, bind as b, interpolation1 as i1, interpolation2 as i2, interpolation3 as i3, interpolation4 as i4, interpolation5 as i5, interpolation6 as i6, interpolation7 as i7, interpolation8 as i8, interpolationV as iV, componentRefresh as r, container as C, containerRefreshStart as cR, containerRefreshEnd as cr, elementAttribute as a, elementClass as k, elementEnd as e, elementProperty as p, elementStart as E, elementStyle as s, listener as L, memory as m, projection as P, projectionDef as pD, text as T, textBinding as t, embeddedViewStart as V, embeddedViewEnd as v } from './instructions';
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR } from './query';
-export { objectLiteral1 as o1, objectLiteral2 as o2, objectLiteral3 as o3, objectLiteral4 as o4, objectLiteral5 as o5, objectLiteral6 as o6, objectLiteral7 as o7, objectLiteral8 as o8, objectLiteralV as oV } from './object_literal';
+export { pureFunction0 as f0, pureFunction1 as f1, pureFunction2 as f2, pureFunction3 as f3, pureFunction4 as f4, pureFunction5 as f5, pureFunction6 as f6, pureFunction7 as f7, pureFunction8 as f8, pureFunctionV as fV } from './pure_function';
 export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe };
 export { createComponentRef, detectChanges, getHostElement, markDirty, renderComponent };
 export { CssSelector } from './interfaces/projection';

@@ -288,11 +288,20 @@ export declare function interpolation7(prefix: string, v0: any, i0: string, v1: 
 /** Creates an interpolation binding with 8 expressions. */
 export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
 export declare function memory<T>(index: number, value?: T): T;
-/** Gets the binding at the current bindingIndex */
-export declare function peekBinding(): any;
 export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;
+export declare function getCreationMode(): boolean;
+/** Gets the current binding value and increments the binding index. */
+export declare function consumeBinding(): any;
+/** Updates binding if changed, then returns whether it was updated. */
+export declare function bindingUpdated(value: any): boolean;
+/** Updates binding if changed, then returns the latest value. */
+export declare function checkAndUpdateBinding(value: any): any;
+/** Updates 2 bindings if changed, then returns whether either was updated. */
+export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
+/** Updates 4 bindings if changed, then returns whether any was updated. */
+export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getRenderer(): Renderer3;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;

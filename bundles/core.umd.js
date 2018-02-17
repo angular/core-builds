@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-e1bf067
+ * @license Angular v6.0.0-beta.4-f693be3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-e1bf067
+ * @license Angular v6.0.0-beta.4-f693be3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-e1bf067');
+var VERSION = new Version('6.0.0-beta.4-f693be3');
 
 /**
  * @fileoverview added by tsickle
@@ -18856,19 +18856,75 @@ function valueInData(data, index, value) {
     return /** @type {?} */ ((value));
 }
 /**
- * Gets the binding at the current bindingIndex
- * @return {?}
- */
-function peekBinding() {
-    ngDevMode && assertNotEqual(currentView.bindingStartIndex, null, 'bindingStartIndex');
-    return data[bindingIndex];
-}
-/**
  * @param {?} QueryType
  * @return {?}
  */
 function getCurrentQueries(QueryType) {
     return currentQueries || (currentQueries = new QueryType());
+}
+/**
+ * @return {?}
+ */
+function getCreationMode() {
+    return creationMode;
+}
+/**
+ * Gets the current binding value and increments the binding index.
+ * @return {?}
+ */
+function consumeBinding() {
+    ngDevMode && assertDataInRange(bindingIndex);
+    ngDevMode &&
+        assertNotEqual(data[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return data[bindingIndex++];
+}
+/**
+ * Updates binding if changed, then returns whether it was updated.
+ * @param {?} value
+ * @return {?}
+ */
+function bindingUpdated(value) {
+    ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
+    if (creationMode || isDifferent(data[bindingIndex], value)) {
+        creationMode && initBindings();
+        data[bindingIndex++] = value;
+        return true;
+    }
+    else {
+        bindingIndex++;
+        return false;
+    }
+}
+/**
+ * Updates binding if changed, then returns the latest value.
+ * @param {?} value
+ * @return {?}
+ */
+function checkAndUpdateBinding$1(value) {
+    bindingUpdated(value);
+    return value;
+}
+/**
+ * Updates 2 bindings if changed, then returns whether either was updated.
+ * @param {?} exp1
+ * @param {?} exp2
+ * @return {?}
+ */
+function bindingUpdated2(exp1, exp2) {
+    var /** @type {?} */ different = bindingUpdated(exp1);
+    return bindingUpdated(exp2) || different;
+}
+/**
+ * Updates 4 bindings if changed, then returns whether any was updated.
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @return {?}
+ */
+function bindingUpdated4(exp1, exp2, exp3, exp4) {
+    var /** @type {?} */ different = bindingUpdated2(exp1, exp2);
+    return bindingUpdated2(exp3, exp4) || different;
 }
 /**
  * @return {?}
@@ -20533,163 +20589,112 @@ function queryRefresh(queryList) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * If the object or array has changed, returns a copy with the updated expression.
- * Or if the expression hasn't changed, returns NO_CHANGE.
+ * If the value hasn't been saved, calls the pure function to store and return the
+ * value. If it has been saved, returns the saved value.
  *
- * @param {?} factoryFn Function that returns an updated instance of the object/array
- * @param {?} exp Updated expression value
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @template T
+ * @param {?} pureFn Function that returns a value
+ * @return {?} value
  */
-function objectLiteral1(factoryFn, exp) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestValue = exp === NO_CHANGE ? peekBinding() : exp;
-    if (bind(exp) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestValue) : NO_CHANGE;
+function pureFunction0(pureFn) {
+    return getCreationMode() ? checkAndUpdateBinding$1(pureFn()) : consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of the provided exp has changed, calls the pure function to return
+ * an updated value. Or if the value has not changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn Function that returns an updated value
+ * @param {?} exp Updated expression value
+ * @return {?} Updated value
+ */
+function pureFunction1(pureFn, exp) {
+    return bindingUpdated(exp) ? checkAndUpdateBinding$1(pureFn(exp)) : consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral2(factoryFn, exp1, exp2) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestVal1, latestVal2) : NO_CHANGE;
+function pureFunction2(pureFn, exp1, exp2) {
+    return bindingUpdated2(exp1, exp2) ? checkAndUpdateBinding$1(pureFn(exp1, exp2)) : consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral3(factoryFn, exp1, exp2, exp3) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestVal1, latestVal2, latestVal3) : NO_CHANGE;
+function pureFunction3(pureFn, exp1, exp2, exp3) {
+    var /** @type {?} */ different = bindingUpdated2(exp1, exp2);
+    return bindingUpdated(exp3) || different ? checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3)) :
+        consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
  * @param {?} exp4
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral4(factoryFn, exp1, exp2, exp3, exp4) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
-    if (bind(exp4) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4) : NO_CHANGE;
+function pureFunction4(pureFn, exp1, exp2, exp3, exp4) {
+    return bindingUpdated4(exp1, exp2, exp3, exp4) ?
+        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4)) :
+        consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
  * @param {?} exp4
  * @param {?} exp5
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral5(factoryFn, exp1, exp2, exp3, exp4, exp5) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
-    if (bind(exp4) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
-    if (bind(exp5) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5) :
-        NO_CHANGE;
+function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5) {
+    var /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated(exp5) || different ?
+        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5)) :
+        consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
  * @param {?} exp4
  * @param {?} exp5
  * @param {?} exp6
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral6(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
-    if (bind(exp4) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
-    if (bind(exp5) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
-    if (bind(exp6) !== NO_CHANGE)
-        different = true;
-    return different ?
-        factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6) :
-        NO_CHANGE;
+function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6) {
+    var /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated2(exp5, exp6) || different ?
+        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
+        consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
@@ -20697,40 +20702,20 @@ function objectLiteral6(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6) {
  * @param {?} exp5
  * @param {?} exp6
  * @param {?} exp7
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral7(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
-    if (bind(exp4) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
-    if (bind(exp5) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
-    if (bind(exp6) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal7 = exp7 === NO_CHANGE ? peekBinding() : exp7;
-    if (bind(exp7) !== NO_CHANGE)
-        different = true;
-    return different ?
-        factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6, latestVal7) :
-        NO_CHANGE;
+function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
+    var /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    different = bindingUpdated2(exp5, exp6) || different;
+    return bindingUpdated(exp7) || different ?
+        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
+        consumeBinding();
 }
 /**
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn
+ * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
@@ -20739,58 +20724,31 @@ function objectLiteral7(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
  * @param {?} exp6
  * @param {?} exp7
  * @param {?} exp8
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteral8(factoryFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) {
-    var /** @type {?} */ different = false;
-    var /** @type {?} */ latestVal1 = exp1 === NO_CHANGE ? peekBinding() : exp1;
-    if (bind(exp1) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal2 = exp2 === NO_CHANGE ? peekBinding() : exp2;
-    if (bind(exp2) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal3 = exp3 === NO_CHANGE ? peekBinding() : exp3;
-    if (bind(exp3) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal4 = exp4 === NO_CHANGE ? peekBinding() : exp4;
-    if (bind(exp4) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal5 = exp5 === NO_CHANGE ? peekBinding() : exp5;
-    if (bind(exp5) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal6 = exp6 === NO_CHANGE ? peekBinding() : exp6;
-    if (bind(exp6) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal7 = exp7 === NO_CHANGE ? peekBinding() : exp7;
-    if (bind(exp7) !== NO_CHANGE)
-        different = true;
-    var /** @type {?} */ latestVal8 = exp8 === NO_CHANGE ? peekBinding() : exp8;
-    if (bind(exp8) !== NO_CHANGE)
-        different = true;
-    return different ? factoryFn(latestVal1, latestVal2, latestVal3, latestVal4, latestVal5, latestVal6, latestVal7, latestVal8) :
-        NO_CHANGE;
+function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) {
+    var /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated4(exp1, exp2, exp3, exp4) || different ?
+        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
+        consumeBinding();
 }
 /**
- * objectLiteral instruction that can support any number of bindings.
+ * pureFunction instruction that can support any number of bindings.
  *
- * If the object or array has changed, returns a copy with all updated expressions.
- * Or if no expressions have changed, returns NO_CHANGE.
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
  *
- * @param {?} factoryFn A factory function that takes binding values and builds an object or array
+ * @param {?} pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param {?} exps
- * @return {?} A copy of the object/array or NO_CHANGE
+ * @return {?} Updated value
  */
-function objectLiteralV(factoryFn, exps) {
+function pureFunctionV(pureFn, exps) {
     var /** @type {?} */ different = false;
     for (var /** @type {?} */ i = 0; i < exps.length; i++) {
-        var /** @type {?} */ exp = exps[i];
-        if (exp === NO_CHANGE)
-            exps[i] = peekBinding();
-        if (bind(exp) !== NO_CHANGE)
-            different = true;
+        bindingUpdated(exps[i]) && (different = true);
     }
-    return different ? factoryFn(exps) : NO_CHANGE;
+    return different ? checkAndUpdateBinding$1(pureFn.apply(null, exps)) : consumeBinding();
 }
 
 /**
@@ -22157,6 +22115,7 @@ exports.ɵinjectTemplateRef = injectTemplateRef;
 exports.ɵinjectViewContainerRef = injectViewContainerRef;
 exports.ɵPublicFeature = PublicFeature;
 exports.ɵNgOnChangesFeature = NgOnChangesFeature;
+exports.ɵNC = NO_CHANGE;
 exports.ɵC = container;
 exports.ɵE = elementStart;
 exports.ɵL = listener;
@@ -22179,15 +22138,16 @@ exports.ɵpb2 = pipeBind2;
 exports.ɵpb3 = pipeBind3;
 exports.ɵpb4 = pipeBind4;
 exports.ɵpbV = pipeBindV;
-exports.ɵo1 = objectLiteral1;
-exports.ɵo2 = objectLiteral2;
-exports.ɵo3 = objectLiteral3;
-exports.ɵo4 = objectLiteral4;
-exports.ɵo5 = objectLiteral5;
-exports.ɵo6 = objectLiteral6;
-exports.ɵo7 = objectLiteral7;
-exports.ɵo8 = objectLiteral8;
-exports.ɵoV = objectLiteralV;
+exports.ɵf0 = pureFunction0;
+exports.ɵf1 = pureFunction1;
+exports.ɵf2 = pureFunction2;
+exports.ɵf3 = pureFunction3;
+exports.ɵf4 = pureFunction4;
+exports.ɵf5 = pureFunction5;
+exports.ɵf6 = pureFunction6;
+exports.ɵf7 = pureFunction7;
+exports.ɵf8 = pureFunction8;
+exports.ɵfV = pureFunctionV;
 exports.ɵcR = containerRefreshStart;
 exports.ɵcr = containerRefreshEnd;
 exports.ɵqR = queryRefresh;
@@ -22235,14 +22195,14 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵbk = animate$1;
-exports.ɵbl = group$1;
-exports.ɵbp = keyframes$1;
-exports.ɵbm = sequence$1;
-exports.ɵbo = state$1;
-exports.ɵbn = style$1;
-exports.ɵbq = transition$1;
-exports.ɵbj = trigger$1;
+exports.ɵbq = animate$1;
+exports.ɵbr = group$1;
+exports.ɵbv = keyframes$1;
+exports.ɵbs = sequence$1;
+exports.ɵbu = state$1;
+exports.ɵbt = style$1;
+exports.ɵbw = transition$1;
+exports.ɵbp = trigger$1;
 exports.ɵn = _iterableDiffersFactory;
 exports.ɵo = _keyValueDiffersFactory;
 exports.ɵq = _localeFactory;
@@ -22264,7 +22224,13 @@ exports.ɵbf = getOrCreateContainerRef;
 exports.ɵbe = getOrCreateInjectable;
 exports.ɵbd = getOrCreateNodeInjector;
 exports.ɵbg = getOrCreateTemplateRef;
-exports.ɵbh = stringify$1;
+exports.ɵbj = bindingUpdated;
+exports.ɵbl = bindingUpdated2;
+exports.ɵbm = bindingUpdated4;
+exports.ɵbk = checkAndUpdateBinding$1;
+exports.ɵbi = consumeBinding;
+exports.ɵbh = getCreationMode;
+exports.ɵbn = stringify$1;
 exports.ɵa = makeParamDecorator;
 exports.ɵc = makePropDecorator;
 exports.ɵbb = _def;
