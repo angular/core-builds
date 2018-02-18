@@ -78,6 +78,13 @@ export interface DirectiveDef<T> {
      * like ngOnInit and ngDoCheck, if they are defined on the directive.
      */
     h(directiveIndex: number, elementIndex: number): void;
+    /**
+     * Static attributes to set on host element.
+     *
+     * Even indices: attribute name
+     * Odd indices: attribute value
+     */
+    attributes: string[] | null;
     onInit: (() => void) | null;
     doCheck: (() => void) | null;
     afterContentInit: (() => void) | null;
@@ -129,6 +136,7 @@ export interface PipeDef<T> {
 export interface DirectiveDefArgs<T> {
     type: Type<T>;
     factory: () => T | [T];
+    attributes?: string[];
     inputs?: {
         [P in keyof T]?: string;
     };

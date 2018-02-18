@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-ac2b04a
+ * @license Angular v6.0.0-beta.4-c30d329
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-ac2b04a
+ * @license Angular v6.0.0-beta.4-c30d329
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-ac2b04a');
+var VERSION = new Version('6.0.0-beta.4-c30d329');
 
 /**
  * @fileoverview added by tsickle
@@ -17715,7 +17715,20 @@ function elementEnd() {
  * @param {?} value Value to write. This value will go through stringification.
  * @return {?}
  */
-
+function elementAttribute(index, attrName, value) {
+    if (value !== NO_CHANGE) {
+        var /** @type {?} */ element = /** @type {?} */ (data[index]);
+        if (value == null) {
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, attrName) :
+                element.native.removeAttribute(attrName);
+        }
+        else {
+            isProceduralRenderer(renderer) ?
+                renderer.setAttribute(element.native, attrName, stringify$1(value)) :
+                element.native.setAttribute(attrName, stringify$1(value));
+        }
+    }
+}
 /**
  * Update a property on an Element.
  *
@@ -17944,6 +17957,9 @@ function directiveCreate(index, directive, directiveDef, queryName) {
     var /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
     if (diPublic) {
         diPublic(/** @type {?} */ ((directiveDef)));
+    }
+    if (/** @type {?} */ ((directiveDef)).attributes != null && (previousOrParentNode.flags & 3 /* TYPE_MASK */) == 3 /* Element */) {
+        setUpAttributes((/** @type {?} */ (previousOrParentNode)).native, /** @type {?} */ (((directiveDef)).attributes));
     }
     var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
     if (tNode && tNode.attrs) {
@@ -19800,6 +19816,7 @@ function defineComponent(componentDefinition) {
         tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
         h: componentDefinition.hostBindings || noop$1,
+        attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
@@ -22238,6 +22255,7 @@ exports.ɵqR = queryRefresh;
 exports.ɵe = elementEnd;
 exports.ɵp = elementProperty;
 exports.ɵpD = projectionDef;
+exports.ɵa = elementAttribute;
 exports.ɵs = elementStyle;
 exports.ɵt = textBinding;
 exports.ɵv = embeddedViewEnd;
@@ -22279,46 +22297,46 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵbq = animate$1;
-exports.ɵbr = group$1;
-exports.ɵbv = keyframes$1;
-exports.ɵbs = sequence$1;
-exports.ɵbu = state$1;
-exports.ɵbt = style$1;
-exports.ɵbw = transition$1;
-exports.ɵbp = trigger$1;
-exports.ɵn = _iterableDiffersFactory;
-exports.ɵo = _keyValueDiffersFactory;
-exports.ɵq = _localeFactory;
-exports.ɵh = _appIdRandomProviderFactory;
-exports.ɵi = defaultIterableDiffers;
-exports.ɵj = defaultKeyValueDiffers;
-exports.ɵk = DefaultIterableDifferFactory;
-exports.ɵl = DefaultKeyValueDifferFactory;
-exports.ɵd = ReflectiveInjector_;
-exports.ɵf = ReflectiveDependency;
-exports.ɵg = resolveReflectiveProviders;
-exports.ɵu = wtfEnabled;
-exports.ɵx = createScope;
-exports.ɵw = detectWTF;
-exports.ɵba = endTimeRange;
-exports.ɵy = leave;
-exports.ɵz = startTimeRange;
-exports.ɵbf = getOrCreateContainerRef;
-exports.ɵbe = getOrCreateInjectable;
-exports.ɵbd = getOrCreateNodeInjector;
-exports.ɵbg = getOrCreateTemplateRef;
-exports.ɵbj = bindingUpdated;
-exports.ɵbl = bindingUpdated2;
-exports.ɵbm = bindingUpdated4;
-exports.ɵbk = checkAndUpdateBinding$1;
-exports.ɵbi = consumeBinding;
-exports.ɵbh = getCreationMode;
-exports.ɵbn = stringify$1;
-exports.ɵa = makeParamDecorator;
-exports.ɵc = makePropDecorator;
-exports.ɵbb = _def;
-exports.ɵbc = DebugContext;
+exports.ɵbr = animate$1;
+exports.ɵbs = group$1;
+exports.ɵbw = keyframes$1;
+exports.ɵbt = sequence$1;
+exports.ɵbv = state$1;
+exports.ɵbu = style$1;
+exports.ɵbx = transition$1;
+exports.ɵbq = trigger$1;
+exports.ɵo = _iterableDiffersFactory;
+exports.ɵq = _keyValueDiffersFactory;
+exports.ɵu = _localeFactory;
+exports.ɵi = _appIdRandomProviderFactory;
+exports.ɵj = defaultIterableDiffers;
+exports.ɵk = defaultKeyValueDiffers;
+exports.ɵl = DefaultIterableDifferFactory;
+exports.ɵn = DefaultKeyValueDifferFactory;
+exports.ɵf = ReflectiveInjector_;
+exports.ɵg = ReflectiveDependency;
+exports.ɵh = resolveReflectiveProviders;
+exports.ɵw = wtfEnabled;
+exports.ɵy = createScope;
+exports.ɵx = detectWTF;
+exports.ɵbb = endTimeRange;
+exports.ɵz = leave;
+exports.ɵba = startTimeRange;
+exports.ɵbg = getOrCreateContainerRef;
+exports.ɵbf = getOrCreateInjectable;
+exports.ɵbe = getOrCreateNodeInjector;
+exports.ɵbh = getOrCreateTemplateRef;
+exports.ɵbk = bindingUpdated;
+exports.ɵbm = bindingUpdated2;
+exports.ɵbn = bindingUpdated4;
+exports.ɵbl = checkAndUpdateBinding$1;
+exports.ɵbj = consumeBinding;
+exports.ɵbi = getCreationMode;
+exports.ɵbo = stringify$1;
+exports.ɵc = makeParamDecorator;
+exports.ɵd = makePropDecorator;
+exports.ɵbc = _def;
+exports.ɵbd = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
