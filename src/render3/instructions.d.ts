@@ -37,7 +37,7 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
-export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template?: ComponentTemplate<any> | null, context?: any | null): LView;
+export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.

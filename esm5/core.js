@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-4ec40c6
+ * @license Angular v6.0.0-beta.4-ac2b04a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2030,7 +2030,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-4ec40c6');
+var VERSION = new Version('6.0.0-beta.4-ac2b04a');
 
 /**
  * @fileoverview added by tsickle
@@ -16412,6 +16412,12 @@ var domRendererFactory3 = {
  * @record
  */
 
+/**
+ * RootContext contains information which is shared for all components which
+ * were bootstrapped with {\@link renderComponent}.
+ * @record
+ */
+
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 
@@ -17137,10 +17143,13 @@ var isParent;
 var tData;
 /**
  * State of the current view being processed.
+ *
+ * NOTE: we cheat here and initialize it to `null` even thought the type does not
+ * contain `null`. This is because we expect this value to be not `null` as soon
+ * as we enter the view. Declaring the type as `null` would require us to place `!`
+ * in most instructions since they all assume that `currentView` is defined.
  */
-var currentView;
-// The initialization has to be after the `let`, otherwise `createLView` can't see `let`.
-currentView = createLView(/** @type {?} */ ((null)), /** @type {?} */ ((null)), createTView());
+var currentView = /** @type {?} */ ((null));
 var currentQueries;
 /**
  * This property gets set before entering a template.
@@ -17187,18 +17196,18 @@ var cleanup;
  */
 function enterView(newView, host) {
     var /** @type {?} */ oldView = currentView;
-    data = newView.data;
-    bindingIndex = newView.bindingStartIndex || 0;
-    tData = newView.tView.data;
-    creationMode = newView.creationMode;
-    cleanup = newView.cleanup;
-    renderer = newView.renderer;
+    data = newView && newView.data;
+    bindingIndex = newView && newView.bindingStartIndex || 0;
+    tData = newView && newView.tView.data;
+    creationMode = newView && newView.creationMode;
+    cleanup = newView && newView.cleanup;
+    renderer = newView && newView.renderer;
     if (host != null) {
         previousOrParentNode = host;
         isParent = true;
     }
     currentView = newView;
-    currentQueries = newView.queries;
+    currentQueries = newView && newView.queries;
     return /** @type {?} */ ((oldView));
 }
 /**
@@ -17218,13 +17227,11 @@ function leaveView(newView) {
  * @param {?} viewId
  * @param {?} renderer
  * @param {?} tView
- * @param {?=} template
- * @param {?=} context
+ * @param {?} template
+ * @param {?} context
  * @return {?}
  */
 function createLView(viewId, renderer, tView, template, context) {
-    if (template === void 0) { template = null; }
-    if (context === void 0) { context = null; }
     var /** @type {?} */ newView = {
         parent: currentView,
         id: viewId,
@@ -17436,7 +17443,7 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
             var /** @type {?} */ componentView = null;
             if (isHostElement) {
                 var /** @type {?} */ tView = getOrCreateTView(/** @type {?} */ ((hostComponentDef)).template);
-                componentView = addToViewTree(createLView(-1, rendererFactory.createRenderer(native, /** @type {?} */ ((hostComponentDef)).rendererType), tView));
+                componentView = addToViewTree(createLView(-1, rendererFactory.createRenderer(native, /** @type {?} */ ((hostComponentDef)).rendererType), tView, null, null));
             }
             // Only component views should be added to the view tree directly. Embedded views are
             // accessed through their containers because they may be removed / re-added later.
@@ -17590,7 +17597,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(rNode, def) {
     resetApplicationState();
-    createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template)));
+    createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template), null, null));
 }
 /**
  * Adds an event listener to the current node.
@@ -18088,7 +18095,7 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        var /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container));
+        var /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null);
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
@@ -18968,8 +18975,19 @@ function assertDataNext(index) {
 // TODO: A hack to not pull in the NullInjector from @angular/core.
 
 /**
+ * A permanent marker promise which signifies that the current CD tree is
+ * clean.
+ */
+var CLEAN_PROMISE = Promise.resolve(null);
+/**
  * Bootstraps a Component into an existing host element and returns an instance
  * of the component.
+ *
+ * Use this function to bootstrap a component into the DOM tree. Each invocation
+ * of this function will create a separate tree of components, injectors and
+ * change detection cycles and lifetimes. To dynamically insert a new component
+ * into an existing tree such that it shares the same injection, change detection
+ * and object lifetime, use {\@link ViewContainer#createComponent}.
  *
  * @template T
  * @param {?} componentType Component to bootstrap
@@ -18984,12 +19002,19 @@ function renderComponent(componentType, opts) {
         componentDef.type = componentType;
     var /** @type {?} */ component;
     var /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
-    var /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView()), /** @type {?} */ ((null)));
+    var /** @type {?} */ rootContext = {
+        // Incomplete initialization due to circular reference.
+        component: /** @type {?} */ ((null)),
+        scheduler: opts.scheduler || requestAnimationFrame,
+        clean: CLEAN_PROMISE,
+    };
+    var /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext), /** @type {?} */ ((null)));
     try {
         // Create element node at index 0 in data array
         hostElement(hostNode, componentDef);
         // Create directive instance with n() and store at index 1 in data array (el is 0)
-        component = getDirectiveInstance(directiveCreate(1, componentDef.n(), componentDef));
+        component = rootContext.component =
+            getDirectiveInstance(directiveCreate(1, componentDef.n(), componentDef));
     }
     finally {
         leaveView(oldView);
@@ -18999,25 +19024,39 @@ function renderComponent(componentType, opts) {
     return component;
 }
 /**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {\@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
  * @template T
- * @param {?} component
+ * @param {?} component The component which the change detection should be performed on.
  * @return {?}
  */
 function detectChanges(component) {
-    ngDevMode && assertNotNull(component, 'detectChanges should be called with a component');
-    var /** @type {?} */ hostNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
-    if (ngDevMode && !hostNode) {
-        createError('Not a directive instance', component);
-    }
+    var /** @type {?} */ hostNode = _getComponentHostLElementNode(component);
     ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
     renderComponentOrTemplate(hostNode, hostNode.view, component);
-    isDirty = false;
 }
-var isDirty = false;
 /**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent` a scheduler
+ * can be provided.
+ *
  * @template T
- * @param {?} component
- * @param {?=} scheduler
+ * @param {?} component Component to mark as dirty.
  * @return {?}
  */
 
@@ -19025,6 +19064,51 @@ var isDirty = false;
  * @template T
  * @param {?} component
  * @return {?}
+ */
+function _getComponentHostLElementNode(component) {
+    ngDevMode && assertNotNull(component, 'expecting component got null');
+    var /** @type {?} */ lElementNode = /** @type {?} */ ((/** @type {?} */ (component))[NG_HOST_SYMBOL]);
+    ngDevMode && assertNotNull(component, 'object is not a component');
+    return lElementNode;
+}
+/**
+ * Retrieve the host element of the component.
+ *
+ * Use this function to retrieve the host element of the component. The host
+ * element is the element which the component is associated with.
+ *
+ * @template T
+ * @param {?} component Component for which the host element should be retrieved.
+ * @return {?}
+ */
+
+/**
+ * Retrieves the rendered text for a given component.
+ *
+ * This function retrieves the host element of a component and
+ * and then returns the `textContent` for that element. This implies
+ * that the text returned will include re-projected content of
+ * the component as well.
+ *
+ * @param {?} component The component to return the content text for.
+ * @return {?}
+ */
+
+/**
+ * Wait on component until it is rendered.
+ *
+ * This function returns a `Promise` which is resolved when the component's
+ * change detection is executed. This is determined by finding the scheduler
+ * associated with the `component`'s render tree and waiting until the scheduler
+ * flushes. If nothing is scheduled, the function returns a resolved promise.
+ *
+ * Example:
+ * ```
+ * await whenRendered(myComponent);
+ * ```
+ *
+ * @param {?} component Component to wait upon
+ * @return {?} Promise which resolves when the component is rendered.
  */
 
 /**
