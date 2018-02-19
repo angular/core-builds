@@ -19,6 +19,12 @@ import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/rende
  * facilitate jumping from an instance to the host node.
  */
 export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
+export declare function getRenderer(): Renderer3;
+export declare function getPreviousOrParentNode(): LNode;
+export declare function getCurrentQueries(QueryType: {
+    new (): LQueries;
+}): LQueries;
+export declare function getCreationMode(): boolean;
 /**
  * Swap the current state with a new state.
  *
@@ -99,14 +105,14 @@ export declare function listener(eventName: string, listener: EventListener, use
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
- * Update an attribute on an Element. This is used with a `bind` instruction.
+ * Updates the value of removes an attribute on an Element.
  *
- * @param index The index of the element to update in the data array
- * @param attrName Name of attribute. Because it is going to DOM, this is not subject to
- *        renaming as port of minification.
- * @param value Value to write. This value will go through stringification.
+ * @param number index The index of the element in the data array
+ * @param string name The name of the attribute.
+ * @param any value The attribute is removed when value is `null` or `undefined`.
+ *                  Otherwise the attribute value is set to the stringified value.
  */
-export declare function elementAttribute(index: number, attrName: string, value: any): void;
+export declare function elementAttribute(index: number, name: string, value: any): void;
 /**
  * Update a property on an Element.
  *
@@ -255,12 +261,12 @@ export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
- * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
- * Those are faster because there is no need to create an array of expressions and loop over it.
+ * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and iterate over it.
  *
  * `values`:
  * - has static text at even indexes,
- * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ * - has evaluated expressions at odd indexes.
  *
  * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  */
@@ -269,10 +275,10 @@ export declare function interpolationV(values: any[]): string | NO_CHANGE;
  * Creates an interpolation binding with 1 expression.
  *
  * @param prefix static value used for concatenation only.
- * @param value value checked for change.
+ * @param v0 value checked for change.
  * @param suffix static value used for concatenation only.
  */
-export declare function interpolation1(prefix: string, value: any, suffix: string): string | NO_CHANGE;
+export declare function interpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation binding with 2 expressions. */
 export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation bindings with 3 expressions. */
@@ -287,11 +293,10 @@ export declare function interpolation6(prefix: string, v0: any, i0: string, v1: 
 export declare function interpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
 /** Creates an interpolation binding with 8 expressions. */
 export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
-export declare function memory<T>(index: number, value?: T): T;
-export declare function getCurrentQueries(QueryType: {
-    new (): LQueries;
-}): LQueries;
-export declare function getCreationMode(): boolean;
+/** Store a value in the `data` at a given `index`. */
+export declare function store<T>(index: number, value: T): void;
+/** Retrieves a value from the `data`. */
+export declare function load<T>(index: number): T;
 /** Gets the current binding value and increments the binding index. */
 export declare function consumeBinding(): any;
 /** Updates binding if changed, then returns whether it was updated. */
@@ -302,7 +307,5 @@ export declare function checkAndUpdateBinding(value: any): any;
 export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
 /** Updates 4 bindings if changed, then returns whether any was updated. */
 export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
-export declare function getPreviousOrParentNode(): LNode;
-export declare function getRenderer(): Renderer3;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;

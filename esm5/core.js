@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-3ceee99
+ * @license Angular v6.0.0-beta.4-a8b5465
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2030,7 +2030,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-3ceee99');
+var VERSION = new Version('6.0.0-beta.4-a8b5465');
 
 /**
  * @fileoverview added by tsickle
@@ -17123,9 +17123,23 @@ var NG_HOST_SYMBOL = '__ngHostLNode__';
 var renderer;
 var rendererFactory;
 /**
+ * @return {?}
+ */
+function getRenderer() {
+    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    return renderer;
+}
+/**
  * Used to set the parent property when nodes are created.
  */
 var previousOrParentNode;
+/**
+ * @return {?}
+ */
+function getPreviousOrParentNode() {
+    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    return previousOrParentNode;
+}
 /**
  * If `isParent` is:
  *  - `true`: then `previousOrParentNode` points to a parent node.
@@ -17152,9 +17166,24 @@ var tData;
 var currentView = /** @type {?} */ ((null));
 var currentQueries;
 /**
+ * @param {?} QueryType
+ * @return {?}
+ */
+function getCurrentQueries(QueryType) {
+    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    return currentQueries || (currentQueries = new QueryType());
+}
+/**
  * This property gets set before entering a template.
  */
 var creationMode;
+/**
+ * @return {?}
+ */
+function getCreationMode() {
+    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    return creationMode;
+}
 /**
  * An array of nodes (text, element, container, etc), their bindings, and
  * any local variables that need to be stored between invocations.
@@ -17669,25 +17698,24 @@ function elementEnd() {
     queueLifecycleHooks(previousOrParentNode.flags, currentView);
 }
 /**
- * Update an attribute on an Element. This is used with a `bind` instruction.
+ * Updates the value of removes an attribute on an Element.
  *
- * @param {?} index The index of the element to update in the data array
- * @param {?} attrName Name of attribute. Because it is going to DOM, this is not subject to
- *        renaming as port of minification.
- * @param {?} value Value to write. This value will go through stringification.
+ * @param {?} index
+ * @param {?} name
+ * @param {?} value
  * @return {?}
  */
-function elementAttribute(index, attrName, value) {
+function elementAttribute(index, name, value) {
     if (value !== NO_CHANGE) {
-        var /** @type {?} */ element = /** @type {?} */ (data[index]);
+        var /** @type {?} */ element = data[index];
         if (value == null) {
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, attrName) :
-                element.native.removeAttribute(attrName);
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, name) :
+                element.native.removeAttribute(name);
         }
         else {
             isProceduralRenderer(renderer) ?
-                renderer.setAttribute(element.native, attrName, stringify$1(value)) :
-                element.native.setAttribute(attrName, stringify$1(value));
+                renderer.setAttribute(element.native, name, stringify$1(value)) :
+                element.native.setAttribute(name, stringify$1(value));
         }
     }
 }
@@ -18275,7 +18303,7 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     // re-distribution of projectable nodes is memorized on a component's view level
     var /** @type {?} */ componentNode = findComponentHost(currentView);
     // make sure that nodes to project were memorized
-    var /** @type {?} */ nodesForSelector = valueInData(/** @type {?} */ ((/** @type {?} */ ((componentNode.data)).data)), localIndex)[selectorIndex];
+    var /** @type {?} */ nodesForSelector = /** @type {?} */ ((/** @type {?} */ ((componentNode.data)).data))[localIndex][selectorIndex];
     // build the linked list of projected nodes:
     for (var /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
         var /** @type {?} */ nodeToProject = nodesForSelector[i];
@@ -18370,12 +18398,12 @@ function bind(value) {
 /**
  * Create interpolation bindings with a variable number of expressions.
  *
- * If there are 1 to 7 expressions `interpolation1()` to `interpolation7` should be used instead.
- * Those are faster because there is no need to create an array of expressions and loop over it.
+ * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and iterate over it.
  *
  * `values`:
  * - has static text at even indexes,
- * - has evaluated expressions at odd indexes (could be NO_CHANGE).
+ * - has evaluated expressions at odd indexes.
  *
  * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
  * @param {?} values
@@ -18384,45 +18412,32 @@ function bind(value) {
 function interpolationV(values) {
     ngDevMode && assertLessThan(2, values.length, 'should have at least 3 values');
     ngDevMode && assertEqual(values.length % 2, 1, 'should have an odd number of values');
-    // TODO(vicb): Add proper unit tests when there is a place to add them
-    if (creationMode) {
-        initBindings();
-        // Only the bindings (odd indexes) are stored as texts are constant.
-        var /** @type {?} */ bindings_1 = [];
-        data[bindingIndex++] = bindings_1;
-        var /** @type {?} */ content = values[0];
-        for (var /** @type {?} */ i = 1; i < values.length; i += 2) {
-            content += stringify$1(values[i]) + values[i + 1];
-            bindings_1.push(values[i]);
-        }
-        return content;
+    var /** @type {?} */ different = false;
+    for (var /** @type {?} */ i = 1; i < values.length; i += 2) {
+        // Check if bindings (odd indexes) have changed
+        bindingUpdated(values[i]) && (different = true);
     }
-    var /** @type {?} */ bindings = data[bindingIndex++];
-    // `bIdx` is the index in the `bindings` array, `vIdx` in the `values` array
-    for (var /** @type {?} */ bIdx = 0, /** @type {?} */ vIdx = 1; bIdx < bindings.length; bIdx++, vIdx += 2) {
-        if (values[vIdx] !== NO_CHANGE && isDifferent(values[vIdx], bindings[bIdx])) {
-            var /** @type {?} */ content = values[0];
-            for (bIdx = 0, vIdx = 1; bIdx < bindings.length; vIdx += 2, bIdx++) {
-                if (values[vIdx] !== NO_CHANGE) {
-                    bindings[bIdx] = values[vIdx];
-                }
-                content += stringify$1(bindings[bIdx]) + values[vIdx + 1];
-            }
-            return content;
-        }
+    if (!different) {
+        return NO_CHANGE;
     }
-    return NO_CHANGE;
+    // Build the updated content
+    var /** @type {?} */ content = values[0];
+    for (var /** @type {?} */ i = 1; i < values.length; i += 2) {
+        content += stringify$1(values[i]) + values[i + 1];
+    }
+    return content;
 }
 /**
  * Creates an interpolation binding with 1 expression.
  *
  * @param {?} prefix static value used for concatenation only.
- * @param {?} value value checked for change.
+ * @param {?} v0 value checked for change.
  * @param {?} suffix static value used for concatenation only.
  * @return {?}
  */
-function interpolation1(prefix, value, suffix) {
-    return bind(value) === NO_CHANGE ? NO_CHANGE : prefix + stringify$1(value) + suffix;
+function interpolation1(prefix, v0, suffix) {
+    var /** @type {?} */ different = bindingUpdated(v0);
+    return different ? prefix + stringify$1(v0) + suffix : NO_CHANGE;
 }
 /**
  * Creates an interpolation binding with 2 expressions.
@@ -18434,24 +18449,7 @@ function interpolation1(prefix, value, suffix) {
  * @return {?}
  */
 function interpolation2(prefix, v0, i0, v1, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (different = (isDifferent(part0, v0) || isDifferent(part1, v1))) {
-            data[bindingIndex - 2] = v0;
-            data[bindingIndex - 1] = v1;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated2(v0, v1);
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + suffix : NO_CHANGE;
 }
 /**
@@ -18466,29 +18464,8 @@ function interpolation2(prefix, v0, i0, v1, suffix) {
  * @return {?}
  */
 function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (different = (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2))) {
-            data[bindingIndex - 3] = v0;
-            data[bindingIndex - 2] = v1;
-            data[bindingIndex - 1] = v2;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated2(v0, v1);
+    different = bindingUpdated(v2) || different;
     return different ? prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + suffix :
         NO_CHANGE;
 }
@@ -18506,36 +18483,7 @@ function interpolation3(prefix, v0, i0, v1, i1, v2, suffix) {
  * @return {?}
  */
 function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-        data[bindingIndex++] = v3;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        var /** @type {?} */ part3 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (v3 === NO_CHANGE)
-            v3 = part3;
-        if (different =
-            (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2) ||
-                isDifferent(part3, v3))) {
-            data[bindingIndex - 4] = v0;
-            data[bindingIndex - 3] = v1;
-            data[bindingIndex - 2] = v2;
-            data[bindingIndex - 1] = v3;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated4(v0, v1, v2, v3);
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) +
             suffix :
@@ -18557,41 +18505,8 @@ function interpolation4(prefix, v0, i0, v1, i1, v2, i2, v3, suffix) {
  * @return {?}
  */
 function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-        data[bindingIndex++] = v3;
-        data[bindingIndex++] = v4;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        var /** @type {?} */ part3 = data[bindingIndex++];
-        var /** @type {?} */ part4 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (v3 === NO_CHANGE)
-            v3 = part3;
-        if (v4 === NO_CHANGE)
-            v4 = part4;
-        if (different =
-            (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2) ||
-                isDifferent(part3, v3) || isDifferent(part4, v4))) {
-            data[bindingIndex - 5] = v0;
-            data[bindingIndex - 4] = v1;
-            data[bindingIndex - 3] = v2;
-            data[bindingIndex - 2] = v3;
-            data[bindingIndex - 1] = v4;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated(v4) || different;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + suffix :
@@ -18615,46 +18530,8 @@ function interpolation5(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, suffix) {
  * @return {?}
  */
 function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-        data[bindingIndex++] = v3;
-        data[bindingIndex++] = v4;
-        data[bindingIndex++] = v5;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        var /** @type {?} */ part3 = data[bindingIndex++];
-        var /** @type {?} */ part4 = data[bindingIndex++];
-        var /** @type {?} */ part5 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (v3 === NO_CHANGE)
-            v3 = part3;
-        if (v4 === NO_CHANGE)
-            v4 = part4;
-        if (v5 === NO_CHANGE)
-            v5 = part5;
-        if (different =
-            (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2) ||
-                isDifferent(part3, v3) || isDifferent(part4, v4) || isDifferent(part5, v5))) {
-            data[bindingIndex - 6] = v0;
-            data[bindingIndex - 5] = v1;
-            data[bindingIndex - 4] = v2;
-            data[bindingIndex - 3] = v3;
-            data[bindingIndex - 2] = v4;
-            data[bindingIndex - 1] = v5;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + suffix :
@@ -18680,52 +18557,9 @@ function interpolation6(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, suff
  * @return {?}
  */
 function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-        data[bindingIndex++] = v3;
-        data[bindingIndex++] = v4;
-        data[bindingIndex++] = v5;
-        data[bindingIndex++] = v6;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        var /** @type {?} */ part3 = data[bindingIndex++];
-        var /** @type {?} */ part4 = data[bindingIndex++];
-        var /** @type {?} */ part5 = data[bindingIndex++];
-        var /** @type {?} */ part6 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (v3 === NO_CHANGE)
-            v3 = part3;
-        if (v4 === NO_CHANGE)
-            v4 = part4;
-        if (v5 === NO_CHANGE)
-            v5 = part5;
-        if (v6 === NO_CHANGE)
-            v6 = part6;
-        if (different =
-            (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2) ||
-                isDifferent(part3, v3) || isDifferent(part4, v4) || isDifferent(part5, v5) ||
-                isDifferent(part6, v6))) {
-            data[bindingIndex - 7] = v0;
-            data[bindingIndex - 6] = v1;
-            data[bindingIndex - 5] = v2;
-            data[bindingIndex - 4] = v3;
-            data[bindingIndex - 3] = v4;
-            data[bindingIndex - 2] = v5;
-            data[bindingIndex - 1] = v6;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated2(v4, v5) || different;
+    different = bindingUpdated(v6) || different;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + i5 + stringify$1(v6) + suffix :
@@ -18753,105 +18587,37 @@ function interpolation7(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, 
  * @return {?}
  */
 function interpolation8(prefix, v0, i0, v1, i1, v2, i2, v3, i3, v4, i4, v5, i5, v6, i6, v7, suffix) {
-    var /** @type {?} */ different;
-    if (different = creationMode) {
-        initBindings();
-        data[bindingIndex++] = v0;
-        data[bindingIndex++] = v1;
-        data[bindingIndex++] = v2;
-        data[bindingIndex++] = v3;
-        data[bindingIndex++] = v4;
-        data[bindingIndex++] = v5;
-        data[bindingIndex++] = v6;
-        data[bindingIndex++] = v7;
-    }
-    else {
-        var /** @type {?} */ part0 = data[bindingIndex++];
-        var /** @type {?} */ part1 = data[bindingIndex++];
-        var /** @type {?} */ part2 = data[bindingIndex++];
-        var /** @type {?} */ part3 = data[bindingIndex++];
-        var /** @type {?} */ part4 = data[bindingIndex++];
-        var /** @type {?} */ part5 = data[bindingIndex++];
-        var /** @type {?} */ part6 = data[bindingIndex++];
-        var /** @type {?} */ part7 = data[bindingIndex++];
-        if (v0 === NO_CHANGE)
-            v0 = part0;
-        if (v1 === NO_CHANGE)
-            v1 = part1;
-        if (v2 === NO_CHANGE)
-            v2 = part2;
-        if (v3 === NO_CHANGE)
-            v3 = part3;
-        if (v4 === NO_CHANGE)
-            v4 = part4;
-        if (v5 === NO_CHANGE)
-            v5 = part5;
-        if (v6 === NO_CHANGE)
-            v6 = part6;
-        if (v7 === NO_CHANGE)
-            v7 = part7;
-        if (different =
-            (isDifferent(part0, v0) || isDifferent(part1, v1) || isDifferent(part2, v2) ||
-                isDifferent(part3, v3) || isDifferent(part4, v4) || isDifferent(part5, v5) ||
-                isDifferent(part6, v6) || isDifferent(part7, v7))) {
-            data[bindingIndex - 8] = v0;
-            data[bindingIndex - 7] = v1;
-            data[bindingIndex - 6] = v2;
-            data[bindingIndex - 5] = v3;
-            data[bindingIndex - 4] = v4;
-            data[bindingIndex - 3] = v5;
-            data[bindingIndex - 2] = v6;
-            data[bindingIndex - 1] = v7;
-        }
-    }
+    var /** @type {?} */ different = bindingUpdated4(v0, v1, v2, v3);
+    different = bindingUpdated4(v4, v5, v6, v7) || different;
     return different ?
         prefix + stringify$1(v0) + i0 + stringify$1(v1) + i1 + stringify$1(v2) + i2 + stringify$1(v3) + i3 +
             stringify$1(v4) + i4 + stringify$1(v5) + i5 + stringify$1(v6) + i6 + stringify$1(v7) + suffix :
         NO_CHANGE;
 }
 /**
+ * Store a value in the `data` at a given `index`.
  * @template T
  * @param {?} index
- * @param {?=} value
+ * @param {?} value
  * @return {?}
  */
-function memory(index, value) {
-    return valueInData(data, index, value);
+function store(index, value) {
+    // We don't store any static data for local variables, so the first time
+    // we see the template, we should store as null to avoid a sparse array
+    if (index >= tData.length) {
+        tData[index] = null;
+    }
+    data[index] = value;
 }
 /**
+ * Retrieves a value from the `data`.
  * @template T
- * @param {?} data
  * @param {?} index
- * @param {?=} value
  * @return {?}
  */
-function valueInData(data, index, value) {
-    if (value === undefined) {
-        ngDevMode && assertDataInRange(index, data);
-        value = data[index];
-    }
-    else {
-        // We don't store any static data for local variables, so the first time
-        // we see the template, we should store as null to avoid a sparse array
-        if (index >= tData.length) {
-            tData[index] = null;
-        }
-        data[index] = value;
-    }
-    return /** @type {?} */ ((value));
-}
-/**
- * @param {?} QueryType
- * @return {?}
- */
-function getCurrentQueries(QueryType) {
-    return currentQueries || (currentQueries = new QueryType());
-}
-/**
- * @return {?}
- */
-function getCreationMode() {
-    return creationMode;
+function load(index) {
+    ngDevMode && assertDataInRange(index, data);
+    return data[index];
 }
 /**
  * Gets the current binding value and increments the binding index.
@@ -18910,18 +18676,6 @@ function bindingUpdated2(exp1, exp2) {
 function bindingUpdated4(exp1, exp2, exp3, exp4) {
     var /** @type {?} */ different = bindingUpdated2(exp1, exp2);
     return bindingUpdated2(exp3, exp4) || different;
-}
-/**
- * @return {?}
- */
-function getPreviousOrParentNode() {
-    return previousOrParentNode;
-}
-/**
- * @return {?}
- */
-function getRenderer() {
-    return renderer;
 }
 /**
  * @template T
@@ -20619,7 +20373,7 @@ function query(memoryIndex, predicate, descend, read) {
     var /** @type {?} */ queries = getCurrentQueries(LQueries_);
     queries.track(queryList, predicate, descend, read);
     if (memoryIndex != null) {
-        memory(memoryIndex, queryList);
+        store(memoryIndex, queryList);
     }
     return queryList;
 }
@@ -22088,5 +21842,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, APP_ROOT_SCOPE, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, memory as ɵm, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbr, group$1 as ɵbs, keyframes$1 as ɵbw, sequence$1 as ɵbt, state$1 as ɵbv, style$1 as ɵbu, transition$1 as ɵbx, trigger$1 as ɵbq, _iterableDiffersFactory as ɵo, _keyValueDiffersFactory as ɵq, _localeFactory as ɵu, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵk, DefaultIterableDifferFactory as ɵl, DefaultKeyValueDifferFactory as ɵn, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵw, createScope as ɵy, detectWTF as ɵx, endTimeRange as ɵbb, leave as ɵz, startTimeRange as ɵba, getOrCreateContainerRef as ɵbg, getOrCreateInjectable as ɵbf, getOrCreateNodeInjector as ɵbe, getOrCreateTemplateRef as ɵbh, bindingUpdated as ɵbk, bindingUpdated2 as ɵbm, bindingUpdated4 as ɵbn, checkAndUpdateBinding$1 as ɵbl, consumeBinding as ɵbj, getCreationMode as ɵbi, stringify$1 as ɵbo, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbc, DebugContext as ɵbd };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, APP_ROOT_SCOPE, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, componentRefresh as ɵr, store as ɵst, load as ɵld, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbp, group$1 as ɵbq, keyframes$1 as ɵbu, sequence$1 as ɵbr, state$1 as ɵbt, style$1 as ɵbs, transition$1 as ɵbv, trigger$1 as ɵbo, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵk, DefaultIterableDifferFactory as ɵl, DefaultKeyValueDifferFactory as ɵm, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵu, createScope as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateContainerRef as ɵbf, getOrCreateInjectable as ɵbe, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbg, bindingUpdated as ɵbj, bindingUpdated2 as ɵbl, bindingUpdated4 as ɵbm, checkAndUpdateBinding$1 as ɵbk, consumeBinding as ɵbi, getCreationMode as ɵbh, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbb, DebugContext as ɵbc };
 //# sourceMappingURL=core.js.map
