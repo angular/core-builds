@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-f6120c0
+ * @license Angular v6.0.0-beta.4-ee60bb5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-f6120c0
+ * @license Angular v6.0.0-beta.4-ee60bb5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-f6120c0');
+var VERSION = new Version('6.0.0-beta.4-ee60bb5');
 
 /**
  * @fileoverview added by tsickle
@@ -20583,7 +20583,7 @@ function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
  */
 function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) {
     var /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated4(exp1, exp2, exp3, exp4) || different ?
+    return bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
         checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
         consumeBinding();
 }
