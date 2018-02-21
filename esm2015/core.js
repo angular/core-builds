@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-b42921b
+ * @license Angular v6.0.0-beta.4-a7ebf5a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -607,7 +607,7 @@ function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
  * @return {?}
  */
 function getParentCtor(ctor) {
-    const /** @type {?} */ parentProto = Object.getPrototypeOf(ctor.prototype);
+    const /** @type {?} */ parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
     const /** @type {?} */ parentCtor = parentProto ? parentProto.constructor : null;
     // Note: We always use `Object` as the null value
     // to simplify checking later on.
@@ -1858,7 +1858,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.4-b42921b');
+const VERSION = new Version('6.0.0-beta.4-a7ebf5a');
 
 /**
  * @fileoverview added by tsickle

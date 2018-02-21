@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-b42921b
+ * @license Angular v6.0.0-beta.4-a7ebf5a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.4-b42921b
+ * @license Angular v6.0.0-beta.4-a7ebf5a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -756,7 +756,7 @@ function convertTsickleDecoratorIntoMetadata(decoratorInvocations) {
  * @return {?}
  */
 function getParentCtor(ctor) {
-    var /** @type {?} */ parentProto = Object.getPrototypeOf(ctor.prototype);
+    var /** @type {?} */ parentProto = ctor.prototype ? Object.getPrototypeOf(ctor.prototype) : null;
     var /** @type {?} */ parentCtor = parentProto ? parentProto.constructor : null;
     // Note: We always use `Object` as the null value
     // to simplify checking later on.
@@ -2068,7 +2068,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.4-b42921b');
+var VERSION = new Version('6.0.0-beta.4-a7ebf5a');
 
 /**
  * @fileoverview added by tsickle
