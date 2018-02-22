@@ -9,9 +9,11 @@ import { Type } from '../type';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 import { GetterFn, MethodFn, SetterFn } from './types';
 /**
- * Attention: This regex has to hold even if the code is minified!
+ * Attention: These regex has to hold even if the code is minified!
  */
 export declare const DELEGATE_CTOR: RegExp;
+export declare const INHERITED_CLASS: RegExp;
+export declare const INHERITED_CLASS_WITH_CTOR: RegExp;
 export declare class ReflectionCapabilities implements PlatformReflectionCapabilities {
     private _reflect;
     constructor(reflect?: any);
