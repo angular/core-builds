@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.5-f194d00
+ * @license Angular v6.0.0-beta.5-b3ffeaa
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.5-f194d00
+ * @license Angular v6.0.0-beta.5-b3ffeaa
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.5-f194d00');
+var VERSION = new Version('6.0.0-beta.5-b3ffeaa');
 
 /**
  * @fileoverview added by tsickle
@@ -16679,7 +16679,9 @@ function destroyViewTree(rootView) {
             next = viewOrContainer.next;
         }
         if (next == null) {
-            while (viewOrContainer && !/** @type {?} */ ((viewOrContainer)).next) {
+            // If the viewOrContainer is the rootView, then the cleanup is done twice.
+            // Without this check, ngOnDestroy would be called twice for a directive on an element.
+            while (viewOrContainer && !/** @type {?} */ ((viewOrContainer)).next && viewOrContainer !== rootView) {
                 cleanUpView(/** @type {?} */ (viewOrContainer));
                 viewOrContainer = getParentState(viewOrContainer, rootView);
             }
