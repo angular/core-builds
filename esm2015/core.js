@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.4-3e6a86f
+ * @license Angular v6.0.0-beta.4-5c89d6b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -311,9 +311,11 @@ function makePropDecorator(name, props, parentClass) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Attention: This regex has to hold even if the code is minified!
+ * Attention: These regex has to hold even if the code is minified!
  */
 const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
+const INHERITED_CLASS = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{/;
+const INHERITED_CLASS_WITH_CTOR = /^class\s+[A-Za-z\d$_]*\s*extends\s+[A-Za-z\d$_]+\s*{[\s\S]*constructor\s*\(/;
 class ReflectionCapabilities {
     /**
      * @param {?=} reflect
@@ -368,6 +370,7 @@ class ReflectionCapabilities {
      * @return {?}
      */
     _ownParameters(type, parentCtor) {
+        const /** @type {?} */ typeStr = type.toString();
         // If we have no decorators, we only have function.length as metadata.
         // In that case, to detect whether a child class declared an own constructor or not,
         // we need to look inside of that constructor to check whether it is
@@ -375,7 +378,8 @@ class ReflectionCapabilities {
         // This also helps to work around for https://github.com/Microsoft/TypeScript/issues/12439
         // that sets 'design:paramtypes' to []
         // if a class inherits from another class but has no ctor declared itself.
-        if (DELEGATE_CTOR.exec(type.toString())) {
+        if (DELEGATE_CTOR.exec(typeStr) ||
+            (INHERITED_CLASS.exec(typeStr) && !INHERITED_CLASS_WITH_CTOR.exec(typeStr))) {
             return null;
         }
         // Prefer the direct API.
@@ -1858,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.4-3e6a86f');
+const VERSION = new Version('6.0.0-beta.4-5c89d6b');
 
 /**
  * @fileoverview added by tsickle
