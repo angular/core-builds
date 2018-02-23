@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.5-f791862
+ * @license Angular v6.0.0-beta.5-7effb00
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.5-f791862
+ * @license Angular v6.0.0-beta.5-7effb00
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.5-f791862');
+var VERSION = new Version('6.0.0-beta.5-7effb00');
 
 /**
  * @fileoverview added by tsickle
@@ -19578,6 +19578,7 @@ function defineComponent(componentDefinition) {
         h: componentDefinition.hostBindings || noop$1,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
+        inputsPropertyName: componentDefinition.inputsPropertyName || null,
         outputs: invertObject(componentDefinition.outputs),
         methods: invertObject(componentDefinition.methods),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
@@ -19602,10 +19603,12 @@ var PRIVATE_PREFIX = '__ngOnChanges_';
 function NgOnChangesFeature(definition) {
     var /** @type {?} */ inputs = definition.inputs;
     var /** @type {?} */ proto = definition.type.prototype;
+    var /** @type {?} */ inputsPropertyName = definition.inputsPropertyName;
     // Place where we will store SimpleChanges if there is a change
     Object.defineProperty(proto, PRIVATE_PREFIX, { value: undefined, writable: true });
     var _loop_1 = function (pubKey) {
         var /** @type {?} */ minKey = inputs[pubKey];
+        var /** @type {?} */ propertyName = inputsPropertyName && inputsPropertyName[minKey] || pubKey;
         var /** @type {?} */ privateMinKey = PRIVATE_PREFIX + minKey;
         // Create a place where the actual value will be stored and make it non-enumerable
         Object.defineProperty(proto, privateMinKey, { value: undefined, writable: true });
@@ -19622,7 +19625,7 @@ function NgOnChangesFeature(definition) {
                 if (simpleChanges == null) {
                     simpleChanges = this[PRIVATE_PREFIX] = {};
                 }
-                simpleChanges[pubKey] = new SimpleChange(this[privateMinKey], value, isFirstChange);
+                simpleChanges[propertyName] = new SimpleChange(this[privateMinKey], value, isFirstChange);
                 (existingDesc && existingDesc.set) ? existingDesc.set.call(this, value) :
                     this[privateMinKey] = value;
             }
