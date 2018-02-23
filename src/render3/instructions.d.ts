@@ -210,14 +210,15 @@ export declare function embeddedViewStart(viewBlockId: number): boolean;
 /** Marks the end of an embedded view. */
 export declare function embeddedViewEnd(): void;
 /**
- * Refreshes the component view.
+ * Refreshes the directive, triggering init and content hooks.
  *
- * In other words, enters the component's view and processes it to update bindings, queries, etc.
+ * When it is a component, it also enters the component's view and processes it to update bindings,
+ * queries, etc.
  *
  * @param directiveIndex
  * @param elementIndex
  */
-export declare function componentRefresh<T>(directiveIndex: number, elementIndex: number): void;
+export declare function directiveRefresh<T>(directiveIndex: number, elementIndex: number): void;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where

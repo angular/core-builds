@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.5-a81d599
+ * @license Angular v6.0.0-beta.5-aad4316
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.5-a81d599
+ * @license Angular v6.0.0-beta.5-aad4316
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.5-a81d599');
+var VERSION = new Version('6.0.0-beta.5-aad4316');
 
 /**
  * @fileoverview added by tsickle
@@ -17463,7 +17463,7 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
         else {
             // Element was stored at 0 and directive was stored at 1 in renderComponent
             // so to refresh the component, refresh() needs to be called with (1, 0)
-            componentRefresh(1, 0);
+            directiveRefresh(1, 0);
         }
     }
     finally {
@@ -18236,16 +18236,17 @@ function embeddedViewEnd() {
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
 }
 /**
- * Refreshes the component view.
+ * Refreshes the directive, triggering init and content hooks.
  *
- * In other words, enters the component's view and processes it to update bindings, queries, etc.
+ * When it is a component, it also enters the component's view and processes it to update bindings,
+ * queries, etc.
  *
  * @template T
  * @param {?} directiveIndex
  * @param {?} elementIndex
  * @return {?}
  */
-function componentRefresh(directiveIndex, elementIndex) {
+function directiveRefresh(directiveIndex, elementIndex) {
     executeInitHooks(currentView, currentView.tView, creationMode);
     executeContentHooks(currentView, currentView.tView, creationMode);
     var /** @type {?} */ template = (/** @type {?} */ (tData[directiveIndex])).template;
@@ -22022,7 +22023,7 @@ exports.ɵa = elementAttribute;
 exports.ɵs = elementStyle;
 exports.ɵt = textBinding;
 exports.ɵv = embeddedViewEnd;
-exports.ɵr = componentRefresh;
+exports.ɵr = directiveRefresh;
 exports.ɵst = store;
 exports.ɵld = load;
 exports.ɵPp = pipe;
