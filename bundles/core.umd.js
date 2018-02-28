@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.5-7d65356
+ * @license Angular v6.0.0-beta.5-c82cef8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.5-7d65356
+ * @license Angular v6.0.0-beta.5-c82cef8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.5-7d65356');
+var VERSION = new Version('6.0.0-beta.5-c82cef8');
 
 /**
  * @fileoverview added by tsickle
@@ -21972,6 +21972,7 @@ exports.defineInjectable = defineInjectable;
 exports.Injectable = Injectable;
 exports.forwardRef = forwardRef;
 exports.resolveForwardRef = resolveForwardRef;
+exports.inject = inject;
 exports.Injector = Injector;
 exports.ReflectiveInjector = ReflectiveInjector;
 exports.ResolvedReflectiveFactory = ResolvedReflectiveFactory;
@@ -22024,6 +22025,7 @@ exports.ɵisListLikeIterable = isListLikeIterable;
 exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
 exports.ɵisDefaultChangeDetectionStrategy = isDefaultChangeDetectionStrategy;
 exports.ɵConsole = Console;
+exports.ɵsetCurrentInjector = setCurrentInjector;
 exports.ɵComponentFactory = ComponentFactory;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
