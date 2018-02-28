@@ -1,3 +1,11 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
@@ -91,6 +99,15 @@ export declare function injectTemplateRef<T>(): viewEngine_TemplateRef<T>;
  * @returns The ViewContainerRef instance to use
  */
 export declare function injectViewContainerRef(): viewEngine_ViewContainerRef;
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
+/**
+ * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
+ * Or, if it already exists, retrieves the existing instance.
+ *
+ * @returns The ChangeDetectorRef to use
+ */
+export declare function getOrCreateChangeDetectorRef(di: LInjector, context: any): viewEngine_ChangeDetectorRef;
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.

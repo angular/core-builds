@@ -7,6 +7,7 @@
  */
 import './ng_dev_mode';
 import { LContainer } from './interfaces/container';
+import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
@@ -75,6 +76,8 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, nameOrComponentType?: string | ComponentType<any>, attrs?: string[] | null, directiveTypes?: DirectiveType<any>[] | null, localRefs?: string[] | null): RElement;
+/** Sets the context for a ChangeDetectorRef to the given instance. */
+export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any): void;
 /** Creates a TView instance */
 export declare function createTView(): TView;
 export declare function createError(text: string, token: any): Error;
@@ -89,8 +92,10 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @param rNode Render host element.
  * @param def ComponentDef
+ *
+ * @returns LElementNode created
  */
-export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): void;
+export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
