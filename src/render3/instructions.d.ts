@@ -9,7 +9,7 @@ import './ng_dev_mode';
 import { LContainer } from './interfaces/container';
 import { CssSelector, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { LView, TView } from './interfaces/view';
+import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -43,7 +43,7 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
-export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null): LView;
+export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null, flags: LViewFlags): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -248,6 +248,44 @@ export declare function projection(nodeIndex: number, localIndex: number, select
  * @returns The state passed in
  */
 export declare function addToViewTree<T extends LView | LContainer>(state: T): T;
+/** If node is an OnPush component, marks its LView dirty. */
+export declare function markDirtyIfOnPush(node: LElementNode): void;
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Necessary to support OnPush components.
+ */
+export declare function wrapListenerWithDirtyLogic(view: LView, listener: EventListener): EventListener;
+/** Given a root context, schedules change detection at that root. */
+export declare function scheduleChangeDetection<T>(rootContext: RootContext): void;
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+export declare function detectChanges<T>(component: T): void;
+/**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent`, a scheduler
+ * can be provided.
+ *
+ * @param component Component to mark as dirty.
+ */
+export declare function markDirty<T>(component: T): void;
 export interface NO_CHANGE {
     brand: 'NO_CHANGE';
 }
@@ -310,3 +348,5 @@ export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
 export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
+export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
+export declare const CLEAN_PROMISE: Promise<null>;

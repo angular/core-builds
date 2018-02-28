@@ -64,35 +64,6 @@ export declare const NULL_INJECTOR: Injector;
  */
 export declare function renderComponent<T>(componentType: ComponentType<T>, opts?: CreateComponentOptions): T;
 /**
- * Synchronously perform change detection on a component (and possibly its sub-components).
- *
- * This function triggers change detection in a synchronous way on a component. There should
- * be very little reason to call this function directly since a preferred way to do change
- * detection is to {@link markDirty} the component and wait for the scheduler to call this method
- * at some future point in time. This is because a single user action often results in many
- * components being invalidated and calling change detection on each component synchronously
- * would be inefficient. It is better to wait until all components are marked as dirty and
- * then perform single change detection across all of the components
- *
- * @param component The component which the change detection should be performed on.
- */
-export declare function detectChanges<T>(component: T): void;
-/**
- * Mark the component as dirty (needing change detection).
- *
- * Marking a component dirty will schedule a change detection on this
- * component at some point in the future. Marking an already dirty
- * component as dirty is a noop. Only one outstanding change detection
- * can be scheduled per component tree. (Two components bootstrapped with
- * separate `renderComponent` will have separate schedulers)
- *
- * When the root component is bootstrapped with `renderComponent` a scheduler
- * can be provided.
- *
- * @param component Component to mark as dirty.
- */
-export declare function markDirty<T>(component: T): void;
-/**
  * Retrieve the host element of the component.
  *
  * Use this function to retrieve the host element of the component. The host
