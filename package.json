@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "6.0.0-beta.6-ba8df8a",
+  "version": "6.0.0-beta.6-d7e5d45",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./esm5/core.js",
@@ -20,6 +20,6 @@
     "url": "https://github.com/angular/angular.git"
   },
   "ng-update": {
-    "packageGroup": ["core", "compiler", "common", "animations", "platform-browser", "platform-browser-dynamic", "forms", "http", "platform-server", "platform-webworker", "platform-webworker-dynamic", "upgrade", "router", "compiler-cli", "language-service", "benchpress", "service-worker"]
+    "packageGroup": ["/core", "/compiler", "/common", "/animations", "/platform-browser", "/platform-browser-dynamic", "/forms", "/http", "/platform-server", "/platform-webworker", "/platform-webworker-dynamic", "/upgrade", "/router", "/compiler-cli", "/language-service", "/benchpress", "/service-worker"]
   }
 }
