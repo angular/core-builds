@@ -1,17 +1,6 @@
 import { LContainerNode, LElementNode, LNode, LTextNode, LViewNode } from './interfaces/node';
-import { LProjection } from './interfaces/projection';
 import { RNode } from './interfaces/renderer';
 import { LView, LViewOrLContainer } from './interfaces/view';
-/**
- * Finds the closest DOM node above a given container in the hierarchy.
- *
- * This is necessary to add or remove elements from the DOM when a view
- * is added or removed from the container. e.g. parent.removeChild(...)
- *
- * @param containerNode The container node whose parent must be found
- * @returns Closest DOM node above the container
- */
-export declare function findNativeParent(containerNode: LContainerNode): RNode | null;
 /**
  * Adds or removes all DOM elements associated with a view.
  *
@@ -89,12 +78,27 @@ export declare function setViewNext(view: LViewNode, next: LViewNode | null): vo
  */
 export declare function getParentState(state: LViewOrLContainer, rootView: LView): LViewOrLContainer | null;
 /**
- * Appends the provided child element to the provided parent, if appropriate.
+ * Returns whether a native element should be inserted in the given parent.
  *
- * If the parent is a view, the element will be appended as part of viewEnd(), so
- * the element should not be appended now. Similarly, if the child is a content child
- * of a parent component, the child will be appended to the right position later by
- * the content projection system. Otherwise, append normally.
+ * The native node can be inserted when its parent is:
+ * - A regular element => Yes
+ * - A component host element =>
+ *    - if the `currentView` === the parent `view`: The element is in the content (vs the
+ *      template)
+ *      => don't add as the parent component will project if needed.
+ *    - `currentView` !== the parent `view` => The element is in the template (vs the content),
+ *      add it
+ * - View element => delay insertion, will be done on `viewEnd()`
+ *
+ * @param parent The parent in which to insert the child
+ * @param currentView The LView being processed
+ * @return boolean Whether the child element should be inserted.
+ */
+export declare function canInsertNativeNode(parent: LNode, currentView: LView): boolean;
+/**
+ * Appends the `child` element to the `parent`.
+ *
+ * The element insertion might be delayed {@link canInsertNativeNode}
  *
  * @param parent The parent to which to append the child
  * @param child The child that should be appended
@@ -103,12 +107,9 @@ export declare function getParentState(state: LViewOrLContainer, rootView: LView
  */
 export declare function appendChild(parent: LNode, child: RNode | null, currentView: LView): boolean;
 /**
- * Inserts the provided node before the correct element in the DOM, if appropriate.
+ * Inserts the provided node before the correct element in the DOM.
  *
- * If the parent is a view, the element will be inserted as part of viewEnd(), so
- * the element should not be inserted now. Similarly, if the child is a content child
- * of a parent component, the child will be inserted to the right position later by
- * the content projection system. Otherwise, insertBefore normally.
+ * The element insertion might be delayed {@link canInsertNativeNode}
  *
  * @param node Node to insert
  * @param currentView Current LView
@@ -116,12 +117,10 @@ export declare function appendChild(parent: LNode, child: RNode | null, currentV
 export declare function insertChild(node: LNode, currentView: LView): void;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
- * appends the nodes from all of the container's active views to the DOM. Also stores the
- * node in the given projectedNodes array.
+ * appends the nodes from all of the container's active views to the DOM.
  *
- * @param projectedNodes Array to store the projected node
  * @param node The node to process
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function processProjectedNode(projectedNodes: LProjection, node: LElementNode | LTextNode | LContainerNode, currentParent: LViewNode | LElementNode, currentView: LView): void;
+export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LViewNode | LElementNode, currentView: LView): void;

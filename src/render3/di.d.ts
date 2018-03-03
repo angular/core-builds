@@ -1,10 +1,19 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { TypedDirectiveDef } from './interfaces/definition';
+import { DirectiveDef } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode } from './interfaces/node';
+import { QueryReadType } from './interfaces/query';
 /**
  * Registers this directive as present in its node's injector by flipping the directive's
  * corresponding bit in the injector's bloom filter.
@@ -13,6 +22,7 @@ import { LContainerNode, LElementNode } from './interfaces/node';
  * @param type The directive to register
  */
 export declare function bloomAdd(injector: LInjector, type: Type<any>): void;
+export declare function getOrCreateNodeInjector(): LInjector;
 /**
  * Creates (or gets an existing) injector for a given element or container.
  *
@@ -38,7 +48,66 @@ export declare const enum InjectFlags {
  * @param di The node injector in which a directive will be added
  * @param def The definition of the directive to be made public
  */
-export declare function diPublicInInjector(di: LInjector, def: TypedDirectiveDef<any>): void;
+export declare function diPublicInInjector(di: LInjector, def: DirectiveDef<any>): void;
+/**
+ * Makes a directive public to the DI system by adding it to an injector's bloom filter.
+ *
+ * @param def The definition of the directive to be made public
+ */
+export declare function diPublic(def: DirectiveDef<any>): void;
+/**
+ * Searches for an instance of the given directive type up the injector tree and returns
+ * that instance if found.
+ *
+ * If not found, it will propagate up to the next parent injector until the token
+ * is found or the top is reached.
+ *
+ * Usage example (in factory function):
+ *
+ * class SomeDirective {
+ *   constructor(directive: DirectiveA) {}
+ *
+ *   static ngDirectiveDef = defineDirective({
+ *     type: SomeDirective,
+ *     factory: () => new SomeDirective(inject(DirectiveA))
+ *   });
+ * }
+ *
+ * @param token The directive type to search for
+ * @param flags Injection flags (e.g. CheckParent)
+ * @returns The instance found
+ */
+export declare function inject<T>(token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
+/**
+ * Creates an ElementRef and stores it on the injector.
+ * Or, if the ElementRef already exists, retrieves the existing ElementRef.
+ *
+ * @returns The ElementRef instance to use
+ */
+export declare function injectElementRef(): viewEngine_ElementRef;
+/**
+ * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
+ * exists, retrieves the existing TemplateRef.
+ *
+ * @returns The TemplateRef instance to use
+ */
+export declare function injectTemplateRef<T>(): viewEngine_TemplateRef<T>;
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function injectViewContainerRef(): viewEngine_ViewContainerRef;
+/** Returns a ChangeDetectorRef (a.k.a. a ViewRef) */
+export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
+/**
+ * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
+ * Or, if it already exists, retrieves the existing instance.
+ *
+ * @returns The ChangeDetectorRef to use
+ */
+export declare function getOrCreateChangeDetectorRef(di: LInjector, context: any): viewEngine_ChangeDetectorRef;
 /**
  * Searches for an instance of the given directive type up the injector tree and returns
  * that instance if found.
@@ -56,7 +125,7 @@ export declare function diPublicInInjector(di: LInjector, def: TypedDirectiveDef
  * @param flags Injection flags (e.g. CheckParent)
  * @returns The instance found
  */
-export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags): T;
+export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
 /**
  * Finds the closest injector that might have a certain directive.
  *
@@ -77,6 +146,10 @@ export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, 
  * @returns An injector that might have the directive
  */
 export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number): LInjector | null;
+export declare class ReadFromInjectorFn<T> {
+    readonly read: (injector: LInjector, node: LNode, directiveIndex?: number) => T;
+    constructor(read: (injector: LInjector, node: LNode, directiveIndex?: number) => T);
+}
 /**
  * Creates an ElementRef for a given node injector and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
@@ -85,6 +158,17 @@ export declare function bloomFindPossibleInjector(startInjector: LInjector, bloo
  * @returns The ElementRef instance to use
  */
 export declare function getOrCreateElementRef(di: LInjector): viewEngine_ElementRef;
+export declare const QUERY_READ_TEMPLATE_REF: QueryReadType<viewEngine_TemplateRef<any>>;
+export declare const QUERY_READ_CONTAINER_REF: QueryReadType<viewEngine_ViewContainerRef>;
+export declare const QUERY_READ_ELEMENT_REF: QueryReadType<viewEngine_ElementRef<any>>;
+export declare const QUERY_READ_FROM_NODE: QueryReadType<any>;
+/**
+ * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
+ * already exists, retrieves the existing ViewContainerRef.
+ *
+ * @returns The ViewContainerRef instance to use
+ */
+export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
  * exists, retrieves the existing TemplateRef.
@@ -93,10 +177,3 @@ export declare function getOrCreateElementRef(di: LInjector): viewEngine_Element
  * @returns The TemplateRef instance to use
  */
 export declare function getOrCreateTemplateRef<T>(di: LInjector): viewEngine_TemplateRef<T>;
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-export declare function getOrCreateContainerRef(di: LInjector): viewEngine_ViewContainerRef;

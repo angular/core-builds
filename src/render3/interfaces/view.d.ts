@@ -6,31 +6,23 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './container';
-import { DirectiveDef } from './definition';
+import { ComponentTemplate, DirectiveDef } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
+import { LQueries } from './query';
 import { Renderer3 } from './renderer';
 /**
  * `LView` stores all of the information needed to process the instructions as
  * they are invoked from the template. Each embedded view and component view has its
  * own `LView`. When processing a particular view, we set the `currentView` to that
  * `LView`. When that view is done processing, the `currentView` is set back to
- * whatever the original `currentView` was before(the parent `LView`).
+ * whatever the original `currentView` was before (the parent `LView`).
  *
  * Keeping separate state for each view facilities view insertion / deletion, so we
  * don't have to edit the data array based on which views are present.
  */
 export interface LView {
-    /**
-     * Whether or not the view is in creationMode.
-     *
-     * This must be stored in the view rather than using `data` as a marker so that
-     * we can properly support embedded views. Otherwise, when exiting a child view
-     * back into the parent view, `data` will be defined and `creationMode` will be
-     * improperly reported as false.
-     */
-    creationMode: boolean;
-    /** The index in the data array at which view hooks begin to be stored. */
-    viewHookStartIndex: number | null;
+    /** Flags for this view (see LViewFlags for definition of each bit). */
+    flags: LViewFlags;
     /**
      * The parent view is needed when we exit the view and must restore the previous
      * `LView`. Without this, the render method would have to keep a stack of
@@ -62,9 +54,9 @@ export interface LView {
      */
     bindingStartIndex: number | null;
     /**
-     * When a view is destroyed, listeners need to be released and onDestroy callbacks
-     * need to be called. This cleanup array stores both listener data (in chunks of 4)
-     * and onDestroy data (in chunks of 2) for a particular view. Combining the arrays
+     * When a view is destroyed, listeners need to be released and outputs need to be
+     * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
+     * and output data (in chunks of 2) for a particular view. Combining the arrays
      * saves on memory (70 bytes per array) and on a few bytes of code size (for two
      * separate for loops).
      *
@@ -74,11 +66,27 @@ export interface LView {
      * 3rd index is: listener function
      * 4th index is: useCapture boolean
      *
-     * If it's an onDestroy function:
-     * 1st index is: onDestroy function
-     * 2nd index is; context for function
+     * If it's an output subscription:
+     * 1st index is: unsubscribe function
+     * 2nd index is: context for function
      */
     cleanup: any[] | null;
+    /**
+     * This number tracks the next lifecycle hook that needs to be run.
+     *
+     * If lifecycleStage === LifecycleStage.ON_INIT, the init hooks haven't yet been run
+     * and should be executed by the first r() instruction that runs OR the first
+     * cR() instruction that runs (so inits are run for the top level view before any
+     * embedded views).
+     *
+     * If lifecycleStage === LifecycleStage.CONTENT_INIT, the init hooks have been run, but
+     * the content hooks have not yet been run. They should be executed on the first
+     * r() instruction that runs.
+     *
+     * If lifecycleStage === LifecycleStage.VIEW_INIT, both the init hooks and content hooks
+     * have already been run.
+     */
+    lifecycleStage: LifecycleStage;
     /**
      * The first LView or LContainer beneath this LView in the hierarchy.
      *
@@ -123,6 +131,43 @@ export interface LView {
      * directive defs are stored).
      */
     tView: TView;
+    /**
+     * For dynamically inserted views, the template function to refresh the view.
+     */
+    template: ComponentTemplate<{}> | null;
+    /**
+     * - For embedded views, the context with which to render the template.
+     * - For root view of the root component the context contains change detection data.
+     * - `null` otherwise.
+     */
+    context: {} | RootContext | null;
+    /**
+     * A count of dynamic views that are children of this view (indirectly via containers).
+     *
+     * This is used to decide whether to scan children of this view when refreshing dynamic views
+     * after refreshing the view itself.
+     */
+    dynamicViewCount: number;
+    /**
+     * Queries active for this view - nodes from a view are reported to those queries
+     */
+    queries: LQueries | null;
+}
+/** Flags associated with an LView (saved in LView.flags) */
+export declare const enum LViewFlags {
+    /**
+     * Whether or not the view is in creationMode.
+     *
+     * This must be stored in the view rather than using `data` as a marker so that
+     * we can properly support embedded views. Otherwise, when exiting a child view
+     * back into the parent view, `data` will be defined and `creationMode` will be
+     * improperly reported as false.
+     */
+    CreationMode = 1,
+    /** Whether this view has default change detection strategy (checks always) or onPush */
+    CheckAlways = 2,
+    /** Whether or not this view is currently dirty (needing check) */
+    Dirty = 4,
 }
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {
@@ -138,7 +183,99 @@ export interface LViewOrLContainer {
  * Stored on the template function as ngPrivateData.
  */
 export interface TView {
+    /** Static data equivalent of LView.data[]. Contains TNodes and directive defs. */
     data: TData;
+    /** Whether or not this template has been processed. */
+    firstTemplatePass: boolean;
+    /**
+     * Array of ngOnInit and ngDoCheck hooks that should be executed for this view in
+     * creation mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    initHooks: HookData | null;
+    /**
+     * Array of ngDoCheck hooks that should be executed for this view in update mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    checkHooks: HookData | null;
+    /**
+     * Array of ngAfterContentInit and ngAfterContentChecked hooks that should be executed
+     * for this view in creation mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    contentHooks: HookData | null;
+    /**
+     * Array of ngAfterContentChecked hooks that should be executed for this view in update
+     * mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    contentCheckHooks: HookData | null;
+    /**
+     * Array of ngAfterViewInit and ngAfterViewChecked hooks that should be executed for
+     * this view in creation mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    viewHooks: HookData | null;
+    /**
+     * Array of ngAfterViewChecked hooks that should be executed for this view in
+     * update mode.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    viewCheckHooks: HookData | null;
+    /**
+     * Array of ngOnDestroy hooks that should be executed when this view is destroyed.
+     *
+     * Even indices: Directive index
+     * Odd indices: Hook function
+     */
+    destroyHooks: HookData | null;
+}
+/**
+ * RootContext contains information which is shared for all components which
+ * were bootstrapped with {@link renderComponent}.
+ */
+export interface RootContext {
+    /**
+     * A function used for scheduling change detection in the future. Usually
+     * this is `requestAnimationFrame`.
+     */
+    scheduler: (workFn: () => void) => void;
+    /**
+     * A promise which is resolved when all components are considered clean (not dirty).
+     *
+     * This promise is overwritten every time a first call to {@link markDirty} is invoked.
+     */
+    clean: Promise<null>;
+    /**
+     * RootComponent - The component which was instantiated by the call to
+     * {@link renderComponent}.
+     */
+    component: {};
+}
+/**
+ * Array of hooks that should be executed for a view and their directive indices.
+ *
+ * Even indices: Directive index
+ * Odd indices: Hook function
+ */
+export declare type HookData = (number | (() => void))[];
+/** Possible values of LView.lifecycleStage, used to determine which hooks to run.  */
+export declare const enum LifecycleStage {
+    INIT = 1,
+    CONTENT_INIT = 2,
+    VIEW_INIT = 3,
 }
 /**
  * Static data that corresponds to the instance-specific data array on an LView.

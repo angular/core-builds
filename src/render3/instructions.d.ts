@@ -6,38 +6,26 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
-import { ElementRef } from '../linker/element_ref';
-import { TemplateRef } from '../linker/template_ref';
-import { ViewContainerRef } from '../linker/view_container_ref';
-import { Type } from '../type';
 import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
-import { QueryReadType } from './interfaces/query';
-import { LView, TView } from './interfaces/view';
+import { LQueries } from './interfaces/query';
+import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType, TypedDirectiveDef } from './interfaces/definition';
-import { InjectFlags } from './di';
-import { QueryList } from './query';
-import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-export { queryRefresh } from './query';
-/**
- * Enum used by the lifecycle (l) instruction to determine which lifecycle hook is requesting
- * processing.
- */
-export declare const enum LifecycleHook {
-    ON_INIT = 1,
-    ON_DESTROY = 2,
-    ON_CHANGES = 4,
-    AFTER_VIEW_INIT = 8,
-    AFTER_VIEW_CHECKED = 16,
-}
+import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
+import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
  */
 export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
+export declare function getRenderer(): Renderer3;
+export declare function getPreviousOrParentNode(): LNode;
+export declare function getCurrentQueries(QueryType: {
+    new (): LQueries;
+}): LQueries;
+export declare function getCreationMode(): boolean;
 /**
  * Swap the current state with a new state.
  *
@@ -56,14 +44,14 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
-export declare function createLView(viewId: number, renderer: Renderer3, tView: TView): LView;
+export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null, flags: LViewFlags): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
  */
 export declare function createLNode(index: number | null, type: LNodeFlags.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
 export declare function createLNode(index: null, type: LNodeFlags.View, native: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeFlags.Container, native: RComment, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeFlags.Container, native: undefined, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: LNodeFlags.Projection, native: null, lProjection: LProjection): LProjectionNode;
 /**
  *
@@ -72,58 +60,8 @@ export declare function createLNode(index: number, type: LNodeFlags.Projection, 
  * @param context to pass into the template.
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null): LElementNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
-export declare function getOrCreateNodeInjector(): LInjector;
-/**
- * Makes a directive public to the DI system by adding it to an injector's bloom filter.
- *
- * @param def The definition of the directive to be made public
- */
-export declare function diPublic(def: TypedDirectiveDef<any>): void;
-/**
- * Searches for an instance of the given directive type up the injector tree and returns
- * that instance if found.
- *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
- *
- * Usage example (in factory function):
- *
- * class SomeDirective {
- *   constructor(directive: DirectiveA) {}
- *
- *   static ngDirectiveDef = defineDirective({
- *     type: SomeDirective,
- *     factory: () => new SomeDirective(inject(DirectiveA))
- *   });
- * }
- *
- * @param token The directive type to search for
- * @param flags Injection flags (e.g. CheckParent)
- * @returns The instance found
- */
-export declare function inject<T>(token: Type<T>, flags?: InjectFlags): T;
-/**
- * Creates an ElementRef and stores it on the injector.
- * Or, if the ElementRef already exists, retrieves the existing ElementRef.
- *
- * @returns The ElementRef instance to use
- */
-export declare function injectElementRef(): ElementRef;
-/**
- * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
- * exists, retrieves the existing TemplateRef.
- *
- * @returns The TemplateRef instance to use
- */
-export declare function injectTemplateRef<T>(): TemplateRef<T>;
-/**
- * Creates a ViewContainerRef and stores it on the injector. Or, if the ViewContainerRef
- * already exists, retrieves the existing ViewContainerRef.
- *
- * @returns The ViewContainerRef instance to use
- */
-export declare function injectViewContainerRef(): ViewContainerRef;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
@@ -138,6 +76,10 @@ export declare function injectViewContainerRef(): ViewContainerRef;
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, nameOrComponentType?: string | ComponentType<any>, attrs?: string[] | null, directiveTypes?: DirectiveType<any>[] | null, localRefs?: string[] | null): RElement;
+/** Sets the context for a ChangeDetectorRef to the given instance. */
+export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any): void;
+/** Creates a TView instance */
+export declare function createTView(): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -150,8 +92,10 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @param rNode Render host element.
  * @param def ComponentDef
+ *
+ * @returns LElementNode created
  */
-export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): void;
+export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -166,14 +110,14 @@ export declare function listener(eventName: string, listener: EventListener, use
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
- * Update an attribute on an Element. This is used with a `bind` instruction.
+ * Updates the value of removes an attribute on an Element.
  *
- * @param index The index of the element to update in the data array
- * @param attrName Name of attribute. Because it is going to DOM, this is not subject to
- *        renaming as port of minification.
- * @param value Value to write. This value will go through stringification.
+ * @param number index The index of the element in the data array
+ * @param string name The name of the attribute.
+ * @param any value The attribute is removed when value is `null` or `undefined`.
+ *                  Otherwise the attribute value is set to the stringified value.
  */
-export declare function elementAttribute(index: number, attrName: string, value: any): void;
+export declare function elementAttribute(index: number, name: string, value: any): void;
 /**
  * Update a property on an Element.
  *
@@ -225,16 +169,6 @@ export declare function text(index: number, value?: any): void;
  */
 export declare function textBinding<T>(index: number, value: T | NO_CHANGE): void;
 /**
- * Retrieve a directive.
- *
- * NOTE: directives can be created in order other than the index order. They can also
- *       be retrieved before they are created in which case the value will be null.
- *
- * @param index Each directive in a `View` will have a unique index. Directives can
- *        be created or retrieved out of order.
- */
-export declare function directive<T>(index: number): T;
-/**
  * Create a directive.
  *
  * NOTE: directives can be created in order other than the index order. They can also
@@ -247,31 +181,6 @@ export declare function directive<T>(index: number): T;
  * @param queryName Name under which the query can retrieve the directive instance.
  */
 export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, queryName?: string | null): T;
-/**
- * Accepts a lifecycle hook type and determines when and how the related lifecycle hook
- * callback should run.
- *
- * For the onInit lifecycle hook, it will return whether or not the ngOnInit() function
- * should run. If so, ngOnInit() will be called outside of this function.
- *
- * e.g. l(LifecycleHook.ON_INIT) && ctx.ngOnInit();
- *
- * For the onDestroy lifecycle hook, this instruction also accepts an onDestroy
- * method that should be stored and called internally when the parent view is being
- * cleaned up.
- *
- * e.g.  l(LifecycleHook.ON_DESTROY, ctx, ctx.onDestroy);
- *
- * @param lifecycle
- * @param self
- * @param method
- */
-export declare function lifecycle(lifecycle: LifecycleHook.ON_DESTROY, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_INIT, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook.AFTER_VIEW_CHECKED, self: any, method: Function): void;
-export declare function lifecycle(lifecycle: LifecycleHook): boolean;
-/** Iterates over view hook functions and calls them. */
-export declare function executeViewHooks(): void;
 /**
  * Creates an LContainerNode.
  *
@@ -297,24 +206,24 @@ export declare function containerRefreshStart(index: number): void;
  */
 export declare function containerRefreshEnd(): void;
 /**
- * Creates an LViewNode.
+ * Marks the start of an embedded view.
  *
  * @param viewBlockId The ID of this view
- * @return Whether or not this view is in creation mode
+ * @return boolean Whether or not this view is in creation mode
  */
-export declare function viewStart(viewBlockId: number): boolean;
-/** Marks the end of the LViewNode. */
-export declare function viewEnd(): void;
+export declare function embeddedViewStart(viewBlockId: number): boolean;
+/** Marks the end of an embedded view. */
+export declare function embeddedViewEnd(): void;
 /**
- * Refreshes the component view.
+ * Refreshes the directive, triggering init and content hooks.
  *
- * In other words, enters the component's view and processes it to update bindings, queries, etc.
+ * When it is a component, it also enters the component's view and processes it to update bindings,
+ * queries, etc.
  *
  * @param directiveIndex
  * @param elementIndex
- * @param template
  */
-export declare const componentRefresh: <T>(directiveIndex: number, elementIndex: number, template: ComponentTemplate<T>) => void;
+export declare function directiveRefresh<T>(directiveIndex: number, elementIndex: number): void;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where
@@ -323,7 +232,7 @@ export declare const componentRefresh: <T>(directiveIndex: number, elementIndex:
  *
  * @param selectors
  */
-export declare function projectionDef(selectors?: CssSelector[]): LNode[][];
+export declare function projectionDef(index: number, selectors?: CssSelector[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.
@@ -331,8 +240,9 @@ export declare function projectionDef(selectors?: CssSelector[]): LNode[][];
  * @param nodeIndex
  * @param localIndex - index under which distribution of projected nodes was memorized
  * @param selectorIndex - 0 means <ng-content> without any selector
+ * @param attrs - attributes attached to the ng-content node, if present
  */
-export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number): void;
+export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number, attrs?: string[]): void;
 /**
  * Adds a LView or a LContainer to the end of the current view tree.
  *
@@ -343,145 +253,105 @@ export declare function projection(nodeIndex: number, localIndex: number, select
  * @returns The state passed in
  */
 export declare function addToViewTree<T extends LView | LContainer>(state: T): T;
+/** If node is an OnPush component, marks its LView dirty. */
+export declare function markDirtyIfOnPush(node: LElementNode): void;
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Necessary to support OnPush components.
+ */
+export declare function wrapListenerWithDirtyLogic(view: LView, listener: EventListener): EventListener;
+/** Given a root context, schedules change detection at that root. */
+export declare function scheduleChangeDetection<T>(rootContext: RootContext): void;
+/**
+ * Synchronously perform change detection on a component (and possibly its sub-components).
+ *
+ * This function triggers change detection in a synchronous way on a component. There should
+ * be very little reason to call this function directly since a preferred way to do change
+ * detection is to {@link markDirty} the component and wait for the scheduler to call this method
+ * at some future point in time. This is because a single user action often results in many
+ * components being invalidated and calling change detection on each component synchronously
+ * would be inefficient. It is better to wait until all components are marked as dirty and
+ * then perform single change detection across all of the components
+ *
+ * @param component The component which the change detection should be performed on.
+ */
+export declare function detectChanges<T>(component: T): void;
+/**
+ * Mark the component as dirty (needing change detection).
+ *
+ * Marking a component dirty will schedule a change detection on this
+ * component at some point in the future. Marking an already dirty
+ * component as dirty is a noop. Only one outstanding change detection
+ * can be scheduled per component tree. (Two components bootstrapped with
+ * separate `renderComponent` will have separate schedulers)
+ *
+ * When the root component is bootstrapped with `renderComponent`, a scheduler
+ * can be provided.
+ *
+ * @param component Component to mark as dirty.
+ */
+export declare function markDirty<T>(component: T): void;
 export interface NO_CHANGE {
     brand: 'NO_CHANGE';
 }
 /** A special value which designates that a value has not changed. */
 export declare const NO_CHANGE: NO_CHANGE;
 /**
- * Create interpolation bindings with variable number of arguments.
- *
- * If any of the arguments change, then the interpolation is concatenated
- * and causes an update.
- *
- * @param values an array of values to diff.
- */
-export declare function bindV(values: any[]): string | NO_CHANGE;
-/**
- * Create a single value binding without interpolation.
+ * Creates a single value binding.
  *
  * @param value Value to diff
  */
 export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
- * Create an interpolation bindings with 1 arguments.
+ * Create interpolation bindings with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
+ * Those are faster because there is no need to create an array of expressions and iterate over it.
+ *
+ * `values`:
+ * - has static text at even indexes,
+ * - has evaluated expressions at odd indexes.
+ *
+ * Returns the concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+export declare function interpolationV(values: any[]): string | NO_CHANGE;
+/**
+ * Creates an interpolation binding with 1 expression.
  *
  * @param prefix static value used for concatenation only.
- * @param value value checked for change.
+ * @param v0 value checked for change.
  * @param suffix static value used for concatenation only.
  */
-export declare function bind1(prefix: string, value: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation bindings with 2 arguments.
- *
- * @param prefix
- * @param v0 value checked for change
- * @param i0
- * @param v1 value checked for change
- * @param suffix
- */
-export declare function bind2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation bindings with 3 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param suffix
- */
-export declare function bind3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 4 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param suffix
- */
-export declare function bind4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 5 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param suffix
- */
-export declare function bind5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 6 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param suffix
- */
-export declare function bind6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 7 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param i5
- * @param v6
- * @param suffix
- */
-export declare function bind7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
-/**
- * Create an interpolation binding with 8 arguments.
- *
- * @param prefix
- * @param v0
- * @param i0
- * @param v1
- * @param i1
- * @param v2
- * @param i2
- * @param v3
- * @param i3
- * @param v4
- * @param i4
- * @param v5
- * @param i5
- * @param v6
- * @param i6
- * @param v7
- * @param suffix
- */
-export declare function bind8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
-export declare function memory<T>(index: number, value?: T): T;
-export declare function query<T>(predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType | Type<T>): QueryList<T>;
+export declare function interpolation1(prefix: string, v0: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 2 expressions. */
+export declare function interpolation2(prefix: string, v0: any, i0: string, v1: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation bindings with 3 expressions. */
+export declare function interpolation3(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, suffix: string): string | NO_CHANGE;
+/** Create an interpolation binding with 4 expressions. */
+export declare function interpolation4(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 5 expressions. */
+export declare function interpolation5(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 6 expressions. */
+export declare function interpolation6(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 7 expressions. */
+export declare function interpolation7(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, suffix: string): string | NO_CHANGE;
+/** Creates an interpolation binding with 8 expressions. */
+export declare function interpolation8(prefix: string, v0: any, i0: string, v1: any, i1: string, v2: any, i2: string, v3: any, i3: string, v4: any, i4: string, v5: any, i5: string, v6: any, i6: string, v7: any, suffix: string): string | NO_CHANGE;
+/** Store a value in the `data` at a given `index`. */
+export declare function store<T>(index: number, value: T): void;
+/** Retrieves a value from the `data`. */
+export declare function load<T>(index: number): T;
+/** Gets the current binding value and increments the binding index. */
+export declare function consumeBinding(): any;
+/** Updates binding if changed, then returns whether it was updated. */
+export declare function bindingUpdated(value: any): boolean;
+/** Updates binding if changed, then returns the latest value. */
+export declare function checkAndUpdateBinding(value: any): any;
+/** Updates 2 bindings if changed, then returns whether either was updated. */
+export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
+/** Updates 4 bindings if changed, then returns whether any was updated. */
+export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
+export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
+export declare function assertPreviousIsParent(): void;
+export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
+export declare const CLEAN_PROMISE: Promise<null>;

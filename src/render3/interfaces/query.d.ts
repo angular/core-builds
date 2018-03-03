@@ -7,29 +7,37 @@
  */
 import { QueryList } from '../../linker';
 import { Type } from '../../type';
-import { LContainerNode, LNode, LViewNode } from './node';
+import { LNode } from './node';
 /** Used for tracking queries (e.g. ViewChild, ContentChild). */
-export interface LQuery {
+export interface LQueries {
     /**
-     * Used to ask query if it should be cloned to the child element.
+     * Used to ask queries if those should be cloned to the child element.
      *
      * For example in the case of deep queries the `child()` returns
-     * query for the child node. In case of shallow queries it returns
+     * queries for the child node. In case of shallow queries it returns
      * `null`.
      */
-    child(): LQuery | null;
+    child(): LQueries | null;
     /**
-     * Notify `LQuery` that a  `LNode` has been created.
+     * Notify `LQueries` that a new `LNode` has been created and needs to be added to query results
+     * if matching query predicate.
      */
     addNode(node: LNode): void;
     /**
-     * Notify `LQuery` that an `LViewNode` has been added to `LContainerNode`.
+     * Notify `LQueries` that a  `LNode` has been created and needs to be added to query results
+     * if matching query predicate.
      */
-    insertView(container: LContainerNode, view: LViewNode, insertIndex: number): void;
+    container(): LQueries | null;
     /**
-     * Notify `LQuery` that an `LViewNode` has been removed from `LContainerNode`.
+     * Notify `LQueries` that a new view was created and is being entered in the creation mode.
+     * This allow queries to prepare space for matching nodes from views.
      */
-    removeView(container: LContainerNode, view: LViewNode, removeIndex: number): void;
+    enterView(newViewIndex: number): LQueries | null;
+    /**
+     * Notify `LQueries` that an `LViewNode` has been removed from `LContainerNode`. As a result all
+     * the matching nodes from this view should be removed from container's queries.
+     */
+    removeView(removeIndex: number): void;
     /**
      * Add additional `QueryList` to track.
      *
@@ -38,12 +46,9 @@ export interface LQuery {
      * @param descend If true the query will recursively apply to the children.
      * @param read Indicates which token should be read from DI for this query.
      */
-    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType | Type<T>): void;
+    track<T>(queryList: QueryList<T>, predicate: Type<any> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
 }
-/** An enum representing possible values of the "read" option for queries. */
-export declare const enum QueryReadType {
-    ElementRef = 0,
-    ViewContainerRef = 1,
-    TemplateRef = 2,
+export declare class QueryReadType<T> {
+    private defeatStructuralTyping;
 }
 export declare const unusedValueExportToPlacateAjd = 1;

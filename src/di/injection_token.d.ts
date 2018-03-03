@@ -5,6 +5,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../type';
+import { Injectable } from './injectable';
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -29,6 +31,10 @@
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    constructor(_desc: string);
+    readonly ngInjectableDef: Injectable | undefined;
+    constructor(_desc: string, options?: {
+        scope: Type<any>;
+        factory: () => T;
+    });
     toString(): string;
 }

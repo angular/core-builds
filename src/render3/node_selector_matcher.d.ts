@@ -18,3 +18,8 @@ import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './inte
 export declare function isNodeMatchingSimpleSelector(tNode: TNode, selector: SimpleCssSelector): boolean;
 export declare function isNodeMatchingSelectorWithNegations(tNode: TNode, selector: CssSelectorWithNegations): boolean;
 export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector): boolean;
+/**
+ * Checks a given node against matching selectors and returns
+ * selector index (or 0 if none matched);
+ */
+export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelector[]): number;

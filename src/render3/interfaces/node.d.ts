@@ -8,8 +8,8 @@
 import { LContainer, TContainer } from './container';
 import { LInjector } from './injector';
 import { LProjection } from './projection';
-import { LQuery } from './query';
-import { RComment, RElement, RText } from './renderer';
+import { LQueries } from './query';
+import { RElement, RText } from './renderer';
 import { LView } from './view';
 /**
  * LNodeFlags corresponds to the LNode.flags property. It contains information
@@ -68,9 +68,8 @@ export interface LNode {
      * The associated DOM node. Storing this allows us to:
      *  - append children to their element parents in the DOM (e.g. `parent.native.appendChild(...)`)
      *  - retrieve the sibling elements of text nodes whose creation / insertion has been delayed
-     *  - mark locations where child views should be inserted (for containers)
      */
-    readonly native: RElement | RText | RComment | null;
+    readonly native: RElement | RText | null | undefined;
     /**
      * We need a reference to a node's parent so we can append the node to its parent's native
      * element at the appropriate time.
@@ -102,11 +101,18 @@ export interface LNode {
     /** The injector associated with this node. Necessary for DI. */
     nodeInjector: LInjector | null;
     /**
-     * Optional `QueryState` used for tracking queries.
+     * Optional set of queries that track query-related events for this node.
      *
-     * If present the node creation/updates are reported to the `QueryState`.
+     * If present the node creation/updates are reported to the `LQueries`.
      */
-    query: LQuery | null;
+    queries: LQueries | null;
+    /**
+     * If this node is projected, pointer to the next node in the same projection parent
+     * (which is a container, an element, or a text node), or to the parent projection node
+     * if this is the last node in the projection.
+     * If this node is not projected, this field is null.
+     */
+    pNextOrParent: LNode | null;
     /**
      * Pointer to the corresponding TNode object, which stores static
      * data about this node.
@@ -145,14 +151,7 @@ export interface LViewNode extends LNode {
 }
 /** Abstract node container which contains other views. */
 export interface LContainerNode extends LNode {
-    /**
-     * This comment node is appended to the container's parent element to mark where
-     * in the DOM the container's child views should be added.
-     *
-     * If the container is a root node of a view, this comment will not be appended
-     * until the parent view is processed.
-     */
-    readonly native: RComment;
+    native: RElement | RText | null | undefined;
     readonly data: LContainer;
     child: null;
     next: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
@@ -212,14 +211,21 @@ export interface TNode {
      * - `<div #foo #bar="directiveExportAs">` => `["foo", -1, "bar", directiveIdx]`
      */
     localNames: (string | number)[] | null;
-    /**
-     * This property contains information about input properties that
-     * need to be set once from attribute data.
-     */
+    /** Information about input properties that need to be set once from attribute data. */
     initialInputs: InitialInputData | null | undefined;
-    /** Input data for all directives on this node. */
+    /**
+     * Input data for all directives on this node.
+     *
+     * - `undefined` means that the prop has not been initialized yet,
+     * - `null` means that the prop has been initialized but no inputs have been found.
+     */
     inputs: PropertyAliases | null | undefined;
-    /** Output data for all directives on this node. */
+    /**
+     * Output data for all directives on this node.
+     *
+     * - `undefined` means that the prop has not been initialized yet,
+     * - `null` means that the prop has been initialized but no outputs have been found.
+     */
     outputs: PropertyAliases | null | undefined;
     /**
      * The static data equivalent of LNode.data.
@@ -253,11 +259,10 @@ export declare type PropertyAliases = {
     [key: string]: PropertyAliasValue;
 };
 /**
- * The value in PropertyAliases.
+ * Store the runtime input or output names for all the directives.
  *
- * In each array:
- * Even indices: directive index
- * Odd indices: minified / internal name
+ * - Even indices: directive index
+ * - Odd indices: minified / internal name
  *
  * e.g. [0, 'change-minified']
  */

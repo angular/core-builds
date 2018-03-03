@@ -17,3 +17,7 @@ export declare function stringify(value: any): string;
  * @returns Not implemented error
  */
 export declare function notImplemented(): Error;
+/**
+ * Flattens an array in non-recursive way. Input arrays are not modified.
+ */
+export declare function flatten(list: any[]): any[];

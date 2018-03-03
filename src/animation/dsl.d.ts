@@ -324,7 +324,7 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  * The `@childAnimation` trigger will not animate because `@.disabled` prevents it from happening
  (when true).
  *
- * Note that `@.disbled` will only disable all animations (this means any animations running on
+ * Note that `@.disabled` will only disable all animations (this means any animations running on
  * the same element will also be disabled).
  *
  * ### Disabling Animations Application-wide
@@ -351,6 +351,14 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  elements located in disabled areas of the template and still animate them as it sees fit. This is
  also the case for when a sub animation is queried by a parent and then later animated using {@link
  animateChild animateChild}.
+
+ * ### Detecting when an animation is disabled
+ * If a region of the DOM (or the entire application) has its animations disabled, then animation
+ * trigger callbacks will still fire just as normal (only for zero seconds).
+ *
+ * When a trigger callback fires it will provide an instance of an {@link AnimationEvent}. If
+ animations
+ * are disabled then the `.disabled` flag on the event will be true.
  *
  * @experimental Animation support is experimental.
  */

@@ -32,7 +32,7 @@ export declare const PROP_METADATA = "__prop__metadata__";
 /**
  * @suppress {globalThis}
  */
-export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void): {
+export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void, typeFn?: (type: Type<any>, ...args: any[]) => void): {
     new (...args: any[]): any;
     (...args: any[]): any;
     (...args: any[]): (cls: any) => any;
