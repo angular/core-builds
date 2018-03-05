@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.6-4f60968
+ * @license Angular v6.0.0-beta.6-51ca643
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.6-4f60968
+ * @license Angular v6.0.0-beta.6-51ca643
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.6-4f60968');
+var VERSION = new Version('6.0.0-beta.6-51ca643');
 
 /**
  * @fileoverview added by tsickle
@@ -19330,6 +19330,55 @@ function injectChangeDetectorRef() {
     return getOrCreateChangeDetectorRef(getOrCreateNodeInjector(), null);
 }
 /**
+ * Inject static attribute value into directive constructor.
+ *
+ * This method is used with `factory` functions which are generated as part of
+ * `defineDirective` or `defineComponent`. The method retrieves the static value
+ * of an attribute. (Dynamic attributes are not supported since they are not resolved
+ *  at the time of injection and can change over time.)
+ *
+ * # Example
+ * Given:
+ * ```
+ * \@Component(...)
+ * class MyComponent {
+ *   constructor(\@Attribute('title') title: string) { ... }
+ * }
+ * ```
+ * When instantiated with
+ * ```
+ * <my-component title="Hello"></my-component>
+ * ```
+ *
+ * Then factory method generated is:
+ * ```
+ * MyComponent.ngComponentDef = defineComponent({
+ *   factory: () => new MyComponent(injectAttribute('title'))
+ *   ...
+ * })
+ * ```
+ *
+ * \@experimental
+ * @param {?} attrName
+ * @return {?}
+ */
+function injectAttribute(attrName) {
+    ngDevMode && assertPreviousIsParent();
+    var /** @type {?} */ lElement = /** @type {?} */ (getPreviousOrParentNode());
+    ngDevMode && assertNodeType(lElement, 3 /* Element */);
+    var /** @type {?} */ tElement = /** @type {?} */ ((lElement.tNode));
+    ngDevMode && assertNotNull(tElement, 'expecting tNode');
+    var /** @type {?} */ attrs = tElement.attrs;
+    if (attrs) {
+        for (var /** @type {?} */ i = 0; i < attrs.length; i = i + 2) {
+            if (attrs[i] == attrName) {
+                return attrs[i + 1];
+            }
+        }
+    }
+    return undefined;
+}
+/**
  * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
  * Or, if it already exists, retrieves the existing instance.
  *
@@ -22186,6 +22235,7 @@ exports.ɵinject = inject$1;
 exports.ɵinjectTemplateRef = injectTemplateRef;
 exports.ɵinjectViewContainerRef = injectViewContainerRef;
 exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
+exports.ɵinjectAttribute = injectAttribute;
 exports.ɵPublicFeature = PublicFeature;
 exports.ɵNgOnChangesFeature = NgOnChangesFeature;
 exports.ɵNC = NO_CHANGE;

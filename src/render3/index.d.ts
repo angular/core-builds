@@ -8,7 +8,7 @@
 import { createComponentRef, getHostElement, getRenderedText, renderComponent, whenRendered } from './component';
 import { NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe } from './definition';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType } from './interfaces/definition';
-export { InjectFlags, QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF, inject, injectChangeDetectorRef, injectElementRef, injectTemplateRef, injectViewContainerRef } from './di';
+export { InjectFlags, QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF, inject, injectAttribute, injectChangeDetectorRef, injectElementRef, injectTemplateRef, injectViewContainerRef } from './di';
 export { CssSelector } from './interfaces/projection';
 export { NO_CHANGE as NC, bind as b, interpolation1 as i1, interpolation2 as i2, interpolation3 as i3, interpolation4 as i4, interpolation5 as i5, interpolation6 as i6, interpolation7 as i7, interpolation8 as i8, interpolationV as iV, directiveRefresh as r, container as C, containerRefreshStart as cR, containerRefreshEnd as cr, elementAttribute as a, elementClass as k, elementEnd as e, elementProperty as p, elementStart as E, elementStyle as s, listener as L, store as st, load as ld, projection as P, projectionDef as pD, text as T, textBinding as t, embeddedViewStart as V, embeddedViewEnd as v, detectChanges, markDirty } from './instructions';
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV } from './pipe';
