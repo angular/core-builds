@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.6-58932c7
+ * @license Angular v6.0.0-beta.6-2c2b62f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1862,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.6-58932c7');
+const VERSION = new Version('6.0.0-beta.6-2c2b62f');
 
 /**
  * @fileoverview added by tsickle
@@ -15406,23 +15406,24 @@ function hostElement(rNode, def) {
  * and saves the subscription for later cleanup.
  *
  * @param {?} eventName Name of the event
- * @param {?} listener The function to be called when event emits
+ * @param {?} listenerFn The function to be called when event emits
  * @param {?=} useCapture Whether or not to use capture in event listener.
  * @return {?}
  */
-function listener(eventName, listener, useCapture = false) {
+function listener(eventName, listenerFn, useCapture = false) {
     ngDevMode && assertPreviousIsParent();
     const /** @type {?} */ node = previousOrParentNode;
     const /** @type {?} */ native = /** @type {?} */ (node.native);
-    const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listener);
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
     const /** @type {?} */ cleanupFns = cleanup || (cleanup = currentView.cleanup = []);
     if (isProceduralRenderer(renderer)) {
+        const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listenerFn);
         const /** @type {?} */ cleanupFn = renderer.listen(native, eventName, wrappedListener);
         cleanupFns.push(cleanupFn, null);
     }
     else {
+        const /** @type {?} */ wrappedListener = wrapListenerWithDirtyAndDefault(currentView, listenerFn);
         native.addEventListener(eventName, wrappedListener, useCapture);
         cleanupFns.push(eventName, native, wrappedListener, useCapture);
     }
@@ -15435,7 +15436,7 @@ function listener(eventName, listener, useCapture = false) {
     const /** @type {?} */ outputs = tNode.outputs;
     let /** @type {?} */ outputData;
     if (outputs && (outputData = outputs[eventName])) {
-        createOutput(outputData, listener);
+        createOutput(outputData, listenerFn);
     }
 }
 /**
@@ -16148,13 +16149,30 @@ function markDirtyIfOnPush(node) {
  * Wraps an event listener so its host view and its ancestor views will be marked dirty
  * whenever the event fires. Necessary to support OnPush components.
  * @param {?} view
- * @param {?} listener
+ * @param {?} listenerFn
  * @return {?}
  */
-function wrapListenerWithDirtyLogic(view, listener) {
+function wrapListenerWithDirtyLogic(view, listenerFn) {
     return function (e) {
         markViewDirty(view);
-        listener(e);
+        return listenerFn(e);
+    };
+}
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Also wraps with preventDefault behavior.
+ * @param {?} view
+ * @param {?} listenerFn
+ * @return {?}
+ */
+function wrapListenerWithDirtyAndDefault(view, listenerFn) {
+    return function (e) {
+        markViewDirty(view);
+        if (listenerFn(e) === false) {
+            e.preventDefault();
+            // Necessary for legacy browsers that don't support preventDefault (e.g. IE)
+            e.returnValue = false;
+        }
     };
 }
 /**

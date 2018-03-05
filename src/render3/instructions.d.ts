@@ -103,10 +103,10 @@ export declare function hostElement(rNode: RElement | null, def: ComponentDef<an
  * and saves the subscription for later cleanup.
  *
  * @param eventName Name of the event
- * @param listener The function to be called when event emits
+ * @param listenerFn The function to be called when event emits
  * @param useCapture Whether or not to use capture in event listener.
  */
-export declare function listener(eventName: string, listener: EventListener, useCapture?: boolean): void;
+export declare function listener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
@@ -259,7 +259,12 @@ export declare function markDirtyIfOnPush(node: LElementNode): void;
  * Wraps an event listener so its host view and its ancestor views will be marked dirty
  * whenever the event fires. Necessary to support OnPush components.
  */
-export declare function wrapListenerWithDirtyLogic(view: LView, listener: EventListener): EventListener;
+export declare function wrapListenerWithDirtyLogic(view: LView, listenerFn: (e?: any) => any): (e: Event) => any;
+/**
+ * Wraps an event listener so its host view and its ancestor views will be marked dirty
+ * whenever the event fires. Also wraps with preventDefault behavior.
+ */
+export declare function wrapListenerWithDirtyAndDefault(view: LView, listenerFn: (e?: any) => any): EventListener;
 /** Given a root context, schedules change detection at that root. */
 export declare function scheduleChangeDetection<T>(rootContext: RootContext): void;
 /**
