@@ -39,4 +39,5 @@ export declare type CssSelectorWithNegations = [SimpleCssSelector | null, Simple
  * A collection of complex selectors (CSSSelectorWithNegations) in a parsed form
  */
 export declare type CssSelector = CssSelectorWithNegations[];
+export declare const NG_PROJECT_AS_ATTR_NAME = "ngProjectAs";
 export declare const unusedValueExportToPlacateAjd = 1;

@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.6-f86d8ae
+ * @license Angular v6.0.0-beta.6-2c75acc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.6-f86d8ae
+ * @license Angular v6.0.0-beta.6-2c75acc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.6-f86d8ae');
+var VERSION = new Version('6.0.0-beta.6-2c75acc');
 
 /**
  * @fileoverview added by tsickle
@@ -16022,6 +16022,26 @@ if (typeof ngDevMode == 'undefined') {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Linked list of projected nodes (using the pNextOrParent property).
+ * @record
+ */
+
+var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * @param {?} node
  * @param {?} type
  * @return {?}
@@ -16315,25 +16335,6 @@ function callHooks(data, arr) {
 
 /**
  * Static data for an LContainerNode
- * @record
- */
-
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * Linked list of projected nodes (using the pNextOrParent property).
  * @record
  */
 
@@ -17044,15 +17045,39 @@ function isNodeMatchingSelector(tNode, selector) {
     return false;
 }
 /**
- * Checks a given node against matching selectors and returns
- * selector index (or 0 if none matched);
  * @param {?} tNode
- * @param {?} selectors
  * @return {?}
  */
-function matchingSelectorIndex(tNode, selectors) {
+function getProjectAsAttrValue(tNode) {
+    var /** @type {?} */ nodeAttrs = tNode.attrs;
+    if (nodeAttrs != null) {
+        var /** @type {?} */ ngProjectAsAttrIdx = nodeAttrs.indexOf(NG_PROJECT_AS_ATTR_NAME);
+        // only check for ngProjectAs in attribute names, don't accidentally match attribute's value
+        // (attribute names are stored at even indexes)
+        if ((ngProjectAsAttrIdx & 1) === 0) {
+            return nodeAttrs[ngProjectAsAttrIdx + 1];
+        }
+    }
+    return null;
+}
+/**
+ * Checks a given node against matching selectors and returns
+ * selector index (or 0 if none matched).
+ *
+ * This function takes into account the ngProjectAs attribute: if present its value will be compared
+ * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
+ * @param {?} tNode
+ * @param {?} selectors
+ * @param {?} textSelectors
+ * @return {?}
+ */
+function matchingSelectorIndex(tNode, selectors, textSelectors) {
+    var /** @type {?} */ ngProjectAsAttrVal = getProjectAsAttrValue(tNode);
     for (var /** @type {?} */ i = 0; i < selectors.length; i++) {
-        if (isNodeMatchingSelector(tNode, selectors[i])) {
+        // if a node has the ngProjectAs attribute match it against unparsed selector
+        // match a node against a parsed selector only if ngProjectAs attribute is not present
+        if (ngProjectAsAttrVal === textSelectors[i] ||
+            ngProjectAsAttrVal === null && isNodeMatchingSelector(tNode, selectors[i])) {
             return i + 1; // first matching selector "captures" a given node
         }
     }
@@ -17644,8 +17669,12 @@ function setUpAttributes(native, attrs) {
     ngDevMode && assertEqual(attrs.length % 2, 0, 'each attribute should have a key and a value');
     var /** @type {?} */ isProc = isProceduralRenderer(renderer);
     for (var /** @type {?} */ i = 0; i < attrs.length; i += 2) {
-        isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrs[i], attrs[i | 1]) :
-            native.setAttribute(attrs[i], attrs[i | 1]);
+        var /** @type {?} */ attrName = attrs[i];
+        if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
+            var /** @type {?} */ attrVal = attrs[i + 1];
+            isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrName, attrVal) :
+                native.setAttribute(attrName, attrVal);
+        }
     }
 }
 /**
@@ -18304,11 +18333,24 @@ function directiveRefresh(directiveIndex, elementIndex) {
  * each projected node belongs (it re-distributes nodes among "buckets" where each "bucket" is
  * backed by a selector).
  *
+ * This function requires CSS selectors to be provided in 2 forms: parsed (by a compiler) and text,
+ * un-parsed form.
+ *
+ * The parsed form is needed for efficient matching of a node against a given CSS selector.
+ * The un-parsed, textual form is needed for support of the ngProjectAs attribute.
+ *
+ * Having a CSS selector in 2 different formats is not ideal, but alternatives have even more
+ * drawbacks:
+ * - having only a textual form would require runtime parsing of CSS selectors;
+ * - we can't have only a parsed as we can't re-construct textual form from it (as entered by a
+ * template author).
+ *
  * @param {?} index
- * @param {?=} selectors
+ * @param {?=} selectors A collection of parsed CSS selectors
+ * @param {?=} textSelectors
  * @return {?}
  */
-function projectionDef(index, selectors) {
+function projectionDef(index, selectors, textSelectors) {
     var /** @type {?} */ noOfNodeBuckets = selectors ? selectors.length + 1 : 1;
     var /** @type {?} */ distributedNodes = new Array(noOfNodeBuckets);
     for (var /** @type {?} */ i = 0; i < noOfNodeBuckets; i++) {
@@ -18321,7 +18363,7 @@ function projectionDef(index, selectors) {
         // - there are selectors defined
         // - a node has a tag name / attributes that can be matched
         if (selectors && componentChild.tNode) {
-            var /** @type {?} */ matchedIdx = matchingSelectorIndex(componentChild.tNode, /** @type {?} */ ((selectors)));
+            var /** @type {?} */ matchedIdx = matchingSelectorIndex(componentChild.tNode, selectors, /** @type {?} */ ((textSelectors)));
             distributedNodes[matchedIdx].push(componentChild);
         }
         else {

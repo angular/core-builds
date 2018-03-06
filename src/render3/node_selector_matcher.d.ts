@@ -18,8 +18,12 @@ import { CssSelector, CssSelectorWithNegations, SimpleCssSelector } from './inte
 export declare function isNodeMatchingSimpleSelector(tNode: TNode, selector: SimpleCssSelector): boolean;
 export declare function isNodeMatchingSelectorWithNegations(tNode: TNode, selector: CssSelectorWithNegations): boolean;
 export declare function isNodeMatchingSelector(tNode: TNode, selector: CssSelector): boolean;
+export declare function getProjectAsAttrValue(tNode: TNode): string | null;
 /**
  * Checks a given node against matching selectors and returns
- * selector index (or 0 if none matched);
+ * selector index (or 0 if none matched).
+ *
+ * This function takes into account the ngProjectAs attribute: if present its value will be compared
+ * to the raw (un-parsed) CSS selector instead of using standard selector matching logic.
  */
-export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelector[]): number;
+export declare function matchingSelectorIndex(tNode: TNode, selectors: CssSelector[], textSelectors: string[]): number;
