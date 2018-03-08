@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-065bcc5
+ * @license Angular v6.0.0-beta.7-6d1367d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1327,6 +1327,7 @@ function withBody(html, blockFn) {
 }
 var savedDocument = undefined;
 var savedRequestAnimationFrame = undefined;
+var savedNode = undefined;
 var requestAnimationFrameCount = 0;
 var ɵ0 = function (domino) {
     if (typeof global == 'object' && global.process && typeof require == 'function') {
@@ -1365,6 +1366,8 @@ function ensureDocument() {
         // It fails with Domino with TypeError: Cannot assign to read only property
         // 'stopImmediatePropagation' of object '#<Event>'
         global.Event = null;
+        savedNode = global.Node;
+        global.Node = domino.impl.Node;
         savedRequestAnimationFrame = global.requestAnimationFrame;
         global.requestAnimationFrame = function (cb) {
             setImmediate(cb);
@@ -1380,6 +1383,10 @@ function cleanupDocument() {
     if (savedDocument) {
         global.document = savedDocument;
         savedDocument = undefined;
+    }
+    if (savedNode) {
+        global.Node = savedNode;
+        savedNode = undefined;
     }
     if (savedRequestAnimationFrame) {
         global.requestAnimationFrame = savedRequestAnimationFrame;

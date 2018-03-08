@@ -20,6 +20,10 @@ import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/rende
  * facilitate jumping from an instance to the host node.
  */
 export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
+/**
+ * Function used to sanitize the value before writing it into the renderer.
+ */
+export declare type Sanitizer = (value: any) => string;
 export declare function getRenderer(): Renderer3;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getCurrentQueries(QueryType: {
@@ -113,11 +117,12 @@ export declare function elementEnd(): void;
  * Updates the value of removes an attribute on an Element.
  *
  * @param number index The index of the element in the data array
- * @param string name The name of the attribute.
- * @param any value The attribute is removed when value is `null` or `undefined`.
+ * @param name name The name of the attribute.
+ * @param value value The attribute is removed when value is `null` or `undefined`.
  *                  Otherwise the attribute value is set to the stringified value.
+ * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementAttribute(index: number, name: string, value: any): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: Sanitizer): void;
 /**
  * Update a property on an Element.
  *
@@ -129,8 +134,9 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param propName Name of property. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param value New value to write.
+ * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
 /**
  * Add or remove a class in a classList.
  *
@@ -149,9 +155,12 @@ export declare function elementClass<T>(index: number, className: string, value:
  * @param styleName Name of property. Because it is going to DOM this is not subject to
  *        renaming as part of minification.
  * @param value New value to write (null to remove).
- * @param suffix Suffix to add to style's value (optional).
+ * @param suffix Optional suffix. Used with scalar values to add unit such as `px`.
+ * @param sanitizer An optional function used to transform the value typically used for
+ *        sanitization.
  */
 export declare function elementStyle<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
+export declare function elementStyle<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
 /**
  * Create static text node
  *

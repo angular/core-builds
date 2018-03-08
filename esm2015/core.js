@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-065bcc5
+ * @license Angular v6.0.0-beta.7-6d1367d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1862,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-065bcc5');
+const VERSION = new Version('6.0.0-beta.7-6d1367d');
 
 /**
  * @fileoverview added by tsickle
@@ -7801,6 +7801,608 @@ ApplicationModule.decorators = [
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef, },
 ];
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * This helper class is used to get hold of an inert tree of DOM elements containing dirty HTML
+ * that needs sanitizing.
+ * Depending upon browser support we must use one of three strategies for doing this.
+ * Support: Safari 10.x -> XHR strategy
+ * Support: Firefox -> DomParser strategy
+ * Default: InertDocument strategy
+ */
+class InertBodyHelper {
+    /**
+     * @param {?} defaultDoc
+     */
+    constructor(defaultDoc) {
+        this.defaultDoc = defaultDoc;
+        this.inertDocument = this.defaultDoc.implementation.createHTMLDocument('sanitization-inert');
+        this.inertBodyElement = this.inertDocument.body;
+        if (this.inertBodyElement == null) {
+            // usually there should be only one body element in the document, but IE doesn't have any, so
+            // we need to create one.
+            const /** @type {?} */ inertHtml = this.inertDocument.createElement('html');
+            this.inertDocument.appendChild(inertHtml);
+            this.inertBodyElement = this.inertDocument.createElement('body');
+            inertHtml.appendChild(this.inertBodyElement);
+        }
+        this.inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
+        if (this.inertBodyElement.querySelector && !this.inertBodyElement.querySelector('svg')) {
+            // We just hit the Safari 10.1 bug - which allows JS to run inside the SVG G element
+            // so use the XHR strategy.
+            this.getInertBodyElement = this.getInertBodyElement_XHR;
+            return;
+        }
+        this.inertBodyElement.innerHTML =
+            '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+        if (this.inertBodyElement.querySelector && this.inertBodyElement.querySelector('svg img')) {
+            // We just hit the Firefox bug - which prevents the inner img JS from being sanitized
+            // so use the DOMParser strategy, if it is available.
+            // If the DOMParser is not available then we are not in Firefox (Server/WebWorker?) so we
+            // fall through to the default strategy below.
+            if (isDOMParserAvailable()) {
+                this.getInertBodyElement = this.getInertBodyElement_DOMParser;
+                return;
+            }
+        }
+        // None of the bugs were hit so it is safe for us to use the default InertDocument strategy
+        this.getInertBodyElement = this.getInertBodyElement_InertDocument;
+    }
+    /**
+     * Use XHR to create and fill an inert body element (on Safari 10.1)
+     * See
+     * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_XHR(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            html = encodeURI(html);
+        }
+        catch (/** @type {?} */ e) {
+            return null;
+        }
+        const /** @type {?} */ xhr = new XMLHttpRequest();
+        xhr.responseType = 'document';
+        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+        xhr.send(null);
+        const /** @type {?} */ body = xhr.response.body;
+        body.removeChild(/** @type {?} */ ((body.firstChild)));
+        return body;
+    }
+    /**
+     * Use DOMParser to create and fill an inert body element (on Firefox)
+     * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
+     *
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_DOMParser(html) {
+        // We add these extra elements to ensure that the rest of the content is parsed as expected
+        // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the
+        // `<head>` tag.
+        html = '<body><remove></remove>' + html + '</body>';
+        try {
+            const /** @type {?} */ body = /** @type {?} */ (new (/** @type {?} */ (window))
+                .DOMParser()
+                .parseFromString(html, 'text/html')
+                .body);
+            body.removeChild(/** @type {?} */ ((body.firstChild)));
+            return body;
+        }
+        catch (/** @type {?} */ e) {
+            return null;
+        }
+    }
+    /**
+     * Use an HTML5 `template` element, if supported, or an inert body element created via
+     * `createHtmlDocument` to create and fill an inert DOM element.
+     * This is the default sane strategy to use if the browser does not require one of the specialised
+     * strategies above.
+     * @param {?} html
+     * @return {?}
+     */
+    getInertBodyElement_InertDocument(html) {
+        // Prefer using <template> element if supported.
+        const /** @type {?} */ templateEl = this.inertDocument.createElement('template');
+        if ('content' in templateEl) {
+            templateEl.innerHTML = html;
+            return templateEl;
+        }
+        this.inertBodyElement.innerHTML = html;
+        // Support: IE 9-11 only
+        // strip custom-namespaced attributes on IE<=11
+        if ((/** @type {?} */ (this.defaultDoc)).documentMode) {
+            this.stripCustomNsAttrs(this.inertBodyElement);
+        }
+        return this.inertBodyElement;
+    }
+    /**
+     * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
+     * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
+     * 'ns1:xlink:foo').
+     *
+     * This is undesirable since we don't want to allow any of these custom attributes. This method
+     * strips them all.
+     * @param {?} el
+     * @return {?}
+     */
+    stripCustomNsAttrs(el) {
+        const /** @type {?} */ elAttrs = el.attributes;
+        // loop backwards so that we can support removals.
+        for (let /** @type {?} */ i = elAttrs.length - 1; 0 < i; i--) {
+            const /** @type {?} */ attrib = elAttrs.item(i);
+            const /** @type {?} */ attrName = attrib.name;
+            if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+                el.removeAttribute(attrName);
+            }
+        }
+        let /** @type {?} */ childNode = el.firstChild;
+        while (childNode) {
+            if (childNode.nodeType === Node.ELEMENT_NODE)
+                this.stripCustomNsAttrs(/** @type {?} */ (childNode));
+            childNode = childNode.nextSibling;
+        }
+    }
+}
+/**
+ * We need to determine whether the DOMParser exists in the global context.
+ * The try-catch is because, on some browsers, trying to access this property
+ * on window can actually throw an error.
+ *
+ * @suppress {uselessCode}
+ * @return {?}
+ */
+function isDOMParserAvailable() {
+    try {
+        return !!(/** @type {?} */ (window)).DOMParser;
+    }
+    catch (/** @type {?} */ e) {
+        return false;
+    }
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * A pattern that recognizes a commonly useful subset of URLs that are safe.
+ *
+ * This regular expression matches a subset of URLs that will not cause script
+ * execution if used in URL context within a HTML document. Specifically, this
+ * regular expression matches if (comment from here on and regex copied from
+ * Soy's EscapingConventions):
+ * (1) Either a protocol in a whitelist (http, https, mailto or ftp).
+ * (2) or no protocol.  A protocol must be followed by a colon. The below
+ *     allows that by allowing colons only after one of the characters [/?#].
+ *     A colon after a hash (#) must be in the fragment.
+ *     Otherwise, a colon after a (?) must be in a query.
+ *     Otherwise, a colon after a single solidus (/) must be in a path.
+ *     Otherwise, a colon after a double solidus (//) must be in the authority
+ *     (before port).
+ *
+ * The pattern disallows &, used in HTML entity declarations before
+ * one of the characters in [/?#]. This disallows HTML entities used in the
+ * protocol name, which should never happen, e.g. "h&#116;tp" for "http".
+ * It also disallows HTML entities in the first path part of a relative path,
+ * e.g. "foo&lt;bar/baz".  Our existing escaping functions should not produce
+ * that. More importantly, it disallows masking of a colon,
+ * e.g. "javascript&#58;...".
+ *
+ * This regular expression was taken from the Closure sanitization library.
+ */
+const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^&:/?#]*(?:[/?#]|$))/gi;
+/**
+ * A pattern that matches safe data URLs. Only matches image, video and audio types.
+ */
+const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[a-z0-9+\/]+=*$/i;
+/**
+ * @param {?} url
+ * @return {?}
+ */
+function _sanitizeUrl(url) {
+    url = String(url);
+    if (url.match(SAFE_URL_PATTERN) || url.match(DATA_URL_PATTERN))
+        return url;
+    if (isDevMode()) {
+        console.warn(`WARNING: sanitizing unsafe URL value ${url} (see http://g.co/ng/security#xss)`);
+    }
+    return 'unsafe:' + url;
+}
+/**
+ * @param {?} srcset
+ * @return {?}
+ */
+function sanitizeSrcset(srcset) {
+    srcset = String(srcset);
+    return srcset.split(',').map((srcset) => _sanitizeUrl(srcset.trim())).join(', ');
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @param {?} tags
+ * @return {?}
+ */
+function tagSet(tags) {
+    const /** @type {?} */ res = {};
+    for (const /** @type {?} */ t of tags.split(','))
+        res[t] = true;
+    return res;
+}
+/**
+ * @param {...?} sets
+ * @return {?}
+ */
+function merge$1(...sets) {
+    const /** @type {?} */ res = {};
+    for (const /** @type {?} */ s of sets) {
+        for (const /** @type {?} */ v in s) {
+            if (s.hasOwnProperty(v))
+                res[v] = true;
+        }
+    }
+    return res;
+}
+// Good source of info about elements and attributes
+// http://dev.w3.org/html5/spec/Overview.html#semantics
+// http://simon.html5.org/html-elements
+// Safe Void Elements - HTML5
+// http://dev.w3.org/html5/spec/Overview.html#void-elements
+const VOID_ELEMENTS = tagSet('area,br,col,hr,img,wbr');
+// Elements that you can, intentionally, leave open (and which close themselves)
+// http://dev.w3.org/html5/spec/Overview.html#optional-tags
+const OPTIONAL_END_TAG_BLOCK_ELEMENTS = tagSet('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+const OPTIONAL_END_TAG_INLINE_ELEMENTS = tagSet('rp,rt');
+const OPTIONAL_END_TAG_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, OPTIONAL_END_TAG_BLOCK_ELEMENTS);
+// Safe Block Elements - HTML5
+const BLOCK_ELEMENTS = merge$1(OPTIONAL_END_TAG_BLOCK_ELEMENTS, tagSet('address,article,' +
+    'aside,blockquote,caption,center,del,details,dialog,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
+    'h6,header,hgroup,hr,ins,main,map,menu,nav,ol,pre,section,summary,table,ul'));
+// Inline Elements - HTML5
+const INLINE_ELEMENTS = merge$1(OPTIONAL_END_TAG_INLINE_ELEMENTS, tagSet('a,abbr,acronym,audio,b,' +
+    'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,picture,q,ruby,rp,rt,s,' +
+    'samp,small,source,span,strike,strong,sub,sup,time,track,tt,u,var,video'));
+const VALID_ELEMENTS = merge$1(VOID_ELEMENTS, BLOCK_ELEMENTS, INLINE_ELEMENTS, OPTIONAL_END_TAG_ELEMENTS);
+// Attributes that have href and hence need to be sanitized
+const URI_ATTRS = tagSet('background,cite,href,itemtype,longdesc,poster,src,xlink:href');
+// Attributes that have special href set hence need to be sanitized
+const SRCSET_ATTRS = tagSet('srcset');
+const HTML_ATTRS = tagSet('abbr,accesskey,align,alt,autoplay,axis,bgcolor,border,cellpadding,cellspacing,class,clear,color,cols,colspan,' +
+    'compact,controls,coords,datetime,default,dir,download,face,headers,height,hidden,hreflang,hspace,' +
+    'ismap,itemscope,itemprop,kind,label,lang,language,loop,media,muted,nohref,nowrap,open,preload,rel,rev,role,rows,rowspan,rules,' +
+    'scope,scrolling,shape,size,sizes,span,srclang,start,summary,tabindex,target,title,translate,type,usemap,' +
+    'valign,value,vspace,width');
+// NB: This currently consciously doesn't support SVG. SVG sanitization has had several security
+// issues in the past, so it seems safer to leave it out if possible. If support for binding SVG via
+// innerHTML is required, SVG attributes should be added here.
+// NB: Sanitization does not allow <form> elements or other active elements (<button> etc). Those
+// can be sanitized, but they increase security surface area without a legitimate use case, so they
+// are left out here.
+const VALID_ATTRS = merge$1(URI_ATTRS, SRCSET_ATTRS, HTML_ATTRS);
+/**
+ * SanitizingHtmlSerializer serializes a DOM fragment, stripping out any unsafe elements and unsafe
+ * attributes.
+ */
+class SanitizingHtmlSerializer {
+    constructor() {
+        this.sanitizedSomething = false;
+        this.buf = [];
+    }
+    /**
+     * @param {?} el
+     * @return {?}
+     */
+    sanitizeChildren(el) {
+        // This cannot use a TreeWalker, as it has to run on Angular's various DOM adapters.
+        // However this code never accesses properties off of `document` before deleting its contents
+        // again, so it shouldn't be vulnerable to DOM clobbering.
+        let /** @type {?} */ current = /** @type {?} */ ((el.firstChild));
+        while (current) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+                this.startElement(/** @type {?} */ (current));
+            }
+            else if (current.nodeType === Node.TEXT_NODE) {
+                this.chars(/** @type {?} */ ((current.nodeValue)));
+            }
+            else {
+                // Strip non-element, non-text nodes.
+                this.sanitizedSomething = true;
+            }
+            if (current.firstChild) {
+                current = /** @type {?} */ ((current.firstChild));
+                continue;
+            }
+            while (current) {
+                // Leaving the element. Walk up and to the right, closing tags as we go.
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    this.endElement(/** @type {?} */ (current));
+                }
+                let /** @type {?} */ next = this.checkClobberedElement(current, /** @type {?} */ ((current.nextSibling)));
+                if (next) {
+                    current = next;
+                    break;
+                }
+                current = this.checkClobberedElement(current, /** @type {?} */ ((current.parentNode)));
+            }
+        }
+        return this.buf.join('');
+    }
+    /**
+     * @param {?} element
+     * @return {?}
+     */
+    startElement(element) {
+        const /** @type {?} */ tagName = element.nodeName.toLowerCase();
+        if (!VALID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.sanitizedSomething = true;
+            return;
+        }
+        this.buf.push('<');
+        this.buf.push(tagName);
+        const /** @type {?} */ elAttrs = element.attributes;
+        for (let /** @type {?} */ i = 0; i < elAttrs.length; i++) {
+            const /** @type {?} */ elAttr = elAttrs.item(i);
+            const /** @type {?} */ attrName = elAttr.name;
+            const /** @type {?} */ lower = attrName.toLowerCase();
+            if (!VALID_ATTRS.hasOwnProperty(lower)) {
+                this.sanitizedSomething = true;
+                continue;
+            }
+            let /** @type {?} */ value = elAttr.value;
+            // TODO(martinprobst): Special case image URIs for data:image/...
+            if (URI_ATTRS[lower])
+                value = _sanitizeUrl(value);
+            if (SRCSET_ATTRS[lower])
+                value = sanitizeSrcset(value);
+            this.buf.push(' ', attrName, '="', encodeEntities(value), '"');
+        }
+        this.buf.push('>');
+    }
+    /**
+     * @param {?} current
+     * @return {?}
+     */
+    endElement(current) {
+        const /** @type {?} */ tagName = current.nodeName.toLowerCase();
+        if (VALID_ELEMENTS.hasOwnProperty(tagName) && !VOID_ELEMENTS.hasOwnProperty(tagName)) {
+            this.buf.push('</');
+            this.buf.push(tagName);
+            this.buf.push('>');
+        }
+    }
+    /**
+     * @param {?} chars
+     * @return {?}
+     */
+    chars(chars) { this.buf.push(encodeEntities(chars)); }
+    /**
+     * @param {?} node
+     * @param {?} nextNode
+     * @return {?}
+     */
+    checkClobberedElement(node, nextNode) {
+        if (nextNode &&
+            (node.compareDocumentPosition(nextNode) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY) === Node.DOCUMENT_POSITION_CONTAINED_BY) {
+            throw new Error(`Failed to sanitize html because the element is clobbered: ${((/** @type {?} */ (node))).outerHTML}`);
+        }
+        return nextNode;
+    }
+}
+// Regular Expressions for parsing tags and attributes
+const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+// ! to ~ is the ASCII range.
+const NON_ALPHANUMERIC_REGEXP = /([^\#-~ |!])/g;
+/**
+ * Escapes all potentially dangerous characters, so that the
+ * resulting string can be safely inserted into attribute or
+ * element text.
+ * @param {?} value
+ * @return {?}
+ */
+function encodeEntities(value) {
+    return value.replace(/&/g, '&amp;')
+        .replace(SURROGATE_PAIR_REGEXP, function (match) {
+        const /** @type {?} */ hi = match.charCodeAt(0);
+        const /** @type {?} */ low = match.charCodeAt(1);
+        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+    })
+        .replace(NON_ALPHANUMERIC_REGEXP, function (match) { return '&#' + match.charCodeAt(0) + ';'; })
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+let inertBodyHelper;
+/**
+ * Sanitizes the given unsafe, untrusted HTML fragment, and returns HTML text that is safe to add to
+ * the DOM in a browser environment.
+ * @param {?} defaultDoc
+ * @param {?} unsafeHtmlInput
+ * @return {?}
+ */
+function _sanitizeHtml(defaultDoc, unsafeHtmlInput) {
+    let /** @type {?} */ inertBodyElement = null;
+    try {
+        inertBodyHelper = inertBodyHelper || new InertBodyHelper(defaultDoc);
+        // Make sure unsafeHtml is actually a string (TypeScript types are not enforced at runtime).
+        let /** @type {?} */ unsafeHtml = unsafeHtmlInput ? String(unsafeHtmlInput) : '';
+        inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        // mXSS protection. Repeatedly parse the document to make sure it stabilizes, so that a browser
+        // trying to auto-correct incorrect HTML cannot cause formerly inert HTML to become dangerous.
+        let /** @type {?} */ mXSSAttempts = 5;
+        let /** @type {?} */ parsedHtml = unsafeHtml;
+        do {
+            if (mXSSAttempts === 0) {
+                throw new Error('Failed to sanitize html because the input is unstable');
+            }
+            mXSSAttempts--;
+            unsafeHtml = parsedHtml;
+            parsedHtml = /** @type {?} */ ((inertBodyElement)).innerHTML;
+            inertBodyElement = inertBodyHelper.getInertBodyElement(unsafeHtml);
+        } while (unsafeHtml !== parsedHtml);
+        const /** @type {?} */ sanitizer = new SanitizingHtmlSerializer();
+        const /** @type {?} */ safeHtml = sanitizer.sanitizeChildren(/** @type {?} */ (getTemplateContent(/** @type {?} */ ((inertBodyElement)))) || inertBodyElement);
+        if (isDevMode() && sanitizer.sanitizedSomething) {
+            console.warn('WARNING: sanitizing HTML stripped some content (see http://g.co/ng/security#xss).');
+        }
+        return safeHtml;
+    }
+    finally {
+        // In case anything goes wrong, clear out inertElement to reset the entire DOM structure.
+        if (inertBodyElement) {
+            const /** @type {?} */ parent = getTemplateContent(inertBodyElement) || inertBodyElement;
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+    }
+}
+/**
+ * @param {?} el
+ * @return {?}
+ */
+function getTemplateContent(el) {
+    return 'content' in el && isTemplateElement(el) ? el.content : null;
+}
+/**
+ * @param {?} el
+ * @return {?}
+ */
+function isTemplateElement(el) {
+    return el.nodeType === Node.ELEMENT_NODE && el.nodeName === 'TEMPLATE';
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Regular expression for safe style values.
+ *
+ * Quotes (" and ') are allowed, but a check must be done elsewhere to ensure they're balanced.
+ *
+ * ',' allows multiple values to be assigned to the same property (e.g. background-attachment or
+ * font-family) and hence could allow multiple values to get injected, but that should pose no risk
+ * of XSS.
+ *
+ * The function expression checks only for XSS safety, not for CSS validity.
+ *
+ * This regular expression was taken from the Closure sanitization library, and augmented for
+ * transformation values.
+ */
+const VALUES = '[-,."\'%_!# a-zA-Z0-9]+';
+const TRANSFORMATION_FNS = '(?:matrix|translate|scale|rotate|skew|perspective)(?:X|Y|3d)?';
+const COLOR_FNS = '(?:rgb|hsl)a?';
+const GRADIENTS = '(?:repeating-)?(?:linear|radial)-gradient';
+const CSS3_FNS = '(?:calc|attr)';
+const FN_ARGS = '\\([-0-9.%, #a-zA-Z]+\\)';
+const SAFE_STYLE_VALUE = new RegExp(`^(${VALUES}|` +
+    `(?:${TRANSFORMATION_FNS}|${COLOR_FNS}|${GRADIENTS}|${CSS3_FNS})` +
+    `${FN_ARGS})$`, 'g');
+/**
+ * Matches a `url(...)` value with an arbitrary argument as long as it does
+ * not contain parentheses.
+ *
+ * The URL value still needs to be sanitized separately.
+ *
+ * `url(...)` values are a very common use case, e.g. for `background-image`. With carefully crafted
+ * CSS style rules, it is possible to construct an information leak with `url` values in CSS, e.g.
+ * by observing whether scroll bars are displayed, or character ranges used by a font face
+ * definition.
+ *
+ * Angular only allows binding CSS values (as opposed to entire CSS rules), so it is unlikely that
+ * binding a URL value without further cooperation from the page will cause an information leak, and
+ * if so, it is just a leak, not a full blown XSS vulnerability.
+ *
+ * Given the common use case, low likelihood of attack vector, and low impact of an attack, this
+ * code is permissive and allows URLs that sanitize otherwise.
+ */
+const URL_RE = /^url\(([^)]+)\)$/;
+/**
+ * Checks that quotes (" and ') are properly balanced inside a string. Assumes
+ * that neither escape (\) nor any other character that could result in
+ * breaking out of a string parsing context are allowed;
+ * see http://www.w3.org/TR/css3-syntax/#string-token-diagram.
+ *
+ * This code was taken from the Closure sanitization library.
+ * @param {?} value
+ * @return {?}
+ */
+function hasBalancedQuotes(value) {
+    let /** @type {?} */ outsideSingle = true;
+    let /** @type {?} */ outsideDouble = true;
+    for (let /** @type {?} */ i = 0; i < value.length; i++) {
+        const /** @type {?} */ c = value.charAt(i);
+        if (c === '\'' && outsideDouble) {
+            outsideSingle = !outsideSingle;
+        }
+        else if (c === '"' && outsideSingle) {
+            outsideDouble = !outsideDouble;
+        }
+    }
+    return outsideSingle && outsideDouble;
+}
+/**
+ * Sanitizes the given untrusted CSS style property value (i.e. not an entire object, just a single
+ * value) and returns a value that is safe to use in a browser environment.
+ * @param {?} value
+ * @return {?}
+ */
+function _sanitizeStyle(value) {
+    value = String(value).trim(); // Make sure it's actually a string.
+    if (!value)
+        return '';
+    // Single url(...) values are supported, but only for URLs that sanitize cleanly. See above for
+    // reasoning behind this.
+    const /** @type {?} */ urlMatch = value.match(URL_RE);
+    if ((urlMatch && _sanitizeUrl(urlMatch[1]) === urlMatch[1]) ||
+        value.match(SAFE_STYLE_VALUE) && hasBalancedQuotes(value)) {
+        return value; // Safe style values.
+    }
+    if (isDevMode()) {
+        console.warn(`WARNING: sanitizing unsafe style value ${value} (see http://g.co/ng/security#xss).`);
+    }
+    return 'unsafe';
+}
 
 /**
  * @fileoverview added by tsickle
@@ -15503,11 +16105,13 @@ function elementEnd() {
  * Updates the value of removes an attribute on an Element.
  *
  * @param {?} index
- * @param {?} name
- * @param {?} value
+ * @param {?} name name The name of the attribute.
+ * @param {?} value value The attribute is removed when value is `null` or `undefined`.
+ *                  Otherwise the attribute value is set to the stringified value.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
  * @return {?}
  */
-function elementAttribute(index, name, value) {
+function elementAttribute(index, name, value, sanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ element = data[index];
         if (value == null) {
@@ -15515,9 +16119,9 @@ function elementAttribute(index, name, value) {
                 element.native.removeAttribute(name);
         }
         else {
-            isProceduralRenderer(renderer) ?
-                renderer.setAttribute(element.native, name, stringify$1(value)) :
-                element.native.setAttribute(name, stringify$1(value));
+            const /** @type {?} */ strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
+            isProceduralRenderer(renderer) ? renderer.setAttribute(element.native, name, strValue) :
+                element.native.setAttribute(name, strValue);
         }
     }
 }
@@ -15533,9 +16137,10 @@ function elementAttribute(index, name, value) {
  * @param {?} propName Name of property. Because it is going to DOM, this is not subject to
  *        renaming as part of minification.
  * @param {?} value New value to write.
+ * @param {?=} sanitizer An optional function used to sanitize the value.
  * @return {?}
  */
-function elementProperty(index, propName, value) {
+function elementProperty(index, propName, value, sanitizer) {
     if (value === NO_CHANGE)
         return;
     const /** @type {?} */ node = /** @type {?} */ (data[index]);
@@ -15553,6 +16158,7 @@ function elementProperty(index, propName, value) {
         markDirtyIfOnPush(node);
     }
     else {
+        value = /** @type {?} */ ((sanitizer != null ? sanitizer(value) : stringify$1(value)));
         const /** @type {?} */ native = node.native;
         isProceduralRenderer(renderer) ? renderer.setProperty(native, propName, value) :
             (native.setProperty ? native.setProperty(propName, value) :
@@ -15635,17 +16241,14 @@ function generatePropertyAliases(lNodeFlags, direction) {
  */
 
 /**
- * Update a given style on an Element.
- *
  * @template T
- * @param {?} index Index of the element to change in the data array
- * @param {?} styleName Name of property. Because it is going to DOM this is not subject to
- *        renaming as part of minification.
- * @param {?} value New value to write (null to remove).
- * @param {?=} suffix Suffix to add to style's value (optional).
+ * @param {?} index
+ * @param {?} styleName
+ * @param {?} value
+ * @param {?=} suffixOrSanitizer
  * @return {?}
  */
-function elementStyle(index, styleName, value, suffix) {
+function elementStyle(index, styleName, value, suffixOrSanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (value == null) {
@@ -15654,7 +16257,9 @@ function elementStyle(index, styleName, value, suffix) {
                 lElement.native.style.removeProperty(styleName);
         }
         else {
-            const /** @type {?} */ strValue = suffix ? stringify$1(value) + suffix : stringify$1(value);
+            let /** @type {?} */ strValue = typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
+            if (typeof suffixOrSanitizer == 'string')
+                strValue = strValue + suffixOrSanitizer;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
                 lElement.native.style.setProperty(styleName, strValue);
@@ -18463,6 +19068,216 @@ function pureFunctionV(pureFn, exps) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+const BRAND = '__SANITIZER_TRUSTED_BRAND__';
+/**
+ * A branded trusted string used with sanitization.
+ *
+ * See: {\@link TrustedHtmlString}, {\@link TrustedResourceUrlString}, {\@link TrustedScriptString},
+ * {\@link TrustedStyleString}, {\@link TrustedUrlString}
+ * @record
+ */
+
+/**
+ * A branded trusted string used with sanitization of `html` strings.
+ *
+ * See: {\@link bypassSanitizationTrustHtml} and {\@link htmlSanitizer}.
+ * @record
+ */
+
+/**
+ * A branded trusted string used with sanitization of `style` strings.
+ *
+ * See: {\@link bypassSanitizationTrustStyle} and {\@link styleSanitizer}.
+ * @record
+ */
+
+/**
+ * A branded trusted string used with sanitization of `url` strings.
+ *
+ * See: {\@link bypassSanitizationTrustScript} and {\@link scriptSanitizer}.
+ * @record
+ */
+
+/**
+ * A branded trusted string used with sanitization of `url` strings.
+ *
+ * See: {\@link bypassSanitizationTrustUrl} and {\@link urlSanitizer}.
+ * @record
+ */
+
+/**
+ * A branded trusted string used with sanitization of `resourceUrl` strings.
+ *
+ * See: {\@link bypassSanitizationTrustResourceUrl} and {\@link resourceUrlSanitizer}.
+ * @record
+ */
+
+/**
+ * An `html` sanitizer which converts untrusted `html` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `html` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustHtml}.
+ *
+ * @param {?} unsafeHtml untrusted `html`, typically from the user.
+ * @return {?} `html` string which is safe to display to user, because all of the dangerous javascript
+ * and urls have been removed.
+ */
+function sanitizeHtml(unsafeHtml) {
+    if (unsafeHtml instanceof String && (/** @type {?} */ (unsafeHtml))[BRAND] === 'Html') {
+        return unsafeHtml.toString();
+    }
+    return _sanitizeHtml(document, stringify$1(unsafeHtml));
+}
+/**
+ * A `style` sanitizer which converts untrusted `style` **string** into trusted string by removing
+ * dangerous content.
+ *
+ * This method parses the `style` and locates potentially dangerous content (such as urls and
+ * javascript) and removes it.
+ *
+ * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustStyle}.
+ *
+ * @param {?} unsafeStyle untrusted `style`, typically from the user.
+ * @return {?} `style` string which is safe to bind to the `style` properties, because all of the
+ * dangerous javascript and urls have been removed.
+ */
+function sanitizeStyle(unsafeStyle) {
+    if (unsafeStyle instanceof String && (/** @type {?} */ (unsafeStyle))[BRAND] === 'Style') {
+        return unsafeStyle.toString();
+    }
+    return _sanitizeStyle(stringify$1(unsafeStyle));
+}
+/**
+ * A `url` sanitizer which converts untrusted `url` **string** into trusted string by removing
+ * dangerous
+ * content.
+ *
+ * This method parses the `url` and locates potentially dangerous content (such as javascript) and
+ * removes it.
+ *
+ * It is possible to mark a string as trusted by calling {\@link bypassSanitizationTrustUrl}.
+ *
+ * @param {?} unsafeUrl untrusted `url`, typically from the user.
+ * @return {?} `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * all of the dangerous javascript has been removed.
+ */
+function sanitizeUrl(unsafeUrl) {
+    if (unsafeUrl instanceof String && (/** @type {?} */ (unsafeUrl))[BRAND] === 'Url') {
+        return unsafeUrl.toString();
+    }
+    return _sanitizeUrl(stringify$1(unsafeUrl));
+}
+/**
+ * A `url` sanitizer which only lets trusted `url`s through.
+ *
+ * This passes only `url`s marked trusted by calling {\@link bypassSanitizationTrustResourceUrl}.
+ *
+ * @param {?} unsafeResourceUrl untrusted `url`, typically from the user.
+ * @return {?} `url` string which is safe to bind to the `src` properties such as `<img src>`, because
+ * only trusted `url`s have been allowed to pass.
+ */
+function sanitizeResourceUrl(unsafeResourceUrl) {
+    if (unsafeResourceUrl instanceof String &&
+        (/** @type {?} */ (unsafeResourceUrl))[BRAND] === 'ResourceUrl') {
+        return unsafeResourceUrl.toString();
+    }
+    throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
+}
+/**
+ * A `script` sanitizer which only lets trusted javascript through.
+ *
+ * This passes only `script`s marked trusted by calling {\@link bypassSanitizationTrustScript}.
+ *
+ * @param {?} unsafeScript untrusted `script`, typically from the user.
+ * @return {?} `url` string which is safe to bind to the `<script>` element such as `<img src>`,
+ * because only trusted `scripts`s have been allowed to pass.
+ */
+
+/**
+ * Mark `html` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link htmlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedHtml `html` string which needs to be implicitly trusted.
+ * @return {?} a `html` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustHtml(trustedHtml) {
+    return bypassSanitizationTrustString(trustedHtml, 'Html');
+}
+/**
+ * Mark `style` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link styleSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedStyle `style` string which needs to be implicitly trusted.
+ * @return {?} a `style` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustStyle(trustedStyle) {
+    return bypassSanitizationTrustString(trustedStyle, 'Style');
+}
+/**
+ * Mark `script` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link scriptSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedScript `script` string which needs to be implicitly trusted.
+ * @return {?} a `script` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustScript(trustedScript) {
+    return bypassSanitizationTrustString(trustedScript, 'Script');
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link urlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustUrl(trustedUrl) {
+    return bypassSanitizationTrustString(trustedUrl, 'Url');
+}
+/**
+ * Mark `url` string as trusted.
+ *
+ * This function wraps the trusted string in `String` and brands it in a way which makes it
+ * recognizable to {\@link resourceUrlSanitizer} to be trusted implicitly.
+ *
+ * @param {?} trustedResourceUrl `url` string which needs to be implicitly trusted.
+ * @return {?} a `url` `String` which has been branded to be implicitly trusted.
+ */
+function bypassSanitizationTrustResourceUrl(trustedResourceUrl) {
+    return bypassSanitizationTrustString(trustedResourceUrl, 'ResourceUrl');
+}
+/**
+ * @param {?} trustedString
+ * @param {?} mode
+ * @return {?}
+ */
+function bypassSanitizationTrustString(trustedString, mode) {
+    const /** @type {?} */ trusted = /** @type {?} */ (new String(trustedString));
+    trusted[BRAND] = mode;
+    return trusted;
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
 // clang-format on
 
@@ -19710,5 +20525,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, inject, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, APP_ROOT_SCOPE, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, directiveRefresh as ɵr, store as ɵst, load as ɵld, pipe as ɵPp, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbq, group$1 as ɵbr, keyframes$1 as ɵbv, sequence$1 as ɵbs, state$1 as ɵbu, style$1 as ɵbt, transition$1 as ɵbw, trigger$1 as ɵbp, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵk, DefaultIterableDifferFactory as ɵl, DefaultKeyValueDifferFactory as ɵm, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateChangeDetectorRef as ɵbe, getOrCreateContainerRef as ɵbg, getOrCreateInjectable as ɵbf, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbh, bindingUpdated as ɵbk, bindingUpdated2 as ɵbm, bindingUpdated4 as ɵbn, checkAndUpdateBinding$1 as ɵbl, consumeBinding as ɵbj, getCreationMode as ɵbi, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbb, DebugContext as ɵbc };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, inject, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, APP_ROOT_SCOPE, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, inject$1 as ɵinject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, directiveRefresh as ɵr, store as ɵst, load as ɵld, pipe as ɵPp, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbq, group$1 as ɵbr, keyframes$1 as ɵbv, sequence$1 as ɵbs, state$1 as ɵbu, style$1 as ɵbt, transition$1 as ɵbw, trigger$1 as ɵbp, _iterableDiffersFactory as ɵn, _keyValueDiffersFactory as ɵo, _localeFactory as ɵq, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵk, DefaultIterableDifferFactory as ɵl, DefaultKeyValueDifferFactory as ɵm, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateChangeDetectorRef as ɵbe, getOrCreateContainerRef as ɵbg, getOrCreateInjectable as ɵbf, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbh, bindingUpdated as ɵbk, bindingUpdated2 as ɵbm, bindingUpdated4 as ɵbn, checkAndUpdateBinding$1 as ɵbl, consumeBinding as ɵbj, getCreationMode as ɵbi, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbb, DebugContext as ɵbc };
 //# sourceMappingURL=core.js.map
