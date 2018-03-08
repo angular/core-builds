@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-8fb34bc
+ * @license Angular v6.0.0-beta.7-5d4fa7f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-8fb34bc
+ * @license Angular v6.0.0-beta.7-5d4fa7f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-8fb34bc');
+var VERSION = new Version('6.0.0-beta.7-5d4fa7f');
 
 /**
  * @fileoverview added by tsickle
@@ -18594,7 +18594,19 @@ function generatePropertyAliases(lNodeFlags, direction) {
  * @param {?} value A value indicating if a given class should be added or removed.
  * @return {?}
  */
-
+function elementClass(index, className, value) {
+    if (value !== NO_CHANGE) {
+        var /** @type {?} */ lElement = /** @type {?} */ (data[index]);
+        if (value) {
+            isProceduralRenderer(renderer) ? renderer.addClass(lElement.native, className) :
+                lElement.native.classList.add(className);
+        }
+        else {
+            isProceduralRenderer(renderer) ? renderer.removeClass(lElement.native, className) :
+                lElement.native.classList.remove(className);
+        }
+    }
+}
 /**
  * @template T
  * @param {?} index
@@ -23215,6 +23227,7 @@ exports.ɵe = elementEnd;
 exports.ɵp = elementProperty;
 exports.ɵpD = projectionDef;
 exports.ɵa = elementAttribute;
+exports.ɵk = elementClass;
 exports.ɵs = elementStyle;
 exports.ɵt = textBinding;
 exports.ɵv = embeddedViewEnd;
@@ -23266,46 +23279,46 @@ exports.style = style$$1;
 exports.state = state$$1;
 exports.keyframes = keyframes$$1;
 exports.transition = transition$$1;
-exports.ɵbq = animate$1;
-exports.ɵbr = group$1;
-exports.ɵbv = keyframes$1;
-exports.ɵbs = sequence$1;
-exports.ɵbu = state$1;
-exports.ɵbt = style$1;
-exports.ɵbw = transition$1;
-exports.ɵbp = trigger$1;
-exports.ɵn = _iterableDiffersFactory;
-exports.ɵo = _keyValueDiffersFactory;
-exports.ɵq = _localeFactory;
+exports.ɵbr = animate$1;
+exports.ɵbs = group$1;
+exports.ɵbw = keyframes$1;
+exports.ɵbt = sequence$1;
+exports.ɵbv = state$1;
+exports.ɵbu = style$1;
+exports.ɵbx = transition$1;
+exports.ɵbq = trigger$1;
+exports.ɵo = _iterableDiffersFactory;
+exports.ɵq = _keyValueDiffersFactory;
+exports.ɵu = _localeFactory;
 exports.ɵi = _appIdRandomProviderFactory;
 exports.ɵj = defaultIterableDiffers;
-exports.ɵk = defaultKeyValueDiffers;
-exports.ɵl = DefaultIterableDifferFactory;
-exports.ɵm = DefaultKeyValueDifferFactory;
+exports.ɵl = defaultKeyValueDiffers;
+exports.ɵm = DefaultIterableDifferFactory;
+exports.ɵn = DefaultKeyValueDifferFactory;
 exports.ɵf = ReflectiveInjector_;
 exports.ɵg = ReflectiveDependency;
 exports.ɵh = resolveReflectiveProviders;
-exports.ɵu = wtfEnabled;
-exports.ɵx = createScope;
-exports.ɵw = detectWTF;
-exports.ɵba = endTimeRange;
-exports.ɵy = leave;
-exports.ɵz = startTimeRange;
-exports.ɵbe = getOrCreateChangeDetectorRef;
-exports.ɵbg = getOrCreateContainerRef;
-exports.ɵbf = getOrCreateInjectable;
-exports.ɵbd = getOrCreateNodeInjector;
-exports.ɵbh = getOrCreateTemplateRef;
-exports.ɵbk = bindingUpdated;
-exports.ɵbm = bindingUpdated2;
-exports.ɵbn = bindingUpdated4;
-exports.ɵbl = checkAndUpdateBinding$1;
-exports.ɵbj = consumeBinding;
-exports.ɵbi = getCreationMode;
+exports.ɵw = wtfEnabled;
+exports.ɵy = createScope;
+exports.ɵx = detectWTF;
+exports.ɵbb = endTimeRange;
+exports.ɵz = leave;
+exports.ɵba = startTimeRange;
+exports.ɵbf = getOrCreateChangeDetectorRef;
+exports.ɵbh = getOrCreateContainerRef;
+exports.ɵbg = getOrCreateInjectable;
+exports.ɵbe = getOrCreateNodeInjector;
+exports.ɵbi = getOrCreateTemplateRef;
+exports.ɵbl = bindingUpdated;
+exports.ɵbn = bindingUpdated2;
+exports.ɵbo = bindingUpdated4;
+exports.ɵbm = checkAndUpdateBinding$1;
+exports.ɵbk = consumeBinding;
+exports.ɵbj = getCreationMode;
 exports.ɵc = makeParamDecorator;
 exports.ɵd = makePropDecorator;
-exports.ɵbb = _def;
-exports.ɵbc = DebugContext;
+exports.ɵbc = _def;
+exports.ɵbd = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
