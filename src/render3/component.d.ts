@@ -25,9 +25,15 @@ export interface CreateComponentOptions {
      * List of features to be applied to the created component. Features are simply
      * functions that decorate a component with a certain behavior.
      *
-     * Example: PublicFeature is a function that makes the component public to the DI system.
+     * Typically, the features in this list are features that cannot be added to the
+     * other features list in the component definition because they rely on other factors.
+     *
+     * Example: `RootLifecycleHooks` is a function that adds lifecycle hook capabilities
+     * to root components in a tree-shakable way. It cannot be added to the component
+     * features list because there's no way of knowing when the component will be used as
+     * a root component.
      */
-    features?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
+    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -63,6 +69,20 @@ export declare const NULL_INJECTOR: Injector;
  * @param options Optional parameters which control bootstrapping
  */
 export declare function renderComponent<T>(componentType: ComponentType<T>, opts?: CreateComponentOptions): T;
+/**
+ * Used to enable lifecycle hooks on the root component.
+ *
+ * Include this feature when calling `renderComponent` if the root component
+ * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
+ * be called properly.
+ *
+ * Example:
+ *
+ * ```
+ * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
+ * ```
+ */
+export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
 /**
  * Retrieve the host element of the component.
  *
