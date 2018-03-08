@@ -1,19 +1,13 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { PipeDef } from './interfaces/definition';
 /**
  * Create a pipe.
  *
  * @param index Pipe index where the pipe will be stored.
  * @param pipeDef Pipe definition object for registering life cycle hooks.
- * @param pipe A Pipe instance.
+ * @param firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
+ * @returns T the instance of the pipe.
  */
-export declare function pipe<T>(index: number, pipeDef: PipeDef<T>, pipe: T): void;
+export declare function pipe<T>(index: number, pipeDef: PipeDef<T>, firstInstance?: T): T;
 /**
  * Invokes a pipe with 1 arguments.
  *

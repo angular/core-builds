@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-5d4fa7f
+ * @license Angular v6.0.0-beta.7-f64ee15
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1862,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-5d4fa7f');
+const VERSION = new Version('6.0.0-beta.7-f64ee15');
 
 /**
  * @fileoverview added by tsickle
@@ -15566,7 +15566,7 @@ function getCreationMode() {
     return creationMode;
 }
 /**
- * An array of nodes (text, element, container, etc), their bindings, and
+ * An array of nodes (text, element, container, etc), pipes, their bindings, and
  * any local variables that need to be stored between invocations.
  */
 let data;
@@ -17224,6 +17224,12 @@ function bindingUpdated4(exp1, exp2, exp3, exp4) {
     return bindingUpdated2(exp3, exp4) || different;
 }
 /**
+ * @return {?}
+ */
+function getTView() {
+    return currentView.tView;
+}
+/**
  * @template T
  * @param {?} instanceOrArray
  * @return {?}
@@ -18279,7 +18285,205 @@ const defineDirective = /** @type {?} */ (defineComponent);
  * @return {?}
  */
 function definePipe({ type, factory, pure }) {
-    throw new Error('TODO: implement!');
+    return /** @type {?} */ ({
+        n: factory,
+        pure: pure !== false,
+        onDestroy: type.prototype.ngOnDestroy || null
+    });
+}
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * If the value hasn't been saved, calls the pure function to store and return the
+ * value. If it has been saved, returns the saved value.
+ *
+ * @template T
+ * @param {?} pureFn Function that returns a value
+ * @param {?=} thisArg
+ * @return {?} value
+ */
+function pureFunction0(pureFn, thisArg) {
+    return getCreationMode() ? checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg) : pureFn()) :
+        consumeBinding();
+}
+/**
+ * If the value of the provided exp has changed, calls the pure function to return
+ * an updated value. Or if the value has not changed, returns cached value.
+ *
+ * @param {?} pureFn Function that returns an updated value
+ * @param {?} exp Updated expression value
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction1(pureFn, exp, thisArg) {
+    return bindingUpdated(exp) ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction2(pureFn, exp1, exp2, thisArg) {
+    return bindingUpdated2(exp1, exp2) ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
+    const /** @type {?} */ different = bindingUpdated2(exp1, exp2);
+    return bindingUpdated(exp3) || different ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    return bindingUpdated4(exp1, exp2, exp3, exp4) ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @param {?} exp5
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated(exp5) || different ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
+            pureFn(exp1, exp2, exp3, exp4, exp5)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @param {?} exp5
+ * @param {?} exp6
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated2(exp5, exp6) || different ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @param {?} exp5
+ * @param {?} exp6
+ * @param {?} exp7
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    let /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    different = bindingUpdated2(exp5, exp6) || different;
+    return bindingUpdated(exp7) || different ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
+        consumeBinding();
+}
+/**
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn
+ * @param {?} exp1
+ * @param {?} exp2
+ * @param {?} exp3
+ * @param {?} exp4
+ * @param {?} exp5
+ * @param {?} exp6
+ * @param {?} exp7
+ * @param {?} exp8
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
+    return bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
+            pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
+        consumeBinding();
+}
+/**
+ * pureFunction instruction that can support any number of bindings.
+ *
+ * If the value of any provided exp has changed, calls the pure function to return
+ * an updated value. Or if no values have changed, returns cached value.
+ *
+ * @param {?} pureFn A pure function that takes binding values and builds an object or array
+ * containing those values.
+ * @param {?} exps
+ * @param {?=} thisArg
+ * @return {?} Updated value
+ */
+function pureFunctionV(pureFn, exps, thisArg) {
+    let /** @type {?} */ different = false;
+    for (let /** @type {?} */ i = 0; i < exps.length; i++) {
+        bindingUpdated(exps[i]) && (different = true);
+    }
+    return different ? checkAndUpdateBinding$1(pureFn.apply(thisArg, exps)) : consumeBinding();
 }
 
 /**
@@ -18299,11 +18503,20 @@ function definePipe({ type, factory, pure }) {
  * @template T
  * @param {?} index Pipe index where the pipe will be stored.
  * @param {?} pipeDef Pipe definition object for registering life cycle hooks.
- * @param {?} pipe A Pipe instance.
- * @return {?}
+ * @param {?=} firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
+ * @return {?} T the instance of the pipe.
  */
-function pipe(index, pipeDef, pipe) {
-    throw new Error('TODO: implement!');
+function pipe(index, pipeDef, firstInstance) {
+    const /** @type {?} */ tView = getTView();
+    if (tView.firstTemplatePass) {
+        tView.data[index] = pipeDef;
+        if (pipeDef.onDestroy != null) {
+            (tView.destroyHooks || (tView.destroyHooks = [])).push(index, pipeDef.onDestroy);
+        }
+    }
+    const /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();
+    store(index, pipeInstance);
+    return pipeInstance;
 }
 /**
  * Invokes a pipe with 1 arguments.
@@ -18316,7 +18529,9 @@ function pipe(index, pipeDef, pipe) {
  * @return {?}
  */
 function pipeBind1(index, v1) {
-    throw new Error('TODO: implement!');
+    const /** @type {?} */ pipeInstance = load(index);
+    return isPure(index) ? pureFunction1(pipeInstance.transform, v1, pipeInstance) :
+        pipeInstance.transform(v1);
 }
 /**
  * Invokes a pipe with 2 arguments.
@@ -18330,7 +18545,9 @@ function pipeBind1(index, v1) {
  * @return {?}
  */
 function pipeBind2(index, v1, v2) {
-    throw new Error('TODO: implement!');
+    const /** @type {?} */ pipeInstance = load(index);
+    return isPure(index) ? pureFunction2(pipeInstance.transform, v1, v2, pipeInstance) :
+        pipeInstance.transform(v1, v2);
 }
 /**
  * Invokes a pipe with 3 arguments.
@@ -18345,7 +18562,9 @@ function pipeBind2(index, v1, v2) {
  * @return {?}
  */
 function pipeBind3(index, v1, v2, v3) {
-    throw new Error('TODO: implement!');
+    const /** @type {?} */ pipeInstance = load(index);
+    return isPure(index) ? pureFunction3(pipeInstance.transform.bind(pipeInstance), v1, v2, v3) :
+        pipeInstance.transform(v1, v2, v3);
 }
 /**
  * Invokes a pipe with 4 arguments.
@@ -18361,7 +18580,9 @@ function pipeBind3(index, v1, v2, v3) {
  * @return {?}
  */
 function pipeBind4(index, v1, v2, v3, v4) {
-    throw new Error('TODO: implement!');
+    const /** @type {?} */ pipeInstance = load(index);
+    return isPure(index) ? pureFunction4(pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+        pipeInstance.transform(v1, v2, v3, v4);
 }
 /**
  * Invokes a pipe with variable number of arguments.
@@ -18374,7 +18595,16 @@ function pipeBind4(index, v1, v2, v3, v4) {
  * @return {?}
  */
 function pipeBindV(index, values) {
-    throw new Error('TODO: implement!');
+    const /** @type {?} */ pipeInstance = load(index);
+    return isPure(index) ? pureFunctionV(pipeInstance.transform, values, pipeInstance) :
+        pipeInstance.transform.apply(pipeInstance, values);
+}
+/**
+ * @param {?} index
+ * @return {?}
+ */
+function isPure(index) {
+    return (/** @type {?} */ (getTView().data[index])).pure;
 }
 
 /**
@@ -18881,180 +19111,6 @@ function queryRefresh(queryList) {
         return true;
     }
     return false;
-}
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * If the value hasn't been saved, calls the pure function to store and return the
- * value. If it has been saved, returns the saved value.
- *
- * @template T
- * @param {?} pureFn Function that returns a value
- * @return {?} value
- */
-function pureFunction0(pureFn) {
-    return getCreationMode() ? checkAndUpdateBinding$1(pureFn()) : consumeBinding();
-}
-/**
- * If the value of the provided exp has changed, calls the pure function to return
- * an updated value. Or if the value has not changed, returns cached value.
- *
- * @param {?} pureFn Function that returns an updated value
- * @param {?} exp Updated expression value
- * @return {?} Updated value
- */
-function pureFunction1(pureFn, exp) {
-    return bindingUpdated(exp) ? checkAndUpdateBinding$1(pureFn(exp)) : consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @return {?} Updated value
- */
-function pureFunction2(pureFn, exp1, exp2) {
-    return bindingUpdated2(exp1, exp2) ? checkAndUpdateBinding$1(pureFn(exp1, exp2)) : consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @return {?} Updated value
- */
-function pureFunction3(pureFn, exp1, exp2, exp3) {
-    const /** @type {?} */ different = bindingUpdated2(exp1, exp2);
-    return bindingUpdated(exp3) || different ? checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3)) :
-        consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @return {?} Updated value
- */
-function pureFunction4(pureFn, exp1, exp2, exp3, exp4) {
-    return bindingUpdated4(exp1, exp2, exp3, exp4) ?
-        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4)) :
-        consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @param {?} exp5
- * @return {?} Updated value
- */
-function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5) {
-    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated(exp5) || different ?
-        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5)) :
-        consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @param {?} exp5
- * @param {?} exp6
- * @return {?} Updated value
- */
-function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6) {
-    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated2(exp5, exp6) || different ?
-        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
-        consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @param {?} exp5
- * @param {?} exp6
- * @param {?} exp7
- * @return {?} Updated value
- */
-function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7) {
-    let /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    different = bindingUpdated2(exp5, exp6) || different;
-    return bindingUpdated(exp7) || different ?
-        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
-        consumeBinding();
-}
-/**
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn
- * @param {?} exp1
- * @param {?} exp2
- * @param {?} exp3
- * @param {?} exp4
- * @param {?} exp5
- * @param {?} exp6
- * @param {?} exp7
- * @param {?} exp8
- * @return {?} Updated value
- */
-function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) {
-    const /** @type {?} */ different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
-        checkAndUpdateBinding$1(pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
-        consumeBinding();
-}
-/**
- * pureFunction instruction that can support any number of bindings.
- *
- * If the value of any provided exp has changed, calls the pure function to return
- * an updated value. Or if no values have changed, returns cached value.
- *
- * @param {?} pureFn A pure function that takes binding values and builds an object or array
- * containing those values.
- * @param {?} exps
- * @return {?} Updated value
- */
-function pureFunctionV(pureFn, exps) {
-    let /** @type {?} */ different = false;
-    for (let /** @type {?} */ i = 0; i < exps.length; i++) {
-        bindingUpdated(exps[i]) && (different = true);
-    }
-    return different ? checkAndUpdateBinding$1(pureFn.apply(null, exps)) : consumeBinding();
 }
 
 /**

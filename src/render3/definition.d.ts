@@ -1,4 +1,3 @@
-import { PipeTransform } from '../change_detection/pipe_transform';
 import { Type } from '../type';
 import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs, PipeDef } from './interfaces/definition';
 /**
@@ -52,6 +51,6 @@ export declare const defineDirective: <T>(directiveDefinition: DirectiveDefArgs<
  */
 export declare function definePipe<T>({type, factory, pure}: {
     type: Type<T>;
-    factory: () => PipeTransform;
+    factory: () => T;
     pure?: boolean;
 }): PipeDef<T>;

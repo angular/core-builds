@@ -378,6 +378,7 @@ export declare function checkAndUpdateBinding(value: any): any;
 export declare function bindingUpdated2(exp1: any, exp2: any): boolean;
 /** Updates 4 bindings if changed, then returns whether any was updated. */
 export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: any): boolean;
+export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;

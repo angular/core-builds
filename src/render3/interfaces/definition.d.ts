@@ -6,7 +6,6 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectionStrategy } from '../../change_detection/constants';
-import { PipeTransform } from '../../change_detection/pipe_transform';
 import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
 /**
@@ -133,7 +132,7 @@ export interface PipeDef<T> {
      * NOTE: this property is short (1 char) because it is used in
      * component templates which is sensitive to size.
      */
-    n: () => PipeTransform;
+    n: () => T;
     /**
      * Whether or not the pipe is pure.
      *
