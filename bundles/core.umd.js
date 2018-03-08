@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-f13f4db
+ * @license Angular v6.0.0-beta.7-2fee5cc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-f13f4db
+ * @license Angular v6.0.0-beta.7-2fee5cc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2072,7 +2072,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-f13f4db');
+var VERSION = new Version('6.0.0-beta.7-2fee5cc');
 
 /**
  * @fileoverview added by tsickle
@@ -20091,7 +20091,7 @@ function diPublic(def) {
     diPublicInInjector(getOrCreateNodeInjector(), def);
 }
 /**
- * Searches for an instance of the given directive type up the injector tree and returns
+ * Searches for an instance of the given type up the injector tree and returns
  * that instance if found.
  *
  * If not found, it will propagate up to the next parent injector until the token
@@ -20104,9 +20104,12 @@ function diPublic(def) {
  *
  *   static ngDirectiveDef = defineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(inject(DirectiveA))
+ *     factory: () => new SomeDirective(directiveInject(DirectiveA))
  *   });
  * }
+ *
+ * NOTE: use `directiveInject` with `\@Directive`, `\@Component`, and `\@Pipe`. For
+ * all other injection use `inject` which does not walk the DOM render tree.
  *
  * @template T
  * @param {?} token The directive type to search for
@@ -20114,7 +20117,7 @@ function diPublic(def) {
  * @param {?=} defaultValue
  * @return {?} The instance found
  */
-function inject$1(token, flags, defaultValue) {
+function directiveInject(token, flags, defaultValue) {
     return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags, defaultValue);
 }
 /**
@@ -20654,7 +20657,6 @@ function defineComponent(componentDefinition) {
         inputs: invertObject(componentDefinition.inputs),
         inputsPropertyName: componentDefinition.inputsPropertyName || null,
         outputs: invertObject(componentDefinition.outputs),
-        methods: invertObject(componentDefinition.methods),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
         exportAs: componentDefinition.exportAs,
         onInit: type.prototype.ngOnInit || null,
@@ -21126,36 +21128,72 @@ function isPure(index) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
+ * consumable for rendering.
  * @record
  */
 
 /**
+ * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
+ * consumable for rendering.
  * @record
  */
 
 /**
+ * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * consumable for rendering.
  * @record
  */
 
 /**
- * `DirectiveDef` is a compiled version of the Directive used by the renderer instructions.
- * @record
- */
-
-/**
- * @record
- */
-
-/**
+ * Runtime link information for Directives.
  *
+ * This is internal data structure used by the render to link
+ * directives into templates.
+ *
+ * NOTE: Always use `defineDirective` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {\@link defineDirective}
  * @record
  */
 
 /**
+ * Runtime link information for Components.
+ *
+ * This is internal data structure used by the render to link
+ * components into templates.
+ *
+ * NOTE: Always use `defineComponent` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {\@link defineComponent}
  * @record
  */
 
 /**
+ * Runtime link information for Pipes.
+ *
+ * This is internal data structure used by the renderer to link
+ * pipes into templates.
+ *
+ * NOTE: Always use `definePipe` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {\@link definePipe}
+ * @record
+ */
+
+/**
+ * Arguments for `defineDirective`
+ * @record
+ */
+
+/**
+ * Arguments for `defineComponent`.
  * @record
  */
 
@@ -23315,7 +23353,7 @@ exports.ɵdefineDirective = defineDirective;
 exports.ɵdefinePipe = definePipe;
 exports.ɵdetectChanges = detectChanges;
 exports.ɵrenderComponent = renderComponent;
-exports.ɵinject = inject$1;
+exports.ɵdirectiveInject = directiveInject;
 exports.ɵinjectTemplateRef = injectTemplateRef;
 exports.ɵinjectViewContainerRef = injectViewContainerRef;
 exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;

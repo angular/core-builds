@@ -56,7 +56,7 @@ export declare function diPublicInInjector(di: LInjector, def: DirectiveDef<any>
  */
 export declare function diPublic(def: DirectiveDef<any>): void;
 /**
- * Searches for an instance of the given directive type up the injector tree and returns
+ * Searches for an instance of the given type up the injector tree and returns
  * that instance if found.
  *
  * If not found, it will propagate up to the next parent injector until the token
@@ -69,15 +69,18 @@ export declare function diPublic(def: DirectiveDef<any>): void;
  *
  *   static ngDirectiveDef = defineDirective({
  *     type: SomeDirective,
- *     factory: () => new SomeDirective(inject(DirectiveA))
+ *     factory: () => new SomeDirective(directiveInject(DirectiveA))
  *   });
  * }
+ *
+ * NOTE: use `directiveInject` with `@Directive`, `@Component`, and `@Pipe`. For
+ * all other injection use `inject` which does not walk the DOM render tree.
  *
  * @param token The directive type to search for
  * @param flags Injection flags (e.g. CheckParent)
  * @returns The instance found
  */
-export declare function inject<T>(token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
+export declare function directiveInject<T>(token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
 /**
  * Creates an ElementRef and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
