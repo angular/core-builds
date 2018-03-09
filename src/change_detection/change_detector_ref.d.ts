@@ -14,15 +14,15 @@ export declare abstract class ChangeDetectorRef {
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
-     * ### Example ([live demo](http://plnkr.co/edit/GC512b?p=preview))
+     * ### Example ([live demo](https://stackblitz.com/edit/angular-kx7rrw))
      *
      * ```typescript
      * @Component({
-     *   selector: 'cmp',
-     *   changeDetection: ChangeDetectionStrategy.OnPush,
+     *   selector: 'my-app',
      *   template: `Number of ticks: {{numberOfTicks}}`
+     *   changeDetection: ChangeDetectionStrategy.OnPush,
      * })
-     * class Cmp {
+     * class AppComponent {
      *   numberOfTicks = 0;
      *
      *   constructor(private ref: ChangeDetectorRef) {
@@ -32,16 +32,6 @@ export declare abstract class ChangeDetectorRef {
      *       this.ref.markForCheck();
      *     }, 1000);
      *   }
-     * }
-     *
-     * @Component({
-     *   selector: 'app',
-     *   changeDetection: ChangeDetectionStrategy.OnPush,
-     *   template: `
-     *     <cmp><cmp>
-     *   `,
-     * })
-     * class App {
      * }
      * ```
      */
@@ -131,12 +121,9 @@ export declare abstract class ChangeDetectorRef {
     /**
      * Reattach the change detector to the change detector tree.
      *
-     * This also marks OnPush ancestors as to be checked. This reattached change detector will be
-     * checked during the next change detection run.
-     *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
-     * ### Example ([live demo](http://plnkr.co/edit/aUhZha?p=preview))
+     * ### Example ([live demo](https://stackblitz.com/edit/angular-ymgsxw))
      *
      * The following example creates a component displaying `live` data. The component will detach
      * its change detector from the main change detector tree when the component's live property
@@ -171,14 +158,14 @@ export declare abstract class ChangeDetectorRef {
      * }
      *
      * @Component({
-     *   selector: 'app',
+     *   selector: 'my-app',
      *   providers: [DataProvider],
      *   template: `
      *     Live Update: <input type="checkbox" [(ngModel)]="live">
      *     <live-data [live]="live"><live-data>
      *   `,
      * })
-     * class App {
+     * class AppComponent {
      *   live = true;
      * }
      * ```
