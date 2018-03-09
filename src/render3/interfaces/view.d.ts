@@ -168,6 +168,8 @@ export declare const enum LViewFlags {
     CheckAlways = 2,
     /** Whether or not this view is currently dirty (needing check) */
     Dirty = 4,
+    /** Whether or not this view is currently attached to change detection tree. */
+    Attached = 8,
 }
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {

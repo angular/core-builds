@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-b0b9ca3
+ * @license Angular v6.0.0-beta.7-b26a905
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1862,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-b0b9ca3');
+const VERSION = new Version('6.0.0-beta.7-b26a905');
 
 /**
  * @fileoverview added by tsickle
@@ -15648,7 +15648,7 @@ function createLView(viewId, renderer, tView, template, context, flags) {
         parent: currentView,
         id: viewId,
         // -1 for component views
-        flags: flags | 1 /* CreationMode */,
+        flags: flags | 1 /* CreationMode */ | 8 /* Attached */,
         node: /** @type {?} */ ((null)),
         // until we initialize it in createNode.
         data: [],
@@ -16633,12 +16633,20 @@ function directiveRefresh(directiveIndex, elementIndex) {
         ngDevMode &&
             assertNotNull(element.data, `Component's host node should have an LView attached.`);
         const /** @type {?} */ hostView = /** @type {?} */ ((element.data));
-        // Only CheckAlways components or dirty OnPush components should be checked
-        if (hostView.flags & (2 /* CheckAlways */ | 4 /* Dirty */)) {
+        // Only attached CheckAlways components or attached, dirty OnPush components should be checked
+        if (viewAttached(hostView) && hostView.flags & (2 /* CheckAlways */ | 4 /* Dirty */)) {
             ngDevMode && assertDataInRange(directiveIndex);
             detectChangesInternal(hostView, element, getDirectiveInstance(data[directiveIndex]));
         }
     }
+}
+/**
+ * Returns a boolean for whether the view is attached
+ * @param {?} view
+ * @return {?}
+ */
+function viewAttached(view) {
+    return (view.flags & 8 /* Attached */) === 8 /* Attached */;
 }
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
@@ -17354,9 +17362,13 @@ const CLEAN_PROMISE = _CLEAN_PROMISE;
  */
 class ViewRef$1 {
     /**
+     * @param {?} _view
      * @param {?} context
      */
-    constructor(context) { this.context = /** @type {?} */ ((context)); }
+    constructor(_view, context) {
+        this._view = _view;
+        this.context = /** @type {?} */ ((context));
+    }
     /**
      * \@internal
      * @param {?} context
@@ -17377,9 +17389,22 @@ class ViewRef$1 {
      */
     markForCheck() { notImplemented(); }
     /**
+     * Detaches a view from the change detection tree.
+     *
+     * Detached views will not be checked during change detection runs, even if the view
+     * is dirty. This can be used in combination with detectChanges to implement local
+     * change detection checks.
      * @return {?}
      */
-    detach() { notImplemented(); }
+    detach() { this._view.flags &= ~8 /* Attached */; }
+    /**
+     * Re-attaches a view to the change detection tree.
+     *
+     * This can be used to re-attach views that were previously detached from the tree
+     * using detach(). Views are attached to the tree by default.
+     * @return {?}
+     */
+    reattach() { this._view.flags |= 8 /* Attached */; }
     /**
      * @return {?}
      */
@@ -17388,10 +17413,6 @@ class ViewRef$1 {
      * @return {?}
      */
     checkNoChanges() { notImplemented(); }
-    /**
-     * @return {?}
-     */
-    reattach() { notImplemented(); }
 }
 class EmbeddedViewRef$1 extends ViewRef$1 {
     /**
@@ -17400,7 +17421,7 @@ class EmbeddedViewRef$1 extends ViewRef$1 {
      * @param {?} context
      */
     constructor(viewNode, template, context) {
-        super(context);
+        super(viewNode.data, context);
         this._lViewNode = viewNode;
     }
 }
@@ -17408,12 +17429,13 @@ class EmbeddedViewRef$1 extends ViewRef$1 {
  * Creates a ViewRef bundled with destroy functionality.
  *
  * @template T
+ * @param {?} view
  * @param {?} context The context for this view
  * @return {?} The ViewRef
  */
-function createViewRef(context) {
+function createViewRef(view, context) {
     // TODO: add detectChanges back in when implementing ChangeDetectorRef.detectChanges
-    return addDestroyable(new ViewRef$1(context));
+    return addDestroyable(new ViewRef$1(view, context));
 }
 /**
  * Interface for destroy logic. Implemented by addDestroyable.
@@ -17837,7 +17859,7 @@ function getOrCreateChangeDetectorRef(di, context) {
     }
     else if ((currentNode.flags & 3 /* TYPE_MASK */) === 3 /* Element */) {
         // if it's an element node with data, it's a component and context will be set later
-        return di.changeDetectorRef = createViewRef(context);
+        return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
     }
     return /** @type {?} */ ((null));
 }
@@ -17850,8 +17872,9 @@ function getOrCreateHostChangeDetector(currentNode) {
     const /** @type {?} */ hostNode = getClosestComponentAncestor(currentNode);
     const /** @type {?} */ hostInjector = hostNode.nodeInjector;
     const /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
-    return existingRef ? existingRef :
-        createViewRef(hostNode.view.data[hostNode.flags >> 12 /* INDX_SHIFT */]);
+    return existingRef ?
+        existingRef :
+        createViewRef(/** @type {?} */ (hostNode.data), hostNode.view.data[hostNode.flags >> 12 /* INDX_SHIFT */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
