@@ -287,6 +287,8 @@ export declare function wrapListenerWithDirtyLogic(view: LView, listenerFn: (e?:
  * whenever the event fires. Also wraps with preventDefault behavior.
  */
 export declare function wrapListenerWithDirtyAndDefault(view: LView, listenerFn: (e?: any) => any): EventListener;
+/** Marks current view and all ancestors dirty */
+export declare function markViewDirty(view: LView): void;
 /**
  * Used to schedule change detection on the whole application.
  *
