@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-cd58c0a
+ * @license Angular v6.0.0-beta.7-f95730b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-cd58c0a');
+var VERSION = new Version('6.0.0-beta.7-f95730b');
 
 /**
  * @fileoverview added by tsickle
@@ -18485,7 +18485,9 @@ function elementProperty(index, propName, value, sanitizer) {
         markDirtyIfOnPush(node);
     }
     else {
-        value = /** @type {?} */ ((sanitizer != null ? sanitizer(value) : stringify$1(value)));
+        // It is assumed that the sanitizer is only added when the compiler determines that the property
+        // is risky, so sanitization can be done without further checks.
+        value = sanitizer != null ? (/** @type {?} */ (sanitizer(value))) : value;
         var /** @type {?} */ native = node.native;
         isProceduralRenderer(renderer) ? renderer.setProperty(native, propName, value) :
             (native.setProperty ? native.setProperty(propName, value) :
