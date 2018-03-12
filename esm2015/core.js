@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-f95730b
+ * @license Angular v6.0.0-beta.7-6e00410
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1385,13 +1385,13 @@ class InjectionToken {
          */
         this.ngMetadataName = 'InjectionToken';
         if (options !== undefined) {
-            this.ngInjectableDef = defineInjectable({
+            /** @nocollapse */ this.ngInjectableDef = defineInjectable({
                 scope: options.scope,
                 factory: options.factory,
             });
         }
         else {
-            this.ngInjectableDef = undefined;
+            /** @nocollapse */ this.ngInjectableDef = undefined;
         }
     }
     /**
@@ -1862,7 +1862,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-f95730b');
+const VERSION = new Version('6.0.0-beta.7-6e00410');
 
 /**
  * @fileoverview added by tsickle
