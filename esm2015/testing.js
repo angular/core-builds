@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-0bf6fa5
+ * @license Angular v6.0.0-beta.7-3f70aba
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1070,6 +1070,9 @@ function withBody(html, blockFn) {
         let returnValue = undefined;
         if (typeof blockFn === 'function') {
             document.body.innerHTML = html;
+            // TODO(i): I'm not sure why a cast is required here but otherwise I get
+            //   TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has
+            //   no compatible call signatures.
             let blockReturn = blockFn();
             if (blockReturn instanceof Promise) {
                 blockReturn = blockReturn.then(done, done.fail);

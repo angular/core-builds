@@ -9,4 +9,3 @@ declare global  {
     const ngDevMode: boolean;
 }
 export declare const _ngDevMode: boolean;
-export {};
