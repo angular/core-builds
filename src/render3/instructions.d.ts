@@ -336,13 +336,6 @@ export declare function getRootView(component: any): LView;
  */
 export declare function detectChanges<T>(component: T): void;
 /**
- * Checks the change detector and its children, and throws if any changes are detected.
- *
- * This is used in development mode to verify that running change detection doesn't
- * introduce other changes.
- */
-export declare function checkNoChanges<T>(component: T): void;
-/**
  * Mark the component as dirty (needing change detection).
  *
  * Marking a component dirty will schedule a change detection on this

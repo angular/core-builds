@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-aa7dba2
+ * @license Angular v6.0.0-beta.7-0bf6fa5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-aa7dba2');
+var VERSION = new Version('6.0.0-beta.7-0bf6fa5');
 
 /**
  * @fileoverview added by tsickle
@@ -17909,12 +17909,6 @@ var bindingIndex;
  */
 var cleanup;
 /**
- * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
- *
- * Necessary to support ChangeDetectorRef.checkNoChanges().
- */
-var checkNoChangesMode = false;
-/**
  * Swap the current state with a new state.
  *
  * For performance reasons we store the state in the top level of the module.
@@ -17949,9 +17943,7 @@ function enterView(newView, host) {
  * @return {?}
  */
 function leaveView(newView) {
-    if (!checkNoChangesMode) {
-        executeHooks(currentView.data, currentView.tView.viewHooks, currentView.tView.viewCheckHooks, creationMode);
-    }
+    executeHooks(currentView.data, currentView.tView.viewHooks, currentView.tView.viewCheckHooks, creationMode);
     // Views should be clean and in update mode after being checked, so these bits are cleared
     currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     currentView.lifecycleStage = 1 /* INIT */;
@@ -18820,11 +18812,9 @@ function containerRefreshStart(index) {
     isParent = true;
     (/** @type {?} */ (previousOrParentNode)).data.nextIndex = 0;
     ngDevMode && assertSame((/** @type {?} */ (previousOrParentNode)).native, undefined, "the container's native element should not have been set yet.");
-    if (!checkNoChangesMode) {
-        // We need to execute init hooks here so ngOnInit hooks are called in top level views
-        // before they are called in embedded views (for backwards compatibility).
-        executeInitHooks(currentView, currentView.tView, creationMode);
-    }
+    // We need to execute init hooks here so ngOnInit hooks are called in top level views
+    // before they are called in embedded views (for backwards compatibility).
+    executeInitHooks(currentView, currentView.tView, creationMode);
 }
 /**
  * Marks the end of the LContainerNode.
@@ -18950,10 +18940,8 @@ function embeddedViewEnd() {
  * @return {?}
  */
 function directiveRefresh(directiveIndex, elementIndex) {
-    if (!checkNoChangesMode) {
-        executeInitHooks(currentView, currentView.tView, creationMode);
-        executeContentHooks(currentView, currentView.tView, creationMode);
-    }
+    executeInitHooks(currentView, currentView.tView, creationMode);
+    executeContentHooks(currentView, currentView.tView, creationMode);
     var /** @type {?} */ template = (/** @type {?} */ (tData[directiveIndex])).template;
     if (template != null) {
         ngDevMode && assertDataInRange(elementIndex);
@@ -19263,42 +19251,6 @@ function detectChanges(component) {
     detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, component);
 }
 /**
- * Checks the change detector and its children, and throws if any changes are detected.
- *
- * This is used in development mode to verify that running change detection doesn't
- * introduce other changes.
- * @template T
- * @param {?} component
- * @return {?}
- */
-function checkNoChanges(component) {
-    checkNoChangesMode = true;
-    try {
-        detectChanges(component);
-    }
-    finally {
-        checkNoChangesMode = false;
-    }
-}
-/**
- * Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on.
- * @param {?} oldValue
- * @param {?} currValue
- * @return {?}
- */
-function throwErrorIfNoChangesMode(oldValue, currValue) {
-    if (checkNoChangesMode) {
-        var /** @type {?} */ msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (creationMode) {
-            msg +=
-                " It seems like the view has been created after its parent and its children have been dirty checked." +
-                    " Has it been created in a change detection hook ?";
-        }
-        // TODO: include debug context
-        throw new Error(msg);
-    }
-}
-/**
  * Checks the view of the component provided. Does not gate on dirty checks or execute doCheck.
  * @template T
  * @param {?} hostView
@@ -19370,7 +19322,6 @@ function bind(value) {
     }
     var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
     if (changed) {
-        throwErrorIfNoChangesMode(data[bindingIndex], value);
         data[bindingIndex] = value;
     }
     bindingIndex++;
@@ -19617,18 +19568,15 @@ function consumeBinding() {
  */
 function bindingUpdated(value) {
     ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    if (creationMode) {
-        initBindings();
-    }
-    else if (isDifferent(data[bindingIndex], value)) {
-        throwErrorIfNoChangesMode(data[bindingIndex], value);
+    if (creationMode || isDifferent(data[bindingIndex], value)) {
+        creationMode && initBindings();
+        data[bindingIndex++] = value;
+        return true;
     }
     else {
         bindingIndex++;
         return false;
     }
-    data[bindingIndex++] = value;
-    return true;
 }
 /**
  * Updates binding if changed, then returns the latest value.
@@ -20256,26 +20204,12 @@ var ViewRef$1 = /** @class */ (function () {
      */
     function () { detectChanges(this.context); };
     /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
-     */
-    /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
      * @return {?}
      */
     ViewRef.prototype.checkNoChanges = /**
-     * Checks the change detector and its children, and throws if any changes are detected.
-     *
-     * This is used in development mode to verify that running change detection doesn't
-     * introduce other changes.
      * @return {?}
      */
-    function () { checkNoChanges(this.context); };
+    function () { notImplemented(); };
     return ViewRef;
 }());
 var EmbeddedViewRef$1 = /** @class */ (function (_super) {
