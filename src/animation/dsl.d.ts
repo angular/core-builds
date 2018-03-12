@@ -122,7 +122,7 @@ export interface AnimationStateMetadata extends AnimationMetadata {
  * @experimental Animation support is experimental.
  */
 export interface AnimationTransitionMetadata extends AnimationMetadata {
-    expr: string;
+    expr: string | ((fromState: string, toState: string) => boolean);
     animation: AnimationMetadata | AnimationMetadata[];
     options: AnimationOptions | null;
 }
@@ -221,6 +221,13 @@ export interface AnimationGroupMetadata extends AnimationMetadata {
  */
 export interface AnimationQueryOptions extends AnimationOptions {
     optional?: boolean;
+    /**
+     * Used to limit the total amount of results from the start of the query list.
+     *
+     * If a negative value is provided then the queried results will be limited from the
+     * end of the query list towards the beginning (e.g. if `limit: -3` is used then the
+     * final 3 (or less) queried results will be used for the animation).
+     */
     limit?: number;
 }
 /**
@@ -248,6 +255,11 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  * within a template by referencing the name of the trigger followed by the expression value that
  the
  * trigger is bound to (in the form of `[@triggerName]="expression"`.
+ *
+ * Animation trigger bindings strigify values and then match the previous and current values against
+ * any linked transitions. If a boolean value is provided into the trigger binding then it will both
+ * be represented as `1` or `true` and `0` or `false` for a true and false boolean values
+ * respectively.
  *
  * ### Usage
  *
@@ -312,7 +324,7 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  * The `@childAnimation` trigger will not animate because `@.disabled` prevents it from happening
  (when true).
  *
- * Note that `@.disbled` will only disable all animations (this means any animations running on
+ * Note that `@.disabled` will only disable all animations (this means any animations running on
  * the same element will also be disabled).
  *
  * ### Disabling Animations Application-wide
@@ -339,6 +351,14 @@ export interface AnimationStaggerMetadata extends AnimationMetadata {
  elements located in disabled areas of the template and still animate them as it sees fit. This is
  also the case for when a sub animation is queried by a parent and then later animated using {@link
  animateChild animateChild}.
+
+ * ### Detecting when an animation is disabled
+ * If a region of the DOM (or the entire application) has its animations disabled, then animation
+ * trigger callbacks will still fire just as normal (only for zero seconds).
+ *
+ * When a trigger callback fires it will provide an instance of an {@link AnimationEvent}. If
+ animations
+ * are disabled then the `.disabled` flag on the event will be true.
  *
  * @experimental Animation support is experimental.
  */
@@ -705,6 +725,22 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  * ])
  * ```
  *
+ * ### Boolean values
+ * if a trigger binding value is a boolean value then it can be matched using a transition
+ * expression that compares `true` and `false` or `1` and `0`.
+ *
+ * ```
+ * // in the template
+ * <div [@openClose]="open ? true : false">...</div>
+ *
+ * // in the component metadata
+ * trigger('openClose', [
+ *   state('true', style({ height: '*' })),
+ *   state('false', style({ height: '0px' })),
+ *   transition('false <=> true', animate(500))
+ * ])
+ * ```
+ *
  * ### Using :increment and :decrement
  * In addition to the :enter and :leave transition aliases, the :increment and :decrement aliases
  * can be used to kick off a transition when a numeric value has increased or decreased in value.
@@ -737,9 +773,9 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *     <button (click)="next()">Next</button>
  *     <hr>
  *     <div [@bannerAnimation]="selectedIndex" class="banner-container">
- *       <div class="banner"> {{ banner }} </div>
+ *       <div class="banner" *ngFor="let banner of banners"> {{ banner }} </div>
  *     </div>
- *   `
+ *   `,
  *   animations: [
  *     trigger('bannerAnimation', [
  *       transition(":increment", group([
@@ -759,7 +795,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *         query(':leave', [
  *           animate('0.5s ease-out', style({ left: '100%' }))
  *         ])
- *       ])),
+ *       ]))
  *     ])
  *   ]
  * })
@@ -785,7 +821,7 @@ export declare function keyframes(steps: AnimationStyleMetadata[]): AnimationKey
  *
  * @experimental Animation support is experimental.
  */
-export declare function transition(stateChangeExpr: string, steps: AnimationMetadata | AnimationMetadata[], options?: AnimationOptions | null): AnimationTransitionMetadata;
+export declare function transition(stateChangeExpr: string | ((fromState: string, toState: string) => boolean), steps: AnimationMetadata | AnimationMetadata[], options?: AnimationOptions | null): AnimationTransitionMetadata;
 /**
  * `animation` is an animation-specific function that is designed to be used inside of Angular's
  * animation DSL language.
@@ -798,7 +834,7 @@ export declare function transition(stateChangeExpr: string, steps: AnimationMeta
  * var fadeAnimation = animation([
  *   style({ opacity: '{{ start }}' }),
  *   animate('{{ time }}',
- *     style({ opacity: '{{ end }}'))
+ *     style({ opacity: '{{ end }}'}))
  * ], { params: { time: '1000ms', start: 0, end: 1 }});
  * ```
  *

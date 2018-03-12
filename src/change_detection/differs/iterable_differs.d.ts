@@ -1,11 +1,4 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { StaticProvider } from '../../di';
+import { StaticProvider } from '../../di/provider';
 /**
  * A type describing supported iterable types.
  *
@@ -56,7 +49,7 @@ export interface IterableChanges<V> {
      *        original `Iterable` location, where as `currentIndex` refers to the transient location
      *        of the item, after applying the operations up to this point.
      */
-    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number, currentIndex: number) => void): void;
+    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number | null, currentIndex: number | null) => void): void;
     /**
      * Iterate over changes in the order of original `Iterable` showing where the original items
      * have moved.
