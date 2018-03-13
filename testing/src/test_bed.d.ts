@@ -139,6 +139,8 @@ export declare class TestBed implements Injector {
     private _testEnvAotSummaries;
     private _aotSummaries;
     private _templateOverrides;
+    private _isRoot;
+    private _rootProviderOverrides;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     /**

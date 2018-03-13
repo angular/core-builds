@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Type } from '../type';
-import { Injectable } from './injectable';
+import { InjectableDef } from './injectable';
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -31,9 +31,9 @@ import { Injectable } from './injectable';
  */
 export declare class InjectionToken<T> {
     protected _desc: string;
-    readonly ngInjectableDef: Injectable | undefined;
+    readonly ngInjectableDef: InjectableDef<T> | undefined;
     constructor(_desc: string, options?: {
-        scope: Type<any>;
+        providedIn?: Type<any> | 'root' | null;
         factory: () => T;
     });
     toString(): string;

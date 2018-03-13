@@ -36,11 +36,11 @@ export interface InjectableDecorator {
      */
     (): any;
     (options?: {
-        scope: Type<any>;
+        providedIn: Type<any> | 'root' | null;
     } & InjectableProvider): any;
     new (): Injectable;
     new (options?: {
-        scope: Type<any>;
+        providedIn: Type<any> | 'root' | null;
     } & InjectableProvider): Injectable;
 }
 /**
@@ -49,16 +49,20 @@ export interface InjectableDecorator {
  * @experimental
  */
 export interface Injectable {
-    scope?: Type<any>;
+    providedIn?: Type<any> | 'root' | null;
     factory: () => any;
 }
 export declare function convertInjectableProviderToFactory(type: Type<any>, provider?: InjectableProvider): () => any;
 /**
-* Define injectable
+* Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
+* in which injectors (if any) it will be available.
 *
 * @experimental
 */
-export declare function defineInjectable(opts: Injectable): Injectable;
+export declare function defineInjectable<T>(opts: {
+    providedIn?: Type<any> | 'root' | null;
+    factory: () => T;
+}): InjectableDef<T>;
 /**
 * Injectable decorator and metadata.
 *
@@ -66,11 +70,15 @@ export declare function defineInjectable(opts: Injectable): Injectable;
 * @Annotation
 */
 export declare const Injectable: InjectableDecorator;
+export interface InjectableDef<T> {
+    providedIn: Type<any> | 'root' | null;
+    factory: () => T;
+}
 /**
  * Type representing injectable service.
  *
  * @experimental
  */
 export interface InjectableType<T> extends Type<T> {
-    ngInjectableDef?: Injectable;
+    ngInjectableDef: InjectableDef<T>;
 }

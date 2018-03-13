@@ -1,9 +1,9 @@
 /**
- * @license Angular v6.0.0-beta.7-21e44c6
+ * @license Angular v6.0.0-beta.7-db56836
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
+import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
 
 /**
  * @license
@@ -550,6 +550,8 @@ class TestBed {
         this._testEnvAotSummaries = () => [];
         this._aotSummaries = [];
         this._templateOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -690,6 +692,8 @@ class TestBed {
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this._moduleRef = (null);
         this._moduleFactory = (null);
         this._compilerOptions = [];
@@ -786,7 +790,24 @@ class TestBed {
     _createCompilerAndModule() {
         const providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         const declarations = [...this._declarations, ...this._templateOverrides.map(entry => entry.templateOf)];
-        const imports = [this.ngModule, this._imports];
+        const rootScopeImports = [];
+        const rootProviderOverrides = this._rootProviderOverrides;
+        if (this._isRoot) {
+            class RootScopeModule {
+            }
+            RootScopeModule.decorators = [
+                { type: NgModule, args: [{
+                            providers: [
+                                ...rootProviderOverrides,
+                            ],
+                        },] },
+            ];
+            /** @nocollapse */
+            RootScopeModule.ctorParameters = () => [];
+            rootScopeImports.push(RootScopeModule);
+        }
+        providers.push({ provide: ɵAPP_ROOT, useValue: this._isRoot });
+        const imports = [rootScopeImports, this.ngModule, this._imports];
         const schemas = this._schemas;
         class DynamicTestModule {
         }
@@ -850,6 +871,15 @@ class TestBed {
         this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
     }
     overrideProviderImpl(token, provider, deprecated = false) {
+        if (typeof token !== 'string' && token.ngInjectableDef &&
+            token.ngInjectableDef.providedIn === 'root') {
+            if (provider.useFactory) {
+                this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
+            }
+            else {
+                this._rootProviderOverrides.push({ provide: token, useValue: provider.useValue });
+            }
+        }
         let flags = 0;
         let value;
         if (provider.useFactory) {

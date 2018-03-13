@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-21e44c6
+ * @license Angular v6.0.0-beta.7-db56836
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -36,7 +36,7 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v6.0.0-beta.7-21e44c6
+ * @license Angular v6.0.0-beta.7-db56836
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -700,6 +700,8 @@ var TestBed = /** @class */ (function () {
         this._testEnvAotSummaries = function () { return []; };
         this._aotSummaries = [];
         this._templateOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -951,6 +953,8 @@ var TestBed = /** @class */ (function () {
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this._moduleRef = (null);
         this._moduleFactory = (null);
         this._compilerOptions = [];
@@ -1051,7 +1055,25 @@ var TestBed = /** @class */ (function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
-        var imports = [this.ngModule, this._imports];
+        var rootScopeImports = [];
+        var rootProviderOverrides = this._rootProviderOverrides;
+        if (this._isRoot) {
+            var RootScopeModule = /** @class */ (function () {
+                function RootScopeModule() {
+                }
+                RootScopeModule.decorators = [
+                    { type: _angular_core.NgModule, args: [{
+                                providers: rootProviderOverrides.slice(),
+                            },] },
+                ];
+                /** @nocollapse */
+                RootScopeModule.ctorParameters = function () { return []; };
+                return RootScopeModule;
+            }());
+            rootScopeImports.push(RootScopeModule);
+        }
+        providers.push({ provide: _angular_core.ɵAPP_ROOT, useValue: this._isRoot });
+        var imports = [rootScopeImports, this.ngModule, this._imports];
         var schemas = this._schemas;
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
@@ -1122,6 +1144,15 @@ var TestBed = /** @class */ (function () {
     };
     TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
+        if (typeof token !== 'string' && token.ngInjectableDef &&
+            token.ngInjectableDef.providedIn === 'root') {
+            if (provider.useFactory) {
+                this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
+            }
+            else {
+                this._rootProviderOverrides.push({ provide: token, useValue: provider.useValue });
+            }
+        }
         var flags = 0;
         var value;
         if (provider.useFactory) {

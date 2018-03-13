@@ -1,5 +1,4 @@
-import { DepDef, DepFlags, InjectableDef, NgModuleData, NgModuleDefinition, NgModuleProviderDef, NodeFlags } from './types';
-export declare function injectableDef(scope: any, factory: () => any): InjectableDef;
+import { DepDef, DepFlags, NgModuleData, NgModuleDefinition, NgModuleProviderDef, NodeFlags } from './types';
 export declare function moduleProvideDef(flags: NodeFlags, token: any, value: any, deps: ([DepFlags, any] | any)[]): NgModuleProviderDef;
 export declare function moduleDef(providers: NgModuleProviderDef[]): NgModuleDefinition;
 export declare function initNgModule(data: NgModuleData): void;
