@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-34e355a
+ * @license Angular v6.0.0-beta.7-bd9d4df
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1871,7 +1871,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-34e355a');
+const VERSION = new Version('6.0.0-beta.7-bd9d4df');
 
 /**
  * @fileoverview added by tsickle
@@ -18480,7 +18480,6 @@ function defineComponent(componentDefinition) {
         h: componentDefinition.hostBindings || noop$1,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
-        inputsPropertyName: componentDefinition.inputsPropertyName || null,
         outputs: invertObject(componentDefinition.outputs),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
         exportAs: componentDefinition.exportAs,
@@ -18500,47 +18499,67 @@ function defineComponent(componentDefinition) {
 }
 const PRIVATE_PREFIX = '__ngOnChanges_';
 /**
- * @param {?} definition
- * @return {?}
+ * Creates an NgOnChangesFeature function for a component's features list.
+ *
+ * It accepts an optional map of minified input property names to original property names,
+ * if any input properties have a public alias.
+ *
+ * The NgOnChangesFeature function that is returned decorates a component with support for
+ * the ngOnChanges lifecycle hook, so it should be included in any component that implements
+ * that hook.
+ *
+ * Example usage:
+ *
+ * ```
+ * static ngComponentDef = defineComponent({
+ *   ...
+ *   inputs: {name: 'publicName'},
+ *   features: [NgOnChangesFeature({name: 'name'})]
+ * });
+ * ```
+ *
+ * @param {?=} inputPropertyNames Map of input property names, if they are aliased
+ * @return {?} DirectiveDefFeature
  */
-function NgOnChangesFeature(definition) {
-    const /** @type {?} */ inputs = definition.inputs;
-    const /** @type {?} */ proto = definition.type.prototype;
-    const /** @type {?} */ inputsPropertyName = definition.inputsPropertyName;
-    // Place where we will store SimpleChanges if there is a change
-    Object.defineProperty(proto, PRIVATE_PREFIX, { value: undefined, writable: true });
-    for (let /** @type {?} */ pubKey in inputs) {
-        const /** @type {?} */ minKey = inputs[pubKey];
-        const /** @type {?} */ propertyName = inputsPropertyName && inputsPropertyName[minKey] || pubKey;
-        const /** @type {?} */ privateMinKey = PRIVATE_PREFIX + minKey;
-        // Create a place where the actual value will be stored and make it non-enumerable
-        Object.defineProperty(proto, privateMinKey, { value: undefined, writable: true });
-        const /** @type {?} */ existingDesc = Object.getOwnPropertyDescriptor(proto, minKey);
-        // create a getter and setter for property
-        Object.defineProperty(proto, minKey, {
-            get: function () {
-                return (existingDesc && existingDesc.get) ? existingDesc.get.call(this) :
-                    this[privateMinKey];
-            },
-            set: function (value) {
-                let /** @type {?} */ simpleChanges = this[PRIVATE_PREFIX];
-                let /** @type {?} */ isFirstChange = simpleChanges === undefined;
-                if (simpleChanges == null) {
-                    simpleChanges = this[PRIVATE_PREFIX] = {};
+function NgOnChangesFeature(inputPropertyNames) {
+    return function (definition) {
+        const /** @type {?} */ inputs = definition.inputs;
+        const /** @type {?} */ proto = definition.type.prototype;
+        // Place where we will store SimpleChanges if there is a change
+        Object.defineProperty(proto, PRIVATE_PREFIX, { value: undefined, writable: true });
+        for (let /** @type {?} */ pubKey in inputs) {
+            const /** @type {?} */ minKey = inputs[pubKey];
+            const /** @type {?} */ propertyName = inputPropertyNames && inputPropertyNames[minKey] || pubKey;
+            const /** @type {?} */ privateMinKey = PRIVATE_PREFIX + minKey;
+            // Create a place where the actual value will be stored and make it non-enumerable
+            Object.defineProperty(proto, privateMinKey, { value: undefined, writable: true });
+            const /** @type {?} */ existingDesc = Object.getOwnPropertyDescriptor(proto, minKey);
+            // create a getter and setter for property
+            Object.defineProperty(proto, minKey, {
+                get: function () {
+                    return (existingDesc && existingDesc.get) ? existingDesc.get.call(this) :
+                        this[privateMinKey];
+                },
+                set: function (value) {
+                    let /** @type {?} */ simpleChanges = this[PRIVATE_PREFIX];
+                    let /** @type {?} */ isFirstChange = simpleChanges === undefined;
+                    if (simpleChanges == null) {
+                        simpleChanges = this[PRIVATE_PREFIX] = {};
+                    }
+                    simpleChanges[propertyName] = new SimpleChange(this[privateMinKey], value, isFirstChange);
+                    (existingDesc && existingDesc.set) ? existingDesc.set.call(this, value) :
+                        this[privateMinKey] = value;
                 }
-                simpleChanges[propertyName] = new SimpleChange(this[privateMinKey], value, isFirstChange);
-                (existingDesc && existingDesc.set) ? existingDesc.set.call(this, value) :
-                    this[privateMinKey] = value;
-            }
-        });
-    }
-    // If an onInit hook is defined, it will need to wrap the ngOnChanges call
-    // so the call order is changes-init-check in creation mode. In subsequent
-    // change detection runs, only the check wrapper will be called.
-    if (definition.onInit != null) {
-        definition.onInit = onChangesWrapper(definition.onInit);
-    }
-    definition.doCheck = onChangesWrapper(definition.doCheck);
+            });
+        }
+        // If an onInit hook is defined, it will need to wrap the ngOnChanges call
+        // so the call order is changes-init-check in creation mode. In subsequent
+        // change detection runs, only the check wrapper will be called.
+        if (definition.onInit != null) {
+            definition.onInit = onChangesWrapper(definition.onInit);
+        }
+        definition.doCheck = onChangesWrapper(definition.doCheck);
+    };
     /**
      * @param {?} delegateHook
      * @return {?}
