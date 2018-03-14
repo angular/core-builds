@@ -2,7 +2,6 @@
  * Generated bundle index. Do not edit.
  */
 export * from './public_api';
-export { AnimationMetadataType as ɵbo, animate as ɵbq, group as ɵbr, keyframes as ɵbv, sequence as ɵbs, state as ɵbu, style as ɵbt, transition as ɵbw, trigger as ɵbp } from './src/animation/dsl';
 export { _iterableDiffersFactory as ɵo, _keyValueDiffersFactory as ɵq, _localeFactory as ɵr } from './src/application_module';
 export { _appIdRandomProviderFactory as ɵi } from './src/application_tokens';
 export { defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵl } from './src/change_detection/change_detection';
