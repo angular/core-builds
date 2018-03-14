@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-f5a98f4
+ * @license Angular v6.0.0-beta.7-112431d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-f5a98f4
+ * @license Angular v6.0.0-beta.7-112431d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2081,7 +2081,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-f5a98f4');
+var VERSION = new Version('6.0.0-beta.7-112431d');
 
 /**
  * @fileoverview added by tsickle
@@ -18727,7 +18727,7 @@ function generatePropertyAliases(lNodeFlags, direction) {
     return propStore;
 }
 /**
- * Add or remove a class in a classList.
+ * Add or remove a class in a `classList` on a DOM element.
  *
  * This instruction is meant to handle the [class.foo]="exp" case
  *
@@ -18738,7 +18738,7 @@ function generatePropertyAliases(lNodeFlags, direction) {
  * @param {?} value A value indicating if a given class should be added or removed.
  * @return {?}
  */
-function elementClass(index, className, value) {
+function elementClassNamed(index, className, value) {
     if (value !== NO_CHANGE) {
         var /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (value) {
@@ -18752,6 +18752,30 @@ function elementClass(index, className, value) {
     }
 }
 /**
+ * Set the `className` property on a DOM element.
+ *
+ * This instruction is meant to handle the `[class]="exp"` usage.
+ *
+ * `elementClass` instruction writes the value to the "element's" `className` property.
+ *
+ * @template T
+ * @param {?} index The index of the element to update in the data array
+ * @param {?} value A value indicating a set of classes which should be applied. The method overrides
+ *   any existing classes. The value is stringified (`toString`) before it is applied to the
+ *   element.
+ * @return {?}
+ */
+function elementClass(index, value) {
+    if (value !== NO_CHANGE) {
+        // TODO: This is a naive implementation which simply writes value to the `className`. In the
+        // future
+        // we will add logic here which would work with the animation code.
+        var /** @type {?} */ lElement = data[index];
+        isProceduralRenderer(renderer) ? renderer.setProperty(lElement.native, 'className', value) :
+            lElement.native['className'] = stringify$1(value);
+    }
+}
+/**
  * @template T
  * @param {?} index
  * @param {?} styleName
@@ -18759,13 +18783,13 @@ function elementClass(index, className, value) {
  * @param {?=} suffixOrSanitizer
  * @return {?}
  */
-function elementStyle(index, styleName, value, suffixOrSanitizer) {
+function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
     if (value !== NO_CHANGE) {
-        var /** @type {?} */ lElement = /** @type {?} */ (data[index]);
+        var /** @type {?} */ lElement = data[index];
         if (value == null) {
             isProceduralRenderer(renderer) ?
                 renderer.removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
-                lElement.native.style.removeProperty(styleName);
+                lElement.native['style'].removeProperty(styleName);
         }
         else {
             var /** @type {?} */ strValue = typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
@@ -18773,7 +18797,41 @@ function elementStyle(index, styleName, value, suffixOrSanitizer) {
                 strValue = strValue + suffixOrSanitizer;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
-                lElement.native.style.setProperty(styleName, strValue);
+                lElement.native['style'].setProperty(styleName, strValue);
+        }
+    }
+}
+/**
+ * Set the `style` property on a DOM element.
+ *
+ * This instruction is meant to handle the `[style]="exp"` usage.
+ *
+ *
+ * @template T
+ * @param {?} index The index of the element to update in the data array
+ * @param {?} value A value indicating if a given style should be added or removed.
+ *   The expected shape of `value` is an object where keys are style names and the values
+ *   are their corresponding values to set. If value is falsy than the style is remove. An absence
+ *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
+ *   performed.
+ * @return {?}
+ */
+function elementStyle(index, value) {
+    if (value !== NO_CHANGE) {
+        // TODO: This is a naive implementation which simply writes value to the `style`. In the future
+        // we will add logic here which would work with the animation code.
+        var /** @type {?} */ lElement = /** @type {?} */ (data[index]);
+        if (isProceduralRenderer(renderer)) {
+            renderer.setProperty(lElement.native, 'style', value);
+        }
+        else {
+            var /** @type {?} */ style = lElement.native['style'];
+            for (var /** @type {?} */ i = 0, /** @type {?} */ keys = Object.keys(value); i < keys.length; i++) {
+                var /** @type {?} */ styleName = keys[i];
+                var /** @type {?} */ styleValue = (/** @type {?} */ (value))[styleName];
+                styleValue == null ? style.removeProperty(styleName) :
+                    style.setProperty(styleName, styleValue);
+            }
         }
     }
 }
@@ -22913,8 +22971,10 @@ exports.ɵe = elementEnd;
 exports.ɵp = elementProperty;
 exports.ɵpD = projectionDef;
 exports.ɵa = elementAttribute;
-exports.ɵk = elementClass;
 exports.ɵs = elementStyle;
+exports.ɵsn = elementStyleNamed;
+exports.ɵk = elementClass;
+exports.ɵkn = elementClassNamed;
 exports.ɵt = textBinding;
 exports.ɵv = embeddedViewEnd;
 exports.ɵst = store;
