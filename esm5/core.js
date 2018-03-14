@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-b1365d1
+ * @license Angular v6.0.0-beta.7-37fedd0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2043,7 +2043,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-b1365d1');
+var VERSION = new Version('6.0.0-beta.7-37fedd0');
 
 /**
  * @fileoverview added by tsickle
@@ -4693,6 +4693,9 @@ var NgZone = /** @class */ (function () {
         if ((/** @type {?} */ (Zone))['wtfZoneSpec']) {
             self._inner = self._inner.fork((/** @type {?} */ (Zone))['wtfZoneSpec']);
         }
+        if ((/** @type {?} */ (Zone))['TaskTrackingZoneSpec']) {
+            self._inner = self._inner.fork(new (/** @type {?} */ ((/** @type {?} */ (Zone))['TaskTrackingZoneSpec'])));
+        }
         if (enableLongStackTrace && (/** @type {?} */ (Zone))['longStackTraceZoneSpec']) {
             self._inner = self._inner.fork((/** @type {?} */ (Zone))['longStackTraceZoneSpec']);
         }
@@ -5070,6 +5073,10 @@ var NoopNgZone = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * @record
+ */
+
+/**
  * The Testability service provides testing hooks that can be accessed from
  * the browser and by services such as Protractor. Each bootstrapped Angular
  * application on the page will have an instance of Testability.
@@ -5077,14 +5084,9 @@ var NoopNgZone = /** @class */ (function () {
  */
 var Testability = /** @class */ (function () {
     function Testability(_ngZone) {
+        var _this = this;
         this._ngZone = _ngZone;
-        /**
-         * \@internal
-         */
         this._pendingCount = 0;
-        /**
-         * \@internal
-         */
         this._isZoneStable = true;
         /**
          * Whether any work was done since the last 'whenStable' callback. This is
@@ -5093,19 +5095,14 @@ var Testability = /** @class */ (function () {
          * \@internal
          */
         this._didWork = false;
-        /**
-         * \@internal
-         */
         this._callbacks = [];
         this._watchAngularEvents();
+        _ngZone.run(function () { _this.taskTrackingZone = Zone.current.get('TaskTrackingZone'); });
     }
-    /** @internal */
     /**
-     * \@internal
      * @return {?}
      */
     Testability.prototype._watchAngularEvents = /**
-     * \@internal
      * @return {?}
      */
     function () {
@@ -5130,13 +5127,16 @@ var Testability = /** @class */ (function () {
     };
     /**
      * Increases the number of pending request
+     * @deprecated pending requests are now tracked with zones.
      */
     /**
      * Increases the number of pending request
+     * @deprecated pending requests are now tracked with zones.
      * @return {?}
      */
     Testability.prototype.increasePendingRequestCount = /**
      * Increases the number of pending request
+     * @deprecated pending requests are now tracked with zones.
      * @return {?}
      */
     function () {
@@ -5146,13 +5146,16 @@ var Testability = /** @class */ (function () {
     };
     /**
      * Decreases the number of pending request
+     * @deprecated pending requests are now tracked with zones
      */
     /**
      * Decreases the number of pending request
+     * @deprecated pending requests are now tracked with zones
      * @return {?}
      */
     Testability.prototype.decreasePendingRequestCount = /**
      * Decreases the number of pending request
+     * @deprecated pending requests are now tracked with zones
      * @return {?}
      */
     function () {
@@ -5175,15 +5178,12 @@ var Testability = /** @class */ (function () {
      * @return {?}
      */
     function () {
-        return this._isZoneStable && this._pendingCount == 0 && !this._ngZone.hasPendingMacrotasks;
+        return this._isZoneStable && this._pendingCount === 0 && !this._ngZone.hasPendingMacrotasks;
     };
-    /** @internal */
     /**
-     * \@internal
      * @return {?}
      */
     Testability.prototype._runCallbacksIfReady = /**
-     * \@internal
      * @return {?}
      */
     function () {
@@ -5192,43 +5192,132 @@ var Testability = /** @class */ (function () {
             // Schedules the call backs in a new frame so that it is always async.
             scheduleMicroTask(function () {
                 while (_this._callbacks.length !== 0) {
-                    (/** @type {?} */ ((_this._callbacks.pop())))(_this._didWork);
+                    var /** @type {?} */ cb = /** @type {?} */ ((_this._callbacks.pop()));
+                    clearTimeout(cb.timeoutId);
+                    cb.doneCb(_this._didWork);
                 }
                 _this._didWork = false;
             });
         }
         else {
-            // Not Ready
+            // Still not stable, send updates.
+            var /** @type {?} */ pending_1 = this.getPendingTasks();
+            this._callbacks = this._callbacks.filter(function (cb) {
+                if (cb.updateCb && cb.updateCb(pending_1)) {
+                    clearTimeout(cb.timeoutId);
+                    return false;
+                }
+                return true;
+            });
             this._didWork = true;
         }
     };
     /**
-     * Run callback when the application is stable
-     * @param callback function to be called after the application is stable
+     * @return {?}
+     */
+    Testability.prototype.getPendingTasks = /**
+     * @return {?}
+     */
+    function () {
+        if (!this.taskTrackingZone) {
+            return [];
+        }
+        return this.taskTrackingZone.macroTasks.map(function (t) {
+            return {
+                source: t.source,
+                isPeriodic: t.data.isPeriodic,
+                delay: t.data.delay,
+                // From TaskTrackingZone:
+                // https://github.com/angular/zone.js/blob/master/lib/zone-spec/task-tracking.ts#L40
+                creationLocation: /** @type {?} */ ((/** @type {?} */ (t)).creationLocation),
+                // Added by Zones for XHRs
+                // https://github.com/angular/zone.js/blob/master/lib/browser/browser.ts#L133
+                xhr: (/** @type {?} */ (t.data)).target
+            };
+        });
+    };
+    /**
+     * @param {?} cb
+     * @param {?=} timeout
+     * @param {?=} updateCb
+     * @return {?}
+     */
+    Testability.prototype.addCallback = /**
+     * @param {?} cb
+     * @param {?=} timeout
+     * @param {?=} updateCb
+     * @return {?}
+     */
+    function (cb, timeout, updateCb) {
+        var _this = this;
+        var /** @type {?} */ timeoutId = -1;
+        if (timeout && timeout > 0) {
+            timeoutId = setTimeout(function () {
+                _this._callbacks = _this._callbacks.filter(function (cb) { return cb.timeoutId !== timeoutId; });
+                cb(_this._didWork, _this.getPendingTasks());
+            }, timeout);
+        }
+        this._callbacks.push(/** @type {?} */ ({ doneCb: cb, timeoutId: timeoutId, updateCb: updateCb }));
+    };
+    /**
+     * Wait for the application to be stable with a timeout. If the timeout is reached before that
+     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+     *
+     * @param doneCb The callback to invoke when Angular is stable or the timeout expires
+     *    whichever comes first.
+     * @param timeout Optional. The maximum time to wait for Angular to become stable. If not
+     *    specified, whenStable() will wait forever.
+     * @param updateCb Optional. If specified, this callback will be invoked whenever the set of
+     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+     *    and no further updates will be issued.
      */
     /**
-     * Run callback when the application is stable
-     * @param {?} callback function to be called after the application is stable
+     * Wait for the application to be stable with a timeout. If the timeout is reached before that
+     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+     *
+     * @param {?} doneCb The callback to invoke when Angular is stable or the timeout expires
+     *    whichever comes first.
+     * @param {?=} timeout Optional. The maximum time to wait for Angular to become stable. If not
+     *    specified, whenStable() will wait forever.
+     * @param {?=} updateCb Optional. If specified, this callback will be invoked whenever the set of
+     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+     *    and no further updates will be issued.
      * @return {?}
      */
     Testability.prototype.whenStable = /**
-     * Run callback when the application is stable
-     * @param {?} callback function to be called after the application is stable
+     * Wait for the application to be stable with a timeout. If the timeout is reached before that
+     * happens, the callback receives a list of the macro tasks that were pending, otherwise null.
+     *
+     * @param {?} doneCb The callback to invoke when Angular is stable or the timeout expires
+     *    whichever comes first.
+     * @param {?=} timeout Optional. The maximum time to wait for Angular to become stable. If not
+     *    specified, whenStable() will wait forever.
+     * @param {?=} updateCb Optional. If specified, this callback will be invoked whenever the set of
+     *    pending macrotasks changes. If this callback returns true doneCb will not be invoked
+     *    and no further updates will be issued.
      * @return {?}
      */
-    function (callback) {
-        this._callbacks.push(callback);
+    function (doneCb, timeout, updateCb) {
+        if (updateCb && !this.taskTrackingZone) {
+            throw new Error('Task tracking zone is required when passing an update callback to ' +
+                'whenStable(). Is "zone.js/dist/task-tracking.js" loaded?');
+        }
+        // These arguments are 'Function' above to keep the public API simple.
+        this.addCallback(/** @type {?} */ (doneCb), timeout, /** @type {?} */ (updateCb));
         this._runCallbacksIfReady();
     };
     /**
      * Get the number of pending requests
+     * @deprecated pending requests are now tracked with zones
      */
     /**
      * Get the number of pending requests
+     * @deprecated pending requests are now tracked with zones
      * @return {?}
      */
     Testability.prototype.getPendingRequestCount = /**
      * Get the number of pending requests
+     * @deprecated pending requests are now tracked with zones
      * @return {?}
      */
     function () { return this._pendingCount; };
