@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-9df13ad
+ * @license Angular v6.0.0-beta.7-c09bd67
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1871,7 +1871,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-9df13ad');
+const VERSION = new Version('6.0.0-beta.7-c09bd67');
 
 /**
  * @fileoverview added by tsickle
@@ -15089,16 +15089,12 @@ function insertView(container, newView, index) {
         // This is a new view, we need to add it to the children.
         setViewNext(views[index - 1], newView);
     }
-    if (index < views.length && views[index].data.id !== newView.data.id) {
-        // View ID change replace the view.
+    if (index < views.length) {
         setViewNext(newView, views[index]);
         views.splice(index, 0, newView);
     }
-    else if (index >= views.length) {
+    else {
         views.push(newView);
-    }
-    if (state.nextIndex <= index) {
-        state.nextIndex++;
     }
     // If the container's renderParent is null, we know that it is a root node of its own parent view
     // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
@@ -16640,8 +16636,8 @@ function containerRefreshEnd() {
     container.native = undefined;
     ngDevMode && assertNodeType(container, 0 /* Container */);
     const /** @type {?} */ nextIndex = container.data.nextIndex;
+    // remove extra views at the end of the container
     while (nextIndex < container.data.views.length) {
-        // remove extra view.
         removeView(container, nextIndex);
     }
 }
@@ -16660,6 +16656,35 @@ function refreshDynamicChildren() {
     }
 }
 /**
+ * Looks for a view with a given view block id inside a provided LContainer.
+ * Removes views that need to be deleted in the process.
+ *
+ * @param {?} containerNode where to search for views
+ * @param {?} startIdx starting index in the views array to search from
+ * @param {?} viewBlockId exact view block id to look for
+ * @return {?} index of a found view or -1 if not found
+ */
+function scanForView(containerNode, startIdx, viewBlockId) {
+    const /** @type {?} */ views = containerNode.data.views;
+    for (let /** @type {?} */ i = startIdx; i < views.length; i++) {
+        const /** @type {?} */ viewAtPositionId = views[i].data.id;
+        if (viewAtPositionId === viewBlockId) {
+            return views[i];
+        }
+        else if (viewAtPositionId < viewBlockId) {
+            // found a view that should not be at this position - remove
+            removeView(containerNode, i);
+        }
+        else {
+            // found a view with id grater than the one we are searching for
+            // which means that required view doesn't exist and can't be found at
+            // later positions in the views array - stop the search here
+            break;
+        }
+    }
+    return null;
+}
+/**
  * Marks the start of an embedded view.
  *
  * @param {?} viewBlockId The ID of this view
@@ -16669,14 +16694,12 @@ function embeddedViewStart(viewBlockId) {
     const /** @type {?} */ container = /** @type {?} */ ((isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent))));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     const /** @type {?} */ lContainer = container.data;
-    const /** @type {?} */ views = lContainer.views;
-    const /** @type {?} */ existingView = !creationMode && lContainer.nextIndex < views.length && views[lContainer.nextIndex];
-    let /** @type {?} */ viewUpdateMode = existingView && viewBlockId === (/** @type {?} */ (existingView)).data.id;
-    if (viewUpdateMode) {
-        previousOrParentNode = views[lContainer.nextIndex++];
+    const /** @type {?} */ existingViewNode = scanForView(container, lContainer.nextIndex, viewBlockId);
+    if (existingViewNode) {
+        previousOrParentNode = existingViewNode;
         ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
         isParent = true;
-        enterView((/** @type {?} */ (existingView)).data, /** @type {?} */ (previousOrParentNode));
+        enterView((/** @type {?} */ (existingViewNode)).data, /** @type {?} */ (existingViewNode));
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
@@ -16685,9 +16708,8 @@ function embeddedViewStart(viewBlockId) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
         enterView(newView, createLNode(null, 2 /* View */, null, newView));
-        lContainer.nextIndex++;
     }
-    return !viewUpdateMode;
+    return !existingViewNode;
 }
 /**
  * Initialize the TView (e.g. static data) for the active embedded view.
@@ -16717,17 +16739,16 @@ function embeddedViewEnd() {
     refreshChildComponents();
     isParent = false;
     const /** @type {?} */ viewNode = previousOrParentNode = /** @type {?} */ (currentView.node);
-    const /** @type {?} */ container = /** @type {?} */ (previousOrParentNode.parent);
-    if (container) {
+    const /** @type {?} */ containerNode = /** @type {?} */ (previousOrParentNode.parent);
+    if (containerNode) {
         ngDevMode && assertNodeType(viewNode, 2 /* View */);
-        ngDevMode && assertNodeType(container, 0 /* Container */);
-        const /** @type {?} */ containerState = container.data;
-        const /** @type {?} */ previousView = containerState.nextIndex <= containerState.views.length ? /** @type {?} */ (containerState.views[containerState.nextIndex - 1]) :
-            null;
-        const /** @type {?} */ viewIdChanged = previousView == null ? true : previousView.data.id !== viewNode.data.id;
-        if (viewIdChanged) {
-            insertView(container, viewNode, containerState.nextIndex - 1);
+        ngDevMode && assertNodeType(containerNode, 0 /* Container */);
+        const /** @type {?} */ lContainer = containerNode.data;
+        if (creationMode) {
+            // it is a new view, insert it into collection of views for a given container
+            insertView(containerNode, viewNode, lContainer.nextIndex);
         }
+        lContainer.nextIndex++;
     }
     leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
     ngDevMode && assertEqual(isParent, false, 'isParent');
@@ -18450,6 +18471,14 @@ class ViewContainerRef$1 {
         }
         const /** @type {?} */ lView = (/** @type {?} */ (viewRef))._lViewNode;
         insertView(this._node, lView, index);
+        // TODO(pk): this is a temporary index adjustment so imperativelly inserted (through
+        // ViewContainerRef) views
+        // are not removed in the containerRefreshEnd instruction.
+        // The final fix will consist of creating a dedicated container node for views inserted through
+        // ViewContainerRef.
+        // Such container should not be trimmed as it is the case in the containerRefreshEnd
+        // instruction.
+        this._node.data.nextIndex = this._node.data.views.length;
         // If the view is dynamic (has a template), it needs to be counted both at the container
         // level and at the node above the container.
         if (lView.data.template !== null) {
