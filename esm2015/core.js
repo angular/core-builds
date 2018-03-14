@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-4ac606b
+ * @license Angular v6.0.0-beta.7-b1365d1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1871,7 +1871,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-4ac606b');
+const VERSION = new Version('6.0.0-beta.7-b1365d1');
 
 /**
  * @fileoverview added by tsickle
@@ -14440,22 +14440,7 @@ function queueDestroyHooks(def, tView, i) {
 function executeInitHooks(currentView, tView, creationMode) {
     if (currentView.lifecycleStage === 1 /* INIT */) {
         executeHooks(currentView.data, tView.initHooks, tView.checkHooks, creationMode);
-        currentView.lifecycleStage = 2 /* CONTENT_INIT */;
-    }
-}
-/**
- * Calls all afterContentInit and afterContentChecked hooks for the view, then splices
- * out afterContentInit hooks to prep for the next run in update mode.
- *
- * @param {?} currentView The current view
- * @param {?} tView
- * @param {?} creationMode
- * @return {?}
- */
-function executeContentHooks(currentView, tView, creationMode) {
-    if (currentView.lifecycleStage < 3 /* VIEW_INIT */) {
-        executeHooks(currentView.data, tView.contentHooks, tView.contentCheckHooks, creationMode);
-        currentView.lifecycleStage = 3 /* VIEW_INIT */;
+        currentView.lifecycleStage = 2 /* AFTER_INIT */;
     }
 }
 /**
@@ -15664,8 +15649,32 @@ function leaveView(newView) {
     // Views should be clean and in update mode after being checked, so these bits are cleared
     currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     currentView.lifecycleStage = 1 /* INIT */;
-    currentView.tView.firstTemplatePass = false;
     enterView(newView, null);
+}
+/**
+ * Refreshes the views of child components, triggering any init/content hooks existing.
+ * @return {?}
+ */
+function refreshChildComponents() {
+    executeInitAndContentHooks();
+    // This needs to be set before children are processed to support recursive components
+    currentView.tView.firstTemplatePass = false;
+    const /** @type {?} */ components = currentView.tView.components;
+    if (components != null) {
+        for (let /** @type {?} */ i = 0; i < components.length; i++) {
+            componentRefresh(components[i] + 1, components[i]);
+        }
+    }
+}
+/**
+ * @return {?}
+ */
+function executeInitAndContentHooks() {
+    if (!checkNoChangesMode) {
+        const /** @type {?} */ tView = currentView.tView;
+        executeInitHooks(currentView, tView, creationMode);
+        executeHooks(currentView.data, tView.contentHooks, tView.contentCheckHooks, creationMode);
+    }
 }
 /**
  * @param {?} viewId
@@ -15806,9 +15815,10 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         }
         enterView(viewNode.data, viewNode);
         template(context, cm);
+        refreshDynamicChildren();
+        refreshChildComponents();
     }
     finally {
-        refreshDynamicChildren();
         leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
@@ -15831,11 +15841,13 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
         }
         if (template) {
             template(/** @type {?} */ ((componentOrContext)), creationMode);
+            refreshChildComponents();
         }
         else {
+            executeInitAndContentHooks();
             // Element was stored at 0 and directive was stored at 1 in renderComponent
             // so to refresh the component, refresh() needs to be called with (1, 0)
-            directiveRefresh(1, 0);
+            componentRefresh(1, 0);
         }
     }
     finally {
@@ -15908,6 +15920,7 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
                 // TODO(mhevery): This assumes that the directives come in correct order, which
                 // is not guaranteed. Must be refactored to take it into account.
                 const /** @type {?} */ instance = hostComponentDef.n();
+                storeComponentIndex(index);
                 directiveCreate(++index, instance, hostComponentDef, queryName);
                 initChangeDetectorIfExisting(node.nodeInjector, instance);
             }
@@ -15915,6 +15928,16 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
         }
     }
     return native;
+}
+/**
+ * Stores index of component so it will be queued for refresh during change detection.
+ * @param {?} index
+ * @return {?}
+ */
+function storeComponentIndex(index) {
+    if (currentView.tView.firstTemplatePass) {
+        (currentView.tView.components || (currentView.tView.components = [])).push(index);
+    }
 }
 /**
  * Sets the context for a ChangeDetectorRef to the given instance.
@@ -15997,7 +16020,8 @@ function createTView() {
         contentCheckHooks: null,
         viewHooks: null,
         viewCheckHooks: null,
-        destroyHooks: null
+        destroyHooks: null,
+        components: null
     };
 }
 /**
@@ -16630,6 +16654,7 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
  * @return {?}
  */
 function embeddedViewEnd() {
+    refreshChildComponents();
     isParent = false;
     const /** @type {?} */ viewNode = previousOrParentNode = /** @type {?} */ (currentView.node);
     const /** @type {?} */ container = /** @type {?} */ (previousOrParentNode.parent);
@@ -16649,7 +16674,7 @@ function embeddedViewEnd() {
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
 }
 /**
- * Refreshes the directive, triggering init and content hooks.
+ * Refreshes the directive.
  *
  * When it is a component, it also enters the component's view and processes it to update bindings,
  * queries, etc.
@@ -16659,11 +16684,7 @@ function embeddedViewEnd() {
  * @param {?} elementIndex
  * @return {?}
  */
-function directiveRefresh(directiveIndex, elementIndex) {
-    if (!checkNoChangesMode) {
-        executeInitHooks(currentView, currentView.tView, creationMode);
-        executeContentHooks(currentView, currentView.tView, creationMode);
-    }
+function componentRefresh(directiveIndex, elementIndex) {
     const /** @type {?} */ template = (/** @type {?} */ (tData[directiveIndex])).template;
     if (template != null) {
         ngDevMode && assertDataInRange(elementIndex);
@@ -17022,9 +17043,10 @@ function detectChangesInternal(hostView, hostNode, component) {
     if (template != null) {
         try {
             template(component, creationMode);
+            refreshDynamicChildren();
+            refreshChildComponents();
         }
         finally {
-            refreshDynamicChildren();
             leaveView(oldView);
         }
     }
@@ -21010,5 +21032,5 @@ function transition$$1(stateChangeExpr, steps) {
  * Generated bundle index. Do not edit.
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, inject, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementClass as ɵk, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, directiveRefresh as ɵr, store as ɵst, load as ɵld, pipe as ɵPp, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbr, group$1 as ɵbs, keyframes$1 as ɵbw, sequence$1 as ɵbt, state$1 as ɵbv, style$1 as ɵbu, transition$1 as ɵbx, trigger$1 as ɵbq, _iterableDiffersFactory as ɵo, _keyValueDiffersFactory as ɵq, _localeFactory as ɵu, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵl, DefaultIterableDifferFactory as ɵm, DefaultKeyValueDifferFactory as ɵn, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵw, createScope$1 as ɵy, detectWTF as ɵx, endTimeRange as ɵbb, leave as ɵz, startTimeRange as ɵba, getOrCreateChangeDetectorRef as ɵbf, getOrCreateContainerRef as ɵbh, getOrCreateInjectable as ɵbg, getOrCreateNodeInjector as ɵbe, getOrCreateTemplateRef as ɵbi, bindingUpdated as ɵbl, bindingUpdated2 as ɵbn, bindingUpdated4 as ɵbo, checkAndUpdateBinding$1 as ɵbm, consumeBinding as ɵbk, getCreationMode as ɵbj, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbc, DebugContext as ɵbd };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, Injectable, forwardRef, resolveForwardRef, inject, Injector, ReflectiveInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementClass as ɵk, elementStyle as ɵs, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$1 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid, AUTO_STYLE, trigger$$1 as trigger, animate$$1 as animate, group$$1 as group, sequence$$1 as sequence, style$$1 as style, state$$1 as state, keyframes$$1 as keyframes, transition$$1 as transition, animate$1 as ɵbq, group$1 as ɵbr, keyframes$1 as ɵbv, sequence$1 as ɵbs, state$1 as ɵbu, style$1 as ɵbt, transition$1 as ɵbw, trigger$1 as ɵbp, _iterableDiffersFactory as ɵo, _keyValueDiffersFactory as ɵq, _localeFactory as ɵr, _appIdRandomProviderFactory as ɵi, defaultIterableDiffers as ɵj, defaultKeyValueDiffers as ɵl, DefaultIterableDifferFactory as ɵm, DefaultKeyValueDifferFactory as ɵn, ReflectiveInjector_ as ɵf, ReflectiveDependency as ɵg, resolveReflectiveProviders as ɵh, wtfEnabled as ɵu, createScope$1 as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz, getOrCreateChangeDetectorRef as ɵbe, getOrCreateContainerRef as ɵbg, getOrCreateInjectable as ɵbf, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbh, bindingUpdated as ɵbk, bindingUpdated2 as ɵbm, bindingUpdated4 as ɵbn, checkAndUpdateBinding$1 as ɵbl, consumeBinding as ɵbj, getCreationMode as ɵbi, makeParamDecorator as ɵc, makePropDecorator as ɵd, _def as ɵbb, DebugContext as ɵbc };
 //# sourceMappingURL=core.js.map

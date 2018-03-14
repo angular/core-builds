@@ -24,13 +24,6 @@ export declare function queueLifecycleHooks(flags: number, currentView: LView): 
  */
 export declare function executeInitHooks(currentView: LView, tView: TView, creationMode: boolean): void;
 /**
- * Calls all afterContentInit and afterContentChecked hooks for the view, then splices
- * out afterContentInit hooks to prep for the next run in update mode.
- *
- * @param currentView The current view
- */
-export declare function executeContentHooks(currentView: LView, tView: TView, creationMode: boolean): void;
-/**
  * Iterates over afterViewInit and afterViewChecked functions and calls them.
  *
  * @param currentView The current view
