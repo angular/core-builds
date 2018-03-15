@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-88b3198
+ * @license Angular v6.0.0-beta.7-a011654
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1340,6 +1340,7 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
 });
 /**
  * @record
+ * @template T
  */
 
 /**
@@ -1347,6 +1348,7 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
  *
  * \@experimental
  * @record
+ * @template T
  */
 
 /**
@@ -1381,6 +1383,7 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
  * \@stable
+ * @template T
  */
 class InjectionToken {
     /**
@@ -1871,7 +1874,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-88b3198');
+const VERSION = new Version('6.0.0-beta.7-a011654');
 
 /**
  * @fileoverview added by tsickle
@@ -3388,6 +3391,7 @@ Console.ctorParameters = () => [];
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * \@experimental
+ * @template T
  */
 class ModuleWithComponentFactories {
     /**
@@ -3500,12 +3504,14 @@ class CompilerFactory {
  * method.
  * \@stable
  * @abstract
+ * @template C
  */
 class ComponentRef {
 }
 /**
  * \@stable
  * @abstract
+ * @template C
  */
 class ComponentFactory {
 }
@@ -3584,6 +3590,9 @@ class CodegenComponentFactoryResolver {
         return new ComponentFactoryBoundToModule(factory, this._ngModule);
     }
 }
+/**
+ * @template C
+ */
 class ComponentFactoryBoundToModule extends ComponentFactory {
     /**
      * @param {?} factory
@@ -3630,16 +3639,19 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
  *
  * \@stable
  * @abstract
+ * @template T
  */
 class NgModuleRef {
 }
 /**
  * @record
+ * @template T
  */
 
 /**
  * \@experimental
  * @abstract
+ * @template T
  */
 class NgModuleFactory {
 }
@@ -3863,6 +3875,7 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
  *
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
+ * @template T
  */
 class EventEmitter extends Subject {
     /**
@@ -5336,6 +5349,7 @@ class Renderer2 {
  * [Security Guide](http://g.co/ng/security).
  *
  * \@stable
+ * @template T
  */
 class ElementRef {
     /**
@@ -5430,6 +5444,7 @@ function getModuleFactory(id) {
  * }
  * ```
  * \@stable
+ * @template T
  */
 class QueryList {
     constructor() {
@@ -5665,6 +5680,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * createEmbeddedView}, which will create the View and attach it to the View Container.
  * \@stable
  * @abstract
+ * @template C
  */
 class TemplateRef {
 }
@@ -5791,6 +5807,7 @@ class ViewRef extends ChangeDetectorRef {
  * ```
  * \@experimental
  * @abstract
+ * @template C
  */
 class EmbeddedViewRef extends ViewRef {
 }
@@ -6067,6 +6084,7 @@ function removeDebugNodeFromIndex(node) {
  *
  * \@experimental All debugging apis are currently experimental.
  * @record
+ * @template T
  */
 
 /**
@@ -6257,6 +6275,7 @@ class DefaultIterableDifferFactory {
 const trackByIdentity = (index, item) => item;
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * @template V
  */
 class DefaultIterableDiffer {
     /**
@@ -6843,6 +6862,7 @@ class DefaultIterableDiffer {
 }
 /**
  * \@stable
+ * @template V
  */
 class IterableChangeRecord_ {
     /**
@@ -6896,6 +6916,9 @@ class IterableChangeRecord_ {
         this._nextIdentityChange = null;
     }
 }
+/**
+ * @template V
+ */
 class _DuplicateItemRecordList {
     constructor() {
         /**
@@ -6979,6 +7002,9 @@ class _DuplicateItemRecordList {
         return this._head === null;
     }
 }
+/**
+ * @template V
+ */
 class _DuplicateMap {
     constructor() {
         this.map = new Map();
@@ -7064,6 +7090,9 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @template K, V
+ */
 class DefaultKeyValueDifferFactory {
     constructor() { }
     /**
@@ -7077,6 +7106,9 @@ class DefaultKeyValueDifferFactory {
      */
     create() { return new DefaultKeyValueDiffer(); }
 }
+/**
+ * @template K, V
+ */
 class DefaultKeyValueDiffer {
     constructor() {
         this._records = new Map();
@@ -7354,6 +7386,7 @@ class DefaultKeyValueDiffer {
 }
 /**
  * \@stable
+ * @template K, V
  */
 class KeyValueChangeRecord_ {
     /**
@@ -7407,6 +7440,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -7415,6 +7449,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -7422,11 +7457,13 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
  * @record
+ * @template V
  */
 
 /**
@@ -7435,6 +7472,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template T
  */
 
 /**
@@ -7540,6 +7578,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -7548,6 +7587,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -7555,6 +7595,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -8515,12 +8556,14 @@ class Sanitizer {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// unsupported: template constraints.
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
  * We use a function so we can reexeute it in case an error happens and use the given logger
  * function to log the error from the definition of the node, which is shown in all browser
  * logs.
  * @record
+ * @template D
  */
 
 /**
@@ -8530,8 +8573,10 @@ class Sanitizer {
  * @record
  */
 
+// unsupported: template constraints.
 /**
  * @record
+ * @template DF
  */
 
 /**
@@ -17600,6 +17645,9 @@ const CLEAN_PROMISE = _CLEAN_PROMISE;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @template T
+ */
 class ViewRef$1 {
     /**
      * @param {?} _view
@@ -17801,6 +17849,9 @@ class ViewRef$1 {
      */
     checkNoChanges() { checkNoChanges(this.context); }
 }
+/**
+ * @template T
+ */
 class EmbeddedViewRef$1 extends ViewRef$1 {
     /**
      * @param {?} viewNode
@@ -17827,6 +17878,7 @@ function createViewRef(view, context) {
 /**
  * Interface for destroy logic. Implemented by addDestroyable.
  * @record
+ * @template T
  */
 
 /**
@@ -18414,6 +18466,9 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
     }
     return null;
 }
+/**
+ * @template T
+ */
 class ReadFromInjectorFn {
     /**
      * @param {?} read
@@ -18588,6 +18643,9 @@ function getOrCreateTemplateRef(di) {
     const /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
     return di.templateRef || (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer()));
 }
+/**
+ * @template T
+ */
 class TemplateRef$1 {
     /**
      * @param {?} elementRef
@@ -19140,18 +19198,21 @@ function isPure(index) {
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
  * consumable for rendering.
  * @record
+ * @template T
  */
 
 /**
  * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
  * consumable for rendering.
  * @record
+ * @template T
  */
 
 /**
  * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
  * consumable for rendering.
  * @record
+ * @template T
  */
 
 /**
@@ -19166,6 +19227,7 @@ function isPure(index) {
  *
  * See: {\@link defineDirective}
  * @record
+ * @template T
  */
 
 /**
@@ -19180,6 +19242,7 @@ function isPure(index) {
  *
  * See: {\@link defineComponent}
  * @record
+ * @template T
  */
 
 /**
@@ -19194,16 +19257,19 @@ function isPure(index) {
  *
  * See: {\@link definePipe}
  * @record
+ * @template T
  */
 
 /**
  * Arguments for `defineDirective`
  * @record
+ * @template T
  */
 
 /**
  * Arguments for `defineComponent`.
  * @record
+ * @template T
  */
 
 // Note: This hack is necessary so we don't erroneously get a circular dependency
@@ -19243,6 +19309,9 @@ function isPure(index) {
  * @record
  */
 
+/**
+ * @template T
+ */
 
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
@@ -19262,6 +19331,7 @@ function isPure(index) {
  * A predicate which determines if a given element/directive should be included in the query
  * results.
  * @record
+ * @template T
  */
 
 /**
@@ -19270,6 +19340,7 @@ function isPure(index) {
  * - values collected based on a predicate
  * - `QueryList` to which collected values should be reported
  * @record
+ * @template T
  */
 
 class LQueries_ {
@@ -19511,6 +19582,9 @@ function createQuery$1(previous, queryList, predicate, read) {
         values: (/** @type {?} */ ((queryList)))._valuesTree
     };
 }
+/**
+ * @template T
+ */
 class QueryList_ {
     constructor() {
         this.dirty = true;
