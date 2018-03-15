@@ -1,6 +1,6 @@
 {
   "name": "@angular/core",
-  "version": "6.0.0-beta.7-0ebd577",
+  "version": "6.0.0-beta.7-44de10e",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
   "module": "./esm5/core.js",
@@ -21,5 +21,6 @@
   },
   "ng-update": {
     "packageGroup": ["@angular/core", "@angular/compiler", "@angular/common", "@angular/animations", "@angular/platform-browser", "@angular/platform-browser-dynamic", "@angular/forms", "@angular/http", "@angular/platform-server", "@angular/platform-webworker", "@angular/platform-webworker-dynamic", "@angular/upgrade", "@angular/router", "@angular/compiler-cli", "@angular/language-service", "@angular/benchpress", "@angular/service-worker"]
-  }
+  },
+  "sideEffects": false
 }
