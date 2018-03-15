@@ -68,7 +68,6 @@ export declare type CompilerOptions = {
     defaultEncapsulation?: ViewEncapsulation;
     providers?: StaticProvider[];
     missingTranslation?: MissingTranslationStrategy;
-    enableLegacyTemplate?: boolean;
     preserveWhitespaces?: boolean;
 };
 /**
