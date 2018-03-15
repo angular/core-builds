@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-02e6ac2
+ * @license Angular v6.0.0-beta.7-4e6ac18
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-02e6ac2
+ * @license Angular v6.0.0-beta.7-4e6ac18
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2084,7 +2084,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-02e6ac2');
+var VERSION = new Version('6.0.0-beta.7-4e6ac18');
 
 /**
  * @fileoverview added by tsickle
@@ -18367,14 +18367,13 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
         ngDevMode &&
             assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
         var /** @type {?} */ isHostElement = typeof nameOrComponentType !== 'string';
-        // MEGAMORPHIC: `ngComponentDef` is a megamorphic property access here.
-        // This is OK, since we will refactor this code and store the result in `TView.data`
-        // which means that we will be reading this value only once. We are trading clean/simple
-        // template
-        // code for slight startup(first run) performance. (No impact on subsequent runs)
-        // TODO(misko): refactor this to store the `ComponentDef` in `TView.data`.
-        var /** @type {?} */ hostComponentDef = isHostElement ? (/** @type {?} */ (nameOrComponentType)).ngComponentDef : null;
-        var /** @type {?} */ name_1 = isHostElement ? /** @type {?} */ ((hostComponentDef)).tag : /** @type {?} */ (nameOrComponentType);
+        var /** @type {?} */ hostComponentDef = null;
+        var /** @type {?} */ name_1 = /** @type {?} */ (nameOrComponentType);
+        if (isHostElement) {
+            hostComponentDef = currentView.tView.firstTemplatePass ?
+                (/** @type {?} */ (nameOrComponentType)).ngComponentDef : /** @type {?} */ (tData[index + 1]);
+            name_1 = /** @type {?} */ ((hostComponentDef)).tag;
+        }
         if (name_1 === null) {
             // TODO: future support for nameless components.
             throw 'for now name is required';
@@ -18447,15 +18446,10 @@ function hack_declareDirectives(index, directiveTypes, localRefs) {
         // TODO(mhevery): This assumes that the directives come in correct order, which
         // is not guaranteed. Must be refactored to take it into account.
         for (var /** @type {?} */ i = 0; i < directiveTypes.length; i++) {
-            // MEGAMORPHIC: `ngDirectiveDef` is a megamorphic property access here.
-            // This is OK, since we will refactor this code and store the result in `TView.data`
-            // which means that we will be reading this value only once. We are trading clean/simple
-            // template
-            // code for slight startup(first run) performance. (No impact on subsequent runs)
-            // TODO(misko): refactor this to store the `DirectiveDef` in `TView.data`.
+            index++;
             var /** @type {?} */ directiveType = directiveTypes[i];
-            var /** @type {?} */ directiveDef = directiveType.ngDirectiveDef;
-            directiveCreate(++index, directiveDef.n(), directiveDef, hack_findQueryName(directiveDef, localRefs));
+            var /** @type {?} */ directiveDef = currentView.tView.firstTemplatePass ? directiveType.ngDirectiveDef : /** @type {?} */ (tData[index]);
+            directiveCreate(index, directiveDef.n(), directiveDef, hack_findQueryName(directiveDef, localRefs));
         }
     }
 }
@@ -20784,7 +20778,7 @@ var NG_ELEMENT_ID = '__NG_ELEMENT_ID__';
  * directives that will share slots, and thus, the fewer false positives when checking for
  * the existence of a directive.
  */
-var BLOOM_SIZE = 128;
+var BLOOM_SIZE = 256;
 /**
  * Counter used to generate unique IDs for directives.
  */
@@ -20804,9 +20798,9 @@ function bloomAdd(injector, type) {
     if (id == null) {
         id = (/** @type {?} */ (type))[NG_ELEMENT_ID] = nextNgElementId++;
     }
-    // We only have BLOOM_SIZE (128) slots in our bloom filter (4 buckets * 32 bits each),
-    // so all unique IDs must be modulo-ed into a number from 0 - 127 to fit into the filter.
-    // This means that after 128, some directives will share slots, leading to some false positives
+    // We only have BLOOM_SIZE (256) slots in our bloom filter (8 buckets * 32 bits each),
+    // so all unique IDs must be modulo-ed into a number from 0 - 255 to fit into the filter.
+    // This means that after 255, some directives will share slots, leading to some false positives
     // when checking for a directive's presence.
     var /** @type {?} */ bloomBit = id % BLOOM_SIZE;
     // Create a mask that targets the specific bit associated with the directive.
@@ -20814,23 +20808,15 @@ function bloomAdd(injector, type) {
     // to bit positions 0 - 31 in a 32 bit integer.
     var /** @type {?} */ mask = 1 << bloomBit;
     // Use the raw bloomBit number to determine which bloom filter bucket we should check
-    // e.g: bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127]
-    if (bloomBit < 64) {
-        if (bloomBit < 32) {
-            // Then use the mask to flip on the bit (0-31) associated with the directive in that bucket
-            injector.bf0 |= mask;
-        }
-        else {
-            injector.bf1 |= mask;
-        }
+    // e.g: bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc
+    if (bloomBit < 128) {
+        // Then use the mask to flip on the bit (0-31) associated with the directive in that bucket
+        bloomBit < 64 ? (bloomBit < 32 ? (injector.bf0 |= mask) : (injector.bf1 |= mask)) :
+            (bloomBit < 96 ? (injector.bf2 |= mask) : (injector.bf3 |= mask));
     }
     else {
-        if (bloomBit < 96) {
-            injector.bf2 |= mask;
-        }
-        else {
-            injector.bf3 |= mask;
-        }
+        bloomBit < 192 ? (bloomBit < 160 ? (injector.bf4 |= mask) : (injector.bf5 |= mask)) :
+            (bloomBit < 224 ? (injector.bf6 |= mask) : (injector.bf7 |= mask));
     }
 }
 /**
@@ -20859,10 +20845,18 @@ function getOrCreateNodeInjectorForNode(node) {
         bf1: 0,
         bf2: 0,
         bf3: 0,
+        bf4: 0,
+        bf5: 0,
+        bf6: 0,
+        bf7: 0,
         cbf0: parentInjector == null ? 0 : parentInjector.cbf0 | parentInjector.bf0,
         cbf1: parentInjector == null ? 0 : parentInjector.cbf1 | parentInjector.bf1,
         cbf2: parentInjector == null ? 0 : parentInjector.cbf2 | parentInjector.bf2,
         cbf3: parentInjector == null ? 0 : parentInjector.cbf3 | parentInjector.bf3,
+        cbf4: parentInjector == null ? 0 : parentInjector.cbf4 | parentInjector.bf4,
+        cbf5: parentInjector == null ? 0 : parentInjector.cbf5 | parentInjector.bf5,
+        cbf6: parentInjector == null ? 0 : parentInjector.cbf6 | parentInjector.bf6,
+        cbf7: parentInjector == null ? 0 : parentInjector.cbf7 | parentInjector.bf7,
         injector: null,
         templateRef: null,
         viewContainerRef: null,
@@ -21177,20 +21171,33 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
     // match.
     var /** @type {?} */ injector = startInjector;
     while (injector) {
-        // Our bloom filter size is 128 bits, which is four 32-bit bloom filter buckets:
-        // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127]
+        // Our bloom filter size is 256 bits, which is eight 32-bit bloom filter buckets:
+        // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc.
         // Get the bloom filter value from the appropriate bucket based on the directive's bloomBit.
-        var /** @type {?} */ value = bloomBit < 64 ? (bloomBit < 32 ? injector.bf0 : injector.bf1) :
-            (bloomBit < 96 ? injector.bf2 : injector.bf3);
+        var /** @type {?} */ value = void 0;
+        if (bloomBit < 128) {
+            value = bloomBit < 64 ? (bloomBit < 32 ? injector.bf0 : injector.bf1) :
+                (bloomBit < 96 ? injector.bf2 : injector.bf3);
+        }
+        else {
+            value = bloomBit < 192 ? (bloomBit < 160 ? injector.bf4 : injector.bf5) :
+                (bloomBit < 224 ? injector.bf6 : injector.bf7);
+        }
         // If the bloom filter value has the bit corresponding to the directive's bloomBit flipped on,
         // this injector is a potential match.
         if ((value & mask) === mask) {
             return injector;
         }
         // If the current injector does not have the directive, check the bloom filters for the ancestor
-        // injectors (cbf0 - cbf3). These filters capture *all* ancestor injectors.
-        value = bloomBit < 64 ? (bloomBit < 32 ? injector.cbf0 : injector.cbf1) :
-            (bloomBit < 96 ? injector.cbf2 : injector.cbf3);
+        // injectors (cbf0 - cbf7). These filters capture *all* ancestor injectors.
+        if (bloomBit < 128) {
+            value = bloomBit < 64 ? (bloomBit < 32 ? injector.cbf0 : injector.cbf1) :
+                (bloomBit < 96 ? injector.cbf2 : injector.cbf3);
+        }
+        else {
+            value = bloomBit < 192 ? (bloomBit < 160 ? injector.cbf4 : injector.cbf5) :
+                (bloomBit < 224 ? injector.cbf6 : injector.cbf7);
+        }
         // If the ancestor bloom filter value has the bit corresponding to the directive, traverse up to
         // find the specific injector. If the ancestor bloom filter does not have the bit, we can abort.
         injector = (value & mask) ? injector.parent : null;
