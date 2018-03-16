@@ -216,9 +216,9 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  *        be created or retrieved out of order.
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
- * @param queryName Name under which the query can retrieve the directive instance.
+ * @param localNames Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, queryName?: string | null): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localNames?: (string | number)[] | null): T;
 /**
  * Creates an LContainerNode.
  *

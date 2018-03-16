@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-269c3a1
+ * @license Angular v6.0.0-beta.7-cedc04c
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2046,7 +2046,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-269c3a1');
+var VERSION = new Version('6.0.0-beta.7-cedc04c');
 
 /**
  * @fileoverview added by tsickle
@@ -18351,12 +18351,10 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
             // Only component views should be added to the view tree directly. Embedded views are
             // accessed through their containers because they may be removed / re-added later.
             node = createLNode(index, 3 /* Element */, native, componentView);
-            // TODO(misko): implement code which caches the local reference resolution
-            var /** @type {?} */ queryName = hack_findQueryName(hostComponentDef, localRefs, '');
             if (node.tNode == null) {
+                var /** @type {?} */ localNames = findMatchingLocalNames(hostComponentDef, localRefs, isHostElement ? index + 1 : -1, '');
                 ngDevMode && assertDataInRange(index - 1);
-                node.tNode = tData[index] =
-                    createTNode(name_1, attrs || null, null, hostComponentDef ? null : queryName);
+                node.tNode = tData[index] = createTNode(name_1, attrs || null, null, localNames);
             }
             if (attrs)
                 setUpAttributes(native, attrs);
@@ -18366,7 +18364,7 @@ function elementStart(index, nameOrComponentType, attrs, directiveTypes, localRe
                 // is not guaranteed. Must be refactored to take it into account.
                 var /** @type {?} */ instance = hostComponentDef.n();
                 storeComponentIndex(index);
-                directiveCreate(++index, instance, hostComponentDef, queryName);
+                directiveCreate(++index, instance, hostComponentDef, null);
                 initChangeDetectorIfExisting(node.nodeInjector, instance);
             }
             hack_declareDirectives(index, directiveTypes, localRefs);
@@ -18396,8 +18394,8 @@ function initChangeDetectorIfExisting(injector, instance) {
     }
 }
 /**
- * This function instantiates a directive with a correct queryName. It is a hack since we should
- * compute the query value only once and store it with the template (rather than on each invocation)
+ * This function instantiates the given directives. It is a hack since it assumes the directives
+ * come in the correct order for DI.
  * @param {?} index
  * @param {?} directiveTypes
  * @param {?} localRefs
@@ -18411,30 +18409,36 @@ function hack_declareDirectives(index, directiveTypes, localRefs) {
             index++;
             var /** @type {?} */ directiveType = directiveTypes[i];
             var /** @type {?} */ directiveDef = currentView.tView.firstTemplatePass ? directiveType.ngDirectiveDef : /** @type {?} */ (tData[index]);
-            directiveCreate(index, directiveDef.n(), directiveDef, hack_findQueryName(directiveDef, localRefs));
+            var /** @type {?} */ localNames = currentView.tView.firstTemplatePass ?
+                findMatchingLocalNames(directiveDef, localRefs, index) :
+                null;
+            directiveCreate(index, directiveDef.n(), directiveDef, localNames);
         }
     }
 }
 /**
- * This function returns the queryName for a directive. It is a hack since we should
- * compute the query value only once and store it with the template (rather than on each invocation)
+ * Finds any local names that match the given directive's exportAs and returns them with directive
+ * index. If the directiveDef is null, it matches against the default '' value instead of
+ * exportAs.
  * @param {?} directiveDef
  * @param {?} localRefs
+ * @param {?} index
  * @param {?=} defaultExport
  * @return {?}
  */
-function hack_findQueryName(directiveDef, localRefs, defaultExport) {
+function findMatchingLocalNames(directiveDef, localRefs, index, defaultExport) {
     var /** @type {?} */ exportAs = directiveDef && directiveDef.exportAs || defaultExport;
+    var /** @type {?} */ matches = null;
     if (exportAs != null && localRefs) {
         for (var /** @type {?} */ i = 0; i < localRefs.length; i = i + 2) {
             var /** @type {?} */ local = localRefs[i];
             var /** @type {?} */ toExportAs = localRefs[i | 1];
             if (toExportAs === exportAs || toExportAs === defaultExport) {
-                return local;
+                (matches || (matches = [])).push(local, index);
             }
         }
     }
-    return null;
+    return matches;
 }
 /**
  * Gets TView from a template function or creates a new TView
@@ -18671,14 +18675,14 @@ function elementProperty(index, propName, value, sanitizer) {
  * @param {?} tagName
  * @param {?} attrs
  * @param {?} data
- * @param {?} localName
+ * @param {?} localNames A list of local names and their matching indices
  * @return {?} the TNode object
  */
-function createTNode(tagName, attrs, data, localName) {
+function createTNode(tagName, attrs, data, localNames) {
     return {
         tagName: tagName,
         attrs: attrs,
-        localNames: localName ? [localName, -1] : null,
+        localNames: localNames,
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
@@ -18894,10 +18898,10 @@ function textBinding(index, value) {
  *        be created or retrieved out of order.
  * @param {?} directive The directive instance.
  * @param {?} directiveDef DirectiveDef object which contains information about the template.
- * @param {?=} queryName Name under which the query can retrieve the directive instance.
+ * @param {?=} localNames Names under which a query can retrieve the directive instance
  * @return {?}
  */
-function directiveCreate(index, directive, directiveDef, queryName) {
+function directiveCreate(index, directive, directiveDef, localNames) {
     var /** @type {?} */ instance;
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
@@ -18916,10 +18920,10 @@ function directiveCreate(index, directive, directiveDef, queryName) {
     data[index] = instance = directive;
     if (index >= tData.length) {
         tData[index] = /** @type {?} */ ((directiveDef));
-        if (queryName) {
+        if (localNames) {
             ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
             var /** @type {?} */ tNode_1 = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).tNode));
-            (tNode_1.localNames || (tNode_1.localNames = [])).push(queryName, index);
+            tNode_1.localNames = tNode_1.localNames ? tNode_1.localNames.concat(localNames) : localNames;
         }
     }
     var /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
@@ -19022,9 +19026,8 @@ function container(index, directiveTypes, template, tagName, attrs, localRefs) {
     });
     var /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
     if (node.tNode == null) {
-        // TODO(misko): implement queryName caching
-        var /** @type {?} */ queryName = hack_findQueryName(null, localRefs, '');
-        node.tNode = tData[index] = createTNode(tagName || null, attrs || null, [], queryName || null);
+        var /** @type {?} */ localNames = findMatchingLocalNames(null, localRefs, -1, '');
+        node.tNode = tData[index] = createTNode(tagName || null, attrs || null, [], localNames);
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
