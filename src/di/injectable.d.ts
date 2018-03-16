@@ -1,4 +1,5 @@
 import { Type } from '../type';
+import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
 /**
  * Injectable providers used in `@Injectable` decorator.
@@ -54,26 +55,12 @@ export interface Injectable {
 }
 export declare function convertInjectableProviderToFactory(type: Type<any>, provider?: InjectableProvider): () => any;
 /**
-* Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
-* in which injectors (if any) it will be available.
-*
-* @experimental
-*/
-export declare function defineInjectable<T>(opts: {
-    providedIn?: Type<any> | 'root' | null;
-    factory: () => T;
-}): InjectableDef<T>;
-/**
 * Injectable decorator and metadata.
 *
 * @stable
 * @Annotation
 */
 export declare const Injectable: InjectableDecorator;
-export interface InjectableDef<T> {
-    providedIn: Type<any> | 'root' | null;
-    factory: () => T;
-}
 /**
  * Type representing injectable service.
  *
