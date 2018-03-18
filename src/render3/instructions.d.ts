@@ -220,6 +220,13 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  */
 export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localNames?: (string | number)[] | null): T;
 /**
+ * A lighter version of directiveCreate() that is used for the root component
+ *
+ * This version does not contain features that we don't already support at root in
+ * current Angular. Example: local refs and inputs on root component.
+ */
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>): T;
+/**
  * Creates an LContainerNode.
  *
  * Only `LViewNodes` can go into `LContainerNodes`.

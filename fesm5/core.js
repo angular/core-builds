@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-4f21d37
+ * @license Angular v6.0.0-beta.7-e27cfd6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2197,7 +2197,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-4f21d37');
+var VERSION = new Version('6.0.0-beta.7-e27cfd6');
 
 /**
  * @fileoverview added by tsickle
@@ -19564,6 +19564,32 @@ function textBinding(index, value) {
  * @return {?}
  */
 function directiveCreate(index, directive, directiveDef, localNames) {
+    var /** @type {?} */ instance = baseDirectiveCreate(index, directive, directiveDef);
+    ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
+    var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
+    if (currentView.tView.firstTemplatePass && localNames) {
+        tNode.localNames = tNode.localNames ? tNode.localNames.concat(localNames) : localNames;
+    }
+    if (tNode && tNode.attrs) {
+        setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, tNode);
+    }
+    // Init hooks are queued now so ngOnInit is called in host components before
+    // any projected components.
+    queueInitHooks(index, directiveDef.onInit, directiveDef.doCheck, currentView.tView);
+    return instance;
+}
+/**
+ * A lighter version of directiveCreate() that is used for the root component
+ *
+ * This version does not contain features that we don't already support at root in
+ * current Angular. Example: local refs and inputs on root component.
+ * @template T
+ * @param {?} index
+ * @param {?} directive
+ * @param {?} directiveDef
+ * @return {?}
+ */
+function baseDirectiveCreate(index, directive, directiveDef) {
     var /** @type {?} */ instance;
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
@@ -19582,11 +19608,6 @@ function directiveCreate(index, directive, directiveDef, localNames) {
     data[index] = instance = directive;
     if (index >= tData.length) {
         tData[index] = /** @type {?} */ ((directiveDef));
-        if (localNames) {
-            ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
-            var /** @type {?} */ tNode_1 = /** @type {?} */ ((/** @type {?} */ ((previousOrParentNode)).tNode));
-            tNode_1.localNames = tNode_1.localNames ? tNode_1.localNames.concat(localNames) : localNames;
-        }
     }
     var /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
     if (diPublic) {
@@ -19595,13 +19616,6 @@ function directiveCreate(index, directive, directiveDef, localNames) {
     if (/** @type {?} */ ((directiveDef)).attributes != null && (previousOrParentNode.flags & 3 /* TYPE_MASK */) == 3 /* Element */) {
         setUpAttributes((/** @type {?} */ (previousOrParentNode)).native, /** @type {?} */ (((directiveDef)).attributes));
     }
-    var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
-    if (tNode && tNode.attrs) {
-        setInputsFromAttrs(instance, /** @type {?} */ ((directiveDef)).inputs, tNode);
-    }
-    // Init hooks are queued now so ngOnInit is called in host components before
-    // any projected components.
-    queueInitHooks(index, directiveDef.onInit, directiveDef.doCheck, currentView.tView);
     return instance;
 }
 /**
@@ -21298,13 +21312,14 @@ function renderComponent(componentType, opts) {
         scheduler: opts.scheduler || requestAnimationFrame,
         clean: CLEAN_PROMISE,
     };
-    var /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */), /** @type {?} */ ((null)));
+    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    var /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
+    var /** @type {?} */ elementNode;
     try {
         // Create element node at index 0 in data array
-        var /** @type {?} */ elementNode = hostElement(hostNode, componentDef);
+        elementNode = hostElement(hostNode, componentDef);
         // Create directive instance with n() and store at index 1 in data array (el is 0)
-        component = rootContext.component =
-            getDirectiveInstance(directiveCreate(1, componentDef.factory(), componentDef));
+        component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }
     finally {
@@ -21314,7 +21329,7 @@ function renderComponent(componentType, opts) {
         enterView(oldView, null);
     }
     opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
-    tick(component);
+    renderComponentOrTemplate(elementNode, rootView, component);
     return component;
 }
 /**

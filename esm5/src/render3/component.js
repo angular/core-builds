@@ -10,8 +10,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { assertNotNull } from './assert';
-import { queueLifecycleHooks } from './hooks';
-import { CLEAN_PROMISE, _getComponentHostLElementNode, createLView, createTView, directiveCreate, enterView, getDirectiveInstance, getRootView, hostElement, initChangeDetectorIfExisting, locateHostElement, tick } from './instructions';
+import { queueInitHooks, queueLifecycleHooks } from './hooks';
+import { CLEAN_PROMISE, _getComponentHostLElementNode, baseDirectiveCreate, createLView, createTView, enterView, getRootView, hostElement, initChangeDetectorIfExisting, locateHostElement, renderComponentOrTemplate } from './instructions';
 import { domRendererFactory3 } from './interfaces/renderer';
 import { stringify } from './util';
 import { createViewRef } from './view_ref';
@@ -125,13 +125,14 @@ export function renderComponent(componentType, opts) {
         scheduler: opts.scheduler || requestAnimationFrame,
         clean: CLEAN_PROMISE,
     };
-    var /** @type {?} */ oldView = enterView(createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */), /** @type {?} */ ((null)));
+    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    var /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
+    var /** @type {?} */ elementNode;
     try {
         // Create element node at index 0 in data array
-        var /** @type {?} */ elementNode = hostElement(hostNode, componentDef);
+        elementNode = hostElement(hostNode, componentDef);
         // Create directive instance with n() and store at index 1 in data array (el is 0)
-        component = rootContext.component =
-            getDirectiveInstance(directiveCreate(1, componentDef.factory(), componentDef));
+        component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }
     finally {
@@ -141,7 +142,7 @@ export function renderComponent(componentType, opts) {
         enterView(oldView, null);
     }
     opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
-    tick(component);
+    renderComponentOrTemplate(elementNode, rootView, component);
     return component;
 }
 /**
@@ -162,6 +163,8 @@ export function renderComponent(componentType, opts) {
  */
 export function LifecycleHooksFeature(component, def) {
     var /** @type {?} */ elementNode = _getComponentHostLElementNode(component);
+    // Root component is always created at dir index 1, after host element at 0
+    queueInitHooks(1, def.onInit, def.doCheck, elementNode.view.tView);
     queueLifecycleHooks(elementNode.flags, elementNode.view);
 }
 /**
