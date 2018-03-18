@@ -36,10 +36,10 @@ export function defineComponent(componentDefinition) {
     var /** @type {?} */ def = /** @type {?} */ ({
         type: type,
         diPublic: null,
-        n: componentDefinition.factory,
+        factory: componentDefinition.factory,
         tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
         template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
-        h: componentDefinition.hostBindings || noop,
+        hostBindings: componentDefinition.hostBindings || null,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
@@ -149,10 +149,6 @@ export function PublicFeature(definition) {
     definition.diPublic = diPublic;
 }
 var /** @type {?} */ EMPTY = {};
-/**
- * @return {?}
- */
-function noop() { }
 /**
  * Swaps the keys and values of an object.
  * @param {?} obj

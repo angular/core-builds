@@ -131,7 +131,7 @@ export function renderComponent(componentType, opts) {
         var /** @type {?} */ elementNode = hostElement(hostNode, componentDef);
         // Create directive instance with n() and store at index 1 in data array (el is 0)
         component = rootContext.component =
-            getDirectiveInstance(directiveCreate(1, componentDef.n(), componentDef));
+            getDirectiveInstance(directiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }
     finally {

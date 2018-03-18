@@ -295,6 +295,14 @@ function TView_tsickle_Closure_declarations() {
      * @type {?}
      */
     TView.prototype.components;
+    /**
+     * A list of indices for child directives that have host bindings.
+     *
+     * Even indices: Directive indices
+     * Odd indices: Element indices
+     * @type {?}
+     */
+    TView.prototype.hostBindings;
 }
 /**
  * RootContext contains information which is shared for all components which

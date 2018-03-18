@@ -253,10 +253,7 @@ export declare function embeddedViewStart(viewBlockId: number): boolean;
 /** Marks the end of an embedded view. */
 export declare function embeddedViewEnd(): void;
 /**
- * Refreshes the directive.
- *
- * When it is a component, it also enters the component's view and processes it to update bindings,
- * queries, etc.
+ * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
  * @param directiveIndex
  * @param elementIndex

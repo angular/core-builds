@@ -95,18 +95,14 @@ function DirectiveDef_tsickle_Closure_declarations() {
      *
      * Usually returns the directive instance, but if the directive has a content query,
      * it instead returns an array that contains the instance as well as content query data.
-     *
-     * NOTE: this property is short (1 char) because it is used in
-     * component templates which is sensitive to size.
      * @type {?}
      */
-    DirectiveDef.prototype.n;
+    DirectiveDef.prototype.factory;
     /**
-     * Refreshes host bindings on the associated directive. Also calls lifecycle hooks
-     * like ngOnInit and ngDoCheck, if they are defined on the directive.
+     * Refreshes host bindings on the associated directive.
      * @type {?}
      */
-    DirectiveDef.prototype.h;
+    DirectiveDef.prototype.hostBindings;
     /**
      * Static attributes to set on host element.
      *

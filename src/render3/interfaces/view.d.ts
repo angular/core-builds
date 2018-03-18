@@ -248,6 +248,13 @@ export interface TView {
      * current view has finished its check.
      */
     components: number[] | null;
+    /**
+     * A list of indices for child directives that have host bindings.
+     *
+     * Even indices: Directive indices
+     * Odd indices: Element indices
+     */
+    hostBindings: number[] | null;
 }
 /**
  * RootContext contains information which is shared for all components which
