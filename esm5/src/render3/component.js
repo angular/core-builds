@@ -9,7 +9,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { assertNotNull } from './assert';
+import { assertComponentType, assertNotNull } from './assert';
 import { queueInitHooks, queueLifecycleHooks } from './hooks';
 import { CLEAN_PROMISE, _getComponentHostLElementNode, baseDirectiveCreate, createLView, createTView, enterView, getRootView, hostElement, initChangeDetectorIfExisting, locateHostElement, renderComponentOrTemplate } from './instructions';
 import { domRendererFactory3 } from './interfaces/renderer';
@@ -111,10 +111,11 @@ export var /** @type {?} */ NULL_INJECTOR = {
  * @param {?=} opts
  * @return {?}
  */
-export function renderComponent(componentType, opts) {
+export function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts) {
     if (opts === void 0) { opts = {}; }
+    ngDevMode && assertComponentType(componentType);
     var /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
-    var /** @type {?} */ componentDef = /** @type {?} */ (componentType.ngComponentDef);
+    var /** @type {?} */ componentDef = /** @type {?} */ ((/** @type {?} */ (componentType)).ngComponentDef);
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     var /** @type {?} */ component;
@@ -131,7 +132,7 @@ export function renderComponent(componentType, opts) {
     try {
         // Create element node at index 0 in data array
         elementNode = hostElement(hostNode, componentDef);
-        // Create directive instance with n() and store at index 1 in data array (el is 0)
+        // Create directive instance with factory() and store at index 1 in data array (el is 0)
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }

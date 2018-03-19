@@ -93,6 +93,17 @@ export function assertNotNull(actual, msg) {
     }
 }
 /**
+ * @param {?} actual
+ * @param {?=} msg
+ * @return {?}
+ */
+export function assertComponentType(actual, msg) {
+    if (msg === void 0) { msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.'; }
+    if (!actual.ngComponentDef) {
+        throwError(msg);
+    }
+}
+/**
  * @param {?} msg
  * @return {?}
  */

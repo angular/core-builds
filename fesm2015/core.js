@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-bfe077a
+ * @license Angular v6.0.0-beta.7-fc50c77
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-bfe077a');
+const VERSION = new Version('6.0.0-beta.7-fc50c77');
 
 /**
  * @fileoverview added by tsickle
@@ -14985,6 +14985,16 @@ function assertNotNull(actual, msg) {
     }
 }
 /**
+ * @param {?} actual
+ * @param {?=} msg
+ * @return {?}
+ */
+function assertComponentType(actual, msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.') {
+    if (!actual.ngComponentDef) {
+        throwError(msg);
+    }
+}
+/**
  * @param {?} msg
  * @return {?}
  */
@@ -18557,9 +18567,10 @@ function addDestroyable(obj) {
  * @param {?=} opts
  * @return {?}
  */
-function renderComponent(componentType, opts = {}) {
+function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
+    ngDevMode && assertComponentType(componentType);
     const /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
-    const /** @type {?} */ componentDef = /** @type {?} */ (componentType.ngComponentDef);
+    const /** @type {?} */ componentDef = /** @type {?} */ ((/** @type {?} */ (componentType)).ngComponentDef);
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     let /** @type {?} */ component;
@@ -18576,7 +18587,7 @@ function renderComponent(componentType, opts = {}) {
     try {
         // Create element node at index 0 in data array
         elementNode = hostElement(hostNode, componentDef);
-        // Create directive instance with n() and store at index 1 in data array (el is 0)
+        // Create directive instance with factory() and store at index 1 in data array (el is 0)
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }

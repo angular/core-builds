@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-bfe077a
+ * @license Angular v6.0.0-beta.7-fc50c77
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-bfe077a
+ * @license Angular v6.0.0-beta.7-fc50c77
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2235,7 +2235,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-bfe077a');
+var VERSION = new Version('6.0.0-beta.7-fc50c77');
 
 /**
  * @fileoverview added by tsickle
@@ -17413,6 +17413,17 @@ function assertNotNull(actual, msg) {
     }
 }
 /**
+ * @param {?} actual
+ * @param {?=} msg
+ * @return {?}
+ */
+function assertComponentType(actual, msg) {
+    if (msg === void 0) { msg = 'Type passed in is not ComponentType, it does not have \'ngComponentDef\' property.'; }
+    if (!actual.ngComponentDef) {
+        throwError(msg);
+    }
+}
+/**
  * @param {?} msg
  * @return {?}
  */
@@ -21336,10 +21347,11 @@ function addDestroyable(obj) {
  * @param {?=} opts
  * @return {?}
  */
-function renderComponent(componentType, opts) {
+function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts) {
     if (opts === void 0) { opts = {}; }
+    ngDevMode && assertComponentType(componentType);
     var /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
-    var /** @type {?} */ componentDef = /** @type {?} */ (componentType.ngComponentDef);
+    var /** @type {?} */ componentDef = /** @type {?} */ ((/** @type {?} */ (componentType)).ngComponentDef);
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     var /** @type {?} */ component;
@@ -21356,7 +21368,7 @@ function renderComponent(componentType, opts) {
     try {
         // Create element node at index 0 in data array
         elementNode = hostElement(hostNode, componentDef);
-        // Create directive instance with n() and store at index 1 in data array (el is 0)
+        // Create directive instance with factory() and store at index 1 in data array (el is 0)
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }
