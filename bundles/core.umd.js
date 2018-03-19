@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.9-7d9de17
+ * @license Angular v5.2.9-aca4735
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v5.2.9-7d9de17
+ * @license Angular v5.2.9-aca4735
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -80,6 +80,7 @@ var __assign = Object.assign || function __assign(t) {
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
  * \@stable
+ * @template T
  */
 var InjectionToken = /** @class */ (function () {
     function InjectionToken(_desc) {
@@ -755,7 +756,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('5.2.9-7d9de17');
+var VERSION = new Version('5.2.9-aca4735');
 
 /**
  * @fileoverview added by tsickle
@@ -3760,6 +3761,7 @@ var Console = /** @class */ (function () {
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * \@experimental
+ * @template T
  */
 var ModuleWithComponentFactories = /** @class */ (function () {
     function ModuleWithComponentFactories(ngModuleFactory, componentFactories) {
@@ -3928,6 +3930,7 @@ var CompilerFactory = /** @class */ (function () {
  * method.
  * \@stable
  * @abstract
+ * @template C
  */
 var ComponentRef = /** @class */ (function () {
     function ComponentRef() {
@@ -3937,6 +3940,7 @@ var ComponentRef = /** @class */ (function () {
 /**
  * \@stable
  * @abstract
+ * @template C
  */
 var ComponentFactory = /** @class */ (function () {
     function ComponentFactory() {
@@ -4030,6 +4034,9 @@ var CodegenComponentFactoryResolver = /** @class */ (function () {
     };
     return CodegenComponentFactoryResolver;
 }());
+/**
+ * @template C
+ */
 var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
     __extends(ComponentFactoryBoundToModule, _super);
     function ComponentFactoryBoundToModule(factory, ngModule) {
@@ -4082,6 +4089,7 @@ var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
  *
  * \@stable
  * @abstract
+ * @template T
  */
 var NgModuleRef = /** @class */ (function () {
     function NgModuleRef() {
@@ -4090,11 +4098,13 @@ var NgModuleRef = /** @class */ (function () {
 }());
 /**
  * @record
+ * @template T
  */
 
 /**
  * \@experimental
  * @abstract
+ * @template T
  */
 var NgModuleFactory = /** @class */ (function () {
     function NgModuleFactory() {
@@ -4322,6 +4332,7 @@ var wtfEndTimeRange = wtfEnabled ? endTimeRange : function (r) { return null; };
  *
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
+ * @template T
  */
 var EventEmitter = /** @class */ (function (_super) {
     __extends(EventEmitter, _super);
@@ -6325,6 +6336,7 @@ function getModuleFactory(id) {
  * }
  * ```
  * \@stable
+ * @template T
  */
 var QueryList = /** @class */ (function () {
     function QueryList() {
@@ -6663,6 +6675,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * createEmbeddedView}, which will create the View and attach it to the View Container.
  * \@stable
  * @abstract
+ * @template C
  */
 var TemplateRef = /** @class */ (function () {
     function TemplateRef() {
@@ -6803,6 +6816,7 @@ var ViewRef = /** @class */ (function (_super) {
  * ```
  * \@experimental
  * @abstract
+ * @template C
  */
 var EmbeddedViewRef = /** @class */ (function (_super) {
     __extends(EmbeddedViewRef, _super);
@@ -7136,6 +7150,7 @@ function removeDebugNodeFromIndex(node) {
  *
  * \@experimental All debugging apis are currently experimental.
  * @record
+ * @template T
  */
 
 /**
@@ -7363,6 +7378,7 @@ var DefaultIterableDifferFactory = /** @class */ (function () {
 var trackByIdentity = function (index, item) { return item; };
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * @template V
  */
 var DefaultIterableDiffer = /** @class */ (function () {
     function DefaultIterableDiffer(trackByFn) {
@@ -8173,6 +8189,7 @@ var DefaultIterableDiffer = /** @class */ (function () {
 }());
 /**
  * \@stable
+ * @template V
  */
 var IterableChangeRecord_ = /** @class */ (function () {
     function IterableChangeRecord_(item, trackById) {
@@ -8223,6 +8240,9 @@ var IterableChangeRecord_ = /** @class */ (function () {
     }
     return IterableChangeRecord_;
 }());
+/**
+ * @template V
+ */
 var _DuplicateItemRecordList = /** @class */ (function () {
     function _DuplicateItemRecordList() {
         /**
@@ -8338,6 +8358,9 @@ var _DuplicateItemRecordList = /** @class */ (function () {
     };
     return _DuplicateItemRecordList;
 }());
+/**
+ * @template V
+ */
 var _DuplicateMap = /** @class */ (function () {
     function _DuplicateMap() {
         this.map = new Map();
@@ -8464,6 +8487,9 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @template K, V
+ */
 var DefaultKeyValueDifferFactory = /** @class */ (function () {
     function DefaultKeyValueDifferFactory() {
     }
@@ -8487,6 +8513,9 @@ var DefaultKeyValueDifferFactory = /** @class */ (function () {
     function () { return new DefaultKeyValueDiffer(); };
     return DefaultKeyValueDifferFactory;
 }());
+/**
+ * @template K, V
+ */
 var DefaultKeyValueDiffer = /** @class */ (function () {
     function DefaultKeyValueDiffer() {
         this._records = new Map();
@@ -8848,6 +8877,7 @@ var DefaultKeyValueDiffer = /** @class */ (function () {
 }());
 /**
  * \@stable
+ * @template K, V
  */
 var KeyValueChangeRecord_ = /** @class */ (function () {
     function KeyValueChangeRecord_(key) {
@@ -8899,6 +8929,7 @@ var KeyValueChangeRecord_ = /** @class */ (function () {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -8907,6 +8938,7 @@ var KeyValueChangeRecord_ = /** @class */ (function () {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -8914,11 +8946,13 @@ var KeyValueChangeRecord_ = /** @class */ (function () {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
  * @record
+ * @template V
  */
 
 /**
@@ -8927,6 +8961,7 @@ var KeyValueChangeRecord_ = /** @class */ (function () {
  *
  * \@stable
  * @record
+ * @template T
  */
 
 /**
@@ -9084,6 +9119,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -9092,6 +9128,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -9099,6 +9136,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -9491,12 +9529,14 @@ var Sanitizer = /** @class */ (function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// unsupported: template constraints.
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
  * We use a function so we can reexeute it in case an error happens and use the given logger
  * function to log the error from the definition of the node, which is shown in all browser
  * logs.
  * @record
+ * @template D
  */
 
 /**
@@ -9506,8 +9546,10 @@ var Sanitizer = /** @class */ (function () {
  * @record
  */
 
+// unsupported: template constraints.
 /**
  * @record
+ * @template DF
  */
 
 /**
@@ -16219,8 +16261,12 @@ function stringify$1(value) {
 /**
  * A predicate which determines if a given element/directive should be included in the query
  * @record
+ * @template T
  */
 
+/**
+ * @template T
+ */
 var QueryList_ = /** @class */ (function () {
     function QueryList_() {
         this.dirty = false;

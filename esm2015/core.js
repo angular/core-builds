@@ -1,5 +1,5 @@
 /**
- * @license Angular v5.2.9-7d9de17
+ * @license Angular v5.2.9-aca4735
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -41,6 +41,7 @@ import { Subscription } from 'rxjs/Subscription';
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
  * \@stable
+ * @template T
  */
 class InjectionToken {
     /**
@@ -683,7 +684,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('5.2.9-7d9de17');
+const VERSION = new Version('5.2.9-aca4735');
 
 /**
  * @fileoverview added by tsickle
@@ -3187,6 +3188,7 @@ Console.ctorParameters = () => [];
  * Combination of NgModuleFactory and ComponentFactorys.
  *
  * \@experimental
+ * @template T
  */
 class ModuleWithComponentFactories {
     /**
@@ -3299,12 +3301,14 @@ class CompilerFactory {
  * method.
  * \@stable
  * @abstract
+ * @template C
  */
 class ComponentRef {
 }
 /**
  * \@stable
  * @abstract
+ * @template C
  */
 class ComponentFactory {
 }
@@ -3383,6 +3387,9 @@ class CodegenComponentFactoryResolver {
         return new ComponentFactoryBoundToModule(factory, this._ngModule);
     }
 }
+/**
+ * @template C
+ */
 class ComponentFactoryBoundToModule extends ComponentFactory {
     /**
      * @param {?} factory
@@ -3429,16 +3436,19 @@ class ComponentFactoryBoundToModule extends ComponentFactory {
  *
  * \@stable
  * @abstract
+ * @template T
  */
 class NgModuleRef {
 }
 /**
  * @record
+ * @template T
  */
 
 /**
  * \@experimental
  * @abstract
+ * @template T
  */
 class NgModuleFactory {
 }
@@ -3662,6 +3672,7 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
  *
  * Once a reference implementation of the spec is available, switch to it.
  * \@stable
+ * @template T
  */
 class EventEmitter extends Subject {
     /**
@@ -5169,6 +5180,7 @@ function getModuleFactory(id) {
  * }
  * ```
  * \@stable
+ * @template T
  */
 class QueryList {
     constructor() {
@@ -5404,6 +5416,7 @@ function checkNotEmpty(value, modulePath, exportName) {
  * createEmbeddedView}, which will create the View and attach it to the View Container.
  * \@stable
  * @abstract
+ * @template C
  */
 class TemplateRef {
 }
@@ -5530,6 +5543,7 @@ class ViewRef extends ChangeDetectorRef {
  * ```
  * \@experimental
  * @abstract
+ * @template C
  */
 class EmbeddedViewRef extends ViewRef {
 }
@@ -5806,6 +5820,7 @@ function removeDebugNodeFromIndex(node) {
  *
  * \@experimental All debugging apis are currently experimental.
  * @record
+ * @template T
  */
 
 /**
@@ -5996,6 +6011,7 @@ class DefaultIterableDifferFactory {
 const trackByIdentity = (index, item) => item;
 /**
  * @deprecated v4.0.0 - Should not be part of public API.
+ * @template V
  */
 class DefaultIterableDiffer {
     /**
@@ -6582,6 +6598,7 @@ class DefaultIterableDiffer {
 }
 /**
  * \@stable
+ * @template V
  */
 class IterableChangeRecord_ {
     /**
@@ -6635,6 +6652,9 @@ class IterableChangeRecord_ {
         this._nextIdentityChange = null;
     }
 }
+/**
+ * @template V
+ */
 class _DuplicateItemRecordList {
     constructor() {
         /**
@@ -6718,6 +6738,9 @@ class _DuplicateItemRecordList {
         return this._head === null;
     }
 }
+/**
+ * @template V
+ */
 class _DuplicateMap {
     constructor() {
         this.map = new Map();
@@ -6803,6 +6826,9 @@ function getPreviousIndex(item, addRemoveOffset, moveOffsets) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @template K, V
+ */
 class DefaultKeyValueDifferFactory {
     constructor() { }
     /**
@@ -6816,6 +6842,9 @@ class DefaultKeyValueDifferFactory {
      */
     create() { return new DefaultKeyValueDiffer(); }
 }
+/**
+ * @template K, V
+ */
 class DefaultKeyValueDiffer {
     constructor() {
         this._records = new Map();
@@ -7093,6 +7122,7 @@ class DefaultKeyValueDiffer {
 }
 /**
  * \@stable
+ * @template K, V
  */
 class KeyValueChangeRecord_ {
     /**
@@ -7146,6 +7176,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -7154,6 +7185,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
@@ -7161,11 +7193,13 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template V
  */
 
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
  * @record
+ * @template V
  */
 
 /**
@@ -7174,6 +7208,7 @@ class KeyValueChangeRecord_ {
  *
  * \@stable
  * @record
+ * @template T
  */
 
 /**
@@ -7282,6 +7317,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -7290,6 +7326,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -7297,6 +7334,7 @@ function getTypeNameForDebugging(type) {
  *
  * \@stable
  * @record
+ * @template K, V
  */
 
 /**
@@ -7635,12 +7673,14 @@ class Sanitizer {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// unsupported: template constraints.
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
  * We use a function so we can reexeute it in case an error happens and use the given logger
  * function to log the error from the definition of the node, which is shown in all browser
  * logs.
  * @record
+ * @template D
  */
 
 /**
@@ -7650,8 +7690,10 @@ class Sanitizer {
  * @record
  */
 
+// unsupported: template constraints.
 /**
  * @record
+ * @template DF
  */
 
 /**
@@ -14086,6 +14128,7 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
 /**
  * A predicate which determines if a given element/directive should be included in the query
  * @record
+ * @template T
  */
 
 
