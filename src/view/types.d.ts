@@ -7,12 +7,13 @@
  */
 import { Injector } from '../di';
 import { ErrorHandler } from '../error_handler';
+import { ComponentFactory } from '../linker/component_factory';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { QueryList } from '../linker/query_list';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
 import { Renderer2, RendererFactory2, RendererType2 } from '../render/api';
-import { Sanitizer, SecurityContext } from '../security';
+import { Sanitizer, SecurityContext } from '../sanitization/security';
 import { Type } from '../type';
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
@@ -39,6 +40,8 @@ export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory
     providersByKey: {
         [tokenKey: string]: NgModuleProviderDef;
     };
+    modules: any[];
+    isRoot: boolean;
 }
 export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {
 }
@@ -96,11 +99,12 @@ export declare const enum ViewFlags {
  */
 export interface NodeDef {
     flags: NodeFlags;
-    index: number;
+    nodeIndex: number;
+    checkIndex: number;
     parent: NodeDef | null;
     renderParent: NodeDef | null;
     /** this is checked against NgContentDef.index to find matched nodes */
-    ngContentIndex: number;
+    ngContentIndex: number | null;
     /** number of transitive children */
     childCount: number;
     /** aggregated NodeFlags for all transitive children (does not include self) **/
@@ -180,6 +184,7 @@ export declare const enum NodeFlags {
     TypeViewQuery = 134217728,
     StaticQuery = 268435456,
     DynamicQuery = 536870912,
+    TypeNgModule = 1073741824,
     CatQuery = 201326592,
     Types = 201347067,
 }
@@ -270,6 +275,7 @@ export declare const enum DepFlags {
     None = 0,
     SkipSelf = 1,
     Optional = 2,
+    Self = 4,
     Value = 8,
 }
 export interface TextDef {
@@ -321,6 +327,7 @@ export interface ViewData {
     state: ViewState;
     oldValues: any[];
     disposables: DisposableFn[] | null;
+    initIndex: number;
 }
 /**
  * Bitmask of states
@@ -334,9 +341,17 @@ export declare const enum ViewState {
     CheckProjectedView = 32,
     CheckProjectedViews = 64,
     Destroyed = 128,
+    InitState_Mask = 1792,
+    InitState_BeforeInit = 0,
+    InitState_CallingOnInit = 256,
+    InitState_CallingAfterContentInit = 512,
+    InitState_CallingAfterViewInit = 768,
+    InitState_AfterInit = 1024,
     CatDetectChanges = 12,
     CatInit = 13,
 }
+export declare function shiftInitState(view: ViewData, priorInitState: ViewState, newInitState: ViewState): boolean;
+export declare function shouldCallLifecycleInitHook(view: ViewData, initState: ViewState, index: number): boolean;
 export interface DisposableFn {
     (): void;
 }
@@ -448,6 +463,7 @@ export interface ProviderOverride {
     flags: NodeFlags;
     value: any;
     deps: ([DepFlags, any] | any)[];
+    deprecatedBehavior: boolean;
 }
 export interface Services {
     setCurrentNode(view: ViewData, nodeIndex: number): void;
@@ -456,7 +472,8 @@ export interface Services {
     createComponentView(parentView: ViewData, nodeDef: NodeDef, viewDef: ViewDefinition, hostElement: any): ViewData;
     createNgModuleRef(moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[], def: NgModuleDefinition): NgModuleRef<any>;
     overrideProvider(override: ProviderOverride): void;
-    clearProviderOverrides(): void;
+    overrideComponentView(compType: Type<any>, compFactory: ComponentFactory<any>): void;
+    clearOverrides(): void;
     checkAndUpdateView(view: ViewData): void;
     checkNoChangesView(view: ViewData): void;
     destroyView(view: ViewData): void;

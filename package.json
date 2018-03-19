@@ -1,22 +1,30 @@
 {
   "name": "@angular/core",
-  "version": "5.0.0-beta.6-3f585ba",
+  "version": "6.0.0-beta.7-a7d6efe",
   "description": "Angular - the core framework",
   "main": "./bundles/core.umd.js",
-  "module": "./esm5/index.js",
-  "es2015": "./esm15/index.js",
-  "typings": "./index.d.ts",
+  "module": "./fesm5/core.js",
+  "es2015": "./fesm2015/core.js",
+  "esm5": "./esm5/core.js",
+  "esm2015": "./esm2015/core.js",
+  "fesm5": "./fesm5/core.js",
+  "fesm2015": "./fesm2015/core.js",
+  "typings": "./core.d.ts",
   "author": "angular",
   "license": "MIT",
   "dependencies": {
-    "tslib": "^1.7.1"
+    "tslib": "^1.9.0"
   },
   "peerDependencies": {
-    "rxjs": "^5.0.1",
+    "rxjs": "^5.5.0",
     "zone.js": "^0.8.4"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/angular/angular.git"
-  }
+  },
+  "ng-update": {
+    "packageGroup": ["@angular/core", "@angular/compiler", "@angular/common", "@angular/animations", "@angular/platform-browser", "@angular/platform-browser-dynamic", "@angular/forms", "@angular/http", "@angular/platform-server", "@angular/platform-webworker", "@angular/platform-webworker-dynamic", "@angular/upgrade", "@angular/router", "@angular/compiler-cli", "@angular/language-service", "@angular/benchpress", "@angular/service-worker", "@angular/elements"]
+  },
+  "sideEffects": false
 }
