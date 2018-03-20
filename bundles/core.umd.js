@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-3cc5c2e
+ * @license Angular v6.0.0-beta.7-17fb983
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-3cc5c2e
+ * @license Angular v6.0.0-beta.7-17fb983
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2235,7 +2235,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-3cc5c2e');
+var VERSION = new Version('6.0.0-beta.7-17fb983');
 
 /**
  * @fileoverview added by tsickle
@@ -22164,8 +22164,8 @@ function defineComponent(componentDefinition) {
         type: type,
         diPublic: null,
         factory: componentDefinition.factory,
-        tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
-        template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
+        tag: componentDefinition.tag || /** @type {?} */ ((null)),
+        template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
@@ -22179,8 +22179,7 @@ function defineComponent(componentDefinition) {
         afterViewInit: type.prototype.ngAfterViewInit || null,
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
-        onPush: (/** @type {?} */ (componentDefinition)).changeDetection ===
-            ChangeDetectionStrategy.OnPush
+        onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush
     });
     var /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });
@@ -22304,7 +22303,7 @@ function invertObject(obj) {
  * }
  * ```
  */
-var defineDirective = /** @type {?} */ (defineComponent);
+var defineDirective = /** @type {?} */ ((defineComponent));
 /**
  * Create a pipe definition object.
  *
@@ -22718,18 +22717,6 @@ function isPure(index) {
  * can change between versions.
  *
  * See: {\@link definePipe}
- * @record
- * @template T
- */
-
-/**
- * Arguments for `defineDirective`
- * @record
- * @template T
- */
-
-/**
- * Arguments for `defineComponent`.
  * @record
  * @template T
  */

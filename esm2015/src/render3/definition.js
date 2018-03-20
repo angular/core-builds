@@ -37,8 +37,8 @@ export function defineComponent(componentDefinition) {
         type: type,
         diPublic: null,
         factory: componentDefinition.factory,
-        tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
-        template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
+        tag: componentDefinition.tag || /** @type {?} */ ((null)),
+        template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
@@ -52,8 +52,7 @@ export function defineComponent(componentDefinition) {
         afterViewInit: type.prototype.ngAfterViewInit || null,
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
-        onPush: (/** @type {?} */ (componentDefinition)).changeDetection ===
-            ChangeDetectionStrategy.OnPush
+        onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
@@ -174,7 +173,7 @@ function invertObject(obj) {
  * }
  * ```
  */
-export const /** @type {?} */ defineDirective = /** @type {?} */ (defineComponent);
+export const /** @type {?} */ defineDirective = /** @type {?} */ ((defineComponent));
 /**
  * Create a pipe definition object.
  *

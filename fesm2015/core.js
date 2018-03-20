@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-beta.7-3cc5c2e
+ * @license Angular v6.0.0-beta.7-17fb983
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2022,7 +2022,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-3cc5c2e');
+const VERSION = new Version('6.0.0-beta.7-17fb983');
 
 /**
  * @fileoverview added by tsickle
@@ -19339,8 +19339,8 @@ function defineComponent(componentDefinition) {
         type: type,
         diPublic: null,
         factory: componentDefinition.factory,
-        tag: (/** @type {?} */ (componentDefinition)).tag || /** @type {?} */ ((null)),
-        template: (/** @type {?} */ (componentDefinition)).template || /** @type {?} */ ((null)),
+        tag: componentDefinition.tag || /** @type {?} */ ((null)),
+        template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
         attributes: componentDefinition.attributes || null,
         inputs: invertObject(componentDefinition.inputs),
@@ -19354,8 +19354,7 @@ function defineComponent(componentDefinition) {
         afterViewInit: type.prototype.ngAfterViewInit || null,
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
-        onPush: (/** @type {?} */ (componentDefinition)).changeDetection ===
-            ChangeDetectionStrategy.OnPush
+        onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
@@ -19476,7 +19475,7 @@ function invertObject(obj) {
  * }
  * ```
  */
-const defineDirective = /** @type {?} */ (defineComponent);
+const defineDirective = /** @type {?} */ ((defineComponent));
 /**
  * Create a pipe definition object.
  *
@@ -19889,18 +19888,6 @@ function isPure(index) {
  * can change between versions.
  *
  * See: {\@link definePipe}
- * @record
- * @template T
- */
-
-/**
- * Arguments for `defineDirective`
- * @record
- * @template T
- */
-
-/**
- * Arguments for `defineComponent`.
  * @record
  * @template T
  */
