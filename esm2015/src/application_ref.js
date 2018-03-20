@@ -9,9 +9,8 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Observable } from 'rxjs/Observable';
-import { merge } from 'rxjs/observable/merge';
-import { share } from 'rxjs/operator/share';
+import { Observable, merge } from 'rxjs';
+import { share } from 'rxjs/operators';
 import { ErrorHandler } from '../src/error_handler';
 import { scheduleMicroTask, stringify } from '../src/util';
 import { isPromise } from '../src/util/lang';
@@ -486,7 +485,7 @@ export class ApplicationRef {
             };
         });
         (/** @type {?} */ (this)).isStable =
-            merge(isCurrentlyStable, share.call(isStable));
+            merge(isCurrentlyStable, isStable.pipe(share()));
     }
     /**
      * Bootstrap a new component at the root level of the application.

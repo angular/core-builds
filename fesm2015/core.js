@@ -1,13 +1,10 @@
 /**
- * @license Angular v6.0.0-beta.7-2b3de63
+ * @license Angular v6.0.0-beta.7-4648597
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
-import { Observable } from 'rxjs/Observable';
-import { merge } from 'rxjs/observable/merge';
-import { share } from 'rxjs/operator/share';
-import { Subject } from 'rxjs/Subject';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subject, Subscription, merge } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 /**
  * @fileoverview added by tsickle
@@ -2025,7 +2022,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-beta.7-2b3de63');
+const VERSION = new Version('6.0.0-beta.7-4648597');
 
 /**
  * @fileoverview added by tsickle
@@ -5621,7 +5618,7 @@ class ApplicationRef {
             };
         });
         (/** @type {?} */ (this)).isStable =
-            merge(isCurrentlyStable, share.call(isStable));
+            merge(isCurrentlyStable, isStable.pipe(share()));
     }
     /**
      * Bootstrap a new component at the root level of the application.

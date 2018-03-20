@@ -1,13 +1,13 @@
 /**
- * @license Angular v6.0.0-beta.7-2b3de63
+ * @license Angular v6.0.0-beta.7-4648597
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs/Observable'), require('rxjs/observable/merge'), require('rxjs/operator/share'), require('rxjs/Subject'), require('rxjs/Subscription')) :
-	typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs/Observable', 'rxjs/observable/merge', 'rxjs/operator/share', 'rxjs/Subject', 'rxjs/Subscription'], factory) :
-	(factory((global.ng = global.ng || {}, global.ng.core = {}),global.Rx,global.Rx.Observable,global.Rx.Observable.prototype,global.Rx,global.Rx));
-}(this, (function (exports,rxjs_Observable,rxjs_observable_merge,rxjs_operator_share,rxjs_Subject,rxjs_Subscription) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
+	typeof define === 'function' && define.amd ? define('@angular/core', ['exports', 'rxjs', 'rxjs/operators'], factory) :
+	(factory((global.ng = global.ng || {}, global.ng.core = {}),global.rxjs,global.rxjs.operators));
+}(this, (function (exports,rxjs,rxjs_operators) { 'use strict';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-beta.7-2b3de63
+ * @license Angular v6.0.0-beta.7-4648597
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2235,7 +2235,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-beta.7-2b3de63');
+var VERSION = new Version('6.0.0-beta.7-4648597');
 
 /**
  * @fileoverview added by tsickle
@@ -5241,13 +5241,13 @@ var EventEmitter = /** @class */ (function (_super) {
             }
         }
         var /** @type {?} */ sink = _super.prototype.subscribe.call(this, schedulerFn, errorFn, completeFn);
-        if (generatorOrNext instanceof rxjs_Subscription.Subscription) {
+        if (generatorOrNext instanceof rxjs.Subscription) {
             generatorOrNext.add(sink);
         }
         return sink;
     };
     return EventEmitter;
-}(rxjs_Subject.Subject));
+}(rxjs.Subject));
 
 /**
  * @fileoverview added by tsickle
@@ -6717,7 +6717,7 @@ var ApplicationRef = /** @class */ (function () {
         this.components = [];
         this._enforceNoNewChanges = isDevMode();
         this._zone.onMicrotaskEmpty.subscribe({ next: function () { _this._zone.run(function () { _this.tick(); }); } });
-        var /** @type {?} */ isCurrentlyStable = new rxjs_Observable.Observable(function (observer) {
+        var /** @type {?} */ isCurrentlyStable = new rxjs.Observable(function (observer) {
             _this._stable = _this._zone.isStable && !_this._zone.hasPendingMacrotasks &&
                 !_this._zone.hasPendingMicrotasks;
             _this._zone.runOutsideAngular(function () {
@@ -6725,7 +6725,7 @@ var ApplicationRef = /** @class */ (function () {
                 observer.complete();
             });
         });
-        var /** @type {?} */ isStable = new rxjs_Observable.Observable(function (observer) {
+        var /** @type {?} */ isStable = new rxjs.Observable(function (observer) {
             // Create the subscription to onStable outside the Angular Zone so that
             // the callback is run outside the Angular Zone.
             var /** @type {?} */ stableSub;
@@ -6756,7 +6756,7 @@ var ApplicationRef = /** @class */ (function () {
             };
         });
         (/** @type {?} */ (this)).isStable =
-            rxjs_observable_merge.merge(isCurrentlyStable, rxjs_operator_share.share.call(isStable));
+            rxjs.merge(isCurrentlyStable, isStable.pipe(rxjs_operators.share()));
     }
     /**
      * Bootstrap a new component at the root level of the application.
