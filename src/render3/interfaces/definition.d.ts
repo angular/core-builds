@@ -1,0 +1,171 @@
+import { Provider } from '../../core';
+import { RendererType2 } from '../../render/api';
+import { Type } from '../../type';
+/**
+ * Definition of what a template rendering function should look like.
+ */
+export declare type ComponentTemplate<T> = {
+    (ctx: T, creationMode: boolean): void;
+    ngPrivateData?: never;
+};
+/**
+ * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
+ * consumable for rendering.
+ */
+export interface ComponentType<T> extends Type<T> {
+    ngComponentDef: ComponentDef<T>;
+}
+/**
+ * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
+ * consumable for rendering.
+ */
+export interface DirectiveType<T> extends Type<T> {
+    ngDirectiveDef: DirectiveDef<T>;
+}
+export declare const enum DirectiveDefFlags {
+    ContentQuery = 2,
+}
+/**
+ * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * consumable for rendering.
+ */
+export interface PipeType<T> extends Type<T> {
+    ngPipeDef: PipeDef<T>;
+}
+/**
+ * Runtime link information for Directives.
+ *
+ * This is internal data structure used by the render to link
+ * directives into templates.
+ *
+ * NOTE: Always use `defineDirective` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {@link defineDirective}
+ */
+export interface DirectiveDef<T> {
+    /** Token representing the directive. Used by DI. */
+    type: Type<T>;
+    /** Function that makes a directive public to the DI system. */
+    diPublic: ((def: DirectiveDef<any>) => void) | null;
+    /**
+     * A dictionary mapping the inputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Input('alias') propertyName: any;`).
+     */
+    readonly inputs: {
+        [P in keyof T]: P;
+    };
+    /**
+     * A dictionary mapping the outputs' minified property names to their public API names, which
+     * are their aliases if any, or their original unminified property names
+     * (as in `@Output('alias') propertyName: any;`).
+     */
+    readonly outputs: {
+        [P in keyof T]: P;
+    };
+    /**
+     * Name under which the directive is exported (for use with local references in template)
+     */
+    readonly exportAs: string | null;
+    /**
+     * Factory function used to create a new directive instance.
+     *
+     * Usually returns the directive instance, but if the directive has a content query,
+     * it instead returns an array that contains the instance as well as content query data.
+     */
+    factory(): T | [T];
+    /** Refreshes host bindings on the associated directive. */
+    hostBindings: ((directiveIndex: number, elementIndex: number) => void) | null;
+    /**
+     * Static attributes to set on host element.
+     *
+     * Even indices: attribute name
+     * Odd indices: attribute value
+     */
+    attributes: string[] | null;
+    onInit: (() => void) | null;
+    doCheck: (() => void) | null;
+    afterContentInit: (() => void) | null;
+    afterContentChecked: (() => void) | null;
+    afterViewInit: (() => void) | null;
+    afterViewChecked: (() => void) | null;
+    onDestroy: (() => void) | null;
+}
+/**
+ * Runtime link information for Components.
+ *
+ * This is internal data structure used by the render to link
+ * components into templates.
+ *
+ * NOTE: Always use `defineComponent` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {@link defineComponent}
+ */
+export interface ComponentDef<T> extends DirectiveDef<T> {
+    /**
+     * The tag name which should be used by the component.
+     *
+     * NOTE: only used with component directives.
+     */
+    readonly tag: string;
+    /**
+     * The View template of the component.
+     *
+     * NOTE: only used with component directives.
+     */
+    readonly template: ComponentTemplate<T>;
+    /**
+     * Renderer type data of the component.
+     *
+     * NOTE: only used with component directives.
+     */
+    readonly rendererType: RendererType2 | null;
+    /** Whether or not this component's ChangeDetectionStrategy is OnPush */
+    readonly onPush: boolean;
+    /**
+     * Defines the set of injectable providers that are visible to a Directive and its content DOM
+     * children.
+     */
+    readonly providers?: Provider[];
+    /**
+     * Defines the set of injectable providers that are visible to a Directive and its view DOM
+     * children only.
+     */
+    readonly viewProviders?: Provider[];
+}
+/**
+ * Runtime link information for Pipes.
+ *
+ * This is internal data structure used by the renderer to link
+ * pipes into templates.
+ *
+ * NOTE: Always use `definePipe` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ *
+ * See: {@link definePipe}
+ */
+export interface PipeDef<T> {
+    /**
+     * factory function used to create a new directive instance.
+     *
+     * NOTE: this property is short (1 char) because it is used in
+     * component templates which is sensitive to size.
+     */
+    n: () => T;
+    /**
+     * Whether or not the pipe is pure.
+     *
+     * Pure pipes result only depends on the pipe input and not on internal
+     * state of the pipe.
+     */
+    pure: boolean;
+    onDestroy: (() => void) | null;
+}
+export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
+export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => void;
+export declare const unusedValueExportToPlacateAjd = 1;
