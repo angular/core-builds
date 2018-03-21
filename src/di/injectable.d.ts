@@ -1,4 +1,5 @@
 import { Type } from '../type';
+import { InjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
 /**
  * Injectable providers used in `@Injectable` decorator.
@@ -36,11 +37,11 @@ export interface InjectableDecorator {
      */
     (): any;
     (options?: {
-        scope: Type<any>;
+        providedIn: Type<any> | 'root' | null;
     } & InjectableProvider): any;
     new (): Injectable;
     new (options?: {
-        scope: Type<any>;
+        providedIn: Type<any> | 'root' | null;
     } & InjectableProvider): Injectable;
 }
 /**
@@ -49,16 +50,10 @@ export interface InjectableDecorator {
  * @experimental
  */
 export interface Injectable {
-    scope?: Type<any>;
+    providedIn?: Type<any> | 'root' | null;
     factory: () => any;
 }
 export declare function convertInjectableProviderToFactory(type: Type<any>, provider?: InjectableProvider): () => any;
-/**
-* Define injectable
-*
-* @experimental
-*/
-export declare function defineInjectable(opts: Injectable): Injectable;
 /**
 * Injectable decorator and metadata.
 *
@@ -72,5 +67,5 @@ export declare const Injectable: InjectableDecorator;
  * @experimental
  */
 export interface InjectableType<T> extends Type<T> {
-    ngInjectableDef?: Injectable;
+    ngInjectableDef: InjectableDef<T>;
 }

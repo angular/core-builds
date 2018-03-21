@@ -138,7 +138,7 @@ export declare function elementAttribute(index: number, name: string, value: any
  */
 export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
 /**
- * Add or remove a class in a classList.
+ * Add or remove a class in a `classList` on a DOM element.
  *
  * This instruction is meant to handle the [class.foo]="exp" case
  *
@@ -147,7 +147,20 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  *        renaming as part of minification.
  * @param value A value indicating if a given class should be added or removed.
  */
-export declare function elementClass<T>(index: number, className: string, value: T | NO_CHANGE): void;
+export declare function elementClassNamed<T>(index: number, className: string, value: T | NO_CHANGE): void;
+/**
+ * Set the `className` property on a DOM element.
+ *
+ * This instruction is meant to handle the `[class]="exp"` usage.
+ *
+ * `elementClass` instruction writes the value to the "element's" `className` property.
+ *
+ * @param index The index of the element to update in the data array
+ * @param value A value indicating a set of classes which should be applied. The method overrides
+ *   any existing classes. The value is stringified (`toString`) before it is applied to the
+ *   element.
+ */
+export declare function elementClass<T>(index: number, value: T | NO_CHANGE): void;
 /**
  * Update a given style on an Element.
  *
@@ -159,8 +172,24 @@ export declare function elementClass<T>(index: number, className: string, value:
  * @param sanitizer An optional function used to transform the value typically used for
  *        sanitization.
  */
-export declare function elementStyle<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
-export declare function elementStyle<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
+export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+/**
+ * Set the `style` property on a DOM element.
+ *
+ * This instruction is meant to handle the `[style]="exp"` usage.
+ *
+ *
+ * @param index The index of the element to update in the data array
+ * @param value A value indicating if a given style should be added or removed.
+ *   The expected shape of `value` is an object where keys are style names and the values
+ *   are their corresponding values to set. If value is falsy than the style is remove. An absence
+ *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
+ *   performed.
+ */
+export declare function elementStyle<T>(index: number, value: {
+    [styleName: string]: any;
+} | NO_CHANGE): void;
 /**
  * Create static text node
  *
@@ -187,9 +216,16 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  *        be created or retrieved out of order.
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
- * @param queryName Name under which the query can retrieve the directive instance.
+ * @param localNames Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, queryName?: string | null): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localNames?: (string | number)[] | null): T;
+/**
+ * A lighter version of directiveCreate() that is used for the root component
+ *
+ * This version does not contain features that we don't already support at root in
+ * current Angular. Example: local refs and inputs on root component.
+ */
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>): T;
 /**
  * Creates an LContainerNode.
  *
@@ -224,15 +260,12 @@ export declare function embeddedViewStart(viewBlockId: number): boolean;
 /** Marks the end of an embedded view. */
 export declare function embeddedViewEnd(): void;
 /**
- * Refreshes the directive, triggering init and content hooks.
- *
- * When it is a component, it also enters the component's view and processes it to update bindings,
- * queries, etc.
+ * Refreshes components by entering the component view and processing its bindings, queries, etc.
  *
  * @param directiveIndex
  * @param elementIndex
  */
-export declare function directiveRefresh<T>(directiveIndex: number, elementIndex: number): void;
+export declare function componentRefresh<T>(directiveIndex: number, elementIndex: number): void;
 /**
  * Instruction to distribute projectable nodes among <ng-content> occurrences in a given template.
  * It takes all the selectors from the entire component's template and decides where

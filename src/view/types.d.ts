@@ -278,10 +278,6 @@ export declare const enum DepFlags {
     Self = 4,
     Value = 8,
 }
-export interface InjectableDef {
-    scope: any;
-    factory: () => any;
-}
 export interface TextDef {
     prefix: string;
 }

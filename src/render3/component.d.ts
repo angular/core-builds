@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
 import { ComponentDef, ComponentType } from './interfaces/definition';
@@ -68,7 +69,7 @@ export declare const NULL_INJECTOR: Injector;
  * @param componentType Component to bootstrap
  * @param options Optional parameters which control bootstrapping
  */
-export declare function renderComponent<T>(componentType: ComponentType<T>, opts?: CreateComponentOptions): T;
+export declare function renderComponent<T>(componentType: ComponentType<T> | Type<T>, opts?: CreateComponentOptions): T;
 /**
  * Used to enable lifecycle hooks on the root component.
  *

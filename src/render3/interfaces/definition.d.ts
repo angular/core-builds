@@ -1,11 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { ChangeDetectionStrategy } from '../../change_detection/constants';
 import { Provider } from '../../core';
 import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
@@ -66,15 +58,6 @@ export interface DirectiveDef<T> {
         [P in keyof T]: P;
     };
     /**
-     * A dictionary mapping the inputs' minified property names to the original unminified property
-     * names.
-     *
-     * An entry is added if and only if the alias is different from the property name.
-     */
-    readonly inputsPropertyName: {
-        [P in keyof T]: P;
-    };
-    /**
      * A dictionary mapping the outputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
      * (as in `@Output('alias') propertyName: any;`).
@@ -91,16 +74,10 @@ export interface DirectiveDef<T> {
      *
      * Usually returns the directive instance, but if the directive has a content query,
      * it instead returns an array that contains the instance as well as content query data.
-     *
-     * NOTE: this property is short (1 char) because it is used in
-     * component templates which is sensitive to size.
      */
-    n(): T | [T];
-    /**
-     * Refreshes host bindings on the associated directive. Also calls lifecycle hooks
-     * like ngOnInit and ngDoCheck, if they are defined on the directive.
-     */
-    h(directiveIndex: number, elementIndex: number): void;
+    factory(): T | [T];
+    /** Refreshes host bindings on the associated directive. */
+    hostBindings: ((directiveIndex: number, elementIndex: number) => void) | null;
     /**
      * Static attributes to set on host element.
      *
@@ -188,132 +165,6 @@ export interface PipeDef<T> {
      */
     pure: boolean;
     onDestroy: (() => void) | null;
-}
-/**
- * Arguments for `defineDirective`
- */
-export interface DirectiveDefArgs<T> {
-    /**
-     * Directive type, needed to configure the injector.
-     */
-    type: Type<T>;
-    /**
-     * Factory method used to create an instance of directive.
-     */
-    factory: () => T | ({
-        0: T;
-    } & any[]);
-    /**
-     * Static attributes to set on host element.
-     *
-     * Even indices: attribute name
-     * Odd indices: attribute value
-     */
-    attributes?: string[];
-    /**
-     * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    inputs?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * TODO: Remove per https://github.com/angular/angular/issues/22591
-     */
-    inputsPropertyName?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
-    outputs?: {
-        [P in keyof T]?: string;
-    };
-    /**
-     * A list of optional features to apply.
-     *
-     * See: {@link NgOnChangesFeature}, {@link PublicFeature}
-     */
-    features?: DirectiveDefFeature[];
-    /**
-     * Function executed by the parent template to allow child directive to apply host bindings.
-     */
-    hostBindings?: (directiveIndex: number, elementIndex: number) => void;
-    /**
-     * Defines the name that can be used in the template to assign this directive to a variable.
-     *
-     * See: {@link Directive.exportAs}
-     */
-    exportAs?: string;
-}
-/**
- * Arguments for `defineComponent`.
- */
-export interface ComponentDefArgs<T> extends DirectiveDefArgs<T> {
-    /**
-     * HTML tag name to use in place where this component should be instantiated.
-     */
-    tag: string;
-    /**
-     * Template function use for rendering DOM.
-     *
-     * This function has following structure.
-     *
-     * ```
-     * function Template<T>(ctx:T, creationMode: boolean) {
-     *   if (creationMode) {
-     *     // Contains creation mode instructions.
-     *   }
-     *   // Contains binding update instructions
-     * }
-     * ```
-     *
-     * Common instructions are:
-     * Creation mode instructions:
-     *  - `elementStart`, `elementEnd`
-     *  - `text`
-     *  - `container`
-     *  - `listener`
-     *
-     * Binding update instructions:
-     * - `bind`
-     * - `elementAttribute`
-     * - `elementProperty`
-     * - `elementClass`
-     * - `elementStyle`
-     *
-     */
-    template: ComponentTemplate<T>;
-    /**
-     * A list of optional features to apply.
-     *
-     * See: {@link NgOnChancesFeature}, {@link PublicFeature}
-     */
-    features?: ComponentDefFeature[];
-    rendererType?: RendererType2;
-    changeDetection?: ChangeDetectionStrategy;
-    /**
-     * Defines the set of injectable objects that are visible to a Directive and its light DOM
-     * children.
-     */
-    providers?: Provider[];
-    /**
-     * Defines the set of injectable objects that are visible to its view DOM children.
-     */
-    viewProviders?: Provider[];
 }
 export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
 export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => void;

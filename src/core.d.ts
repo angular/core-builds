@@ -34,24 +34,3 @@ export * from './core_private_export';
 export * from './core_render3_private_export';
 export { Sanitizer, SecurityContext } from './sanitization/security';
 export * from './codegen_private_exports';
-export * from './animation/animation_metadata_wrapped';
-/**
- * @deprecated from v4
- */
-export declare type AnimationEntryMetadata = any;
-/**
- * @deprecated from v4
- */
-export declare type AnimationStateTransitionMetadata = any;
-/**
- * @deprecated from v4
- */
-export declare type AnimationPlayer = any;
-/**
- * @deprecated from v4
- */
-export declare type AnimationStyles = any;
-/**
- * @deprecated from v4
- */
-export declare type AnimationKeyframe = any;

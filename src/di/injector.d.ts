@@ -6,10 +6,23 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Type } from '../type';
+import { InjectableDef } from './defs';
 import { InjectionToken } from './injection_token';
 import { StaticProvider } from './provider';
 export declare const SOURCE = "__source";
 export declare const THROW_IF_NOT_FOUND: Object;
+/**
+ * An InjectionToken that gets the current `Injector` for `createInjector()`-style injectors.
+ *
+ * Requesting this token instead of `Injector` allows `StaticInjector` to be tree-shaken from a
+ * project.
+ *
+ * @experimental
+ */
+export declare const INJECTOR: InjectionToken<Injector>;
+export declare class NullInjector implements Injector {
+    get(token: any, notFoundValue?: any): any;
+}
 /**
  * @whatItDoes Injector interface
  * @howToUse
@@ -55,7 +68,9 @@ export declare abstract class Injector {
         parent?: Injector;
         name?: string;
     }): Injector;
+    static ngInjectableDef: InjectableDef<Injector>;
 }
+export declare const USE_VALUE: string;
 export declare class StaticInjector implements Injector {
     readonly parent: Injector;
     readonly source: string | null;

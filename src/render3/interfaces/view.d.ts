@@ -243,6 +243,18 @@ export interface TView {
      * Odd indices: Hook function
      */
     destroyHooks: HookData | null;
+    /**
+     * A list of element indices for child components that will need to be refreshed when the
+     * current view has finished its check.
+     */
+    components: number[] | null;
+    /**
+     * A list of indices for child directives that have host bindings.
+     *
+     * Even indices: Directive indices
+     * Odd indices: Element indices
+     */
+    hostBindings: number[] | null;
 }
 /**
  * RootContext contains information which is shared for all components which
@@ -276,8 +288,7 @@ export declare type HookData = (number | (() => void))[];
 /** Possible values of LView.lifecycleStage, used to determine which hooks to run.  */
 export declare const enum LifecycleStage {
     INIT = 1,
-    CONTENT_INIT = 2,
-    VIEW_INIT = 3,
+    AFTER_INIT = 2,
 }
 /**
  * Static data that corresponds to the instance-specific data array on an LView.

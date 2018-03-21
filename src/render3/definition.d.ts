@@ -1,5 +1,8 @@
+import { ChangeDetectionStrategy } from '../change_detection/constants';
+import { Provider } from '../core';
+import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs, PipeDef } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, DirectiveDef, DirectiveDefFeature, PipeDef } from './interfaces/definition';
 /**
  * Create a component definition object.
  *
@@ -15,8 +18,138 @@ import { ComponentDef, ComponentDefArgs, DirectiveDef, DirectiveDefArgs, PipeDef
  * }
  * ```
  */
-export declare function defineComponent<T>(componentDefinition: ComponentDefArgs<T>): ComponentDef<T>;
-export declare function NgOnChangesFeature(definition: DirectiveDef<any>): void;
+export declare function defineComponent<T>(componentDefinition: {
+    /**
+     * Directive type, needed to configure the injector.
+     */
+    type: Type<T>;
+    /**
+     * Factory method used to create an instance of directive.
+     */
+    factory: () => T | ({
+        0: T;
+    } & any[]);
+    /**
+     * Static attributes to set on host element.
+     *
+     * Even indices: attribute name
+     * Odd indices: attribute value
+     */
+    attributes?: string[];
+    /**
+     * A map of input names.
+     *
+     * The format is in: `{[actualPropertyName: string]:string}`.
+     *
+     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     *
+     * This allows the render to re-construct the minified and non-minified names
+     * of properties.
+     */
+    inputs?: {
+        [P in keyof T]?: string;
+    };
+    /**
+     * A map of output names.
+     *
+     * The format is in: `{[actualPropertyName: string]:string}`.
+     *
+     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     *
+     * This allows the render to re-construct the minified and non-minified names
+     * of properties.
+     */
+    outputs?: {
+        [P in keyof T]?: string;
+    };
+    /**
+     * Function executed by the parent template to allow child directive to apply host bindings.
+     */
+    hostBindings?: (directiveIndex: number, elementIndex: number) => void;
+    /**
+     * Defines the name that can be used in the template to assign this directive to a variable.
+     *
+     * See: {@link Directive.exportAs}
+     */
+    exportAs?: string;
+    /**
+     * HTML tag name to use in place where this component should be instantiated.
+     */
+    tag: string;
+    /**
+     * Template function use for rendering DOM.
+     *
+     * This function has following structure.
+     *
+     * ```
+     * function Template<T>(ctx:T, creationMode: boolean) {
+     *   if (creationMode) {
+     *     // Contains creation mode instructions.
+     *   }
+     *   // Contains binding update instructions
+     * }
+     * ```
+     *
+     * Common instructions are:
+     * Creation mode instructions:
+     *  - `elementStart`, `elementEnd`
+     *  - `text`
+     *  - `container`
+     *  - `listener`
+     *
+     * Binding update instructions:
+     * - `bind`
+     * - `elementAttribute`
+     * - `elementProperty`
+     * - `elementClass`
+     * - `elementStyle`
+     *
+     */
+    template: ComponentTemplate<T>;
+    /**
+     * A list of optional features to apply.
+     *
+     * See: {@link NgOnChangesFeature}, {@link PublicFeature}
+     */
+    features?: ComponentDefFeature[];
+    rendererType?: RendererType2;
+    changeDetection?: ChangeDetectionStrategy;
+    /**
+     * Defines the set of injectable objects that are visible to a Directive and its light DOM
+     * children.
+     */
+    providers?: Provider[];
+    /**
+     * Defines the set of injectable objects that are visible to its view DOM children.
+     */
+    viewProviders?: Provider[];
+}): ComponentDef<T>;
+/**
+ * Creates an NgOnChangesFeature function for a component's features list.
+ *
+ * It accepts an optional map of minified input property names to original property names,
+ * if any input properties have a public alias.
+ *
+ * The NgOnChangesFeature function that is returned decorates a component with support for
+ * the ngOnChanges lifecycle hook, so it should be included in any component that implements
+ * that hook.
+ *
+ * Example usage:
+ *
+ * ```
+ * static ngComponentDef = defineComponent({
+ *   ...
+ *   inputs: {name: 'publicName'},
+ *   features: [NgOnChangesFeature({name: 'name'})]
+ * });
+ * ```
+ *
+ * @param inputPropertyNames Map of input property names, if they are aliased
+ * @returns DirectiveDefFeature
+ */
+export declare function NgOnChangesFeature(inputPropertyNames?: {
+    [key: string]: string;
+}): DirectiveDefFeature;
 export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
 /**
  * Create a directive definition object.
@@ -32,7 +165,18 @@ export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
  * }
  * ```
  */
-export declare const defineDirective: <T>(directiveDefinition: DirectiveDefArgs<T>) => DirectiveDef<T>;
+export declare const defineDirective: <T>(directiveDefinition: {
+    type: Type<T>;
+    factory: () => T | ({
+        0: T;
+    } & any[]);
+    attributes?: string[] | undefined;
+    inputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    outputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    features?: DirectiveDefFeature[] | undefined;
+    hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
+    exportAs?: string | undefined;
+}) => DirectiveDef<T>;
 /**
  * Create a pipe definition object.
  *
