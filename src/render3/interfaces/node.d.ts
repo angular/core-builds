@@ -12,29 +12,24 @@ import { LQueries } from './query';
 import { RElement, RText } from './renderer';
 import { LView } from './view';
 /**
- * LNodeFlags corresponds to the LNode.flags property. It contains information
- * on how to map a particular set of bits in LNode.flags to the node type, directive
- * count, or directive starting index.
- *
- * For example, if you wanted to check the type of a certain node, you would mask
- * node.flags with TYPE_MASK and compare it to the value for a certain node type. e.g:
- *
- *```ts
- * if ((node.flags & LNodeFlags.TYPE_MASK) === LNodeFlags.Element) {...}
- *```
+ * LNodeType corresponds to the LNode.type property. It contains information
+ * on how to map a particular set of bits in LNode.flags to the node type.
  */
-export declare const enum LNodeFlags {
+export declare const enum LNodeType {
     Container = 0,
     Projection = 1,
     View = 2,
     Element = 3,
     ViewOrElement = 2,
-    SIZE_SKIP = 4,
-    SIZE_SHIFT = 2,
+}
+/**
+ * TNodeFlags corresponds to the TNode.flags property. It contains information
+ * on how to map a particular set of bits to the node's first directive index
+ * (with INDX_SHIFT) or the node's directive count (with SIZE_MASK)
+ */
+export declare const enum TNodeFlags {
     INDX_SHIFT = 12,
-    TYPE_MASK = 3,
-    SIZE_MASK = 4092,
-    INDX_MASK = 4294963200,
+    SIZE_MASK = 4095,
 }
 /**
  * LNode is an internal data structure which is used for the incremental DOM algorithm.
@@ -53,17 +48,8 @@ export declare const enum LNodeFlags {
  * instructions.
  */
 export interface LNode {
-    /**
-     * This number stores three values using its bits:
-     *
-     * - the type of the node (first 2 bits)
-     * - the number of directives on that node (next 10 bits)
-     * - the starting index of the node's directives in the directives array (last 20 bits).
-     *
-     * The latter two values are necessary so DI can effectively search the directives associated
-     * with a node without searching the whole directives array.
-     */
-    flags: LNodeFlags;
+    /** The type of the node (see LNodeFlags) */
+    type: LNodeType;
     /**
      * The associated DOM node. Storing this allows us to:
      *  - append children to their element parents in the DOM (e.g. `parent.native.appendChild(...)`)
@@ -178,6 +164,16 @@ export interface LProjectionNode extends LNode {
  * see: https://en.wikipedia.org/wiki/Flyweight_pattern for more on the Flyweight pattern
  */
 export interface TNode {
+    /**
+     * This number stores two values using its bits:
+     *
+     * - the number of directives on that node (first 12 bits)
+     * - the starting index of the node's directives in the directives array (last 20 bits).
+     *
+     * These two values are necessary so DI can effectively search the directives associated
+     * with a node without searching the whole directives array.
+     */
+    flags: TNodeFlags;
     /** The tag name associated with this node. */
     tagName: string | null;
     /**

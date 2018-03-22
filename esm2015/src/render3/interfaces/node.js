@@ -10,20 +10,17 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /** @enum {number} */
-const LNodeFlags = {
+const LNodeType = {
     Container: 0,
     Projection: 1,
     View: 2,
     Element: 3,
     ViewOrElement: 2,
-    SIZE_SKIP: 4,
-    SIZE_SHIFT: 2,
-    INDX_SHIFT: 12,
-    TYPE_MASK: 3,
-    SIZE_MASK: 4092,
-    INDX_MASK: 4294963200,
 };
-export { LNodeFlags };
+export { LNodeType };
+/** @enum {number} */
+const TNodeFlags = { INDX_SHIFT: 12, SIZE_MASK: 4095, };
+export { TNodeFlags };
 /**
  * LNode is an internal data structure which is used for the incremental DOM algorithm.
  * The "L" stands for "Logical" to differentiate between `RNodes` (actual rendered DOM
@@ -44,17 +41,10 @@ export { LNodeFlags };
 export function LNode() { }
 function LNode_tsickle_Closure_declarations() {
     /**
-     * This number stores three values using its bits:
-     *
-     * - the type of the node (first 2 bits)
-     * - the number of directives on that node (next 10 bits)
-     * - the starting index of the node's directives in the directives array (last 20 bits).
-     *
-     * The latter two values are necessary so DI can effectively search the directives associated
-     * with a node without searching the whole directives array.
+     * The type of the node (see LNodeFlags)
      * @type {?}
      */
-    LNode.prototype.flags;
+    LNode.prototype.type;
     /**
      * The associated DOM node. Storing this allows us to:
      *  - append children to their element parents in the DOM (e.g. `parent.native.appendChild(...)`)
@@ -244,6 +234,17 @@ function LProjectionNode_tsickle_Closure_declarations() {
  */
 export function TNode() { }
 function TNode_tsickle_Closure_declarations() {
+    /**
+     * This number stores two values using its bits:
+     *
+     * - the number of directives on that node (first 12 bits)
+     * - the starting index of the node's directives in the directives array (last 20 bits).
+     *
+     * These two values are necessary so DI can effectively search the directives associated
+     * with a node without searching the whole directives array.
+     * @type {?}
+     */
+    TNode.prototype.flags;
     /**
      * The tag name associated with this node.
      * @type {?}

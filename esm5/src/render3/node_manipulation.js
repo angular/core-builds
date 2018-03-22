@@ -34,8 +34,7 @@ function findNextRNodeSibling(node, stopNode) {
     while (currentNode && currentNode !== stopNode) {
         var /** @type {?} */ pNextOrParent = currentNode.pNextOrParent;
         if (pNextOrParent) {
-            var /** @type {?} */ pNextOrParentType = pNextOrParent.flags & 3 /* TYPE_MASK */;
-            while (pNextOrParentType !== 1 /* Projection */) {
+            while (pNextOrParent.type !== 1 /* Projection */) {
                 var /** @type {?} */ nativeNode = findFirstRNode(pNextOrParent);
                 if (nativeNode) {
                     return nativeNode;
@@ -56,7 +55,7 @@ function findNextRNodeSibling(node, stopNode) {
             var /** @type {?} */ parentNode = currentNode.parent;
             currentNode = null;
             if (parentNode) {
-                var /** @type {?} */ parentType = parentNode.flags & 3 /* TYPE_MASK */;
+                var /** @type {?} */ parentType = parentNode.type;
                 if (parentType === 0 /* Container */ || parentType === 2 /* View */) {
                     currentNode = parentNode;
                 }
@@ -76,7 +75,7 @@ function getNextLNodeWithProjection(node) {
     var /** @type {?} */ pNextOrParent = node.pNextOrParent;
     if (pNextOrParent) {
         // The node is projected
-        var /** @type {?} */ isLastProjectedNode = (pNextOrParent.flags & 3 /* TYPE_MASK */) === 1 /* Projection */;
+        var /** @type {?} */ isLastProjectedNode = pNextOrParent.type === 1 /* Projection */;
         // returns pNextOrParent if we are not at the end of the list, null otherwise
         return isLastProjectedNode ? null : pNextOrParent;
     }
@@ -117,18 +116,17 @@ function getNextOrParentSiblingNode(initialNode, rootNode) {
 function findFirstRNode(rootNode) {
     var /** @type {?} */ node = rootNode;
     while (node) {
-        var /** @type {?} */ type = node.flags & 3 /* TYPE_MASK */;
         var /** @type {?} */ nextNode = null;
-        if (type === 3 /* Element */) {
+        if (node.type === 3 /* Element */) {
             // A LElementNode has a matching RNode in LElementNode.native
             return (/** @type {?} */ (node)).native;
         }
-        else if (type === 0 /* Container */) {
+        else if (node.type === 0 /* Container */) {
             // For container look at the first node of the view next
             var /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
             nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
         }
-        else if (type === 1 /* Projection */) {
+        else if (node.type === 1 /* Projection */) {
             // For Projection look at the first projected node
             nextNode = (/** @type {?} */ (node)).data.head;
         }
@@ -155,10 +153,9 @@ export function addRemoveViewFromContainer(container, rootNode, insertMode, befo
     var /** @type {?} */ node = rootNode.child;
     if (parent) {
         while (node) {
-            var /** @type {?} */ type = node.flags & 3 /* TYPE_MASK */;
             var /** @type {?} */ nextNode = null;
             var /** @type {?} */ renderer = container.view.renderer;
-            if (type === 3 /* Element */) {
+            if (node.type === 3 /* Element */) {
                 if (insertMode) {
                     isProceduralRenderer(renderer) ?
                         renderer.insertBefore(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
@@ -170,14 +167,14 @@ export function addRemoveViewFromContainer(container, rootNode, insertMode, befo
                 }
                 nextNode = node.next;
             }
-            else if (type === 0 /* Container */) {
+            else if (node.type === 0 /* Container */) {
                 // if we get to a container, it must be a root node of a view because we are only
                 // propagating down into child views / containers and not child elements
                 var /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
                 childContainerData.renderParent = parentNode;
                 nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
             }
-            else if (type === 1 /* Projection */) {
+            else if (node.type === 1 /* Projection */) {
                 nextNode = (/** @type {?} */ (node)).data.head;
             }
             else {
@@ -328,7 +325,7 @@ export function setViewNext(view, next) {
  */
 export function getParentState(state, rootView) {
     var /** @type {?} */ node;
-    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) && (node.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) && node.type === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
         return /** @type {?} */ (((node.parent)).data);
@@ -398,7 +395,7 @@ function executeOnDestroys(view) {
  * @return {?} boolean Whether the child element should be inserted.
  */
 export function canInsertNativeNode(parent, currentView) {
-    var /** @type {?} */ parentIsElement = (parent.flags & 3 /* TYPE_MASK */) === 3 /* Element */;
+    var /** @type {?} */ parentIsElement = parent.type === 3 /* Element */;
     return parentIsElement &&
         (parent.view !== currentView || parent.data === null /* Regular Element. */);
 }
@@ -449,7 +446,7 @@ export function insertChild(node, currentView) {
  * @return {?}
  */
 export function appendProjectedNode(node, currentParent, currentView) {
-    if ((node.flags & 3 /* TYPE_MASK */) !== 0 /* Container */) {
+    if (node.type !== 0 /* Container */) {
         appendChild(currentParent, (/** @type {?} */ (node)).native, currentView);
     }
     else if (canInsertNativeNode(currentParent, currentView)) {

@@ -299,7 +299,7 @@ export function createLNode(index, type, native, state) {
         parent && parent.queries && parent.queries.child();
     const /** @type {?} */ isState = state != null;
     const /** @type {?} */ node = {
-        flags: type,
+        type: type,
         native: /** @type {?} */ (native),
         view: currentView,
         parent: /** @type {?} */ (parent),
@@ -332,7 +332,7 @@ export function createLNode(index, type, native, state) {
         if (isParent) {
             currentQueries = null;
             if (previousOrParentNode.view === currentView ||
-                (previousOrParentNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+                previousOrParentNode.type === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
                 ngDevMode && assertNull(previousOrParentNode.child, `previousOrParentNode's child should not have been set.`);
                 previousOrParentNode.child = node;
@@ -685,7 +685,10 @@ export function locateHostElement(factory, elementOrSelector) {
  */
 export function hostElement(rNode, def) {
     resetApplicationState();
-    return createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    if (firstTemplatePass)
+        node.tNode = createTNode(def.tag, null, null, null);
+    return node;
 }
 /**
  * Adds an event listener to the current node.
@@ -719,7 +722,7 @@ export function listener(eventName, listenerFn, useCapture = false) {
     if (tNode.outputs === undefined) {
         // if we create TNode here, inputs must be undefined so we know they still need to be
         // checked
-        tNode.outputs = generatePropertyAliases(node.flags, 1 /* Output */);
+        tNode.outputs = generatePropertyAliases(/** @type {?} */ ((node.tNode)).flags, 1 /* Output */);
     }
     const /** @type {?} */ outputs = tNode.outputs;
     let /** @type {?} */ outputData;
@@ -756,7 +759,7 @@ export function elementEnd() {
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
     const /** @type {?} */ queries = previousOrParentNode.queries;
     queries && queries.addNode(previousOrParentNode);
-    queueLifecycleHooks(previousOrParentNode.flags, currentView);
+    queueLifecycleHooks(/** @type {?} */ ((previousOrParentNode.tNode)).flags, currentView);
 }
 /**
  * Updates the value of removes an attribute on an Element.
@@ -806,7 +809,7 @@ export function elementProperty(index, propName, value, sanitizer) {
     // yet been checked
     if (tNode && tNode.inputs === undefined) {
         // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(node.flags, 0 /* Input */);
+        tNode.inputs = generatePropertyAliases(/** @type {?} */ ((node.tNode)).flags, 0 /* Input */);
     }
     const /** @type {?} */ inputData = tNode && tNode.inputs;
     let /** @type {?} */ dataValue;
@@ -835,6 +838,7 @@ export function elementProperty(index, propName, value, sanitizer) {
  */
 function createTNode(tagName, attrs, data, localNames) {
     return {
+        flags: 0,
         tagName: tagName,
         attrs: attrs,
         localNames: localNames,
@@ -860,15 +864,15 @@ function setInputsForProperty(inputs, value) {
 /**
  * Consolidates all inputs or outputs of all directives on this logical node.
  *
- * @param {?} lNodeFlags
+ * @param {?} tNodeFlags
  * @param {?} direction
  * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
-function generatePropertyAliases(lNodeFlags, direction) {
-    const /** @type {?} */ size = (lNodeFlags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */;
+function generatePropertyAliases(tNodeFlags, direction) {
+    const /** @type {?} */ size = tNodeFlags & 4095 /* SIZE_MASK */;
     let /** @type {?} */ propStore = null;
     if (size > 0) {
-        const /** @type {?} */ start = lNodeFlags >> 12 /* INDX_SHIFT */;
+        const /** @type {?} */ start = tNodeFlags >> 12 /* INDX_SHIFT */;
         const /** @type {?} */ isInput = direction === 0 /* Input */;
         for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
             const /** @type {?} */ directiveDef = /** @type {?} */ (((tData))[i]);
@@ -1060,7 +1064,7 @@ export function directiveCreate(index, directive, directiveDef, localNames) {
     const /** @type {?} */ instance = baseDirectiveCreate(index, directive, directiveDef);
     ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
     const /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
-    if (currentView.tView.firstTemplatePass && localNames) {
+    if (firstTemplatePass && localNames) {
         tNode.localNames = tNode.localNames ? tNode.localNames.concat(localNames) : localNames;
     }
     if (tNode && tNode.attrs) {
@@ -1087,15 +1091,10 @@ export function baseDirectiveCreate(index, directive, directiveDef) {
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
-    let /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode)).flags;
-    let /** @type {?} */ size = flags & 4092 /* SIZE_MASK */;
-    if (size === 0) {
-        flags = (index << 12 /* INDX_SHIFT */) | 4 /* SIZE_SKIP */ | flags & 3 /* TYPE_MASK */;
+    if (firstTemplatePass) {
+        const /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode.tNode)).flags; /** @type {?} */
+        ((previousOrParentNode.tNode)).flags = (flags & 4095 /* SIZE_MASK */) === 0 ? (index << 12 /* INDX_SHIFT */) | 1 : flags + 1;
     }
-    else {
-        flags += 4 /* SIZE_SKIP */;
-    } /** @type {?} */
-    ((previousOrParentNode)).flags = flags;
     ngDevMode && assertDataInRange(index - 1);
     Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
     data[index] = instance = directive;
@@ -1106,7 +1105,7 @@ export function baseDirectiveCreate(index, directive, directiveDef) {
     if (diPublic) {
         diPublic(/** @type {?} */ ((directiveDef)));
     }
-    if (/** @type {?} */ ((directiveDef)).attributes != null && (previousOrParentNode.flags & 3 /* TYPE_MASK */) == 3 /* Element */) {
+    if (/** @type {?} */ ((directiveDef)).attributes != null && previousOrParentNode.type == 3 /* Element */) {
         setUpAttributes((/** @type {?} */ (previousOrParentNode)).native, /** @type {?} */ (((directiveDef)).attributes));
     }
     return instance;
@@ -1121,7 +1120,7 @@ export function baseDirectiveCreate(index, directive, directiveDef) {
  * @return {?}
  */
 function setInputsFromAttrs(instance, inputs, tNode) {
-    const /** @type {?} */ directiveIndex = ((previousOrParentNode.flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */) - 1;
+    const /** @type {?} */ directiveIndex = (/** @type {?} */ ((previousOrParentNode.tNode)).flags & 4095 /* SIZE_MASK */) - 1;
     let /** @type {?} */ initialInputData = /** @type {?} */ (tNode.initialInputs);
     if (initialInputData === undefined || directiveIndex >= initialInputData.length) {
         initialInputData = generateInitialInputs(directiveIndex, inputs, tNode);
@@ -1386,7 +1385,8 @@ export function componentRefresh(directiveIndex, elementIndex) {
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
     if (viewAttached(hostView) && hostView.flags & (2 /* CheckAlways */ | 4 /* Dirty */)) {
         ngDevMode && assertDataInRange(directiveIndex);
-        detectChangesInternal(hostView, element, getDirectiveInstance(data[directiveIndex]));
+        const /** @type {?} */ template = (/** @type {?} */ (tData[directiveIndex])).template;
+        detectChangesInternal(hostView, element, template, getDirectiveInstance(data[directiveIndex]));
     }
 }
 /**
@@ -1492,7 +1492,7 @@ export function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
     // build the linked list of projected nodes:
     for (let /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
         const /** @type {?} */ nodeToProject = nodesForSelector[i];
-        if ((nodeToProject.flags & 3 /* TYPE_MASK */) === 1 /* Projection */) {
+        if (nodeToProject.type === 1 /* Projection */) {
             const /** @type {?} */ previouslyProjected = (/** @type {?} */ (nodeToProject)).data;
             appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
         }
@@ -1518,7 +1518,7 @@ export function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
  */
 function findComponentHost(lView) {
     let /** @type {?} */ viewRootLNode = lView.node;
-    while ((viewRootLNode.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+    while (viewRootLNode.type === 2 /* View */) {
         ngDevMode && assertNotNull(lView.parent, 'lView.parent');
         lView = /** @type {?} */ ((lView.parent));
         viewRootLNode = lView.node;
@@ -1679,7 +1679,9 @@ export function getRootView(component) {
 export function detectChanges(component) {
     const /** @type {?} */ hostNode = _getComponentHostLElementNode(component);
     ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
-    detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, component);
+    const /** @type {?} */ componentIndex = /** @type {?} */ ((hostNode.tNode)).flags >> 12 /* INDX_SHIFT */;
+    const /** @type {?} */ template = (/** @type {?} */ (hostNode.view.tView.data[componentIndex])).template;
+    detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, template, component);
 }
 /**
  * Checks the change detector and its children, and throws if any changes are detected.
@@ -1722,12 +1724,11 @@ function throwErrorIfNoChangesMode(oldValue, currValue) {
  * @template T
  * @param {?} hostView
  * @param {?} hostNode
+ * @param {?} template
  * @param {?} component
  * @return {?}
  */
-function detectChangesInternal(hostView, hostNode, component) {
-    const /** @type {?} */ componentIndex = hostNode.flags >> 12 /* INDX_SHIFT */;
-    const /** @type {?} */ template = (/** @type {?} */ (hostNode.view.tView.data[componentIndex])).template;
+export function detectChangesInternal(hostView, hostNode, template, component) {
     const /** @type {?} */ oldView = enterView(hostView, hostNode);
     try {
         template(component, creationMode);

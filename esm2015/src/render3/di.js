@@ -284,7 +284,7 @@ export function getOrCreateChangeDetectorRef(di, context) {
         // if data is null, this node is a regular element node (not a component)
         return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
     }
-    else if ((currentNode.flags & 3 /* TYPE_MASK */) === 3 /* Element */) {
+    else if (currentNode.type === 3 /* Element */) {
         // if it's an element node with data, it's a component and context will be set later
         return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
     }
@@ -299,9 +299,8 @@ function getOrCreateHostChangeDetector(currentNode) {
     const /** @type {?} */ hostNode = getClosestComponentAncestor(currentNode);
     const /** @type {?} */ hostInjector = hostNode.nodeInjector;
     const /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
-    return existingRef ?
-        existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), hostNode.view.data[hostNode.flags >> 12 /* INDX_SHIFT */]);
+    return existingRef ? existingRef :
+        createViewRef(/** @type {?} */ (hostNode.data), hostNode.view.data[/** @type {?} */ ((hostNode.tNode)).flags >> 12 /* INDX_SHIFT */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -311,7 +310,7 @@ function getOrCreateHostChangeDetector(currentNode) {
  * @return {?}
  */
 function getClosestComponentAncestor(node) {
-    while ((node.flags & 3 /* TYPE_MASK */) === 2 /* View */) {
+    while (node.type === 2 /* View */) {
         node = node.view.node;
     }
     return /** @type {?} */ (node);
@@ -365,8 +364,8 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
             const /** @type {?} */ node = injector.node;
             // The size of the node's directive's list is stored in certain bits of the node's flags,
             // so exact it with a mask and shift it back such that the bits reflect the real value.
-            const /** @type {?} */ flags = node.flags;
-            const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */;
+            const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
+            const /** @type {?} */ size = flags & 4095 /* SIZE_MASK */;
             if (size !== 0) {
                 // The start index of the directives list is also part of the node's flags, but there is
                 // nothing to the "left" of it so it doesn't need a mask.
@@ -490,9 +489,7 @@ function ReadFromInjectorFn_tsickle_Closure_declarations() {
  * @return {?} The ElementRef instance to use
  */
 export function getOrCreateElementRef(di) {
-    return di.elementRef ||
-        (di.elementRef = new ElementRef(((di.node.flags & 3 /* TYPE_MASK */) === 0 /* Container */) ? null :
-            di.node.native));
+    return di.elementRef || (di.elementRef = new ElementRef(di.node.type === 0 /* Container */ ? null : di.node.native));
 }
 export const /** @type {?} */ QUERY_READ_TEMPLATE_REF = /** @type {?} */ ((/** @type {?} */ (new ReadFromInjectorFn((injector) => getOrCreateTemplateRef(injector)))));
 export const /** @type {?} */ QUERY_READ_CONTAINER_REF = /** @type {?} */ ((/** @type {?} */ (new ReadFromInjectorFn((injector) => getOrCreateContainerRef(injector)))));
@@ -502,10 +499,10 @@ export const /** @type {?} */ QUERY_READ_FROM_NODE = (/** @type {?} */ ((new Rea
     if (directiveIdx > -1) {
         return node.view.data[directiveIdx];
     }
-    else if ((node.flags & 3 /* TYPE_MASK */) === 3 /* Element */) {
+    else if (node.type === 3 /* Element */) {
         return getOrCreateElementRef(injector);
     }
-    else if ((node.flags & 3 /* TYPE_MASK */) === 0 /* Container */) {
+    else if (node.type === 0 /* Container */) {
         return getOrCreateTemplateRef(injector);
     }
     throw new Error('fail');

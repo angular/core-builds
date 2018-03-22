@@ -44,12 +44,12 @@ export function queueInitHooks(index, onInit, doCheck, tView) {
 export function queueLifecycleHooks(flags, currentView) {
     const /** @type {?} */ tView = currentView.tView;
     if (tView.firstTemplatePass === true) {
-        const /** @type {?} */ size = (flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */;
         const /** @type {?} */ start = flags >> 12 /* INDX_SHIFT */;
+        const /** @type {?} */ end = start + (flags & 4095 /* SIZE_MASK */);
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
         // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
         // hooks for projected components and directives must be called *before* their hosts.
-        for (let /** @type {?} */ i = start, /** @type {?} */ end = start + size; i < end; i++) {
+        for (let /** @type {?} */ i = start; i < end; i++) {
             const /** @type {?} */ def = (/** @type {?} */ (tView.data[i]));
             queueContentHooks(def, tView, i);
             queueViewHooks(def, tView, i);

@@ -17,7 +17,7 @@ import { assertEqual, assertNotNull } from './assert';
  */
 export function assertNodeType(node, type) {
     assertNotNull(node, 'should be called with a node');
-    assertEqual(node.flags & 3 /* TYPE_MASK */, type, "should be a " + typeName(type));
+    assertEqual(node.type, type, "should be a " + typeName(type));
 }
 /**
  * @param {?} node
@@ -30,8 +30,7 @@ export function assertNodeOfPossibleTypes(node) {
         types[_i - 1] = arguments[_i];
     }
     assertNotNull(node, 'should be called with a node');
-    var /** @type {?} */ nodeType = node.flags & 3 /* TYPE_MASK */;
-    var /** @type {?} */ found = types.some(function (type) { return nodeType === type; });
+    var /** @type {?} */ found = types.some(function (type) { return node.type === type; });
     assertEqual(found, true, "Should be one of " + types.map(typeName).join(', '));
 }
 /**

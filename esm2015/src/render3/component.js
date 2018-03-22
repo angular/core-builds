@@ -165,7 +165,7 @@ export function LifecycleHooksFeature(component, def) {
     const /** @type {?} */ elementNode = _getComponentHostLElementNode(component);
     // Root component is always created at dir index 1, after host element at 0
     queueInitHooks(1, def.onInit, def.doCheck, elementNode.view.tView);
-    queueLifecycleHooks(elementNode.flags, elementNode.view);
+    queueLifecycleHooks(/** @type {?} */ ((elementNode.tNode)).flags, elementNode.view);
 }
 /**
  * Retrieve the root context for any component by walking the parent `LView` until

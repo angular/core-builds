@@ -215,9 +215,8 @@ function getIdxOfMatchingSelector(tNode, selector) {
  */
 function geIdxOfMatchingDirective(node, type) {
     const /** @type {?} */ tData = node.view.tView.data;
-    const /** @type {?} */ flags = node.flags;
-    for (let /** @type {?} */ i = flags >> 12 /* INDX_SHIFT */, /** @type {?} */
-    ii = i + ((flags & 4092 /* SIZE_MASK */) >> 2 /* SIZE_SHIFT */); i < ii; i++) {
+    const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
+    for (let /** @type {?} */ i = flags >> 12 /* INDX_SHIFT */, /** @type {?} */ ii = i + (flags & 4095 /* SIZE_MASK */); i < ii; i++) {
         const /** @type {?} */ def = /** @type {?} */ (tData[i]);
         if (def.diPublic && def.type === type) {
             return i;

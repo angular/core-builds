@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeFlags, LProjectionNode, LViewNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
@@ -53,10 +53,10 @@ export declare function createLView(viewId: number, renderer: Renderer3, tView: 
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
  */
-export declare function createLNode(index: number | null, type: LNodeFlags.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: null, type: LNodeFlags.View, native: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeFlags.Container, native: undefined, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: LNodeFlags.Projection, native: null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: null, type: LNodeType.View, native: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeType.Projection, native: null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param host Existing node to render into.
@@ -375,6 +375,8 @@ export declare function detectChanges<T>(component: T): void;
  * introduce other changes.
  */
 export declare function checkNoChanges<T>(component: T): void;
+/** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
+export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, template: ComponentTemplate<any>, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
