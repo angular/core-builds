@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-4f0cae0
+ * @license Angular v6.0.0-rc.0-6f01917
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2032,7 +2032,8 @@ function convertInjectableProviderToFactory(type, provider) {
  * \@Annotation
  */
 var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (injectableType, options) {
-    if (options && options.providedIn !== undefined) {
+    if (options && options.providedIn !== undefined &&
+        injectableType.ngInjectableDef === undefined) {
         /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
             providedIn: options.providedIn,
             factory: convertInjectableProviderToFactory(injectableType, options)
@@ -2194,7 +2195,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.0-4f0cae0');
+var VERSION = new Version('6.0.0-rc.0-6f01917');
 
 /**
  * @fileoverview added by tsickle

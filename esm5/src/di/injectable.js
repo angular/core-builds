@@ -91,7 +91,8 @@ export function convertInjectableProviderToFactory(type, provider) {
  * \@Annotation
  */
 export var /** @type {?} */ Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (injectableType, options) {
-    if (options && options.providedIn !== undefined) {
+    if (options && options.providedIn !== undefined &&
+        injectableType.ngInjectableDef === undefined) {
         /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
             providedIn: options.providedIn,
             factory: convertInjectableProviderToFactory(injectableType, options)
