@@ -214,10 +214,10 @@ function getIdxOfMatchingSelector(tNode, selector) {
  * @return {?} Index of a found directive or null when none found.
  */
 function geIdxOfMatchingDirective(node, type) {
-    const /** @type {?} */ tData = node.view.tView.data;
+    const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
     const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
     for (let /** @type {?} */ i = flags >> 12 /* INDX_SHIFT */, /** @type {?} */ ii = i + (flags & 4095 /* SIZE_MASK */); i < ii; i++) {
-        const /** @type {?} */ def = /** @type {?} */ (tData[i]);
+        const /** @type {?} */ def = /** @type {?} */ (defs[i]);
         if (def.diPublic && def.type === type) {
             return i;
         }
@@ -238,7 +238,7 @@ function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
     else {
         const /** @type {?} */ matchingIdx = geIdxOfMatchingDirective(node, /** @type {?} */ (read));
         if (matchingIdx !== null) {
-            return node.view.data[matchingIdx];
+            return /** @type {?} */ ((node.view.directives))[matchingIdx];
         }
     }
     return null;

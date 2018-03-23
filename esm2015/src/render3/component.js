@@ -131,8 +131,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     try {
         // Create element node at index 0 in data array
         elementNode = hostElement(hostNode, componentDef);
-        // Create directive instance with factory() and store at index 1 in data array (el is 0)
-        component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(1, componentDef.factory(), componentDef));
+        // Create directive instance with factory() and store at index 0 in directives array
+        component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component);
     }
     finally {
@@ -163,8 +163,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
  */
 export function LifecycleHooksFeature(component, def) {
     const /** @type {?} */ elementNode = _getComponentHostLElementNode(component);
-    // Root component is always created at dir index 1, after host element at 0
-    queueInitHooks(1, def.onInit, def.doCheck, elementNode.view.tView);
+    // Root component is always created at dir index 0
+    queueInitHooks(0, def.onInit, def.doCheck, elementNode.view.tView);
     queueLifecycleHooks(/** @type {?} */ ((elementNode.tNode)).flags, elementNode.view);
 }
 /**

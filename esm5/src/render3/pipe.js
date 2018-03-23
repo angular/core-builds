@@ -24,8 +24,8 @@ export function pipe(index, pipeDef, firstInstance) {
     var /** @type {?} */ tView = getTView();
     if (tView.firstTemplatePass) {
         tView.data[index] = pipeDef;
-        if (pipeDef.onDestroy != null) {
-            (tView.destroyHooks || (tView.destroyHooks = [])).push(index, pipeDef.onDestroy);
+        if (pipeDef.onDestroy) {
+            (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(index, pipeDef.onDestroy);
         }
     }
     var /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();

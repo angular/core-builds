@@ -133,7 +133,7 @@ function LView_tsickle_Closure_declarations() {
      * This array stores all element/text/container nodes created inside this view
      * and their bindings. Stored as an array rather than a linked list so we can
      * look up nodes directly in the case of forward declaration or bindings
-     * (e.g. E(1))..
+     * (e.g. E(1)).
      *
      * All bindings for a given view are stored in the order in which they
      * appear in the template, starting with `bindingStartIndex`.
@@ -142,6 +142,14 @@ function LView_tsickle_Closure_declarations() {
      * @type {?}
      */
     LView.prototype.data;
+    /**
+     * An array of directive instances in the current view.
+     *
+     * These must be stored separately from LNodes because their presence is
+     * unknown at compile-time and thus space cannot be reserved in data[].
+     * @type {?}
+     */
+    LView.prototype.directives;
     /**
      * The static data for this view. We need a reference to this so we can easily walk up the
      * node tree in DI and get the TView.data array associated with a node (where the
@@ -219,10 +227,18 @@ function LViewOrLContainer_tsickle_Closure_declarations() {
 export function TView() { }
 function TView_tsickle_Closure_declarations() {
     /**
-     * Static data equivalent of LView.data[]. Contains TNodes and directive defs.
+     * Static data equivalent of LView.data[]. Contains TNodes.
      * @type {?}
      */
     TView.prototype.data;
+    /**
+     * Directive and component defs for this view
+     *
+     * Defs are stored at the same index in TView.directives[] as their instances
+     * are stored in LView.directives[]. This simplifies lookup in DI.
+     * @type {?}
+     */
+    TView.prototype.directives;
     /**
      * Whether or not this template has been processed.
      * @type {?}
@@ -290,8 +306,22 @@ function TView_tsickle_Closure_declarations() {
      */
     TView.prototype.destroyHooks;
     /**
-     * A list of element indices for child components that will need to be refreshed when the
-     * current view has finished its check.
+     * Array of pipe ngOnDestroy hooks that should be executed when this view is destroyed.
+     *
+     * Even indices: Index of pipe in data
+     * Odd indices: Hook function
+     *
+     * These must be stored separately from directive destroy hooks because their contexts
+     * are stored in data.
+     * @type {?}
+     */
+    TView.prototype.pipeDestroyHooks;
+    /**
+     * A list of directive and element indices for child components that will need to be
+     * refreshed when the current view has finished its check.
+     *
+     * Even indices: Directive indices
+     * Odd indices: Element indices
      * @type {?}
      */
     TView.prototype.components;

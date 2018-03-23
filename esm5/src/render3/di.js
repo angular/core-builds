@@ -299,8 +299,9 @@ function getOrCreateHostChangeDetector(currentNode) {
     var /** @type {?} */ hostNode = getClosestComponentAncestor(currentNode);
     var /** @type {?} */ hostInjector = hostNode.nodeInjector;
     var /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
-    return existingRef ? existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), hostNode.view.data[/** @type {?} */ ((hostNode.tNode)).flags >> 12 /* INDX_SHIFT */]);
+    return existingRef ?
+        existingRef :
+        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view.directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 12 /* INDX_SHIFT */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -370,13 +371,13 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
                 // The start index of the directives list is also part of the node's flags, but there is
                 // nothing to the "left" of it so it doesn't need a mask.
                 var /** @type {?} */ start = flags_1 >> 12 /* INDX_SHIFT */;
-                var /** @type {?} */ tData = node.view.tView.data;
+                var /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
                 for (var /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
                     // Get the definition for the directive at this index and, if it is injectable (diPublic),
                     // and matches the given token, return the directive instance.
-                    var /** @type {?} */ directiveDef = /** @type {?} */ (tData[i]);
+                    var /** @type {?} */ directiveDef = /** @type {?} */ (defs[i]);
                     if (directiveDef.diPublic && directiveDef.type == token) {
-                        return getDirectiveInstance(node.view.data[i]);
+                        return getDirectiveInstance(/** @type {?} */ ((node.view.directives))[i]);
                     }
                 }
             }
@@ -502,7 +503,7 @@ export var /** @type {?} */ QUERY_READ_ELEMENT_REF = /** @type {?} */ ((/** @typ
 export var /** @type {?} */ QUERY_READ_FROM_NODE = (/** @type {?} */ ((new ReadFromInjectorFn(function (injector, node, directiveIdx) {
     ngDevMode && assertNodeOfPossibleTypes(node, 0 /* Container */, 3 /* Element */);
     if (directiveIdx > -1) {
-        return node.view.data[directiveIdx];
+        return /** @type {?} */ ((node.view.directives))[directiveIdx];
     }
     else if (node.type === 3 /* Element */) {
         return getOrCreateElementRef(injector);

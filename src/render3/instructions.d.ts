@@ -212,13 +212,13 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * NOTE: directives can be created in order other than the index order. They can also
  *       be retrieved before they are created in which case the value will be null.
  *
- * @param index Each directive in a `View` will have a unique index. Directives can
- *        be created or retrieved out of order.
+ * @param index Index to save the directive in the directives array
+ * @param elementIndex Index of the host element in the data array
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
- * @param localNames Names under which a query can retrieve the directive instance
+ * @param localRefs Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>, localNames?: (string | number)[] | null): T;
+export declare function directiveCreate<T>(index: number, elementIndex: number, directive: T, directiveDef: DirectiveDef<T>, localRefs?: string[] | null): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
@@ -442,6 +442,8 @@ export declare function interpolation8(prefix: string, v0: any, i0: string, v1: 
 export declare function store<T>(index: number, value: T): void;
 /** Retrieves a value from the `data`. */
 export declare function load<T>(index: number): T;
+/** Retrieves a value from the `directives` array. */
+export declare function loadDirective<T>(index: number): T;
 /** Gets the current binding value and increments the binding index. */
 export declare function consumeBinding(): any;
 /** Updates binding if changed, then returns whether it was updated. */

@@ -344,6 +344,7 @@ export function getParentState(state, rootView) {
 function cleanUpView(view) {
     removeListeners(view);
     executeOnDestroys(view);
+    executePipeOnDestroys(view);
 }
 /**
  * Removes listeners and unsubscribes from output subscriptions
@@ -374,7 +375,18 @@ function executeOnDestroys(view) {
     var /** @type {?} */ tView = view.tView;
     var /** @type {?} */ destroyHooks;
     if (tView != null && (destroyHooks = tView.destroyHooks) != null) {
-        callHooks(view.data, destroyHooks);
+        callHooks(/** @type {?} */ ((view.directives)), destroyHooks);
+    }
+}
+/**
+ * Calls pipe destroy hooks for this view
+ * @param {?} view
+ * @return {?}
+ */
+function executePipeOnDestroys(view) {
+    var /** @type {?} */ pipeDestroyHooks = view.tView && view.tView.pipeDestroyHooks;
+    if (pipeDestroyHooks) {
+        callHooks(/** @type {?} */ ((view.data)), pipeDestroyHooks);
     }
 }
 /**
