@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, DirectiveDef, DirectiveDefFeature, PipeDef } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, DirectiveDef, DirectiveDefFeature, DirectiveDefListOrFactory, PipeDef } from './interfaces/definition';
+import { CssSelector } from './interfaces/projection';
 /**
  * Create a component definition object.
  *
@@ -23,6 +24,8 @@ export declare function defineComponent<T>(componentDefinition: {
      * Directive type, needed to configure the injector.
      */
     type: Type<T>;
+    /** The selector that will be used to match nodes to this component. */
+    selector: CssSelector;
     /**
      * Factory method used to create an instance of directive.
      */
@@ -73,10 +76,6 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     exportAs?: string;
     /**
-     * HTML tag name to use in place where this component should be instantiated.
-     */
-    tag: string;
-    /**
      * Template function use for rendering DOM.
      *
      * This function has following structure.
@@ -123,6 +122,13 @@ export declare function defineComponent<T>(componentDefinition: {
      * Defines the set of injectable objects that are visible to its view DOM children.
      */
     viewProviders?: Provider[];
+    /**
+     * Registry of directives and components that may be found in this component's view.
+     *
+     * The property is either an array of `DirectiveDef`s or a function which returns the array of
+     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     */
+    directiveDefs?: DirectiveDefListOrFactory | null;
 }): ComponentDef<T>;
 /**
  * Creates an NgOnChangesFeature function for a component's features list.
@@ -167,6 +173,7 @@ export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
  */
 export declare const defineDirective: <T>(directiveDefinition: {
     type: Type<T>;
+    selector: [string[] | null, string[][] | null][];
     factory: () => T | ({
         0: T;
     } & any[]);

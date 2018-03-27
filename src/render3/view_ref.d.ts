@@ -198,7 +198,7 @@ export declare class EmbeddedViewRef<T> extends ViewRef<T> {
  * @param context The context for this view
  * @returns The ViewRef
  */
-export declare function createViewRef<T>(view: LView, context: T): ViewRef<T>;
+export declare function createViewRef<T>(view: LView | null, context: T): ViewRef<T>;
 /** Interface for destroy logic. Implemented by addDestroyable. */
 export interface DestroyRef<T> {
     /** Whether or not this object has been destroyed */

@@ -26,15 +26,20 @@ ViewRef = /** @class */ (function () {
     /** @internal */
     /**
      * \@internal
+     * @param {?} view
      * @param {?} context
      * @return {?}
      */
     ViewRef.prototype._setComponentContext = /**
      * \@internal
+     * @param {?} view
      * @param {?} context
      * @return {?}
      */
-    function (context) { this.context = context; };
+    function (view, context) {
+        this._view = view;
+        this.context = context;
+    };
     /**
      * @return {?}
      */
@@ -616,7 +621,7 @@ function EmbeddedViewRef_tsickle_Closure_declarations() {
  */
 export function createViewRef(view, context) {
     // TODO: add detectChanges back in when implementing ChangeDetectorRef.detectChanges
-    return addDestroyable(new ViewRef(view, context));
+    return addDestroyable(new ViewRef(/** @type {?} */ ((view)), context));
 }
 /**
  * Interface for destroy logic. Implemented by addDestroyable.

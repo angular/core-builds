@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './container';
-import { ComponentDef, ComponentTemplate, DirectiveDef, PipeDef } from './definition';
+import { ComponentTemplate, DirectiveDefList, PipeDef } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
@@ -192,17 +192,28 @@ export interface LViewOrLContainer {
  * Stored on the template function as ngPrivateData.
  */
 export interface TView {
+    /** Whether or not this template has been processed. */
+    firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
     /**
-     * Directive and component defs for this view
+     * Directive and component defs that have already been matched to nodes on
+     * this view.
      *
      * Defs are stored at the same index in TView.directives[] as their instances
      * are stored in LView.directives[]. This simplifies lookup in DI.
      */
-    directives: (ComponentDef<any> | DirectiveDef<any>)[] | null;
-    /** Whether or not this template has been processed. */
-    firstTemplatePass: boolean;
+    directives: DirectiveDefList | null;
+    /**
+     * Full registry of directives and components that may be found in this view.
+     *
+     * The property is either an array of `DirectiveDef`s or a function which returns the array of
+     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     *
+     * It's necessary to keep a copy of the full def list on the TView so it's possible
+     * to render template functions without a host component.
+     */
+    directiveRegistry: DirectiveDefList | null;
     /**
      * Array of ngOnInit and ngDoCheck hooks that should be executed for this view in
      * creation mode.

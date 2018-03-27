@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { assertLessThan, assertNotNull } from './assert';
-import { assertPreviousIsParent, getDirectiveInstance, getPreviousOrParentNode, getRenderer, renderEmbeddedTemplate } from './instructions';
+import { assertPreviousIsParent, enterView, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
 import { assertNodeOfPossibleTypes, assertNodeType } from './node_assert';
 import { insertView } from './node_manipulation';
 import { notImplemented, stringify } from './util';
@@ -280,13 +280,11 @@ export function getOrCreateChangeDetectorRef(di, context) {
     if (di.changeDetectorRef)
         return di.changeDetectorRef;
     var /** @type {?} */ currentNode = di.node;
-    if (currentNode.data === null) {
-        // if data is null, this node is a regular element node (not a component)
-        return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
+    if (isComponent(/** @type {?} */ ((currentNode.tNode)))) {
+        return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
     }
     else if (currentNode.type === 3 /* Element */) {
-        // if it's an element node with data, it's a component and context will be set later
-        return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
+        return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
     }
     return /** @type {?} */ ((null));
 }
@@ -301,7 +299,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     var /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
     return existingRef ?
         existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view.directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 12 /* INDX_SHIFT */]);
+        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view.directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* INDX_SHIFT */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -366,11 +364,11 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
             // The size of the node's directive's list is stored in certain bits of the node's flags,
             // so exact it with a mask and shift it back such that the bits reflect the real value.
             var /** @type {?} */ flags_1 = /** @type {?} */ ((node.tNode)).flags;
-            var /** @type {?} */ size = flags_1 & 4095 /* SIZE_MASK */;
+            var /** @type {?} */ size = (flags_1 & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
             if (size !== 0) {
                 // The start index of the directives list is also part of the node's flags, but there is
                 // nothing to the "left" of it so it doesn't need a mask.
-                var /** @type {?} */ start = flags_1 >> 12 /* INDX_SHIFT */;
+                var /** @type {?} */ start = flags_1 >> 13 /* INDX_SHIFT */;
                 var /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
                 for (var /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
                     // Get the definition for the directive at this index and, if it is injectable (diPublic),
@@ -583,6 +581,8 @@ ViewContainerRef = /** @class */ (function () {
      * @return {?}
      */
     function (templateRef, context, index) {
+        // set current view to container node's view
+        enterView(this._node.view, null);
         var /** @type {?} */ viewRef = templateRef.createEmbeddedView(/** @type {?} */ ((context)));
         this.insert(viewRef, index);
         return viewRef;

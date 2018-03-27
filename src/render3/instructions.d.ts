@@ -11,8 +11,8 @@ import { LInjector } from './interfaces/injector';
 import { CssSelector, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveType } from './interfaces/definition';
+import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode, TNode } from './interfaces/node';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -24,6 +24,12 @@ export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
  * Function used to sanitize the value before writing it into the renderer.
  */
 export declare type Sanitizer = (value: any) => string;
+/**
+ * Directive and element indices for top-level directive.
+ *
+ * Saved here to avoid re-instantiating an array on every change detection run.
+ */
+export declare const _ROOT_DIRECTIVE_INDICES: number[];
 export declare function getRenderer(): Renderer3;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getCurrentQueries(QueryType: {
@@ -48,6 +54,9 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
  * the direction of traversal (up or down the view tree) a bit clearer.
  */
 export declare function leaveView(newView: LView): void;
+/** Sets the host bindings for the current view. */
+export declare function setHostBindings(bindings: number[] | null): void;
+export declare function executeInitAndContentHooks(): void;
 export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null, flags: LViewFlags): LView;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
@@ -59,31 +68,34 @@ export declare function createLNode(index: number, type: LNodeType.Container, na
 export declare function createLNode(index: number, type: LNodeType.Projection, native: null, lProjection: LProjection): LProjectionNode;
 /**
  *
- * @param host Existing node to render into.
+ * @param hostNode Existing node to render into.
  * @param template Template function with the instructions.
  * @param context to pass into the template.
+ * @param providedRendererFactory renderer factory to use
+ * @param host The host element node to use
+ * @param directiveRegistry Any directive defs that should be used to match nodes to directives
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directiveRegistry?: DirectiveDefListOrFactory | null): LElementNode;
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the data array
- * @param nameOrComponentType Name of the DOM Node or `ComponentType` to create.
+ * @param name Name of the DOM Node
  * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
- * @param directiveTypes A set of directives declared on this element.
  * @param localRefs A set of local reference bindings on the element.
  *
  * Attributes and localRefs are passed as an array of strings where elements with an even index
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, nameOrComponentType?: string | ComponentType<any>, attrs?: string[] | null, directiveTypes?: DirectiveType<any>[] | null, localRefs?: string[] | null): RElement;
+export declare function elementStart(index: number, name?: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
-export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any): void;
+export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
+export declare function isComponent(tNode: TNode): boolean;
 /** Creates a TView instance */
-export declare function createTView(): TView;
+export declare function createTView(defs: DirectiveDefListOrFactory | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -99,7 +111,7 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @returns LElementNode created
  */
-export declare function hostElement(rNode: RElement | null, def: ComponentDef<any>): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -212,20 +224,19 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * NOTE: directives can be created in order other than the index order. They can also
  *       be retrieved before they are created in which case the value will be null.
  *
- * @param index Index to save the directive in the directives array
  * @param elementIndex Index of the host element in the data array
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
  * @param localRefs Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(index: number, elementIndex: number, directive: T, directiveDef: DirectiveDef<T>, localRefs?: string[] | null): T;
+export declare function directiveCreate<T>(elementIndex: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, localRefs?: string[] | null): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T>): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<any>): T;
 /**
  * Creates an LContainerNode.
  *
@@ -237,7 +248,7 @@ export declare function baseDirectiveCreate<T>(index: number, directive: T, dire
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, directiveTypes?: DirectiveType<any>[], template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *
@@ -376,7 +387,7 @@ export declare function detectChanges<T>(component: T): void;
  */
 export declare function checkNoChanges<T>(component: T): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, template: ComponentTemplate<any>, component: T): void;
+export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ComponentDef<any>, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
@@ -459,3 +470,4 @@ export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
+export declare const ROOT_DIRECTIVE_INDICES: number[];

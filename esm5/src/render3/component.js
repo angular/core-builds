@@ -11,7 +11,7 @@
  */
 import { assertComponentType, assertNotNull } from './assert';
 import { queueInitHooks, queueLifecycleHooks } from './hooks';
-import { CLEAN_PROMISE, _getComponentHostLElementNode, baseDirectiveCreate, createLView, createTView, enterView, getRootView, hostElement, initChangeDetectorIfExisting, locateHostElement, renderComponentOrTemplate } from './instructions';
+import { CLEAN_PROMISE, ROOT_DIRECTIVE_INDICES, _getComponentHostLElementNode, baseDirectiveCreate, createLView, createTView, detectChangesInternal, enterView, executeInitAndContentHooks, getRootView, hostElement, initChangeDetectorIfExisting, leaveView, locateHostElement, setHostBindings } from './instructions';
 import { domRendererFactory3 } from './interfaces/renderer';
 import { stringify } from './util';
 import { createViewRef } from './view_ref';
@@ -119,31 +119,36 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     var /** @type {?} */ component;
-    var /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentDef.tag);
+    // TODO: Replace when flattening CssSelector type
+    var /** @type {?} */ componentTag = /** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((componentDef.selector))[0]))[0]))[0];
+    var /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     var /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.
         component: /** @type {?} */ ((null)),
         scheduler: opts.scheduler || requestAnimationFrame,
         clean: CLEAN_PROMISE,
     };
-    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     var /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
     var /** @type {?} */ elementNode;
     try {
+        if (rendererFactory.begin)
+            rendererFactory.begin();
         // Create element node at index 0 in data array
-        elementNode = hostElement(hostNode, componentDef);
+        elementNode = hostElement(componentTag, hostNode, componentDef);
         // Create directive instance with factory() and store at index 0 in directives array
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef));
-        initChangeDetectorIfExisting(elementNode.nodeInjector, component);
+        initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
+        opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
+        executeInitAndContentHooks();
+        setHostBindings(ROOT_DIRECTIVE_INDICES);
+        detectChangesInternal(/** @type {?} */ (elementNode.data), elementNode, componentDef, component);
     }
     finally {
-        // We must not use leaveView here because it will set creationMode to false too early,
-        // causing init-only hooks not to run. The detectChanges call below will execute
-        // leaveView at the appropriate time in the lifecycle.
-        enterView(oldView, null);
+        leaveView(oldView);
+        if (rendererFactory.end)
+            rendererFactory.end();
     }
-    opts.hostFeatures && opts.hostFeatures.forEach(function (feature) { return feature(component, componentDef); });
-    renderComponentOrTemplate(elementNode, rootView, component);
     return component;
 }
 /**

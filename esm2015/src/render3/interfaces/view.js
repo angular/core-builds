@@ -227,12 +227,18 @@ function LViewOrLContainer_tsickle_Closure_declarations() {
 export function TView() { }
 function TView_tsickle_Closure_declarations() {
     /**
+     * Whether or not this template has been processed.
+     * @type {?}
+     */
+    TView.prototype.firstTemplatePass;
+    /**
      * Static data equivalent of LView.data[]. Contains TNodes.
      * @type {?}
      */
     TView.prototype.data;
     /**
-     * Directive and component defs for this view
+     * Directive and component defs that have already been matched to nodes on
+     * this view.
      *
      * Defs are stored at the same index in TView.directives[] as their instances
      * are stored in LView.directives[]. This simplifies lookup in DI.
@@ -240,10 +246,16 @@ function TView_tsickle_Closure_declarations() {
      */
     TView.prototype.directives;
     /**
-     * Whether or not this template has been processed.
+     * Full registry of directives and components that may be found in this view.
+     *
+     * The property is either an array of `DirectiveDef`s or a function which returns the array of
+     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     *
+     * It's necessary to keep a copy of the full def list on the TView so it's possible
+     * to render template functions without a host component.
      * @type {?}
      */
-    TView.prototype.firstTemplatePass;
+    TView.prototype.directiveRegistry;
     /**
      * Array of ngOnInit and ngDoCheck hooks that should be executed for this view in
      * creation mode.

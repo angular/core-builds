@@ -72,6 +72,11 @@ function DirectiveDef_tsickle_Closure_declarations() {
      */
     DirectiveDef.prototype.diPublic;
     /**
+     * The selector that will be used to match nodes to this directive.
+     * @type {?}
+     */
+    DirectiveDef.prototype.selector;
+    /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
      * (as in `\@Input('alias') propertyName: any;`).
@@ -143,13 +148,6 @@ function DirectiveDef_tsickle_Closure_declarations() {
 export function ComponentDef() { }
 function ComponentDef_tsickle_Closure_declarations() {
     /**
-     * The tag name which should be used by the component.
-     *
-     * NOTE: only used with component directives.
-     * @type {?}
-     */
-    ComponentDef.prototype.tag;
-    /**
      * The View template of the component.
      *
      * NOTE: only used with component directives.
@@ -180,6 +178,14 @@ function ComponentDef_tsickle_Closure_declarations() {
      * @type {?|undefined}
      */
     ComponentDef.prototype.viewProviders;
+    /**
+     * Registry of directives and components that may be found in this view.
+     *
+     * The property is either an array of `DirectiveDef`s or a function which returns the array of
+     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     * @type {?}
+     */
+    ComponentDef.prototype.directiveDefs;
 }
 /**
  * Runtime link information for Pipes.

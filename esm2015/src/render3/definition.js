@@ -37,7 +37,6 @@ export function defineComponent(componentDefinition) {
         type: type,
         diPublic: null,
         factory: componentDefinition.factory,
-        tag: componentDefinition.tag || /** @type {?} */ ((null)),
         template: componentDefinition.template || /** @type {?} */ ((null)),
         hostBindings: componentDefinition.hostBindings || null,
         attributes: componentDefinition.attributes || null,
@@ -52,7 +51,9 @@ export function defineComponent(componentDefinition) {
         afterViewInit: type.prototype.ngAfterViewInit || null,
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
-        onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush
+        onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
+        directiveDefs: componentDefinition.directiveDefs || null,
+        selector: componentDefinition.selector
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));

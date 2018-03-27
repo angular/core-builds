@@ -28,8 +28,14 @@ export declare const enum LNodeType {
  * (with INDX_SHIFT) or the node's directive count (with SIZE_MASK)
  */
 export declare const enum TNodeFlags {
-    INDX_SHIFT = 12,
-    SIZE_MASK = 4095,
+    /** Whether or not this node is a component */
+    Component = 1,
+    /** How far to shift the flags to get the first directive index on this node */
+    INDX_SHIFT = 13,
+    /** How far to shift the flags to get the number of directives on this node */
+    SIZE_SHIFT = 1,
+    /** Mask to get the number of directives on this node */
+    SIZE_MASK = 8190,
 }
 /**
  * LNode is an internal data structure which is used for the incremental DOM algorithm.
