@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-910a16a
+ * @license Angular v6.0.0-rc.0-0ebdb3d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -243,7 +243,7 @@ var InjectionToken = /** @class */ (function () {
  */
 
 var ANNOTATIONS = '__annotations__';
-var PARAMETERS = '__paramaters__';
+var PARAMETERS = '__parameters__';
 var PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
@@ -2195,7 +2195,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.0-910a16a');
+var VERSION = new Version('6.0.0-rc.0-0ebdb3d');
 
 /**
  * @fileoverview added by tsickle
@@ -12667,7 +12667,7 @@ function attachProjectedView(vcElementData, view) {
     // - add a view to template._projectedViews only 1x throughout its lifetime,
     //   and remove it not until the view is destroyed.
     //   (hard, as when a parent view is attached/detached we would need to attach/detach all
-    //    nested projected views as well, even accross component boundaries).
+    //    nested projected views as well, even across component boundaries).
     // - don't track the insertion order of views in the projected views array
     //   (hard, as when the views of the same template are inserted different view containers)
     view.state |= 16 /* IsProjectedView */;
@@ -17756,7 +17756,7 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
  */
 
 /**
- * Returns wether the `renderer` is a `ProceduralRenderer3`
+ * Returns whether the `renderer` is a `ProceduralRenderer3`
  * @param {?} renderer
  * @return {?}
  */
@@ -18927,7 +18927,8 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         previousOrParentNode = /** @type {?} */ ((null));
         var /** @type {?} */ cm = false;
         if (viewNode == null) {
-            var /** @type {?} */ view = createLView(-1, renderer, createTView(currentView.tView.directiveRegistry), template, context, 2 /* CheckAlways */);
+            // TODO: revisit setting currentView when re-writing view containers
+            var /** @type {?} */ view = createLView(-1, renderer, createTView(currentView && currentView.tView.directiveRegistry), template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, view);
             cm = true;
         }
@@ -18937,7 +18938,7 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         refreshDirectives();
     }
     finally {
-        leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
+        leaveView(currentView && /** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
     }
@@ -22040,8 +22041,6 @@ var ViewContainerRef$1 = /** @class */ (function () {
      * @return {?}
      */
     function (templateRef, context, index) {
-        // set current view to container node's view
-        enterView(this._node.view, null);
         var /** @type {?} */ viewRef = templateRef.createEmbeddedView(/** @type {?} */ ((context)));
         this.insert(viewRef, index);
         return viewRef;

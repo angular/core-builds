@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { assertLessThan, assertNotNull } from './assert';
-import { assertPreviousIsParent, enterView, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
+import { assertPreviousIsParent, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
 import { assertNodeOfPossibleTypes, assertNodeType } from './node_assert';
 import { insertView } from './node_manipulation';
 import { notImplemented, stringify } from './util';
@@ -558,8 +558,6 @@ class ViewContainerRef {
      * @return {?}
      */
     createEmbeddedView(templateRef, context, index) {
-        // set current view to container node's view
-        enterView(this._node.view, null);
         const /** @type {?} */ viewRef = templateRef.createEmbeddedView(/** @type {?} */ ((context)));
         this.insert(viewRef, index);
         return viewRef;
