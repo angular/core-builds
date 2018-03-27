@@ -36,7 +36,7 @@ function ObjectOrientedRenderer3_tsickle_Closure_declarations() {
     ObjectOrientedRenderer3.prototype.querySelector;
 }
 /**
- * Returns wether the `renderer` is a `ProceduralRenderer3`
+ * Returns whether the `renderer` is a `ProceduralRenderer3`
  * @param {?} renderer
  * @return {?}
  */

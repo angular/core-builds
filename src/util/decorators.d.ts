@@ -27,7 +27,7 @@ export interface TypeDecorator {
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
 }
 export declare const ANNOTATIONS = "__annotations__";
-export declare const PARAMETERS = "__paramaters__";
+export declare const PARAMETERS = "__parameters__";
 export declare const PROP_METADATA = "__prop__metadata__";
 /**
  * @suppress {globalThis}

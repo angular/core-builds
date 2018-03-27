@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-f739f75
+ * @license Angular v6.0.0-rc.0-ab348ee
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -242,7 +242,7 @@ class InjectionToken {
  */
 
 const ANNOTATIONS = '__annotations__';
-const PARAMETERS = '__paramaters__';
+const PARAMETERS = '__parameters__';
 const PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
@@ -2023,7 +2023,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-rc.0-f739f75');
+const VERSION = new Version('6.0.0-rc.0-ab348ee');
 
 /**
  * @fileoverview added by tsickle
@@ -10706,7 +10706,7 @@ function attachProjectedView(vcElementData, view) {
     // - add a view to template._projectedViews only 1x throughout its lifetime,
     //   and remove it not until the view is destroyed.
     //   (hard, as when a parent view is attached/detached we would need to attach/detach all
-    //    nested projected views as well, even accross component boundaries).
+    //    nested projected views as well, even across component boundaries).
     // - don't track the insertion order of views in the projected views array
     //   (hard, as when the views of the same template are inserted different view containers)
     view.state |= 16 /* IsProjectedView */;
@@ -15361,7 +15361,7 @@ RendererStyleFlags3[RendererStyleFlags3.DashCase] = "DashCase";
  */
 
 /**
- * Returns wether the `renderer` is a `ProceduralRenderer3`
+ * Returns whether the `renderer` is a `ProceduralRenderer3`
  * @param {?} renderer
  * @return {?}
  */
