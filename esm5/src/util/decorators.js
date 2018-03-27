@@ -33,7 +33,7 @@ function TypeDecorator_tsickle_Closure_declarations() {
     */
 }
 export var /** @type {?} */ ANNOTATIONS = '__annotations__';
-export var /** @type {?} */ PARAMETERS = '__parameters__';
+export var /** @type {?} */ PARAMETERS = '__paramaters__';
 export var /** @type {?} */ PROP_METADATA = '__prop__metadata__';
 /**
  * @suppress {globalThis}
