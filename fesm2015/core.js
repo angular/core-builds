@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-0b348c8
+ * @license Angular v6.0.0-rc.0-bd024c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1428,7 +1428,7 @@ class StaticInjector {
         this.source = source;
         const /** @type {?} */ records = this._records = new Map();
         records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
-        records.set(INJECTOR, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
+        records.set(INJECTOR, /** @type {?} */ ({ token: INJECTOR, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
         recursivelyProcessProviders(records, providers);
     }
     /**
@@ -2023,7 +2023,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-rc.0-0b348c8');
+const VERSION = new Version('6.0.0-rc.0-bd024c0');
 
 /**
  * @fileoverview added by tsickle
@@ -10438,6 +10438,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  */
 const UNDEFINED_VALUE = new Object();
 const InjectorRefTokenKey$1 = tokenKey(Injector);
+const INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
 const NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
  * @param {?} flags
@@ -10519,6 +10520,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
     const /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
     switch (tokenKey$$1) {
         case InjectorRefTokenKey$1:
+        case INJECTORRefTokenKey$1:
         case NgModuleRefTokenKey:
             return data;
     }
@@ -11618,6 +11620,7 @@ const ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 const TemplateRefTokenKey = tokenKey(TemplateRef);
 const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 const InjectorRefTokenKey = tokenKey(Injector);
+const INJECTORRefTokenKey = tokenKey(INJECTOR);
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -12019,6 +12022,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue = I
                     return createChangeDetectorRef(cdView);
                 }
                 case InjectorRefTokenKey:
+                case INJECTORRefTokenKey:
                     return createInjector$1(searchView, elDef);
                 default:
                     const /** @type {?} */ providerDef = /** @type {?} */ (((allowPrivateServices ? /** @type {?} */ ((elDef.element)).allProviders : /** @type {?} */ ((elDef.element)).publicProviders)))[tokenKey$$1];

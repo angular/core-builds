@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-0b348c8
+ * @license Angular v6.0.0-rc.0-bd024c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.0-0b348c8
+ * @license Angular v6.0.0-rc.0-bd024c0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1626,7 +1626,7 @@ var StaticInjector = /** @class */ (function () {
         this.source = source;
         var /** @type {?} */ records = this._records = new Map();
         records.set(Injector, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
-        records.set(INJECTOR, /** @type {?} */ ({ token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
+        records.set(INJECTOR, /** @type {?} */ ({ token: INJECTOR, fn: IDENT, deps: EMPTY, value: this, useNew: false }));
         recursivelyProcessProviders(records, providers);
     }
     /**
@@ -2236,7 +2236,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.0-0b348c8');
+var VERSION = new Version('6.0.0-rc.0-bd024c0');
 
 /**
  * @fileoverview added by tsickle
@@ -12439,6 +12439,7 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  */
 var UNDEFINED_VALUE = new Object();
 var InjectorRefTokenKey$1 = tokenKey(Injector);
+var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
 var NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
  * @param {?} flags
@@ -12521,6 +12522,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
     var /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
     switch (tokenKey$$1) {
         case InjectorRefTokenKey$1:
+        case INJECTORRefTokenKey$1:
         case NgModuleRefTokenKey:
             return data;
     }
@@ -13875,6 +13877,7 @@ var ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 var TemplateRefTokenKey = tokenKey(TemplateRef);
 var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 var InjectorRefTokenKey = tokenKey(Injector);
+var INJECTORRefTokenKey = tokenKey(INJECTOR);
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -14277,6 +14280,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                     return createChangeDetectorRef(cdView);
                 }
                 case InjectorRefTokenKey:
+                case INJECTORRefTokenKey:
                     return createInjector$1(searchView, elDef);
                 default:
                     var /** @type {?} */ providerDef_1 = /** @type {?} */ (((allowPrivateServices ? /** @type {?} */ ((elDef.element)).allProviders : /** @type {?} */ ((elDef.element)).publicProviders)))[tokenKey$$1];

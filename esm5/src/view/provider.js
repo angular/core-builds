@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectorRef, SimpleChange, WrappedValue } from '../change_detection/change_detection';
-import { Injector, resolveForwardRef } from '../di';
+import { INJECTOR, Injector, resolveForwardRef } from '../di';
 import { ElementRef } from '../linker/element_ref';
 import { TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef } from '../linker/view_container_ref';
@@ -26,6 +26,7 @@ var /** @type {?} */ ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 var /** @type {?} */ TemplateRefTokenKey = tokenKey(TemplateRef);
 var /** @type {?} */ ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 var /** @type {?} */ InjectorRefTokenKey = tokenKey(Injector);
+var /** @type {?} */ INJECTORRefTokenKey = tokenKey(INJECTOR);
 /**
  * @param {?} checkIndex
  * @param {?} flags
@@ -428,6 +429,7 @@ export function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundVa
                     return createChangeDetectorRef(cdView);
                 }
                 case InjectorRefTokenKey:
+                case INJECTORRefTokenKey:
                     return createInjector(searchView, elDef);
                 default:
                     var /** @type {?} */ providerDef_1 = /** @type {?} */ (((allowPrivateServices ? /** @type {?} */ ((elDef.element)).allProviders : /** @type {?} */ ((elDef.element)).publicProviders)))[tokenKey];

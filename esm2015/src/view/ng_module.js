@@ -10,13 +10,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { resolveForwardRef } from '../di/forward_ref';
-import { Injector, setCurrentInjector } from '../di/injector';
+import { INJECTOR, Injector, setCurrentInjector } from '../di/injector';
 import { APP_ROOT } from '../di/scope';
 import { NgModuleRef } from '../linker/ng_module_factory';
 import { stringify } from '../util';
 import { splitDepsDsl, tokenKey } from './util';
 const /** @type {?} */ UNDEFINED_VALUE = new Object();
 const /** @type {?} */ InjectorRefTokenKey = tokenKey(Injector);
+const /** @type {?} */ INJECTORRefTokenKey = tokenKey(INJECTOR);
 const /** @type {?} */ NgModuleRefTokenKey = tokenKey(NgModuleRef);
 /**
  * @param {?} flags
@@ -98,6 +99,7 @@ export function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_
     const /** @type {?} */ tokenKey = depDef.tokenKey;
     switch (tokenKey) {
         case InjectorRefTokenKey:
+        case INJECTORRefTokenKey:
         case NgModuleRefTokenKey:
             return data;
     }
