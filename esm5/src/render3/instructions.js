@@ -458,7 +458,7 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param {?} index Index of the element in the data array
- * @param {?=} name Name of the DOM Node
+ * @param {?} name Name of the DOM Node
  * @param {?=} attrs Statically bound set of attributes to be written into the DOM element on creation.
  * @param {?=} localRefs A set of local reference bindings on the element.
  *
@@ -470,30 +470,20 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
 export function elementStart(index, name, attrs, localRefs) {
     var /** @type {?} */ node;
     var /** @type {?} */ native;
-    if (name == null) {
-        // native node retrieval - used for exporting elements as tpl local variables (<div #foo>)
-        var /** @type {?} */ node_1 = /** @type {?} */ ((data[index]));
-        native = node_1 && (/** @type {?} */ (node_1)).native;
+    ngDevMode &&
+        assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
+    native = renderer.createElement(name);
+    node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
+    if (attrs)
+        setUpAttributes(native, attrs);
+    appendChild(/** @type {?} */ ((node.parent)), native, currentView);
+    if (firstTemplatePass) {
+        var /** @type {?} */ tNode = createTNode(name, attrs || null, null);
+        cacheMatchingDirectivesForNode(tNode);
+        ngDevMode && assertDataInRange(index - 1);
+        node.tNode = tData[index] = tNode;
     }
-    else {
-        ngDevMode &&
-            assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
-        native = renderer.createElement(name);
-        node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
-        if (attrs)
-            setUpAttributes(native, attrs);
-        appendChild(/** @type {?} */ ((node.parent)), native, currentView);
-        if (firstTemplatePass) {
-            var /** @type {?} */ tNode = createTNode(name, attrs || null, null, null);
-            cacheMatchingDirectivesForNode(tNode);
-            ngDevMode && assertDataInRange(index - 1);
-            node.tNode = tData[index] = tNode;
-            if (!isComponent(tNode)) {
-                tNode.localNames = findMatchingLocalNames(null, localRefs, -1, '');
-            }
-        }
-        hack_declareDirectives(index, localRefs);
-    }
+    hack_declareDirectives(index, localRefs || null);
     return native;
 }
 /**
@@ -588,43 +578,77 @@ export function isComponent(tNode) {
  * @return {?}
  */
 function hack_declareDirectives(elementIndex, localRefs) {
-    var /** @type {?} */ size = (/** @type {?} */ ((previousOrParentNode.tNode)).flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
+    var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
+    var /** @type {?} */ size = (tNode.flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
+    var /** @type {?} */ exportsMap = firstTemplatePass && localRefs ? { '': -1 } : null;
     if (size > 0) {
-        var /** @type {?} */ startIndex = /** @type {?} */ ((previousOrParentNode.tNode)).flags >> 13 /* INDX_SHIFT */;
+        var /** @type {?} */ startIndex = tNode.flags >> 13 /* INDX_SHIFT */;
         var /** @type {?} */ endIndex = startIndex + size;
         var /** @type {?} */ tDirectives = /** @type {?} */ ((currentView.tView.directives));
         // TODO(mhevery): This assumes that the directives come in correct order, which
         // is not guaranteed. Must be refactored to take it into account.
         for (var /** @type {?} */ i = startIndex; i < endIndex; i++) {
             var /** @type {?} */ def = /** @type {?} */ (tDirectives[i]);
-            directiveCreate(elementIndex, def.factory(), def, localRefs);
+            directiveCreate(elementIndex, def.factory(), def);
+            saveNameToExportMap(startIndex, def, exportsMap);
             startIndex++;
+        }
+    }
+    if (firstTemplatePass)
+        cacheMatchingLocalNames(tNode, localRefs, /** @type {?} */ ((exportsMap)));
+    saveResolvedLocalsInData();
+}
+/**
+ * Caches local names and their matching directive indices for query and template lookups.
+ * @param {?} tNode
+ * @param {?} localRefs
+ * @param {?} exportsMap
+ * @return {?}
+ */
+function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
+    if (localRefs) {
+        var /** @type {?} */ localNames = tNode.localNames = [];
+        // Local names must be stored in tNode in the same order that localRefs are defined
+        // in the template to ensure the data is loaded in the same slots as their refs
+        // in the template (for template queries).
+        for (var /** @type {?} */ i = 0; i < localRefs.length; i += 2) {
+            var /** @type {?} */ index = exportsMap[localRefs[i | 1]];
+            if (index == null)
+                throw new Error("Export of name '" + localRefs[i | 1] + "' not found!");
+            localNames.push(localRefs[i], index);
         }
     }
 }
 /**
- * Finds any local names that match the given directive's exportAs and returns them with directive
- * index. If the directiveDef is null, it matches against the default '' value instead of
- * exportAs.
- * @param {?} directiveDef
- * @param {?} localRefs
+ * Builds up an export map as directives are created, so local refs can be quickly mapped
+ * to their directive instances.
  * @param {?} index
- * @param {?=} defaultExport
+ * @param {?} def
+ * @param {?} exportsMap
  * @return {?}
  */
-function findMatchingLocalNames(directiveDef, localRefs, index, defaultExport) {
-    var /** @type {?} */ exportAs = directiveDef && directiveDef.exportAs || defaultExport;
-    var /** @type {?} */ matches = null;
-    if (exportAs != null && localRefs) {
-        for (var /** @type {?} */ i = 0; i < localRefs.length; i = i + 2) {
-            var /** @type {?} */ local = localRefs[i];
-            var /** @type {?} */ toExportAs = localRefs[i | 1];
-            if (toExportAs === exportAs || toExportAs === defaultExport) {
-                (matches || (matches = [])).push(local, index);
-            }
+function saveNameToExportMap(index, def, exportsMap) {
+    if (exportsMap) {
+        if (def.exportAs)
+            exportsMap[def.exportAs] = index;
+        if ((/** @type {?} */ (def)).template)
+            exportsMap[''] = index;
+    }
+}
+/**
+ * Takes a list of local names and indices and pushes the resolved local variable values
+ * to data[] in the same order as they are loaded in the template with load().
+ * @return {?}
+ */
+function saveResolvedLocalsInData() {
+    var /** @type {?} */ localNames = /** @type {?} */ ((previousOrParentNode.tNode)).localNames;
+    if (localNames) {
+        for (var /** @type {?} */ i = 0; i < localNames.length; i += 2) {
+            var /** @type {?} */ index = /** @type {?} */ (localNames[i | 1]);
+            var /** @type {?} */ value = index === -1 ? previousOrParentNode.native : /** @type {?} */ ((directives))[index];
+            data.push(value);
         }
     }
-    return matches;
 }
 /**
  * Gets TView from a template function or creates a new TView
@@ -724,7 +748,7 @@ export function hostElement(tag, rNode, def) {
     resetApplicationState();
     var /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
     if (firstTemplatePass) {
-        node.tNode = createTNode(/** @type {?} */ (tag), null, null, null);
+        node.tNode = createTNode(/** @type {?} */ (tag), null, null);
         // Root directive is stored at index 0, size 1
         buildTNodeFlags(node.tNode, 0, 1, 1 /* Component */);
         currentView.tView.directives = [def];
@@ -875,15 +899,14 @@ export function elementProperty(index, propName, value, sanitizer) {
  * @param {?} tagName
  * @param {?} attrs
  * @param {?} data
- * @param {?} localNames A list of local names and their matching indices
  * @return {?} the TNode object
  */
-function createTNode(tagName, attrs, data, localNames) {
+function createTNode(tagName, attrs, data) {
     return {
         flags: 0,
         tagName: tagName,
         attrs: attrs,
-        localNames: localNames,
+        localNames: null,
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
@@ -1099,10 +1122,9 @@ export function textBinding(index, value) {
  * @param {?} elementIndex Index of the host element in the data array
  * @param {?} directive The directive instance.
  * @param {?} directiveDef DirectiveDef object which contains information about the template.
- * @param {?=} localRefs Names under which a query can retrieve the directive instance
  * @return {?}
  */
-export function directiveCreate(elementIndex, directive, directiveDef, localRefs) {
+export function directiveCreate(elementIndex, directive, directiveDef) {
     var /** @type {?} */ index = directives ? directives.length : 0;
     var /** @type {?} */ instance = baseDirectiveCreate(index, directive, directiveDef);
     ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
@@ -1117,11 +1139,6 @@ export function directiveCreate(elementIndex, directive, directiveDef, localRefs
         queueInitHooks(index, directiveDef.onInit, directiveDef.doCheck, currentView.tView);
         if (directiveDef.hostBindings)
             queueHostBindingForCheck(index, elementIndex);
-        if (localRefs) {
-            var /** @type {?} */ localNames = findMatchingLocalNames(directiveDef, localRefs, index, isComponent ? '' : undefined);
-            tNode.localNames =
-                localNames && tNode.localNames ? tNode.localNames.concat(localNames) : localNames;
-        }
     }
     if (tNode && tNode.attrs) {
         setInputsFromAttrs(index, instance, directiveDef.inputs, tNode);
@@ -1144,9 +1161,8 @@ function addComponentLogic(index, elementIndex, instance, def) {
     (/** @type {?} */ (previousOrParentNode.data)) = hostView;
     (/** @type {?} */ (hostView.node)) = previousOrParentNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
-    if (firstTemplatePass) {
+    if (firstTemplatePass)
         queueComponentIndexForCheck(index, elementIndex);
-    }
 }
 /**
  * A lighter version of directiveCreate() that is used for the root component
@@ -1260,15 +1276,15 @@ export function container(index, template, tagName, attrs, localRefs) {
     });
     var /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
     if (node.tNode == null) {
-        var /** @type {?} */ localNames = findMatchingLocalNames(null, localRefs, -1, '');
-        node.tNode = tData[index] = createTNode(tagName || null, attrs || null, [], localNames);
+        node.tNode = tData[index] = createTNode(tagName || null, attrs || null, []);
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(node.data);
     if (firstTemplatePass)
         cacheMatchingDirectivesForNode(node.tNode);
-    hack_declareDirectives(index, localRefs);
+    // TODO: handle TemplateRef!
+    hack_declareDirectives(index, localRefs || null);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     var /** @type {?} */ queries = node.queries;
@@ -1550,7 +1566,7 @@ export function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     if (selectorIndex === void 0) { selectorIndex = 0; }
     var /** @type {?} */ node = createLNode(nodeIndex, 1 /* Projection */, null, { head: null, tail: null });
     if (node.tNode == null) {
-        node.tNode = createTNode(null, attrs || null, null, null);
+        node.tNode = createTNode(null, attrs || null, null);
     }
     isParent = false; // self closing
     var /** @type {?} */ currentParent = node.parent;
@@ -2211,7 +2227,7 @@ function assertDataInRange(index, arr) {
 function assertDataNext(index, arr) {
     if (arr == null)
         arr = data;
-    assertEqual(arr.length, index, 'index expected to be at the end of arr');
+    assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
 }
 /**
  * @template T

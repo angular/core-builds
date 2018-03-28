@@ -90,7 +90,7 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, name?: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
+export declare function elementStart(index: number, name: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
@@ -229,7 +229,7 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * @param directiveDef DirectiveDef object which contains information about the template.
  * @param localRefs Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(elementIndex: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>, localRefs?: string[] | null): T;
+export declare function directiveCreate<T>(elementIndex: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
