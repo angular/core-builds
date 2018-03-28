@@ -12,7 +12,7 @@ import { CssSelector, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode, TNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -73,9 +73,9 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param context to pass into the template.
  * @param providedRendererFactory renderer factory to use
  * @param host The host element node to use
- * @param directiveRegistry Any directive defs that should be used to match nodes to directives
+ * @param defs Any directive or pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directiveRegistry?: DirectiveDefListOrFactory | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
@@ -95,7 +95,7 @@ export declare function elementStart(index: number, name: string, attrs?: string
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
 /** Creates a TView instance */
-export declare function createTView(defs: DirectiveDefListOrFactory | null): TView;
+export declare function createTView(defs: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.

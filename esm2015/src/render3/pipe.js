@@ -14,23 +14,46 @@ import { pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunctio
 /**
  * Create a pipe.
  *
- * @template T
  * @param {?} index Pipe index where the pipe will be stored.
- * @param {?} pipeDef Pipe definition object for registering life cycle hooks.
+ * @param {?} pipeName
  * @param {?=} firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
  * @return {?} T the instance of the pipe.
  */
-export function pipe(index, pipeDef, firstInstance) {
+export function pipe(index, pipeName, firstInstance) {
     const /** @type {?} */ tView = getTView();
+    let /** @type {?} */ pipeDef;
     if (tView.firstTemplatePass) {
+        pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
         tView.data[index] = pipeDef;
         if (pipeDef.onDestroy) {
             (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(index, pipeDef.onDestroy);
         }
     }
+    else {
+        pipeDef = /** @type {?} */ (tView.data[index]);
+    }
     const /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();
     store(index, pipeInstance);
     return pipeInstance;
+}
+/**
+ * Searches the pipe registry for a pipe with the given name. If one is found,
+ * returns the pipe. Otherwise, an error is thrown because the pipe cannot be resolved.
+ *
+ * @param {?} name Name of pipe to resolve
+ * @param {?} registry Full list of available pipes
+ * @return {?} Matching PipeDef
+ */
+function getPipeDef(name, registry) {
+    if (registry) {
+        for (let /** @type {?} */ i = 0; i < registry.length; i++) {
+            const /** @type {?} */ pipeDef = registry[i];
+            if (name === pipeDef.name) {
+                return pipeDef;
+            }
+        }
+    }
+    throw new Error(`Pipe with name '${name}' not found!`);
 }
 /**
  * Invokes a pipe with 1 arguments.

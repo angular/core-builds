@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.0-5a86f71
+ * @license Angular v6.0.0-rc.0-e2e80ec
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2195,7 +2195,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.0-5a86f71');
+var VERSION = new Version('6.0.0-rc.0-e2e80ec');
 
 /**
  * @fileoverview added by tsickle
@@ -18911,7 +18911,8 @@ function resetApplicationState() {
  * @param {?} context to pass into the template.
  * @param {?} providedRendererFactory renderer factory to use
  * @param {?} host The host element node to use
- * @param {?=} directiveRegistry Any directive defs that should be used to match nodes to directives
+ * @param {?=} directives
+ * @param {?=} pipes
  * @return {?}
  */
 
@@ -18932,7 +18933,9 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         var /** @type {?} */ cm = false;
         if (viewNode == null) {
             // TODO: revisit setting currentView when re-writing view containers
-            var /** @type {?} */ view = createLView(-1, renderer, createTView(currentView && currentView.tView.directiveRegistry), template, context, 2 /* CheckAlways */);
+            var /** @type {?} */ directives_1 = currentView && currentView.tView.directiveRegistry;
+            var /** @type {?} */ pipes = currentView && currentView.tView.pipeRegistry;
+            var /** @type {?} */ view = createLView(-1, renderer, createTView(directives_1, pipes), template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, view);
             cm = true;
         }
@@ -19182,18 +19185,21 @@ function saveResolvedLocalsInData() {
  * if it doesn't already exist.
  *
  * @param {?} template The template from which to get static data
- * @param {?} defs
+ * @param {?} directives Directive defs that should be saved on TView
+ * @param {?} pipes Pipe defs that should be saved on TView
  * @return {?} TView
  */
-function getOrCreateTView(template, defs) {
-    return template.ngPrivateData || (template.ngPrivateData = /** @type {?} */ (createTView(defs)));
+function getOrCreateTView(template, directives, pipes) {
+    return template.ngPrivateData ||
+        (template.ngPrivateData = /** @type {?} */ (createTView(directives, pipes)));
 }
 /**
  * Creates a TView instance
  * @param {?} defs
+ * @param {?} pipes
  * @return {?}
  */
-function createTView(defs) {
+function createTView(defs, pipes) {
     return {
         data: [],
         directives: null,
@@ -19208,7 +19214,8 @@ function createTView(defs) {
         pipeDestroyHooks: null,
         hostBindings: null,
         components: null,
-        directiveRegistry: typeof defs === 'function' ? defs() : defs
+        directiveRegistry: typeof defs === 'function' ? defs() : defs,
+        pipeRegistry: typeof pipes === 'function' ? pipes() : pipes
     };
 }
 /**
@@ -19273,7 +19280,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(tag, rNode, def) {
     resetApplicationState();
-    var /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    var /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
     if (firstTemplatePass) {
         node.tNode = createTNode(/** @type {?} */ (tag), null, null);
         // Root directive is stored at index 0, size 1
@@ -19681,7 +19688,7 @@ function directiveCreate(elementIndex, directive, directiveDef) {
  * @return {?}
  */
 function addComponentLogic(index, elementIndex, instance, def) {
-    var /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs);
+    var /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     var /** @type {?} */ hostView = addToViewTree(createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
@@ -19952,7 +19959,8 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
     var /** @type {?} */ tContainer = (/** @type {?} */ (((parent)).tNode)).data;
     if (viewIndex >= tContainer.length || tContainer[viewIndex] == null) {
-        tContainer[viewIndex] = createTView(currentView.tView.directiveRegistry);
+        var /** @type {?} */ tView = currentView.tView;
+        tContainer[viewIndex] = createTView(tView.directiveRegistry, tView.pipeRegistry);
     }
     return tContainer[viewIndex];
 }
@@ -21441,7 +21449,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         scheduler: opts.scheduler || requestAnimationFrame,
         clean: CLEAN_PROMISE,
     };
-    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null, null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     var /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
     var /** @type {?} */ elementNode;
     try {
@@ -22258,6 +22266,7 @@ function defineComponent(componentDefinition) {
         onDestroy: type.prototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
         directiveDefs: componentDefinition.directiveDefs || null,
+        pipeDefs: componentDefinition.pipeDefs || null,
         selector: componentDefinition.selector
     });
     var /** @type {?} */ feature = componentDefinition.features;
@@ -22396,15 +22405,15 @@ var defineDirective = /** @type {?} */ ((defineComponent));
  * }
  * ```
  * @template T
- * @param {?} __0
+ * @param {?} pipeDef Pipe definition generated by the compiler
  * @return {?}
  */
-function definePipe(_a) {
-    var type = _a.type, factory = _a.factory, pure = _a.pure;
+function definePipe(pipeDef) {
     return /** @type {?} */ ({
-        n: factory,
-        pure: pure !== false,
-        onDestroy: type.prototype.ngOnDestroy || null
+        name: pipeDef.name,
+        n: pipeDef.factory,
+        pure: pipeDef.pure !== false,
+        onDestroy: pipeDef.type.prototype.ngOnDestroy || null
     });
 }
 
@@ -22616,23 +22625,46 @@ function pureFunctionV(pureFn, exps, thisArg) {
 /**
  * Create a pipe.
  *
- * @template T
  * @param {?} index Pipe index where the pipe will be stored.
- * @param {?} pipeDef Pipe definition object for registering life cycle hooks.
+ * @param {?} pipeName
  * @param {?=} firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
  * @return {?} T the instance of the pipe.
  */
-function pipe(index, pipeDef, firstInstance) {
+function pipe(index, pipeName, firstInstance) {
     var /** @type {?} */ tView = getTView();
+    var /** @type {?} */ pipeDef;
     if (tView.firstTemplatePass) {
+        pipeDef = getPipeDef(pipeName, tView.pipeRegistry);
         tView.data[index] = pipeDef;
         if (pipeDef.onDestroy) {
             (tView.pipeDestroyHooks || (tView.pipeDestroyHooks = [])).push(index, pipeDef.onDestroy);
         }
     }
+    else {
+        pipeDef = /** @type {?} */ (tView.data[index]);
+    }
     var /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();
     store(index, pipeInstance);
     return pipeInstance;
+}
+/**
+ * Searches the pipe registry for a pipe with the given name. If one is found,
+ * returns the pipe. Otherwise, an error is thrown because the pipe cannot be resolved.
+ *
+ * @param {?} name Name of pipe to resolve
+ * @param {?} registry Full list of available pipes
+ * @return {?} Matching PipeDef
+ */
+function getPipeDef(name, registry) {
+    if (registry) {
+        for (var /** @type {?} */ i = 0; i < registry.length; i++) {
+            var /** @type {?} */ pipeDef = registry[i];
+            if (name === pipeDef.name) {
+                return pipeDef;
+            }
+        }
+    }
+    throw new Error("Pipe with name '" + name + "' not found!");
 }
 /**
  * Invokes a pipe with 1 arguments.

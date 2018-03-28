@@ -186,6 +186,14 @@ function ComponentDef_tsickle_Closure_declarations() {
      * @type {?}
      */
     ComponentDef.prototype.directiveDefs;
+    /**
+     * Registry of pipes that may be found in this view.
+     *
+     * The property is either an array of `PipeDefs`s or a function which returns the array of
+     * `PipeDefs`s. The function is necessary to be able to support forward declarations.
+     * @type {?}
+     */
+    ComponentDef.prototype.pipeDefs;
 }
 /**
  * Runtime link information for Pipes.
@@ -203,6 +211,13 @@ function ComponentDef_tsickle_Closure_declarations() {
  */
 export function PipeDef() { }
 function PipeDef_tsickle_Closure_declarations() {
+    /**
+     * Pipe name.
+     *
+     * Used to resolve pipe in templates.
+     * @type {?}
+     */
+    PipeDef.prototype.name;
     /**
      * factory function used to create a new directive instance.
      *

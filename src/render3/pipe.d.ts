@@ -1,4 +1,3 @@
-import { PipeDef } from './interfaces/definition';
 /**
  * Create a pipe.
  *
@@ -7,7 +6,7 @@ import { PipeDef } from './interfaces/definition';
  * @param firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
  * @returns T the instance of the pipe.
  */
-export declare function pipe<T>(index: number, pipeDef: PipeDef<T>, firstInstance?: T): T;
+export declare function pipe(index: number, pipeName: string, firstInstance?: any): any;
 /**
  * Invokes a pipe with 1 arguments.
  *

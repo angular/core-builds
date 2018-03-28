@@ -140,6 +140,13 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
      * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
      */
     directiveDefs: DirectiveDefListOrFactory | null;
+    /**
+     * Registry of pipes that may be found in this view.
+     *
+     * The property is either an array of `PipeDefs`s or a function which returns the array of
+     * `PipeDefs`s. The function is necessary to be able to support forward declarations.
+     */
+    pipeDefs: PipeDefListOrFactory | null;
 }
 /**
  * Runtime link information for Pipes.
@@ -154,6 +161,12 @@ export interface ComponentDef<T> extends DirectiveDef<T> {
  * See: {@link definePipe}
  */
 export interface PipeDef<T> {
+    /**
+     * Pipe name.
+     *
+     * Used to resolve pipe in templates.
+     */
+    name: string;
     /**
      * factory function used to create a new directive instance.
      *
@@ -179,4 +192,11 @@ export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => 
  */
 export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
 export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
+/**
+ * Type used for PipeDefs on component definition.
+ *
+ * The function is necessary to be able to support forward declarations.
+ */
+export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
+export declare type PipeDefList = PipeDef<any>[];
 export declare const unusedValueExportToPlacateAjd = 1;
