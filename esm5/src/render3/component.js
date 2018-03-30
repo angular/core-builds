@@ -119,8 +119,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     var /** @type {?} */ component;
-    // TODO: Replace when flattening CssSelector type
-    var /** @type {?} */ componentTag = /** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((componentDef.selector))[0]))[0]))[0];
+    // The first index of the first selector is the tag name.
+    var /** @type {?} */ componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     var /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     var /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.

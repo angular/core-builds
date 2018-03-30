@@ -14,7 +14,7 @@ import { assertEqual, assertLessThan, assertNotEqual, assertNotNull, assertNull,
 import { NG_PROJECT_AS_ATTR_NAME } from './interfaces/projection';
 import { assertNodeType } from './node_assert';
 import { appendChild, insertChild, insertView, appendProjectedNode, removeView, canInsertNativeNode } from './node_manipulation';
-import { isNodeMatchingSelector, matchingSelectorIndex } from './node_selector_matcher';
+import { isNodeMatchingSelectorList, matchingSelectorIndex } from './node_selector_matcher';
 import { RendererStyleFlags3, isProceduralRenderer } from './interfaces/renderer';
 import { isDifferent, stringify } from './util';
 import { executeHooks, queueLifecycleHooks, queueInitHooks, executeInitHooks } from './hooks';
@@ -501,7 +501,7 @@ function cacheMatchingDirectivesForNode(tNode) {
         var /** @type {?} */ size = 0;
         for (var /** @type {?} */ i = 0; i < registry.length; i++) {
             var /** @type {?} */ def = registry[i];
-            if (isNodeMatchingSelector(tNode, /** @type {?} */ ((def.selector)))) {
+            if (isNodeMatchingSelectorList(tNode, /** @type {?} */ ((def.selectors)))) {
                 if ((/** @type {?} */ (def)).template) {
                     if (componentFlag)
                         throwMultipleComponentError(tNode);

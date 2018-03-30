@@ -54,7 +54,7 @@ export function defineComponent(componentDefinition) {
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
         directiveDefs: componentDefinition.directiveDefs || null,
         pipeDefs: componentDefinition.pipeDefs || null,
-        selector: componentDefinition.selector
+        selectors: componentDefinition.selectors
     });
     var /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });

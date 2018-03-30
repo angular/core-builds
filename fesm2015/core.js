@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-6cb1adf
+ * @license Angular v6.0.0-rc.1-9cd4465
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2023,7 +2023,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-rc.1-6cb1adf');
+const VERSION = new Version('6.0.0-rc.1-9cd4465');
 
 /**
  * @fileoverview added by tsickle
@@ -15964,81 +15964,91 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  * @param {?} selector
  * @return {?} true if node matches the selector.
  */
-function isNodeMatchingSimpleSelector(tNode, selector) {
-    const /** @type {?} */ noOfSelectorParts = selector.length;
-    ngDevMode && assertNotNull(selector[0], 'the selector should have a tag name');
-    const /** @type {?} */ tagNameInSelector = selector[0];
-    // check tag tame
-    if (tagNameInSelector !== '' && tagNameInSelector !== tNode.tagName) {
-        return false;
-    }
-    // short-circuit case where we are only matching on element's tag name
-    if (noOfSelectorParts === 1) {
-        return true;
-    }
-    // short-circuit case where an element has no attrs but a selector tries to match some
-    if (noOfSelectorParts > 1 && !tNode.attrs) {
-        return false;
-    }
-    const /** @type {?} */ attrsInNode = /** @type {?} */ ((tNode.attrs));
-    for (let /** @type {?} */ i = 1; i < noOfSelectorParts; i += 2) {
-        const /** @type {?} */ attrNameInSelector = selector[i];
-        const /** @type {?} */ attrIdxInNode = attrsInNode.indexOf(attrNameInSelector);
-        if (attrIdxInNode % 2 !== 0) {
-            // attribute names are stored at even indexes
-            return false;
-        }
-        else {
-            const /** @type {?} */ attrValInSelector = selector[i + 1];
-            if (attrValInSelector !== '') {
-                // selector should also match on an attribute value
-                const /** @type {?} */ attrValInNode = attrsInNode[attrIdxInNode + 1];
-                if (attrNameInSelector === 'class') {
-                    // iterate over all the remaining items in the selector selector array = class names
-                    for (i++; i < noOfSelectorParts; i++) {
-                        if (!isCssClassMatching(attrValInNode, selector[i])) {
-                            return false;
-                        }
-                    }
-                }
-                else if (attrValInSelector !== attrValInNode) {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-/**
- * @param {?} tNode
- * @param {?} selector
- * @return {?}
- */
-function isNodeMatchingSelectorWithNegations(tNode, selector) {
-    const /** @type {?} */ positiveSelector = selector[0];
-    if (positiveSelector != null && !isNodeMatchingSimpleSelector(tNode, positiveSelector)) {
-        return false;
-    }
-    // do we have any negation parts in this selector?
-    const /** @type {?} */ negativeSelectors = selector[1];
-    if (negativeSelectors) {
-        for (let /** @type {?} */ i = 0; i < negativeSelectors.length; i++) {
-            // if one of negative selectors matched than the whole selector doesn't match
-            if (isNodeMatchingSimpleSelector(tNode, negativeSelectors[i])) {
+function isNodeMatchingSelector(tNode, selector) {
+    ngDevMode && assertNotNull(selector[0], 'Selector should have a tag name');
+    let /** @type {?} */ mode = 4;
+    const /** @type {?} */ nodeAttrs = /** @type {?} */ ((tNode.attrs));
+    // When processing ":not" selectors, we skip to the next ":not" if the
+    // current one doesn't match
+    let /** @type {?} */ skipToNextSelector = false;
+    for (let /** @type {?} */ i = 0; i < selector.length; i++) {
+        const /** @type {?} */ current = selector[i];
+        if (typeof current === 'number') {
+            // If we finish processing a :not selector and it hasn't failed, return false
+            if (!skipToNextSelector && !isPositive(mode) && !isPositive(/** @type {?} */ (current))) {
                 return false;
             }
+            // If we are skipping to the next :not() and this mode flag is positive,
+            // it's a part of the current :not() selector, and we should keep skipping
+            if (skipToNextSelector && isPositive(current))
+                continue;
+            skipToNextSelector = false;
+            mode = (/** @type {?} */ (current)) | (mode & 1 /* NOT */);
+            continue;
+        }
+        if (skipToNextSelector)
+            continue;
+        if (mode & 4 /* ELEMENT */) {
+            mode = 2 /* ATTRIBUTE */ | mode & 1 /* NOT */;
+            if (current !== '' && current !== tNode.tagName) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+            }
+        }
+        else {
+            const /** @type {?} */ attrName = mode & 8 /* CLASS */ ? 'class' : current;
+            const /** @type {?} */ attrIndexInNode = findAttrIndexInNode(attrName, nodeAttrs);
+            if (attrIndexInNode === -1) {
+                if (isPositive(mode))
+                    return false;
+                skipToNextSelector = true;
+                continue;
+            }
+            const /** @type {?} */ selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
+            if (selectorAttrValue !== '') {
+                const /** @type {?} */ nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
+                if (mode & 8 /* CLASS */ &&
+                    !isCssClassMatching(nodeAttrValue, /** @type {?} */ (selectorAttrValue)) ||
+                    mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
+                    if (isPositive(mode))
+                        return false;
+                    skipToNextSelector = true;
+                }
+            }
         }
     }
-    return true;
+    return isPositive(mode) || skipToNextSelector;
+}
+/**
+ * @param {?} mode
+ * @return {?}
+ */
+function isPositive(mode) {
+    return (mode & 1 /* NOT */) === 0;
+}
+/**
+ * @param {?} name
+ * @param {?} attrs
+ * @return {?}
+ */
+function findAttrIndexInNode(name, attrs) {
+    if (attrs === null)
+        return -1;
+    for (let /** @type {?} */ i = 0; i < attrs.length; i += 2) {
+        if (attrs[i] === name)
+            return i;
+    }
+    return -1;
 }
 /**
  * @param {?} tNode
  * @param {?} selector
  * @return {?}
  */
-function isNodeMatchingSelector(tNode, selector) {
+function isNodeMatchingSelectorList(tNode, selector) {
     for (let /** @type {?} */ i = 0; i < selector.length; i++) {
-        if (isNodeMatchingSelectorWithNegations(tNode, selector[i])) {
+        if (isNodeMatchingSelector(tNode, selector[i])) {
             return true;
         }
     }
@@ -16077,7 +16087,7 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
         // if a node has the ngProjectAs attribute match it against unparsed selector
         // match a node against a parsed selector only if ngProjectAs attribute is not present
         if (ngProjectAsAttrVal === textSelectors[i] ||
-            ngProjectAsAttrVal === null && isNodeMatchingSelector(tNode, selectors[i])) {
+            ngProjectAsAttrVal === null && isNodeMatchingSelectorList(tNode, selectors[i])) {
             return i + 1; // first matching selector "captures" a given node
         }
     }
@@ -16633,7 +16643,7 @@ function cacheMatchingDirectivesForNode(tNode) {
         let /** @type {?} */ size = 0;
         for (let /** @type {?} */ i = 0; i < registry.length; i++) {
             const /** @type {?} */ def = registry[i];
-            if (isNodeMatchingSelector(tNode, /** @type {?} */ ((def.selector)))) {
+            if (isNodeMatchingSelectorList(tNode, /** @type {?} */ ((def.selectors)))) {
                 if ((/** @type {?} */ (def)).template) {
                     if (componentFlag)
                         throwMultipleComponentError(tNode);
@@ -18696,8 +18706,8 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     let /** @type {?} */ component;
-    // TODO: Replace when flattening CssSelector type
-    const /** @type {?} */ componentTag = /** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((componentDef.selector))[0]))[0]))[0];
+    // The first index of the first selector is the tag name.
+    const /** @type {?} */ componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     const /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.
@@ -19482,7 +19492,7 @@ function defineComponent(componentDefinition) {
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
         directiveDefs: componentDefinition.directiveDefs || null,
         pipeDefs: componentDefinition.pipeDefs || null,
-        selector: componentDefinition.selector
+        selectors: componentDefinition.selectors
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));

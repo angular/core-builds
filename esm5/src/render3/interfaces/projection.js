@@ -20,6 +20,18 @@ function LProjection_tsickle_Closure_declarations() {
     /** @type {?} */
     LProjection.prototype.tail;
 }
+/** @enum {number} */
+var SelectorFlags = {
+    /** Indicates this is the beginning of a new negative selector */
+    NOT: 1,
+    /** Mode for matching attributes */
+    ATTRIBUTE: 2,
+    /** Mode for matching tag names */
+    ELEMENT: 4,
+    /** Mode for matching class names */
+    CLASS: 8,
+};
+export { SelectorFlags };
 export var /** @type {?} */ NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.

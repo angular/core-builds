@@ -1,7 +1,7 @@
 import { Provider } from '../../core';
 import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
-import { CssSelector } from './projection';
+import { CssSelectorList } from './projection';
 /**
  * Definition of what a template rendering function should look like.
  */
@@ -50,8 +50,8 @@ export interface DirectiveDef<T> {
     type: Type<T>;
     /** Function that makes a directive public to the DI system. */
     diPublic: ((def: DirectiveDef<any>) => void) | null;
-    /** The selector that will be used to match nodes to this directive. */
-    selector: CssSelector;
+    /** The selectors that will be used to match nodes to this directive. */
+    selectors: CssSelectorList;
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names

@@ -8,7 +8,7 @@
 import './ng_dev_mode';
 import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
-import { CssSelector, LProjection } from './interfaces/projection';
+import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode, TNode } from './interfaces/node';
@@ -298,7 +298,7 @@ export declare function componentRefresh<T>(directiveIndex: number, elementIndex
  * @param selectors A collection of parsed CSS selectors
  * @param rawSelectors A collection of CSS selectors in the raw, un-parsed form
  */
-export declare function projectionDef(index: number, selectors?: CssSelector[], textSelectors?: string[]): void;
+export declare function projectionDef(index: number, selectors?: CssSelectorList[], textSelectors?: string[]): void;
 /**
  * Inserts previously re-distributed projected nodes. This instruction must be preceded by a call
  * to the projectionDef instruction.

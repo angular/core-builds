@@ -3,7 +3,7 @@ import { Provider } from '../core';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
 import { ComponentDef, ComponentDefFeature, ComponentTemplate, DirectiveDef, DirectiveDefFeature, DirectiveDefListOrFactory, PipeDef, PipeDefListOrFactory } from './interfaces/definition';
-import { CssSelector } from './interfaces/projection';
+import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
  *
@@ -24,8 +24,8 @@ export declare function defineComponent<T>(componentDefinition: {
      * Directive type, needed to configure the injector.
      */
     type: Type<T>;
-    /** The selector that will be used to match nodes to this component. */
-    selector: CssSelector;
+    /** The selectors that will be used to match nodes to this component. */
+    selectors: CssSelectorList;
     /**
      * Factory method used to create an instance of directive.
      */
@@ -180,7 +180,7 @@ export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
  */
 export declare const defineDirective: <T>(directiveDefinition: {
     type: Type<T>;
-    selector: [string[] | null, string[][] | null][];
+    selectors: (string | SelectorFlags)[][];
     factory: () => T | ({
         0: T;
     } & any[]);

@@ -72,10 +72,10 @@ function DirectiveDef_tsickle_Closure_declarations() {
      */
     DirectiveDef.prototype.diPublic;
     /**
-     * The selector that will be used to match nodes to this directive.
+     * The selectors that will be used to match nodes to this directive.
      * @type {?}
      */
-    DirectiveDef.prototype.selector;
+    DirectiveDef.prototype.selectors;
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names

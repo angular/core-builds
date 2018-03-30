@@ -118,8 +118,8 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     if (componentDef.type != componentType)
         componentDef.type = componentType;
     let /** @type {?} */ component;
-    // TODO: Replace when flattening CssSelector type
-    const /** @type {?} */ componentTag = /** @type {?} */ ((/** @type {?} */ ((/** @type {?} */ ((componentDef.selector))[0]))[0]))[0];
+    // The first index of the first selector is the tag name.
+    const /** @type {?} */ componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     const /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.
