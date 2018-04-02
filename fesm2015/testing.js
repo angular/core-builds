@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-a2330ff
+ * @license Angular v6.0.0-rc.1-55c9fb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1144,6 +1144,7 @@ function ensureDocument() {
         // we are in node.js.
         const window = domino.createWindow('', 'http://localhost');
         savedDocument = global.document;
+        global.window = window;
         global.document = window.document;
         // Trick to avoid Event patching from
         // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
@@ -1170,6 +1171,7 @@ function ensureDocument() {
 function cleanupDocument() {
     if (savedDocument) {
         global.document = savedDocument;
+        global.window = undefined;
         savedDocument = undefined;
     }
     if (savedNode) {

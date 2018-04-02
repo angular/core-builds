@@ -73,7 +73,8 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param context to pass into the template.
  * @param providedRendererFactory renderer factory to use
  * @param host The host element node to use
- * @param defs Any directive or pipe defs that should be used for matching
+ * @param directives Directive defs that should be used for matching
+ * @param pipes Pipe defs that should be used for matching
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;

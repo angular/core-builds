@@ -108,5 +108,6 @@ export declare function setCurrentInjector(injector: Injector | null): Injector 
  * @experimental
  */
 export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: undefined, flags?: InjectFlags): T;
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T | null, flags?: InjectFlags): T | null;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T, flags?: InjectFlags): T;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];

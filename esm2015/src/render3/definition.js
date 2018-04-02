@@ -33,6 +33,8 @@ import { diPublic } from './di';
  */
 export function defineComponent(componentDefinition) {
     const /** @type {?} */ type = componentDefinition.type;
+    const /** @type {?} */ pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
+    const /** @type {?} */ directiveTypes = /** @type {?} */ ((componentDefinition.directives));
     const /** @type {?} */ def = /** @type {?} */ ({
         type: type,
         diPublic: null,
@@ -52,12 +54,39 @@ export function defineComponent(componentDefinition) {
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-        directiveDefs: componentDefinition.directiveDefs || null,
-        pipeDefs: componentDefinition.pipeDefs || null,
+        directiveDefs: directiveTypes ?
+            () => (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                .map(extractDirectiveDef) :
+            null,
+        pipeDefs: pipeTypes ?
+            () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
+            null,
         selectors: componentDefinition.selectors
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+export function extractDirectiveDef(type) {
+    const /** @type {?} */ def = type.ngComponentDef || type.ngDirectiveDef;
+    if (ngDevMode && !def) {
+        throw new Error(`'${type.name}' is neither 'ComponentType' or 'DirectiveType'.`);
+    }
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+export function extractPipeDef(type) {
+    const /** @type {?} */ def = type.ngPipeDef;
+    if (ngDevMode && !def) {
+        throw new Error(`'${type.name}' is not a 'PipeType'.`);
+    }
     return def;
 }
 const /** @type {?} */ PRIVATE_PREFIX = '__ngOnChanges_';

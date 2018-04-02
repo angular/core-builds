@@ -107,6 +107,7 @@ export function assertComponentType(actual, msg = 'Type passed in is not Compone
  * @return {?}
  */
 function throwError(msg) {
+    debugger; // Left intentionally for better debugger experience.
     throw new Error(`ASSERTION ERROR: ${msg}`);
 }
 //# sourceMappingURL=assert.js.map

@@ -124,7 +124,7 @@ export function renderComponent(componentType /* Type as workaround for: Microso
     const /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.
         component: /** @type {?} */ ((null)),
-        scheduler: opts.scheduler || requestAnimationFrame,
+        scheduler: opts.scheduler || requestAnimationFrame.bind(window),
         clean: CLEAN_PROMISE,
     };
     const /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null, null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);

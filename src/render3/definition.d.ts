@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, DirectiveDef, DirectiveDefFeature, DirectiveDefListOrFactory, PipeDef, PipeDefListOrFactory } from './interfaces/definition';
+import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -128,15 +128,17 @@ export declare function defineComponent<T>(componentDefinition: {
      * The property is either an array of `DirectiveDef`s or a function which returns the array of
      * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
      */
-    directiveDefs?: DirectiveDefListOrFactory | null;
+    directives?: DirectiveTypesOrFactory | null;
     /**
      * Registry of pipes that may be found in this component's view.
      *
      * The property is either an array of `PipeDefs`s or a function which returns the array of
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
-    pipeDefs?: PipeDefListOrFactory | null;
+    pipes?: PipeTypesOrFactory | null;
 }): ComponentDef<T>;
+export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
+export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 /**
  * Creates an NgOnChangesFeature function for a component's features list.
  *

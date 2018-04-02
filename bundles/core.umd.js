@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-a2330ff
+ * @license Angular v6.0.0-rc.1-55c9fb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.1-a2330ff
+ * @license Angular v6.0.0-rc.1-55c9fb2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2236,7 +2236,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.1-a2330ff');
+var VERSION = new Version('6.0.0-rc.1-55c9fb2');
 
 /**
  * @fileoverview added by tsickle
@@ -17433,6 +17433,7 @@ function assertComponentType(actual, msg) {
  * @return {?}
  */
 function throwError(msg) {
+    debugger; // Left intentionally for better debugger experience.
     throw new Error("ASSERTION ERROR: " + msg);
 }
 
@@ -18962,8 +18963,8 @@ function resetApplicationState() {
  * @param {?} context to pass into the template.
  * @param {?} providedRendererFactory renderer factory to use
  * @param {?} host The host element node to use
- * @param {?=} directives
- * @param {?=} pipes
+ * @param {?=} directives Directive defs that should be used for matching
+ * @param {?=} pipes Pipe defs that should be used for matching
  * @return {?}
  */
 
@@ -20427,7 +20428,11 @@ function detectChangesInternal(hostView, hostNode, def, component) {
  * @param {?} component Component to mark as dirty.
  * @return {?}
  */
-
+function markDirty(component) {
+    ngDevMode && assertNotNull(component, 'component');
+    var /** @type {?} */ lElementNode = _getComponentHostLElementNode(component);
+    markViewDirty(lElementNode.view);
+}
 /**
  * A special value which designates that a value has not changed.
  */
@@ -21497,7 +21502,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     var /** @type {?} */ rootContext = {
         // Incomplete initialization due to circular reference.
         component: /** @type {?} */ ((null)),
-        scheduler: opts.scheduler || requestAnimationFrame,
+        scheduler: opts.scheduler || requestAnimationFrame.bind(window),
         clean: CLEAN_PROMISE,
     };
     var /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null, null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
@@ -22297,6 +22302,8 @@ var TemplateRef$1 = /** @class */ (function () {
  */
 function defineComponent(componentDefinition) {
     var /** @type {?} */ type = componentDefinition.type;
+    var /** @type {?} */ pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
+    var /** @type {?} */ directiveTypes = /** @type {?} */ ((componentDefinition.directives));
     var /** @type {?} */ def = /** @type {?} */ ({
         type: type,
         diPublic: null,
@@ -22316,12 +22323,41 @@ function defineComponent(componentDefinition) {
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-        directiveDefs: componentDefinition.directiveDefs || null,
-        pipeDefs: componentDefinition.pipeDefs || null,
+        directiveDefs: directiveTypes ?
+            function () {
+                return (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                    .map(extractDirectiveDef);
+            } :
+            null,
+        pipeDefs: pipeTypes ?
+            function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
+            null,
         selectors: componentDefinition.selectors
     });
     var /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function extractDirectiveDef(type) {
+    var /** @type {?} */ def = type.ngComponentDef || type.ngDirectiveDef;
+    if (ngDevMode && !def) {
+        throw new Error("'" + type.name + "' is neither 'ComponentType' or 'DirectiveType'.");
+    }
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+function extractPipeDef(type) {
+    var /** @type {?} */ def = type.ngPipeDef;
+    if (ngDevMode && !def) {
+        throw new Error("'" + type.name + "' is not a 'PipeType'.");
+    }
     return def;
 }
 var PRIVATE_PREFIX = '__ngOnChanges_';
@@ -23803,6 +23839,7 @@ exports.WrappedValue = WrappedValue;
 exports.platformCore = platformCore;
 exports.ɵALLOW_MULTIPLE_PLATFORMS = ALLOW_MULTIPLE_PLATFORMS;
 exports.ɵAPP_ID_RANDOM_PROVIDER = APP_ID_RANDOM_PROVIDER;
+exports.ɵdefaultIterableDiffers = defaultIterableDiffers;
 exports.ɵdevModeEqual = devModeEqual;
 exports.ɵisListLikeIterable = isListLikeIterable;
 exports.ɵChangeDetectorStatus = ChangeDetectorStatus;
@@ -23839,6 +23876,7 @@ exports.ɵinjectChangeDetectorRef = injectChangeDetectorRef;
 exports.ɵinjectAttribute = injectAttribute;
 exports.ɵPublicFeature = PublicFeature;
 exports.ɵNgOnChangesFeature = NgOnChangesFeature;
+exports.ɵmarkDirty = markDirty;
 exports.ɵNC = NO_CHANGE;
 exports.ɵC = container;
 exports.ɵE = elementStart;
@@ -23924,38 +23962,37 @@ exports.ɵqud = queryDef;
 exports.ɵted = textDef;
 exports.ɵunv = unwrapValue;
 exports.ɵvid = viewDef;
-exports.ɵq = _iterableDiffersFactory;
-exports.ɵr = _keyValueDiffersFactory;
-exports.ɵu = _localeFactory;
+exports.ɵo = _iterableDiffersFactory;
+exports.ɵq = _keyValueDiffersFactory;
+exports.ɵr = _localeFactory;
 exports.ɵj = _appIdRandomProviderFactory;
-exports.ɵl = defaultIterableDiffers;
-exports.ɵm = defaultKeyValueDiffers;
-exports.ɵn = DefaultIterableDifferFactory;
-exports.ɵo = DefaultKeyValueDifferFactory;
+exports.ɵl = defaultKeyValueDiffers;
+exports.ɵm = DefaultIterableDifferFactory;
+exports.ɵn = DefaultKeyValueDifferFactory;
 exports.ɵg = ReflectiveInjector_;
 exports.ɵh = ReflectiveDependency;
 exports.ɵi = resolveReflectiveProviders;
-exports.ɵw = wtfEnabled;
-exports.ɵy = createScope;
-exports.ɵx = detectWTF;
-exports.ɵbb = endTimeRange;
-exports.ɵz = leave;
-exports.ɵba = startTimeRange;
-exports.ɵbf = getOrCreateChangeDetectorRef;
-exports.ɵbh = getOrCreateContainerRef;
-exports.ɵbg = getOrCreateInjectable;
-exports.ɵbe = getOrCreateNodeInjector;
-exports.ɵbi = getOrCreateTemplateRef;
-exports.ɵbl = bindingUpdated;
-exports.ɵbn = bindingUpdated2;
-exports.ɵbo = bindingUpdated4;
-exports.ɵbm = checkAndUpdateBinding$1;
-exports.ɵbk = consumeBinding;
-exports.ɵbj = getCreationMode;
+exports.ɵu = wtfEnabled;
+exports.ɵx = createScope;
+exports.ɵw = detectWTF;
+exports.ɵba = endTimeRange;
+exports.ɵy = leave;
+exports.ɵz = startTimeRange;
+exports.ɵbe = getOrCreateChangeDetectorRef;
+exports.ɵbg = getOrCreateContainerRef;
+exports.ɵbf = getOrCreateInjectable;
+exports.ɵbd = getOrCreateNodeInjector;
+exports.ɵbh = getOrCreateTemplateRef;
+exports.ɵbk = bindingUpdated;
+exports.ɵbm = bindingUpdated2;
+exports.ɵbn = bindingUpdated4;
+exports.ɵbl = checkAndUpdateBinding$1;
+exports.ɵbj = consumeBinding;
+exports.ɵbi = getCreationMode;
 exports.ɵc = makeParamDecorator;
 exports.ɵf = makePropDecorator;
-exports.ɵbc = _def;
-exports.ɵbd = DebugContext;
+exports.ɵbb = _def;
+exports.ɵbc = DebugContext;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

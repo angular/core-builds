@@ -33,6 +33,8 @@ import { diPublic } from './di';
  */
 export function defineComponent(componentDefinition) {
     var /** @type {?} */ type = componentDefinition.type;
+    var /** @type {?} */ pipeTypes = /** @type {?} */ ((componentDefinition.pipes));
+    var /** @type {?} */ directiveTypes = /** @type {?} */ ((componentDefinition.directives));
     var /** @type {?} */ def = /** @type {?} */ ({
         type: type,
         diPublic: null,
@@ -52,12 +54,41 @@ export function defineComponent(componentDefinition) {
         afterViewChecked: type.prototype.ngAfterViewChecked || null,
         onDestroy: type.prototype.ngOnDestroy || null,
         onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
-        directiveDefs: componentDefinition.directiveDefs || null,
-        pipeDefs: componentDefinition.pipeDefs || null,
+        directiveDefs: directiveTypes ?
+            function () {
+                return (typeof directiveTypes === 'function' ? directiveTypes() : directiveTypes)
+                    .map(extractDirectiveDef);
+            } :
+            null,
+        pipeDefs: pipeTypes ?
+            function () { return (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef); } :
+            null,
         selectors: componentDefinition.selectors
     });
     var /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach(function (fn) { return fn(def); });
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+export function extractDirectiveDef(type) {
+    var /** @type {?} */ def = type.ngComponentDef || type.ngDirectiveDef;
+    if (ngDevMode && !def) {
+        throw new Error("'" + type.name + "' is neither 'ComponentType' or 'DirectiveType'.");
+    }
+    return def;
+}
+/**
+ * @param {?} type
+ * @return {?}
+ */
+export function extractPipeDef(type) {
+    var /** @type {?} */ def = type.ngPipeDef;
+    if (ngDevMode && !def) {
+        throw new Error("'" + type.name + "' is not a 'PipeType'.");
+    }
     return def;
 }
 var /** @type {?} */ PRIVATE_PREFIX = '__ngOnChanges_';

@@ -192,6 +192,8 @@ export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => 
  */
 export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
 export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
+export declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
+export declare type DirectiveTypeList = (DirectiveDef<any> | ComponentDef<any> | Type<any>)[];
 /**
  * Type used for PipeDefs on component definition.
  *
@@ -199,4 +201,6 @@ export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[]
  */
 export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
 export declare type PipeDefList = PipeDef<any>[];
+export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
+export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;

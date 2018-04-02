@@ -108,6 +108,7 @@ export function assertComponentType(actual, msg) {
  * @return {?}
  */
 function throwError(msg) {
+    debugger; // Left intentionally for better debugger experience.
     throw new Error("ASSERTION ERROR: " + msg);
 }
 //# sourceMappingURL=assert.js.map
