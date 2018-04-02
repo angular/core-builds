@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-43d6202
+ * @license Angular v6.0.0-rc.1-7a1c437
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.1-43d6202
+ * @license Angular v6.0.0-rc.1-7a1c437
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2236,7 +2236,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.1-43d6202');
+var VERSION = new Version('6.0.0-rc.1-7a1c437');
 
 /**
  * @fileoverview added by tsickle
@@ -22677,11 +22677,10 @@ function pureFunctionV(pureFn, exps, thisArg) {
  * Create a pipe.
  *
  * @param {?} index Pipe index where the pipe will be stored.
- * @param {?} pipeName
- * @param {?=} firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
+ * @param {?} pipeName The name of the pipe
  * @return {?} T the instance of the pipe.
  */
-function pipe(index, pipeName, firstInstance) {
+function pipe(index, pipeName) {
     var /** @type {?} */ tView = getTView();
     var /** @type {?} */ pipeDef;
     if (tView.firstTemplatePass) {
@@ -22694,7 +22693,7 @@ function pipe(index, pipeName, firstInstance) {
     else {
         pipeDef = /** @type {?} */ (tView.data[index]);
     }
-    var /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();
+    var /** @type {?} */ pipeInstance = pipeDef.n();
     store(index, pipeInstance);
     return pipeInstance;
 }

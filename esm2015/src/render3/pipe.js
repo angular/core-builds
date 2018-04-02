@@ -15,11 +15,10 @@ import { pureFunction1, pureFunction2, pureFunction3, pureFunction4, pureFunctio
  * Create a pipe.
  *
  * @param {?} index Pipe index where the pipe will be stored.
- * @param {?} pipeName
- * @param {?=} firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
+ * @param {?} pipeName The name of the pipe
  * @return {?} T the instance of the pipe.
  */
-export function pipe(index, pipeName, firstInstance) {
+export function pipe(index, pipeName) {
     const /** @type {?} */ tView = getTView();
     let /** @type {?} */ pipeDef;
     if (tView.firstTemplatePass) {
@@ -32,7 +31,7 @@ export function pipe(index, pipeName, firstInstance) {
     else {
         pipeDef = /** @type {?} */ (tView.data[index]);
     }
-    const /** @type {?} */ pipeInstance = pipeDef.pure && firstInstance ? firstInstance : pipeDef.n();
+    const /** @type {?} */ pipeInstance = pipeDef.n();
     store(index, pipeInstance);
     return pipeInstance;
 }

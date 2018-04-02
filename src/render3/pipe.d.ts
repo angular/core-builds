@@ -2,11 +2,10 @@
  * Create a pipe.
  *
  * @param index Pipe index where the pipe will be stored.
- * @param pipeDef Pipe definition object for registering life cycle hooks.
- * @param firstInstance (optional) The first instance of the pipe that can be reused for pure pipes.
+ * @param pipeName The name of the pipe
  * @returns T the instance of the pipe.
  */
-export declare function pipe(index: number, pipeName: string, firstInstance?: any): any;
+export declare function pipe(index: number, pipeName: string): any;
 /**
  * Invokes a pipe with 1 arguments.
  *
