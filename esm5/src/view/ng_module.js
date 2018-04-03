@@ -88,52 +88,52 @@ export function initNgModule(data) {
  */
 export function resolveNgModuleDep(data, depDef, notFoundValue) {
     if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
-    var /** @type {?} */ former = setCurrentInjector(data);
-    try {
-        if (depDef.flags & 8 /* Value */) {
-            return depDef.token;
+    if (depDef.flags & 8 /* Value */) {
+        return depDef.token;
+    }
+    if (depDef.flags & 2 /* Optional */) {
+        notFoundValue = null;
+    }
+    if (depDef.flags & 1 /* SkipSelf */) {
+        return data._parent.get(depDef.token, notFoundValue);
+    }
+    var /** @type {?} */ tokenKey = depDef.tokenKey;
+    switch (tokenKey) {
+        case InjectorRefTokenKey:
+        case INJECTORRefTokenKey:
+        case NgModuleRefTokenKey:
+            return data;
+    }
+    var /** @type {?} */ providerDef = data._def.providersByKey[tokenKey];
+    if (providerDef) {
+        var /** @type {?} */ providerInstance = data._providers[providerDef.index];
+        if (providerInstance === undefined) {
+            providerInstance = data._providers[providerDef.index] =
+                _createProviderInstance(data, providerDef);
         }
-        if (depDef.flags & 2 /* Optional */) {
-            notFoundValue = null;
-        }
-        if (depDef.flags & 1 /* SkipSelf */) {
-            return data._parent.get(depDef.token, notFoundValue);
-        }
-        var /** @type {?} */ tokenKey_1 = depDef.tokenKey;
-        switch (tokenKey_1) {
-            case InjectorRefTokenKey:
-            case INJECTORRefTokenKey:
-            case NgModuleRefTokenKey:
-                return data;
-        }
-        var /** @type {?} */ providerDef = data._def.providersByKey[tokenKey_1];
-        if (providerDef) {
-            var /** @type {?} */ providerInstance = data._providers[providerDef.index];
-            if (providerInstance === undefined) {
-                providerInstance = data._providers[providerDef.index] =
-                    _createProviderInstance(data, providerDef);
-            }
-            return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
-        }
-        else if (depDef.token.ngInjectableDef && targetsModule(data, depDef.token.ngInjectableDef)) {
-            var /** @type {?} */ injectableDef = /** @type {?} */ (depDef.token.ngInjectableDef);
-            var /** @type {?} */ key = tokenKey_1;
-            var /** @type {?} */ index = data._providers.length;
-            data._def.providersByKey[depDef.tokenKey] = {
-                flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
-                value: injectableDef.factory,
-                deps: [], index: index,
-                token: depDef.token,
-            };
+        return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
+    }
+    else if (depDef.token.ngInjectableDef && targetsModule(data, depDef.token.ngInjectableDef)) {
+        var /** @type {?} */ injectableDef = /** @type {?} */ (depDef.token.ngInjectableDef);
+        var /** @type {?} */ key = tokenKey;
+        var /** @type {?} */ index = data._providers.length;
+        data._def.providersByKey[depDef.tokenKey] = {
+            flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
+            value: injectableDef.factory,
+            deps: [], index: index,
+            token: depDef.token,
+        };
+        var /** @type {?} */ former = setCurrentInjector(data);
+        try {
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
                 _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
         }
-        return data._parent.get(depDef.token, notFoundValue);
+        finally {
+            setCurrentInjector(former);
+        }
     }
-    finally {
-        setCurrentInjector(former);
-    }
+    return data._parent.get(depDef.token, notFoundValue);
 }
 /**
  * @param {?} ngModule
