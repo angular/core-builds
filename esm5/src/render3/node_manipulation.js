@@ -266,7 +266,10 @@ export function insertView(container, newView, index) {
         if (!beforeNode) {
             var /** @type {?} */ containerNextNativeNode = container.native;
             if (containerNextNativeNode === undefined) {
-                containerNextNativeNode = container.native = findNextRNodeSibling(container, null);
+                // TODO(pk): this is probably too simplistic, add more tests for various host placements
+                // (dynamic view, projection, ...)
+                containerNextNativeNode = container.native =
+                    findNextRNodeSibling(container.data.host ? container.data.host : container, null);
             }
             beforeNode = containerNextNativeNode;
         }

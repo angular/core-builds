@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LViewNode, TNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
@@ -58,6 +58,12 @@ export declare function leaveView(newView: LView): void;
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
 export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null, flags: LViewFlags): LView;
+/**
+ * Creation of LNode object is extracted to a separate function so we always create LNode object
+ * with the same shape
+ * (same properties assigned in the same order).
+ */
+export declare function createLNodeObject(type: LNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -238,6 +244,7 @@ export declare function directiveCreate<T>(elementIndex: number, directive: T, d
  * current Angular. Example: local refs and inputs on root component.
  */
 export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<any>): T;
+export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, host?: LContainerNode | LElementNode): LContainer;
 /**
  * Creates an LContainerNode.
  *
@@ -316,10 +323,11 @@ export declare function projection(nodeIndex: number, localIndex: number, select
  * This structure will be used to traverse through nested views to remove listeners
  * and call onDestroy callbacks.
  *
+ * @param currentView The view where LView or LContainer should be added
  * @param state The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-export declare function addToViewTree<T extends LView | LContainer>(state: T): T;
+export declare function addToViewTree<T extends LView | LContainer>(currentView: LView, state: T): T;
 /** If node is an OnPush component, marks its LView dirty. */
 export declare function markDirtyIfOnPush(node: LElementNode): void;
 /**

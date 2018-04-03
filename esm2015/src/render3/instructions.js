@@ -293,6 +293,33 @@ export function createLView(viewId, renderer, tView, template, context, flags) {
     return newView;
 }
 /**
+ * Creation of LNode object is extracted to a separate function so we always create LNode object
+ * with the same shape
+ * (same properties assigned in the same order).
+ * @param {?} type
+ * @param {?} currentView
+ * @param {?} parent
+ * @param {?} native
+ * @param {?} state
+ * @param {?} queries
+ * @return {?}
+ */
+export function createLNodeObject(type, currentView, parent, native, state, queries) {
+    return {
+        type: type,
+        native: /** @type {?} */ (native),
+        view: currentView,
+        parent: /** @type {?} */ (parent),
+        child: null,
+        next: null,
+        nodeInjector: parent ? parent.nodeInjector : null,
+        data: state,
+        queries: queries,
+        tNode: null,
+        pNextOrParent: null
+    };
+}
+/**
  * @param {?} index
  * @param {?} type
  * @param {?} native
@@ -305,19 +332,7 @@ export function createLNode(index, type, native, state) {
     let /** @type {?} */ queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
         parent && parent.queries && parent.queries.child();
     const /** @type {?} */ isState = state != null;
-    const /** @type {?} */ node = {
-        type: type,
-        native: /** @type {?} */ (native),
-        view: currentView,
-        parent: /** @type {?} */ (parent),
-        child: null,
-        next: null,
-        nodeInjector: parent ? parent.nodeInjector : null,
-        data: isState ? /** @type {?} */ (state) : null,
-        queries: queries,
-        tNode: null,
-        pNextOrParent: null
-    };
+    const /** @type {?} */ node = createLNodeObject(type, currentView, parent, native, isState ? /** @type {?} */ (state) : null, queries);
     if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
         // Bit of a hack to bust through the readonly because there is a circular dep between
         // LView and LNode.
@@ -349,7 +364,7 @@ export function createLNode(index, type, native, state) {
             }
         }
         else if (previousOrParentNode) {
-            ngDevMode && assertNull(previousOrParentNode.next, `previousOrParentNode's next property should not have been set.`);
+            ngDevMode && assertNull(previousOrParentNode.next, `previousOrParentNode's next property should not have been set ${index}.`);
             previousOrParentNode.next = node;
         }
     }
@@ -414,8 +429,8 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         }
         enterView(viewNode.data, viewNode);
         template(context, cm);
-        refreshDynamicChildren();
         refreshDirectives();
+        refreshDynamicChildren();
     }
     finally {
         leaveView(currentView && /** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
@@ -1163,7 +1178,7 @@ function addComponentLogic(index, elementIndex, instance, def) {
     const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const /** @type {?} */ hostView = addToViewTree(createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
     (/** @type {?} */ (previousOrParentNode.data)) = hostView;
     (/** @type {?} */ (hostView.node)) = previousOrParentNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
@@ -1252,6 +1267,29 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
     return initialInputData;
 }
 /**
+ * @param {?} parentLNode
+ * @param {?} currentView
+ * @param {?=} template
+ * @param {?=} host
+ * @return {?}
+ */
+export function createLContainer(parentLNode, currentView, template, host) {
+    ngDevMode && assertNotNull(parentLNode, 'containers should have a parent');
+    return /** @type {?} */ ({
+        views: [],
+        nextIndex: 0,
+        // If the direct parent of the container is a view, its views will need to be added
+        // through insertView() when its parent view is being inserted:
+        renderParent: canInsertNativeNode(parentLNode, currentView) ? parentLNode : null,
+        template: template == null ? null : template,
+        next: null,
+        parent: currentView,
+        dynamicViewCount: 0,
+        queries: null,
+        host: host == null ? null : host
+    });
+}
+/**
  * Creates an LContainerNode.
  *
  * Only `LViewNodes` can go into `LContainerNodes`.
@@ -1267,26 +1305,14 @@ export function container(index, template, tagName, attrs, localRefs) {
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'container nodes should be created before any bindings');
     const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
-    ngDevMode && assertNotNull(currentParent, 'containers should have a parent');
-    const /** @type {?} */ lContainer = /** @type {?} */ ({
-        views: [],
-        nextIndex: 0,
-        // If the direct parent of the container is a view, its views will need to be added
-        // through insertView() when its parent view is being inserted:
-        renderParent: canInsertNativeNode(currentParent, currentView) ? currentParent : null,
-        template: template == null ? null : template,
-        next: null,
-        parent: currentView,
-        dynamicViewCount: 0,
-        queries: null
-    });
+    const /** @type {?} */ lContainer = createLContainer(currentParent, currentView, template);
     const /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
     if (node.tNode == null) {
         node.tNode = tData[index] = createTNode(tagName || null, attrs || null, []);
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
-    addToViewTree(node.data);
+    addToViewTree(currentView, node.data);
     if (firstTemplatePass)
         cacheMatchingDirectivesForNode(node.tNode);
     // TODO: handle TemplateRef!
@@ -1625,10 +1651,11 @@ function findComponentHost(lView) {
  * and call onDestroy callbacks.
  *
  * @template T
+ * @param {?} currentView The view where LView or LContainer should be added
  * @param {?} state The LView or LContainer to add to the view tree
  * @return {?} The state passed in
  */
-export function addToViewTree(state) {
+export function addToViewTree(currentView, state) {
     currentView.tail ? (currentView.tail.next = state) : (currentView.child = state);
     currentView.tail = state;
     return state;
@@ -1824,8 +1851,8 @@ export function detectChangesInternal(hostView, hostNode, def, component) {
     const /** @type {?} */ template = def.template;
     try {
         template(component, creationMode);
-        refreshDynamicChildren();
         refreshDirectives();
+        refreshDynamicChildren();
     }
     finally {
         leaveView(oldView);

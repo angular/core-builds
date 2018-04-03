@@ -10,9 +10,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { assertLessThan, assertNotNull } from './assert';
-import { assertPreviousIsParent, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
+import { addToViewTree, assertPreviousIsParent, createLContainer, createLNodeObject, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
 import { assertNodeOfPossibleTypes, assertNodeType } from './node_assert';
-import { insertView } from './node_manipulation';
+import { insertView, removeView } from './node_manipulation';
 import { notImplemented, stringify } from './util';
 import { EmbeddedViewRef, addDestroyable, createViewRef } from './view_ref';
 /**
@@ -535,8 +535,15 @@ function ElementRef_tsickle_Closure_declarations() {
  * @return {?} The ViewContainerRef instance to use
  */
 export function getOrCreateContainerRef(di) {
-    return di.viewContainerRef ||
-        (di.viewContainerRef = new ViewContainerRef(/** @type {?} */ (di.node)));
+    if (!di.viewContainerRef) {
+        var /** @type {?} */ vcRefHost = di.node;
+        ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
+        var /** @type {?} */ lContainer = createLContainer(/** @type {?} */ ((vcRefHost.parent)), vcRefHost.view, undefined, vcRefHost);
+        var /** @type {?} */ lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, /** @type {?} */ ((vcRefHost.parent)), undefined, lContainer, null);
+        addToViewTree(vcRefHost.view, lContainer);
+        di.viewContainerRef = new ViewContainerRef(lContainerNode);
+    }
+    return di.viewContainerRef;
 }
 /**
  * A ref to a container that enables adding and removing views from that container
@@ -547,8 +554,9 @@ var /**
  * imperatively.
  */
 ViewContainerRef = /** @class */ (function () {
-    function ViewContainerRef(_node) {
-        this._node = _node;
+    function ViewContainerRef(_lContainerNode) {
+        this._lContainerNode = _lContainerNode;
+        this._viewRefs = [];
     }
     /**
      * @return {?}
@@ -556,7 +564,12 @@ ViewContainerRef = /** @class */ (function () {
     ViewContainerRef.prototype.clear = /**
      * @return {?}
      */
-    function () { throw notImplemented(); };
+    function () {
+        var /** @type {?} */ lContainer = this._lContainerNode.data;
+        while (lContainer.views.length) {
+            this.remove(0);
+        }
+    };
     /**
      * @param {?} index
      * @return {?}
@@ -565,7 +578,18 @@ ViewContainerRef = /** @class */ (function () {
      * @param {?} index
      * @return {?}
      */
-    function (index) { throw notImplemented(); };
+    function (index) { return this._viewRefs[index] || null; };
+    Object.defineProperty(ViewContainerRef.prototype, "length", {
+        get: /**
+         * @return {?}
+         */
+        function () {
+            var /** @type {?} */ lContainer = this._lContainerNode.data;
+            return lContainer.views.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * @template C
      * @param {?} templateRef
@@ -581,7 +605,7 @@ ViewContainerRef = /** @class */ (function () {
      * @return {?}
      */
     function (templateRef, context, index) {
-        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(/** @type {?} */ ((context)));
+        var /** @type {?} */ viewRef = templateRef.createEmbeddedView(context || /** @type {?} */ ({}));
         this.insert(viewRef, index);
         return viewRef;
     };
@@ -617,33 +641,20 @@ ViewContainerRef = /** @class */ (function () {
      * @return {?}
      */
     function (viewRef, index) {
-        if (index == null) {
-            index = this._node.data.views.length;
-        }
-        else {
-            // +1 because it's legal to insert at the end.
-            ngDevMode && assertLessThan(index, this._node.data.views.length + 1, 'index');
-        }
-        var /** @type {?} */ lView = (/** @type {?} */ (viewRef))._lViewNode;
-        insertView(this._node, lView, index);
-        // TODO(pk): this is a temporary index adjustment so imperativelly inserted (through
-        // ViewContainerRef) views
-        // are not removed in the containerRefreshEnd instruction.
-        // The final fix will consist of creating a dedicated container node for views inserted through
-        // ViewContainerRef.
-        // Such container should not be trimmed as it is the case in the containerRefreshEnd
-        // instruction.
-        this._node.data.nextIndex = this._node.data.views.length;
+        var /** @type {?} */ lViewNode = (/** @type {?} */ (viewRef))._lViewNode;
+        var /** @type {?} */ adjustedIdx = this._adjustAndAssertIndex(index);
+        insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        this._viewRefs.splice(adjustedIdx, 0, viewRef);
+        (/** @type {?} */ (lViewNode)).parent = this._lContainerNode;
         // If the view is dynamic (has a template), it needs to be counted both at the container
         // level and at the node above the container.
-        if (lView.data.template !== null) {
+        if (lViewNode.data.template !== null) {
             // Increment the container view count.
-            this._node.data.dynamicViewCount++;
+            this._lContainerNode.data.dynamicViewCount++;
             // Look for the parent node and increment its dynamic view count.
-            if (this._node.parent !== null && this._node.parent.data !== null) {
-                ngDevMode &&
-                    assertNodeOfPossibleTypes(this._node.parent, 2 /* View */, 3 /* Element */);
-                this._node.parent.data.dynamicViewCount++;
+            if (this._lContainerNode.parent !== null && this._lContainerNode.parent.data !== null) {
+                ngDevMode && assertNodeOfPossibleTypes(this._lContainerNode.parent, 2 /* View */, 3 /* Element */);
+                this._lContainerNode.parent.data.dynamicViewCount++;
             }
         }
         return viewRef;
@@ -678,7 +689,11 @@ ViewContainerRef = /** @class */ (function () {
      * @param {?=} index
      * @return {?}
      */
-    function (index) { throw notImplemented(); };
+    function (index) {
+        var /** @type {?} */ adjustedIdx = this._adjustAndAssertIndex(index);
+        removeView(this._lContainerNode, adjustedIdx);
+        this._viewRefs.splice(adjustedIdx, 1);
+    };
     /**
      * @param {?=} index
      * @return {?}
@@ -688,9 +703,29 @@ ViewContainerRef = /** @class */ (function () {
      * @return {?}
      */
     function (index) { throw notImplemented(); };
+    /**
+     * @param {?=} index
+     * @return {?}
+     */
+    ViewContainerRef.prototype._adjustAndAssertIndex = /**
+     * @param {?=} index
+     * @return {?}
+     */
+    function (index) {
+        if (index == null) {
+            index = this._lContainerNode.data.views.length;
+        }
+        else {
+            // +1 because it's legal to insert at the end.
+            ngDevMode && assertLessThan(index, this._lContainerNode.data.views.length + 1, 'index');
+        }
+        return index;
+    };
     return ViewContainerRef;
 }());
 function ViewContainerRef_tsickle_Closure_declarations() {
+    /** @type {?} */
+    ViewContainerRef.prototype._viewRefs;
     /** @type {?} */
     ViewContainerRef.prototype.element;
     /** @type {?} */
@@ -698,9 +733,7 @@ function ViewContainerRef_tsickle_Closure_declarations() {
     /** @type {?} */
     ViewContainerRef.prototype.parentInjector;
     /** @type {?} */
-    ViewContainerRef.prototype.length;
-    /** @type {?} */
-    ViewContainerRef.prototype._node;
+    ViewContainerRef.prototype._lContainerNode;
 }
 /**
  * Creates a TemplateRef and stores it on the injector. Or, if the TemplateRef already
