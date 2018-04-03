@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-18ac228
+ * @license Angular v6.0.0-rc.1-4506230
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2023,7 +2023,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-rc.1-18ac228');
+const VERSION = new Version('6.0.0-rc.1-4506230');
 
 /**
  * @fileoverview added by tsickle
@@ -10508,52 +10508,52 @@ function initNgModule(data) {
  * @return {?}
  */
 function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_FOUND) {
-    if (depDef.flags & 8 /* Value */) {
-        return depDef.token;
-    }
-    if (depDef.flags & 2 /* Optional */) {
-        notFoundValue = null;
-    }
-    if (depDef.flags & 1 /* SkipSelf */) {
-        return data._parent.get(depDef.token, notFoundValue);
-    }
-    const /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
-    switch (tokenKey$$1) {
-        case InjectorRefTokenKey$1:
-        case INJECTORRefTokenKey$1:
-        case NgModuleRefTokenKey:
-            return data;
-    }
-    const /** @type {?} */ providerDef = data._def.providersByKey[tokenKey$$1];
-    if (providerDef) {
-        let /** @type {?} */ providerInstance = data._providers[providerDef.index];
-        if (providerInstance === undefined) {
-            providerInstance = data._providers[providerDef.index] =
-                _createProviderInstance$1(data, providerDef);
+    const /** @type {?} */ former = setCurrentInjector(data);
+    try {
+        if (depDef.flags & 8 /* Value */) {
+            return depDef.token;
         }
-        return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
-    }
-    else if (depDef.token.ngInjectableDef && targetsModule(data, depDef.token.ngInjectableDef)) {
-        const /** @type {?} */ injectableDef = /** @type {?} */ (depDef.token.ngInjectableDef);
-        const /** @type {?} */ key = tokenKey$$1;
-        const /** @type {?} */ index = data._providers.length;
-        data._def.providersByKey[depDef.tokenKey] = {
-            flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
-            value: injectableDef.factory,
-            deps: [], index,
-            token: depDef.token,
-        };
-        const /** @type {?} */ former = setCurrentInjector(data);
-        try {
+        if (depDef.flags & 2 /* Optional */) {
+            notFoundValue = null;
+        }
+        if (depDef.flags & 1 /* SkipSelf */) {
+            return data._parent.get(depDef.token, notFoundValue);
+        }
+        const /** @type {?} */ tokenKey$$1 = depDef.tokenKey;
+        switch (tokenKey$$1) {
+            case InjectorRefTokenKey$1:
+            case INJECTORRefTokenKey$1:
+            case NgModuleRefTokenKey:
+                return data;
+        }
+        const /** @type {?} */ providerDef = data._def.providersByKey[tokenKey$$1];
+        if (providerDef) {
+            let /** @type {?} */ providerInstance = data._providers[providerDef.index];
+            if (providerInstance === undefined) {
+                providerInstance = data._providers[providerDef.index] =
+                    _createProviderInstance$1(data, providerDef);
+            }
+            return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
+        }
+        else if (depDef.token.ngInjectableDef && targetsModule(data, depDef.token.ngInjectableDef)) {
+            const /** @type {?} */ injectableDef = /** @type {?} */ (depDef.token.ngInjectableDef);
+            const /** @type {?} */ key = tokenKey$$1;
+            const /** @type {?} */ index = data._providers.length;
+            data._def.providersByKey[depDef.tokenKey] = {
+                flags: 1024 /* TypeFactoryProvider */ | 4096 /* LazyProvider */,
+                value: injectableDef.factory,
+                deps: [], index,
+                token: depDef.token,
+            };
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
                 _createProviderInstance$1(data, data._def.providersByKey[depDef.tokenKey]));
         }
-        finally {
-            setCurrentInjector(former);
-        }
+        return data._parent.get(depDef.token, notFoundValue);
     }
-    return data._parent.get(depDef.token, notFoundValue);
+    finally {
+        setCurrentInjector(former);
+    }
 }
 /**
  * @param {?} ngModule
