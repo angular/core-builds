@@ -192,7 +192,7 @@ export function enterView(newView, host) {
     }
     currentView = newView;
     currentQueries = newView && newView.queries;
-    return /** @type {?} */ ((oldView));
+    return oldView;
 }
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
@@ -232,7 +232,7 @@ export function setHostBindings(bindings) {
         for (let /** @type {?} */ i = 0; i < bindings.length; i += 2) {
             const /** @type {?} */ dirIndex = bindings[i];
             const /** @type {?} */ def = /** @type {?} */ (defs[dirIndex]);
-            def.hostBindings && def.hostBindings(dirIndex, bindings[i | 1]);
+            def.hostBindings && def.hostBindings(dirIndex, bindings[i + 1]);
         }
     }
 }
@@ -244,7 +244,7 @@ export function setHostBindings(bindings) {
 function refreshChildComponents(components) {
     if (components != null) {
         for (let /** @type {?} */ i = 0; i < components.length; i += 2) {
-            componentRefresh(components[i], components[i | 1]);
+            componentRefresh(components[i], components[i + 1]);
         }
     }
 }
@@ -486,12 +486,10 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
  * @return {?}
  */
 export function elementStart(index, name, attrs, localRefs) {
-    let /** @type {?} */ node;
-    let /** @type {?} */ native;
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
-    native = renderer.createElement(name);
-    node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
+    const /** @type {?} */ native = renderer.createElement(name);
+    const /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
     if (attrs)
         setUpAttributes(native, attrs);
     appendChild(/** @type {?} */ ((node.parent)), native, currentView);
@@ -509,8 +507,8 @@ export function elementStart(index, name, attrs, localRefs) {
  * @return {?}
  */
 function cacheMatchingDirectivesForNode(tNode) {
-    const /** @type {?} */ registry = currentView.tView.directiveRegistry;
-    const /** @type {?} */ startIndex = directives ? directives.length : 0;
+    const /** @type {?} */ tView = currentView.tView;
+    const /** @type {?} */ registry = tView.directiveRegistry;
     if (registry) {
         let /** @type {?} */ componentFlag = 0;
         let /** @type {?} */ size = 0;
@@ -522,12 +520,14 @@ function cacheMatchingDirectivesForNode(tNode) {
                         throwMultipleComponentError(tNode);
                     componentFlag |= 1 /* Component */;
                 }
-                (currentView.tView.directives || (currentView.tView.directives = [])).push(def);
+                (tView.directives || (tView.directives = [])).push(def);
                 size++;
             }
         }
-        if (size > 0)
+        if (size > 0) {
+            const /** @type {?} */ startIndex = directives ? directives.length : 0;
             buildTNodeFlags(tNode, startIndex, size, componentFlag);
+        }
     }
 }
 /**
@@ -630,9 +630,9 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
         for (let /** @type {?} */ i = 0; i < localRefs.length; i += 2) {
-            const /** @type {?} */ index = exportsMap[localRefs[i | 1]];
+            const /** @type {?} */ index = exportsMap[localRefs[i + 1]];
             if (index == null)
-                throw new Error(`Export of name '${localRefs[i | 1]}' not found!`);
+                throw new Error(`Export of name '${localRefs[i + 1]}' not found!`);
             localNames.push(localRefs[i], index);
         }
     }
@@ -662,7 +662,7 @@ function saveResolvedLocalsInData() {
     const /** @type {?} */ localNames = /** @type {?} */ ((previousOrParentNode.tNode)).localNames;
     if (localNames) {
         for (let /** @type {?} */ i = 0; i < localNames.length; i += 2) {
-            const /** @type {?} */ index = /** @type {?} */ (localNames[i | 1]);
+            const /** @type {?} */ index = /** @type {?} */ (localNames[i + 1]);
             const /** @type {?} */ value = index === -1 ? previousOrParentNode.native : /** @type {?} */ ((directives))[index];
             data.push(value);
         }
@@ -827,7 +827,7 @@ export function listener(eventName, listenerFn, useCapture = false) {
 function createOutput(outputs, listener) {
     for (let /** @type {?} */ i = 0; i < outputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (outputs[i]), /** @type {?} */ ((directives)));
-        const /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i | 1]].subscribe(listener); /** @type {?} */
+        const /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i + 1]].subscribe(listener); /** @type {?} */
         ((cleanup)).push(subscription.unsubscribe, subscription);
     }
 }
@@ -944,7 +944,7 @@ function createTNode(tagName, attrs, data) {
 function setInputsForProperty(inputs, value) {
     for (let /** @type {?} */ i = 0; i < inputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (inputs[i]), /** @type {?} */ ((directives))); /** @type {?} */
-        ((directives))[/** @type {?} */ (inputs[i])][inputs[i | 1]] = value;
+        ((directives))[/** @type {?} */ (inputs[i])][inputs[i + 1]] = value;
     }
 }
 /**
@@ -1232,7 +1232,7 @@ function setInputsFromAttrs(directiveIndex, instance, inputs, tNode) {
     const /** @type {?} */ initialInputs = initialInputData[directiveIndex];
     if (initialInputs) {
         for (let /** @type {?} */ i = 0; i < initialInputs.length; i += 2) {
-            (/** @type {?} */ (instance))[initialInputs[i]] = initialInputs[i | 1];
+            (/** @type {?} */ (instance))[initialInputs[i]] = initialInputs[i + 1];
         }
     }
 }
@@ -1261,7 +1261,7 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         const /** @type {?} */ minifiedInputName = inputs[attrName];
         if (minifiedInputName !== undefined) {
             const /** @type {?} */ inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-            inputsToStore.push(minifiedInputName, attrs[i | 1]);
+            inputsToStore.push(minifiedInputName, attrs[i + 1]);
         }
     }
     return initialInputData;

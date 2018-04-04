@@ -1,14 +1,6 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
+import { discardPeriodicTasksFallback, fakeAsyncFallback, flushFallback, flushMicrotasksFallback, resetFakeAsyncZoneFallback, tickFallback } from './fake_async_fallback';
 const _Zone = typeof Zone !== 'undefined' ? Zone : null;
-const FakeAsyncTestZoneSpec = _Zone && _Zone['FakeAsyncTestZoneSpec'];
-const ProxyZoneSpec = _Zone && _Zone['ProxyZoneSpec'];
-let _fakeAsyncTestZoneSpec = null;
+const fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
 /**
  * Clears out the shared fake async zone for a test.
  * To be called in a global `beforeEach`.
@@ -16,11 +8,13 @@ let _fakeAsyncTestZoneSpec = null;
  * @experimental
  */
 export function resetFakeAsyncZone() {
-    _fakeAsyncTestZoneSpec = null;
-    // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
-    ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.resetFakeAsyncZone();
+    }
+    else {
+        return resetFakeAsyncZoneFallback();
+    }
 }
-let _inFakeAsyncCall = false;
 /**
  * Wraps a function to be executed in the fakeAsync zone:
  * - microtasks are manually executed by calling `flushMicrotasks()`,
@@ -40,50 +34,12 @@ let _inFakeAsyncCall = false;
  * @experimental
  */
 export function fakeAsync(fn) {
-    // Not using an arrow function to preserve context passed from call site
-    return function (...args) {
-        const proxyZoneSpec = ProxyZoneSpec.assertPresent();
-        if (_inFakeAsyncCall) {
-            throw new Error('fakeAsync() calls can not be nested');
-        }
-        _inFakeAsyncCall = true;
-        try {
-            if (!_fakeAsyncTestZoneSpec) {
-                if (proxyZoneSpec.getDelegate() instanceof FakeAsyncTestZoneSpec) {
-                    throw new Error('fakeAsync() calls can not be nested');
-                }
-                _fakeAsyncTestZoneSpec = new FakeAsyncTestZoneSpec();
-            }
-            let res;
-            const lastProxyZoneSpec = proxyZoneSpec.getDelegate();
-            proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
-            try {
-                res = fn.apply(this, args);
-                flushMicrotasks();
-            }
-            finally {
-                proxyZoneSpec.setDelegate(lastProxyZoneSpec);
-            }
-            if (_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length > 0) {
-                throw new Error(`${_fakeAsyncTestZoneSpec.pendingPeriodicTimers.length} ` +
-                    `periodic timer(s) still in the queue.`);
-            }
-            if (_fakeAsyncTestZoneSpec.pendingTimers.length > 0) {
-                throw new Error(`${_fakeAsyncTestZoneSpec.pendingTimers.length} timer(s) still in the queue.`);
-            }
-            return res;
-        }
-        finally {
-            _inFakeAsyncCall = false;
-            resetFakeAsyncZone();
-        }
-    };
-}
-function _getFakeAsyncZoneSpec() {
-    if (_fakeAsyncTestZoneSpec == null) {
-        throw new Error('The code should be running in the fakeAsync zone to call this function');
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.fakeAsync(fn);
     }
-    return _fakeAsyncTestZoneSpec;
+    else {
+        return fakeAsyncFallback(fn);
+    }
 }
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
@@ -98,7 +54,12 @@ function _getFakeAsyncZoneSpec() {
  * @experimental
  */
 export function tick(millis = 0) {
-    _getFakeAsyncZoneSpec().tick(millis);
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.tick(millis);
+    }
+    else {
+        return tickFallback(millis);
+    }
 }
 /**
  * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
@@ -111,7 +72,12 @@ export function tick(millis = 0) {
  * @experimental
  */
 export function flush(maxTurns) {
-    return _getFakeAsyncZoneSpec().flush(maxTurns);
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flush(maxTurns);
+    }
+    else {
+        return flushFallback(maxTurns);
+    }
 }
 /**
  * Discard all remaining periodic tasks.
@@ -119,9 +85,12 @@ export function flush(maxTurns) {
  * @experimental
  */
 export function discardPeriodicTasks() {
-    const zoneSpec = _getFakeAsyncZoneSpec();
-    const pendingTimers = zoneSpec.pendingPeriodicTimers;
-    zoneSpec.pendingPeriodicTimers.length = 0;
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.discardPeriodicTasks();
+    }
+    else {
+        discardPeriodicTasksFallback();
+    }
 }
 /**
  * Flush any pending microtasks.
@@ -129,6 +98,11 @@ export function discardPeriodicTasks() {
  * @experimental
  */
 export function flushMicrotasks() {
-    _getFakeAsyncZoneSpec().flushMicrotasks();
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flushMicrotasks();
+    }
+    else {
+        return flushMicrotasksFallback();
+    }
 }
 //# sourceMappingURL=fake_async.js.map

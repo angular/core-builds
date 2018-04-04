@@ -142,7 +142,7 @@ export function executeHooks(data, allHooks, checkHooks, creationMode) {
  */
 export function callHooks(data, arr) {
     for (let /** @type {?} */ i = 0; i < arr.length; i += 2) {
-        (/** @type {?} */ (arr[i | 1])).call(data[/** @type {?} */ (arr[i])]);
+        (/** @type {?} */ (arr[i + 1])).call(data[/** @type {?} */ (arr[i])]);
     }
 }
 //# sourceMappingURL=hooks.js.map

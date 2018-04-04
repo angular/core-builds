@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-46eadb5
+ * @license Angular v6.0.0-rc.1-5c8340a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2195,7 +2195,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.1-46eadb5');
+var VERSION = new Version('6.0.0-rc.1-5c8340a');
 
 /**
  * @fileoverview added by tsickle
@@ -17539,7 +17539,7 @@ function executeHooks(data, allHooks, checkHooks, creationMode) {
  */
 function callHooks(data, arr) {
     for (var /** @type {?} */ i = 0; i < arr.length; i += 2) {
-        (/** @type {?} */ (arr[i | 1])).call(data[/** @type {?} */ (arr[i])]);
+        (/** @type {?} */ (arr[i + 1])).call(data[/** @type {?} */ (arr[i])]);
     }
 }
 
@@ -18744,7 +18744,7 @@ function enterView(newView, host) {
     }
     currentView = newView;
     currentQueries = newView && newView.queries;
-    return /** @type {?} */ ((oldView));
+    return oldView;
 }
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
@@ -18784,7 +18784,7 @@ function setHostBindings(bindings) {
         for (var /** @type {?} */ i = 0; i < bindings.length; i += 2) {
             var /** @type {?} */ dirIndex = bindings[i];
             var /** @type {?} */ def = /** @type {?} */ (defs[dirIndex]);
-            def.hostBindings && def.hostBindings(dirIndex, bindings[i | 1]);
+            def.hostBindings && def.hostBindings(dirIndex, bindings[i + 1]);
         }
     }
 }
@@ -18796,7 +18796,7 @@ function setHostBindings(bindings) {
 function refreshChildComponents(components) {
     if (components != null) {
         for (var /** @type {?} */ i = 0; i < components.length; i += 2) {
-            componentRefresh(components[i], components[i | 1]);
+            componentRefresh(components[i], components[i + 1]);
         }
     }
 }
@@ -19027,12 +19027,10 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
  * @return {?}
  */
 function elementStart(index, name, attrs, localRefs) {
-    var /** @type {?} */ node;
-    var /** @type {?} */ native;
     ngDevMode &&
         assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
-    native = renderer.createElement(name);
-    node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
+    var /** @type {?} */ native = renderer.createElement(name);
+    var /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
     if (attrs)
         setUpAttributes(native, attrs);
     appendChild(/** @type {?} */ ((node.parent)), native, currentView);
@@ -19050,8 +19048,8 @@ function elementStart(index, name, attrs, localRefs) {
  * @return {?}
  */
 function cacheMatchingDirectivesForNode(tNode) {
-    var /** @type {?} */ registry = currentView.tView.directiveRegistry;
-    var /** @type {?} */ startIndex = directives ? directives.length : 0;
+    var /** @type {?} */ tView = currentView.tView;
+    var /** @type {?} */ registry = tView.directiveRegistry;
     if (registry) {
         var /** @type {?} */ componentFlag = 0;
         var /** @type {?} */ size = 0;
@@ -19063,12 +19061,14 @@ function cacheMatchingDirectivesForNode(tNode) {
                         throwMultipleComponentError(tNode);
                     componentFlag |= 1 /* Component */;
                 }
-                (currentView.tView.directives || (currentView.tView.directives = [])).push(def);
+                (tView.directives || (tView.directives = [])).push(def);
                 size++;
             }
         }
-        if (size > 0)
+        if (size > 0) {
+            var /** @type {?} */ startIndex = directives ? directives.length : 0;
             buildTNodeFlags(tNode, startIndex, size, componentFlag);
+        }
     }
 }
 /**
@@ -19171,9 +19171,9 @@ function cacheMatchingLocalNames(tNode, localRefs, exportsMap) {
         // in the template to ensure the data is loaded in the same slots as their refs
         // in the template (for template queries).
         for (var /** @type {?} */ i = 0; i < localRefs.length; i += 2) {
-            var /** @type {?} */ index = exportsMap[localRefs[i | 1]];
+            var /** @type {?} */ index = exportsMap[localRefs[i + 1]];
             if (index == null)
-                throw new Error("Export of name '" + localRefs[i | 1] + "' not found!");
+                throw new Error("Export of name '" + localRefs[i + 1] + "' not found!");
             localNames.push(localRefs[i], index);
         }
     }
@@ -19203,7 +19203,7 @@ function saveResolvedLocalsInData() {
     var /** @type {?} */ localNames = /** @type {?} */ ((previousOrParentNode.tNode)).localNames;
     if (localNames) {
         for (var /** @type {?} */ i = 0; i < localNames.length; i += 2) {
-            var /** @type {?} */ index = /** @type {?} */ (localNames[i | 1]);
+            var /** @type {?} */ index = /** @type {?} */ (localNames[i + 1]);
             var /** @type {?} */ value = index === -1 ? previousOrParentNode.native : /** @type {?} */ ((directives))[index];
             data.push(value);
         }
@@ -19369,7 +19369,7 @@ function listener(eventName, listenerFn, useCapture) {
 function createOutput(outputs, listener) {
     for (var /** @type {?} */ i = 0; i < outputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (outputs[i]), /** @type {?} */ ((directives)));
-        var /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i | 1]].subscribe(listener); /** @type {?} */
+        var /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i + 1]].subscribe(listener); /** @type {?} */
         ((cleanup)).push(subscription.unsubscribe, subscription);
     }
 }
@@ -19486,7 +19486,7 @@ function createTNode(tagName, attrs, data) {
 function setInputsForProperty(inputs, value) {
     for (var /** @type {?} */ i = 0; i < inputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (inputs[i]), /** @type {?} */ ((directives))); /** @type {?} */
-        ((directives))[/** @type {?} */ (inputs[i])][inputs[i | 1]] = value;
+        ((directives))[/** @type {?} */ (inputs[i])][inputs[i + 1]] = value;
     }
 }
 /**
@@ -19774,7 +19774,7 @@ function setInputsFromAttrs(directiveIndex, instance, inputs, tNode) {
     var /** @type {?} */ initialInputs = initialInputData[directiveIndex];
     if (initialInputs) {
         for (var /** @type {?} */ i = 0; i < initialInputs.length; i += 2) {
-            (/** @type {?} */ (instance))[initialInputs[i]] = initialInputs[i | 1];
+            (/** @type {?} */ (instance))[initialInputs[i]] = initialInputs[i + 1];
         }
     }
 }
@@ -19803,7 +19803,7 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
         var /** @type {?} */ minifiedInputName = inputs[attrName];
         if (minifiedInputName !== undefined) {
             var /** @type {?} */ inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-            inputsToStore.push(minifiedInputName, attrs[i | 1]);
+            inputsToStore.push(minifiedInputName, attrs[i + 1]);
         }
     }
     return initialInputData;
