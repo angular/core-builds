@@ -81,13 +81,6 @@ function LContainer_tsickle_Closure_declarations() {
      * @type {?}
      */
     LContainer.prototype.queries;
-    /**
-     * If a LContainer is created dynamically (by a directive requesting ViewContainerRef) this fields
-     * keeps a reference to a node on which a ViewContainerRef was requested. We need to store this
-     * information to find a next render sibling node.
-     * @type {?}
-     */
-    LContainer.prototype.host;
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.

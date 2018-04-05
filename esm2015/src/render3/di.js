@@ -530,8 +530,9 @@ export function getOrCreateContainerRef(di) {
     if (!di.viewContainerRef) {
         const /** @type {?} */ vcRefHost = di.node;
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
-        const /** @type {?} */ lContainer = createLContainer(/** @type {?} */ ((vcRefHost.parent)), vcRefHost.view, undefined, vcRefHost);
+        const /** @type {?} */ lContainer = createLContainer(/** @type {?} */ ((vcRefHost.parent)), vcRefHost.view);
         const /** @type {?} */ lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, /** @type {?} */ ((vcRefHost.parent)), undefined, lContainer, null);
+        vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, lContainer);
         di.viewContainerRef = new ViewContainerRef(lContainerNode);
     }
@@ -603,6 +604,9 @@ class ViewContainerRef {
         const /** @type {?} */ lViewNode = (/** @type {?} */ (viewRef))._lViewNode;
         const /** @type {?} */ adjustedIdx = this._adjustAndAssertIndex(index);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        // invalidate cache of next sibling RNode (we do similar operation in the containerRefreshEnd
+        // instruction)
+        this._lContainerNode.native = undefined;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         (/** @type {?} */ (lViewNode)).parent = this._lContainerNode;
         // If the view is dynamic (has a template), it needs to be counted both at the container

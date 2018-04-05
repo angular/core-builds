@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ComponentTemplate } from './definition';
-import { LContainerNode, LElementNode, LViewNode } from './node';
+import { LElementNode, LViewNode } from './node';
 import { LQueries } from './query';
 import { LView, TView } from './view';
 /** The state associated with an LContainer */
@@ -69,12 +69,6 @@ export interface LContainer {
      * this container are reported to queries referenced here.
      */
     queries: LQueries | null;
-    /**
-     * If a LContainer is created dynamically (by a directive requesting ViewContainerRef) this fields
-     * keeps a reference to a node on which a ViewContainerRef was requested. We need to store this
-     * information to find a next render sibling node.
-     */
-    host: LContainerNode | LElementNode | null;
 }
 /**
  * The static equivalent of LContainer, used in TContainerNode.

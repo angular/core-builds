@@ -110,6 +110,10 @@ export interface LNode {
      * data about this node.
      */
     tNode: TNode | null;
+    /**
+     * A pointer to a LContainerNode created by directives requesting ViewContainerRef
+     */
+    dynamicLContainerNode: LContainerNode | null;
 }
 /** LNode representing an element. */
 export interface LElementNode extends LNode {
@@ -131,6 +135,7 @@ export interface LTextNode extends LNode {
     /** LTextNodes can be inside LElementNodes or inside LViewNodes. */
     readonly parent: LElementNode | LViewNode;
     readonly data: null;
+    dynamicLContainerNode: null;
 }
 /** Abstract node which contains root nodes of a view. */
 export interface LViewNode extends LNode {
@@ -140,6 +145,7 @@ export interface LViewNode extends LNode {
     /**  LViewNodes can only be added to LContainerNodes. */
     readonly parent: LContainerNode | null;
     readonly data: LView;
+    dynamicLContainerNode: null;
 }
 /** Abstract node container which contains other views. */
 export interface LContainerNode extends LNode {
@@ -157,6 +163,7 @@ export interface LProjectionNode extends LNode {
     readonly data: LProjection;
     /** Projections can be added to elements or views. */
     readonly parent: LElementNode | LViewNode;
+    dynamicLContainerNode: null;
 }
 /**
  * LNode binding data (flyweight) for a particular node that is shared between all templates

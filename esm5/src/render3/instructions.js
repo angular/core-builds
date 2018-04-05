@@ -317,7 +317,8 @@ export function createLNodeObject(type, currentView, parent, native, state, quer
         data: state,
         queries: queries,
         tNode: null,
-        pNextOrParent: null
+        pNextOrParent: null,
+        dynamicLContainerNode: null
     };
 }
 /**
@@ -367,6 +368,9 @@ export function createLNode(index, type, native, state) {
         else if (previousOrParentNode) {
             ngDevMode && assertNull(previousOrParentNode.next, "previousOrParentNode's next property should not have been set " + index + ".");
             previousOrParentNode.next = node;
+            if (previousOrParentNode.dynamicLContainerNode) {
+                previousOrParentNode.dynamicLContainerNode.next = node;
+            }
         }
     }
     previousOrParentNode = node;
@@ -425,8 +429,9 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
             // TODO: revisit setting currentView when re-writing view containers
             var /** @type {?} */ directives_1 = currentView && currentView.tView.directiveRegistry;
             var /** @type {?} */ pipes = currentView && currentView.tView.pipeRegistry;
-            var /** @type {?} */ view = createLView(-1, renderer, createTView(directives_1, pipes), template, context, 2 /* CheckAlways */);
-            viewNode = createLNode(null, 2 /* View */, null, view);
+            var /** @type {?} */ tView = getOrCreateTView(template, directives_1, pipes);
+            var /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
+            viewNode = createLNode(null, 2 /* View */, null, lView);
             cm = true;
         }
         oldView = enterView(viewNode.data, viewNode);
@@ -1273,10 +1278,9 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @param {?} parentLNode
  * @param {?} currentView
  * @param {?=} template
- * @param {?=} host
  * @return {?}
  */
-export function createLContainer(parentLNode, currentView, template, host) {
+export function createLContainer(parentLNode, currentView, template) {
     ngDevMode && assertNotNull(parentLNode, 'containers should have a parent');
     return /** @type {?} */ ({
         views: [],
@@ -1288,8 +1292,7 @@ export function createLContainer(parentLNode, currentView, template, host) {
         next: null,
         parent: currentView,
         dynamicViewCount: 0,
-        queries: null,
-        host: host == null ? null : host
+        queries: null
     });
 }
 /**

@@ -244,7 +244,7 @@ export declare function directiveCreate<T>(elementIndex: number, directive: T, d
  * current Angular. Example: local refs and inputs on root component.
  */
 export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
-export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, host?: LContainerNode | LElementNode): LContainer;
+export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>): LContainer;
 /**
  * Creates an LContainerNode.
  *

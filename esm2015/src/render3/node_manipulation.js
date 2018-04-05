@@ -122,8 +122,10 @@ function findFirstRNode(rootNode) {
             return (/** @type {?} */ (node)).native;
         }
         else if (node.type === 0 /* Container */) {
-            // For container look at the first node of the view next
-            const /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
+            const /** @type {?} */ lContainerNode = (/** @type {?} */ (node));
+            const /** @type {?} */ childContainerData = lContainerNode.dynamicLContainerNode ?
+                lContainerNode.dynamicLContainerNode.data :
+                lContainerNode.data;
             nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
         }
         else if (node.type === 1 /* Projection */) {
@@ -266,10 +268,7 @@ export function insertView(container, newView, index) {
         if (!beforeNode) {
             let /** @type {?} */ containerNextNativeNode = container.native;
             if (containerNextNativeNode === undefined) {
-                // TODO(pk): this is probably too simplistic, add more tests for various host placements
-                // (dynamic view, projection, ...)
-                containerNextNativeNode = container.native =
-                    findNextRNodeSibling(container.data.host ? container.data.host : container, null);
+                containerNextNativeNode = container.native = findNextRNodeSibling(container, null);
             }
             beforeNode = containerNextNativeNode;
         }

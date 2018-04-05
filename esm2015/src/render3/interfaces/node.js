@@ -120,6 +120,11 @@ function LNode_tsickle_Closure_declarations() {
      * @type {?}
      */
     LNode.prototype.tNode;
+    /**
+     * A pointer to a LContainerNode created by directives requesting ViewContainerRef
+     * @type {?}
+     */
+    LNode.prototype.dynamicLContainerNode;
 }
 /**
  * LNode representing an element.
@@ -169,6 +174,8 @@ function LTextNode_tsickle_Closure_declarations() {
     LTextNode.prototype.parent;
     /** @type {?} */
     LTextNode.prototype.data;
+    /** @type {?} */
+    LTextNode.prototype.dynamicLContainerNode;
 }
 /**
  * Abstract node which contains root nodes of a view.
@@ -189,6 +196,8 @@ function LViewNode_tsickle_Closure_declarations() {
     LViewNode.prototype.parent;
     /** @type {?} */
     LViewNode.prototype.data;
+    /** @type {?} */
+    LViewNode.prototype.dynamicLContainerNode;
 }
 /**
  * Abstract node container which contains other views.
@@ -228,6 +237,8 @@ function LProjectionNode_tsickle_Closure_declarations() {
      * @type {?}
      */
     LProjectionNode.prototype.parent;
+    /** @type {?} */
+    LProjectionNode.prototype.dynamicLContainerNode;
 }
 /**
  * LNode binding data (flyweight) for a particular node that is shared between all templates
