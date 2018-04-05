@@ -259,6 +259,7 @@ export function executeInitAndContentHooks() {
     }
 }
 /**
+ * @template T
  * @param {?} viewId
  * @param {?} renderer
  * @param {?} tView

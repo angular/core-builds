@@ -57,7 +57,7 @@ export declare function leaveView(newView: LView): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<any> | null, context: any | null, flags: LViewFlags): LView;
+export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -243,7 +243,7 @@ export declare function directiveCreate<T>(elementIndex: number, directive: T, d
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<any>): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
 export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, host?: LContainerNode | LElementNode): LContainer;
 /**
  * Creates an LContainerNode.
@@ -396,7 +396,7 @@ export declare function detectChanges<T>(component: T): void;
  */
 export declare function checkNoChanges<T>(component: T): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ComponentDef<any>, component: T): void;
+export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ComponentDef<T>, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
