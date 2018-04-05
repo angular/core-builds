@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-3b607e6
+ * @license Angular v6.0.0-rc.1-fc813f6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.1-3b607e6
+ * @license Angular v6.0.0-rc.1-fc813f6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2238,7 +2238,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.1-3b607e6');
+var VERSION = new Version('6.0.0-rc.1-fc813f6');
 
 /**
  * @fileoverview added by tsickle
@@ -19000,6 +19000,7 @@ function resetApplicationState() {
 function renderEmbeddedTemplate(viewNode, template, context, renderer) {
     var /** @type {?} */ _isParent = isParent;
     var /** @type {?} */ _previousOrParentNode = previousOrParentNode;
+    var /** @type {?} */ oldView;
     try {
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
@@ -19012,13 +19013,13 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
             viewNode = createLNode(null, 2 /* View */, null, view);
             cm = true;
         }
-        enterView(viewNode.data, viewNode);
+        oldView = enterView(viewNode.data, viewNode);
         template(context, cm);
         refreshDirectives();
         refreshDynamicChildren();
     }
     finally {
-        leaveView(currentView && /** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
+        leaveView(/** @type {?} */ ((oldView)));
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
     }

@@ -416,6 +416,7 @@ export function renderTemplate(hostNode, template, context, providedRendererFact
 export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
     const /** @type {?} */ _isParent = isParent;
     const /** @type {?} */ _previousOrParentNode = previousOrParentNode;
+    let /** @type {?} */ oldView;
     try {
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
@@ -428,13 +429,13 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
             viewNode = createLNode(null, 2 /* View */, null, view);
             cm = true;
         }
-        enterView(viewNode.data, viewNode);
+        oldView = enterView(viewNode.data, viewNode);
         template(context, cm);
         refreshDirectives();
         refreshDynamicChildren();
     }
     finally {
-        leaveView(currentView && /** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
+        leaveView(/** @type {?} */ ((oldView)));
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
     }
