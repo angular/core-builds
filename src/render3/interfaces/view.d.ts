@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { LContainer } from './container';
-import { ComponentTemplate, DirectiveDefList, PipeDef, PipeDefList } from './definition';
+import { ComponentTemplate, DirectiveDef, DirectiveDefList, PipeDef, PipeDefList } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
@@ -197,6 +197,23 @@ export interface TView {
     /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
     /**
+     * Selector matches for a node are temporarily cached on the TView so the
+     * DI system can eagerly instantiate directives on the same node if they are
+     * created out of order. They are overwritten after each node.
+     *
+     * <div dirA dirB></div>
+     *
+     * e.g. DirA injects DirB, but DirA is created first. DI should instantiate
+     * DirB when it finds that it's on the same node, but not yet created.
+     *
+     * Even indices: Directive defs
+     * Odd indices:
+     *   - Null if the associated directive hasn't been instantiated yet
+     *   - Directive index, if associated directive has been created
+     *   - String, temporary 'CIRCULAR' token set while dependencies are being resolved
+     */
+    currentMatches: CurrentMatchesList | null;
+    /**
      * Directive and component defs that have already been matched to nodes on
      * this view.
      *
@@ -344,4 +361,6 @@ export declare const enum LifecycleStage {
  * data store a null value in tData to avoid a sparse array.
  */
 export declare type TData = (TNode | PipeDef<any> | null)[];
+/** Type for TView.currentMatches */
+export declare type CurrentMatchesList = [DirectiveDef<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;

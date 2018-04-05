@@ -237,6 +237,24 @@ function TView_tsickle_Closure_declarations() {
      */
     TView.prototype.data;
     /**
+     * Selector matches for a node are temporarily cached on the TView so the
+     * DI system can eagerly instantiate directives on the same node if they are
+     * created out of order. They are overwritten after each node.
+     *
+     * <div dirA dirB></div>
+     *
+     * e.g. DirA injects DirB, but DirA is created first. DI should instantiate
+     * DirB when it finds that it's on the same node, but not yet created.
+     *
+     * Even indices: Directive defs
+     * Odd indices:
+     *   - Null if the associated directive hasn't been instantiated yet
+     *   - Directive index, if associated directive has been created
+     *   - String, temporary 'CIRCULAR' token set while dependencies are being resolved
+     * @type {?}
+     */
+    TView.prototype.currentMatches;
+    /**
      * Directive and component defs that have already been matched to nodes on
      * this view.
      *

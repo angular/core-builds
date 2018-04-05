@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { assertLessThan, assertNotNull } from './assert';
-import { addToViewTree, assertPreviousIsParent, createLContainer, createLNodeObject, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate } from './instructions';
+import { addToViewTree, assertPreviousIsParent, createLContainer, createLNodeObject, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate, resolveDirective } from './instructions';
 import { assertNodeOfPossibleTypes, assertNodeType } from './node_assert';
 import { insertView, removeView } from './node_manipulation';
 import { notImplemented, stringify } from './util';
@@ -379,14 +379,38 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
                     }
                 }
             }
-            // If we *didn't* find the directive for the token from the candidate injector, we had a false
-            // positive. Traverse up the tree and continue.
+            // If we *didn't* find the directive for the token and we are searching the current node's
+            // injector, it's possible the directive is on this node and hasn't been created yet.
+            let /** @type {?} */ instance;
+            if (injector === di && (instance = searchMatchesQueuedForCreation(node, token))) {
+                return instance;
+            }
+            // The def wasn't found anywhere on this node, so it might be a false positive.
+            // Traverse up the tree and continue searching.
             injector = injector.parent;
         }
     }
     // No directive was found for the given token.
     // TODO: implement optional, check-self, and check-parent.
     throw createInjectionError('Not found', token);
+}
+/**
+ * @template T
+ * @param {?} node
+ * @param {?} token
+ * @return {?}
+ */
+function searchMatchesQueuedForCreation(node, token) {
+    const /** @type {?} */ matches = node.view.tView.currentMatches;
+    if (matches) {
+        for (let /** @type {?} */ i = 0; i < matches.length; i += 2) {
+            const /** @type {?} */ def = /** @type {?} */ (matches[i]);
+            if (def.type === token) {
+                return resolveDirective(def, i + 1, matches, node.view.tView);
+            }
+        }
+    }
+    return null;
 }
 /**
  * Given a directive type, this function returns the bit in an injector's bloom filter

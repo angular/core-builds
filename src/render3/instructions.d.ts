@@ -10,7 +10,7 @@ import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
-import { LView, LViewFlags, RootContext, TView } from './interfaces/view';
+import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
@@ -30,6 +30,13 @@ export declare type Sanitizer = (value: any) => string;
  * Saved here to avoid re-instantiating an array on every change detection run.
  */
 export declare const _ROOT_DIRECTIVE_INDICES: number[];
+/**
+ * Token set in currentMatches while dependencies are being resolved.
+ *
+ * If we visit a directive that has a value set to CIRCULAR, we know we've
+ * already seen it, and thus have a circular dependency.
+ */
+export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getCurrentQueries(QueryType: {
@@ -98,6 +105,7 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, name: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
+export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
@@ -231,12 +239,10 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * NOTE: directives can be created in order other than the index order. They can also
  *       be retrieved before they are created in which case the value will be null.
  *
- * @param elementIndex Index of the host element in the data array
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
- * @param localRefs Names under which a query can retrieve the directive instance
  */
-export declare function directiveCreate<T>(elementIndex: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
