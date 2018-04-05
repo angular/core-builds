@@ -7,14 +7,15 @@
  */
 import { Type } from '../type';
 /**
- * @whatItDoes Configures the {@link Injector} to return a value for a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable(SomeModule, {useValue: 'someValue'})
  * class SomeClass {}
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value for a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -30,13 +31,14 @@ export interface ValueSansProvider {
     useValue: any;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value for a token.
- * @howToUse
+ * @usageNotes
  * ```
  * const provider: ValueProvider = {provide: 'someToken', useValue: 'someValue'};
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value for a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -61,14 +63,15 @@ export interface ValueProvider extends ValueSansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of `useClass` for a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable(SomeModule, {useClass: MyService, deps: []})
  * class MyService {}
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -90,8 +93,7 @@ export interface StaticClassSansProvider {
     deps: any[];
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of `useClass` for a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable()
  * class MyService {}
@@ -100,6 +102,8 @@ export interface StaticClassSansProvider {
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -127,14 +131,15 @@ export interface StaticClassProvider extends StaticClassSansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable(SomeModule, {deps: []})
  * class MyService {}
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -151,8 +156,7 @@ export interface ConstructorSansProvider {
     deps?: any[];
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable()
  * class MyService {}
@@ -161,6 +165,8 @@ export interface ConstructorSansProvider {
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -185,14 +191,15 @@ export interface ConstructorProvider extends ConstructorSansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value of another `useExisting` token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable(SomeModule, {useExisting: 'someOtherToken'})
  * class SomeClass {}
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value of another `useExisting` token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -208,13 +215,14 @@ export interface ExistingSansProvider {
     useExisting: any;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value of another `useExisting` token.
- * @howToUse
+ * @usageNotes
  * ```
  * const provider: ExistingProvider = {provide: 'someToken', useExisting: 'someOtherToken'};
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value of another `useExisting` token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -239,9 +247,7 @@ export interface ExistingProvider extends ExistingSansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value by invoking a `useFactory`
- * function.
- * @howToUse
+ * @usageNotes
  * ```
  * function serviceFactory() { ... }
  *
@@ -250,6 +256,8 @@ export interface ExistingProvider extends ExistingSansProvider {
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value by invoking a `useFactory` function.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -271,9 +279,7 @@ export interface FactorySansProvider {
     deps?: any[];
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value by invoking a `useFactory`
- * function.
- * @howToUse
+ * @usageNotes
  * ```
  * function serviceFactory() { ... }
  *
@@ -281,6 +287,8 @@ export interface FactorySansProvider {
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value by invoking a `useFactory` function.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -308,21 +316,19 @@ export interface FactoryProvider extends FactorySansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Describes how the {@link Injector} should be configured in a static way (Without
- * reflection).
- * @howToUse
+ * @usageNotes
  * See {@link ValueProvider}, {@link ExistingProvider}, {@link FactoryProvider}.
  *
  * @description
+ * Describes how the `Injector` should be configured in a static way (Without reflection).
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * @stable
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of `Type` when `Type' is used
- * as token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable()
  * class MyService {}
@@ -331,6 +337,7 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of `Type` when `Type' is used as the token.
  *
  * Create an instance by invoking the `new` operator and supplying additional arguments.
  * This form is a short form of `TypeProvider`;
@@ -346,9 +353,7 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
 export interface TypeProvider extends Type<any> {
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return a value by invoking a `useClass`
- * function.
- * @howToUse
+ * @usageNotes
  * ```
  *
  * class SomeClassImpl {}
@@ -358,6 +363,8 @@ export interface TypeProvider extends Type<any> {
  * ```
  *
  * @description
+ * Configures the `Injector` to return a value by invoking a `useClass` function.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -373,8 +380,7 @@ export interface ClassSansProvider {
     useClass: Type<any>;
 }
 /**
- * @whatItDoes Configures the {@link Injector} to return an instance of `useClass` for a token.
- * @howToUse
+ * @usageNotes
  * ```
  * @Injectable()
  * class MyService {}
@@ -383,6 +389,8 @@ export interface ClassSansProvider {
  * ```
  *
  * @description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -410,11 +418,12 @@ export interface ClassProvider extends ClassSansProvider {
     multi?: boolean;
 }
 /**
- * @whatItDoes Describes how the {@link Injector} should be configured.
- * @howToUse
+ * @usageNotes
  * See {@link TypeProvider}, {@link ClassProvider}, {@link StaticProvider}.
  *
  * @description
+ * Describes how the `Injector` should be configured.
+ *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * @stable

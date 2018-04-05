@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-5db9ab1
+ * @license Angular v6.0.0-rc.1-8ea15b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -760,9 +760,9 @@ var HostListener = makePropDecorator('HostListener', function (eventName, args) 
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@whatItDoes Represents a type that a Component or other object is instances of.
- *
  * \@description
+ *
+ * Represents a type that a Component or other object is instances of.
  *
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
@@ -1496,14 +1496,16 @@ var NullInjector = /** @class */ (function () {
     return NullInjector;
 }());
 /**
- * \@whatItDoes Injector interface
- * \@howToUse
+ * \@usageNotes
  * ```
  * const injector: Injector = ...;
  * injector.get(...);
  * ```
  *
  * \@description
+ *
+ * Concrete injectors implement this interface.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -2179,7 +2181,7 @@ ViewEncapsulation[ViewEncapsulation.None] = "None";
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@whatItDoes Represents the version of Angular
+ * \@description Represents the version of Angular
  *
  * \@stable
  */
@@ -2195,7 +2197,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.1-5db9ab1');
+var VERSION = new Version('6.0.0-rc.1-8ea15b4');
 
 /**
  * @fileoverview added by tsickle
@@ -2263,9 +2265,9 @@ function defaultErrorLogger(console) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@whatItDoes Provides a hook for centralized exception handling.
  *
  * \@description
+ * Provides a hook for centralized exception handling.
  *
  * The default implementation of `ErrorHandler` prints error messages to the `console`. To
  * intercept error handling, write a custom exception handler that replaces this default as

@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.1-5db9ab1
+ * @license Angular v6.0.0-rc.1-8ea15b4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -676,9 +676,9 @@ const ComponentFixtureAutoDetect = new InjectionToken('ComponentFixtureAutoDetec
  */
 const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *

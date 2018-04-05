@@ -10,7 +10,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@whatItDoes Represents the version of Angular
+ * \@description Represents the version of Angular
  *
  * \@stable
  */
@@ -38,5 +38,5 @@ function Version_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export const /** @type {?} */ VERSION = new Version('6.0.0-rc.1-5db9ab1');
+export const /** @type {?} */ VERSION = new Version('6.0.0-rc.1-8ea15b4');
 //# sourceMappingURL=version.js.map

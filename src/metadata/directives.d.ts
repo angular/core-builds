@@ -17,10 +17,7 @@ import { ViewEncapsulation } from './view';
  */
 export interface DirectiveDecorator {
     /**
-     * @whatItDoes Marks a class as an Angular directive and collects directive configuration
-     * metadata.
-     *
-     * @howToUse
+     * @usageNotes
      *
      * ```
      * import {Directive} from '@angular/core';
@@ -33,6 +30,9 @@ export interface DirectiveDecorator {
      * ```
      *
      * @description
+     *
+     * Marks a class as an Angular directive and collects directive configuration
+     * metadata.
      *
      * Directive decorator allows you to mark a class as an Angular directive and provide additional
      * metadata that determines how the directive should be processed, instantiated and used at
@@ -399,14 +399,14 @@ export declare const Directive: DirectiveDecorator;
  */
 export interface ComponentDecorator {
     /**
-     * @whatItDoes Marks a class as an Angular component and collects component configuration
-     * metadata.
-     *
-     * @howToUse
+     * @usageNotes
      *
      * {@example core/ts/metadata/metadata.ts region='component'}
      *
      * @description
+     * Marks a class as an Angular component and collects component configuration
+     * metadata.
+     *
      * Component decorator allows you to mark a class as an Angular component and provide additional
      * metadata that determines how the component should be processed, instantiated and used at
      * runtime.

@@ -10,14 +10,15 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value for a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable(SomeModule, {useValue: 'someValue'})
  * class SomeClass {}
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value for a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -36,13 +37,14 @@ function ValueSansProvider_tsickle_Closure_declarations() {
     ValueSansProvider.prototype.useValue;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value for a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * const provider: ValueProvider = {provide: 'someToken', useValue: 'someValue'};
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value for a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -71,14 +73,15 @@ function ValueProvider_tsickle_Closure_declarations() {
     ValueProvider.prototype.multi;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable(SomeModule, {useClass: MyService, deps: []})
  * class MyService {}
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -104,8 +107,7 @@ function StaticClassSansProvider_tsickle_Closure_declarations() {
     StaticClassSansProvider.prototype.deps;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable()
  * class MyService {}
@@ -114,6 +116,8 @@ function StaticClassSansProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -145,14 +149,15 @@ function StaticClassProvider_tsickle_Closure_declarations() {
     StaticClassProvider.prototype.multi;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable(SomeModule, {deps: []})
  * class MyService {}
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -172,8 +177,7 @@ function ConstructorSansProvider_tsickle_Closure_declarations() {
     ConstructorSansProvider.prototype.deps;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable()
  * class MyService {}
@@ -182,6 +186,8 @@ function ConstructorSansProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -210,14 +216,15 @@ function ConstructorProvider_tsickle_Closure_declarations() {
     ConstructorProvider.prototype.multi;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable(SomeModule, {useExisting: 'someOtherToken'})
  * class SomeClass {}
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value of another `useExisting` token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -236,13 +243,14 @@ function ExistingSansProvider_tsickle_Closure_declarations() {
     ExistingSansProvider.prototype.useExisting;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value of another `useExisting` token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * const provider: ExistingProvider = {provide: 'someToken', useExisting: 'someOtherToken'};
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value of another `useExisting` token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -271,9 +279,7 @@ function ExistingProvider_tsickle_Closure_declarations() {
     ExistingProvider.prototype.multi;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value by invoking a `useFactory`
- * function.
- * \@howToUse
+ * \@usageNotes
  * ```
  * function serviceFactory() { ... }
  *
@@ -282,6 +288,8 @@ function ExistingProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value by invoking a `useFactory` function.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -307,9 +315,7 @@ function FactorySansProvider_tsickle_Closure_declarations() {
     FactorySansProvider.prototype.deps;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value by invoking a `useFactory`
- * function.
- * \@howToUse
+ * \@usageNotes
  * ```
  * function serviceFactory() { ... }
  *
@@ -317,6 +323,8 @@ function FactorySansProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value by invoking a `useFactory` function.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -348,9 +356,7 @@ function FactoryProvider_tsickle_Closure_declarations() {
     FactoryProvider.prototype.multi;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `Type` when `Type' is used
- * as token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable()
  * class MyService {}
@@ -359,6 +365,7 @@ function FactoryProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of `Type` when `Type' is used as the token.
  *
  * Create an instance by invoking the `new` operator and supplying additional arguments.
  * This form is a short form of `TypeProvider`;
@@ -376,9 +383,7 @@ export function TypeProvider() { }
 function TypeProvider_tsickle_Closure_declarations() {
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return a value by invoking a `useClass`
- * function.
- * \@howToUse
+ * \@usageNotes
  * ```
  *
  * class SomeClassImpl {}
@@ -388,6 +393,8 @@ function TypeProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return a value by invoking a `useClass` function.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example
@@ -406,8 +413,7 @@ function ClassSansProvider_tsickle_Closure_declarations() {
     ClassSansProvider.prototype.useClass;
 }
 /**
- * \@whatItDoes Configures the {\@link Injector} to return an instance of `useClass` for a token.
- * \@howToUse
+ * \@usageNotes
  * ```
  * \@Injectable()
  * class MyService {}
@@ -416,6 +422,8 @@ function ClassSansProvider_tsickle_Closure_declarations() {
  * ```
  *
  * \@description
+ * Configures the `Injector` to return an instance of `useClass` for a token.
+ *
  * For more details, see the {\@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
  * ### Example

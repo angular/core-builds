@@ -15,11 +15,12 @@ export interface SimpleChanges {
     [propName: string]: SimpleChange;
 }
 /**
- * @whatItDoes Lifecycle hook that is called when any data-bound property of a directive changes.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnChanges'}
  *
  * @description
+ * Lifecycle hook that is called when any data-bound property of a directive changes.
+ *
  * `ngOnChanges` is called right after the data-bound properties have been checked and before view
  * and content children are checked if at least one of them has changed.
  * The `changes` parameter contains the changed properties.
@@ -32,12 +33,13 @@ export interface OnChanges {
     ngOnChanges(changes: SimpleChanges): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called after data-bound properties of a directive are
- * initialized.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnInit'}
  *
  * @description
+ * Lifecycle hook that is called after data-bound properties of a directive are
+ * initialized.
+ *
  * `ngOnInit` is called right after the directive's data-bound properties have been checked for the
  * first time, and before any of its children have been checked. It is invoked only once when the
  * directive is instantiated.
@@ -50,11 +52,12 @@ export interface OnInit {
     ngOnInit(): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called when Angular dirty checks a directive.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='DoCheck'}
  *
  * @description
+ * Lifecycle hook that is called when Angular dirty checks a directive.
+ *
  * `ngDoCheck` gets called to check the changes in the directives in addition to the default
  * algorithm. The default change detection algorithm looks for differences by comparing
  * bound-property values by reference across change detection runs.
@@ -74,11 +77,12 @@ export interface DoCheck {
     ngDoCheck(): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called when a directive, pipe or service is destroyed.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='OnDestroy'}
  *
  * @description
+ * Lifecycle hook that is called when a directive, pipe or service is destroyed.
+ *
  * `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
  * instance is destroyed.
  *
@@ -91,12 +95,13 @@ export interface OnDestroy {
 }
 /**
  *
- * @whatItDoes Lifecycle hook that is called after a directive's content has been fully
- * initialized.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentInit'}
  *
  * @description
+ * Lifecycle hook that is called after a directive's content has been fully
+ * initialized.
+ *
  * See {@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
  * @stable
@@ -105,11 +110,12 @@ export interface AfterContentInit {
     ngAfterContentInit(): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called after every check of a directive's content.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterContentChecked'}
  *
  * @description
+ * Lifecycle hook that is called after every check of a directive's content.
+ *
  * See {@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
  * @stable
@@ -118,12 +124,13 @@ export interface AfterContentChecked {
     ngAfterContentChecked(): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called after a component's view has been fully
- * initialized.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewInit'}
  *
  * @description
+ * Lifecycle hook that is called after a component's view has been fully
+ * initialized.
+ *
  * See {@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
  * @stable
@@ -132,11 +139,12 @@ export interface AfterViewInit {
     ngAfterViewInit(): void;
 }
 /**
- * @whatItDoes Lifecycle hook that is called after every check of a component's view.
- * @howToUse
+ * @usageNotes
  * {@example core/ts/metadata/lifecycle_hooks_spec.ts region='AfterViewChecked'}
  *
  * @description
+ * Lifecycle hook that is called after every check of a component's view.
+ *
  * See {@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
  * @stable
