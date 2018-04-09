@@ -141,7 +141,7 @@ export interface Directive {
      * @Component({
      *   selector: 'app',
      *   template: `
-     *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
+     *     <bank-account bankName="RBC" account-id="4747"></bank-account>
      *   `
      * })
      * class App {}
@@ -802,7 +802,7 @@ export interface InputDecorator {
      * @Component({
      *   selector: 'app',
      *   template: `
-     *     <bank-account bank-name="RBC" account-id="4747"></bank-account>
+     *     <bank-account bankName="RBC" account-id="4747"></bank-account>
      *   `
      * })
      *
