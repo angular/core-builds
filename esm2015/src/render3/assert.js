@@ -73,6 +73,18 @@ export function assertLessThan(actual, expected, msg) {
 /**
  * @template T
  * @param {?} actual
+ * @param {?} expected
+ * @param {?} msg
+ * @return {?}
+ */
+export function assertGreaterThan(actual, expected, msg) {
+    if (actual <= expected) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
  * @param {?} msg
  * @return {?}
  */

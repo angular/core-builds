@@ -10,6 +10,7 @@ export declare function assertEqual<T>(actual: T, expected: T, msg: string): voi
 export declare function assertNotEqual<T>(actual: T, expected: T, msg: string): void;
 export declare function assertSame<T>(actual: T, expected: T, msg: string): void;
 export declare function assertLessThan<T>(actual: T, expected: T, msg: string): void;
+export declare function assertGreaterThan<T>(actual: T, expected: T, msg: string): void;
 export declare function assertNull<T>(actual: T, msg: string): void;
 export declare function assertNotNull<T>(actual: T, msg: string): void;
 export declare function assertComponentType(actual: any, msg?: string): void;

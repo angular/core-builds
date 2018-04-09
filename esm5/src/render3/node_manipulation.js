@@ -294,6 +294,7 @@ export function removeView(container, removeIndex) {
         setViewNext(views[removeIndex - 1], viewNode.next);
     }
     views.splice(removeIndex, 1);
+    viewNode.next = null;
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed

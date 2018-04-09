@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.3-5a298b1
+ * @license Angular v6.0.0-rc.3-f4c56f4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ class Version {
 /**
  * \@stable
  */
-const VERSION = new Version('6.0.0-rc.3-5a298b1');
+const VERSION = new Version('6.0.0-rc.3-f4c56f4');
 
 /**
  * @fileoverview added by tsickle
@@ -14969,6 +14969,18 @@ function assertLessThan(actual, expected, msg) {
 /**
  * @template T
  * @param {?} actual
+ * @param {?} expected
+ * @param {?} msg
+ * @return {?}
+ */
+function assertGreaterThan(actual, expected, msg) {
+    if (actual <= expected) {
+        throwError(msg);
+    }
+}
+/**
+ * @template T
+ * @param {?} actual
  * @param {?} msg
  * @return {?}
  */
@@ -15750,6 +15762,7 @@ function removeView(container, removeIndex) {
         setViewNext(views[removeIndex - 1], viewNode.next);
     }
     views.splice(removeIndex, 1);
+    viewNode.next = null;
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
@@ -19489,7 +19502,7 @@ class ViewContainerRef$1 {
      */
     insert(viewRef, index) {
         const /** @type {?} */ lViewNode = (/** @type {?} */ (viewRef))._lViewNode;
-        const /** @type {?} */ adjustedIdx = this._adjustAndAssertIndex(index);
+        const /** @type {?} */ adjustedIdx = this._adjustIndex(index);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
         // invalidate cache of next sibling RNode (we do similar operation in the containerRefreshEnd
         // instruction)
@@ -19511,42 +19524,52 @@ class ViewContainerRef$1 {
     }
     /**
      * @param {?} viewRef
-     * @param {?} currentIndex
+     * @param {?} newIndex
      * @return {?}
      */
-    move(viewRef, currentIndex) {
-        throw notImplemented();
+    move(viewRef, newIndex) {
+        const /** @type {?} */ index = this.indexOf(viewRef);
+        this.detach(index);
+        this.insert(viewRef, this._adjustIndex(newIndex));
+        return viewRef;
     }
     /**
      * @param {?} viewRef
      * @return {?}
      */
-    indexOf(viewRef) { throw notImplemented(); }
+    indexOf(viewRef) { return this._viewRefs.indexOf(viewRef); }
     /**
      * @param {?=} index
      * @return {?}
      */
     remove(index) {
-        const /** @type {?} */ adjustedIdx = this._adjustAndAssertIndex(index);
-        removeView(this._lContainerNode, adjustedIdx);
-        this._viewRefs.splice(adjustedIdx, 1);
+        this.detach(index);
+        // TODO(ml): proper destroy of the ViewRef, i.e. recursively destroy the LviewNode and its
+        // children, delete DOM nodes and QueryList, trigger hooks (onDestroy), destroy the renderer,
+        // detach projected nodes
     }
     /**
      * @param {?=} index
      * @return {?}
      */
-    detach(index) { throw notImplemented(); }
+    detach(index) {
+        const /** @type {?} */ adjustedIdx = this._adjustIndex(index, -1);
+        removeView(this._lContainerNode, adjustedIdx);
+        return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
+    }
     /**
      * @param {?=} index
+     * @param {?=} shift
      * @return {?}
      */
-    _adjustAndAssertIndex(index) {
+    _adjustIndex(index, shift = 0) {
         if (index == null) {
-            index = this._lContainerNode.data.views.length;
+            return this._lContainerNode.data.views.length + shift;
         }
-        else {
+        if (ngDevMode) {
+            assertGreaterThan(index, -1, 'index must be positive');
             // +1 because it's legal to insert at the end.
-            ngDevMode && assertLessThan(index, this._lContainerNode.data.views.length + 1, 'index');
+            assertLessThan(index, this._lContainerNode.data.views.length + 1 + shift, 'index');
         }
         return index;
     }
