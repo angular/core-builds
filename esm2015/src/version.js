@@ -38,5 +38,5 @@ function Version_tsickle_Closure_declarations() {
 /**
  * \@stable
  */
-export const /** @type {?} */ VERSION = new Version('6.0.0-rc.3-f4c56f4');
+export const /** @type {?} */ VERSION = new Version('6.0.0-rc.3-60e8392');
 //# sourceMappingURL=version.js.map
