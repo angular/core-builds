@@ -477,5 +477,8 @@ export function appendProjectedNode(node, currentParent, currentView) {
             addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
         }
     }
+    if (node.dynamicLContainerNode) {
+        node.dynamicLContainerNode.data.renderParent = /** @type {?} */ (currentParent);
+    }
 }
 //# sourceMappingURL=node_manipulation.js.map

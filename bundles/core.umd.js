@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.3-37c1634
+ * @license Angular v6.0.0-rc.3-bb3f0e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.3-37c1634
+ * @license Angular v6.0.0-rc.3-bb3f0e5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2238,7 +2238,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.3-37c1634');
+var VERSION = new Version('6.0.0-rc.3-bb3f0e5');
 
 /**
  * @fileoverview added by tsickle
@@ -18380,6 +18380,9 @@ function appendProjectedNode(node, currentParent, currentView) {
         for (var /** @type {?} */ i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
         }
+    }
+    if (node.dynamicLContainerNode) {
+        node.dynamicLContainerNode.data.renderParent = /** @type {?} */ (currentParent);
     }
 }
 
