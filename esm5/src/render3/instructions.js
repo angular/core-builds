@@ -1731,7 +1731,7 @@ export function wrapListenerWithDirtyLogic(view, listenerFn) {
  * @return {?}
  */
 export function wrapListenerWithDirtyAndDefault(view, listenerFn) {
-    return function (e) {
+    return function wrapListenerIn_markViewDirty(e) {
         markViewDirty(view);
         if (listenerFn(e) === false) {
             e.preventDefault();

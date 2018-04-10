@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.3-10ecdb1
+ * @license Angular v6.0.0-rc.3-8555a3a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.3-10ecdb1
+ * @license Angular v6.0.0-rc.3-8555a3a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2238,7 +2238,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.3-10ecdb1');
+var VERSION = new Version('6.0.0-rc.3-8555a3a');
 
 /**
  * @fileoverview added by tsickle
@@ -20370,7 +20370,7 @@ function wrapListenerWithDirtyLogic(view, listenerFn) {
  * @return {?}
  */
 function wrapListenerWithDirtyAndDefault(view, listenerFn) {
-    return function (e) {
+    return function wrapListenerIn_markViewDirty(e) {
         markViewDirty(view);
         if (listenerFn(e) === false) {
             e.preventDefault();
@@ -21652,6 +21652,18 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
  */
 
 /**
+ * Retrieve the root context for any component by walking the parent `LView` until
+ * reaching the root `LView`.
+ *
+ * @param {?} component any component
+ * @return {?}
+ */
+function getRootContext(component) {
+    var /** @type {?} */ rootContext = /** @type {?} */ (getRootView(component).context);
+    ngDevMode && assertNotNull(rootContext, 'rootContext');
+    return rootContext;
+}
+/**
  * Retrieve the host element of the component.
  *
  * Use this function to retrieve the host element of the component. The host
@@ -21690,6 +21702,9 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
  * @param {?} component Component to wait upon
  * @return {?} Promise which resolves when the component is rendered.
  */
+function whenRendered(component) {
+    return getRootContext(component).clean;
+}
 
 /**
  * @fileoverview added by tsickle
@@ -24106,6 +24121,7 @@ exports.ɵv = embeddedViewEnd;
 exports.ɵst = store;
 exports.ɵld = load;
 exports.ɵPp = pipe;
+exports.ɵwhenRendered = whenRendered;
 exports.ɵbypassSanitizationTrustHtml = bypassSanitizationTrustHtml;
 exports.ɵbypassSanitizationTrustStyle = bypassSanitizationTrustStyle;
 exports.ɵbypassSanitizationTrustScript = bypassSanitizationTrustScript;
