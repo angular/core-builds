@@ -1,6 +1,6 @@
 /**
- * @license Angular v5.1.0-5a0076f
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v6.0.0-rc.3-5992fe6
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 (function (global, factory) {
@@ -36,8 +36,8 @@ function __extends(d, b) {
 }
 
 /**
- * @license Angular v5.1.0-5a0076f
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v6.0.0-rc.3-5992fe6
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 /**
@@ -65,7 +65,7 @@ var _global = (typeof window === 'undefined' ? global : window);
  *
  * @stable
  */
-function async(fn) {
+function asyncFallback(fn) {
     // If we're running using the Jasmine test framework, adapt to call the 'done'
     // function when asynchronous activity is finished.
     if (_global.jasmine) {
@@ -139,6 +139,48 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
         proxyZoneSpec.setDelegate(testZoneSpec);
     });
     return Zone.current.runGuarded(fn, context);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
+ *
+ * Example:
+ *
+ * ```
+ * it('...', async(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * });
+ * ```
+ *
+ * @stable
+ */
+function async(fn) {
+    var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+    if (!_Zone) {
+        return function () {
+            return Promise.reject('Zone is needed for the async() test helper but could not be found. ' +
+                'Please make sure that your environment includes zone.js/dist/zone.js');
+        };
+    }
+    var asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
+    if (typeof asyncTest === 'function') {
+        return asyncTest(fn);
+    }
+    // not using new version of zone.js
+    // TODO @JiaLiPassion, remove this after all library updated to
+    // newest version of zone.js(0.8.25)
+    return asyncFallback(fn);
 }
 
 /**
@@ -387,8 +429,13 @@ function scheduleMicroTask(fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
-var ProxyZoneSpec = Zone['ProxyZoneSpec'];
+/**
+ * fakeAsync has been moved to zone.js
+ * this file is for fallback in case old version of zone.js is used
+ */
+var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+var FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -396,9 +443,10 @@ var _fakeAsyncTestZoneSpec = null;
  *
  * @experimental
  */
-function resetFakeAsyncZone() {
+function resetFakeAsyncZoneFallback() {
     _fakeAsyncTestZoneSpec = null;
-    ProxyZoneSpec.assertPresent().resetDelegate();
+    // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
+    ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
 }
 var _inFakeAsyncCall = false;
 /**
@@ -412,14 +460,14 @@ var _inFakeAsyncCall = false;
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
  * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
-function fakeAsync(fn) {
+function fakeAsyncFallback(fn) {
     // Not using an arrow function to preserve context passed from call site
     return function () {
         var args = [];
@@ -443,7 +491,7 @@ function fakeAsync(fn) {
             proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
             try {
                 res = fn.apply(this, args);
-                flushMicrotasks();
+                flushMicrotasksFallback();
             }
             finally {
                 proxyZoneSpec.setDelegate(lastProxyZoneSpec);
@@ -459,7 +507,7 @@ function fakeAsync(fn) {
         }
         finally {
             _inFakeAsyncCall = false;
-            resetFakeAsyncZone();
+            resetFakeAsyncZoneFallback();
         }
     };
 }
@@ -477,11 +525,11 @@ function _getFakeAsyncZoneSpec() {
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @experimental
  */
-function tick(millis) {
+function tickFallback(millis) {
     if (millis === void 0) { millis = 0; }
     _getFakeAsyncZoneSpec().tick(millis);
 }
@@ -495,7 +543,7 @@ function tick(millis) {
  *
  * @experimental
  */
-function flush(maxTurns) {
+function flushFallback(maxTurns) {
     return _getFakeAsyncZoneSpec().flush(maxTurns);
 }
 /**
@@ -503,7 +551,7 @@ function flush(maxTurns) {
  *
  * @experimental
  */
-function discardPeriodicTasks() {
+function discardPeriodicTasksFallback() {
     var zoneSpec = _getFakeAsyncZoneSpec();
     var pendingTimers = zoneSpec.pendingPeriodicTimers;
     zoneSpec.pendingPeriodicTimers.length = 0;
@@ -513,8 +561,116 @@ function discardPeriodicTasks() {
  *
  * @experimental
  */
-function flushMicrotasks() {
+function flushMicrotasksFallback() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
+}
+
+var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+/**
+ * Clears out the shared fake async zone for a test.
+ * To be called in a global `beforeEach`.
+ *
+ * @experimental
+ */
+function resetFakeAsyncZone() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.resetFakeAsyncZone();
+    }
+    else {
+        return resetFakeAsyncZoneFallback();
+    }
+}
+/**
+ * Wraps a function to be executed in the fakeAsync zone:
+ * - microtasks are manually executed by calling `flushMicrotasks()`,
+ * - timers are synchronous, `tick()` simulates the asynchronous passage of time.
+ *
+ * If there are any pending timers at the end of the function, an exception will be thrown.
+ *
+ * Can be used to wrap inject() calls.
+ *
+ * ## Example
+ *
+ * {@example core/testing/ts/fake_async.ts region='basic'}
+ *
+ * @param fn
+ * @returns The function wrapped to be executed in the fakeAsync zone
+ *
+ * @experimental
+ */
+function fakeAsync(fn) {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.fakeAsync(fn);
+    }
+    else {
+        return fakeAsyncFallback(fn);
+    }
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
+ *
+ * The microtasks queue is drained at the very start of this function and after any timer callback
+ * has been executed.
+ *
+ * ## Example
+ *
+ * {@example core/testing/ts/fake_async.ts region='basic'}
+ *
+ * @experimental
+ */
+function tick(millis) {
+    if (millis === void 0) { millis = 0; }
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.tick(millis);
+    }
+    else {
+        return tickFallback(millis);
+    }
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flush(maxTurns);
+    }
+    else {
+        return flushFallback(maxTurns);
+    }
+}
+/**
+ * Discard all remaining periodic tasks.
+ *
+ * @experimental
+ */
+function discardPeriodicTasks() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.discardPeriodicTasks();
+    }
+    else {
+        discardPeriodicTasksFallback();
+    }
+}
+/**
+ * Flush any pending microtasks.
+ *
+ * @experimental
+ */
+function flushMicrotasks() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flushMicrotasks();
+    }
+    else {
+        return flushMicrotasksFallback();
+    }
 }
 
 /**
@@ -624,6 +780,11 @@ var TestingCompiler = /** @class */ (function (_super) {
        * This can be used for errors created by compileModule...
        */
     function (error) { throw unimplemented(); };
+    TestingCompiler.decorators = [
+        { type: _angular_core.Injectable },
+    ];
+    /** @nocollapse */
+    TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
 }(_angular_core.Compiler));
 /**
@@ -666,9 +827,9 @@ var ComponentFixtureAutoDetect = new _angular_core.InjectionToken('ComponentFixt
  */
 var ComponentFixtureNoNgZone = new _angular_core.InjectionToken('ComponentFixtureNoNgZone');
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
@@ -693,6 +854,8 @@ var TestBed = /** @class */ (function () {
         this._testEnvAotSummaries = function () { return []; };
         this._aotSummaries = [];
         this._templateOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -944,6 +1107,8 @@ var TestBed = /** @class */ (function () {
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this._moduleRef = (null);
         this._moduleFactory = (null);
         this._compilerOptions = [];
@@ -957,7 +1122,10 @@ var TestBed = /** @class */ (function () {
                 fixture.destroy();
             }
             catch (e) {
-                console.error('Error during cleanup of component', fixture.componentInstance);
+                console.error('Error during cleanup of component', {
+                    component: fixture.componentInstance,
+                    stacktrace: e,
+                });
             }
         });
         this._activeFixtures = [];
@@ -1023,7 +1191,12 @@ var TestBed = /** @class */ (function () {
             _angular_core.ɵoverrideComponentView(component, compFactory);
         }
         var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
-        var ngZoneInjector = _angular_core.Injector.create([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
+        var providers = [{ provide: _angular_core.NgZone, useValue: ngZone }];
+        var ngZoneInjector = _angular_core.Injector.create({
+            providers: providers,
+            parent: this.platform.injector,
+            name: this._moduleFactory.moduleType.name
+        });
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
@@ -1036,7 +1209,25 @@ var TestBed = /** @class */ (function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
-        var imports = [this.ngModule, this._imports];
+        var rootScopeImports = [];
+        var rootProviderOverrides = this._rootProviderOverrides;
+        if (this._isRoot) {
+            var RootScopeModule = /** @class */ (function () {
+                function RootScopeModule() {
+                }
+                RootScopeModule.decorators = [
+                    { type: _angular_core.NgModule, args: [{
+                                providers: rootProviderOverrides.slice(),
+                            },] },
+                ];
+                /** @nocollapse */
+                RootScopeModule.ctorParameters = function () { return []; };
+                return RootScopeModule;
+            }());
+            rootScopeImports.push(RootScopeModule);
+        }
+        providers.push({ provide: _angular_core.ɵAPP_ROOT, useValue: this._isRoot });
+        var imports = [rootScopeImports, this.ngModule, this._imports];
         var schemas = this._schemas;
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
@@ -1107,6 +1298,15 @@ var TestBed = /** @class */ (function () {
     };
     TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
+        if (typeof token !== 'string' && token.ngInjectableDef &&
+            token.ngInjectableDef.providedIn === 'root') {
+            if (provider.useFactory) {
+                this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
+            }
+            else {
+                this._rootProviderOverrides.push({ provide: token, useValue: provider.useValue });
+            }
+        }
         var flags = 0;
         var value;
         if (provider.useFactory) {
@@ -1272,11 +1472,6 @@ function withModule(moduleDef, fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
- */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
@@ -1288,6 +1483,144 @@ if (_global$1.beforeEach) {
 // TODO(juliemr): remove this, only used because we need to export something to have compilation
 // work.
 var __core_private_testing_placeholder__ = '';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+* Wraps a function in a new function which sets up document and HTML for running a test.
+*
+* This function is intended to wrap an existing testing function. The wrapper
+* adds HTML to the `body` element of the `document` and subsequently tears it down.
+*
+* This function is intended to be used with `async await` and `Promise`s. If the wrapped
+* function returns a promise (or is `async`) then the teardown is delayed until that `Promise`
+* is resolved.
+*
+* On `node` this function detects if `document` is present and if not it will create one by
+* loading `domino` and installing it.
+*
+* Example:
+*
+* ```
+* describe('something', () => {
+*   it('should do something', withBody('<my-app></my-app>', async () => {
+*     const myApp = renderComponent(MyApp);
+*     await whenRendered(myApp);
+*     expect(getRenderedText(myApp)).toEqual('Hello World!');
+*   }));
+* });
+* ```
+*
+* @param html HTML which should be inserted into `body` of the `document`.
+* @param blockFn function to wrap. The function can return promise or be `async`.
+* @experimental
+*/
+function withBody(html, blockFn) {
+    return function (done) {
+        ensureDocument();
+        var returnValue = undefined;
+        if (typeof blockFn === 'function') {
+            document.body.innerHTML = html;
+            // TODO(i): I'm not sure why a cast is required here but otherwise I get
+            //   TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has
+            //   no compatible call signatures.
+            var blockReturn = blockFn();
+            if (blockReturn instanceof Promise) {
+                blockReturn = blockReturn.then(done, done.fail);
+            }
+            else {
+                done();
+            }
+        }
+    };
+}
+var savedDocument = undefined;
+var savedRequestAnimationFrame = undefined;
+var savedNode = undefined;
+var requestAnimationFrameCount = 0;
+var ɵ0 = function (domino) {
+    if (typeof global == 'object' && global.process && typeof require == 'function') {
+        try {
+            return require(domino);
+        }
+        catch (e) {
+            // It is possible that we don't have domino available in which case just give up.
+        }
+    }
+    // Seems like we don't have domino, give up.
+    return null;
+};
+/**
+ * System.js uses regexp to look for `require` statements. `domino` has to be
+ * extracted into a constant so that the regexp in the System.js does not match
+ * and does not try to load domino in the browser.
+ */
+var domino = (ɵ0)('domino');
+/**
+ * Ensure that global has `Document` if we are in node.js
+ * @experimental
+ */
+function ensureDocument() {
+    if (domino) {
+        // we are in node.js.
+        var window_1 = domino.createWindow('', 'http://localhost');
+        savedDocument = global.document;
+        global.window = window_1;
+        global.document = window_1.document;
+        // Trick to avoid Event patching from
+        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
+        // It fails with Domino with TypeError: Cannot assign to read only property
+        // 'stopImmediatePropagation' of object '#<Event>'
+        // Trick to avoid Event patching from
+        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
+        // It fails with Domino with TypeError: Cannot assign to read only property
+        // 'stopImmediatePropagation' of object '#<Event>'
+        global.Event = null;
+        savedNode = global.Node;
+        global.Node = domino.impl.Node;
+        savedRequestAnimationFrame = global.requestAnimationFrame;
+        global.requestAnimationFrame = function (cb) {
+            setImmediate(cb);
+            return requestAnimationFrameCount++;
+        };
+    }
+}
+/**
+ * Restore the state of `Document` between tests.
+ * @experimental
+ */
+function cleanupDocument() {
+    if (savedDocument) {
+        global.document = savedDocument;
+        global.window = undefined;
+        savedDocument = undefined;
+    }
+    if (savedNode) {
+        global.Node = savedNode;
+        savedNode = undefined;
+    }
+    if (savedRequestAnimationFrame) {
+        global.requestAnimationFrame = savedRequestAnimationFrame;
+        savedRequestAnimationFrame = undefined;
+    }
+}
+if (typeof beforeEach == 'function')
+    beforeEach(ensureDocument);
+if (typeof afterEach == 'function')
+    beforeEach(cleanupDocument);
 
 exports.async = async;
 exports.ComponentFixture = ComponentFixture;
@@ -1308,6 +1641,10 @@ exports.withModule = withModule;
 exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
 exports.ɵTestingCompiler = TestingCompiler;
 exports.ɵTestingCompilerFactory = TestingCompilerFactory;
+exports.withBody = withBody;
+exports.ensureDocument = ensureDocument;
+exports.cleanupDocument = cleanupDocument;
+exports.ɵ0 = ɵ0;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

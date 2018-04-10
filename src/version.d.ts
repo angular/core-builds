@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @whatItDoes Represents the version of Angular
+ * @description Represents the version of Angular
  *
  * @stable
  */

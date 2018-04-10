@@ -30,7 +30,6 @@ export declare class CodegenComponentFactoryResolver implements ComponentFactory
 export declare class ComponentFactoryBoundToModule<C> extends ComponentFactory<C> {
     private factory;
     private ngModule;
-    constructor(factory: ComponentFactory<C>, ngModule: NgModuleRef<any>);
     readonly selector: string;
     readonly componentType: Type<any>;
     readonly ngContentSelectors: string[];
@@ -42,5 +41,6 @@ export declare class ComponentFactoryBoundToModule<C> extends ComponentFactory<C
         propName: string;
         templateName: string;
     }[];
+    constructor(factory: ComponentFactory<C>, ngModule: NgModuleRef<any>);
     create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
 }

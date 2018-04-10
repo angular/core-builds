@@ -2,17 +2,17 @@
  * Generated bundle index. Do not edit.
  */
 export * from './public_api';
-export { AnimationMetadataType as ɵv, animate as ɵx, group as ɵy, keyframes as ɵbc, sequence as ɵz, state as ɵbb, style as ɵba, transition as ɵbd, trigger as ɵw } from './src/animation/dsl';
-export { _iterableDiffersFactory as ɵk, _keyValueDiffersFactory as ɵl, _localeFactory as ɵm } from './src/application_module';
-export { _appIdRandomProviderFactory as ɵf } from './src/application_tokens';
-export { defaultIterableDiffers as ɵg, defaultKeyValueDiffers as ɵh } from './src/change_detection/change_detection';
-export { DefaultIterableDifferFactory as ɵi } from './src/change_detection/differs/default_iterable_differ';
-export { DefaultKeyValueDifferFactory as ɵj } from './src/change_detection/differs/default_keyvalue_differ';
-export { StaticInjector as ɵb } from './src/di/injector';
-export { ReflectiveInjector_ as ɵc } from './src/di/reflective_injector';
-export { ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe } from './src/di/reflective_provider';
-export { wtfEnabled as ɵn } from './src/profile/profile';
-export { createScope as ɵp, detectWTF as ɵo, endTimeRange as ɵs, leave as ɵq, startTimeRange as ɵr } from './src/profile/wtf_impl';
-export { makeParamDecorator as ɵa } from './src/util/decorators';
-export { _def as ɵt } from './src/view/provider';
-export { DebugContext as ɵu } from './src/view/types';
+export { _iterableDiffersFactory as ɵo, _keyValueDiffersFactory as ɵq, _localeFactory as ɵr } from './src/application_module';
+export { _appIdRandomProviderFactory as ɵj } from './src/application_tokens';
+export { defaultKeyValueDiffers as ɵl } from './src/change_detection/change_detection';
+export { DefaultIterableDifferFactory as ɵm } from './src/change_detection/differs/default_iterable_differ';
+export { DefaultKeyValueDifferFactory as ɵn } from './src/change_detection/differs/default_keyvalue_differ';
+export { ReflectiveInjector_ as ɵg } from './src/di/reflective_injector';
+export { ReflectiveDependency as ɵh, resolveReflectiveProviders as ɵi } from './src/di/reflective_provider';
+export { wtfEnabled as ɵu } from './src/profile/profile';
+export { createScope as ɵx, detectWTF as ɵw, endTimeRange as ɵba, leave as ɵy, startTimeRange as ɵz } from './src/profile/wtf_impl';
+export { getOrCreateChangeDetectorRef as ɵbe, getOrCreateContainerRef as ɵbg, getOrCreateInjectable as ɵbf, getOrCreateNodeInjector as ɵbd, getOrCreateTemplateRef as ɵbh } from './src/render3/di';
+export { bindingUpdated as ɵbk, bindingUpdated2 as ɵbm, bindingUpdated4 as ɵbn, checkAndUpdateBinding as ɵbl, consumeBinding as ɵbj, getCreationMode as ɵbi } from './src/render3/instructions';
+export { makeParamDecorator as ɵc, makePropDecorator as ɵf } from './src/util/decorators';
+export { _def as ɵbb } from './src/view/provider';
+export { DebugContext as ɵbc } from './src/view/types';

@@ -35,9 +35,9 @@ export declare type TestModuleMetadata = {
     aotSummaries?: () => any[];
 };
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
@@ -139,6 +139,8 @@ export declare class TestBed implements Injector {
     private _testEnvAotSummaries;
     private _aotSummaries;
     private _templateOverrides;
+    private _isRoot;
+    private _rootProviderOverrides;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     /**
