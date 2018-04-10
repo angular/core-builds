@@ -123,4 +123,4 @@ export declare function insertChild(node: LNode, currentView: LView): void;
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LViewNode | LElementNode, currentView: LView): void;
+export declare function appendProjectedNode(node: LElementNode | LTextNode | LContainerNode, currentParent: LElementNode, currentView: LView): void;

@@ -464,21 +464,21 @@ export function appendProjectedNode(node, currentParent, currentView) {
     if (node.type !== 0 /* Container */) {
         appendChild(currentParent, (/** @type {?} */ (node)).native, currentView);
     }
-    else if (canInsertNativeNode(currentParent, currentView)) {
+    else {
         // The node we are adding is a Container and we are adding it to Element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
         // Assignee the final projection location in those cases.
         var /** @type {?} */ lContainer = (/** @type {?} */ (node)).data;
-        lContainer.renderParent = /** @type {?} */ (currentParent);
+        lContainer.renderParent = currentParent;
         var /** @type {?} */ views = lContainer.views;
         for (var /** @type {?} */ i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data.renderParent = /** @type {?} */ (currentParent);
+        node.dynamicLContainerNode.data.renderParent = currentParent;
     }
 }
 //# sourceMappingURL=node_manipulation.js.map

@@ -1655,11 +1655,12 @@ export function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
         }
     }
     if (canInsertNativeNode(currentParent, currentView)) {
+        ngDevMode && assertNodeType(currentParent, 3 /* Element */);
         // process each node in the list of projected nodes:
         let /** @type {?} */ nodeToProject = node.data.head;
         const /** @type {?} */ lastNodeToProject = node.data.tail;
         while (nodeToProject) {
-            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, currentView);
+            appendProjectedNode(/** @type {?} */ (nodeToProject), /** @type {?} */ (currentParent), currentView);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }

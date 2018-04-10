@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.3-f1db789
+ * @license Angular v6.0.0-rc.3-c973830
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.3-f1db789
+ * @license Angular v6.0.0-rc.3-c973830
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2238,7 +2238,7 @@ var Version = /** @class */ (function () {
 /**
  * \@stable
  */
-var VERSION = new Version('6.0.0-rc.3-f1db789');
+var VERSION = new Version('6.0.0-rc.3-c973830');
 
 /**
  * @fileoverview added by tsickle
@@ -18368,21 +18368,21 @@ function appendProjectedNode(node, currentParent, currentView) {
     if (node.type !== 0 /* Container */) {
         appendChild(currentParent, (/** @type {?} */ (node)).native, currentView);
     }
-    else if (canInsertNativeNode(currentParent, currentView)) {
+    else {
         // The node we are adding is a Container and we are adding it to Element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
         // Assignee the final projection location in those cases.
         var /** @type {?} */ lContainer = (/** @type {?} */ (node)).data;
-        lContainer.renderParent = /** @type {?} */ (currentParent);
+        lContainer.renderParent = currentParent;
         var /** @type {?} */ views = lContainer.views;
         for (var /** @type {?} */ i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data.renderParent = /** @type {?} */ (currentParent);
+        node.dynamicLContainerNode.data.renderParent = currentParent;
     }
 }
 
@@ -20296,11 +20296,12 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
         }
     }
     if (canInsertNativeNode(currentParent, currentView)) {
+        ngDevMode && assertNodeType(currentParent, 3 /* Element */);
         // process each node in the list of projected nodes:
         var /** @type {?} */ nodeToProject = node.data.head;
         var /** @type {?} */ lastNodeToProject = node.data.tail;
         while (nodeToProject) {
-            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, currentView);
+            appendProjectedNode(/** @type {?} */ (nodeToProject), /** @type {?} */ (currentParent), currentView);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
