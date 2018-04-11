@@ -13,6 +13,6 @@
  * });
  * ```
  *
- * @stable
+ *
  */
 export declare function asyncFallback(fn: Function): (done: any) => any;

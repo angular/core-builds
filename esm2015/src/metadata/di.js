@@ -49,7 +49,7 @@ export const /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken(
 /**
  * Type of the Attribute decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function AttributeDecorator() { }
@@ -64,7 +64,7 @@ function AttributeDecorator_tsickle_Closure_declarations() {
 /**
  * Attribute decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export const /** @type {?} */ Attribute = makeParamDecorator('Attribute', (attributeName) => ({ attributeName }));
@@ -74,7 +74,7 @@ export const /** @type {?} */ Attribute = makeParamDecorator('Attribute', (attri
  * See {\@link ContentChildren}, {\@link ContentChild}, {\@link ViewChildren}, {\@link ViewChild} for
  * more information.
  *
- * \@stable
+ *
  * @abstract
  */
 export class Query {
@@ -84,7 +84,7 @@ export class Query {
  *
  * See {\@link ContentChildren}.
  *
- * \@stable
+ *
  * @record
  */
 export function ContentChildrenDecorator() { }
@@ -99,7 +99,7 @@ function ContentChildrenDecorator_tsickle_Closure_declarations() {
 /**
  * ContentChildren decorator and metadata.
  *
- *  \@stable
+ *
  *  \@Annotation
  */
 export const /** @type {?} */ ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
@@ -107,7 +107,7 @@ export const /** @type {?} */ ContentChildren = makePropDecorator('ContentChildr
  * Type of the ContentChild decorator / constructor function.
  *
  *
- * \@stable
+ *
  * @record
  */
 export function ContentChildDecorator() { }
@@ -122,7 +122,7 @@ function ContentChildDecorator_tsickle_Closure_declarations() {
 /**
  * ContentChild decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export const /** @type {?} */ ContentChild = makePropDecorator('ContentChild', (selector, data = {}) => (Object.assign({ selector, first: true, isViewQuery: false, descendants: true }, data)), Query);
@@ -131,7 +131,7 @@ export const /** @type {?} */ ContentChild = makePropDecorator('ContentChild', (
  *
  * See {\@link ViewChildren}.
  *
- * \@stable
+ *
  * @record
  */
 export function ViewChildrenDecorator() { }
@@ -146,7 +146,7 @@ function ViewChildrenDecorator_tsickle_Closure_declarations() {
 /**
  * ViewChildren decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export const /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: true, descendants: true }, data)), Query);
@@ -155,7 +155,7 @@ export const /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', (
  *
  * See {\@link ViewChild}
  *
- * \@stable
+ *
  * @record
  */
 export function ViewChildDecorator() { }
@@ -170,7 +170,7 @@ function ViewChildDecorator_tsickle_Closure_declarations() {
 /**
  * ViewChild decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export const /** @type {?} */ ViewChild = makePropDecorator('ViewChild', (selector, data) => (Object.assign({ selector, first: true, isViewQuery: true, descendants: true }, data)), Query);

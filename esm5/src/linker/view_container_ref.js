@@ -25,7 +25,7 @@
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {\@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {\@link ViewChild} query.
- * \@stable
+ *
  * @abstract
  */
 var /**
@@ -44,7 +44,7 @@ var /**
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {\@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {\@link ViewChild} query.
- * \@stable
+ *
  * @abstract
  */
 ViewContainerRef = /** @class */ (function () {
@@ -68,7 +68,7 @@ ViewContainerRef = /** @class */ (function () {
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {\@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {\@link ViewChild} query.
- * \@stable
+ *
  * @abstract
  */
 export { ViewContainerRef };

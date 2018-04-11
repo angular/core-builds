@@ -28,13 +28,13 @@ SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- * \@stable
+ *
  * @abstract
  */
 var /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- * \@stable
+ *
  * @abstract
  */
 Sanitizer = /** @class */ (function () {
@@ -45,7 +45,7 @@ Sanitizer = /** @class */ (function () {
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- * \@stable
+ *
  * @abstract
  */
 export { Sanitizer };

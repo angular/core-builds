@@ -15,7 +15,7 @@ import { makeDecorator, makePropDecorator } from '../util/decorators';
 /**
  * Type of the Directive decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function DirectiveDecorator() { }
@@ -30,7 +30,7 @@ function DirectiveDecorator_tsickle_Closure_declarations() {
 /**
  * Directive decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Directive = makeDecorator('Directive', function (dir) {
@@ -40,7 +40,7 @@ export var /** @type {?} */ Directive = makeDecorator('Directive', function (dir
 /**
  * Type of the Component decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function ComponentDecorator() { }
@@ -55,7 +55,7 @@ function ComponentDecorator_tsickle_Closure_declarations() {
 /**
  * Component decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Component = makeDecorator('Component', function (c) {
@@ -65,7 +65,7 @@ export var /** @type {?} */ Component = makeDecorator('Component', function (c) 
 /**
  * Type of the Pipe decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function PipeDecorator() { }
@@ -86,14 +86,14 @@ function PipeDecorator_tsickle_Closure_declarations() {
  * To use the pipe include a reference to the pipe class in
  * {\@link NgModule#declarations}.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Pipe = makeDecorator('Pipe', function (p) { return (tslib_1.__assign({ pure: true }, p)); });
 /**
  * Type of the Input decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function InputDecorator() { }
@@ -108,14 +108,14 @@ function InputDecorator_tsickle_Closure_declarations() {
 /**
  * Input decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Input = makePropDecorator('Input', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * Type of the Output decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function OutputDecorator() { }
@@ -130,14 +130,14 @@ function OutputDecorator_tsickle_Closure_declarations() {
 /**
  * Output decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Output = makePropDecorator('Output', function (bindingPropertyName) { return ({ bindingPropertyName: bindingPropertyName }); });
 /**
  * Type of the HostBinding decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function HostBindingDecorator() { }
@@ -152,14 +152,14 @@ function HostBindingDecorator_tsickle_Closure_declarations() {
 /**
  * HostBinding decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ HostBinding = makePropDecorator('HostBinding', function (hostPropertyName) { return ({ hostPropertyName: hostPropertyName }); });
 /**
  * Type of the HostListener decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function HostListenerDecorator() { }
@@ -174,7 +174,7 @@ function HostListenerDecorator_tsickle_Closure_declarations() {
 /**
  * HostListener decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ HostListener = makePropDecorator('HostListener', function (eventName, args) { return ({ eventName: eventName, args: args }); });

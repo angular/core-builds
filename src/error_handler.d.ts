@@ -22,7 +22,7 @@
  * class MyModule {}
  * ```
  *
- * @stable
+ *
  */
 export declare class ErrorHandler {
     handleError(error: any): void;

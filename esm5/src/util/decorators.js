@@ -20,7 +20,7 @@
  * \@ng.Component({...})
  * class MyClass {...}
  * ```
- * \@stable
+ *
  * @record
  */
 export function TypeDecorator() { }

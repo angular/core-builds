@@ -45,7 +45,7 @@ export interface ValueSansProvider {
  *
  * {@example core/di/ts/provider_spec.ts region='ValueProvider'}
  *
- * @stable
+ *
  */
 export interface ValueProvider extends ValueSansProvider {
     /**
@@ -113,7 +113,7 @@ export interface StaticClassSansProvider {
  * Note that following two providers are not equal:
  * {@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
- * @stable
+ *
  */
 export interface StaticClassProvider extends StaticClassSansProvider {
     /**
@@ -173,7 +173,7 @@ export interface ConstructorSansProvider {
  *
  * {@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
  *
- * @stable
+ *
  */
 export interface ConstructorProvider extends ConstructorSansProvider {
     /**
@@ -206,7 +206,7 @@ export interface ConstructorProvider extends ConstructorSansProvider {
  *
  * {@example core/di/ts/provider_spec.ts region='ExistingSansProvider'}
  *
- * @stable
+ *
  */
 export interface ExistingSansProvider {
     /**
@@ -229,7 +229,7 @@ export interface ExistingSansProvider {
  *
  * {@example core/di/ts/provider_spec.ts region='ExistingProvider'}
  *
- * @stable
+ *
  */
 export interface ExistingProvider extends ExistingSansProvider {
     /**
@@ -298,7 +298,7 @@ export interface FactorySansProvider {
  * Dependencies can also be marked as optional:
  * {@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
  *
- * @stable
+ *
  */
 export interface FactoryProvider extends FactorySansProvider {
     /**
@@ -324,7 +324,7 @@ export interface FactoryProvider extends FactorySansProvider {
  *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
- * @stable
+ *
  */
 export declare type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider | any[];
 /**
@@ -348,7 +348,7 @@ export declare type StaticProvider = ValueProvider | ExistingProvider | StaticCl
  *
  * {@example core/di/ts/provider_spec.ts region='TypeProvider'}
  *
- * @stable
+ *
  */
 export interface TypeProvider extends Type<any> {
 }
@@ -400,7 +400,7 @@ export interface ClassSansProvider {
  * Note that following two providers are not equal:
  * {@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
  *
- * @stable
+ *
  */
 export interface ClassProvider extends ClassSansProvider {
     /**
@@ -426,6 +426,6 @@ export interface ClassProvider extends ClassSansProvider {
  *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
- * @stable
+ *
  */
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | ExistingProvider | FactoryProvider | any[];

@@ -11,7 +11,7 @@
  */
 /**
  * Used to load ng module factories.
- * \@stable
+ *
  * @abstract
  */
 export class NgModuleFactoryLoader {

@@ -33,7 +33,7 @@ import { getSymbolIterator } from '../util';
  *   \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * \@stable
+ *
  * @template T
  */
 var /**
@@ -58,7 +58,7 @@ var /**
  *   \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * \@stable
+ *
  * @template T
  */
 QueryList = /** @class */ (function () {
@@ -274,7 +274,7 @@ QueryList = /** @class */ (function () {
  *   \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * \@stable
+ *
  * @template T
  */
 export { QueryList };

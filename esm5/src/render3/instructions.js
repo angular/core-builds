@@ -1657,11 +1657,12 @@ export function projection(nodeIndex, localIndex, selectorIndex, attrs) {
         }
     }
     if (canInsertNativeNode(currentParent, currentView)) {
+        ngDevMode && assertNodeType(currentParent, 3 /* Element */);
         // process each node in the list of projected nodes:
         var /** @type {?} */ nodeToProject = node.data.head;
         var /** @type {?} */ lastNodeToProject = node.data.tail;
         while (nodeToProject) {
-            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, currentView);
+            appendProjectedNode(/** @type {?} */ (nodeToProject), /** @type {?} */ (currentParent), currentView);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
@@ -1731,7 +1732,7 @@ export function wrapListenerWithDirtyLogic(view, listenerFn) {
  * @return {?}
  */
 export function wrapListenerWithDirtyAndDefault(view, listenerFn) {
-    return function (e) {
+    return function wrapListenerIn_markViewDirty(e) {
         markViewDirty(view);
         if (listenerFn(e) === false) {
             e.preventDefault();

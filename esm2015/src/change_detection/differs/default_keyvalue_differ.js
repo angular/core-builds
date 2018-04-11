@@ -328,7 +328,7 @@ function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
     DefaultKeyValueDiffer.prototype._removalsTail;
 }
 /**
- * \@stable
+ *
  * @template K, V
  */
 class KeyValueChangeRecord_ {

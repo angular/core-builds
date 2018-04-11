@@ -17,7 +17,7 @@ import { Type } from '../type';
  * @ng.Component({...})
  * class MyClass {...}
  * ```
- * @stable
+ *
  */
 export interface TypeDecorator {
     /**

@@ -896,11 +896,11 @@ function DefaultIterableDiffer_tsickle_Closure_declarations() {
     DefaultIterableDiffer.prototype._trackByFn;
 }
 /**
- * \@stable
+ *
  * @template V
  */
 var /**
- * \@stable
+ *
  * @template V
  */
 IterableChangeRecord_ = /** @class */ (function () {
@@ -953,7 +953,7 @@ IterableChangeRecord_ = /** @class */ (function () {
     return IterableChangeRecord_;
 }());
 /**
- * \@stable
+ *
  * @template V
  */
 export { IterableChangeRecord_ };

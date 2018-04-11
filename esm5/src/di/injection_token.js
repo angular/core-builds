@@ -46,7 +46,7 @@ import { defineInjectable } from './defs';
  *
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * \@stable
+ *
  * @template T
  */
 var /**
@@ -85,7 +85,7 @@ var /**
  *
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * \@stable
+ *
  * @template T
  */
 InjectionToken = /** @class */ (function () {
@@ -150,7 +150,7 @@ InjectionToken = /** @class */ (function () {
  *
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * \@stable
+ *
  * @template T
  */
 export { InjectionToken };

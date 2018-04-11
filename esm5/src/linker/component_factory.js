@@ -15,7 +15,7 @@
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
  * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
  * method.
- * \@stable
+ *
  * @abstract
  * @template C
  */
@@ -25,7 +25,7 @@ var /**
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
  * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
  * method.
- * \@stable
+ *
  * @abstract
  * @template C
  */
@@ -40,7 +40,7 @@ ComponentRef = /** @class */ (function () {
  * `ComponentRef` provides access to the Component Instance as well other objects related to this
  * Component Instance and allows you to destroy the Component Instance via the {\@link #destroy}
  * method.
- * \@stable
+ *
  * @abstract
  * @template C
  */
@@ -97,12 +97,12 @@ function ComponentRef_tsickle_Closure_declarations() {
     ComponentRef.prototype.onDestroy = function (callback) { };
 }
 /**
- * \@stable
+ *
  * @abstract
  * @template C
  */
 var /**
- * \@stable
+ *
  * @abstract
  * @template C
  */
@@ -112,7 +112,7 @@ ComponentFactory = /** @class */ (function () {
     return ComponentFactory;
 }());
 /**
- * \@stable
+ *
  * @abstract
  * @template C
  */

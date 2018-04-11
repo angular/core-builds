@@ -34,7 +34,7 @@ export const ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNg
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 export class TestBed {
     constructor() {
@@ -479,7 +479,7 @@ export function getTestBed() {
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 export function inject(tokens, fn) {
     const testBed = getTestBed();

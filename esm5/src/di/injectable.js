@@ -20,7 +20,7 @@ var /** @type {?} */ USE_VALUE = getClosureSafeProperty({ provide: String, useVa
 /**
  * Type of the Injectable decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function InjectableDecorator() { }
@@ -87,7 +87,7 @@ export function convertInjectableProviderToFactory(type, provider) {
 /**
  * Injectable decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (injectableType, options) {

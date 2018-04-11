@@ -12,7 +12,7 @@
 /**
  * A `changes` object whose keys are property names and
  * values are instances of {\@link SimpleChange}. See {\@link OnChanges}
- * \@stable
+ *
  * @record
  */
 export function SimpleChanges() { }
@@ -34,7 +34,7 @@ function SimpleChanges_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#onchanges "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function OnChanges() { }
@@ -56,7 +56,7 @@ function OnChanges_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function OnInit() { }
@@ -84,7 +84,7 @@ function OnInit_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#docheck "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function DoCheck() { }
@@ -104,7 +104,7 @@ function DoCheck_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function OnDestroy() { }
@@ -123,7 +123,7 @@ function OnDestroy_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function AfterContentInit() { }
@@ -140,7 +140,7 @@ function AfterContentInit_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function AfterContentChecked() { }
@@ -158,7 +158,7 @@ function AfterContentChecked_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function AfterViewInit() { }
@@ -175,7 +175,7 @@ function AfterViewInit_tsickle_Closure_declarations() {
  *
  * See {\@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
- * \@stable
+ *
  * @record
  */
 export function AfterViewChecked() { }

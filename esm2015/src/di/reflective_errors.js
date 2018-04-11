@@ -208,7 +208,7 @@ export function invalidProviderError(provider) {
  *
  * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
  * ```
- * \@stable
+ *
  * @param {?} typeOrFunc
  * @param {?} params
  * @return {?}
@@ -241,7 +241,7 @@ export function noAnnotationError(typeOrFunc, params) {
  *
  * expect(() => injector.getAt(100)).toThrowError();
  * ```
- * \@stable
+ *
  * @param {?} index
  * @return {?}
  */

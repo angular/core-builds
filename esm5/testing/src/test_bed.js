@@ -48,7 +48,7 @@ export var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZo
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 var /**
  * @description
@@ -57,7 +57,7 @@ var /**
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 TestBed = /** @class */ (function () {
     function TestBed() {
@@ -608,7 +608,7 @@ TestBed = /** @class */ (function () {
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 export { TestBed };
 var _testBed = (null);
@@ -640,7 +640,7 @@ export function getTestBed() {
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 export function inject(tokens, fn) {
     var testBed = getTestBed();

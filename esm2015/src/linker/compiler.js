@@ -46,7 +46,7 @@ function _throwError() {
  * Each `\@NgModule` provides an own `Compiler` to its injector,
  * that will use the directives/pipes of the ng module for compilation
  * of components.
- * \@stable
+ *
  */
 export class Compiler {
     /**

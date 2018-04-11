@@ -13,7 +13,7 @@ import { makeParamDecorator } from '../util/decorators';
 /**
  * Type of the Inject decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function InjectDecorator() { }
@@ -28,14 +28,14 @@ function InjectDecorator_tsickle_Closure_declarations() {
 /**
  * Inject decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Inject = makeParamDecorator('Inject', function (token) { return ({ token: token }); });
 /**
  * Type of the Optional decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function OptionalDecorator() { }
@@ -50,14 +50,14 @@ function OptionalDecorator_tsickle_Closure_declarations() {
 /**
  * Optional decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Optional = makeParamDecorator('Optional');
 /**
  * Type of the Self decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function SelfDecorator() { }
@@ -72,14 +72,14 @@ function SelfDecorator_tsickle_Closure_declarations() {
 /**
  * Self decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Self = makeParamDecorator('Self');
 /**
  * Type of the SkipSelf decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function SkipSelfDecorator() { }
@@ -94,14 +94,14 @@ function SkipSelfDecorator_tsickle_Closure_declarations() {
 /**
  * SkipSelf decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ SkipSelf = makeParamDecorator('SkipSelf');
 /**
  * Type of the Host decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function HostDecorator() { }
@@ -116,7 +116,7 @@ function HostDecorator_tsickle_Closure_declarations() {
 /**
  * Host decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Host = makeParamDecorator('Host');

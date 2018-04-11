@@ -28,7 +28,7 @@ import { Observable } from 'rxjs';
  *   @ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * @stable
+ *
  */
 export declare class QueryList<T> {
     readonly dirty: boolean;

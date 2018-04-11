@@ -41,7 +41,7 @@ export declare type TestModuleMetadata = {
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 export declare class TestBed implements Injector {
     /**
@@ -231,7 +231,7 @@ export declare function getTestBed(): TestBed;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
 /**

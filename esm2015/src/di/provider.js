@@ -51,7 +51,7 @@ function ValueSansProvider_tsickle_Closure_declarations() {
  *
  * {\@example core/di/ts/provider_spec.ts region='ValueProvider'}
  *
- * \@stable
+ *
  * @record
  */
 export function ValueProvider() { }
@@ -127,7 +127,7 @@ function StaticClassSansProvider_tsickle_Closure_declarations() {
  * Note that following two providers are not equal:
  * {\@example core/di/ts/provider_spec.ts region='StaticClassProviderDifference'}
  *
- * \@stable
+ *
  * @record
  */
 export function StaticClassProvider() { }
@@ -194,7 +194,7 @@ function ConstructorSansProvider_tsickle_Closure_declarations() {
  *
  * {\@example core/di/ts/provider_spec.ts region='ConstructorProvider'}
  *
- * \@stable
+ *
  * @record
  */
 export function ConstructorProvider() { }
@@ -231,7 +231,7 @@ function ConstructorProvider_tsickle_Closure_declarations() {
  *
  * {\@example core/di/ts/provider_spec.ts region='ExistingSansProvider'}
  *
- * \@stable
+ *
  * @record
  */
 export function ExistingSansProvider() { }
@@ -257,7 +257,7 @@ function ExistingSansProvider_tsickle_Closure_declarations() {
  *
  * {\@example core/di/ts/provider_spec.ts region='ExistingProvider'}
  *
- * \@stable
+ *
  * @record
  */
 export function ExistingProvider() { }
@@ -334,7 +334,7 @@ function FactorySansProvider_tsickle_Closure_declarations() {
  * Dependencies can also be marked as optional:
  * {\@example core/di/ts/provider_spec.ts region='FactoryProviderOptionalDeps'}
  *
- * \@stable
+ *
  * @record
  */
 export function FactoryProvider() { }
@@ -376,7 +376,7 @@ function FactoryProvider_tsickle_Closure_declarations() {
  *
  * {\@example core/di/ts/provider_spec.ts region='TypeProvider'}
  *
- * \@stable
+ *
  * @record
  */
 export function TypeProvider() { }
@@ -433,7 +433,7 @@ function ClassSansProvider_tsickle_Closure_declarations() {
  * Note that following two providers are not equal:
  * {\@example core/di/ts/provider_spec.ts region='ClassProviderDifference'}
  *
- * \@stable
+ *
  * @record
  */
 export function ClassProvider() { }

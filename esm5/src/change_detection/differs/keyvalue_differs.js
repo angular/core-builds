@@ -13,7 +13,7 @@ import { Optional, SkipSelf } from '../../di';
 /**
  * A differ that tracks changes made to an object over time.
  *
- * \@stable
+ *
  * @record
  * @template K, V
  */
@@ -42,7 +42,7 @@ function KeyValueDiffer_tsickle_Closure_declarations() {
  * An object describing the changes in the `Map` or `{[k:string]: string}` since last time
  * `KeyValueDiffer#diff()` was invoked.
  *
- * \@stable
+ *
  * @record
  * @template K, V
  */
@@ -79,7 +79,7 @@ function KeyValueChanges_tsickle_Closure_declarations() {
 /**
  * Record representing the item change information.
  *
- * \@stable
+ *
  * @record
  * @template K, V
  */
@@ -104,7 +104,7 @@ function KeyValueChangeRecord_tsickle_Closure_declarations() {
 /**
  * Provides a factory for {\@link KeyValueDiffer}.
  *
- * \@stable
+ *
  * @record
  */
 export function KeyValueDifferFactory() { }
@@ -122,11 +122,11 @@ function KeyValueDifferFactory_tsickle_Closure_declarations() {
 }
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- * \@stable
+ *
  */
 var /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- * \@stable
+ *
  */
 KeyValueDiffers = /** @class */ (function () {
     function KeyValueDiffers(factories) {
@@ -248,7 +248,7 @@ KeyValueDiffers = /** @class */ (function () {
 }());
 /**
  * A repository of different Map diffing strategies used by NgClass, NgStyle, and others.
- * \@stable
+ *
  */
 export { KeyValueDiffers };
 function KeyValueDiffers_tsickle_Closure_declarations() {

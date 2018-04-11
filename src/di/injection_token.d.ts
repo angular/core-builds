@@ -43,7 +43,7 @@ import { InjectableDef } from './defs';
  *
  * {@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * @stable
+ *
  */
 export declare class InjectionToken<T> {
     protected _desc: string;

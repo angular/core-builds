@@ -9,12 +9,12 @@ import { RendererFactory2, getDebugNode } from '@angular/core';
 /**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 var /**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 ComponentFixture = /** @class */ (function () {
     function ComponentFixture(componentRef, ngZone, _autoDetect) {
@@ -242,7 +242,7 @@ ComponentFixture = /** @class */ (function () {
 /**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 export { ComponentFixture };
 function scheduleMicroTask(fn) {

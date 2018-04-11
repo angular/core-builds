@@ -11,12 +11,12 @@
  */
 /**
  * Used to load ng module factories.
- * \@stable
+ *
  * @abstract
  */
 var /**
  * Used to load ng module factories.
- * \@stable
+ *
  * @abstract
  */
 NgModuleFactoryLoader = /** @class */ (function () {
@@ -26,7 +26,7 @@ NgModuleFactoryLoader = /** @class */ (function () {
 }());
 /**
  * Used to load ng module factories.
- * \@stable
+ *
  * @abstract
  */
 export { NgModuleFactoryLoader };

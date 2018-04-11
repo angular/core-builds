@@ -46,7 +46,7 @@ import { defineInjectable } from './defs';
  *
  * {\@example core/di/ts/injector_spec.ts region='InjectionToken'}
  *
- * \@stable
+ *
  * @template T
  */
 export class InjectionToken {

@@ -9,7 +9,7 @@ import { SimpleChange } from '../change_detection/change_detection_util';
 /**
  * A `changes` object whose keys are property names and
  * values are instances of {@link SimpleChange}. See {@link OnChanges}
- * @stable
+ *
  */
 export interface SimpleChanges {
     [propName: string]: SimpleChange;
@@ -27,7 +27,7 @@ export interface SimpleChanges {
  *
  * See {@linkDocs guide/lifecycle-hooks#onchanges "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface OnChanges {
     ngOnChanges(changes: SimpleChanges): void;
@@ -46,7 +46,7 @@ export interface OnChanges {
  *
  * See {@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface OnInit {
     ngOnInit(): void;
@@ -71,7 +71,7 @@ export interface OnInit {
  *
  * See {@linkDocs guide/lifecycle-hooks#docheck "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface DoCheck {
     ngDoCheck(): void;
@@ -88,7 +88,7 @@ export interface DoCheck {
  *
  * See {@linkDocs guide/lifecycle-hooks "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface OnDestroy {
     ngOnDestroy(): void;
@@ -104,7 +104,7 @@ export interface OnDestroy {
  *
  * See {@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface AfterContentInit {
     ngAfterContentInit(): void;
@@ -118,7 +118,7 @@ export interface AfterContentInit {
  *
  * See {@linkDocs guide/lifecycle-hooks#aftercontent "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface AfterContentChecked {
     ngAfterContentChecked(): void;
@@ -133,7 +133,7 @@ export interface AfterContentChecked {
  *
  * See {@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface AfterViewInit {
     ngAfterViewInit(): void;
@@ -147,7 +147,7 @@ export interface AfterViewInit {
  *
  * See {@linkDocs guide/lifecycle-hooks#afterview "Lifecycle Hooks Guide"}.
  *
- * @stable
+ *
  */
 export interface AfterViewChecked {
     ngAfterViewChecked(): void;

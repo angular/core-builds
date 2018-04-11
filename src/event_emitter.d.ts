@@ -51,7 +51,7 @@ import { Subject } from 'rxjs';
  * https://github.com/jhusain/observable-spec
  *
  * Once a reference implementation of the spec is available, switch to it.
- * @stable
+ *
  */
 export declare class EventEmitter<T> extends Subject<T> {
     __isAsync: boolean;
