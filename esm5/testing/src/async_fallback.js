@@ -21,7 +21,7 @@ var _global = (typeof window === 'undefined' ? global : window);
  * });
  * ```
  *
- * @stable
+ *
  */
 export function asyncFallback(fn) {
     // If we're running using the Jasmine test framework, adapt to call the 'done'

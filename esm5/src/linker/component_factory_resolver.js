@@ -48,7 +48,7 @@ var _NullComponentFactoryResolver = /** @class */ (function () {
     return _NullComponentFactoryResolver;
 }());
 /**
- * \@stable
+ *
  * @abstract
  */
 var ComponentFactoryResolver = /** @class */ (function () {

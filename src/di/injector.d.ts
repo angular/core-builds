@@ -43,7 +43,7 @@ export declare class NullInjector implements Injector {
  * `Injector` returns itself when given `Injector` as a token:
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
- * @stable
+ *
  */
 export declare abstract class Injector {
     static THROW_IF_NOT_FOUND: Object;
@@ -85,7 +85,7 @@ export declare class StaticInjector implements Injector {
 /**
  * Injection flags for DI.
  *
- * @stable
+ *
  */
 export declare const enum InjectFlags {
     Default = 0,

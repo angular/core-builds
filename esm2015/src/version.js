@@ -12,7 +12,7 @@
 /**
  * \@description Represents the version of Angular
  *
- * \@stable
+ *
  */
 export class Version {
     /**
@@ -36,7 +36,7 @@ function Version_tsickle_Closure_declarations() {
     Version.prototype.full;
 }
 /**
- * \@stable
+ *
  */
-export const /** @type {?} */ VERSION = new Version('6.0.0-rc.3-ee14579');
+export const /** @type {?} */ VERSION = new Version('6.0.0-rc.3-0cb4f12');
 //# sourceMappingURL=version.js.map

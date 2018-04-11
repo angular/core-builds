@@ -12,12 +12,12 @@
 /**
  * \@description Represents the version of Angular
  *
- * \@stable
+ *
  */
 var /**
  * \@description Represents the version of Angular
  *
- * \@stable
+ *
  */
 Version = /** @class */ (function () {
     function Version(full) {
@@ -31,7 +31,7 @@ Version = /** @class */ (function () {
 /**
  * \@description Represents the version of Angular
  *
- * \@stable
+ *
  */
 export { Version };
 function Version_tsickle_Closure_declarations() {
@@ -45,7 +45,7 @@ function Version_tsickle_Closure_declarations() {
     Version.prototype.full;
 }
 /**
- * \@stable
+ *
  */
-export var /** @type {?} */ VERSION = new Version('6.0.0-rc.3-ee14579');
+export var /** @type {?} */ VERSION = new Version('6.0.0-rc.3-0cb4f12');
 //# sourceMappingURL=version.js.map

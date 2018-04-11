@@ -436,11 +436,11 @@ function DefaultKeyValueDiffer_tsickle_Closure_declarations() {
     DefaultKeyValueDiffer.prototype._removalsTail;
 }
 /**
- * \@stable
+ *
  * @template K, V
  */
 var /**
- * \@stable
+ *
  * @template K, V
  */
 KeyValueChangeRecord_ = /** @class */ (function () {

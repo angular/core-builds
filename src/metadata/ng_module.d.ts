@@ -4,7 +4,7 @@ import { TypeDecorator } from '../util/decorators';
 /**
  * A wrapper around a module that also includes the providers.
  *
- * @stable
+ *
  */
 export interface ModuleWithProviders {
     ngModule: Type<any>;
@@ -24,7 +24,7 @@ export interface SchemaMetadata {
  * - any properties on elements with a `-` in their name which is the common rule for custom
  * elements.
  *
- * @stable
+ *
  */
 export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
@@ -36,7 +36,7 @@ export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 /**
  * Type of the NgModule decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface NgModuleDecorator {
     /**
@@ -48,7 +48,7 @@ export interface NgModuleDecorator {
 /**
  * Type of the NgModule metadata.
  *
- * @stable
+ *
  */
 export interface NgModule {
     /**
@@ -162,7 +162,7 @@ export interface NgModule {
 /**
  * NgModule decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const NgModule: NgModuleDecorator;

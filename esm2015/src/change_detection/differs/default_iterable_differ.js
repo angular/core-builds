@@ -651,7 +651,7 @@ function DefaultIterableDiffer_tsickle_Closure_declarations() {
     DefaultIterableDiffer.prototype._trackByFn;
 }
 /**
- * \@stable
+ *
  * @template V
  */
 export class IterableChangeRecord_ {

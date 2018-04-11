@@ -49,7 +49,7 @@ export function devModeEqual(a, b) {
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
- * \@stable
+ *
  */
 export class WrappedValue {
     /**
@@ -86,7 +86,7 @@ function WrappedValue_tsickle_Closure_declarations() {
 }
 /**
  * Represents a basic change from a previous to a new value.
- * \@stable
+ *
  */
 export class SimpleChange {
     /**

@@ -34,7 +34,7 @@ import { ERROR_ORIGINAL_ERROR, getDebugContext, getErrorLogger, getOriginalError
  * class MyModule {}
  * ```
  *
- * \@stable
+ *
  */
 var /**
  *
@@ -60,7 +60,7 @@ var /**
  * class MyModule {}
  * ```
  *
- * \@stable
+ *
  */
 ErrorHandler = /** @class */ (function () {
     function ErrorHandler() {
@@ -153,7 +153,7 @@ ErrorHandler = /** @class */ (function () {
  * class MyModule {}
  * ```
  *
- * \@stable
+ *
  */
 export { ErrorHandler };
 function ErrorHandler_tsickle_Closure_declarations() {

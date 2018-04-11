@@ -8,7 +8,7 @@
 /**
  * @description Represents the version of Angular
  *
- * @stable
+ *
  */
 export declare class Version {
     full: string;
@@ -18,6 +18,6 @@ export declare class Version {
     constructor(full: string);
 }
 /**
- * @stable
+ *
  */
 export declare const VERSION: Version;

@@ -19,7 +19,7 @@
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- * \@stable
+ *
  * @template T
  */
 var /**
@@ -32,7 +32,7 @@ var /**
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- * \@stable
+ *
  * @template T
  */
 ElementRef = /** @class */ (function () {
@@ -51,7 +51,7 @@ ElementRef = /** @class */ (function () {
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- * \@stable
+ *
  * @template T
  */
 export { ElementRef };
@@ -75,7 +75,7 @@ function ElementRef_tsickle_Closure_declarations() {
      *    web worker.
      *   </p>
      * </div>
-     * \@stable
+     *
      * @type {?}
      */
     ElementRef.prototype.nativeElement;

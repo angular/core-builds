@@ -10,7 +10,7 @@ export declare type InjectableProvider = ValueSansProvider | ExistingSansProvide
 /**
  * Type of the Injectable decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface InjectableDecorator {
     /**
@@ -34,7 +34,7 @@ export interface InjectableDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
      *
-     * @stable
+     *
      */
     (): any;
     (options?: {
@@ -58,7 +58,7 @@ export declare function convertInjectableProviderToFactory(type: Type<any>, prov
 /**
 * Injectable decorator and metadata.
 *
-* @stable
+*
 * @Annotation
 */
 export declare const Injectable: InjectableDecorator;

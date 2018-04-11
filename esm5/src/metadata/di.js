@@ -50,7 +50,7 @@ export var /** @type {?} */ ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken('A
 /**
  * Type of the Attribute decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function AttributeDecorator() { }
@@ -65,7 +65,7 @@ function AttributeDecorator_tsickle_Closure_declarations() {
 /**
  * Attribute decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ Attribute = makeParamDecorator('Attribute', function (attributeName) { return ({ attributeName: attributeName }); });
@@ -75,7 +75,7 @@ export var /** @type {?} */ Attribute = makeParamDecorator('Attribute', function
  * See {\@link ContentChildren}, {\@link ContentChild}, {\@link ViewChildren}, {\@link ViewChild} for
  * more information.
  *
- * \@stable
+ *
  * @abstract
  */
 var /**
@@ -84,7 +84,7 @@ var /**
  * See {\@link ContentChildren}, {\@link ContentChild}, {\@link ViewChildren}, {\@link ViewChild} for
  * more information.
  *
- * \@stable
+ *
  * @abstract
  */
 Query = /** @class */ (function () {
@@ -98,7 +98,7 @@ Query = /** @class */ (function () {
  * See {\@link ContentChildren}, {\@link ContentChild}, {\@link ViewChildren}, {\@link ViewChild} for
  * more information.
  *
- * \@stable
+ *
  * @abstract
  */
 export { Query };
@@ -107,7 +107,7 @@ export { Query };
  *
  * See {\@link ContentChildren}.
  *
- * \@stable
+ *
  * @record
  */
 export function ContentChildrenDecorator() { }
@@ -122,7 +122,7 @@ function ContentChildrenDecorator_tsickle_Closure_declarations() {
 /**
  * ContentChildren decorator and metadata.
  *
- *  \@stable
+ *
  *  \@Annotation
  */
 export var /** @type {?} */ ContentChildren = makePropDecorator('ContentChildren', function (selector, data) {
@@ -133,7 +133,7 @@ export var /** @type {?} */ ContentChildren = makePropDecorator('ContentChildren
  * Type of the ContentChild decorator / constructor function.
  *
  *
- * \@stable
+ *
  * @record
  */
 export function ContentChildDecorator() { }
@@ -148,7 +148,7 @@ function ContentChildDecorator_tsickle_Closure_declarations() {
 /**
  * ContentChild decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', function (selector, data) {
@@ -160,7 +160,7 @@ export var /** @type {?} */ ContentChild = makePropDecorator('ContentChild', fun
  *
  * See {\@link ViewChildren}.
  *
- * \@stable
+ *
  * @record
  */
 export function ViewChildrenDecorator() { }
@@ -175,7 +175,7 @@ function ViewChildrenDecorator_tsickle_Closure_declarations() {
 /**
  * ViewChildren decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', function (selector, data) {
@@ -187,7 +187,7 @@ export var /** @type {?} */ ViewChildren = makePropDecorator('ViewChildren', fun
  *
  * See {\@link ViewChild}
  *
- * \@stable
+ *
  * @record
  */
 export function ViewChildDecorator() { }
@@ -202,7 +202,7 @@ function ViewChildDecorator_tsickle_Closure_declarations() {
 /**
  * ViewChild decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ ViewChild = makePropDecorator('ViewChild', function (selector, data) {

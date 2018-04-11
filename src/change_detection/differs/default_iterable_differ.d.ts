@@ -39,7 +39,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     private _addToRemovals(record);
 }
 /**
- * @stable
+ *
  */
 export declare class IterableChangeRecord_<V> implements IterableChangeRecord<V> {
     item: V;

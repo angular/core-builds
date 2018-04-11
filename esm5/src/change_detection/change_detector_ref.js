@@ -10,11 +10,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * \@stable
+ *
  * @abstract
  */
 var /**
- * \@stable
+ *
  * @abstract
  */
 ChangeDetectorRef = /** @class */ (function () {
@@ -23,7 +23,7 @@ ChangeDetectorRef = /** @class */ (function () {
     return ChangeDetectorRef;
 }());
 /**
- * \@stable
+ *
  * @abstract
  */
 export { ChangeDetectorRef };

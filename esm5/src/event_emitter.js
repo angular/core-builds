@@ -56,7 +56,7 @@ import { Subject, Subscription } from 'rxjs';
  * https://github.com/jhusain/observable-spec
  *
  * Once a reference implementation of the spec is available, switch to it.
- * \@stable
+ *
  * @template T
  */
 var /**
@@ -104,7 +104,7 @@ var /**
  * https://github.com/jhusain/observable-spec
  *
  * Once a reference implementation of the spec is available, switch to it.
- * \@stable
+ *
  * @template T
  */
 EventEmitter = /** @class */ (function (_super) {
@@ -225,7 +225,7 @@ EventEmitter = /** @class */ (function (_super) {
  * https://github.com/jhusain/observable-spec
  *
  * Once a reference implementation of the spec is available, switch to it.
- * \@stable
+ *
  * @template T
  */
 export { EventEmitter };

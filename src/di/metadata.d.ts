@@ -1,7 +1,7 @@
 /**
  * Type of the Inject decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface InjectDecorator {
     /**
@@ -29,7 +29,7 @@ export interface InjectDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      *
-     * @stable
+     *
      */
     (token: any): any;
     new (token: any): Inject;
@@ -37,7 +37,7 @@ export interface InjectDecorator {
 /**
  * Type of the Inject metadata.
  *
- * @stable
+ *
  */
 export interface Inject {
     token: any;
@@ -45,14 +45,14 @@ export interface Inject {
 /**
  * Inject decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Inject: InjectDecorator;
 /**
  * Type of the Optional decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface OptionalDecorator {
     /**
@@ -74,7 +74,7 @@ export interface OptionalDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='Optional'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Optional;
@@ -82,21 +82,21 @@ export interface OptionalDecorator {
 /**
  * Type of the Optional metadata.
  *
- * @stable
+ *
  */
 export interface Optional {
 }
 /**
  * Optional decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Optional: OptionalDecorator;
 /**
  * Type of the Self decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface SelfDecorator {
     /**
@@ -117,7 +117,7 @@ export interface SelfDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='Self'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Self;
@@ -125,21 +125,21 @@ export interface SelfDecorator {
 /**
  * Type of the Self metadata.
  *
- * @stable
+ *
  */
 export interface Self {
 }
 /**
  * Self decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Self: SelfDecorator;
 /**
  * Type of the SkipSelf decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface SkipSelfDecorator {
     /**
@@ -160,7 +160,7 @@ export interface SkipSelfDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): SkipSelf;
@@ -168,21 +168,21 @@ export interface SkipSelfDecorator {
 /**
  * Type of the SkipSelf metadata.
  *
- * @stable
+ *
  */
 export interface SkipSelf {
 }
 /**
  * SkipSelf decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const SkipSelf: SkipSelfDecorator;
 /**
  * Type of the Host decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface HostDecorator {
     /**
@@ -204,7 +204,7 @@ export interface HostDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='Host'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Host;
@@ -212,14 +212,14 @@ export interface HostDecorator {
 /**
  * Type of the Host metadata.
  *
- * @stable
+ *
  */
 export interface Host {
 }
 /**
  * Host decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Host: HostDecorator;

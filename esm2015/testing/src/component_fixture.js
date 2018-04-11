@@ -9,7 +9,7 @@ import { RendererFactory2, getDebugNode } from '@angular/core';
 /**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 export class ComponentFixture {
     constructor(componentRef, ngZone, _autoDetect) {

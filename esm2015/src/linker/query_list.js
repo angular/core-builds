@@ -33,7 +33,7 @@ import { getSymbolIterator } from '../util';
  *   \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- * \@stable
+ *
  * @template T
  */
 export class QueryList {

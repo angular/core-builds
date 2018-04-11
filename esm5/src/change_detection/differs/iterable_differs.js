@@ -14,7 +14,7 @@ import { Optional, SkipSelf } from '../../di/metadata';
  * A strategy for tracking changes over time to an iterable. Used by {\@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
- * \@stable
+ *
  * @record
  * @template V
  */
@@ -34,7 +34,7 @@ function IterableDiffer_tsickle_Closure_declarations() {
  * An object describing the changes in the `Iterable` collection since last time
  * `IterableDiffer#diff()` was invoked.
  *
- * \@stable
+ *
  * @record
  * @template V
  */
@@ -95,7 +95,7 @@ function IterableChanges_tsickle_Closure_declarations() {
 /**
  * Record representing the item change information.
  *
- * \@stable
+ *
  * @record
  * @template V
  */
@@ -134,7 +134,7 @@ function CollectionChangeRecord_tsickle_Closure_declarations() {
  * An optional function passed into {\@link NgForOf} that defines how to track
  * items in an iterable (e.g. fby index or id)
  *
- * \@stable
+ *
  * @record
  * @template T
  */
@@ -147,7 +147,7 @@ function TrackByFunction_tsickle_Closure_declarations() {
 /**
  * Provides a factory for {\@link IterableDiffer}.
  *
- * \@stable
+ *
  * @record
  */
 export function IterableDifferFactory() { }
@@ -159,11 +159,11 @@ function IterableDifferFactory_tsickle_Closure_declarations() {
 }
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * \@stable
+ *
  */
 var /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * \@stable
+ *
  */
 IterableDiffers = /** @class */ (function () {
     function IterableDiffers(factories) {
@@ -284,7 +284,7 @@ IterableDiffers = /** @class */ (function () {
 }());
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * \@stable
+ *
  */
 export { IterableDiffers };
 function IterableDiffers_tsickle_Closure_declarations() {

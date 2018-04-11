@@ -28,7 +28,7 @@ SecurityContext[SecurityContext.RESOURCE_URL] = "RESOURCE_URL";
 /**
  * Sanitizer is used by the views to sanitize potentially dangerous values.
  *
- * \@stable
+ *
  * @abstract
  */
 export class Sanitizer {

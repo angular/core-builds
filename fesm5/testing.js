@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.3-ee14579
+ * @license Angular v6.0.0-rc.3-0cb4f12
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -29,7 +29,7 @@ var _global = (typeof window === 'undefined' ? global : window);
  * });
  * ```
  *
- * @stable
+ *
  */
 function asyncFallback(fn) {
     // If we're running using the Jasmine test framework, adapt to call the 'done'
@@ -129,7 +129,7 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * });
  * ```
  *
- * @stable
+ *
  */
 function async(fn) {
     var _Zone = typeof Zone !== 'undefined' ? Zone : null;
@@ -159,7 +159,7 @@ function async(fn) {
 /**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 var ComponentFixture = /** @class */ (function () {
     function ComponentFixture(componentRef, ngZone, _autoDetect) {
@@ -799,7 +799,7 @@ var ComponentFixtureNoNgZone = new InjectionToken('ComponentFixtureNoNgZone');
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 var TestBed = /** @class */ (function () {
     function TestBed() {
@@ -1372,7 +1372,7 @@ function getTestBed() {
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 function inject(tokens, fn) {
     var testBed = getTestBed();

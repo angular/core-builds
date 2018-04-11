@@ -15,7 +15,7 @@ import { makeDecorator } from '../util/decorators';
 /**
  * A wrapper around a module that also includes the providers.
  *
- * \@stable
+ *
  * @record
  */
 export function ModuleWithProviders() { }
@@ -42,7 +42,7 @@ function SchemaMetadata_tsickle_Closure_declarations() {
  * - any properties on elements with a `-` in their name which is the common rule for custom
  * elements.
  *
- * \@stable
+ *
  */
 export var /** @type {?} */ CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
@@ -58,7 +58,7 @@ export var /** @type {?} */ NO_ERRORS_SCHEMA = {
 /**
  * Type of the NgModule decorator / constructor function.
  *
- * \@stable
+ *
  * @record
  */
 export function NgModuleDecorator() { }
@@ -73,7 +73,7 @@ function NgModuleDecorator_tsickle_Closure_declarations() {
 /**
  * NgModule decorator and metadata.
  *
- * \@stable
+ *
  * \@Annotation
  */
 export var /** @type {?} */ NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; }, undefined, undefined, function (moduleType, metadata) {

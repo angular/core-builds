@@ -12,11 +12,11 @@
 import * as tslib_1 from "tslib";
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 /**
- * \@stable
+ *
  * @abstract
  */
 var /**
- * \@stable
+ *
  * @abstract
  */
 ViewRef = /** @class */ (function (_super) {
@@ -27,7 +27,7 @@ ViewRef = /** @class */ (function (_super) {
     return ViewRef;
 }(ChangeDetectorRef));
 /**
- * \@stable
+ *
  * @abstract
  */
 export { ViewRef };

@@ -39,7 +39,7 @@ class _NullComponentFactoryResolver {
     }
 }
 /**
- * \@stable
+ *
  * @abstract
  */
 export class ComponentFactoryResolver {

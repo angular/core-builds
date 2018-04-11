@@ -49,7 +49,7 @@ export function devModeEqual(a, b) {
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
- * \@stable
+ *
  */
 var /**
  * Indicates that the result of a {\@link Pipe} transformation has changed even though the
@@ -68,7 +68,7 @@ var /**
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
- * \@stable
+ *
  */
 WrappedValue = /** @class */ (function () {
     function WrappedValue(value) {
@@ -136,7 +136,7 @@ WrappedValue = /** @class */ (function () {
  *    return WrappedValue.wrap(this._latestValue); // this will force update
  *  }
  * ```
- * \@stable
+ *
  */
 export { WrappedValue };
 function WrappedValue_tsickle_Closure_declarations() {
@@ -148,11 +148,11 @@ function WrappedValue_tsickle_Closure_declarations() {
 }
 /**
  * Represents a basic change from a previous to a new value.
- * \@stable
+ *
  */
 var /**
  * Represents a basic change from a previous to a new value.
- * \@stable
+ *
  */
 SimpleChange = /** @class */ (function () {
     function SimpleChange(previousValue, currentValue, firstChange) {
@@ -176,7 +176,7 @@ SimpleChange = /** @class */ (function () {
 }());
 /**
  * Represents a basic change from a previous to a new value.
- * \@stable
+ *
  */
 export { SimpleChange };
 function SimpleChange_tsickle_Closure_declarations() {

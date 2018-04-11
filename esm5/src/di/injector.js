@@ -69,7 +69,7 @@ export { NullInjector };
  * `Injector` returns itself when given `Injector` as a token:
  * {\@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
- * \@stable
+ *
  * @abstract
  */
 var Injector = /** @class */ (function () {
