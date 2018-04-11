@@ -12,7 +12,7 @@ import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -281,7 +281,7 @@ export declare function containerRefreshEnd(): void;
  * @param viewBlockId The ID of this view
  * @return boolean Whether or not this view is in creation mode
  */
-export declare function embeddedViewStart(viewBlockId: number): boolean;
+export declare function embeddedViewStart(viewBlockId: number): RenderFlags;
 /** Marks the end of an embedded view. */
 export declare function embeddedViewEnd(): void;
 /**

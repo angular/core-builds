@@ -9,6 +9,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/** @enum {number} */
+const RenderFlags = {
+    /* Whether to run the creation block (e.g. create elements and directives) */
+    Create: 1,
+    /* Whether to run the update block (e.g. refresh bindings) */
+    Update: 2,
+};
+export { RenderFlags };
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
  * consumable for rendering.

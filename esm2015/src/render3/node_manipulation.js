@@ -16,6 +16,7 @@ import { unusedValueExportToPlacateAjd as unused3 } from './interfaces/projectio
 import { isProceduralRenderer, unusedValueExportToPlacateAjd as unused4 } from './interfaces/renderer';
 import { unusedValueExportToPlacateAjd as unused5 } from './interfaces/view';
 import { assertNodeType } from './node_assert';
+import { stringify } from './util';
 const /** @type {?} */ unusedValueToPlacateAjd = unused1 + unused2 + unused3 + unused4 + unused5;
 /**
  * Returns the first RNode following the given LNode in the same parent DOM element.
@@ -141,6 +142,15 @@ function findFirstRNode(rootNode) {
     return null;
 }
 /**
+ * @param {?} value
+ * @param {?} renderer
+ * @return {?}
+ */
+export function createTextNode(value, renderer) {
+    return isProceduralRenderer(renderer) ? renderer.createText(stringify(value)) :
+        renderer.createTextNode(stringify(value));
+}
+/**
  * @param {?} container
  * @param {?} rootNode
  * @param {?} insertMode
@@ -159,6 +169,12 @@ export function addRemoveViewFromContainer(container, rootNode, insertMode, befo
             const /** @type {?} */ renderer = container.view.renderer;
             if (node.type === 3 /* Element */) {
                 if (insertMode) {
+                    if (!node.native) {
+                        // If the native element doesn't exist, this is a bound text node that hasn't yet been
+                        // created because update mode has not run (occurs when a bound text node is a root
+                        // node of a dynamically created view). See textBinding() in instructions for ctx.
+                        (/** @type {?} */ (node)).native = createTextNode('', renderer);
+                    }
                     isProceduralRenderer(renderer) ?
                         renderer.insertBefore(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
                         parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true);

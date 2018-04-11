@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Provider } from '../../core';
 import { RendererType2 } from '../../render/api';
 import { Type } from '../../type';
@@ -6,9 +13,21 @@ import { CssSelectorList } from './projection';
  * Definition of what a template rendering function should look like.
  */
 export declare type ComponentTemplate<T> = {
-    (ctx: T, creationMode: boolean): void;
+    (rf: RenderFlags, ctx: T): void;
     ngPrivateData?: never;
 };
+/**
+ * Flags passed into template functions to determine which blocks (i.e. creation, update)
+ * should be executed.
+ *
+ * Typically, a template runs both the creation block and the update block on initialization and
+ * subsequent runs only execute the update block. However, dynamically created views require that
+ * the creation block be executed separately from the update block (for backwards compat).
+ */
+export declare const enum RenderFlags {
+    Create = 1,
+    Update = 2,
+}
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
  * consumable for rendering.

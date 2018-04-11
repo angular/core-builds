@@ -65,6 +65,15 @@ function LView_tsickle_Closure_declarations() {
      */
     LView.prototype.bindingStartIndex;
     /**
+     * The binding index we should access next.
+     *
+     * This is stored so that bindings can continue where they left off
+     * if a view is left midway through processing bindings (e.g. if there is
+     * a setter that creates an embedded view, like in ngIf).
+     * @type {?}
+     */
+    LView.prototype.bindingIndex;
+    /**
      * When a view is destroyed, listeners need to be released and outputs need to be
      * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
      * and output data (in chunks of 2) for a particular view. Combining the arrays

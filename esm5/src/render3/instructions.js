@@ -13,7 +13,7 @@ import './ng_dev_mode';
 import { assertEqual, assertLessThan, assertNotEqual, assertNotNull, assertNull, assertSame } from './assert';
 import { NG_PROJECT_AS_ATTR_NAME } from './interfaces/projection';
 import { assertNodeType } from './node_assert';
-import { appendChild, insertChild, insertView, appendProjectedNode, removeView, canInsertNativeNode } from './node_manipulation';
+import { appendChild, insertChild, insertView, appendProjectedNode, removeView, canInsertNativeNode, createTextNode } from './node_manipulation';
 import { isNodeMatchingSelectorList, matchingSelectorIndex } from './node_selector_matcher';
 import { RendererStyleFlags3, isProceduralRenderer } from './interfaces/renderer';
 import { isDifferent, stringify } from './util';
@@ -136,10 +136,6 @@ var /** @type {?} */ data;
  */
 var /** @type {?} */ directives;
 /**
- * Points to the next binding index to read or write to.
- */
-var /** @type {?} */ bindingIndex;
-/**
  * When a view is destroyed, listeners need to be released and outputs need to be
  * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
  * and output data (in chunks of 2) for a particular view. Combining the arrays
@@ -188,12 +184,14 @@ export function enterView(newView, host) {
     var /** @type {?} */ oldView = currentView;
     data = newView && newView.data;
     directives = newView && newView.directives;
-    bindingIndex = newView && newView.bindingStartIndex || 0;
     tData = newView && newView.tView.data;
     creationMode = newView && (newView.flags & 1 /* CreationMode */) === 1 /* CreationMode */;
     firstTemplatePass = newView && newView.tView.firstTemplatePass;
     cleanup = newView && newView.cleanup;
     renderer = newView && newView.renderer;
+    if (newView && newView.bindingIndex < 0) {
+        newView.bindingIndex = newView.bindingStartIndex;
+    }
     if (host != null) {
         previousOrParentNode = host;
         isParent = true;
@@ -215,6 +213,7 @@ export function leaveView(newView) {
     // Views should be clean and in update mode after being checked, so these bits are cleared
     currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     currentView.lifecycleStage = 1 /* INIT */;
+    currentView.bindingIndex = -1;
     enterView(newView, null);
 }
 /**
@@ -292,7 +291,8 @@ export function createLView(viewId, renderer, tView, template, context, flags) {
         child: null,
         tail: null,
         next: null,
-        bindingStartIndex: null,
+        bindingStartIndex: -1,
+        bindingIndex: -1,
         template: template,
         context: context,
         dynamicViewCount: 0,
@@ -432,7 +432,7 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
     try {
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
-        var /** @type {?} */ cm = false;
+        var /** @type {?} */ rf = 2 /* Update */;
         if (viewNode == null) {
             // TODO: revisit setting currentView when re-writing view containers
             var /** @type {?} */ directives_1 = currentView && currentView.tView.directiveRegistry;
@@ -440,10 +440,10 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
             var /** @type {?} */ tView = getOrCreateTView(template, directives_1, pipes);
             var /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, lView);
-            cm = true;
+            rf = 1 /* Create */;
         }
         oldView = enterView(viewNode.data, viewNode);
-        template(context, cm);
+        template(rf, context);
         refreshDirectives();
         refreshDynamicChildren();
     }
@@ -469,7 +469,8 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
             rendererFactory.begin();
         }
         if (template) {
-            template(/** @type {?} */ ((componentOrContext)), creationMode);
+            template(getRenderFlags(hostView), /** @type {?} */ ((componentOrContext)));
+            refreshDynamicChildren();
             refreshDirectives();
         }
         else {
@@ -488,6 +489,21 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
     }
 }
 /**
+ * This function returns the default configuration of rendering flags depending on when the
+ * template is in creation mode or update mode. By default, the update block is run with the
+ * creation block when the view is in creation mode. Otherwise, the update block is run
+ * alone.
+ *
+ * Dynamically created views do NOT use this configuration (update block and create block are
+ * always run separately).
+ * @param {?} view
+ * @return {?}
+ */
+function getRenderFlags(view) {
+    return view.flags & 1 /* CreationMode */ ? 1 /* Create */ | 2 /* Update */ :
+        2 /* Update */;
+}
+/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param {?} index Index of the element in the data array
@@ -502,7 +518,7 @@ export function renderComponentOrTemplate(node, hostView, componentOrContext, te
  */
 export function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'elements should be created before any bindings');
+        assertEqual(currentView.bindingStartIndex, -1, 'elements should be created before any bindings');
     var /** @type {?} */ native = renderer.createElement(name);
     var /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
     if (attrs)
@@ -1137,11 +1153,8 @@ export function elementStyle(index, value) {
  */
 export function text(index, value) {
     ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'text nodes should be created before bindings');
-    var /** @type {?} */ textNode = value != null ?
-        (isProceduralRenderer(renderer) ? renderer.createText(stringify(value)) :
-            renderer.createTextNode(stringify(value))) :
-        null;
+        assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
+    var /** @type {?} */ textNode = value != null ? createTextNode(value, renderer) : null;
     var /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
     // Text nodes are self closing.
     isParent = false;
@@ -1168,9 +1181,7 @@ export function textBinding(index, value) {
     }
     else {
         // Node was created but DOM node creation was delayed. Create and append now.
-        existingNode.native = isProceduralRenderer(renderer) ?
-            renderer.createText(stringify(value)) :
-            renderer.createTextNode(stringify(value));
+        existingNode.native = createTextNode(value, renderer);
         insertChild(existingNode, currentView);
     }
 }
@@ -1237,7 +1248,7 @@ function addComponentLogic(index, instance, def) {
  */
 export function baseDirectiveCreate(index, directive, directiveDef) {
     ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'directives should be created before any bindings');
+        assertEqual(currentView.bindingStartIndex, -1, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
     if (directives == null)
@@ -1346,8 +1357,7 @@ export function createLContainer(parentLNode, currentView, template) {
  * @return {?}
  */
 export function container(index, template, tagName, attrs, localRefs) {
-    ngDevMode &&
-        assertNull(currentView.bindingStartIndex, 'container nodes should be created before any bindings');
+    ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'container nodes should be created before any bindings');
     var /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
     var /** @type {?} */ lContainer = createLContainer(currentParent, currentView, template);
     var /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
@@ -1462,12 +1472,12 @@ export function embeddedViewStart(viewBlockId) {
     var /** @type {?} */ container = /** @type {?} */ ((isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent))));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     var /** @type {?} */ lContainer = container.data;
-    var /** @type {?} */ existingViewNode = scanForView(container, lContainer.nextIndex, viewBlockId);
-    if (existingViewNode) {
-        previousOrParentNode = existingViewNode;
+    var /** @type {?} */ viewNode = scanForView(container, lContainer.nextIndex, viewBlockId);
+    if (viewNode) {
+        previousOrParentNode = viewNode;
         ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
         isParent = true;
-        enterView((/** @type {?} */ (existingViewNode)).data, /** @type {?} */ (existingViewNode));
+        enterView(viewNode.data, viewNode);
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
@@ -1475,9 +1485,9 @@ export function embeddedViewStart(viewBlockId) {
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
-        enterView(newView, createLNode(null, 2 /* View */, null, newView));
+        enterView(newView, viewNode = createLNode(null, 2 /* View */, null, newView));
     }
-    return !existingViewNode;
+    return getRenderFlags(viewNode.data);
 }
 /**
  * Initialize the TView (e.g. static data) for the active embedded view.
@@ -1872,7 +1882,7 @@ export function detectChangesInternal(hostView, hostNode, def, component) {
     var /** @type {?} */ oldView = enterView(hostView, hostNode);
     var /** @type {?} */ template = def.template;
     try {
-        template(component, creationMode);
+        template(getRenderFlags(hostView), component);
         refreshDirectives();
         refreshDynamicChildren();
     }
@@ -1913,12 +1923,9 @@ export var /** @type {?} */ NO_CHANGE = /** @type {?} */ ({});
  * @return {?}
  */
 function initBindings() {
-    // `bindingIndex` is initialized when the view is first entered when not in creation mode
-    ngDevMode &&
-        assertEqual(creationMode, true, 'should only be called in creationMode for performance reasons');
-    if (currentView.bindingStartIndex == null) {
-        bindingIndex = currentView.bindingStartIndex = data.length;
-    }
+    ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'Binding start index should only be set once, when null');
+    ngDevMode && assertEqual(currentView.bindingIndex, -1, 'Binding index should not yet be set ' + currentView.bindingIndex);
+    currentView.bindingIndex = currentView.bindingStartIndex = data.length;
 }
 /**
  * Creates a single value binding.
@@ -1928,16 +1935,16 @@ function initBindings() {
  * @return {?}
  */
 export function bind(value) {
-    if (creationMode) {
+    if (currentView.bindingStartIndex < 0) {
         initBindings();
-        return data[bindingIndex++] = value;
+        return data[currentView.bindingIndex++] = value;
     }
-    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[bindingIndex], value);
+    var /** @type {?} */ changed = value !== NO_CHANGE && isDifferent(data[currentView.bindingIndex], value);
     if (changed) {
-        throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[bindingIndex], value);
-        data[bindingIndex] = value;
+        throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[currentView.bindingIndex], value);
+        data[currentView.bindingIndex] = value;
     }
-    bindingIndex++;
+    currentView.bindingIndex++;
     return changed ? value : NO_CHANGE;
 }
 /**
@@ -2180,10 +2187,10 @@ export function loadDirective(index) {
  * @return {?}
  */
 export function consumeBinding() {
-    ngDevMode && assertDataInRange(bindingIndex);
+    ngDevMode && assertDataInRange(currentView.bindingIndex);
     ngDevMode &&
-        assertNotEqual(data[bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
-    return data[bindingIndex++];
+        assertNotEqual(data[currentView.bindingIndex], NO_CHANGE, 'Stored value should never be NO_CHANGE.');
+    return data[currentView.bindingIndex++];
 }
 /**
  * Updates binding if changed, then returns whether it was updated.
@@ -2192,17 +2199,17 @@ export function consumeBinding() {
  */
 export function bindingUpdated(value) {
     ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    if (creationMode) {
+    if (currentView.bindingStartIndex < 0) {
         initBindings();
     }
-    else if (isDifferent(data[bindingIndex], value)) {
-        throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[bindingIndex], value);
+    else if (isDifferent(data[currentView.bindingIndex], value)) {
+        throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[currentView.bindingIndex], value);
     }
     else {
-        bindingIndex++;
+        currentView.bindingIndex++;
         return false;
     }
-    data[bindingIndex++] = value;
+    data[currentView.bindingIndex++] = value;
     return true;
 }
 /**

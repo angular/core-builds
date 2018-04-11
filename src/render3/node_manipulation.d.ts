@@ -1,6 +1,7 @@
 import { LContainerNode, LElementNode, LNode, LTextNode, LViewNode } from './interfaces/node';
-import { RNode } from './interfaces/renderer';
+import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView, LViewOrLContainer } from './interfaces/view';
+export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
  *
