@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.4-aa27155
+ * @license Angular v6.0.0-rc.4-639d52f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.4-aa27155');
+const VERSION = new Version('6.0.0-rc.4-639d52f');
 
 /**
  * @fileoverview added by tsickle
@@ -3778,7 +3778,7 @@ function isPromise(obj) {
  * @return {?}
  */
 function isObservable(obj) {
-    // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+    // TODO: use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
     return !!obj && typeof obj.subscribe === 'function';
 }
 
@@ -7100,7 +7100,7 @@ class DefaultIterableDiffer {
             this._movesHead = this._movesTail = null;
             this._removalsHead = this._removalsTail = null;
             this._identityChangesHead = this._identityChangesTail = null;
-            // todo(vicb) when assert gets supported
+            // TODO(vicb): when assert gets supported
             // assert(!this.isDirty);
         }
     }
@@ -7287,12 +7287,12 @@ class DefaultIterableDiffer {
     _addAfter(record, prevRecord, index) {
         this._insertAfter(record, prevRecord, index);
         if (this._additionsTail === null) {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(this._additionsHead === null);
             this._additionsTail = this._additionsHead = record;
         }
         else {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(_additionsTail._nextAdded === null);
             // assert(record._nextAdded === null);
             this._additionsTail = this._additionsTail._nextAdded = record;
@@ -7307,12 +7307,12 @@ class DefaultIterableDiffer {
      * @return {?}
      */
     _insertAfter(record, prevRecord, index) {
-        // todo(vicb)
+        // TODO(vicb):
         // assert(record != prevRecord);
         // assert(record._next === null);
         // assert(record._prev === null);
         const /** @type {?} */ next = prevRecord === null ? this._itHead : prevRecord._next;
-        // todo(vicb)
+        // TODO(vicb):
         // assert(next != record);
         // assert(prevRecord != record);
         record._next = next;
@@ -7355,7 +7355,7 @@ class DefaultIterableDiffer {
         }
         const /** @type {?} */ prev = record._prev;
         const /** @type {?} */ next = record._next;
-        // todo(vicb)
+        // TODO(vicb):
         // assert((record._prev = null) === null);
         // assert((record._next = null) === null);
         if (prev === null) {
@@ -7379,18 +7379,18 @@ class DefaultIterableDiffer {
      * @return {?}
      */
     _addToMoves(record, toIndex) {
-        // todo(vicb)
+        // TODO(vicb):
         // assert(record._nextMoved === null);
         if (record.previousIndex === toIndex) {
             return record;
         }
         if (this._movesTail === null) {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(_movesHead === null);
             this._movesTail = this._movesHead = record;
         }
         else {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(_movesTail._nextMoved === null);
             this._movesTail = this._movesTail._nextMoved = record;
         }
@@ -7408,13 +7408,13 @@ class DefaultIterableDiffer {
         record.currentIndex = null;
         record._nextRemoved = null;
         if (this._removalsTail === null) {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(_removalsHead === null);
             this._removalsTail = this._removalsHead = record;
             record._prevRemoved = null;
         }
         else {
-            // todo(vicb)
+            // TODO(vicb):
             // assert(_removalsTail._nextRemoved === null);
             // assert(record._nextRemoved === null);
             record._prevRemoved = this._removalsTail;
@@ -7524,7 +7524,7 @@ class _DuplicateItemRecordList {
         }
         else {
             /** @type {?} */ ((
-            // todo(vicb)
+            // TODO(vicb):
             // assert(record.item ==  _head.item ||
             //       record.item is num && record.item.isNaN && _head.item is num && _head.item.isNaN);
             this._tail))._nextDup = record;
@@ -7556,7 +7556,7 @@ class _DuplicateItemRecordList {
      * @return {?}
      */
     remove(record) {
-        // todo(vicb)
+        // TODO(vicb):
         // assert(() {
         //  // verify that the record being removed is in the list.
         //  for (IterableChangeRecord_ cursor = _head; cursor != null; cursor = cursor._nextDup) {

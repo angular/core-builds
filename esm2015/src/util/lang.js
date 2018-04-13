@@ -25,7 +25,7 @@ export function isPromise(obj) {
  * @return {?}
  */
 export function isObservable(obj) {
-    // TODO use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
+    // TODO: use Symbol.observable when https://github.com/ReactiveX/rxjs/issues/2415 will be resolved
     return !!obj && typeof obj.subscribe === 'function';
 }
 //# sourceMappingURL=lang.js.map
