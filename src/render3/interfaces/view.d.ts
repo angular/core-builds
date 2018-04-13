@@ -7,7 +7,7 @@
  */
 import { Injector } from '../../di/injector';
 import { LContainer } from './container';
-import { ComponentTemplate, DirectiveDef, DirectiveDefList, PipeDef, PipeDefList } from './definition';
+import { ComponentTemplate, DirectiveDefList, PipeDefList, ɵDirectiveDef, ɵPipeDef } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
 import { LQueries } from './query';
 import { Renderer3 } from './renderer';
@@ -373,7 +373,7 @@ export declare const enum LifecycleStage {
  * as its pipe instance in the data array. Any nodes that do not have static
  * data store a null value in tData to avoid a sparse array.
  */
-export declare type TData = (TNode | PipeDef<any> | null)[];
+export declare type TData = (TNode | ɵPipeDef<any> | null)[];
 /** Type for TView.currentMatches */
-export declare type CurrentMatchesList = [DirectiveDef<any>, (string | number | null)];
+export declare type CurrentMatchesList = [ɵDirectiveDef<any>, (string | number | null)];
 export declare const unusedValueExportToPlacateAjd = 1;

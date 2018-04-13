@@ -11,7 +11,7 @@ import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { Type } from '../type';
-import { DirectiveDef } from './interfaces/definition';
+import { ɵDirectiveDef } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
 import { LContainerNode, LElementNode, LNode } from './interfaces/node';
 import { QueryReadType } from './interfaces/query';
@@ -37,13 +37,13 @@ export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LCon
  * @param di The node injector in which a directive will be added
  * @param def The definition of the directive to be made public
  */
-export declare function diPublicInInjector(di: LInjector, def: DirectiveDef<any>): void;
+export declare function diPublicInInjector(di: LInjector, def: ɵDirectiveDef<any>): void;
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
  * @param def The definition of the directive to be made public
  */
-export declare function diPublic(def: DirectiveDef<any>): void;
+export declare function diPublic(def: ɵDirectiveDef<any>): void;
 /**
  * Searches for an instance of the given type up the injector tree and returns
  * that instance if found.

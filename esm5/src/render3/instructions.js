@@ -818,7 +818,7 @@ export function locateHostElement(factory, elementOrSelector) {
  *
  * @param {?} tag
  * @param {?} rNode Render host element.
- * @param {?} def ComponentDef
+ * @param {?} def ɵComponentDef
  *
  * @return {?} LElementNode created
  */
@@ -1196,7 +1196,7 @@ export function textBinding(index, value) {
  * @template T
  * @param {?} index
  * @param {?} directive The directive instance.
- * @param {?} directiveDef DirectiveDef object which contains information about the template.
+ * @param {?} directiveDef ɵDirectiveDef object which contains information about the template.
  * @return {?}
  */
 export function directiveCreate(index, directive, directiveDef) {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { ComponentDefFeature, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeType, PipeTypesOrFactory, ɵComponentDef, ɵDirectiveDef, ɵPipeDef } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -125,8 +125,8 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * Registry of directives and components that may be found in this component's view.
      *
-     * The property is either an array of `DirectiveDef`s or a function which returns the array of
-     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     * The property is either an array of `ɵDirectiveDef`s or a function which returns the array of
+     * `ɵDirectiveDef`s. The function is necessary to be able to support forward declarations.
      */
     directives?: DirectiveTypesOrFactory | null;
     /**
@@ -136,9 +136,9 @@ export declare function defineComponent<T>(componentDefinition: {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipes?: PipeTypesOrFactory | null;
-}): ComponentDef<T>;
-export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
-export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
+}): ɵComponentDef<T>;
+export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): ɵDirectiveDef<any> | ɵComponentDef<any>;
+export declare function extractPipeDef(type: PipeType<any>): ɵPipeDef<any>;
 /**
  * Creates an NgOnChangesFeature function for a component's features list.
  *
@@ -165,7 +165,7 @@ export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 export declare function NgOnChangesFeature(inputPropertyNames?: {
     [key: string]: string;
 }): DirectiveDefFeature;
-export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
+export declare function PublicFeature<T>(definition: ɵDirectiveDef<T>): void;
 /**
  * Create a directive definition object.
  *
@@ -192,7 +192,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     features?: DirectiveDefFeature[] | undefined;
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
     exportAs?: string | undefined;
-}) => DirectiveDef<T>;
+}) => ɵDirectiveDef<T>;
 /**
  * Create a pipe definition object.
  *
@@ -216,4 +216,4 @@ export declare function definePipe<T>(pipeDef: {
     factory: () => T;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): PipeDef<T>;
+}): ɵPipeDef<T>;

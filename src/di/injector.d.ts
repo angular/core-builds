@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Type } from '../type';
-import { InjectableDef } from './defs';
+import { ɵInjectableDef } from './defs';
 import { InjectionToken } from './injection_token';
 import { StaticProvider } from './provider';
 export declare const SOURCE = "__source";
@@ -70,7 +70,7 @@ export declare abstract class Injector {
         parent?: Injector;
         name?: string;
     }): Injector;
-    static ngInjectableDef: InjectableDef<Injector>;
+    static ngInjectableDef: ɵInjectableDef<Injector>;
 }
 export declare const USE_VALUE: string;
 export declare class StaticInjector implements Injector {

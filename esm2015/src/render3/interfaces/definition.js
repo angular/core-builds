@@ -18,7 +18,7 @@ const RenderFlags = {
 };
 export { RenderFlags };
 /**
- * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
+ * A subclass of `Type` which has a static `ngComponentDef`:`ɵComponentDef` field making it
  * consumable for rendering.
  * @record
  * @template T
@@ -29,7 +29,7 @@ function ComponentType_tsickle_Closure_declarations() {
     ComponentType.prototype.ngComponentDef;
 }
 /**
- * A subclass of `Type` which has a static `ngDirectiveDef`:`DirectiveDef` field making it
+ * A subclass of `Type` which has a static `ngDirectiveDef`:`ɵDirectiveDef` field making it
  * consumable for rendering.
  * @record
  * @template T
@@ -43,7 +43,7 @@ function DirectiveType_tsickle_Closure_declarations() {
 const DirectiveDefFlags = { ContentQuery: 2, };
 export { DirectiveDefFlags };
 /**
- * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
+ * A subclass of `Type` which has a static `ngPipeDef`:`ɵPipeDef` field making it
  * consumable for rendering.
  * @record
  * @template T
@@ -64,45 +64,50 @@ function PipeType_tsickle_Closure_declarations() {
  * can change between versions.
  *
  * See: {\@link defineDirective}
+ *
+ * NOTE: This is a semi public API, and there are no guaranties that the shape of this API will
+ * remain consistent between version. Use with caution.
+ *
+ * \@experimental
  * @record
  * @template T
  */
-export function DirectiveDef() { }
-function DirectiveDef_tsickle_Closure_declarations() {
+export function ɵDirectiveDef() { }
+function ɵDirectiveDef_tsickle_Closure_declarations() {
     /**
      * Token representing the directive. Used by DI.
      * @type {?}
      */
-    DirectiveDef.prototype.type;
+    ɵDirectiveDef.prototype.type;
     /**
      * Function that makes a directive public to the DI system.
      * @type {?}
      */
-    DirectiveDef.prototype.diPublic;
+    ɵDirectiveDef.prototype.diPublic;
     /**
      * The selectors that will be used to match nodes to this directive.
      * @type {?}
      */
-    DirectiveDef.prototype.selectors;
+    ɵDirectiveDef.prototype.selectors;
     /**
      * A dictionary mapping the inputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
      * (as in `\@Input('alias') propertyName: any;`).
      * @type {?}
      */
-    DirectiveDef.prototype.inputs;
+    ɵDirectiveDef.prototype.inputs;
     /**
      * A dictionary mapping the outputs' minified property names to their public API names, which
      * are their aliases if any, or their original unminified property names
      * (as in `\@Output('alias') propertyName: any;`).
      * @type {?}
      */
-    DirectiveDef.prototype.outputs;
+    ɵDirectiveDef.prototype.outputs;
     /**
      * Name under which the directive is exported (for use with local references in template)
      * @type {?}
      */
-    DirectiveDef.prototype.exportAs;
+    ɵDirectiveDef.prototype.exportAs;
     /**
      * Factory function used to create a new directive instance.
      *
@@ -110,12 +115,12 @@ function DirectiveDef_tsickle_Closure_declarations() {
      * it instead returns an array that contains the instance as well as content query data.
      * @type {?}
      */
-    DirectiveDef.prototype.factory;
+    ɵDirectiveDef.prototype.factory;
     /**
      * Refreshes host bindings on the associated directive.
      * @type {?}
      */
-    DirectiveDef.prototype.hostBindings;
+    ɵDirectiveDef.prototype.hostBindings;
     /**
      * Static attributes to set on host element.
      *
@@ -123,21 +128,21 @@ function DirectiveDef_tsickle_Closure_declarations() {
      * Odd indices: attribute value
      * @type {?}
      */
-    DirectiveDef.prototype.attributes;
+    ɵDirectiveDef.prototype.attributes;
     /** @type {?} */
-    DirectiveDef.prototype.onInit;
+    ɵDirectiveDef.prototype.onInit;
     /** @type {?} */
-    DirectiveDef.prototype.doCheck;
+    ɵDirectiveDef.prototype.doCheck;
     /** @type {?} */
-    DirectiveDef.prototype.afterContentInit;
+    ɵDirectiveDef.prototype.afterContentInit;
     /** @type {?} */
-    DirectiveDef.prototype.afterContentChecked;
+    ɵDirectiveDef.prototype.afterContentChecked;
     /** @type {?} */
-    DirectiveDef.prototype.afterViewInit;
+    ɵDirectiveDef.prototype.afterViewInit;
     /** @type {?} */
-    DirectiveDef.prototype.afterViewChecked;
+    ɵDirectiveDef.prototype.afterViewChecked;
     /** @type {?} */
-    DirectiveDef.prototype.onDestroy;
+    ɵDirectiveDef.prototype.onDestroy;
 }
 /**
  * Runtime link information for Components.
@@ -150,50 +155,55 @@ function DirectiveDef_tsickle_Closure_declarations() {
  * can change between versions.
  *
  * See: {\@link defineComponent}
+ *
+ * NOTE: This is a semi public API, and there are no guaranties that the shape of this API will
+ * remain consistent between version. Use with caution.
+ *
+ * \@experimental
  * @record
  * @template T
  */
-export function ComponentDef() { }
-function ComponentDef_tsickle_Closure_declarations() {
+export function ɵComponentDef() { }
+function ɵComponentDef_tsickle_Closure_declarations() {
     /**
      * The View template of the component.
      *
      * NOTE: only used with component directives.
      * @type {?}
      */
-    ComponentDef.prototype.template;
+    ɵComponentDef.prototype.template;
     /**
      * Renderer type data of the component.
      *
      * NOTE: only used with component directives.
      * @type {?}
      */
-    ComponentDef.prototype.rendererType;
+    ɵComponentDef.prototype.rendererType;
     /**
      * Whether or not this component's ChangeDetectionStrategy is OnPush
      * @type {?}
      */
-    ComponentDef.prototype.onPush;
+    ɵComponentDef.prototype.onPush;
     /**
      * Defines the set of injectable providers that are visible to a Directive and its content DOM
      * children.
      * @type {?|undefined}
      */
-    ComponentDef.prototype.providers;
+    ɵComponentDef.prototype.providers;
     /**
      * Defines the set of injectable providers that are visible to a Directive and its view DOM
      * children only.
      * @type {?|undefined}
      */
-    ComponentDef.prototype.viewProviders;
+    ɵComponentDef.prototype.viewProviders;
     /**
      * Registry of directives and components that may be found in this view.
      *
-     * The property is either an array of `DirectiveDef`s or a function which returns the array of
-     * `DirectiveDef`s. The function is necessary to be able to support forward declarations.
+     * The property is either an array of `ɵDirectiveDef`s or a function which returns the array of
+     * `ɵDirectiveDef`s. The function is necessary to be able to support forward declarations.
      * @type {?}
      */
-    ComponentDef.prototype.directiveDefs;
+    ɵComponentDef.prototype.directiveDefs;
     /**
      * Registry of pipes that may be found in this view.
      *
@@ -201,7 +211,7 @@ function ComponentDef_tsickle_Closure_declarations() {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      * @type {?}
      */
-    ComponentDef.prototype.pipeDefs;
+    ɵComponentDef.prototype.pipeDefs;
 }
 /**
  * Runtime link information for Pipes.
@@ -214,18 +224,23 @@ function ComponentDef_tsickle_Closure_declarations() {
  * can change between versions.
  *
  * See: {\@link definePipe}
+ *
+ * NOTE: This is a semi public API, and there are no guaranties that the shape of this API will
+ * remain consistent between version. Use with caution.
+ *
+ * \@experimental
  * @record
  * @template T
  */
-export function PipeDef() { }
-function PipeDef_tsickle_Closure_declarations() {
+export function ɵPipeDef() { }
+function ɵPipeDef_tsickle_Closure_declarations() {
     /**
      * Pipe name.
      *
      * Used to resolve pipe in templates.
      * @type {?}
      */
-    PipeDef.prototype.name;
+    ɵPipeDef.prototype.name;
     /**
      * factory function used to create a new directive instance.
      *
@@ -233,7 +248,7 @@ function PipeDef_tsickle_Closure_declarations() {
      * component templates which is sensitive to size.
      * @type {?}
      */
-    PipeDef.prototype.n;
+    ɵPipeDef.prototype.n;
     /**
      * Whether or not the pipe is pure.
      *
@@ -241,9 +256,9 @@ function PipeDef_tsickle_Closure_declarations() {
      * state of the pipe.
      * @type {?}
      */
-    PipeDef.prototype.pure;
+    ɵPipeDef.prototype.pure;
     /** @type {?} */
-    PipeDef.prototype.onDestroy;
+    ɵPipeDef.prototype.onDestroy;
 }
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.

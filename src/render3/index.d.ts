@@ -7,7 +7,7 @@
  */
 import { LifecycleHooksFeature, createComponentRef, getHostElement, getRenderedText, renderComponent, whenRendered } from './component';
 import { NgOnChangesFeature, PublicFeature, defineComponent, defineDirective, definePipe } from './definition';
-import { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, PipeDef } from './interfaces/definition';
+import { ComponentTemplate, ComponentType, DirectiveDefFlags, DirectiveType, ɵComponentDef, ɵDirectiveDef, ɵPipeDef } from './interfaces/definition';
 export { QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF, directiveInject, injectAttribute, injectChangeDetectorRef, injectElementRef, injectTemplateRef, injectViewContainerRef } from './di';
 export { RenderFlags } from './interfaces/definition';
 export { CssSelectorList } from './interfaces/projection';
@@ -15,4 +15,4 @@ export { NO_CHANGE as NC, bind as b, interpolation1 as i1, interpolation2 as i2,
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR } from './query';
 export { pureFunction0 as f0, pureFunction1 as f1, pureFunction2 as f2, pureFunction3 as f3, pureFunction4 as f4, pureFunction5 as f5, pureFunction6 as f6, pureFunction7 as f7, pureFunction8 as f8, pureFunctionV as fV } from './pure_function';
-export { ComponentDef, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, definePipe, createComponentRef, getHostElement, getRenderedText, renderComponent, whenRendered };
+export { ɵComponentDef, ComponentTemplate, ComponentType, ɵDirectiveDef, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, PublicFeature, ɵPipeDef, LifecycleHooksFeature, defineComponent, defineDirective, definePipe, createComponentRef, getHostElement, getRenderedText, renderComponent, whenRendered };

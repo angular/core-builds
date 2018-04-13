@@ -1,5 +1,5 @@
 import { Type } from '../type';
-import { InjectableDef } from './defs';
+import { ɵInjectableDef } from './defs';
 import { ClassSansProvider, ConstructorSansProvider, ExistingSansProvider, FactorySansProvider, StaticClassSansProvider, ValueSansProvider } from './provider';
 /**
  * Injectable providers used in `@Injectable` decorator.
@@ -68,5 +68,5 @@ export declare const Injectable: InjectableDecorator;
  * @experimental
  */
 export interface InjectableType<T> extends Type<T> {
-    ngInjectableDef: InjectableDef<T>;
+    ngInjectableDef: ɵInjectableDef<T>;
 }

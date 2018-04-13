@@ -12,7 +12,7 @@ import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ɵComponentDef, ComponentTemplate, ɵDirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -105,7 +105,7 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, name: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
-export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
+export declare function resolveDirective(def: ɵDirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
@@ -122,11 +122,11 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  * Creates the host LNode.
  *
  * @param rNode Render host element.
- * @param def ComponentDef
+ * @param def ɵComponentDef
  *
  * @returns LElementNode created
  */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ɵComponentDef<any>): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -240,16 +240,16 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  *       be retrieved before they are created in which case the value will be null.
  *
  * @param directive The directive instance.
- * @param directiveDef DirectiveDef object which contains information about the template.
+ * @param directiveDef ɵDirectiveDef object which contains information about the template.
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: ɵDirectiveDef<T> | ɵComponentDef<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: ɵDirectiveDef<T> | ɵComponentDef<T>): T;
 export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>): LContainer;
 /**
  * Creates an LContainerNode.
@@ -402,7 +402,7 @@ export declare function detectChanges<T>(component: T): void;
  */
 export declare function checkNoChanges<T>(component: T): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ComponentDef<T>, component: T): void;
+export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ɵComponentDef<T>, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *
