@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.4-6199ea5
+ * @license Angular v6.0.0-rc.4-2bb7838
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.4-6199ea5');
+const VERSION = new Version('6.0.0-rc.4-2bb7838');
 
 /**
  * @fileoverview added by tsickle
@@ -17741,6 +17741,9 @@ function embeddedViewEnd() {
         ngDevMode && assertNodeType(containerNode, 0 /* Container */);
         const /** @type {?} */ lContainer = containerNode.data;
         if (creationMode) {
+            // When projected nodes are going to be inserted, the renderParent of the dynamic container
+            // used by the ViewContainerRef must be set.
+            setRenderParentInProjectedNodes(lContainer.renderParent, viewNode);
             // it is a new view, insert it into collection of views for a given container
             insertView(containerNode, viewNode, lContainer.nextIndex);
         }
@@ -17749,6 +17752,31 @@ function embeddedViewEnd() {
     leaveView(/** @type {?} */ ((/** @type {?} */ ((currentView)).parent)));
     ngDevMode && assertEqual(isParent, false, 'isParent');
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
+}
+/**
+ * For nodes which are projected inside an embedded view, this function sets the renderParent
+ * of their dynamic LContainerNode.
+ * @param {?} renderParent the renderParent of the LContainer which contains the embedded view.
+ * @param {?} viewNode the embedded view.
+ * @return {?}
+ */
+function setRenderParentInProjectedNodes(renderParent, viewNode) {
+    if (renderParent != null) {
+        let /** @type {?} */ node = viewNode.child;
+        while (node) {
+            if (node.type === 1 /* Projection */) {
+                let /** @type {?} */ nodeToProject = (/** @type {?} */ (node)).data.head;
+                const /** @type {?} */ lastNodeToProject = (/** @type {?} */ (node)).data.tail;
+                while (nodeToProject) {
+                    if (nodeToProject.dynamicLContainerNode) {
+                        nodeToProject.dynamicLContainerNode.data.renderParent = renderParent;
+                    }
+                    nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
+                }
+            }
+            node = node.next;
+        }
+    }
 }
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
