@@ -82,8 +82,6 @@ function LInjector_tsickle_Closure_declarations() {
     LInjector.prototype.cbf6;
     /** @type {?} */
     LInjector.prototype.cbf7;
-    /** @type {?} */
-    LInjector.prototype.injector;
     /**
      * Stores the TemplateRef so subsequent injections of the TemplateRef get the same instance.
      * @type {?}

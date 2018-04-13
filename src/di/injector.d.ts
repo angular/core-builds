@@ -84,17 +84,22 @@ export declare class StaticInjector implements Injector {
 }
 /**
  * Injection flags for DI.
- *
- *
  */
 export declare const enum InjectFlags {
     Default = 0,
-    /** Skip the node that is requesting injection. */
-    SkipSelf = 1,
+    /**
+     * Specifies that an injector should retrieve a dependency from any injector until reaching the
+     * host element of the current component. (Only used with Element Injector)
+     */
+    Host = 1,
     /** Don't descend into ancestors of the node requesting injection. */
     Self = 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf = 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional = 8,
 }
-export declare function setCurrentInjector(injector: Injector | null): Injector | null;
+export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**
  * Injects a token from the currently active injector.
  *
@@ -109,7 +114,6 @@ export declare function setCurrentInjector(injector: Injector | null): Injector 
  *
  * @experimental
  */
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: undefined, flags?: InjectFlags): T;
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: T, flags?: InjectFlags): T;
-export declare function inject<T>(token: Type<T> | InjectionToken<T>, notFoundValue: null, flags?: InjectFlags): T | null;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>): T;
+export declare function inject<T>(token: Type<T> | InjectionToken<T>, flags?: InjectFlags): T | null;
 export declare function injectArgs(types: (Type<any> | InjectionToken<any> | any[])[]): any[];

@@ -9,7 +9,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { defineInjectable } from '../../di/defs';
 import { Optional, SkipSelf } from '../../di/metadata';
+import { DefaultIterableDifferFactory } from '../differs/default_iterable_differ';
 /**
  * A strategy for tracking changes over time to an iterable. Used by {\@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
@@ -161,11 +163,7 @@ function IterableDifferFactory_tsickle_Closure_declarations() {
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
  *
  */
-var /**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- */
-IterableDiffers = /** @class */ (function () {
+var IterableDiffers = /** @class */ (function () {
     function IterableDiffers(factories) {
         this.factories = factories;
     }
@@ -280,14 +278,16 @@ IterableDiffers = /** @class */ (function () {
             throw new Error("Cannot find a differ supporting object '" + iterable + "' of type '" + getTypeNameForDebugging(iterable) + "'");
         }
     };
+    /** @nocollapse */ IterableDiffers.ngInjectableDef = defineInjectable({
+        providedIn: 'root',
+        factory: function () { return new IterableDiffers([new DefaultIterableDifferFactory()]); }
+    });
     return IterableDiffers;
 }());
-/**
- * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- *
- */
 export { IterableDiffers };
 function IterableDiffers_tsickle_Closure_declarations() {
+    /** @type {?} */
+    IterableDiffers.ngInjectableDef;
     /**
      * @deprecated v4.0.0 - Should be private
      * @type {?}

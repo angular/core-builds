@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
+import { InjectFlags } from '../di/injector';
 import { ElementRef as viewEngine_ElementRef } from '../linker/element_ref';
 import { TemplateRef as viewEngine_TemplateRef } from '../linker/template_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
@@ -30,18 +31,6 @@ export declare function getOrCreateNodeInjector(): LInjector;
  * @returns Node injector
  */
 export declare function getOrCreateNodeInjectorForNode(node: LElementNode | LContainerNode): LInjector;
-/** Injection flags for DI. */
-export declare const enum InjectFlags {
-    /** Dependency is not required. Null will be injected if there is no provider for the dependency.
-       */
-    Optional = 1,
-    /** When resolving a dependency, include the node that is requesting injection. */
-    CheckSelf = 2,
-    /** When resolving a dependency, include ancestors of the node requesting injection. */
-    CheckParent = 4,
-    /** Default injection options: required, checks both self and ancestors. */
-    Default = 6,
-}
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
  *
@@ -80,7 +69,8 @@ export declare function diPublic(def: DirectiveDef<any>): void;
  * @param flags Injection flags (e.g. CheckParent)
  * @returns The instance found
  */
-export declare function directiveInject<T>(token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
+export declare function directiveInject<T>(token: Type<T>): T;
+export declare function directiveInject<T>(token: Type<T>, flags?: InjectFlags): T | null;
 /**
  * Creates an ElementRef and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
@@ -160,7 +150,7 @@ export declare function getOrCreateChangeDetectorRef(di: LInjector, context: any
  * @param flags Injection flags (e.g. CheckParent)
  * @returns The instance found
  */
-export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags, defaultValue?: T): T;
+export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, flags?: InjectFlags): T | null;
 /**
  * Finds the closest injector that might have a certain directive.
  *

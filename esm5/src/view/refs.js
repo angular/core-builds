@@ -1047,7 +1047,7 @@ var NgModuleRef_ = /** @class */ (function () {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (injectFlags === void 0) { injectFlags = 0 /* Default */; }
         var /** @type {?} */ flags = 0 /* None */;
-        if (injectFlags & 1 /* SkipSelf */) {
+        if (injectFlags & 4 /* SkipSelf */) {
             flags |= 1 /* SkipSelf */;
         }
         else if (injectFlags & 2 /* Self */) {

@@ -806,7 +806,7 @@ class NgModuleRef_ {
      */
     get(token, notFoundValue = Injector.THROW_IF_NOT_FOUND, injectFlags = 0 /* Default */) {
         let /** @type {?} */ flags = 0 /* None */;
-        if (injectFlags & 1 /* SkipSelf */) {
+        if (injectFlags & 4 /* SkipSelf */) {
             flags |= 1 /* SkipSelf */;
         }
         else if (injectFlags & 2 /* Self */) {

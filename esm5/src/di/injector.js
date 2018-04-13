@@ -394,7 +394,7 @@ function tryResolveToken(token, record, records, parent, notFoundValue, flags) {
  */
 function resolveToken(token, record, records, parent, notFoundValue, flags) {
     var /** @type {?} */ value;
-    if (record && !(flags & 1 /* SkipSelf */)) {
+    if (record && !(flags & 4 /* SkipSelf */)) {
         // If we don't have a record, this implies that we don't own the provider hence don't know how
         // to resolve it.
         value = record.value;
@@ -525,13 +525,26 @@ function getClosureSafeProperty(objWithPropertyToExtract) {
 /** @enum {number} */
 var InjectFlags = {
     Default: 0,
-    /** Skip the node that is requesting injection. */
-    SkipSelf: 1,
+    /**
+       * Specifies that an injector should retrieve a dependency from any injector until reaching the
+       * host element of the current component. (Only used with Element Injector)
+       */
+    Host: 1,
     /** Don't descend into ancestors of the node requesting injection. */
     Self: 2,
+    /** Skip the node that is requesting injection. */
+    SkipSelf: 4,
+    /** Inject `defaultValue` instead if token not found. */
+    Optional: 8,
 };
 export { InjectFlags };
-var /** @type {?} */ _currentInjector = null;
+/**
+ * Current injector value used by `inject`.
+ * - `undefined`: it is an error to call `inject`
+ * - `null`: `inject` can be called but there is no injector (limp-mode).
+ * - Injector instance: Use the injector for resolution.
+ */
+var /** @type {?} */ _currentInjector = undefined;
 /**
  * @param {?} injector
  * @return {?}
@@ -544,16 +557,25 @@ export function setCurrentInjector(injector) {
 /**
  * @template T
  * @param {?} token
- * @param {?=} notFoundValue
  * @param {?=} flags
  * @return {?}
  */
-export function inject(token, notFoundValue, flags) {
+export function inject(token, flags) {
     if (flags === void 0) { flags = 0 /* Default */; }
-    if (_currentInjector === null) {
+    if (_currentInjector === undefined) {
         throw new Error("inject() must be called from an injection context");
     }
-    return _currentInjector.get(token, notFoundValue, flags);
+    else if (_currentInjector === null) {
+        var /** @type {?} */ injectableDef = (/** @type {?} */ (token)).ngInjectableDef;
+        if (injectableDef && injectableDef.providedIn == 'root') {
+            return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
+                injectableDef.value;
+        }
+        throw new Error("Injector: NOT_FOUND [" + stringify(token) + "]");
+    }
+    else {
+        return _currentInjector.get(token, flags & 8 /* Optional */ ? null : undefined, flags);
+    }
 }
 /**
  * @param {?} types
@@ -568,15 +590,14 @@ export function injectArgs(types) {
                 throw new Error('Arguments array must have arguments.');
             }
             var /** @type {?} */ type = undefined;
-            var /** @type {?} */ defaultValue = undefined;
             var /** @type {?} */ flags = 0 /* Default */;
             for (var /** @type {?} */ j = 0; j < arg.length; j++) {
                 var /** @type {?} */ meta = arg[j];
                 if (meta instanceof Optional || meta.__proto__.ngMetadataName === 'Optional') {
-                    defaultValue = null;
+                    flags |= 8 /* Optional */;
                 }
                 else if (meta instanceof SkipSelf || meta.__proto__.ngMetadataName === 'SkipSelf') {
-                    flags |= 1 /* SkipSelf */;
+                    flags |= 4 /* SkipSelf */;
                 }
                 else if (meta instanceof Self || meta.__proto__.ngMetadataName === 'Self') {
                     flags |= 2 /* Self */;
@@ -588,7 +609,7 @@ export function injectArgs(types) {
                     type = meta;
                 }
             }
-            args.push(inject(/** @type {?} */ ((type)), defaultValue, 0 /* Default */));
+            args.push(inject(/** @type {?} */ ((type)), flags));
         }
         else {
             args.push(inject(arg));

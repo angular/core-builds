@@ -298,6 +298,7 @@ export function createLView(viewId, renderer, tView, template, context, flags) {
         dynamicViewCount: 0,
         lifecycleStage: 1 /* Init */,
         queries: null,
+        injector: currentView && currentView.injector,
     };
     return newView;
 }

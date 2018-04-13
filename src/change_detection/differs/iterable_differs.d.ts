@@ -1,3 +1,11 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { InjectableDef } from '../../di/defs';
 import { StaticProvider } from '../../di/provider';
 /**
  * A type describing supported iterable types.
@@ -108,6 +116,7 @@ export interface IterableDifferFactory {
  *
  */
 export declare class IterableDiffers {
+    static ngInjectableDef: InjectableDef<IterableDiffers>;
     /**
      * @deprecated v4.0.0 - Should be private
      */

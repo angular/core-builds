@@ -22,8 +22,23 @@ import { ClassProvider, ConstructorProvider, ExistingProvider, FactoryProvider, 
  * @experimental
  */
 export interface InjectableDef<T> {
+    /**
+     * Specifies that the given type belongs to a particular injector:
+     * - `InjectorType` such as `NgModule`,
+     * - `'root'` the root injector
+     * - `'any'` all injectors.
+     * - `null`, does not belong to any injector. Must be explicitly listed in the injector
+     *   `providers`.
+     */
     providedIn: InjectorType<any> | 'root' | 'any' | null;
+    /**
+     * Factory method to execute to create an instance of the injectable.
+     */
     factory: () => T;
+    /**
+     * In a case of no explicit injector, a location where the instance of the injectable is stored.
+     */
+    value: T | undefined;
 }
 /**
  * Information about the providers to be included in an `Injector` as well as how the given type
@@ -90,7 +105,7 @@ export interface InjectorTypeWithProviders<T> {
  * @experimental
  */
 export declare function defineInjectable<T>(opts: {
-    providedIn?: Type<any> | 'root' | null;
+    providedIn?: Type<any> | 'root' | 'any' | null;
     factory: () => T;
 }): InjectableDef<T>;
 /**

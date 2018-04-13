@@ -9,11 +9,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { inject, setCurrentInjector } from '../di/injector';
 import { assertGreaterThan, assertLessThan, assertNotNull } from './assert';
 import { addToViewTree, assertPreviousIsParent, createLContainer, createLNodeObject, getDirectiveInstance, getPreviousOrParentNode, getRenderer, isComponent, renderEmbeddedTemplate, resolveDirective } from './instructions';
 import { assertNodeOfPossibleTypes, assertNodeType } from './node_assert';
 import { insertView, removeView } from './node_manipulation';
-import { notImplemented, stringify } from './util';
+import { notImplemented } from './util';
 import { EmbeddedViewRef, addDestroyable, createViewRef } from './view_ref';
 /**
  * If a directive is diPublic, bloomAdd sets a property on the instance with this constant as
@@ -105,35 +106,11 @@ export function getOrCreateNodeInjectorForNode(node) {
         cbf5: parentInjector == null ? 0 : parentInjector.cbf5 | parentInjector.bf5,
         cbf6: parentInjector == null ? 0 : parentInjector.cbf6 | parentInjector.bf6,
         cbf7: parentInjector == null ? 0 : parentInjector.cbf7 | parentInjector.bf7,
-        injector: null,
         templateRef: null,
         viewContainerRef: null,
         elementRef: null,
         changeDetectorRef: null
     };
-}
-/** @enum {number} */
-const InjectFlags = {
-    /** Dependency is not required. Null will be injected if there is no provider for the dependency.
-         */
-    Optional: 1,
-    /** When resolving a dependency, include the node that is requesting injection. */
-    CheckSelf: 2,
-    /** When resolving a dependency, include ancestors of the node requesting injection. */
-    CheckParent: 4,
-    /** Default injection options: required, checks both self and ancestors. */
-    Default: 6,
-};
-export { InjectFlags };
-/**
- * Constructs an injection error with the given text and token.
- *
- * @param {?} text The text of the error
- * @param {?} token The token associated with the error
- * @return {?} The error that was created
- */
-function createInjectionError(text, token) {
-    return new Error(`ElementInjector: ${text} [${stringify(token)}]`);
 }
 /**
  * Makes a directive public to the DI system by adding it to an injector's bloom filter.
@@ -155,34 +132,13 @@ export function diPublic(def) {
     diPublicInInjector(getOrCreateNodeInjector(), def);
 }
 /**
- * Searches for an instance of the given type up the injector tree and returns
- * that instance if found.
- *
- * If not found, it will propagate up to the next parent injector until the token
- * is found or the top is reached.
- *
- * Usage example (in factory function):
- *
- * class SomeDirective {
- *   constructor(directive: DirectiveA) {}
- *
- *   static ngDirectiveDef = defineDirective({
- *     type: SomeDirective,
- *     factory: () => new SomeDirective(directiveInject(DirectiveA))
- *   });
- * }
- *
- * NOTE: use `directiveInject` with `\@Directive`, `\@Component`, and `\@Pipe`. For
- * all other injection use `inject` which does not walk the DOM render tree.
- *
  * @template T
- * @param {?} token The directive type to search for
- * @param {?=} flags Injection flags (e.g. CheckParent)
- * @param {?=} defaultValue
- * @return {?} The instance found
+ * @param {?} token
+ * @param {?=} flags
+ * @return {?}
  */
-export function directiveInject(token, flags, defaultValue) {
-    return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags, defaultValue);
+export function directiveInject(token, flags = 0 /* Default */) {
+    return getOrCreateInjectable(getOrCreateNodeInjector(), token, flags);
 }
 /**
  * Creates an ElementRef and stores it on the injector.
@@ -331,22 +287,21 @@ function getClosestComponentAncestor(node) {
  * @param {?} di Node injector where the search should start
  * @param {?} token The directive type to search for
  * @param {?=} flags Injection flags (e.g. CheckParent)
- * @param {?=} defaultValue
  * @return {?} The instance found
  */
-export function getOrCreateInjectable(di, token, flags, defaultValue) {
+export function getOrCreateInjectable(di, token, flags) {
     const /** @type {?} */ bloomHash = bloomHashBit(token);
     // If the token has a bloom hash, then it is a directive that is public to the injection system
     // (diPublic). If there is no hash, fall back to the module injector.
     if (bloomHash === null) {
-        const /** @type {?} */ moduleInjector = di.injector;
-        if (!moduleInjector) {
-            if (defaultValue != null) {
-                return defaultValue;
-            }
-            throw createInjectionError('NotFound', token);
+        const /** @type {?} */ moduleInjector = getPreviousOrParentNode().view.injector;
+        const /** @type {?} */ formerInjector = setCurrentInjector(moduleInjector);
+        try {
+            return inject(token, flags);
         }
-        moduleInjector.get(token);
+        finally {
+            setCurrentInjector(formerInjector);
+        }
     }
     else {
         let /** @type {?} */ injector = di;
@@ -390,7 +345,7 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
     }
     // No directive was found for the given token.
     // TODO: implement optional, check-self, and check-parent.
-    throw createInjectionError('Not found', token);
+    throw new Error('Implement');
 }
 /**
  * @template T

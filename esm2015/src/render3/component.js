@@ -128,6 +128,7 @@ export function renderComponent(componentType /* Type as workaround for: Microso
         clean: CLEAN_PROMISE,
     };
     const /** @type {?} */ rootView = createLView(-1, rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(null, null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    rootView.injector = opts.injector || null;
     const /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
     let /** @type {?} */ elementNode;
     try {

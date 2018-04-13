@@ -3,7 +3,7 @@ import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
 import { InjectFlags, Injector } from './injector';
 /**
- * Create a new `Injector` which is configured using `InjectorDefType`s.
+ * Create a new `Injector` which is configured using `InjectorType`s.
  *
  * @experimental
  */
@@ -15,7 +15,7 @@ export declare class R3Injector {
      */
     private records;
     /**
-     * The transitive set of `InjectorDefType`s which define this injector.
+     * The transitive set of `InjectorType`s which define this injector.
      */
     private injectorDefTypes;
     /**
@@ -42,7 +42,7 @@ export declare class R3Injector {
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
     private assertNotDestroyed();
     /**
-     * Add an `InjectorDefType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+     * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      */
     private processInjectorType(defOrWrappedDef, parents);

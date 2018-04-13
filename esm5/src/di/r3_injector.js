@@ -56,7 +56,7 @@ function Record_tsickle_Closure_declarations() {
     Record.prototype.multi;
 }
 /**
- * Create a new `Injector` which is configured using `InjectorDefType`s.
+ * Create a new `Injector` which is configured using `InjectorType`s.
  *
  * \@experimental
  * @param {?} defType
@@ -77,7 +77,7 @@ var R3Injector = /** @class */ (function () {
          */
         this.records = new Map();
         /**
-         * The transitive set of `InjectorDefType`s which define this injector.
+         * The transitive set of `InjectorType`s which define this injector.
          */
         this.injectorDefTypes = new Set();
         /**
@@ -88,7 +88,7 @@ var R3Injector = /** @class */ (function () {
          * Flag indicating that this injector was previously destroyed.
          */
         this.destroyed = false;
-        // Start off by creating Records for every provider declared in every InjectorDefType
+        // Start off by creating Records for every provider declared in every InjectorType
         // included transitively in `def`.
         deepForEach([def], function (injectorDef) { return _this.processInjectorType(injectorDef, new Set()); });
         // Make sure the INJECTOR token provides this injector.
@@ -96,7 +96,7 @@ var R3Injector = /** @class */ (function () {
         // Detect whether this injector has the APP_ROOT_SCOPE token and thus should provide
         // any injectable scoped to APP_ROOT_SCOPE.
         this.isRootInjector = this.records.has(APP_ROOT);
-        // Eagerly instantiate the InjectorDefType classes themselves.
+        // Eagerly instantiate the InjectorType classes themselves.
         this.injectorDefTypes.forEach(function (defType) { return _this.get(defType); });
     }
     /**
@@ -156,7 +156,7 @@ var R3Injector = /** @class */ (function () {
         var /** @type {?} */ previousInjector = setCurrentInjector(this);
         try {
             // Check for the SkipSelf flag.
-            if (!(flags & 1 /* SkipSelf */)) {
+            if (!(flags & 4 /* SkipSelf */)) {
                 // SkipSelf isn't set, check if the record belongs to this injector.
                 var /** @type {?} */ record = this.records.get(token);
                 if (record === undefined) {
@@ -199,14 +199,14 @@ var R3Injector = /** @class */ (function () {
         }
     };
     /**
-     * Add an `InjectorDefType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+     * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      * @param {?} defOrWrappedDef
      * @param {?} parents
      * @return {?}
      */
     R3Injector.prototype.processInjectorType = /**
-     * Add an `InjectorDefType` or `InjectorDefTypeWithProviders` and all of its transitive providers
+     * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      * @param {?} defOrWrappedDef
      * @param {?} parents
@@ -215,14 +215,14 @@ var R3Injector = /** @class */ (function () {
     function (defOrWrappedDef, parents) {
         var _this = this;
         defOrWrappedDef = resolveForwardRef(defOrWrappedDef);
-        // Either the defOrWrappedDef is an InjectorDefType (with ngInjectorDef) or an
+        // Either the defOrWrappedDef is an InjectorType (with ngInjectorDef) or an
         // InjectorDefTypeWithProviders (aka ModuleWithProviders). Detecting either is a megamorphic
         // read, so care is taken to only do the read once.
         // First attempt to read the ngInjectorDef.
         var /** @type {?} */ def = /** @type {?} */ ((/** @type {?} */ (defOrWrappedDef)).ngInjectorDef);
         // If that's not present, then attempt to read ngModule from the InjectorDefTypeWithProviders.
         var /** @type {?} */ ngModule = (def == null) && (/** @type {?} */ (defOrWrappedDef)).ngModule || undefined;
-        // Determine the InjectorDefType. In the case where `defOrWrappedDef` is an `InjectorDefType`,
+        // Determine the InjectorType. In the case where `defOrWrappedDef` is an `InjectorType`,
         // then this is easy. In the case of an InjectorDefTypeWithProviders, then the definition type
         // is the `ngModule`.
         var /** @type {?} */ defType = (ngModule === undefined) ? (/** @type {?} */ (defOrWrappedDef)) : ngModule;
@@ -243,7 +243,7 @@ var R3Injector = /** @class */ (function () {
         if (parents.has(defType)) {
             throw new Error("Circular dependency: type " + stringify(defType) + " ends up importing itself.");
         }
-        // Track the InjectorDefType and add a provider for it.
+        // Track the InjectorType and add a provider for it.
         this.injectorDefTypes.add(defType);
         this.records.set(defType, makeRecord(def.factory));
         // Add providers in the same way that @NgModule resolution did:
@@ -363,7 +363,7 @@ function R3Injector_tsickle_Closure_declarations() {
      */
     R3Injector.prototype.records;
     /**
-     * The transitive set of `InjectorDefType`s which define this injector.
+     * The transitive set of `InjectorType`s which define this injector.
      * @type {?}
      */
     R3Injector.prototype.injectorDefTypes;

@@ -191,6 +191,11 @@ function LView_tsickle_Closure_declarations() {
      * @type {?}
      */
     LView.prototype.queries;
+    /**
+     * An optional Module Injector to be used as fall back after Element Injectors are consulted.
+     * @type {?}
+     */
+    LView.prototype.injector;
 }
 /** @enum {number} */
 var LViewFlags = {
