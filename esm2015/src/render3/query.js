@@ -213,13 +213,15 @@ function getIdxOfMatchingSelector(tNode, selector) {
  * @param {?} type Type of a directive to look for.
  * @return {?} Index of a found directive or null when none found.
  */
-function geIdxOfMatchingDirective(node, type) {
+function getIdxOfMatchingDirective(node, type) {
     const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
     const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-    const /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
-    for (let /** @type {?} */ i = flags >> 13 /* INDX_SHIFT */, /** @type {?} */ ii = i + size; i < ii; i++) {
+    const /** @type {?} */ count = flags & 4095 /* DirectiveCountMask */;
+    const /** @type {?} */ start = flags >> 13 /* DirectiveStartingIndexShift */;
+    const /** @type {?} */ end = start + count;
+    for (let /** @type {?} */ i = start; i < end; i++) {
         const /** @type {?} */ def = /** @type {?} */ (defs[i]);
-        if (def.diPublic && def.type === type) {
+        if (def.type === type && def.diPublic) {
             return i;
         }
     }
@@ -237,7 +239,7 @@ function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
         return read.read(nodeInjector, node, directiveIdx);
     }
     else {
-        const /** @type {?} */ matchingIdx = geIdxOfMatchingDirective(node, /** @type {?} */ (read));
+        const /** @type {?} */ matchingIdx = getIdxOfMatchingDirective(node, /** @type {?} */ (read));
         if (matchingIdx !== null) {
             return /** @type {?} */ ((node.view.directives))[matchingIdx];
         }
@@ -255,7 +257,7 @@ function add(query, node) {
         const /** @type {?} */ predicate = query.predicate;
         const /** @type {?} */ type = predicate.type;
         if (type) {
-            const /** @type {?} */ directiveIdx = geIdxOfMatchingDirective(node, type);
+            const /** @type {?} */ directiveIdx = getIdxOfMatchingDirective(node, type);
             if (directiveIdx !== null) {
                 // a node is matching a predicate - determine what to read
                 // if read token and / or strategy is not specified, use type as read token

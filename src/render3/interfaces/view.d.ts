@@ -357,8 +357,8 @@ export interface RootContext {
 export declare type HookData = (number | (() => void))[];
 /** Possible values of LView.lifecycleStage, used to determine which hooks to run.  */
 export declare const enum LifecycleStage {
-    INIT = 1,
-    AFTER_INIT = 2,
+    Init = 1,
+    AfterInit = 2,
 }
 /**
  * Static data that corresponds to the instance-specific data array on an LView.

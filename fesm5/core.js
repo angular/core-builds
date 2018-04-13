@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.4-6e73300
+ * @license Angular v6.0.0-rc.4-d5e7f60
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2197,7 +2197,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0-rc.4-6e73300');
+var VERSION = new Version('6.0.0-rc.4-d5e7f60');
 
 /**
  * @fileoverview added by tsickle
@@ -17457,13 +17457,13 @@ function queueLifecycleHooks(flags, currentView) {
     var /** @type {?} */ tView = currentView.tView;
     if (tView.firstTemplatePass === true) {
         var /** @type {?} */ start = flags >> 13;
-        var /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1;
-        var /** @type {?} */ end = start + size;
+        var /** @type {?} */ count = flags & 4095;
+        var /** @type {?} */ end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
         // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
         // hooks for projected components and directives must be called *before* their hosts.
         for (var /** @type {?} */ i = start; i < end; i++) {
-            var /** @type {?} */ def = (/** @type {?} */ (((tView.directives))[i]));
+            var /** @type {?} */ def = /** @type {?} */ ((tView.directives))[i];
             queueContentHooks(def, tView, i);
             queueViewHooks(def, tView, i);
             queueDestroyHooks(def, tView, i);
@@ -17523,9 +17523,9 @@ function queueDestroyHooks(def, tView, i) {
  * @return {?}
  */
 function executeInitHooks(currentView, tView, creationMode) {
-    if (currentView.lifecycleStage === 1 /* INIT */) {
+    if (currentView.lifecycleStage === 1 /* Init */) {
         executeHooks(/** @type {?} */ ((currentView.directives)), tView.initHooks, tView.checkHooks, creationMode);
-        currentView.lifecycleStage = 2 /* AFTER_INIT */;
+        currentView.lifecycleStage = 2 /* AfterInit */;
     }
 }
 /**
@@ -18836,7 +18836,7 @@ function leaveView(newView) {
     }
     // Views should be clean and in update mode after being checked, so these bits are cleared
     currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
-    currentView.lifecycleStage = 1 /* INIT */;
+    currentView.lifecycleStage = 1 /* Init */;
     currentView.bindingIndex = -1;
     enterView(newView, null);
 }
@@ -18920,7 +18920,7 @@ function createLView(viewId, renderer, tView, template, context, flags) {
         template: template,
         context: context,
         dynamicViewCount: 0,
-        lifecycleStage: 1 /* INIT */,
+        lifecycleStage: 1 /* Init */,
         queries: null,
     };
     return newView;
@@ -19196,9 +19196,9 @@ function findDirectiveMatches(tNode) {
             var /** @type {?} */ def = registry[i];
             if (isNodeMatchingSelectorList(tNode, /** @type {?} */ ((def.selectors)))) {
                 if ((/** @type {?} */ (def)).template) {
-                    if (tNode.flags & 1 /* Component */)
+                    if (tNode.flags & 4096 /* isComponent */)
                         throwMultipleComponentError(tNode);
-                    tNode.flags = 1 /* Component */;
+                    tNode.flags = 4096 /* isComponent */;
                 }
                 if (def.diPublic)
                     def.diPublic(def);
@@ -19265,7 +19265,7 @@ function initChangeDetectorIfExisting(injector, instance, view) {
  * @return {?}
  */
 function isComponent(tNode) {
-    return (tNode.flags & 1 /* Component */) === 1 /* Component */;
+    return (tNode.flags & 4096 /* isComponent */) === 4096 /* isComponent */;
 }
 /**
  * This function instantiates the given directives.
@@ -19273,12 +19273,13 @@ function isComponent(tNode) {
  */
 function instantiateDirectivesDirectly() {
     var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
-    var /** @type {?} */ size = (tNode.flags & 8190 /* SIZE_MASK */) >> 1;
-    if (size > 0) {
-        var /** @type {?} */ startIndex = tNode.flags >> 13;
+    var /** @type {?} */ count = tNode.flags & 4095;
+    if (count > 0) {
+        var /** @type {?} */ start = tNode.flags >> 13;
+        var /** @type {?} */ end = start + count;
         var /** @type {?} */ tDirectives = /** @type {?} */ ((currentView.tView.directives));
-        for (var /** @type {?} */ i = startIndex; i < startIndex + size; i++) {
-            var /** @type {?} */ def = /** @type {?} */ (tDirectives[i]);
+        for (var /** @type {?} */ i = start; i < end; i++) {
+            var /** @type {?} */ def = tDirectives[i];
             directiveCreate(i, def.factory(), def);
         }
     }
@@ -19439,7 +19440,7 @@ function hostElement(tag, rNode, def) {
     var /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
     if (firstTemplatePass) {
         node.tNode = createTNode(/** @type {?} */ (tag), null, null);
-        node.tNode.flags = 1 /* Component */;
+        node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
             def.diPublic(def);
         currentView.tView.directives = [def];
@@ -19625,13 +19626,14 @@ function setInputsForProperty(inputs, value) {
  * @return {?} PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 function generatePropertyAliases(tNodeFlags, direction) {
-    var /** @type {?} */ size = (tNodeFlags & 8190 /* SIZE_MASK */) >> 1;
+    var /** @type {?} */ count = tNodeFlags & 4095;
     var /** @type {?} */ propStore = null;
-    if (size > 0) {
+    if (count > 0) {
         var /** @type {?} */ start = tNodeFlags >> 13;
+        var /** @type {?} */ end = start + count;
         var /** @type {?} */ isInput = direction === 0;
         var /** @type {?} */ defs = /** @type {?} */ ((currentView.tView.directives));
-        for (var /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+        for (var /** @type {?} */ i = start; i < end; i++) {
             var /** @type {?} */ directiveDef = /** @type {?} */ (defs[i]);
             var /** @type {?} */ propertyAliasMap = isInput ? directiveDef.inputs : directiveDef.outputs;
             for (var /** @type {?} */ publicName in propertyAliasMap) {
@@ -19813,7 +19815,7 @@ function textBinding(index, value) {
 function directiveCreate(index, directive, directiveDef) {
     var /** @type {?} */ instance = baseDirectiveCreate(index, directive, directiveDef);
     ngDevMode && assertNotNull(previousOrParentNode.tNode, 'previousOrParentNode.tNode');
-    var /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
+    var /** @type {?} */ tNode = previousOrParentNode.tNode;
     var /** @type {?} */ isComponent = (/** @type {?} */ (directiveDef)).template;
     if (isComponent) {
         addComponentLogic(index, directive, /** @type {?} */ (directiveDef));
@@ -19869,10 +19871,19 @@ function baseDirectiveCreate(index, directive, directiveDef) {
     ngDevMode && assertDataNext(index, directives);
     directives[index] = directive;
     if (firstTemplatePass) {
-        var /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode.tNode)).flags; /** @type {?} */
-        ((previousOrParentNode.tNode)).flags = (flags & 8190 /* SIZE_MASK */) === 0 ?
-            (index << 13 /* INDX_SHIFT */) | 2 /* SIZE_SKIP */ | flags & 1 /* Component */ :
-            flags + 2 /* SIZE_SKIP */;
+        var /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode.tNode)).flags;
+        if ((flags & 4095 /* DirectiveCountMask */) === 0) {
+            /** @type {?} */ ((
+            // When the first directive is created:
+            // - save the index,
+            // - set the number of directives to 1
+            previousOrParentNode.tNode)).flags = index << 13 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+        }
+        else {
+            // Only need to bump the size when subsequent directives are created
+            ngDevMode && assertNotEqual(flags & 4095 /* DirectiveCountMask */, 4095 /* DirectiveCountMask */, 'Reached the max number of directives'); /** @type {?} */
+            ((previousOrParentNode.tNode)).flags++;
+        }
     }
     else {
         var /** @type {?} */ diPublic = /** @type {?} */ ((directiveDef)).diPublic;
@@ -21996,7 +22007,8 @@ function getOrCreateHostChangeDetector(currentNode) {
     var /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
     return existingRef ?
         existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view.directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* INDX_SHIFT */]);
+        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view
+            .directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -22058,20 +22070,17 @@ function getOrCreateInjectable(di, token, flags, defaultValue) {
             // At this point, we have an injector which *may* contain the token, so we step through the
             // directives associated with the injector's corresponding node to get the directive instance.
             var /** @type {?} */ node = injector.node;
-            // The size of the node's directive's list is stored in certain bits of the node's flags,
-            // so exact it with a mask and shift it back such that the bits reflect the real value.
             var /** @type {?} */ flags_1 = /** @type {?} */ ((node.tNode)).flags;
-            var /** @type {?} */ size = (flags_1 & 8190 /* SIZE_MASK */) >> 1;
-            if (size !== 0) {
-                // The start index of the directives list is also part of the node's flags, but there is
-                // nothing to the "left" of it so it doesn't need a mask.
+            var /** @type {?} */ count = flags_1 & 4095;
+            if (count !== 0) {
                 var /** @type {?} */ start = flags_1 >> 13;
+                var /** @type {?} */ end = start + count;
                 var /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
-                for (var /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+                for (var /** @type {?} */ i = start; i < end; i++) {
                     // Get the definition for the directive at this index and, if it is injectable (diPublic),
                     // and matches the given token, return the directive instance.
                     var /** @type {?} */ directiveDef = /** @type {?} */ (defs[i]);
-                    if (directiveDef.diPublic && directiveDef.type == token) {
+                    if (directiveDef.type === token && directiveDef.diPublic) {
                         return getDirectiveInstance(/** @type {?} */ ((node.view.directives))[i]);
                     }
                 }
@@ -23343,13 +23352,15 @@ function getIdxOfMatchingSelector(tNode, selector) {
  * @param {?} type Type of a directive to look for.
  * @return {?} Index of a found directive or null when none found.
  */
-function geIdxOfMatchingDirective(node, type) {
+function getIdxOfMatchingDirective(node, type) {
     var /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
     var /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-    var /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1;
-    for (var /** @type {?} */ i = flags >> 13 /* INDX_SHIFT */, /** @type {?} */ ii = i + size; i < ii; i++) {
+    var /** @type {?} */ count = flags & 4095;
+    var /** @type {?} */ start = flags >> 13;
+    var /** @type {?} */ end = start + count;
+    for (var /** @type {?} */ i = start; i < end; i++) {
         var /** @type {?} */ def = /** @type {?} */ (defs[i]);
-        if (def.diPublic && def.type === type) {
+        if (def.type === type && def.diPublic) {
             return i;
         }
     }
@@ -23367,7 +23378,7 @@ function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
         return read.read(nodeInjector, node, directiveIdx);
     }
     else {
-        var /** @type {?} */ matchingIdx = geIdxOfMatchingDirective(node, /** @type {?} */ (read));
+        var /** @type {?} */ matchingIdx = getIdxOfMatchingDirective(node, /** @type {?} */ (read));
         if (matchingIdx !== null) {
             return /** @type {?} */ ((node.view.directives))[matchingIdx];
         }
@@ -23385,7 +23396,7 @@ function add(query, node) {
         var /** @type {?} */ predicate = query.predicate;
         var /** @type {?} */ type = predicate.type;
         if (type) {
-            var /** @type {?} */ directiveIdx = geIdxOfMatchingDirective(node, type);
+            var /** @type {?} */ directiveIdx = getIdxOfMatchingDirective(node, type);
             if (directiveIdx !== null) {
                 // a node is matching a predicate - determine what to read
                 // if read token and / or strategy is not specified, use type as read token

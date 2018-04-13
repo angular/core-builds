@@ -411,9 +411,9 @@ function RootContext_tsickle_Closure_declarations() {
 /** @enum {number} */
 const LifecycleStage = {
     /* Init hooks need to be run, if any. */
-    INIT: 1,
+    Init: 1,
     /* Content hooks need to be run, if any. Init hooks have already run. */
-    AFTER_INIT: 2,
+    AfterInit: 2,
 };
 export { LifecycleStage };
 // Note: This hack is necessary so we don't erroneously get a circular dependency

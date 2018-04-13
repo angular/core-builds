@@ -238,13 +238,15 @@ function getIdxOfMatchingSelector(tNode, selector) {
  * @param {?} type Type of a directive to look for.
  * @return {?} Index of a found directive or null when none found.
  */
-function geIdxOfMatchingDirective(node, type) {
+function getIdxOfMatchingDirective(node, type) {
     var /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
     var /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-    var /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
-    for (var /** @type {?} */ i = flags >> 13 /* INDX_SHIFT */, /** @type {?} */ ii = i + size; i < ii; i++) {
+    var /** @type {?} */ count = flags & 4095 /* DirectiveCountMask */;
+    var /** @type {?} */ start = flags >> 13 /* DirectiveStartingIndexShift */;
+    var /** @type {?} */ end = start + count;
+    for (var /** @type {?} */ i = start; i < end; i++) {
         var /** @type {?} */ def = /** @type {?} */ (defs[i]);
-        if (def.diPublic && def.type === type) {
+        if (def.type === type && def.diPublic) {
             return i;
         }
     }
@@ -262,7 +264,7 @@ function readFromNodeInjector(nodeInjector, node, read, directiveIdx) {
         return read.read(nodeInjector, node, directiveIdx);
     }
     else {
-        var /** @type {?} */ matchingIdx = geIdxOfMatchingDirective(node, /** @type {?} */ (read));
+        var /** @type {?} */ matchingIdx = getIdxOfMatchingDirective(node, /** @type {?} */ (read));
         if (matchingIdx !== null) {
             return /** @type {?} */ ((node.view.directives))[matchingIdx];
         }
@@ -280,7 +282,7 @@ function add(query, node) {
         var /** @type {?} */ predicate = query.predicate;
         var /** @type {?} */ type = predicate.type;
         if (type) {
-            var /** @type {?} */ directiveIdx = geIdxOfMatchingDirective(node, type);
+            var /** @type {?} */ directiveIdx = getIdxOfMatchingDirective(node, type);
             if (directiveIdx !== null) {
                 // a node is matching a predicate - determine what to read
                 // if read token and / or strategy is not specified, use type as read token

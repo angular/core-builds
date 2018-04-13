@@ -45,14 +45,14 @@ export function queueInitHooks(index, onInit, doCheck, tView) {
 export function queueLifecycleHooks(flags, currentView) {
     var /** @type {?} */ tView = currentView.tView;
     if (tView.firstTemplatePass === true) {
-        var /** @type {?} */ start = flags >> 13 /* INDX_SHIFT */;
-        var /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
-        var /** @type {?} */ end = start + size;
+        var /** @type {?} */ start = flags >> 13 /* DirectiveStartingIndexShift */;
+        var /** @type {?} */ count = flags & 4095 /* DirectiveCountMask */;
+        var /** @type {?} */ end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
         // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
         // hooks for projected components and directives must be called *before* their hosts.
         for (var /** @type {?} */ i = start; i < end; i++) {
-            var /** @type {?} */ def = (/** @type {?} */ (((tView.directives))[i]));
+            var /** @type {?} */ def = /** @type {?} */ ((tView.directives))[i];
             queueContentHooks(def, tView, i);
             queueViewHooks(def, tView, i);
             queueDestroyHooks(def, tView, i);
@@ -112,9 +112,9 @@ function queueDestroyHooks(def, tView, i) {
  * @return {?}
  */
 export function executeInitHooks(currentView, tView, creationMode) {
-    if (currentView.lifecycleStage === 1 /* INIT */) {
+    if (currentView.lifecycleStage === 1 /* Init */) {
         executeHooks(/** @type {?} */ ((currentView.directives)), tView.initHooks, tView.checkHooks, creationMode);
-        currentView.lifecycleStage = 2 /* AFTER_INIT */;
+        currentView.lifecycleStage = 2 /* AfterInit */;
     }
 }
 /**

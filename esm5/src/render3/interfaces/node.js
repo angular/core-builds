@@ -20,16 +20,12 @@ var LNodeType = {
 export { LNodeType };
 /** @enum {number} */
 var TNodeFlags = {
-    /** Whether or not this node is a component */
-    Component: 1,
-    /** How far to shift the flags to get the first directive index on this node */
-    INDX_SHIFT: 13,
-    /** How far to shift the flags to get the number of directives on this node */
-    SIZE_SHIFT: 1,
-    /** The amount to add to flags to increment size when each directive is added */
-    SIZE_SKIP: 2,
-    /** Mask to get the number of directives on this node */
-    SIZE_MASK: 8190,
+    /** The number of directives on this node is encoded on the least significant bits */
+    DirectiveCountMask: 4095,
+    /** Then this bit is set when the node is a component */
+    isComponent: 4096,
+    /** The index of the first directive on this node is encoded on the most significant bits  */
+    DirectiveStartingIndexShift: 13,
 };
 export { TNodeFlags };
 /**

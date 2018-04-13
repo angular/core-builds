@@ -299,7 +299,8 @@ function getOrCreateHostChangeDetector(currentNode) {
     const /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
     return existingRef ?
         existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view.directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* INDX_SHIFT */]);
+        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view
+            .directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -361,20 +362,17 @@ export function getOrCreateInjectable(di, token, flags, defaultValue) {
             // At this point, we have an injector which *may* contain the token, so we step through the
             // directives associated with the injector's corresponding node to get the directive instance.
             const /** @type {?} */ node = injector.node;
-            // The size of the node's directive's list is stored in certain bits of the node's flags,
-            // so exact it with a mask and shift it back such that the bits reflect the real value.
             const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-            const /** @type {?} */ size = (flags & 8190 /* SIZE_MASK */) >> 1 /* SIZE_SHIFT */;
-            if (size !== 0) {
-                // The start index of the directives list is also part of the node's flags, but there is
-                // nothing to the "left" of it so it doesn't need a mask.
-                const /** @type {?} */ start = flags >> 13 /* INDX_SHIFT */;
+            const /** @type {?} */ count = flags & 4095 /* DirectiveCountMask */;
+            if (count !== 0) {
+                const /** @type {?} */ start = flags >> 13 /* DirectiveStartingIndexShift */;
+                const /** @type {?} */ end = start + count;
                 const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
-                for (let /** @type {?} */ i = start, /** @type {?} */ ii = start + size; i < ii; i++) {
+                for (let /** @type {?} */ i = start; i < end; i++) {
                     // Get the definition for the directive at this index and, if it is injectable (diPublic),
                     // and matches the given token, return the directive instance.
                     const /** @type {?} */ directiveDef = /** @type {?} */ (defs[i]);
-                    if (directiveDef.diPublic && directiveDef.type == token) {
+                    if (directiveDef.type === token && directiveDef.diPublic) {
                         return getDirectiveInstance(/** @type {?} */ ((node.view.directives))[i]);
                     }
                 }
