@@ -12,7 +12,7 @@ import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -90,7 +90,7 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param pipes Pipe defs that should be used for matching
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.

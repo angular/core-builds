@@ -719,7 +719,8 @@ function ViewContainerRef_tsickle_Closure_declarations() {
 export function getOrCreateTemplateRef(di) {
     ngDevMode && assertNodeType(di.node, 0 /* Container */);
     const /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
-    return di.templateRef || (di.templateRef = new TemplateRef(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer()));
+    const /** @type {?} */ tView = di.node.view.tView;
+    return di.templateRef || (di.templateRef = new TemplateRef(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer(), tView.directiveRegistry, tView.pipeRegistry));
 }
 /**
  * @template T
@@ -729,9 +730,13 @@ class TemplateRef {
      * @param {?} elementRef
      * @param {?} template
      * @param {?} _renderer
+     * @param {?} _directives
+     * @param {?} _pipes
      */
-    constructor(elementRef, template, _renderer) {
+    constructor(elementRef, template, _renderer, _directives, _pipes) {
         this._renderer = _renderer;
+        this._directives = _directives;
+        this._pipes = _pipes;
         this.elementRef = elementRef;
         this._template = template;
     }
@@ -740,7 +745,7 @@ class TemplateRef {
      * @return {?}
      */
     createEmbeddedView(context) {
-        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer);
+        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer, this._directives, this._pipes);
         return addDestroyable(new EmbeddedViewRef(viewNode, this._template, context));
     }
 }
@@ -751,5 +756,9 @@ function TemplateRef_tsickle_Closure_declarations() {
     TemplateRef.prototype._template;
     /** @type {?} */
     TemplateRef.prototype._renderer;
+    /** @type {?} */
+    TemplateRef.prototype._directives;
+    /** @type {?} */
+    TemplateRef.prototype._pipes;
 }
 //# sourceMappingURL=di.js.map

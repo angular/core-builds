@@ -423,9 +423,11 @@ export function renderTemplate(hostNode, template, context, providedRendererFact
  * @param {?} template
  * @param {?} context
  * @param {?} renderer
+ * @param {?=} directives
+ * @param {?=} pipes
  * @return {?}
  */
-export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
+export function renderEmbeddedTemplate(viewNode, template, context, renderer, directives, pipes) {
     var /** @type {?} */ _isParent = isParent;
     var /** @type {?} */ _previousOrParentNode = previousOrParentNode;
     var /** @type {?} */ oldView;
@@ -434,10 +436,7 @@ export function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         previousOrParentNode = /** @type {?} */ ((null));
         var /** @type {?} */ rf = 2 /* Update */;
         if (viewNode == null) {
-            // TODO: revisit setting currentView when re-writing view containers
-            var /** @type {?} */ directives_1 = currentView && currentView.tView.directiveRegistry;
-            var /** @type {?} */ pipes = currentView && currentView.tView.pipeRegistry;
-            var /** @type {?} */ tView = getOrCreateTView(template, directives_1, pipes);
+            var /** @type {?} */ tView = getOrCreateTView(template, directives || null, pipes || null);
             var /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, lView);
             rf = 1 /* Create */;
@@ -1439,6 +1438,7 @@ function refreshDynamicChildren() {
             var /** @type {?} */ container_1 = /** @type {?} */ (current);
             for (var /** @type {?} */ i = 0; i < container_1.views.length; i++) {
                 var /** @type {?} */ view = container_1.views[i];
+                // The directives and pipes are not needed here as an existing view is only being refreshed.
                 renderEmbeddedTemplate(view, /** @type {?} */ ((view.data.template)), /** @type {?} */ ((view.data.context)), renderer);
             }
         }

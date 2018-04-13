@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.4-d5e7f60
+ * @license Angular v6.0.0-rc.4-e7ef027
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2025,7 +2025,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.4-d5e7f60');
+const VERSION = new Version('6.0.0-rc.4-e7ef027');
 
 /**
  * @fileoverview added by tsickle
@@ -16641,9 +16641,11 @@ function resetApplicationState() {
  * @param {?} template
  * @param {?} context
  * @param {?} renderer
+ * @param {?=} directives
+ * @param {?=} pipes
  * @return {?}
  */
-function renderEmbeddedTemplate(viewNode, template, context, renderer) {
+function renderEmbeddedTemplate(viewNode, template, context, renderer, directives, pipes) {
     const /** @type {?} */ _isParent = isParent;
     const /** @type {?} */ _previousOrParentNode = previousOrParentNode;
     let /** @type {?} */ oldView;
@@ -16652,10 +16654,7 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer) {
         previousOrParentNode = /** @type {?} */ ((null));
         let /** @type {?} */ rf = 2;
         if (viewNode == null) {
-            // TODO: revisit setting currentView when re-writing view containers
-            const /** @type {?} */ directives = currentView && currentView.tView.directiveRegistry;
-            const /** @type {?} */ pipes = currentView && currentView.tView.pipeRegistry;
-            const /** @type {?} */ tView = getOrCreateTView(template, directives, pipes);
+            const /** @type {?} */ tView = getOrCreateTView(template, directives || null, pipes || null);
             const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, lView);
             rf = 1 /* Create */;
@@ -17656,6 +17655,7 @@ function refreshDynamicChildren() {
             const /** @type {?} */ container = /** @type {?} */ (current);
             for (let /** @type {?} */ i = 0; i < container.views.length; i++) {
                 const /** @type {?} */ view = container.views[i];
+                // The directives and pipes are not needed here as an existing view is only being refreshed.
                 renderEmbeddedTemplate(view, /** @type {?} */ ((view.data.template)), /** @type {?} */ ((view.data.context)), renderer);
             }
         }
@@ -19663,7 +19663,8 @@ class ViewContainerRef$1 {
 function getOrCreateTemplateRef(di) {
     ngDevMode && assertNodeType(di.node, 0 /* Container */);
     const /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
-    return di.templateRef || (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer()));
+    const /** @type {?} */ tView = di.node.view.tView;
+    return di.templateRef || (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer(), tView.directiveRegistry, tView.pipeRegistry));
 }
 /**
  * @template T
@@ -19673,9 +19674,13 @@ class TemplateRef$1 {
      * @param {?} elementRef
      * @param {?} template
      * @param {?} _renderer
+     * @param {?} _directives
+     * @param {?} _pipes
      */
-    constructor(elementRef, template, _renderer) {
+    constructor(elementRef, template, _renderer, _directives, _pipes) {
         this._renderer = _renderer;
+        this._directives = _directives;
+        this._pipes = _pipes;
         this.elementRef = elementRef;
         this._template = template;
     }
@@ -19684,7 +19689,7 @@ class TemplateRef$1 {
      * @return {?}
      */
     createEmbeddedView(context) {
-        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer);
+        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer, this._directives, this._pipes);
         return addDestroyable(new EmbeddedViewRef$1(viewNode, this._template, context));
     }
 }
