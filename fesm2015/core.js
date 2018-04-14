@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.4-d1177c7
+ * @license Angular v6.0.0-rc.4-33630dd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2041,7 +2041,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.4-d1177c7');
+const VERSION = new Version('6.0.0-rc.4-33630dd');
 
 /**
  * @fileoverview added by tsickle
@@ -16795,6 +16795,7 @@ function createDirectivesAndLocals(index, name, attrs, localRefs, containerData)
  * @return {?}
  */
 function cacheMatchingDirectivesForNode(tNode, tView, localRefs) {
+    // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
     const /** @type {?} */ exportsMap = localRefs ? { '': -1 } : null;
     const /** @type {?} */ matches = tView.currentMatches = findDirectiveMatches(tNode);
     if (matches) {

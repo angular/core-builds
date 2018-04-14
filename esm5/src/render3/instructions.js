@@ -557,6 +557,7 @@ function createDirectivesAndLocals(index, name, attrs, localRefs, containerData)
  * @return {?}
  */
 function cacheMatchingDirectivesForNode(tNode, tView, localRefs) {
+    // Please make sure to have explicit type for `exportsMap`. Inferred type triggers bug in tsickle.
     var /** @type {?} */ exportsMap = localRefs ? { '': -1 } : null;
     var /** @type {?} */ matches = tView.currentMatches = findDirectiveMatches(tNode);
     if (matches) {
