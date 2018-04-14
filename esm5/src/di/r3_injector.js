@@ -231,7 +231,7 @@ var R3Injector = /** @class */ (function () {
         var /** @type {?} */ providers = (ngModule !== undefined) && (/** @type {?} */ (defOrWrappedDef)).providers ||
             EMPTY_ARRAY;
         // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
-        // `ɵInjectorDef` is on its `ngModule`.
+        // `InjectorDef` is on its `ngModule`.
         if (ngModule !== undefined) {
             def = ngModule.ngInjectorDef;
         }

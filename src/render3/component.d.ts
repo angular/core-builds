@@ -8,7 +8,7 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
-import { ComponentType, ɵComponentDef } from './interfaces/definition';
+import { ComponentDef, ComponentType } from './interfaces/definition';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
@@ -34,7 +34,7 @@ export interface CreateComponentOptions {
      * features list because there's no way of knowing when the component will be used as
      * a root component.
      */
-    hostFeatures?: (<T>(component: T, componentDef: ɵComponentDef<T>) => void)[];
+    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -83,7 +83,7 @@ export declare function renderComponent<T>(componentType: ComponentType<T> | Typ
  * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
  * ```
  */
-export declare function LifecycleHooksFeature(component: any, def: ɵComponentDef<any>): void;
+export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
 /**
  * Retrieve the host element of the component.
  *

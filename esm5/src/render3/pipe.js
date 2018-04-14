@@ -41,7 +41,7 @@ export function pipe(index, pipeName) {
  *
  * @param {?} name Name of pipe to resolve
  * @param {?} registry Full list of available pipes
- * @return {?} Matching ɵPipeDef
+ * @return {?} Matching PipeDef
  */
 function getPipeDef(name, registry) {
     if (registry) {
