@@ -136,7 +136,7 @@ export declare function defineComponent<T>(componentDefinition: {
      * `PipeDefs`s. The function is necessary to be able to support forward declarations.
      */
     pipes?: PipeTypesOrFactory | null;
-}): ComponentDef<T>;
+}): never;
 export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 /**
@@ -192,7 +192,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
     features?: DirectiveDefFeature[] | undefined;
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
     exportAs?: string | undefined;
-}) => DirectiveDef<T>;
+}) => never;
 /**
  * Create a pipe definition object.
  *
@@ -216,4 +216,4 @@ export declare function definePipe<T>(pipeDef: {
     factory: () => T;
     /** Whether the pipe is pure. */
     pure?: boolean;
-}): PipeDef<T>;
+}): never;

@@ -391,7 +391,7 @@ function R3Injector_tsickle_Closure_declarations() {
  * @return {?}
  */
 function injectableDefRecord(token) {
-    var /** @type {?} */ def = (/** @type {?} */ (token)).ngInjectableDef;
+    var /** @type {?} */ def = /** @type {?} */ ((/** @type {?} */ (token)).ngInjectableDef);
     if (def === undefined) {
         throw new Error("Type " + stringify(token) + " is missing an ngInjectableDef definition.");
     }

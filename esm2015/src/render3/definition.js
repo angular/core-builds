@@ -65,7 +65,7 @@ export function defineComponent(componentDefinition) {
     });
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
-    return def;
+    return /** @type {?} */ (def);
 }
 /**
  * @param {?} type
@@ -222,11 +222,11 @@ export const /** @type {?} */ defineDirective = /** @type {?} */ ((defineCompone
  * @return {?}
  */
 export function definePipe(pipeDef) {
-    return /** @type {?} */ ({
+    return /** @type {?} */ ((/** @type {?} */ ({
         name: pipeDef.name,
         n: pipeDef.factory,
         pure: pipeDef.pure !== false,
         onDestroy: pipeDef.type.prototype.ngOnDestroy || null
-    });
+    })));
 }
 //# sourceMappingURL=definition.js.map
