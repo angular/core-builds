@@ -13,7 +13,7 @@ import './ng_dev_mode';
 import { assertEqual, assertLessThan, assertNotEqual, assertNotNull, assertNull, assertSame } from './assert';
 import { NG_PROJECT_AS_ATTR_NAME } from './interfaces/projection';
 import { assertNodeType } from './node_assert';
-import { appendChild, insertChild, insertView, appendProjectedNode, removeView, canInsertNativeNode, createTextNode } from './node_manipulation';
+import { appendChild, insertView, appendProjectedNode, removeView, canInsertNativeNode, createTextNode } from './node_manipulation';
 import { isNodeMatchingSelectorList, matchingSelectorIndex } from './node_selector_matcher';
 import { RendererStyleFlags3, isProceduralRenderer } from './interfaces/renderer';
 import { isDifferent, stringify } from './util';
@@ -1150,13 +1150,12 @@ export function elementStyle(index, value) {
  *
  * @param {?} index Index of the node in the data array.
  * @param {?=} value Value to write. This value will be stringified.
- *   If value is not provided than the actual creation of the text node is delayed.
  * @return {?}
  */
 export function text(index, value) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
-    const /** @type {?} */ textNode = value != null ? createTextNode(value, renderer) : null;
+    const /** @type {?} */ textNode = createTextNode(value, renderer);
     const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
     // Text nodes are self closing.
     isParent = false;
@@ -1174,18 +1173,11 @@ export function text(index, value) {
 export function textBinding(index, value) {
     ngDevMode && assertDataInRange(index);
     let /** @type {?} */ existingNode = /** @type {?} */ (data[index]);
-    ngDevMode && assertNotNull(existingNode, 'existing node');
-    if (existingNode.native) {
-        // If DOM node exists and value changed, update textContent
-        value !== NO_CHANGE &&
-            (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify(value)) :
-                existingNode.native.textContent = stringify(value));
-    }
-    else {
-        // Node was created but DOM node creation was delayed. Create and append now.
-        existingNode.native = createTextNode(value, renderer);
-        insertChild(existingNode, currentView);
-    }
+    ngDevMode && assertNotNull(existingNode, 'LNode should exist');
+    ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
+    value !== NO_CHANGE &&
+        (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify(value)) :
+            existingNode.native.textContent = stringify(value));
 }
 /**
  * Create a directive.

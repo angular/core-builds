@@ -222,7 +222,6 @@ export declare function elementStyle<T>(index: number, value: {
  *
  * @param index Index of the node in the data array.
  * @param value Value to write. This value will be stringified.
- *   If value is not provided than the actual creation of the text node is delayed.
  */
 export declare function text(index: number, value?: any): void;
 /**
