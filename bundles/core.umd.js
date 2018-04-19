@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5-1d1e75e
+ * @license Angular v6.0.0-rc.5-9757347
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -44,7 +44,7 @@ var __assign = Object.assign || function __assign(t) {
 };
 
 /**
- * @license Angular v6.0.0-rc.5-1d1e75e
+ * @license Angular v6.0.0-rc.5-9757347
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2247,7 +2247,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0-rc.5-1d1e75e');
+var VERSION = new Version('6.0.0-rc.5-9757347');
 
 /**
  * @fileoverview added by tsickle
@@ -20325,8 +20325,8 @@ function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
  *
  * @param {?} nodeIndex
  * @param {?} localIndex - index under which distribution of projected nodes was memorized
- * @param {?=} selectorIndex - 0 means <ng-content> without any selector
- * @param {?=} attrs - attributes attached to the ng-content node, if present
+ * @param {?=} selectorIndex
+ * @param {?=} attrs
  * @return {?}
  */
 function projection(nodeIndex, localIndex, selectorIndex, attrs) {
@@ -20335,20 +20335,23 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     if (node.tNode == null) {
         node.tNode = createTNode(null, attrs || null, null);
     }
-    isParent = false; // self closing
+    // `<ng-content>` has no content
+    isParent = false;
     var /** @type {?} */ currentParent = node.parent;
     // re-distribution of projectable nodes is memorized on a component's view level
     var /** @type {?} */ componentNode = findComponentHost(currentView);
-    // make sure that nodes to project were memorized
-    var /** @type {?} */ nodesForSelector = /** @type {?} */ ((/** @type {?} */ ((componentNode.data)).data))[localIndex][selectorIndex];
+    var /** @type {?} */ componentLView = /** @type {?} */ ((componentNode.data));
+    var /** @type {?} */ nodesForSelector = /** @type {?} */ ((componentLView.data))[localIndex][selectorIndex];
     // build the linked list of projected nodes:
     for (var /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
         var /** @type {?} */ nodeToProject = nodesForSelector[i];
         if (nodeToProject.type === 1 /* Projection */) {
+            // Reprojecting a projection -> append the list of previously projected nodes
             var /** @type {?} */ previouslyProjected = (/** @type {?} */ (nodeToProject)).data;
             appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
         }
         else {
+            // Projecting a single node
             appendToProjectionNode(node, /** @type {?} */ (nodeToProject), /** @type {?} */ (nodeToProject));
         }
     }
