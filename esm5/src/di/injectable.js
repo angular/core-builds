@@ -1,0 +1,115 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+import { ReflectionCapabilities } from '../reflection/reflection_capabilities';
+import { makeDecorator } from '../util/decorators';
+import { getClosureSafeProperty } from '../util/property';
+import { defineInjectable } from './defs';
+import { inject, injectArgs } from './injector';
+var /** @type {?} */ GET_PROPERTY_NAME = /** @type {?} */ ({});
+var ɵ0 = GET_PROPERTY_NAME;
+var /** @type {?} */ USE_VALUE = getClosureSafeProperty({ provide: String, useValue: ɵ0 }, GET_PROPERTY_NAME);
+/**
+ * Type of the Injectable decorator / constructor function.
+ *
+ *
+ * @record
+ */
+export function InjectableDecorator() { }
+function InjectableDecorator_tsickle_Closure_declarations() {
+    /* TODO: handle strange member:
+    (): any;
+    */
+    /* TODO: handle strange member:
+    (options?: {providedIn: Type<any>| 'root' | null}&InjectableProvider): any;
+    */
+    /* TODO: handle strange member:
+    new (): Injectable;
+    */
+    /* TODO: handle strange member:
+    new (options?: {providedIn: Type<any>| 'root' | null}&InjectableProvider): Injectable;
+    */
+}
+var /** @type {?} */ EMPTY_ARRAY = [];
+/**
+ * @param {?} type
+ * @param {?=} provider
+ * @return {?}
+ */
+export function convertInjectableProviderToFactory(type, provider) {
+    if (!provider) {
+        var /** @type {?} */ reflectionCapabilities = new ReflectionCapabilities();
+        var /** @type {?} */ deps_1 = reflectionCapabilities.parameters(type);
+        // TODO - convert to flags.
+        return function () { return new (type.bind.apply(type, [void 0].concat(injectArgs(/** @type {?} */ (deps_1)))))(); };
+    }
+    if (USE_VALUE in provider) {
+        var /** @type {?} */ valueProvider_1 = (/** @type {?} */ (provider));
+        return function () { return valueProvider_1.useValue; };
+    }
+    else if ((/** @type {?} */ (provider)).useExisting) {
+        var /** @type {?} */ existingProvider_1 = (/** @type {?} */ (provider));
+        return function () { return inject(existingProvider_1.useExisting); };
+    }
+    else if ((/** @type {?} */ (provider)).useFactory) {
+        var /** @type {?} */ factoryProvider_1 = (/** @type {?} */ (provider));
+        return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, injectArgs(factoryProvider_1.deps || EMPTY_ARRAY)); };
+    }
+    else if ((/** @type {?} */ (provider)).useClass) {
+        var /** @type {?} */ classProvider_1 = (/** @type {?} */ (provider));
+        var /** @type {?} */ deps_2 = (/** @type {?} */ (provider)).deps;
+        if (!deps_2) {
+            var /** @type {?} */ reflectionCapabilities = new ReflectionCapabilities();
+            deps_2 = reflectionCapabilities.parameters(type);
+        }
+        return function () {
+            return new ((_a = classProvider_1.useClass).bind.apply(_a, [void 0].concat(injectArgs(deps_2))))();
+            var _a;
+        };
+    }
+    else {
+        var /** @type {?} */ deps_3 = (/** @type {?} */ (provider)).deps;
+        if (!deps_3) {
+            var /** @type {?} */ reflectionCapabilities = new ReflectionCapabilities();
+            deps_3 = reflectionCapabilities.parameters(type);
+        }
+        return function () { return new (type.bind.apply(type, [void 0].concat(injectArgs(/** @type {?} */ ((deps_3))))))(); };
+    }
+}
+/**
+ * Injectable decorator and metadata.
+ *
+ *
+ * \@Annotation
+ */
+export var /** @type {?} */ Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (injectableType, options) {
+    if (options && options.providedIn !== undefined &&
+        injectableType.ngInjectableDef === undefined) {
+        /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
+            providedIn: options.providedIn,
+            factory: convertInjectableProviderToFactory(injectableType, options)
+        });
+    }
+});
+/**
+ * Type representing injectable service.
+ *
+ * \@experimental
+ * @record
+ * @template T
+ */
+export function InjectableType() { }
+function InjectableType_tsickle_Closure_declarations() {
+    /** @type {?} */
+    InjectableType.prototype.ngInjectableDef;
+}
+export { ɵ0 };
+//# sourceMappingURL=injectable.js.map
