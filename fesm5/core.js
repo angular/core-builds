@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+8.sha-13a46b1
+ * @license Angular v6.0.0-rc.5+73.sha-57310b7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1570,7 +1570,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0-rc.5+8.sha-13a46b1');
+var VERSION = new Version('6.0.0-rc.5+73.sha-57310b7');
 
 /**
  * @license
@@ -12931,15 +12931,6 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
             var renderer = container.view.renderer;
             if (node.type === 3 /* Element */) {
                 if (insertMode) {
-                    if (!node.native) {
-                        // If the native element doesn't exist, this is a bound text node that hasn't yet been
-                        // created because update mode has not run (occurs when a bound text node is a root
-                        // node of a dynamically created view). See textBinding() in instructions for ctx.
-                        // If the native element doesn't exist, this is a bound text node that hasn't yet been
-                        // created because update mode has not run (occurs when a bound text node is a root
-                        // node of a dynamically created view). See textBinding() in instructions for ctx.
-                        node.native = createTextNode('', renderer);
-                    }
                     isProceduralRenderer(renderer) ?
                         renderer.insertBefore(parent, (node.native), beforeNode) :
                         parent.insertBefore((node.native), beforeNode, true);
@@ -13207,16 +13198,7 @@ function appendChild(parent, child, currentView) {
  * @param node Node to insert
  * @param currentView Current LView
  */
-function insertChild(node, currentView) {
-    var parent = (node.parent);
-    if (canInsertNativeNode(parent, currentView)) {
-        var nativeSibling = findNextRNodeSibling(node, null);
-        var renderer = currentView.renderer;
-        isProceduralRenderer(renderer) ?
-            renderer.insertBefore((parent.native), (node.native), nativeSibling) :
-            parent.native.insertBefore((node.native), nativeSibling, false);
-    }
-}
+
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
@@ -14349,12 +14331,11 @@ function elementStyle(index, value) {
  *
  * @param index Index of the node in the data array.
  * @param value Value to write. This value will be stringified.
- *   If value is not provided than the actual creation of the text node is delayed.
  */
 function text(index, value) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
-    var textNode = value != null ? createTextNode(value, renderer) : null;
+    var textNode = createTextNode(value, renderer);
     var node = createLNode(index, 3 /* Element */, textNode);
     // Text nodes are self closing.
     isParent = false;
@@ -14370,18 +14351,11 @@ function text(index, value) {
 function textBinding(index, value) {
     ngDevMode && assertDataInRange(index);
     var existingNode = data[index];
-    ngDevMode && assertNotNull(existingNode, 'existing node');
-    if (existingNode.native) {
-        // If DOM node exists and value changed, update textContent
-        value !== NO_CHANGE &&
-            (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
-                existingNode.native.textContent = stringify$1(value));
-    }
-    else {
-        // Node was created but DOM node creation was delayed. Create and append now.
-        existingNode.native = createTextNode(value, renderer);
-        insertChild(existingNode, currentView);
-    }
+    ngDevMode && assertNotNull(existingNode, 'LNode should exist');
+    ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
+    value !== NO_CHANGE &&
+        (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
+            existingNode.native.textContent = stringify$1(value));
 }
 /**
  * Create a directive.
@@ -14835,8 +14809,9 @@ function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
  *
  * @param nodeIndex
  * @param localIndex - index under which distribution of projected nodes was memorized
- * @param selectorIndex - 0 means <ng-content> without any selector
- * @param attrs - attributes attached to the ng-content node, if present
+ * @param selectorIndex:
+ *        - 0 when the selector is `*` (or unspecified as this is the default value),
+ *        - 1 based index of the selector from the {@link projectionDef}
  */
 function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     if (selectorIndex === void 0) { selectorIndex = 0; }
@@ -14844,20 +14819,23 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     if (node.tNode == null) {
         node.tNode = createTNode(null, attrs || null, null);
     }
-    isParent = false; // self closing
+    // `<ng-content>` has no content
+    isParent = false;
     var currentParent = node.parent;
     // re-distribution of projectable nodes is memorized on a component's view level
     var componentNode = findComponentHost(currentView);
-    // make sure that nodes to project were memorized
-    var nodesForSelector = componentNode.data.data[localIndex][selectorIndex];
+    var componentLView = (componentNode.data);
+    var nodesForSelector = componentLView.data[localIndex][selectorIndex];
     // build the linked list of projected nodes:
     for (var i = 0; i < nodesForSelector.length; i++) {
         var nodeToProject = nodesForSelector[i];
         if (nodeToProject.type === 1 /* Projection */) {
+            // Reprojecting a projection -> append the list of previously projected nodes
             var previouslyProjected = nodeToProject.data;
             appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
         }
         else {
+            // Projecting a single node
             appendToProjectionNode(node, nodeToProject, nodeToProject);
         }
     }
