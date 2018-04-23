@@ -1,8 +1,4 @@
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-/**
  * @license
  * Copyright Google Inc. All Rights Reserved.
  *
@@ -13,11 +9,9 @@ import * as tslib_1 from "tslib";
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
 /**
  *
- * @abstract
  */
 var /**
  *
- * @abstract
  */
 ViewRef = /** @class */ (function (_super) {
     tslib_1.__extends(ViewRef, _super);
@@ -28,28 +22,8 @@ ViewRef = /** @class */ (function (_super) {
 }(ChangeDetectorRef));
 /**
  *
- * @abstract
  */
 export { ViewRef };
-function ViewRef_tsickle_Closure_declarations() {
-    /**
-     * Destroys the view and all of the data structures associated with it.
-     * @abstract
-     * @return {?}
-     */
-    ViewRef.prototype.destroy = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    ViewRef.prototype.destroyed = function () { };
-    /**
-     * @abstract
-     * @param {?} callback
-     * @return {?}
-     */
-    ViewRef.prototype.onDestroy = function (callback) { };
-}
 /**
  * Represents an Angular View.
  *
@@ -59,7 +33,7 @@ function ViewRef_tsickle_Closure_declarations() {
  *
  * Properties of elements in a View can change, but the structure (number and order) of elements in
  * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
- * removing nested Views via a {\@link ViewContainerRef}. Each View can contain many View Containers.
+ * removing nested Views via a {@link ViewContainerRef}. Each View can contain many View Containers.
  * <!-- /TODO -->
  *
  * ### Example
@@ -73,9 +47,9 @@ function ViewRef_tsickle_Closure_declarations() {
  * </ul>
  * ```
  *
- * We have two {\@link TemplateRef}s:
+ * We have two {@link TemplateRef}s:
  *
- * Outer {\@link TemplateRef}:
+ * Outer {@link TemplateRef}:
  * ```
  * Count: {{items.length}}
  * <ul>
@@ -83,14 +57,14 @@ function ViewRef_tsickle_Closure_declarations() {
  * </ul>
  * ```
  *
- * Inner {\@link TemplateRef}:
+ * Inner {@link TemplateRef}:
  * ```
  *   <li>{{item}}</li>
  * ```
  *
- * Notice that the original template is broken down into two separate {\@link TemplateRef}s.
+ * Notice that the original template is broken down into two separate {@link TemplateRef}s.
  *
- * The outer/inner {\@link TemplateRef}s are then assembled into views like so:
+ * The outer/inner {@link TemplateRef}s are then assembled into views like so:
  *
  * ```
  * <!-- ViewRef: outer-0 -->
@@ -102,9 +76,7 @@ function ViewRef_tsickle_Closure_declarations() {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
- * \@experimental
- * @abstract
- * @template C
+ * @experimental
  */
 var /**
  * Represents an Angular View.
@@ -115,7 +87,7 @@ var /**
  *
  * Properties of elements in a View can change, but the structure (number and order) of elements in
  * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
- * removing nested Views via a {\@link ViewContainerRef}. Each View can contain many View Containers.
+ * removing nested Views via a {@link ViewContainerRef}. Each View can contain many View Containers.
  * <!-- /TODO -->
  *
  * ### Example
@@ -129,9 +101,9 @@ var /**
  * </ul>
  * ```
  *
- * We have two {\@link TemplateRef}s:
+ * We have two {@link TemplateRef}s:
  *
- * Outer {\@link TemplateRef}:
+ * Outer {@link TemplateRef}:
  * ```
  * Count: {{items.length}}
  * <ul>
@@ -139,14 +111,14 @@ var /**
  * </ul>
  * ```
  *
- * Inner {\@link TemplateRef}:
+ * Inner {@link TemplateRef}:
  * ```
  *   <li>{{item}}</li>
  * ```
  *
- * Notice that the original template is broken down into two separate {\@link TemplateRef}s.
+ * Notice that the original template is broken down into two separate {@link TemplateRef}s.
  *
- * The outer/inner {\@link TemplateRef}s are then assembled into views like so:
+ * The outer/inner {@link TemplateRef}s are then assembled into views like so:
  *
  * ```
  * <!-- ViewRef: outer-0 -->
@@ -158,9 +130,7 @@ var /**
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
- * \@experimental
- * @abstract
- * @template C
+ * @experimental
  */
 EmbeddedViewRef = /** @class */ (function (_super) {
     tslib_1.__extends(EmbeddedViewRef, _super);
@@ -178,7 +148,7 @@ EmbeddedViewRef = /** @class */ (function (_super) {
  *
  * Properties of elements in a View can change, but the structure (number and order) of elements in
  * a View cannot. Changing the structure of Elements can only be done by inserting, moving or
- * removing nested Views via a {\@link ViewContainerRef}. Each View can contain many View Containers.
+ * removing nested Views via a {@link ViewContainerRef}. Each View can contain many View Containers.
  * <!-- /TODO -->
  *
  * ### Example
@@ -192,9 +162,9 @@ EmbeddedViewRef = /** @class */ (function (_super) {
  * </ul>
  * ```
  *
- * We have two {\@link TemplateRef}s:
+ * We have two {@link TemplateRef}s:
  *
- * Outer {\@link TemplateRef}:
+ * Outer {@link TemplateRef}:
  * ```
  * Count: {{items.length}}
  * <ul>
@@ -202,14 +172,14 @@ EmbeddedViewRef = /** @class */ (function (_super) {
  * </ul>
  * ```
  *
- * Inner {\@link TemplateRef}:
+ * Inner {@link TemplateRef}:
  * ```
  *   <li>{{item}}</li>
  * ```
  *
- * Notice that the original template is broken down into two separate {\@link TemplateRef}s.
+ * Notice that the original template is broken down into two separate {@link TemplateRef}s.
  *
- * The outer/inner {\@link TemplateRef}s are then assembled into views like so:
+ * The outer/inner {@link TemplateRef}s are then assembled into views like so:
  *
  * ```
  * <!-- ViewRef: outer-0 -->
@@ -221,31 +191,8 @@ EmbeddedViewRef = /** @class */ (function (_super) {
  * </ul>
  * <!-- /ViewRef: outer-0 -->
  * ```
- * \@experimental
- * @abstract
- * @template C
+ * @experimental
  */
 export { EmbeddedViewRef };
-function EmbeddedViewRef_tsickle_Closure_declarations() {
-    /**
-     * @abstract
-     * @return {?}
-     */
-    EmbeddedViewRef.prototype.context = function () { };
-    /**
-     * @abstract
-     * @return {?}
-     */
-    EmbeddedViewRef.prototype.rootNodes = function () { };
-}
-/**
- * @record
- */
-export function InternalViewRef() { }
-function InternalViewRef_tsickle_Closure_declarations() {
-    /** @type {?} */
-    InternalViewRef.prototype.detachFromAppRef;
-    /** @type {?} */
-    InternalViewRef.prototype.attachToAppRef;
-}
-//# sourceMappingURL=view_ref.js.map
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlld19yZWYuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9saW5rZXIvdmlld19yZWYudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFTQSxPQUFPLEVBQUMsaUJBQWlCLEVBQUMsTUFBTSx5Q0FBeUMsQ0FBQzs7OztBQU0xRTs7O0FBQUE7SUFBc0MsbUNBQWlCOzs7O2tCQWZ2RDtFQWVzQyxpQkFBaUIsRUFTdEQsQ0FBQTs7OztBQVRELG1CQVNDOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBd0REOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTtJQUFpRCwyQ0FBTzs7OzswQkFoRnhEO0VBZ0ZpRCxPQUFPLEVBSXZELENBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFKRCwyQkFJQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHtBcHBsaWNhdGlvblJlZn0gZnJvbSAnLi4vYXBwbGljYXRpb25fcmVmJztcbmltcG9ydCB7Q2hhbmdlRGV0ZWN0b3JSZWZ9IGZyb20gJy4uL2NoYW5nZV9kZXRlY3Rpb24vY2hhbmdlX2RldGVjdG9yX3JlZic7XG5cblxuLyoqXG4gKlxuICovXG5leHBvcnQgYWJzdHJhY3QgY2xhc3MgVmlld1JlZiBleHRlbmRzIENoYW5nZURldGVjdG9yUmVmIHtcbiAgLyoqXG4gICAqIERlc3Ryb3lzIHRoZSB2aWV3IGFuZCBhbGwgb2YgdGhlIGRhdGEgc3RydWN0dXJlcyBhc3NvY2lhdGVkIHdpdGggaXQuXG4gICAqL1xuICBhYnN0cmFjdCBkZXN0cm95KCk6IHZvaWQ7XG5cbiAgYWJzdHJhY3QgZ2V0IGRlc3Ryb3llZCgpOiBib29sZWFuO1xuXG4gIGFic3RyYWN0IG9uRGVzdHJveShjYWxsYmFjazogRnVuY3Rpb24pOiBhbnkgLyoqIFRPRE8gIzkxMDAgKi87XG59XG5cbi8qKlxuICogUmVwcmVzZW50cyBhbiBBbmd1bGFyIFZpZXcuXG4gKlxuICogPCEtLSBUT0RPOiBtb3ZlIHRoZSBuZXh0IHR3byBwYXJhZ3JhcGhzIHRvIHRoZSBkZXYgZ3VpZGUgLS0+XG4gKiBBIFZpZXcgaXMgYSBmdW5kYW1lbnRhbCBidWlsZGluZyBibG9jayBvZiB0aGUgYXBwbGljYXRpb24gVUkuIEl0IGlzIHRoZSBzbWFsbGVzdCBncm91cGluZyBvZlxuICogRWxlbWVudHMgd2hpY2ggYXJlIGNyZWF0ZWQgYW5kIGRlc3Ryb3llZCB0b2dldGhlci5cbiAqXG4gKiBQcm9wZXJ0aWVzIG9mIGVsZW1lbnRzIGluIGEgVmlldyBjYW4gY2hhbmdlLCBidXQgdGhlIHN0cnVjdHVyZSAobnVtYmVyIGFuZCBvcmRlcikgb2YgZWxlbWVudHMgaW5cbiAqIGEgVmlldyBjYW5ub3QuIENoYW5naW5nIHRoZSBzdHJ1Y3R1cmUgb2YgRWxlbWVudHMgY2FuIG9ubHkgYmUgZG9uZSBieSBpbnNlcnRpbmcsIG1vdmluZyBvclxuICogcmVtb3ZpbmcgbmVzdGVkIFZpZXdzIHZpYSBhIHtAbGluayBWaWV3Q29udGFpbmVyUmVmfS4gRWFjaCBWaWV3IGNhbiBjb250YWluIG1hbnkgVmlldyBDb250YWluZXJzLlxuICogPCEtLSAvVE9ETyAtLT5cbiAqXG4gKiAjIyMgRXhhbXBsZVxuICpcbiAqIEdpdmVuIHRoaXMgdGVtcGxhdGUuLi5cbiAqXG4gKiBgYGBcbiAqIENvdW50OiB7e2l0ZW1zLmxlbmd0aH19XG4gKiA8dWw+XG4gKiAgIDxsaSAqbmdGb3I9XCJsZXQgIGl0ZW0gb2YgaXRlbXNcIj57e2l0ZW19fTwvbGk+XG4gKiA8L3VsPlxuICogYGBgXG4gKlxuICogV2UgaGF2ZSB0d28ge0BsaW5rIFRlbXBsYXRlUmVmfXM6XG4gKlxuICogT3V0ZXIge0BsaW5rIFRlbXBsYXRlUmVmfTpcbiAqIGBgYFxuICogQ291bnQ6IHt7aXRlbXMubGVuZ3RofX1cbiAqIDx1bD5cbiAqICAgPG5nLXRlbXBsYXRlIG5nRm9yIGxldC1pdGVtIFtuZ0Zvck9mXT1cIml0ZW1zXCI+PC9uZy10ZW1wbGF0ZT5cbiAqIDwvdWw+XG4gKiBgYGBcbiAqXG4gKiBJbm5lciB7QGxpbmsgVGVtcGxhdGVSZWZ9OlxuICogYGBgXG4gKiAgIDxsaT57e2l0ZW19fTwvbGk+XG4gKiBgYGBcbiAqXG4gKiBOb3RpY2UgdGhhdCB0aGUgb3JpZ2luYWwgdGVtcGxhdGUgaXMgYnJva2VuIGRvd24gaW50byB0d28gc2VwYXJhdGUge0BsaW5rIFRlbXBsYXRlUmVmfXMuXG4gKlxuICogVGhlIG91dGVyL2lubmVyIHtAbGluayBUZW1wbGF0ZVJlZn1zIGFyZSB0aGVuIGFzc2VtYmxlZCBpbnRvIHZpZXdzIGxpa2Ugc286XG4gKlxuICogYGBgXG4gKiA8IS0tIFZpZXdSZWY6IG91dGVyLTAgLS0+XG4gKiBDb3VudDogMlxuICogPHVsPlxuICogICA8bmctdGVtcGxhdGUgdmlldy1jb250YWluZXItcmVmPjwvbmctdGVtcGxhdGU+XG4gKiAgIDwhLS0gVmlld1JlZjogaW5uZXItMSAtLT48bGk+Zmlyc3Q8L2xpPjwhLS0gL1ZpZXdSZWY6IGlubmVyLTEgLS0+XG4gKiAgIDwhLS0gVmlld1JlZjogaW5uZXItMiAtLT48bGk+c2Vjb25kPC9saT48IS0tIC9WaWV3UmVmOiBpbm5lci0yIC0tPlxuICogPC91bD5cbiAqIDwhLS0gL1ZpZXdSZWY6IG91dGVyLTAgLS0+XG4gKiBgYGBcbiAqIEBleHBlcmltZW50YWxcbiAqL1xuZXhwb3J0IGFic3RyYWN0IGNsYXNzIEVtYmVkZGVkVmlld1JlZjxDPiBleHRlbmRzIFZpZXdSZWYge1xuICBhYnN0cmFjdCBnZXQgY29udGV4dCgpOiBDO1xuXG4gIGFic3RyYWN0IGdldCByb290Tm9kZXMoKTogYW55W107XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgSW50ZXJuYWxWaWV3UmVmIGV4dGVuZHMgVmlld1JlZiB7XG4gIGRldGFjaEZyb21BcHBSZWYoKTogdm9pZDtcbiAgYXR0YWNoVG9BcHBSZWYoYXBwUmVmOiBBcHBsaWNhdGlvblJlZik6IHZvaWQ7XG59XG4iXX0=

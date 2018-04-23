@@ -1,10 +1,11 @@
 /**
- * @license Angular v6.0.0-rc.5-60e5507
+ * @license Angular v6.0.0-rc.5+73.sha-ace6440
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
+
 import { ApplicationInitStatus, Compiler, Component, Injectable, InjectionToken, Injector, NgModule, NgZone, Optional, RendererFactory2, SkipSelf, getDebugNode, ɵAPP_ROOT, ɵclearOverrides, ɵoverrideComponentView, ɵoverrideProvider, ɵstringify } from '@angular/core';
-import { __extends } from 'tslib';
+import { __extends, __spread, __values } from 'tslib';
 
 /**
  * @license
@@ -747,7 +748,7 @@ var TestingCompiler = /** @class */ (function (_super) {
        */
     function (error) { throw unimplemented(); };
     TestingCompiler.decorators = [
-        { type: Injectable },
+        { type: Injectable }
     ];
     /** @nocollapse */
     TestingCompiler.ctorParameters = function () { return []; };
@@ -1103,16 +1104,16 @@ var TestBed = /** @class */ (function () {
     TestBed.prototype.configureTestingModule = function (moduleDef) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
-            (_a = this._providers).push.apply(_a, moduleDef.providers);
+            (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
         }
         if (moduleDef.declarations) {
-            (_b = this._declarations).push.apply(_b, moduleDef.declarations);
+            (_b = this._declarations).push.apply(_b, __spread(moduleDef.declarations));
         }
         if (moduleDef.imports) {
-            (_c = this._imports).push.apply(_c, moduleDef.imports);
+            (_c = this._imports).push.apply(_c, __spread(moduleDef.imports));
         }
         if (moduleDef.schemas) {
-            (_d = this._schemas).push.apply(_d, moduleDef.schemas);
+            (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
         }
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
@@ -1151,10 +1152,19 @@ var TestBed = /** @class */ (function () {
                 }
             }
         }
-        for (var _i = 0, _a = this._templateOverrides; _i < _a.length; _i++) {
-            var _b = _a[_i], component = _b.component, templateOf = _b.templateOf;
-            var compFactory = this._compiler.getComponentFactory(templateOf);
-            ɵoverrideComponentView(component, compFactory);
+        try {
+            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+                var compFactory = this._compiler.getComponentFactory(templateOf);
+                ɵoverrideComponentView(component, compFactory);
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+            }
+            finally { if (e_1) throw e_1.error; }
         }
         var ngZone = new NgZone({ enableLongStackTrace: true });
         var providers = [{ provide: NgZone, useValue: ngZone }];
@@ -1170,11 +1180,12 @@ var TestBed = /** @class */ (function () {
         // before accessing it.
         this._moduleRef.injector.get(ApplicationInitStatus).runInitializers();
         this._instantiated = true;
+        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-        var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
+        var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var rootScopeImports = [];
         var rootProviderOverrides = this._rootProviderOverrides;
         if (this._isRoot) {
@@ -1183,7 +1194,7 @@ var TestBed = /** @class */ (function () {
                 }
                 RootScopeModule.decorators = [
                     { type: NgModule, args: [{
-                                providers: rootProviderOverrides.slice(),
+                                providers: __spread(rootProviderOverrides),
                             },] },
                 ];
                 /** @nocollapse */
@@ -1207,15 +1218,25 @@ var TestBed = /** @class */ (function () {
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
-        for (var _i = 0, _a = [this._testEnvAotSummaries].concat(this._aotSummaries); _i < _a.length; _i++) {
-            var summary = _a[_i];
-            this._compiler.loadAotSummaries(summary);
+        try {
+            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var summary = _b.value;
+                this._compiler.loadAotSummaries(summary);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_2) throw e_2.error; }
         }
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
         this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
+        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
@@ -1497,7 +1518,6 @@ var __core_private_testing_placeholder__ = '';
 function withBody(html, blockFn) {
     return function (done) {
         ensureDocument();
-        var returnValue = undefined;
         if (typeof blockFn === 'function') {
             document.body.innerHTML = html;
             // TODO(i): I'm not sure why a cast is required here but otherwise I get
@@ -1605,6 +1625,14 @@ if (typeof afterEach == 'function')
  */
 
 // This file only reexports content of the `src` folder. Keep it that way.
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 
 /**
  * Generated bundle index. Do not edit.

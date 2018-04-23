@@ -1,45 +1,15 @@
 /**
- * @license Angular v6.0.0-rc.5-60e5507
+ * @license Angular v6.0.0-rc.5+73.sha-ace6440
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
+
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
 	typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core'], factory) :
 	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
-}(this, (function (exports,_angular_core) { 'use strict';
+}(this, (function (exports,core) { 'use strict';
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-/**
- * @license Angular v6.0.0-rc.5-60e5507
- * (c) 2010-2018 Google, Inc. https://angular.io/
- * License: MIT
- */
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -211,7 +181,7 @@ var ComponentFixture = /** @class */ (function () {
         this._onErrorSubscription = null;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
-        this.debugElement = _angular_core.getDebugNode(this.elementRef.nativeElement);
+        this.debugElement = core.getDebugNode(this.elementRef.nativeElement);
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
@@ -365,7 +335,7 @@ var ComponentFixture = /** @class */ (function () {
     };
     ComponentFixture.prototype._getRenderer = function () {
         if (this._renderer === undefined) {
-            this._renderer = this.componentRef.injector.get(_angular_core.RendererFactory2, null);
+            this._renderer = this.componentRef.injector.get(core.RendererFactory2, null);
         }
         return this._renderer;
     };
@@ -673,6 +643,82 @@ function flushMicrotasks() {
     }
 }
 
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -781,12 +827,12 @@ var TestingCompiler = /** @class */ (function (_super) {
        */
     function (error) { throw unimplemented(); };
     TestingCompiler.decorators = [
-        { type: _angular_core.Injectable },
+        { type: core.Injectable }
     ];
     /** @nocollapse */
     TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
-}(_angular_core.Compiler));
+}(core.Compiler));
 /**
  * A factory for creating a Compiler
  *
@@ -821,11 +867,11 @@ var _nextRootElementId = 0;
 /**
  * @experimental
  */
-var ComponentFixtureAutoDetect = new _angular_core.InjectionToken('ComponentFixtureAutoDetect');
+var ComponentFixtureAutoDetect = new core.InjectionToken('ComponentFixtureAutoDetect');
 /**
  * @experimental
  */
-var ComponentFixtureNoNgZone = new _angular_core.InjectionToken('ComponentFixtureNoNgZone');
+var ComponentFixtureNoNgZone = new core.InjectionToken('ComponentFixtureNoNgZone');
 /**
  * @description
  * Configures and initializes environment for unit testing and provides methods for
@@ -1022,7 +1068,7 @@ var TestBed = /** @class */ (function () {
         return TestBed;
     };
     TestBed.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = _angular_core.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
     };
     TestBed.createComponent = function (component) {
@@ -1099,7 +1145,7 @@ var TestBed = /** @class */ (function () {
         this._testEnvAotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
-        _angular_core.ɵclearOverrides();
+        core.ɵclearOverrides();
         this._aotSummaries = [];
         this._templateOverrides = [];
         this._compiler = (null);
@@ -1137,16 +1183,16 @@ var TestBed = /** @class */ (function () {
     TestBed.prototype.configureTestingModule = function (moduleDef) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
-            (_a = this._providers).push.apply(_a, moduleDef.providers);
+            (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
         }
         if (moduleDef.declarations) {
-            (_b = this._declarations).push.apply(_b, moduleDef.declarations);
+            (_b = this._declarations).push.apply(_b, __spread(moduleDef.declarations));
         }
         if (moduleDef.imports) {
-            (_c = this._imports).push.apply(_c, moduleDef.imports);
+            (_c = this._imports).push.apply(_c, __spread(moduleDef.imports));
         }
         if (moduleDef.schemas) {
-            (_d = this._schemas).push.apply(_d, moduleDef.schemas);
+            (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
         }
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
@@ -1177,7 +1223,7 @@ var TestBed = /** @class */ (function () {
             catch (e) {
                 var errorCompType = this._compiler.getComponentFromError(e);
                 if (errorCompType) {
-                    throw new Error("This test module uses the component " + _angular_core.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
+                    throw new Error("This test module uses the component " + core.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -1185,14 +1231,23 @@ var TestBed = /** @class */ (function () {
                 }
             }
         }
-        for (var _i = 0, _a = this._templateOverrides; _i < _a.length; _i++) {
-            var _b = _a[_i], component = _b.component, templateOf = _b.templateOf;
-            var compFactory = this._compiler.getComponentFactory(templateOf);
-            _angular_core.ɵoverrideComponentView(component, compFactory);
+        try {
+            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+                var compFactory = this._compiler.getComponentFactory(templateOf);
+                core.ɵoverrideComponentView(component, compFactory);
+            }
         }
-        var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
-        var providers = [{ provide: _angular_core.NgZone, useValue: ngZone }];
-        var ngZoneInjector = _angular_core.Injector.create({
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        var ngZone = new core.NgZone({ enableLongStackTrace: true });
+        var providers = [{ provide: core.NgZone, useValue: ngZone }];
+        var ngZoneInjector = core.Injector.create({
             providers: providers,
             parent: this.platform.injector,
             name: this._moduleFactory.moduleType.name
@@ -1202,13 +1257,14 @@ var TestBed = /** @class */ (function () {
         // before accessing it.
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
-        this._moduleRef.injector.get(_angular_core.ApplicationInitStatus).runInitializers();
+        this._moduleRef.injector.get(core.ApplicationInitStatus).runInitializers();
         this._instantiated = true;
+        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-        var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
+        var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var rootScopeImports = [];
         var rootProviderOverrides = this._rootProviderOverrides;
         if (this._isRoot) {
@@ -1216,8 +1272,8 @@ var TestBed = /** @class */ (function () {
                 function RootScopeModule() {
                 }
                 RootScopeModule.decorators = [
-                    { type: _angular_core.NgModule, args: [{
-                                providers: rootProviderOverrides.slice(),
+                    { type: core.NgModule, args: [{
+                                providers: __spread(rootProviderOverrides),
                             },] },
                 ];
                 /** @nocollapse */
@@ -1226,14 +1282,14 @@ var TestBed = /** @class */ (function () {
             }());
             rootScopeImports.push(RootScopeModule);
         }
-        providers.push({ provide: _angular_core.ɵAPP_ROOT, useValue: this._isRoot });
+        providers.push({ provide: core.ɵAPP_ROOT, useValue: this._isRoot });
         var imports = [rootScopeImports, this.ngModule, this._imports];
         var schemas = this._schemas;
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
             DynamicTestModule.decorators = [
-                { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+                { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
             ];
             /** @nocollapse */
             DynamicTestModule.ctorParameters = function () { return []; };
@@ -1241,15 +1297,25 @@ var TestBed = /** @class */ (function () {
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
-        for (var _i = 0, _a = [this._testEnvAotSummaries].concat(this._aotSummaries); _i < _a.length; _i++) {
-            var summary = _a[_i];
-            this._compiler.loadAotSummaries(summary);
+        try {
+            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var summary = _b.value;
+                this._compiler.loadAotSummaries(summary);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_2) throw e_2.error; }
         }
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
         this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
+        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
@@ -1258,7 +1324,7 @@ var TestBed = /** @class */ (function () {
         }
     };
     TestBed.prototype.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = _angular_core.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
         this._initIfNeeded();
         if (token === TestBed) {
             return this;
@@ -1322,10 +1388,10 @@ var TestBed = /** @class */ (function () {
             var depToken;
             if (Array.isArray(dep)) {
                 dep.forEach(function (entry) {
-                    if (entry instanceof _angular_core.Optional) {
+                    if (entry instanceof core.Optional) {
                         depFlags |= 2 /* Optional */;
                     }
-                    else if (entry instanceof _angular_core.SkipSelf) {
+                    else if (entry instanceof core.SkipSelf) {
                         depFlags |= 1 /* SkipSelf */;
                     }
                     else {
@@ -1338,7 +1404,7 @@ var TestBed = /** @class */ (function () {
             }
             return [depFlags, depToken];
         });
-        _angular_core.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
+        core.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
     };
     TestBed.prototype.overrideTemplateUsingTestingModule = function (component, template) {
         this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
@@ -1346,7 +1412,7 @@ var TestBed = /** @class */ (function () {
             function OverrideComponent() {
             }
             OverrideComponent.decorators = [
-                { type: _angular_core.Component, args: [{ selector: 'empty', template: template },] },
+                { type: core.Component, args: [{ selector: 'empty', template: template },] },
             ];
             /** @nocollapse */
             OverrideComponent.ctorParameters = function () { return []; };
@@ -1359,16 +1425,16 @@ var TestBed = /** @class */ (function () {
         this._initIfNeeded();
         var componentFactory = this._compiler.getComponentFactory(component);
         if (!componentFactory) {
-            throw new Error("Cannot create the component " + _angular_core.ɵstringify(component) + " as it was not imported into the testing module!");
+            throw new Error("Cannot create the component " + core.ɵstringify(component) + " as it was not imported into the testing module!");
         }
         var noNgZone = this.get(ComponentFixtureNoNgZone, false);
         var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-        var ngZone = noNgZone ? null : this.get(_angular_core.NgZone, null);
+        var ngZone = noNgZone ? null : this.get(core.NgZone, null);
         var testComponentRenderer = this.get(TestComponentRenderer);
         var rootElId = "root" + _nextRootElementId++;
         testComponentRenderer.insertRootElement(rootElId);
         var initComponent = function () {
-            var componentRef = componentFactory.create(_angular_core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
+            var componentRef = componentFactory.create(core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
@@ -1531,7 +1597,6 @@ var __core_private_testing_placeholder__ = '';
 function withBody(html, blockFn) {
     return function (done) {
         ensureDocument();
-        var returnValue = undefined;
         if (typeof blockFn === 'function') {
             document.body.innerHTML = html;
             // TODO(i): I'm not sure why a cast is required here but otherwise I get
@@ -1621,6 +1686,36 @@ if (typeof beforeEach == 'function')
     beforeEach(ensureDocument);
 if (typeof afterEach == 'function')
     beforeEach(cleanupDocument);
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// This file only reexports content of the `src` folder. Keep it that way.
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
 
 exports.async = async;
 exports.ComponentFixture = ComponentFixture;
