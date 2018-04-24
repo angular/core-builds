@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+74.sha-1c9200e
+ * @license Angular v6.0.0-rc.5+77.sha-dab5df9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1570,7 +1570,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0-rc.5+74.sha-1c9200e');
+var VERSION = new Version('6.0.0-rc.5+77.sha-dab5df9');
 
 /**
  * @license
@@ -12964,7 +12964,7 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
     }
 }
 /**
- * Traverses the tree of component views and containers to remove listeners and
+ * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
  *
  * Notes:
@@ -12977,7 +12977,11 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
  *  @param rootView The view to destroy
  */
 function destroyViewTree(rootView) {
-    var viewOrContainer = rootView;
+    // A view to cleanup doesn't have children so we should not try to descend down the view tree.
+    if (!rootView.child) {
+        return cleanUpView(rootView);
+    }
+    var viewOrContainer = rootView.child;
     while (viewOrContainer) {
         var next = null;
         if (viewOrContainer.views && viewOrContainer.views.length) {
@@ -12987,12 +12991,15 @@ function destroyViewTree(rootView) {
             next = viewOrContainer.child;
         }
         else if (viewOrContainer.next) {
+            // Only move to the side and clean if operating below rootView -
+            // otherwise we would start cleaning up sibling views of the rootView.
             cleanUpView(viewOrContainer);
             next = viewOrContainer.next;
         }
         if (next == null) {
-            // If the viewOrContainer is the rootView, then the cleanup is done twice.
-            // Without this check, ngOnDestroy would be called twice for a directive on an element.
+            // If the viewOrContainer is the rootView and next is null it means that we are dealing
+            // with a root view that doesn't have children. We didn't descend into child views
+            // so no need to go back up the views tree.
             while (viewOrContainer && !viewOrContainer.next && viewOrContainer !== rootView) {
                 cleanUpView(viewOrContainer);
                 viewOrContainer = getParentState(viewOrContainer, rootView);

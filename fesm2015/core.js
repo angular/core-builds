@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+74.sha-1c9200e
+ * @license Angular v6.0.0-rc.5+77.sha-dab5df9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2035,7 +2035,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5+74.sha-1c9200e');
+const VERSION = new Version('6.0.0-rc.5+77.sha-dab5df9');
 
 /**
  * @fileoverview added by tsickle
@@ -15753,7 +15753,7 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
     }
 }
 /**
- * Traverses the tree of component views and containers to remove listeners and
+ * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
  *
  * Notes:
@@ -15768,7 +15768,11 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
  * @return {?}
  */
 function destroyViewTree(rootView) {
-    let /** @type {?} */ viewOrContainer = rootView;
+    // A view to cleanup doesn't have children so we should not try to descend down the view tree.
+    if (!rootView.child) {
+        return cleanUpView(rootView);
+    }
+    let /** @type {?} */ viewOrContainer = rootView.child;
     while (viewOrContainer) {
         let /** @type {?} */ next = null;
         if (viewOrContainer.views && viewOrContainer.views.length) {
@@ -15778,12 +15782,15 @@ function destroyViewTree(rootView) {
             next = viewOrContainer.child;
         }
         else if (viewOrContainer.next) {
+            // Only move to the side and clean if operating below rootView -
+            // otherwise we would start cleaning up sibling views of the rootView.
             cleanUpView(/** @type {?} */ (viewOrContainer));
             next = viewOrContainer.next;
         }
         if (next == null) {
-            // If the viewOrContainer is the rootView, then the cleanup is done twice.
-            // Without this check, ngOnDestroy would be called twice for a directive on an element.
+            // If the viewOrContainer is the rootView and next is null it means that we are dealing
+            // with a root view that doesn't have children. We didn't descend into child views
+            // so no need to go back up the views tree.
             while (viewOrContainer && !/** @type {?} */ ((viewOrContainer)).next && viewOrContainer !== rootView) {
                 cleanUpView(/** @type {?} */ (viewOrContainer));
                 viewOrContainer = getParentState(viewOrContainer, rootView);

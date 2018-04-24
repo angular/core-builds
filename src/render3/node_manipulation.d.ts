@@ -17,7 +17,7 @@ export declare function createTextNode(value: any, renderer: Renderer3): RText;
 export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: true, beforeNode: RNode | null): void;
 export declare function addRemoveViewFromContainer(container: LContainerNode, rootNode: LViewNode, insertMode: false): void;
 /**
- * Traverses the tree of component views and containers to remove listeners and
+ * Traverses down and up the tree of views and containers to remove listeners and
  * call onDestroy callbacks.
  *
  * Notes:
