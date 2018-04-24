@@ -1,23 +1,15 @@
+import { StaticProvider } from '../../di/provider';
 /**
- * @license
- * Copyright Google Inc. All Rights Reserved.
+ * A type describing supported iterable types.
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { Provider } from '../../di';
-import { ChangeDetectorRef } from '../change_detector_ref';
-/**
- * A type describing supported interable types.
  *
- * @stable
  */
 export declare type NgIterable<T> = Array<T> | Iterable<T>;
 /**
- * A strategy for tracking changes over time to an iterable. Used by {@link NgFor} to
+ * A strategy for tracking changes over time to an iterable. Used by {@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
- * @stable
+ *
  */
 export interface IterableDiffer<V> {
     /**
@@ -27,13 +19,13 @@ export interface IterableDiffer<V> {
      * @returns an object describing the difference. The return value is only valid until the next
      * `diff()` invocation.
      */
-    diff(object: NgIterable<V>): IterableChanges<V>;
+    diff(object: NgIterable<V>): IterableChanges<V> | null;
 }
 /**
  * An object describing the changes in the `Iterable` collection since last time
  * `IterableDiffer#diff()` was invoked.
  *
- * @stable
+ *
  */
 export interface IterableChanges<V> {
     /**
@@ -57,7 +49,7 @@ export interface IterableChanges<V> {
      *        original `Iterable` location, where as `currentIndex` refers to the transient location
      *        of the item, after applying the operations up to this point.
      */
-    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number, currentIndex: number) => void): void;
+    forEachOperation(fn: (record: IterableChangeRecord<V>, previousIndex: number | null, currentIndex: number | null) => void): void;
     /**
      * Iterate over changes in the order of original `Iterable` showing where the original items
      * have moved.
@@ -69,23 +61,24 @@ export interface IterableChanges<V> {
     forEachMovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
     /** Iterate over all removed items. */
     forEachRemovedItem(fn: (record: IterableChangeRecord<V>) => void): void;
-    /** Iterate over all items which had their identity (as computed by the `trackByFn`) changed. */
+    /** Iterate over all items which had their identity (as computed by the `TrackByFunction`)
+     * changed. */
     forEachIdentityChange(fn: (record: IterableChangeRecord<V>) => void): void;
 }
 /**
  * Record representing the item change information.
  *
- * @stable
+ *
  */
 export interface IterableChangeRecord<V> {
     /** Current index of the item in `Iterable` or null if removed. */
-    currentIndex: number;
+    readonly currentIndex: number | null;
     /** Previous index of the item in `Iterable` or null if added. */
-    previousIndex: number;
+    readonly previousIndex: number | null;
     /** The item. */
-    item: V;
-    /** Track by identity as computed by the `trackByFn`. */
-    trackById: any;
+    readonly item: V;
+    /** Track by identity as computed by the `TrackByFunction`. */
+    readonly trackById: any;
 }
 /**
  * @deprecated v4.0.0 - Use IterableChangeRecord instead.
@@ -93,18 +86,10 @@ export interface IterableChangeRecord<V> {
 export interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
 }
 /**
- * Nolonger used.
- *
- * @deprecated v4.0.0 - Use TrackByFunction instead
- */
-export interface TrackByFn {
-    (index: number, item: any): any;
-}
-/**
  * An optional function passed into {@link NgForOf} that defines how to track
  * items in an iterable (e.g. fby index or id)
  *
- * @stable
+ *
  */
 export interface TrackByFunction<T> {
     (index: number, item: T): any;
@@ -112,21 +97,18 @@ export interface TrackByFunction<T> {
 /**
  * Provides a factory for {@link IterableDiffer}.
  *
- * @stable
+ *
  */
 export interface IterableDifferFactory {
     supports(objects: any): boolean;
     create<V>(trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
-    /**
-     * @deprecated v4.0.0 - ChangeDetectorRef is not used and is no longer a parameter
-     */
-    create<V>(_cdr?: ChangeDetectorRef | TrackByFunction<V>, trackByFn?: TrackByFunction<V>): IterableDiffer<V>;
 }
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * @stable
+ *
  */
 export declare class IterableDiffers {
+    static ngInjectableDef: never;
     /**
      * @deprecated v4.0.0 - Should be private
      */
@@ -152,7 +134,7 @@ export declare class IterableDiffers {
      * })
      * ```
      */
-    static extend(factories: IterableDifferFactory[]): Provider;
+    static extend(factories: IterableDifferFactory[]): StaticProvider;
     find(iterable: any): IterableDifferFactory;
 }
 export declare function getTypeNameForDebugging(type: any): string;

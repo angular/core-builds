@@ -1,19 +1,18 @@
 /**
  * Generated bundle index. Do not edit.
  */
-export * from './public_api';
-export { AnimationMetadataType as ɵy, animate as ɵba, group as ɵbb, keyframes as ɵbf, sequence as ɵbc, state as ɵbe, style as ɵbd, transition as ɵbg, trigger as ɵz } from './src/animation/dsl';
-export { _initViewEngine as ɵo, _iterableDiffersFactory as ɵl, _keyValueDiffersFactory as ɵm, _localeFactory as ɵn } from './src/application_module';
-export { ApplicationRef_ as ɵf } from './src/application_ref';
-export { _appIdRandomProviderFactory as ɵg } from './src/application_tokens';
-export { defaultIterableDiffers as ɵh, defaultKeyValueDiffers as ɵi } from './src/change_detection/change_detection';
-export { DefaultIterableDifferFactory as ɵj } from './src/change_detection/differs/default_iterable_differ';
-export { DefaultKeyValueDifferFactory as ɵk } from './src/change_detection/differs/default_keyvalue_differ';
-export { ReflectiveInjector_ as ɵc } from './src/di/reflective_injector';
-export { ReflectiveDependency as ɵd, resolveReflectiveProviders as ɵe } from './src/di/reflective_provider';
-export { wtfEnabled as ɵp } from './src/profile/profile';
-export { createScope as ɵr, detectWTF as ɵq, endTimeRange as ɵu, leave as ɵs, startTimeRange as ɵt } from './src/profile/wtf_impl';
-export { PlatformReflectionCapabilities as ɵv } from './src/reflection/platform_reflection_capabilities';
-export { makeParamDecorator as ɵa, makePropDecorator as ɵb } from './src/util/decorators';
-export { _def as ɵw } from './src/view/provider';
-export { DebugContext as ɵx } from './src/view/types';
+export * from './index';
+export { _iterableDiffersFactory as ɵangular_packages_core_core_j, _keyValueDiffersFactory as ɵangular_packages_core_core_k, _localeFactory as ɵangular_packages_core_core_l } from './src/application_module';
+export { _appIdRandomProviderFactory as ɵangular_packages_core_core_f } from './src/application_tokens';
+export { defaultKeyValueDiffers as ɵangular_packages_core_core_g } from './src/change_detection/change_detection';
+export { DefaultIterableDifferFactory as ɵangular_packages_core_core_h } from './src/change_detection/differs/default_iterable_differ';
+export { DefaultKeyValueDifferFactory as ɵangular_packages_core_core_i } from './src/change_detection/differs/default_keyvalue_differ';
+export { ReflectiveInjector_ as ɵangular_packages_core_core_c } from './src/di/reflective_injector';
+export { ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e } from './src/di/reflective_provider';
+export { wtfEnabled as ɵangular_packages_core_core_m } from './src/profile/profile';
+export { createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q } from './src/profile/wtf_impl';
+export { getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_y } from './src/render3/di';
+export { bindingUpdated as ɵangular_packages_core_core_bb, bindingUpdated2 as ɵangular_packages_core_core_bd, bindingUpdated4 as ɵangular_packages_core_core_be, checkAndUpdateBinding as ɵangular_packages_core_core_bc, consumeBinding as ɵangular_packages_core_core_ba, getCreationMode as ɵangular_packages_core_core_z } from './src/render3/instructions';
+export { makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b } from './src/util/decorators';
+export { _def as ɵangular_packages_core_core_s } from './src/view/provider';
+export { DebugContext as ɵangular_packages_core_core_t } from './src/view/types';

@@ -10,9 +10,11 @@ export declare const APP_INITIALIZER: InjectionToken<(() => void)[]>;
  * @experimental
  */
 export declare class ApplicationInitStatus {
-    private _donePromise;
-    private _done;
-    constructor(appInits: (() => any)[]);
-    readonly done: boolean;
+    private appInits;
+    private resolve;
+    private reject;
+    private initialized;
     readonly donePromise: Promise<any>;
+    readonly done: boolean;
+    constructor(appInits: (() => any)[]);
 }

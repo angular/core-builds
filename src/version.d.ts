@@ -6,18 +6,18 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @whatItDoes Represents the version of Angular
+ * @description Represents the version of Angular
  *
- * @stable
+ *
  */
 export declare class Version {
     full: string;
-    constructor(full: string);
     readonly major: string;
     readonly minor: string;
     readonly patch: string;
+    constructor(full: string);
 }
 /**
- * @stable
+ *
  */
 export declare const VERSION: Version;

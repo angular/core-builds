@@ -27,7 +27,7 @@ import { EmbeddedViewRef, ViewRef } from './view_ref';
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
- * @stable
+ *
  */
 export declare abstract class ViewContainerRef {
     /**
@@ -44,7 +44,7 @@ export declare abstract class ViewContainerRef {
     /**
      * Returns the {@link ViewRef} for the View located in this container at the specified index.
      */
-    abstract get(index: number): ViewRef;
+    abstract get(index: number): ViewRef | null;
     /**
      * Returns the number of Views currently attached to this container.
      */
@@ -62,8 +62,8 @@ export declare abstract class ViewContainerRef {
      * Instantiates a single {@link Component} and inserts its Host View into this container at the
      * specified `index`.
      *
-     * The component is instantiated using its {@link ComponentFactory} which can be
-     * obtained via {@link ComponentFactoryResolver#resolveComponentFactory}.
+     * The component is instantiated using its {@link ComponentFactory} which can be obtained via
+     * {@link ComponentFactoryResolver#resolveComponentFactory resolveComponentFactory}.
      *
      * If `index` is not specified, the new View will be inserted as the last View in the container.
      *
@@ -102,5 +102,5 @@ export declare abstract class ViewContainerRef {
      *
      * If the `index` param is omitted, the last {@link ViewRef} is detached.
      */
-    abstract detach(index?: number): ViewRef;
+    abstract detach(index?: number): ViewRef | null;
 }

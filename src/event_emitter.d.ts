@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 /**
  * Use by directives and components to emit custom Events.
  *
@@ -51,13 +51,16 @@ import { Subject } from 'rxjs/Subject';
  * https://github.com/jhusain/observable-spec
  *
  * Once a reference implementation of the spec is available, switch to it.
- * @stable
+ *
  */
 export declare class EventEmitter<T> extends Subject<T> {
     __isAsync: boolean;
     /**
-     * Creates an instance of [EventEmitter], which depending on [isAsync],
+     * Creates an instance of {@link EventEmitter}, which depending on `isAsync`,
      * delivers events synchronously or asynchronously.
+     *
+     * @param isAsync By default, events are delivered synchronously (default value: `false`).
+     * Set to `true` for asynchronous event delivery.
      */
     constructor(isAsync?: boolean);
     emit(value?: T): void;

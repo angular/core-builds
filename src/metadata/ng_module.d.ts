@@ -1,17 +1,10 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { Provider } from '../di';
+import { Provider } from '../di/provider';
 import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
 /**
  * A wrapper around a module that also includes the providers.
  *
- * @stable
+ *
  */
 export interface ModuleWithProviders {
     ngModule: Type<any>;
@@ -31,7 +24,7 @@ export interface SchemaMetadata {
  * - any properties on elements with a `-` in their name which is the common rule for custom
  * elements.
  *
- * @stable
+ *
  */
 export declare const CUSTOM_ELEMENTS_SCHEMA: SchemaMetadata;
 /**
@@ -43,7 +36,7 @@ export declare const NO_ERRORS_SCHEMA: SchemaMetadata;
 /**
  * Type of the NgModule decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface NgModuleDecorator {
     /**
@@ -55,7 +48,7 @@ export interface NgModuleDecorator {
 /**
  * Type of the NgModule metadata.
  *
- * @stable
+ *
  */
 export interface NgModule {
     /**
@@ -169,7 +162,7 @@ export interface NgModule {
 /**
  * NgModule decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const NgModule: NgModuleDecorator;

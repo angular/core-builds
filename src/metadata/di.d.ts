@@ -45,7 +45,7 @@ export declare const ANALYZE_FOR_ENTRY_COMPONENTS: InjectionToken<any>;
 /**
  * Type of the Attribute decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface AttributeDecorator {
     /**
@@ -69,18 +69,6 @@ export interface AttributeDecorator {
      *
      * {@example core/ts/metadata/metadata.ts region='attributeFactory'}
      *
-     * ### Example as ES5 DSL
-     *
-     * ```
-     * var MyComponent = ng
-     *   .Component({...})
-     *   .Class({
-     *     constructor: [new ng.Attribute('title'), function(title) {
-     *       ...
-     *     }]
-     *   })
-     * ```
-     *
      * ### Example as ES5 annotation
      *
      * ```
@@ -96,7 +84,7 @@ export interface AttributeDecorator {
      * ]
      * ```
      *
-     * @stable
+     *
      */
     (name: string): any;
     new (name: string): Attribute;
@@ -110,14 +98,14 @@ export interface Attribute {
 /**
  * Attribute decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Attribute: AttributeDecorator;
 /**
  * Type of the Query metadata.
  *
- * @stable
+ *
  */
 export interface Query {
     descendants: boolean;
@@ -132,7 +120,7 @@ export interface Query {
  * See {@link ContentChildren}, {@link ContentChild}, {@link ViewChildren}, {@link ViewChild} for
  * more information.
  *
- * @stable
+ *
  */
 export declare abstract class Query {
 }
@@ -141,17 +129,17 @@ export declare abstract class Query {
  *
  * See {@link ContentChildren}.
  *
- * @stable
+ *
  */
 export interface ContentChildrenDecorator {
     /**
-     * @whatItDoes Configures a content query.
      *
-     * @howToUse
+     * @usageNotes
      *
      * {@example core/di/ts/contentChildren/content_children_howto.ts region='HowTo'}
      *
      * @description
+     * Configures a content query.
      *
      * You can use ContentChildren to get the {@link QueryList} of elements or directives from the
      * content DOM. Any time a child element is added, removed, or moved, the query list will be
@@ -172,14 +160,14 @@ export interface ContentChildrenDecorator {
      *
      * **npm package**: `@angular/core`
      *
-     * @stable
+     *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {descendants, read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {descendants, read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         descendants?: boolean;
         read?: any;
     }): Query;
@@ -187,14 +175,14 @@ export interface ContentChildrenDecorator {
 /**
  * Type of the ContentChildren metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare type ContentChildren = Query;
 /**
  * ContentChildren decorator and metadata.
  *
- *  @stable
+ *
  *  @Annotation
  */
 export declare const ContentChildren: ContentChildrenDecorator;
@@ -202,17 +190,17 @@ export declare const ContentChildren: ContentChildrenDecorator;
  * Type of the ContentChild decorator / constructor function.
  *
  *
- * @stable
+ *
  */
 export interface ContentChildDecorator {
     /**
-     * @whatItDoes Configures a content query.
      *
-     * @howToUse
+     * @usageNotes
      *
      * {@example core/di/ts/contentChild/content_child_howto.ts region='HowTo'}
      *
      * @description
+     * Configures a content query.
      *
      * You can use ContentChild to get the first element or the directive matching the selector from
      * the content DOM. If the content DOM changes, and a new child matches the selector,
@@ -231,13 +219,13 @@ export interface ContentChildDecorator {
      *
      * **npm package**: `@angular/core`
      *
-     * @stable
+     *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ContentChild;
 }
@@ -246,32 +234,32 @@ export interface ContentChildDecorator {
  *
  * See {@link ContentChild}.
  *
- * @stable
+ *
  */
 export declare type ContentChild = Query;
 /**
  * ContentChild decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const ContentChild: ContentChildDecorator;
 /**
  * Type of the ViewChildren decorator / constructor function.
  *
- * See {@ViewChildren}.
+ * See {@link ViewChildren}.
  *
- * @stable
+ *
  */
 export interface ViewChildrenDecorator {
     /**
-     * @whatItDoes Configures a view query.
      *
-     * @howToUse
+     * @usageNotes
      *
      * {@example core/di/ts/viewChildren/view_children_howto.ts region='HowTo'}
      *
      * @description
+     * Configures a view query.
      *
      * You can use ViewChildren to get the {@link QueryList} of elements or directives from the
      * view DOM. Any time a child element is added, removed, or moved, the query list will be updated,
@@ -290,26 +278,26 @@ export interface ViewChildrenDecorator {
      *
      * **npm package**: `@angular/core`
      *
-     * @stable
+     *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChildren;
 }
 /**
  * Type of the ViewChildren metadata.
  *
- * @stable
+ *
  */
 export declare type ViewChildren = Query;
 /**
  * ViewChildren decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const ViewChildren: ViewChildrenDecorator;
@@ -318,17 +306,17 @@ export declare const ViewChildren: ViewChildrenDecorator;
  *
  * See {@link ViewChild}
  *
- * @stable
+ *
  */
 export interface ViewChildDecorator {
     /**
-     * @whatItDoes Configures a view query.
      *
-     * @howToUse
+     * @usageNotes
      *
      * {@example core/di/ts/viewChild/view_child_howto.ts region='HowTo'}
      *
      * @description
+     * Configures a view query.
      *
      * You can use ViewChild to get the first element or the directive matching the selector from the
      * view DOM. If the view DOM changes, and a new child matches the selector,
@@ -345,26 +333,26 @@ export interface ViewChildDecorator {
      *
      * **npm package**: `@angular/core`
      *
-     * @stable
+     *
      * @Annotation
      */
-    (selector: Type<any> | Function | string, {read}?: {
+    (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): any;
-    new (selector: Type<any> | Function | string, {read}?: {
+    new (selector: Type<any> | Function | string, opts?: {
         read?: any;
     }): ViewChild;
 }
 /**
  * Type of the ViewChild metadata.
  *
- * @stable
+ *
  */
 export declare type ViewChild = Query;
 /**
  * ViewChild decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const ViewChild: ViewChildDecorator;

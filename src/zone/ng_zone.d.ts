@@ -1,18 +1,11 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { EventEmitter } from '../event_emitter';
 /**
  * An injectable service for executing work inside or outside of the Angular zone.
  *
  * The most common use of this service is to optimize performance when starting a work consisting of
  * one or more asynchronous tasks that don't require UI updates or error handling to be handled by
- * Angular. Such tasks can be kicked off via {@link runOutsideAngular} and if needed, these tasks
- * can reenter the Angular zone via {@link run}.
+ * Angular. Such tasks can be kicked off via {@link #runOutsideAngular} and if needed, these tasks
+ * can reenter the Angular zone via {@link #run}.
  *
  * <!-- TODO: add/fix links to:
  *   - docs explaining zones and the use of zones in Angular and change-detection
@@ -26,7 +19,7 @@ import { EventEmitter } from '../event_emitter';
  * import {NgIf} from '@angular/common';
  *
  * @Component({
- *   selector: 'ng-zone-demo'.
+ *   selector: 'ng-zone-demo',
  *   template: `
  *     <h2>Demo: NgZone</h2>
  *
@@ -58,9 +51,10 @@ import { EventEmitter } from '../event_emitter';
  *     this.progress = 0;
  *     this._ngZone.runOutsideAngular(() => {
  *       this._increaseProgress(() => {
- *       // reenter the Angular zone and display done
- *       this._ngZone.run(() => {console.log('Outside Done!') });
- *     }}));
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
  *   }
  *
  *   _increaseProgress(doneCallback: () => void) {
@@ -68,7 +62,7 @@ import { EventEmitter } from '../event_emitter';
  *     console.log(`Current progress: ${this.progress}%`);
  *
  *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback)), 10)
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
  *     } else {
  *       doneCallback();
  *     }
@@ -79,59 +73,18 @@ import { EventEmitter } from '../event_emitter';
  * @experimental
  */
 export declare class NgZone {
-    private outer;
-    private inner;
-    private _hasPendingMicrotasks;
-    private _hasPendingMacrotasks;
-    private _isStable;
-    private _nesting;
-    private _onUnstable;
-    private _onMicrotaskEmpty;
-    private _onStable;
-    private _onErrorEvents;
-    constructor({enableLongStackTrace}: {
-        enableLongStackTrace?: boolean;
-    });
-    static isInAngularZone(): boolean;
-    static assertInAngularZone(): void;
-    static assertNotInAngularZone(): void;
+    readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
     /**
-     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
-     * the function.
-     *
-     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
-     * outside of the Angular zone (typically started via {@link runOutsideAngular}).
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * within the Angular zone.
-     *
-     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     * Whether there are no outstanding microtasks or macrotasks.
      */
-    run(fn: () => any): any;
-    /**
-     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
-     * rethrown.
-     */
-    runGuarded(fn: () => any): any;
-    /**
-     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
-     * the function.
-     *
-     * Running functions via `runOutsideAngular` allows you to escape Angular's zone and do work that
-     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
-     *
-     * Any future tasks or microtasks scheduled from within this function will continue executing from
-     * outside of the Angular zone.
-     *
-     * Use {@link run} to reenter the Angular zone and do work that updates the application model.
-     */
-    runOutsideAngular(fn: () => any): any;
+    readonly isStable: boolean;
     /**
      * Notifies when code enters Angular Zone. This gets fired first on VM Turn.
      */
     readonly onUnstable: EventEmitter<any>;
     /**
-     * Notifies when there is no more microtasks enqueue in the current VM Turn.
+     * Notifies when there is no more microtasks enqueued in the current VM Turn.
      * This is a hint for Angular to do change detection, which may enqueue more microtasks.
      * For this reason this event can fire multiple times per VM Turn.
      */
@@ -143,20 +96,75 @@ export declare class NgZone {
      */
     readonly onStable: EventEmitter<any>;
     /**
-     * Notify that an error has been delivered.
+     * Notifies that an error has been delivered.
      */
     readonly onError: EventEmitter<any>;
+    constructor({enableLongStackTrace}: {
+        enableLongStackTrace?: boolean;
+    });
+    static isInAngularZone(): boolean;
+    static assertInAngularZone(): void;
+    static assertNotInAngularZone(): void;
     /**
-     * Whether there are no outstanding microtasks or macrotasks.
+     * Executes the `fn` function synchronously within the Angular zone and returns value returned by
+     * the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
      */
-    readonly isStable: boolean;
+    run<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously within the Angular zone as a task and returns value
+     * returned by the function.
+     *
+     * Running functions via `run` allows you to reenter Angular zone from a task that was executed
+     * outside of the Angular zone (typically started via {@link #runOutsideAngular}).
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * within the Angular zone.
+     *
+     * If a synchronous error happens it will be rethrown and not reported via `onError`.
+     */
+    runTask<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], name?: string): T;
+    /**
+     * Same as `run`, except that synchronous errors are caught and forwarded via `onError` and not
+     * rethrown.
+     */
+    runGuarded<T>(fn: (...args: any[]) => T, applyThis?: any, applyArgs?: any[]): T;
+    /**
+     * Executes the `fn` function synchronously in Angular's parent zone and returns value returned by
+     * the function.
+     *
+     * Running functions via {@link #runOutsideAngular} allows you to escape Angular's zone and do
+     * work that
+     * doesn't trigger Angular change-detection or is subject to Angular's error handling.
+     *
+     * Any future tasks or microtasks scheduled from within this function will continue executing from
+     * outside of the Angular zone.
+     *
+     * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
+     */
+    runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+export declare class NoopNgZone implements NgZone {
     readonly hasPendingMicrotasks: boolean;
     readonly hasPendingMacrotasks: boolean;
-    private checkStable();
-    private forkInnerZoneWithAngularBehavior();
-    private onEnter();
-    private onLeave();
-    private setHasMicrotask(hasMicrotasks);
-    private setHasMacrotask(hasMacrotasks);
-    private triggerError(error);
+    readonly isStable: boolean;
+    readonly onUnstable: EventEmitter<any>;
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    readonly onStable: EventEmitter<any>;
+    readonly onError: EventEmitter<any>;
+    run(fn: () => any): any;
+    runGuarded(fn: () => any): any;
+    runOutsideAngular(fn: () => any): any;
+    runTask<T>(fn: () => any): any;
 }
