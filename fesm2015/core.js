@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+83.sha-f567e18
+ * @license Angular v6.0.0-rc.5+85.sha-db77d8d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1752,6 +1752,8 @@ function inject(token, flags = 0 /* Default */) {
             return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
                 injectableDef.value;
         }
+        if (flags & 8 /* Optional */)
+            return null;
         throw new Error(`Injector: NOT_FOUND [${stringify(token)}]`);
     }
     else {
@@ -2035,7 +2037,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5+83.sha-f567e18');
+const VERSION = new Version('6.0.0-rc.5+85.sha-db77d8d');
 
 /**
  * @fileoverview added by tsickle
@@ -19269,7 +19271,7 @@ function getClosestComponentAncestor(node) {
  * @param {?=} flags Injection flags (e.g. CheckParent)
  * @return {?} The instance found
  */
-function getOrCreateInjectable(di, token, flags) {
+function getOrCreateInjectable(di, token, flags = 0 /* Default */) {
     const /** @type {?} */ bloomHash = bloomHashBit(token);
     // If the token has a bloom hash, then it is a directive that is public to the injection system
     // (diPublic). If there is no hash, fall back to the module injector.
@@ -19288,7 +19290,7 @@ function getOrCreateInjectable(di, token, flags) {
         while (injector) {
             // Get the closest potential matching injector (upwards in the injector tree) that
             // *potentially* has the token.
-            injector = bloomFindPossibleInjector(injector, bloomHash);
+            injector = bloomFindPossibleInjector(injector, bloomHash, flags);
             // If no injector is found, we *know* that there is no ancestor injector that contains the
             // token, so we abort.
             if (!injector) {
@@ -19297,10 +19299,10 @@ function getOrCreateInjectable(di, token, flags) {
             // At this point, we have an injector which *may* contain the token, so we step through the
             // directives associated with the injector's corresponding node to get the directive instance.
             const /** @type {?} */ node = injector.node;
-            const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-            const /** @type {?} */ count = flags & 4095;
+            const /** @type {?} */ nodeFlags = /** @type {?} */ ((node.tNode)).flags;
+            const /** @type {?} */ count = nodeFlags & 4095;
             if (count !== 0) {
-                const /** @type {?} */ start = flags >> 13;
+                const /** @type {?} */ start = nodeFlags >> 13;
                 const /** @type {?} */ end = start + count;
                 const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
                 for (let /** @type {?} */ i = start; i < end; i++) {
@@ -19318,14 +19320,20 @@ function getOrCreateInjectable(di, token, flags) {
             if (injector === di && (instance = searchMatchesQueuedForCreation(node, token))) {
                 return instance;
             }
-            // The def wasn't found anywhere on this node, so it might be a false positive.
-            // Traverse up the tree and continue searching.
-            injector = injector.parent;
+            // The def wasn't found anywhere on this node, so it was a false positive.
+            // If flags permit, traverse up the tree and continue searching.
+            if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
+                injector = null;
+            }
+            else {
+                injector = injector.parent;
+            }
         }
     }
     // No directive was found for the given token.
-    // TODO: implement optional, check-self, and check-parent.
-    throw new Error('Implement');
+    if (flags & 8 /* Optional */)
+        return null;
+    throw new Error(`Injector: NOT_FOUND [${stringify$1(token)}]`);
 }
 /**
  * @template T
@@ -19378,16 +19386,17 @@ function bloomHashBit(type) {
  *
  * @param {?} startInjector
  * @param {?} bloomBit The bit to check in each injector's bloom filter
+ * @param {?} flags The injection flags for this injection site (e.g. Optional or SkipSelf)
  * @return {?} An injector that might have the directive
  */
-function bloomFindPossibleInjector(startInjector, bloomBit) {
+function bloomFindPossibleInjector(startInjector, bloomBit, flags) {
     // Create a mask that targets the specific bit associated with the directive we're looking for.
     // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
     // to bit positions 0 - 31 in a 32 bit integer.
     const /** @type {?} */ mask = 1 << bloomBit;
     // Traverse up the injector tree until we find a potential match or until we know there *isn't* a
     // match.
-    let /** @type {?} */ injector = startInjector;
+    let /** @type {?} */ injector = flags & 4 /* SkipSelf */ ? /** @type {?} */ ((startInjector.parent)) : startInjector;
     while (injector) {
         // Our bloom filter size is 256 bits, which is eight 32-bit bloom filter buckets:
         // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc.
@@ -19406,6 +19415,9 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
         if ((value & mask) === mask) {
             return injector;
         }
+        else if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
+            return null;
+        }
         // If the current injector does not have the directive, check the bloom filters for the ancestor
         // injectors (cbf0 - cbf7). These filters capture *all* ancestor injectors.
         if (bloomBit < 128) {
@@ -19421,6 +19433,17 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
         injector = (value & mask) ? injector.parent : null;
     }
     return null;
+}
+/**
+ * Checks whether the current injector and its parent are in the same host view.
+ *
+ * This is necessary to support \@Host() decorators. If \@Host() is set, we should stop searching once
+ * the injector and its parent view don't match because it means we'd cross the view boundary.
+ * @param {?} injector
+ * @return {?}
+ */
+function sameHostView(injector) {
+    return !!injector.parent && injector.parent.node.view === injector.node.view;
 }
 /**
  * @template T
