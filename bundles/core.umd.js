@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+86.sha-b4c252b
+ * @license Angular v6.0.0-rc.5+87.sha-eb031c6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1656,7 +1656,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0-rc.5+86.sha-b4c252b');
+var VERSION = new Version('6.0.0-rc.5+87.sha-eb031c6');
 
 /**
  * @license
@@ -3261,9 +3261,20 @@ var ApplicationInitStatus = /** @class */ (function () {
         }
         this.initialized = true;
     };
-    ApplicationInitStatus.decorators = [
-        { type: Injectable }
-    ];
+    // `ngInjectableDef` is required in core-level code because it sits behind
+    // the injector and any code the loads it inside may run into a dependency
+    // loop (because Injectable is also in core. Do not use the code below
+    // (use @Injectable({ providedIn, factory }))  instead...
+    /**
+       * @internal
+       * @nocollapse
+       */
+    ApplicationInitStatus.ngInjectableDef = defineInjectable({
+        providedIn: 'root',
+        factory: function ApplicationInitStatus_Factory() {
+            return new ApplicationInitStatus(inject(APP_INITIALIZER));
+        }
+    });
     /** @nocollapse */
     ApplicationInitStatus.ctorParameters = function () { return [
         { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
@@ -3461,11 +3472,15 @@ var Compiler = /** @class */ (function () {
        * Clears the cache for the given component/ngModule.
        */
     function (type) { };
-    Compiler.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    Compiler.ctorParameters = function () { return []; };
+    // `ngInjectableDef` is required in core-level code because it sits behind
+    // the injector and any code the loads it inside may run into a dependency
+    // loop (because Injectable is also in core. Do not use the code below
+    // (use @Injectable({ providedIn, factory }))  instead...
+    /**
+       * @internal
+       * @nocollapse
+       */
+    Compiler.ngInjectableDef = defineInjectable({ providedIn: 'root', factory: function () { return new Compiler(); } });
     return Compiler;
 }());
 /**
@@ -5256,20 +5271,24 @@ var ApplicationRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    // `ngInjectableDef` is required in core-level code because it sits behind
+    // the injector and any code the loads it inside may run into a dependency
+    // loop (because Injectable is also in core. Do not use the code below
+    // (use @Injectable({ providedIn, factory }))  instead...
+    /**
+       * @internal
+       * @nocollapse
+       */
+    ApplicationRef.ngInjectableDef = defineInjectable({
+        providedIn: 'root',
+        factory: function ApplicationRef_Factory() {
+            // Type as any is used here due to a type-related bug in injector with abstract classes
+            // (#23528)
+            return new ApplicationRef(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver), inject(ApplicationInitStatus));
+        }
+    });
     /** @internal */
     ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
-    ApplicationRef.ctorParameters = function () { return [
-        { type: NgZone, },
-        { type: Console, },
-        { type: Injector, },
-        { type: ErrorHandler, },
-        { type: ComponentFactoryResolver, },
-        { type: ApplicationInitStatus, },
-    ]; };
     return ApplicationRef;
 }());
 function remove(list, el) {
@@ -7731,22 +7750,18 @@ function _localeFactory(locale) {
     return locale || 'en-US';
 }
 /**
- * This module includes the providers of @angular/core that are needed
- * to bootstrap components via `ApplicationRef`.
- *
  * @experimental
  */
 var ApplicationModule = /** @class */ (function () {
-    // Inject ApplicationRef to make it eager...
-    function ApplicationModule(appRef) {
+    function ApplicationModule() {
     }
     ApplicationModule.decorators = [
         { type: NgModule, args: [{
                     providers: [
-                        ApplicationRef,
-                        ApplicationInitStatus,
-                        Compiler,
                         APP_ID_RANDOM_PROVIDER,
+                        // wen-workers need this value to be here since WorkerApp is defined
+                        // ontop of this application
+                        { provide: APP_ROOT, useValue: true },
                         { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                         { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                         {
@@ -7758,9 +7773,7 @@ var ApplicationModule = /** @class */ (function () {
                 },] }
     ];
     /** @nocollapse */
-    ApplicationModule.ctorParameters = function () { return [
-        { type: ApplicationRef, },
-    ]; };
+    ApplicationModule.ctorParameters = function () { return []; };
     return ApplicationModule;
 }());
 

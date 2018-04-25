@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+86.sha-b4c252b
+ * @license Angular v6.0.0-rc.5+87.sha-eb031c6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2037,7 +2037,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5+86.sha-b4c252b');
+const VERSION = new Version('6.0.0-rc.5+87.sha-eb031c6');
 
 /**
  * @fileoverview added by tsickle
@@ -3856,9 +3856,16 @@ class ApplicationInitStatus {
         this.initialized = true;
     }
 }
-ApplicationInitStatus.decorators = [
-    { type: Injectable }
-];
+/**
+ * \@internal
+ * @nocollapse
+ */
+/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = defineInjectable({
+    providedIn: 'root',
+    factory: function ApplicationInitStatus_Factory() {
+        return new ApplicationInitStatus(inject(APP_INITIALIZER));
+    }
+});
 /** @nocollapse */
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
@@ -4056,11 +4063,11 @@ class Compiler {
      */
     clearCacheFor(type) { }
 }
-Compiler.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-Compiler.ctorParameters = () => [];
+/**
+ * \@internal
+ * @nocollapse
+ */
+/** @nocollapse */ Compiler.ngInjectableDef = defineInjectable({ providedIn: 'root', factory: () => new Compiler() });
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -5775,20 +5782,20 @@ class ApplicationRef {
 }
 /**
  * \@internal
+ * @nocollapse
+ */
+/** @nocollapse */ ApplicationRef.ngInjectableDef = defineInjectable({
+    providedIn: 'root',
+    factory: function ApplicationRef_Factory() {
+        // Type as any is used here due to a type-related bug in injector with abstract classes
+        // (#23528)
+        return new ApplicationRef(inject(NgZone), inject(Console), inject(/** @type {?} */ (Injector)), inject(ErrorHandler), inject(/** @type {?} */ (ComponentFactoryResolver)), inject(ApplicationInitStatus));
+    }
+});
+/**
+ * \@internal
  */
 ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-ApplicationRef.decorators = [
-    { type: Injectable }
-];
-/** @nocollapse */
-ApplicationRef.ctorParameters = () => [
-    { type: NgZone, },
-    { type: Console, },
-    { type: Injector, },
-    { type: ErrorHandler, },
-    { type: ComponentFactoryResolver, },
-    { type: ApplicationInitStatus, },
-];
 /**
  * @template T
  * @param {?} list
@@ -8450,24 +8457,17 @@ function _localeFactory(locale) {
     return locale || 'en-US';
 }
 /**
- * This module includes the providers of \@angular/core that are needed
- * to bootstrap components via `ApplicationRef`.
- *
  * \@experimental
  */
 class ApplicationModule {
-    /**
-     * @param {?} appRef
-     */
-    constructor(appRef) { }
 }
 ApplicationModule.decorators = [
     { type: NgModule, args: [{
                 providers: [
-                    ApplicationRef,
-                    ApplicationInitStatus,
-                    Compiler,
                     APP_ID_RANDOM_PROVIDER,
+                    // wen-workers need this value to be here since WorkerApp is defined
+                    // ontop of this application
+                    { provide: APP_ROOT, useValue: true },
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                     { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                     {
@@ -8479,9 +8479,7 @@ ApplicationModule.decorators = [
             },] }
 ];
 /** @nocollapse */
-ApplicationModule.ctorParameters = () => [
-    { type: ApplicationRef, },
-];
+ApplicationModule.ctorParameters = () => [];
 
 /**
  * @fileoverview added by tsickle
