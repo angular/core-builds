@@ -76,7 +76,10 @@ export function initNgModule(data) {
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
-            providers[i] = _createProviderInstance(data, provDef);
+            // Make sure the provider has not been already initialized outside this loop.
+            if (providers[i] === undefined) {
+                providers[i] = _createProviderInstance(data, provDef);
+            }
         }
     }
 }

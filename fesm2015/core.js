@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5-64bf6ed
+ * @license Angular v6.0.0-rc.5-5021bdd
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5-64bf6ed');
+const VERSION = new Version('6.0.0-rc.5-5021bdd');
 
 /**
  * @fileoverview added by tsickle
@@ -10512,7 +10512,10 @@ function initNgModule(data) {
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
-            providers[i] = _createProviderInstance$1(data, provDef);
+            // Make sure the provider has not been already initialized outside this loop.
+            if (providers[i] === undefined) {
+                providers[i] = _createProviderInstance$1(data, provDef);
+            }
         }
     }
 }
