@@ -94,7 +94,17 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param pipes Pipe defs that should be used for matching
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
+/**
+ * Used for rendering embedded views (e.g. dynamically created views)
+ *
+ * Dynamically created views must store/retrieve their TViews differently from component views
+ * because their template functions are nested in the template functions of their hosts, creating
+ * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor inside
+ * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
+ * can't store TViews in the template function itself (as we do for comps). Instead, we store the
+ * TView for dynamically created views on their host TNode, which only has one instance.
+ */
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -265,7 +275,7 @@ export declare function createLContainer(parentLNode: LNode, currentView: LView,
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: string[], localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *

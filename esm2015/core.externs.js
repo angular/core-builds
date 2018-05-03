@@ -37,3 +37,38 @@ var System;
 // externs from /home/circleci/.cache/bazel/_bazel_circleci/9ce5c2144ecf75d11717c0aa41e45a8d/execroot/angular/packages/core/src/render3/ng_dev_mode.ts:
  /** @type {?} */
 var ngDevMode;
+/**
+ * @record
+ * @struct
+ */
+function NgDevModePerfCounters() {}
+ /** @type {?} */
+NgDevModePerfCounters.prototype.firstTemplatePass;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.tNode;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.tView;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererCreateTextNode;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererSetText;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererCreateElement;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererAddEventListener;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererSetAttribute;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererRemoveAttribute;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererSetProperty;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererSetClassName;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererAddClass;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererRemoveClass;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererSetStyle;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererRemoveStyle;

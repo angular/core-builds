@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+89.sha-1a44a0b
+ * @license Angular v6.0.0-rc.5+116.sha-b45fa5e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2037,7 +2037,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5+89.sha-1a44a0b');
+const VERSION = new Version('6.0.0-rc.5+116.sha-b45fa5e');
 
 /**
  * @fileoverview added by tsickle
@@ -3856,16 +3856,9 @@ class ApplicationInitStatus {
         this.initialized = true;
     }
 }
-/**
- * \@internal
- * @nocollapse
- */
-/** @nocollapse */ ApplicationInitStatus.ngInjectableDef = defineInjectable({
-    providedIn: 'root',
-    factory: function ApplicationInitStatus_Factory() {
-        return new ApplicationInitStatus(inject(APP_INITIALIZER));
-    }
-});
+ApplicationInitStatus.decorators = [
+    { type: Injectable }
+];
 /** @nocollapse */
 ApplicationInitStatus.ctorParameters = () => [
     { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
@@ -4063,11 +4056,11 @@ class Compiler {
      */
     clearCacheFor(type) { }
 }
-/**
- * \@internal
- * @nocollapse
- */
-/** @nocollapse */ Compiler.ngInjectableDef = defineInjectable({ providedIn: 'root', factory: () => new Compiler() });
+Compiler.decorators = [
+    { type: Injectable }
+];
+/** @nocollapse */
+Compiler.ctorParameters = () => [];
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -5782,20 +5775,20 @@ class ApplicationRef {
 }
 /**
  * \@internal
- * @nocollapse
- */
-/** @nocollapse */ ApplicationRef.ngInjectableDef = defineInjectable({
-    providedIn: 'root',
-    factory: function ApplicationRef_Factory() {
-        // Type as any is used here due to a type-related bug in injector with abstract classes
-        // (#23528)
-        return new ApplicationRef(inject(NgZone), inject(Console), inject(/** @type {?} */ (Injector)), inject(ErrorHandler), inject(/** @type {?} */ (ComponentFactoryResolver)), inject(ApplicationInitStatus));
-    }
-});
-/**
- * \@internal
  */
 ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
+ApplicationRef.decorators = [
+    { type: Injectable }
+];
+/** @nocollapse */
+ApplicationRef.ctorParameters = () => [
+    { type: NgZone, },
+    { type: Console, },
+    { type: Injector, },
+    { type: ErrorHandler, },
+    { type: ComponentFactoryResolver, },
+    { type: ApplicationInitStatus, },
+];
 /**
  * @template T
  * @param {?} list
@@ -8457,17 +8450,24 @@ function _localeFactory(locale) {
     return locale || 'en-US';
 }
 /**
+ * This module includes the providers of \@angular/core that are needed
+ * to bootstrap components via `ApplicationRef`.
+ *
  * \@experimental
  */
 class ApplicationModule {
+    /**
+     * @param {?} appRef
+     */
+    constructor(appRef) { }
 }
 ApplicationModule.decorators = [
     { type: NgModule, args: [{
                 providers: [
+                    ApplicationRef,
+                    ApplicationInitStatus,
+                    Compiler,
                     APP_ID_RANDOM_PROVIDER,
-                    // wen-workers need this value to be here since WorkerApp is defined
-                    // ontop of this application
-                    { provide: APP_ROOT, useValue: true },
                     { provide: IterableDiffers, useFactory: _iterableDiffersFactory },
                     { provide: KeyValueDiffers, useFactory: _keyValueDiffersFactory },
                     {
@@ -8479,7 +8479,9 @@ ApplicationModule.decorators = [
             },] }
 ];
 /** @nocollapse */
-ApplicationModule.ctorParameters = () => [];
+ApplicationModule.ctorParameters = () => [
+    { type: ApplicationRef, },
+];
 
 /**
  * @fileoverview added by tsickle
@@ -10513,7 +10515,10 @@ function initNgModule(data) {
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
-            providers[i] = _createProviderInstance$1(data, provDef);
+            // Make sure the provider has not been already initialized outside this loop.
+            if (providers[i] === undefined) {
+                providers[i] = _createProviderInstance$1(data, provDef);
+            }
         }
     }
 }
@@ -15190,14 +15195,33 @@ function callHooks(data, arr) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-if (typeof ngDevMode == 'undefined') {
-    if (typeof window != 'undefined')
-        (/** @type {?} */ (window)).ngDevMode = true;
-    if (typeof self != 'undefined')
-        (/** @type {?} */ (self)).ngDevMode = true;
-    if (typeof global != 'undefined')
-        (/** @type {?} */ (global)).ngDevMode = true;
-}
+const ngDevModeResetPerfCounters = /** @type {?} */ ((typeof ngDevMode == 'undefined' && (function (global) {
+    /**
+     * @return {?}
+     */
+    function ngDevModeResetPerfCounters() {
+        global['ngDevMode'] = {
+            firstTemplatePass: 0,
+            tNode: 0,
+            tView: 0,
+            rendererCreateTextNode: 0,
+            rendererSetText: 0,
+            rendererCreateElement: 0,
+            rendererAddEventListener: 0,
+            rendererSetAttribute: 0,
+            rendererRemoveAttribute: 0,
+            rendererSetProperty: 0,
+            rendererSetClassName: 0,
+            rendererAddClass: 0,
+            rendererRemoveClass: 0,
+            rendererSetStyle: 0,
+            rendererRemoveStyle: 0,
+        };
+    }
+    ngDevModeResetPerfCounters();
+    return ngDevModeResetPerfCounters;
+})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
+    typeof global != 'undefined' && global)));
 
 /**
  * @fileoverview added by tsickle
@@ -16658,8 +16682,17 @@ function resetApplicationState() {
  */
 
 /**
+ * Used for rendering embedded views (e.g. dynamically created views)
+ *
+ * Dynamically created views must store/retrieve their TViews differently from component views
+ * because their template functions are nested in the template functions of their hosts, creating
+ * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor inside
+ * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
+ * can't store TViews in the template function itself (as we do for comps). Instead, we store the
+ * TView for dynamically created views on their host TNode, which only has one instance.
  * @template T
  * @param {?} viewNode
+ * @param {?} tView
  * @param {?} template
  * @param {?} context
  * @param {?} renderer
@@ -16667,7 +16700,7 @@ function resetApplicationState() {
  * @param {?=} pipes
  * @return {?}
  */
-function renderEmbeddedTemplate(viewNode, template, context, renderer, directives, pipes) {
+function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, directives, pipes) {
     const /** @type {?} */ _isParent = isParent;
     const /** @type {?} */ _previousOrParentNode = previousOrParentNode;
     let /** @type {?} */ oldView;
@@ -16676,7 +16709,6 @@ function renderEmbeddedTemplate(viewNode, template, context, renderer, directive
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
         if (viewNode == null) {
-            const /** @type {?} */ tView = getOrCreateTView(template, directives || null, pipes || null);
             const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
             viewNode = createLNode(null, 2 /* View */, null, lView);
             rf = 1 /* Create */;
@@ -16764,27 +16796,31 @@ function getRenderFlags(view) {
 function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'elements should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateElement++;
     const /** @type {?} */ native = renderer.createElement(name);
     const /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
     if (attrs)
         setUpAttributes(native, attrs);
     appendChild(/** @type {?} */ ((node.parent)), native, currentView);
-    createDirectivesAndLocals(index, name, attrs, localRefs, null);
+    createDirectivesAndLocals(index, name, attrs, localRefs, false);
     return native;
 }
 /**
- * @param {?} index
- * @param {?} name
- * @param {?} attrs
- * @param {?} localRefs
- * @param {?} containerData
+ * Creates directive instances and populates local refs.
+ *
+ * @param {?} index Index of the current node (to create TNode)
+ * @param {?} name Tag name of the current node
+ * @param {?} attrs Attrs of the current node
+ * @param {?} localRefs Local refs of the current node
+ * @param {?} inlineViews Whether or not this node will create inline views
  * @return {?}
  */
-function createDirectivesAndLocals(index, name, attrs, localRefs, containerData) {
+function createDirectivesAndLocals(index, name, attrs, localRefs, inlineViews) {
     const /** @type {?} */ node = previousOrParentNode;
     if (firstTemplatePass) {
+        ngDevMode && ngDevMode.firstTemplatePass++;
         ngDevMode && assertDataInRange(index - 1);
-        node.tNode = tData[index] = createTNode(name, attrs || null, containerData);
+        node.tNode = tData[index] = createTNode(name, attrs || null, inlineViews ? [] : null);
         cacheMatchingDirectivesForNode(node.tNode, currentView.tView, localRefs || null);
     }
     else {
@@ -16979,6 +17015,12 @@ function saveResolvedLocalsInData() {
  * @return {?} TView
  */
 function getOrCreateTView(template, directives, pipes) {
+    // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
+    // 1. It is a megamorphic call on each invocation.
+    // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
+    //    outer template invocation, which means that no such property will exist
+    // Correct solution is to only put `ngPrivateData` on the Component template
+    // and not on embedded templates.
     return template.ngPrivateData ||
         (template.ngPrivateData = /** @type {?} */ (createTView(directives, pipes)));
 }
@@ -16989,6 +17031,7 @@ function getOrCreateTView(template, directives, pipes) {
  * @return {?}
  */
 function createTView(defs, pipes) {
+    ngDevMode && ngDevMode.tView++;
     return {
         data: [],
         directives: null,
@@ -17020,6 +17063,7 @@ function setUpAttributes(native, attrs) {
         const /** @type {?} */ attrName = attrs[i];
         if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
             const /** @type {?} */ attrVal = attrs[i + 1];
+            ngDevMode && ngDevMode.rendererSetAttribute++;
             isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrName, attrVal) :
                 native.setAttribute(attrName, attrVal);
         }
@@ -17098,6 +17142,7 @@ function listener(eventName, listenerFn, useCapture = false) {
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
     const /** @type {?} */ cleanupFns = cleanup || (cleanup = currentView.cleanup = []);
+    ngDevMode && ngDevMode.rendererAddEventListener++;
     if (isProceduralRenderer(renderer)) {
         const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listenerFn);
         const /** @type {?} */ cleanupFn = renderer.listen(native, eventName, wrappedListener);
@@ -17165,10 +17210,12 @@ function elementAttribute(index, name, value, sanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ element = data[index];
         if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveAttribute++;
             isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, name) :
                 element.native.removeAttribute(name);
         }
         else {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
             const /** @type {?} */ strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
             isProceduralRenderer(renderer) ? renderer.setAttribute(element.native, name, strValue) :
                 element.native.setAttribute(name, strValue);
@@ -17212,6 +17259,7 @@ function elementProperty(index, propName, value, sanitizer) {
         // is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? (/** @type {?} */ (sanitizer(value))) : value;
         const /** @type {?} */ native = node.native;
+        ngDevMode && ngDevMode.rendererSetProperty++;
         isProceduralRenderer(renderer) ? renderer.setProperty(native, propName, value) :
             (native.setProperty ? native.setProperty(propName, value) :
                 (/** @type {?} */ (native))[propName] = value);
@@ -17220,12 +17268,13 @@ function elementProperty(index, propName, value, sanitizer) {
 /**
  * Constructs a TNode object from the arguments.
  *
- * @param {?} tagName
- * @param {?} attrs
- * @param {?} data
+ * @param {?} tagName The tag name of the node
+ * @param {?} attrs The attributes defined on this ndoe
+ * @param {?} tViews Any TViews attached to this node
  * @return {?} the TNode object
  */
-function createTNode(tagName, attrs, data) {
+function createTNode(tagName, attrs, tViews) {
+    ngDevMode && ngDevMode.tNode++;
     return {
         flags: 0,
         tagName: tagName,
@@ -17234,7 +17283,7 @@ function createTNode(tagName, attrs, data) {
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
-        data: data
+        tViews: tViews
     };
 }
 /**
@@ -17297,10 +17346,12 @@ function elementClassNamed(index, className, value) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (value) {
+            ngDevMode && ngDevMode.rendererAddClass++;
             isProceduralRenderer(renderer) ? renderer.addClass(lElement.native, className) :
                 lElement.native.classList.add(className);
         }
         else {
+            ngDevMode && ngDevMode.rendererRemoveClass++;
             isProceduralRenderer(renderer) ? renderer.removeClass(lElement.native, className) :
                 lElement.native.classList.remove(className);
         }
@@ -17326,6 +17377,7 @@ function elementClass(index, value) {
         // future
         // we will add logic here which would work with the animation code.
         const /** @type {?} */ lElement = data[index];
+        ngDevMode && ngDevMode.rendererSetClassName++;
         isProceduralRenderer(renderer) ? renderer.setProperty(lElement.native, 'className', value) :
             lElement.native['className'] = stringify$1(value);
     }
@@ -17342,6 +17394,7 @@ function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = data[index];
         if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
                 lElement.native['style'].removeProperty(styleName);
@@ -17350,6 +17403,7 @@ function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
             let /** @type {?} */ strValue = typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
             if (typeof suffixOrSanitizer == 'string')
                 strValue = strValue + suffixOrSanitizer;
+            ngDevMode && ngDevMode.rendererSetStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
                 lElement.native['style'].setProperty(styleName, strValue);
@@ -17377,6 +17431,7 @@ function elementStyle(index, value) {
         // we will add logic here which would work with the animation code.
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (isProceduralRenderer(renderer)) {
+            ngDevMode && ngDevMode.rendererSetStyle++;
             renderer.setProperty(lElement.native, 'style', value);
         }
         else {
@@ -17384,8 +17439,14 @@ function elementStyle(index, value) {
             for (let /** @type {?} */ i = 0, /** @type {?} */ keys = Object.keys(value); i < keys.length; i++) {
                 const /** @type {?} */ styleName = keys[i];
                 const /** @type {?} */ styleValue = (/** @type {?} */ (value))[styleName];
-                styleValue == null ? style.removeProperty(styleName) :
+                if (styleValue == null) {
+                    ngDevMode && ngDevMode.rendererRemoveStyle++;
+                    style.removeProperty(styleName);
+                }
+                else {
+                    ngDevMode && ngDevMode.rendererSetStyle++;
                     style.setProperty(styleName, styleValue);
+                }
             }
         }
     }
@@ -17400,6 +17461,7 @@ function elementStyle(index, value) {
 function text(index, value) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
     const /** @type {?} */ textNode = createTextNode(value, renderer);
     const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
     // Text nodes are self closing.
@@ -17420,6 +17482,7 @@ function textBinding(index, value) {
     let /** @type {?} */ existingNode = /** @type {?} */ (data[index]);
     ngDevMode && assertNotNull(existingNode, 'LNode should exist');
     ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
+    ngDevMode && ngDevMode.rendererSetText++;
     value !== NO_CHANGE &&
         (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
             existingNode.native.textContent = stringify$1(value));
@@ -17612,7 +17675,7 @@ function container(index, template, tagName, attrs, localRefs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, node.data);
-    createDirectivesAndLocals(index, tagName || null, attrs, localRefs, []);
+    createDirectivesAndLocals(index, tagName || null, attrs, localRefs, template == null);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     const /** @type {?} */ queries = node.queries;
@@ -17675,9 +17738,11 @@ function refreshDynamicChildren() {
         if (current.dynamicViewCount !== 0 && (/** @type {?} */ (current)).views) {
             const /** @type {?} */ container = /** @type {?} */ (current);
             for (let /** @type {?} */ i = 0; i < container.views.length; i++) {
-                const /** @type {?} */ view = container.views[i];
+                const /** @type {?} */ lViewNode = container.views[i];
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
-                renderEmbeddedTemplate(view, /** @type {?} */ ((view.data.template)), /** @type {?} */ ((view.data.context)), renderer);
+                const /** @type {?} */ dynamicView = lViewNode.data;
+                ngDevMode && assertNotNull(dynamicView.tView, 'TView must be allocated');
+                renderEmbeddedTemplate(lViewNode, dynamicView.tView, /** @type {?} */ ((dynamicView.template)), /** @type {?} */ ((dynamicView.context)), renderer);
             }
         }
     }
@@ -17741,23 +17806,24 @@ function embeddedViewStart(viewBlockId) {
 /**
  * Initialize the TView (e.g. static data) for the active embedded view.
  *
- * Each embedded view needs to set the global tData variable to the static data for
- * that view. Otherwise, the view's static data for a particular node would overwrite
- * the static data for a node in the view above it with the same index (since it's in the
- * same template).
+ * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
+ * static data for a particular node would overwrite the static data for a node in the view above
+ * it with the same index (since it's in the same template).
  *
- * @param {?} viewIndex The index of the TView in TContainer
+ * @param {?} viewIndex The index of the TView in TNode.tViews
  * @param {?} parent The parent container in which to look for the view's static data
  * @return {?} TView
  */
 function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
-    const /** @type {?} */ tContainer = (/** @type {?} */ (((parent)).tNode)).data;
-    if (viewIndex >= tContainer.length || tContainer[viewIndex] == null) {
+    const /** @type {?} */ containerTViews = /** @type {?} */ ((/** @type {?} */ (((parent)).tNode)).tViews);
+    ngDevMode && assertNotNull(containerTViews, 'TView expected');
+    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
+    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
         const /** @type {?} */ tView = currentView.tView;
-        tContainer[viewIndex] = createTView(tView.directiveRegistry, tView.pipeRegistry);
+        containerTViews[viewIndex] = createTView(tView.directiveRegistry, tView.pipeRegistry);
     }
-    return tContainer[viewIndex];
+    return containerTViews[viewIndex];
 }
 /**
  * Marks the end of an embedded view.
@@ -19661,10 +19727,18 @@ class ViewContainerRef$1 {
  * @return {?} The TemplateRef instance to use
  */
 function getOrCreateTemplateRef(di) {
-    ngDevMode && assertNodeType(di.node, 0 /* Container */);
-    const /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
-    const /** @type {?} */ tView = di.node.view.tView;
-    return di.templateRef || (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer(), tView.directiveRegistry, tView.pipeRegistry));
+    if (!di.templateRef) {
+        ngDevMode && assertNodeType(di.node, 0 /* Container */);
+        const /** @type {?} */ hostNode = /** @type {?} */ (di.node);
+        const /** @type {?} */ hostTNode = /** @type {?} */ ((hostNode.tNode));
+        const /** @type {?} */ hostTView = hostNode.view.tView;
+        if (!hostTNode.tViews) {
+            hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
+        }
+        ngDevMode && assertNotNull(hostTNode.tViews, 'TView must be allocated');
+        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ (hostTNode.tViews), /** @type {?} */ ((hostNode.data.template)), getRenderer(), hostTView.directiveRegistry, hostTView.pipeRegistry);
+    }
+    return di.templateRef;
 }
 /**
  * @template T
@@ -19672,24 +19746,26 @@ function getOrCreateTemplateRef(di) {
 class TemplateRef$1 {
     /**
      * @param {?} elementRef
-     * @param {?} template
+     * @param {?} _tView
+     * @param {?} _template
      * @param {?} _renderer
      * @param {?} _directives
      * @param {?} _pipes
      */
-    constructor(elementRef, template, _renderer, _directives, _pipes) {
+    constructor(elementRef, _tView, _template, _renderer, _directives, _pipes) {
+        this._tView = _tView;
+        this._template = _template;
         this._renderer = _renderer;
         this._directives = _directives;
         this._pipes = _pipes;
         this.elementRef = elementRef;
-        this._template = template;
     }
     /**
      * @param {?} context
      * @return {?}
      */
     createEmbeddedView(context) {
-        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer, this._directives, this._pipes);
+        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._directives, this._pipes);
         return addDestroyable(new EmbeddedViewRef$1(viewNode, this._template, context));
     }
 }
