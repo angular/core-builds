@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-3824e3f
+ * @license Angular v6.0.0-9b53a6e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-3824e3f');
+const VERSION = new Version('6.0.0-9b53a6e');
 
 /**
  * @fileoverview added by tsickle
