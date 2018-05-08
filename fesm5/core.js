@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0+27.sha-19262d9
+ * @license Angular v6.0.0+28.sha-5581e97
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1570,7 +1570,7 @@ var Version = /** @class */ (function () {
 /**
  *
  */
-var VERSION = new Version('6.0.0+27.sha-19262d9');
+var VERSION = new Version('6.0.0+28.sha-5581e97');
 
 /**
  * @license
@@ -9264,6 +9264,14 @@ function _createProviderInstance$1(ngModule, providerDef) {
             injectable = providerDef.value;
             break;
     }
+    // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
+    // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
+    // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
+    // set (ngOnDestroy was detected statically).
+    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+        !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
+        providerDef.flags |= 131072 /* OnDestroy */;
+    }
     return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 function _createClass(ngModule, ctor, deps) {
@@ -9306,12 +9314,17 @@ function _callFactory(ngModule, factory, deps) {
 }
 function callNgModuleLifecycle(ngModule, lifecycles) {
     var def = ngModule._def;
+    var destroyed = new Set();
     for (var i = 0; i < def.providers.length; i++) {
         var provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             var instance = ngModule._providers[i];
             if (instance && instance !== UNDEFINED_VALUE) {
-                instance.ngOnDestroy();
+                var onDestroy = instance.ngOnDestroy;
+                if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
+                    onDestroy.apply(instance);
+                    destroyed.add(instance);
+                }
             }
         }
     }
