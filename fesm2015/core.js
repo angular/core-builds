@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+140.sha-77ff72f
+ * @license Angular v6.0.0-rc.5+141.sha-fc03427
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2037,7 +2037,7 @@ class Version {
 /**
  *
  */
-const VERSION = new Version('6.0.0-rc.5+140.sha-77ff72f');
+const VERSION = new Version('6.0.0-rc.5+141.sha-fc03427');
 
 /**
  * @fileoverview added by tsickle
@@ -10613,6 +10613,14 @@ function _createProviderInstance$1(ngModule, providerDef) {
             injectable = providerDef.value;
             break;
     }
+    // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
+    // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
+    // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
+    // set (ngOnDestroy was detected statically).
+    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+        !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
+        providerDef.flags |= 131072 /* OnDestroy */;
+    }
     return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 /**
@@ -10672,12 +10680,17 @@ function _callFactory(ngModule, factory, deps) {
  */
 function callNgModuleLifecycle(ngModule, lifecycles) {
     const /** @type {?} */ def = ngModule._def;
+    const /** @type {?} */ destroyed = new Set();
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             const /** @type {?} */ instance = ngModule._providers[i];
             if (instance && instance !== UNDEFINED_VALUE) {
-                instance.ngOnDestroy();
+                const /** @type {?} */ onDestroy = instance.ngOnDestroy;
+                if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
+                    onDestroy.apply(instance);
+                    destroyed.add(instance);
+                }
             }
         }
     }
