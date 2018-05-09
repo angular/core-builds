@@ -27,7 +27,7 @@ import { EmbeddedViewRef, ViewRef } from './view_ref';
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
- * @stable
+ *
  */
 export declare abstract class ViewContainerRef {
     /**

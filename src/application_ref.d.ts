@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { InjectionToken, Injector, StaticProvider } from './di';
 import { CompilerOptions } from './linker/compiler';
 import { ComponentFactory, ComponentRef } from './linker/component_factory';
@@ -22,7 +22,7 @@ export declare const ALLOW_MULTIPLE_PLATFORMS: InjectionToken<boolean>;
  * does not result in additional changes to any bindings (also known as
  * unidirectional data flow).
  *
- * @stable
+ *
  */
 export declare function enableProdMode(): void;
 /**
@@ -78,7 +78,7 @@ export declare function getPlatform(): PlatformRef | null;
 /**
  * Provides additional options to the bootstraping process.
  *
- * @stable
+ *
  */
 export interface BootstrapOptions {
     /**
@@ -98,7 +98,7 @@ export interface BootstrapOptions {
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
  *
- * @stable
+ *
  */
 export declare class PlatformRef {
     private _injector;
@@ -142,7 +142,7 @@ export declare class PlatformRef {
      *
      * let moduleRef = platformBrowser().bootstrapModule(MyModule);
      * ```
-     * @stable
+     *
      */
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
     private _moduleDoBootstrap(moduleRef);
@@ -164,7 +164,7 @@ export declare class PlatformRef {
 /**
  * A reference to an Angular application running on a page.
  *
- * @stable
+ *
  */
 export declare class ApplicationRef {
     private _zone;

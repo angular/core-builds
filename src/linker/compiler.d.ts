@@ -29,7 +29,7 @@ export declare class ModuleWithComponentFactories<T> {
  * Each `@NgModule` provides an own `Compiler` to its injector,
  * that will use the directives/pipes of the ng module for compilation
  * of components.
- * @stable
+ *
  */
 export declare class Compiler {
     /**
@@ -68,7 +68,6 @@ export declare type CompilerOptions = {
     defaultEncapsulation?: ViewEncapsulation;
     providers?: StaticProvider[];
     missingTranslation?: MissingTranslationStrategy;
-    enableLegacyTemplate?: boolean;
     preserveWhitespaces?: boolean;
 };
 /**

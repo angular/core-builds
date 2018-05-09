@@ -1,22 +1,15 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-import { StaticProvider } from '../../di';
+import { StaticProvider } from '../../di/provider';
 /**
  * A type describing supported iterable types.
  *
- * @stable
+ *
  */
 export declare type NgIterable<T> = Array<T> | Iterable<T>;
 /**
  * A strategy for tracking changes over time to an iterable. Used by {@link NgForOf} to
  * respond to changes in an iterable by effecting equivalent changes in the DOM.
  *
- * @stable
+ *
  */
 export interface IterableDiffer<V> {
     /**
@@ -32,7 +25,7 @@ export interface IterableDiffer<V> {
  * An object describing the changes in the `Iterable` collection since last time
  * `IterableDiffer#diff()` was invoked.
  *
- * @stable
+ *
  */
 export interface IterableChanges<V> {
     /**
@@ -75,7 +68,7 @@ export interface IterableChanges<V> {
 /**
  * Record representing the item change information.
  *
- * @stable
+ *
  */
 export interface IterableChangeRecord<V> {
     /** Current index of the item in `Iterable` or null if removed. */
@@ -96,7 +89,7 @@ export interface CollectionChangeRecord<V> extends IterableChangeRecord<V> {
  * An optional function passed into {@link NgForOf} that defines how to track
  * items in an iterable (e.g. fby index or id)
  *
- * @stable
+ *
  */
 export interface TrackByFunction<T> {
     (index: number, item: T): any;
@@ -104,7 +97,7 @@ export interface TrackByFunction<T> {
 /**
  * Provides a factory for {@link IterableDiffer}.
  *
- * @stable
+ *
  */
 export interface IterableDifferFactory {
     supports(objects: any): boolean;
@@ -112,9 +105,10 @@ export interface IterableDifferFactory {
 }
 /**
  * A repository of different iterable diffing strategies used by NgFor, NgClass, and others.
- * @stable
+ *
  */
 export declare class IterableDiffers {
+    static ngInjectableDef: never;
     /**
      * @deprecated v4.0.0 - Should be private
      */

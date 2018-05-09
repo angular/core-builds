@@ -15,9 +15,9 @@
  * XSS attacks. Carefully review any use of `ElementRef` in your code. For more detail, see the
  * [Security Guide](http://g.co/ng/security).
  *
- * @stable
+ *
  */
-export declare class ElementRef {
+export declare class ElementRef<T = any> {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).
@@ -37,8 +37,8 @@ export declare class ElementRef {
      *    web worker.
      *   </p>
      * </div>
-     * @stable
+     *
      */
-    nativeElement: any;
-    constructor(nativeElement: any);
+    nativeElement: T;
+    constructor(nativeElement: T);
 }

@@ -9,7 +9,7 @@
  * Defines template and style encapsulation options available for Component's {@link Component}.
  *
  * See {@link Component#encapsulation encapsulation}.
- * @stable
+ *
  */
 export declare enum ViewEncapsulation {
     /**
