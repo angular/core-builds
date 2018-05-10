@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+161.sha-72eab4d
+ * @license Angular v6.0.0-rc.5+163.sha-c4221da
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,10 +2034,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-/**
- *
- */
-const VERSION = new Version('6.0.0-rc.5+161.sha-72eab4d');
+const VERSION = new Version('6.0.0-rc.5+163.sha-c4221da');
 
 /**
  * @fileoverview added by tsickle
@@ -4100,7 +4097,6 @@ class CompilerFactory {
 class ComponentRef {
 }
 /**
- *
  * @abstract
  * @template C
  */
@@ -4144,7 +4140,6 @@ class _NullComponentFactoryResolver {
     }
 }
 /**
- *
  * @abstract
  */
 class ComponentFactoryResolver {
@@ -6321,7 +6316,6 @@ class ViewContainerRef {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- *
  * @abstract
  */
 class ChangeDetectorRef {
@@ -6339,7 +6333,6 @@ class ChangeDetectorRef {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- *
  * @abstract
  */
 class ViewRef extends ChangeDetectorRef {
@@ -7452,7 +7445,6 @@ class DefaultIterableDiffer {
     }
 }
 /**
- *
  * @template V
  */
 class IterableChangeRecord_ {
@@ -7976,7 +7968,6 @@ class DefaultKeyValueDiffer {
     }
 }
 /**
- *
  * @template K, V
  */
 class KeyValueChangeRecord_ {
