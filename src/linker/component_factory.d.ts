@@ -53,9 +53,6 @@ export declare abstract class ComponentRef<C> {
      */
     abstract onDestroy(callback: Function): void;
 }
-/**
- *
- */
 export declare abstract class ComponentFactory<C> {
     readonly abstract selector: string;
     readonly abstract componentType: Type<any>;
