@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+171.sha-d2a8687
+ * @license Angular v6.0.0-rc.5+172.sha-816bc8a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+171.sha-d2a8687');
+const VERSION = new Version('6.0.0-rc.5+172.sha-816bc8a');
 
 /**
  * @fileoverview added by tsickle
@@ -16338,6 +16338,12 @@ function getRenderer() {
     return renderer;
 }
 /**
+ * @return {?}
+ */
+function getCurrentSanitizer() {
+    return currentView && currentView.sanitizer;
+}
+/**
  * Used to set the parent property when nodes are created.
  */
 let previousOrParentNode;
@@ -16551,9 +16557,10 @@ function executeInitAndContentHooks() {
  * @param {?} template
  * @param {?} context
  * @param {?} flags
+ * @param {?=} sanitizer
  * @return {?}
  */
-function createLView(viewId, renderer, tView, template, context, flags) {
+function createLView(viewId, renderer, tView, template, context, flags, sanitizer) {
     const /** @type {?} */ newView = {
         parent: currentView,
         id: viewId,
@@ -16577,6 +16584,7 @@ function createLView(viewId, renderer, tView, template, context, flags) {
         lifecycleStage: 1 /* Init */,
         queries: null,
         injector: currentView && currentView.injector,
+        sanitizer: sanitizer || null
     };
     return newView;
 }
@@ -16682,6 +16690,7 @@ function resetApplicationState() {
  * @param {?} host The host element node to use
  * @param {?=} directives Directive defs that should be used for matching
  * @param {?=} pipes Pipe defs that should be used for matching
+ * @param {?=} sanitizer
  * @return {?}
  */
 
@@ -16713,7 +16722,7 @@ function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, di
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
         if (viewNode == null) {
-            const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
+            const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */, getCurrentSanitizer());
             viewNode = createLNode(null, 2 /* View */, null, lView);
             rf = 1 /* Create */;
         }
@@ -17114,11 +17123,12 @@ function locateHostElement(factory, elementOrSelector) {
  * @param {?} rNode Render host element.
  * @param {?} def ComponentDef
  *
+ * @param {?=} sanitizer
  * @return {?} LElementNode created
  */
-function hostElement(tag, rNode, def) {
+function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode = createTNode(/** @type {?} */ (tag), null, null);
         node.tNode.flags = 4096 /* isComponent */;
@@ -17534,7 +17544,7 @@ function addComponentLogic(index, instance, def) {
     const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     (/** @type {?} */ (previousOrParentNode.data)) = hostView;
     (/** @type {?} */ (hostView.node)) = previousOrParentNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
@@ -17799,7 +17809,7 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        const /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */);
+        const /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
@@ -18968,6 +18978,7 @@ function addDestroyable(obj) {
 function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
     ngDevMode && assertComponentType(componentType);
     const /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
+    const /** @type {?} */ sanitizer = opts.sanitizer || null;
     const /** @type {?} */ componentDef = /** @type {?} */ ((/** @type {?} */ (componentType)).ngComponentDef);
     if (componentDef.type != componentType)
         componentDef.type = componentType;
@@ -18989,7 +19000,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
-        elementNode = hostElement(componentTag, hostNode, componentDef);
+        elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
@@ -20969,6 +20980,10 @@ const BRAND = '__SANITIZER_TRUSTED_BRAND__';
  * and urls have been removed.
  */
 function sanitizeHtml(unsafeHtml) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
+    }
     if (unsafeHtml instanceof String && (/** @type {?} */ (unsafeHtml))[BRAND] === 'Html') {
         return unsafeHtml.toString();
     }
@@ -20988,6 +21003,10 @@ function sanitizeHtml(unsafeHtml) {
  * dangerous javascript and urls have been removed.
  */
 function sanitizeStyle(unsafeStyle) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
+    }
     if (unsafeStyle instanceof String && (/** @type {?} */ (unsafeStyle))[BRAND] === 'Style') {
         return unsafeStyle.toString();
     }
@@ -21008,6 +21027,10 @@ function sanitizeStyle(unsafeStyle) {
  * all of the dangerous javascript has been removed.
  */
 function sanitizeUrl(unsafeUrl) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
+    }
     if (unsafeUrl instanceof String && (/** @type {?} */ (unsafeUrl))[BRAND] === 'Url') {
         return unsafeUrl.toString();
     }
@@ -21023,6 +21046,10 @@ function sanitizeUrl(unsafeUrl) {
  * only trusted `url`s have been allowed to pass.
  */
 function sanitizeResourceUrl(unsafeResourceUrl) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+    }
     if (unsafeResourceUrl instanceof String &&
         (/** @type {?} */ (unsafeResourceUrl))[BRAND] === 'ResourceUrl') {
         return unsafeResourceUrl.toString();

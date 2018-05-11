@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+171.sha-d2a8687
+ * @license Angular v6.0.0-rc.5+172.sha-816bc8a
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1653,7 +1653,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+171.sha-d2a8687');
+var VERSION = new Version('6.0.0-rc.5+172.sha-816bc8a');
 
 /**
  * @license
@@ -13543,6 +13543,9 @@ function getRenderer() {
     // top level variables should not be exported for performance reason (PERF_NOTES.md)
     return renderer;
 }
+function getCurrentSanitizer() {
+    return currentView && currentView.sanitizer;
+}
 /** Used to set the parent property when nodes are created. */
 var previousOrParentNode;
 function getPreviousOrParentNode() {
@@ -13721,7 +13724,7 @@ function executeInitAndContentHooks() {
         executeHooks((directives), tView.contentHooks, tView.contentCheckHooks, creationMode);
     }
 }
-function createLView(viewId, renderer, tView, template, context, flags) {
+function createLView(viewId, renderer, tView, template, context, flags, sanitizer) {
     var newView = {
         parent: currentView,
         id: viewId,
@@ -13745,6 +13748,7 @@ function createLView(viewId, renderer, tView, template, context, flags) {
         lifecycleStage: 1 /* Init */,
         queries: null,
         injector: currentView && currentView.injector,
+        sanitizer: sanitizer || null
     };
     return newView;
 }
@@ -13855,7 +13859,7 @@ function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, di
         isParent = true;
         previousOrParentNode = (null);
         if (viewNode == null) {
-            var lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
+            var lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */, getCurrentSanitizer());
             viewNode = createLNode(null, 2 /* View */, null, lView);
             rf = 1 /* Create */;
         }
@@ -14184,9 +14188,9 @@ function locateHostElement(factory, elementOrSelector) {
  *
  * @returns LElementNode created
  */
-function hostElement(tag, rNode, def) {
+function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    var node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    var node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode = createTNode(tag, null, null);
         node.tNode.flags = 4096 /* isComponent */;
@@ -14564,7 +14568,7 @@ function addComponentLogic(index, instance, def) {
     var tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    var hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    var hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     previousOrParentNode.data = hostView;
     hostView.node = previousOrParentNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
@@ -14812,7 +14816,7 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        var newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */);
+        var newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
@@ -16039,6 +16043,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     if (opts === void 0) { opts = {}; }
     ngDevMode && assertComponentType(componentType);
     var rendererFactory = opts.rendererFactory || domRendererFactory3;
+    var sanitizer = opts.sanitizer || null;
     var componentDef = componentType.ngComponentDef;
     if (componentDef.type != componentType)
         componentDef.type = componentType;
@@ -16060,7 +16065,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
-        elementNode = hostElement(componentTag, hostNode, componentDef);
+        elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
         component = rootContext.component = baseDirectiveCreate(0, componentDef.factory(), componentDef);
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, (elementNode.data));
@@ -17653,6 +17658,10 @@ var BRAND = '__SANITIZER_TRUSTED_BRAND__';
  * and urls have been removed.
  */
 function sanitizeHtml(unsafeHtml) {
+    var s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(exports.SecurityContext.HTML, unsafeHtml) || '';
+    }
     if (unsafeHtml instanceof String && unsafeHtml[BRAND] === 'Html') {
         return unsafeHtml.toString();
     }
@@ -17672,6 +17681,10 @@ function sanitizeHtml(unsafeHtml) {
  * dangerous javascript and urls have been removed.
  */
 function sanitizeStyle(unsafeStyle) {
+    var s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(exports.SecurityContext.STYLE, unsafeStyle) || '';
+    }
     if (unsafeStyle instanceof String && unsafeStyle[BRAND] === 'Style') {
         return unsafeStyle.toString();
     }
@@ -17692,6 +17705,10 @@ function sanitizeStyle(unsafeStyle) {
  * all of the dangerous javascript has been removed.
  */
 function sanitizeUrl(unsafeUrl) {
+    var s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(exports.SecurityContext.URL, unsafeUrl) || '';
+    }
     if (unsafeUrl instanceof String && unsafeUrl[BRAND] === 'Url') {
         return unsafeUrl.toString();
     }
@@ -17707,6 +17724,10 @@ function sanitizeUrl(unsafeUrl) {
  * only trusted `url`s have been allowed to pass.
  */
 function sanitizeResourceUrl(unsafeResourceUrl) {
+    var s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(exports.SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+    }
     if (unsafeResourceUrl instanceof String &&
         unsafeResourceUrl[BRAND] === 'ResourceUrl') {
         return unsafeResourceUrl.toString();

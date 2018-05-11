@@ -14,6 +14,7 @@ import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './int
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { Sanitizer } from '../sanitization/security';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -23,7 +24,7 @@ export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-export declare type Sanitizer = (value: any) => string;
+export declare type SanitizerFn = (value: any) => string;
 /**
  * Directive and element indices for top-level directive.
  *
@@ -38,6 +39,7 @@ export declare const _ROOT_DIRECTIVE_INDICES: number[];
  */
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
+export declare function getCurrentSanitizer(): Sanitizer | null;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
@@ -68,7 +70,7 @@ export declare function leaveView(newView: LView, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags): LView;
+export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -93,7 +95,7 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
+export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
@@ -140,7 +142,7 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @returns LElementNode created
  */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -163,7 +165,7 @@ export declare function elementEnd(): void;
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: Sanitizer): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn): void;
 /**
  * Update a property on an Element.
  *
@@ -177,7 +179,7 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -214,7 +216,7 @@ export declare function elementClass<T>(index: number, value: T | NO_CHANGE): vo
  *        sanitization.
  */
 export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
-export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
 /**
  * Set the `style` property on a DOM element.
  *
