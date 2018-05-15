@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+180.sha-d4b6c41
+ * @license Angular v6.0.0-rc.5+181.sha-83631b2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1653,7 +1653,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+180.sha-d4b6c41');
+var VERSION = new Version('6.0.0-rc.5+181.sha-83631b2');
 
 /**
  * @license
@@ -16946,6 +16946,7 @@ function definePipe(pipeDef) {
  * value. If it has been saved, returns the saved value.
  *
  * @param pureFn Function that returns a value
+ * @param thisArg Optional calling context of pureFn
  * @returns value
  */
 function pureFunction0(pureFn, thisArg) {
@@ -16958,6 +16959,7 @@ function pureFunction0(pureFn, thisArg) {
  *
  * @param pureFn Function that returns an updated value
  * @param exp Updated expression value
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction1(pureFn, exp, thisArg) {
@@ -16972,6 +16974,7 @@ function pureFunction1(pureFn, exp, thisArg) {
  * @param pureFn
  * @param exp1
  * @param exp2
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction2(pureFn, exp1, exp2, thisArg) {
@@ -16987,6 +16990,7 @@ function pureFunction2(pureFn, exp1, exp2, thisArg) {
  * @param exp1
  * @param exp2
  * @param exp3
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
@@ -17004,6 +17008,7 @@ function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
  * @param exp2
  * @param exp3
  * @param exp4
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
@@ -17021,6 +17026,7 @@ function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @param exp3
  * @param exp4
  * @param exp5
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
@@ -17041,6 +17047,7 @@ function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
  * @param exp4
  * @param exp5
  * @param exp6
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
@@ -17062,6 +17069,7 @@ function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
  * @param exp5
  * @param exp6
  * @param exp7
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
@@ -17085,6 +17093,7 @@ function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg
  * @param exp6
  * @param exp7
  * @param exp8
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
@@ -17102,7 +17111,8 @@ function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, t
  *
  * @param pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
- * @param exp An array of binding values
+ * @param exps An array of binding values
+ * @param thisArg Optional calling context of pureFn
  * @returns Updated value
  */
 function pureFunctionV(pureFn, exps, thisArg) {
@@ -17205,7 +17215,7 @@ function pipeBind2(index, v1, v2) {
  */
 function pipeBind3(index, v1, v2, v3) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction3(pipeInstance.transform.bind(pipeInstance), v1, v2, v3) :
+    return isPure(index) ? pureFunction3(pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3);
 }
 /**
