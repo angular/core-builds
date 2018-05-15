@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+184.sha-e5e5c24
+ * @license Angular v6.0.0-rc.5+185.sha-5cf82f8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2034,7 +2034,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+184.sha-e5e5c24');
+const VERSION = new Version('6.0.0-rc.5+185.sha-5cf82f8');
 
 /**
  * @fileoverview added by tsickle
@@ -3961,8 +3961,6 @@ class Console {
 Console.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Console.ctorParameters = () => [];
 
 /**
  * @fileoverview added by tsickle
@@ -4056,8 +4054,6 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Compiler.ctorParameters = () => [];
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -8619,7 +8615,7 @@ class InertBodyHelper {
         // loop backwards so that we can support removals.
         for (let /** @type {?} */ i = elAttrs.length - 1; 0 < i; i--) {
             const /** @type {?} */ attrib = elAttrs.item(i);
-            const /** @type {?} */ attrName = attrib.name;
+            const /** @type {?} */ attrName = /** @type {?} */ ((attrib)).name;
             if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
                 el.removeAttribute(attrName);
             }
@@ -8847,13 +8843,13 @@ class SanitizingHtmlSerializer {
         const /** @type {?} */ elAttrs = element.attributes;
         for (let /** @type {?} */ i = 0; i < elAttrs.length; i++) {
             const /** @type {?} */ elAttr = elAttrs.item(i);
-            const /** @type {?} */ attrName = elAttr.name;
+            const /** @type {?} */ attrName = /** @type {?} */ ((elAttr)).name;
             const /** @type {?} */ lower = attrName.toLowerCase();
             if (!VALID_ATTRS.hasOwnProperty(lower)) {
                 this.sanitizedSomething = true;
                 continue;
             }
-            let /** @type {?} */ value = elAttr.value;
+            let /** @type {?} */ value = /** @type {?} */ ((elAttr)).value;
             // TODO(martinprobst): Special case image URIs for data:image/...
             if (URI_ATTRS[lower])
                 value = _sanitizeUrl(value);
@@ -16093,7 +16089,8 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
     if (matchIndex === -1 // no match
         || (matchIndex > 0 && /** @type {?} */ ((nodeClassAttrVal))[matchIndex - 1] !== ' ') // no space before
         ||
-            (matchEndIdx < nodeClassesLen && /** @type {?} */ ((nodeClassAttrVal))[matchEndIdx] !== ' ')) {
+            (matchEndIdx < nodeClassesLen && /** @type {?} */ ((nodeClassAttrVal))[matchEndIdx] !== ' ')) // no space after
+     {
         return false;
     }
     return true;

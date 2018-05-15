@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+184.sha-e5e5c24
+ * @license Angular v6.0.0-rc.5+185.sha-5cf82f8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -829,8 +829,6 @@ var TestingCompiler = /** @class */ (function (_super) {
     TestingCompiler.decorators = [
         { type: core.Injectable }
     ];
-    /** @nocollapse */
-    TestingCompiler.ctorParameters = function () { return []; };
     return TestingCompiler;
 }(core.Compiler));
 /**
@@ -1276,8 +1274,6 @@ var TestBed = /** @class */ (function () {
                                 providers: __spread(rootProviderOverrides),
                             },] },
                 ];
-                /** @nocollapse */
-                RootScopeModule.ctorParameters = function () { return []; };
                 return RootScopeModule;
             }());
             rootScopeImports.push(RootScopeModule);
@@ -1291,8 +1287,6 @@ var TestBed = /** @class */ (function () {
             DynamicTestModule.decorators = [
                 { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
             ];
-            /** @nocollapse */
-            DynamicTestModule.ctorParameters = function () { return []; };
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
@@ -1414,8 +1408,6 @@ var TestBed = /** @class */ (function () {
             OverrideComponent.decorators = [
                 { type: core.Component, args: [{ selector: 'empty', template: template },] },
             ];
-            /** @nocollapse */
-            OverrideComponent.ctorParameters = function () { return []; };
             return OverrideComponent;
         }());
         this._templateOverrides.push({ component: component, templateOf: OverrideComponent });

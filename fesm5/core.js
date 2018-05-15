@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+184.sha-e5e5c24
+ * @license Angular v6.0.0-rc.5+185.sha-5cf82f8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1569,7 +1569,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+184.sha-e5e5c24');
+var VERSION = new Version('6.0.0-rc.5+185.sha-5cf82f8');
 
 /**
  * @license
@@ -3267,8 +3267,6 @@ var Console = /** @class */ (function () {
     Console.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
-    Console.ctorParameters = function () { return []; };
     return Console;
 }());
 
@@ -3377,8 +3375,6 @@ var Compiler = /** @class */ (function () {
     Compiler.decorators = [
         { type: Injectable }
     ];
-    /** @nocollapse */
-    Compiler.ctorParameters = function () { return []; };
     return Compiler;
 }());
 /**
@@ -13263,7 +13259,8 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
     if (matchIndex === -1 // no match
         || (matchIndex > 0 && nodeClassAttrVal[matchIndex - 1] !== ' ') // no space before
         ||
-            (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) {
+            (matchEndIdx < nodeClassesLen && nodeClassAttrVal[matchEndIdx] !== ' ')) // no space after
+     {
         return false;
     }
     return true;
