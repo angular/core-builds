@@ -80,11 +80,19 @@ export declare function createLNodeObject(type: LNodeType, currentView: LView, p
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
+ *
+ * @param index The index at which the LNode should be saved (null if view, since they are not
+ * saved)
+ * @param type The type of LNode to create
+ * @param native The native element for this LNode, if applicable
+ * @param name The tag name of the associated native element, if applicable
+ * @param attrs Any attrs for the native element, if applicable
+ * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: null, type: LNodeType.View, native: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: LNodeType.Projection, native: null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: null, type: LNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.

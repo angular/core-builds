@@ -1,6 +1,8 @@
 import { LContainerNode, LElementNode, LNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView, LViewOrLContainer } from './interfaces/view';
+/** Retrieves the sibling node for the given node. */
+export declare function getNextLNode(node: LNode): LNode | null;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.
@@ -39,11 +41,11 @@ export declare function destroyViewTree(rootView: LView): void;
  * the container's parent view is added later).
  *
  * @param container The container into which the view should be inserted
- * @param newView The view to insert
+ * @param viewNode The view to insert
  * @param index The index at which to insert the view
  * @returns The inserted view
  */
-export declare function insertView(container: LContainerNode, newView: LViewNode, index: number): LViewNode;
+export declare function insertView(container: LContainerNode, viewNode: LViewNode, index: number): LViewNode;
 /**
  * Removes a view from a container.
  *
@@ -56,15 +58,6 @@ export declare function insertView(container: LContainerNode, newView: LViewNode
  * @returns The removed view
  */
 export declare function removeView(container: LContainerNode, removeIndex: number): LViewNode;
-/**
- * Sets a next on the view node, so views in for loops can easily jump from
- * one view to the next to add/remove elements. Also adds the LView (view.data)
- * to the view tree for easy traversal when cleaning up the view.
- *
- * @param view The view to set up
- * @param next The view's new next
- */
-export declare function setViewNext(view: LViewNode, next: LViewNode | null): void;
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
