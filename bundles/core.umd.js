@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+205.sha-db2329e
+ * @license Angular v6.0.0-rc.5+211.sha-373fa78
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -536,6 +536,18 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+var ivyEnabled = false;
+var R3_COMPILE_COMPONENT = null;
+var R3_COMPILE_INJECTABLE = null;
+var R3_COMPILE_NGMODULE = null;
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Directive decorator and metadata.
  *
@@ -555,7 +567,7 @@ var Directive = makeDecorator('Directive', function (dir) {
 var Component = makeDecorator('Component', function (c) {
     if (c === void 0) { c = {}; }
     return (__assign({ changeDetection: exports.ChangeDetectionStrategy.Default }, c));
-}, Directive);
+}, Directive, undefined, function (type, meta) { return (R3_COMPILE_COMPONENT || (function () { }))(type, meta); });
 /**
  * Pipe decorator and metadata.
  *
@@ -1509,19 +1521,24 @@ function convertInjectableProviderToFactory(type, provider) {
     }
 }
 /**
+ * Supports @Injectable() in JIT mode for Render2.
+ */
+function preR3InjectableCompile(injectableType, options) {
+    if (options && options.providedIn !== undefined && injectableType.ngInjectableDef === undefined) {
+        injectableType.ngInjectableDef = defineInjectable({
+            providedIn: options.providedIn,
+            factory: convertInjectableProviderToFactory(injectableType, options),
+        });
+    }
+}
+/**
 * Injectable decorator and metadata.
 *
 *
 * @Annotation
 */
-var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (injectableType, options) {
-    if (options && options.providedIn !== undefined &&
-        injectableType.ngInjectableDef === undefined) {
-        injectableType.ngInjectableDef = defineInjectable({
-            providedIn: options.providedIn,
-            factory: convertInjectableProviderToFactory(injectableType, options)
-        });
-    }
+var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, function (type, meta) {
+    return (R3_COMPILE_INJECTABLE || preR3InjectableCompile)(type, meta);
 });
 
 /**
@@ -1531,6 +1548,7 @@ var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, fu
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 /**
  * Defines a schema that will allow:
  * - any non-Angular elements with a `-` in their name,
@@ -1550,13 +1568,7 @@ var CUSTOM_ELEMENTS_SCHEMA = {
 var NO_ERRORS_SCHEMA = {
     name: 'no-errors-schema'
 };
-/**
- * NgModule decorator and metadata.
- *
- *
- * @Annotation
- */
-var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; }, undefined, undefined, function (moduleType, metadata) {
+function preR3NgModuleCompile(moduleType, metadata) {
     var imports = (metadata && metadata.imports) || [];
     if (metadata && metadata.exports) {
         imports = __spread(imports, [metadata.exports]);
@@ -1566,7 +1578,14 @@ var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; 
         providers: metadata && metadata.providers,
         imports: imports,
     });
-});
+}
+/**
+ * NgModule decorator and metadata.
+ *
+ *
+ * @Annotation
+ */
+var NgModule = makeDecorator('NgModule', function (ngModule) { return ngModule; }, undefined, undefined, function (type, meta) { return (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta); });
 
 /**
  * @license
@@ -1653,7 +1672,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+205.sha-db2329e');
+var VERSION = new Version('6.0.0-rc.5+211.sha-373fa78');
 
 /**
  * @license
@@ -7729,7 +7748,7 @@ var ApplicationModule = /** @class */ (function () {
                             useFactory: _localeFactory,
                             deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
                         },
-                    ]
+                    ],
                 },] }
     ];
     /** @nocollapse */
@@ -18002,6 +18021,7 @@ exports.ɵConsole = Console;
 exports.ɵinject = inject;
 exports.ɵsetCurrentInjector = setCurrentInjector;
 exports.ɵAPP_ROOT = APP_ROOT;
+exports.ɵivyEnabled = ivyEnabled;
 exports.ɵComponentFactory = ComponentFactory;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
