@@ -70,7 +70,8 @@ export declare function diPublic(def: DirectiveDef<any>): void;
  * @returns The instance found
  */
 export declare function directiveInject<T>(token: Type<T>): T;
-export declare function directiveInject<T>(token: Type<T>, flags?: InjectFlags): T | null;
+export declare function directiveInject<T>(token: Type<T>, flags: InjectFlags.Optional): T | null;
+export declare function directiveInject<T>(token: Type<T>, flags: InjectFlags): T;
 /**
  * Creates an ElementRef and stores it on the injector.
  * Or, if the ElementRef already exists, retrieves the existing ElementRef.
@@ -168,9 +169,10 @@ export declare function getOrCreateInjectable<T>(di: LInjector, token: Type<T>, 
  *
  * @param injector The starting node injector to check
  * @param  bloomBit The bit to check in each injector's bloom filter
+ * @param  flags The injection flags for this injection site (e.g. Optional or SkipSelf)
  * @returns An injector that might have the directive
  */
-export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number): LInjector | null;
+export declare function bloomFindPossibleInjector(startInjector: LInjector, bloomBit: number, flags: InjectFlags): LInjector | null;
 export declare class ReadFromInjectorFn<T> {
     readonly read: (injector: LInjector, node: LNode, directiveIndex?: number) => T;
     constructor(read: (injector: LInjector, node: LNode, directiveIndex?: number) => T);

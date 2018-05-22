@@ -14,6 +14,7 @@ import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './int
 import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { Sanitizer } from '../sanitization/security';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -23,7 +24,7 @@ export declare const NG_HOST_SYMBOL = "__ngHostLNode__";
 /**
  * Function used to sanitize the value before writing it into the renderer.
  */
-export declare type Sanitizer = (value: any) => string;
+export declare type SanitizerFn = (value: any) => string;
 /**
  * Directive and element indices for top-level directive.
  *
@@ -38,6 +39,7 @@ export declare const _ROOT_DIRECTIVE_INDICES: number[];
  */
 export declare const CIRCULAR = "__CIRCULAR__";
 export declare function getRenderer(): Renderer3;
+export declare function getCurrentSanitizer(): Sanitizer | null;
 export declare function getPreviousOrParentNode(): LNode;
 export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
@@ -59,12 +61,16 @@ export declare function enterView(newView: LView, host: LElementNode | LViewNode
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
+ *
+ * @param newView New state to become active
+ * @param creationOnly An optional boolean to indicate that the view was processed in creation mode
+ * only, i.e. the first update will be done later. Only possible for dynamically created views.
  */
-export declare function leaveView(newView: LView): void;
+export declare function leaveView(newView: LView, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags): LView;
+export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -74,11 +80,19 @@ export declare function createLNodeObject(type: LNodeType, currentView: LView, p
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
+ *
+ * @param index The index at which the LNode should be saved (null if view, since they are not
+ * saved)
+ * @param type The type of LNode to create
+ * @param native The native element for this LNode, if applicable
+ * @param name The tag name of the associated native element, if applicable
+ * @param attrs Any attrs for the native element, if applicable
+ * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: null, type: LNodeType.View, native: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: LNodeType.Projection, native: null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: null, type: LNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: LNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -89,8 +103,18 @@ export declare function createLNode(index: number, type: LNodeType.Projection, n
  * @param directives Directive defs that should be used for matching
  * @param pipes Pipe defs that should be used for matching
  */
-export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null): LElementNode;
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
+export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
+/**
+ * Used for rendering embedded views (e.g. dynamically created views)
+ *
+ * Dynamically created views must store/retrieve their TViews differently from component views
+ * because their template functions are nested in the template functions of their hosts, creating
+ * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor inside
+ * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
+ * can't store TViews in the template function itself (as we do for comps). Instead, we store the
+ * TView for dynamically created views on their host TNode, which only has one instance.
+ */
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -126,7 +150,7 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @returns LElementNode created
  */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -149,7 +173,7 @@ export declare function elementEnd(): void;
  *                  Otherwise the attribute value is set to the stringified value.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: Sanitizer): void;
+export declare function elementAttribute(index: number, name: string, value: any, sanitizer?: SanitizerFn): void;
 /**
  * Update a property on an Element.
  *
@@ -163,7 +187,7 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param value New value to write.
  * @param sanitizer An optional function used to sanitize the value.
  */
-export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -200,7 +224,7 @@ export declare function elementClass<T>(index: number, value: T | NO_CHANGE): vo
  *        sanitization.
  */
 export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, suffix?: string): void;
-export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: Sanitizer): void;
+export declare function elementStyleNamed<T>(index: number, styleName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
 /**
  * Set the `style` property on a DOM element.
  *
@@ -261,7 +285,7 @@ export declare function createLContainer(parentLNode: LNode, currentView: LView,
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string, attrs?: string[], localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: string[], localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *

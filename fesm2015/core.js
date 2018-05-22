@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+78.sha-e1c4930
+ * @license Angular v6.0.0-rc.5+215.sha-23a98b9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -599,6 +599,27 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+const ivyEnabled = false;
+const R3_COMPILE_COMPONENT = null;
+const R3_COMPILE_INJECTABLE = null;
+const R3_COMPILE_NGMODULE = null;
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes} checked by tsc
+ */
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Type of the Directive decorator / constructor function.
  *
@@ -626,7 +647,7 @@ const Directive = makeDecorator('Directive', (dir = {}) => dir);
  *
  * \@Annotation
  */
-const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive);
+const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (R3_COMPILE_COMPONENT || (() => { }))(type, meta));
 /**
  * Type of the Pipe decorator / constructor function.
  *
@@ -1752,6 +1773,8 @@ function inject(token, flags = 0 /* Default */) {
             return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
                 injectableDef.value;
         }
+        if (flags & 8 /* Optional */)
+            return null;
         throw new Error(`Injector: NOT_FOUND [${stringify(token)}]`);
     }
     else {
@@ -1864,20 +1887,26 @@ function convertInjectableProviderToFactory(type, provider) {
     }
 }
 /**
+ * Supports \@Injectable() in JIT mode for Render2.
+ * @param {?} injectableType
+ * @param {?} options
+ * @return {?}
+ */
+function preR3InjectableCompile(injectableType, options) {
+    if (options && options.providedIn !== undefined && injectableType.ngInjectableDef === undefined) {
+        /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
+            providedIn: options.providedIn,
+            factory: convertInjectableProviderToFactory(injectableType, options),
+        });
+    }
+}
+/**
  * Injectable decorator and metadata.
  *
  *
  * \@Annotation
  */
-const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (injectableType, options) => {
-    if (options && options.providedIn !== undefined &&
-        injectableType.ngInjectableDef === undefined) {
-        /** @nocollapse */ injectableType.ngInjectableDef = defineInjectable({
-            providedIn: options.providedIn,
-            factory: convertInjectableProviderToFactory(injectableType, options)
-        });
-    }
-});
+const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, (type, meta) => (R3_COMPILE_INJECTABLE || preR3InjectableCompile)(type, meta));
 /**
  * Type representing injectable service.
  *
@@ -1897,6 +1926,17 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @record
+ * @template T
+ */
+
+/**
+ * @template T
+ * @param {?} def
+ * @return {?}
+ */
+
 /**
  * A wrapper around a module that also includes the providers.
  *
@@ -1938,12 +1978,11 @@ const NO_ERRORS_SCHEMA = {
  */
 
 /**
- * NgModule decorator and metadata.
- *
- *
- * \@Annotation
+ * @param {?} moduleType
+ * @param {?} metadata
+ * @return {?}
  */
-const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, (moduleType, metadata) => {
+function preR3NgModuleCompile(moduleType, metadata) {
     let /** @type {?} */ imports = (metadata && metadata.imports) || [];
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
@@ -1953,7 +1992,14 @@ const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, un
         providers: metadata && metadata.providers,
         imports: imports,
     });
-});
+}
+/**
+ * NgModule decorator and metadata.
+ *
+ *
+ * \@Annotation
+ */
+const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, (type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
 
 /**
  * @fileoverview added by tsickle
@@ -2032,10 +2078,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-/**
- *
- */
-const VERSION = new Version('6.0.0-rc.5+78.sha-e1c4930');
+const VERSION = new Version('6.0.0-rc.5+215.sha-23a98b9');
 
 /**
  * @fileoverview added by tsickle
@@ -3962,8 +4005,6 @@ class Console {
 Console.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Console.ctorParameters = () => [];
 
 /**
  * @fileoverview added by tsickle
@@ -4057,8 +4098,6 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Compiler.ctorParameters = () => [];
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -4098,7 +4137,6 @@ class CompilerFactory {
 class ComponentRef {
 }
 /**
- *
  * @abstract
  * @template C
  */
@@ -4142,7 +4180,6 @@ class _NullComponentFactoryResolver {
     }
 }
 /**
- *
  * @abstract
  */
 class ComponentFactoryResolver {
@@ -6319,7 +6356,6 @@ class ViewContainerRef {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- *
  * @abstract
  */
 class ChangeDetectorRef {
@@ -6337,7 +6373,6 @@ class ChangeDetectorRef {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- *
  * @abstract
  */
 class ViewRef extends ChangeDetectorRef {
@@ -7450,7 +7485,6 @@ class DefaultIterableDiffer {
     }
 }
 /**
- *
  * @template V
  */
 class IterableChangeRecord_ {
@@ -7974,7 +8008,6 @@ class DefaultKeyValueDiffer {
     }
 }
 /**
- *
  * @template K, V
  */
 class KeyValueChangeRecord_ {
@@ -8473,7 +8506,7 @@ ApplicationModule.decorators = [
                         useFactory: _localeFactory,
                         deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
                     },
-                ]
+                ],
             },] }
 ];
 /** @nocollapse */
@@ -8626,7 +8659,7 @@ class InertBodyHelper {
         // loop backwards so that we can support removals.
         for (let /** @type {?} */ i = elAttrs.length - 1; 0 < i; i--) {
             const /** @type {?} */ attrib = elAttrs.item(i);
-            const /** @type {?} */ attrName = attrib.name;
+            const /** @type {?} */ attrName = /** @type {?} */ ((attrib)).name;
             if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
                 el.removeAttribute(attrName);
             }
@@ -8854,13 +8887,13 @@ class SanitizingHtmlSerializer {
         const /** @type {?} */ elAttrs = element.attributes;
         for (let /** @type {?} */ i = 0; i < elAttrs.length; i++) {
             const /** @type {?} */ elAttr = elAttrs.item(i);
-            const /** @type {?} */ attrName = elAttr.name;
+            const /** @type {?} */ attrName = /** @type {?} */ ((elAttr)).name;
             const /** @type {?} */ lower = attrName.toLowerCase();
             if (!VALID_ATTRS.hasOwnProperty(lower)) {
                 this.sanitizedSomething = true;
                 continue;
             }
-            let /** @type {?} */ value = elAttr.value;
+            let /** @type {?} */ value = /** @type {?} */ ((elAttr)).value;
             // TODO(martinprobst): Special case image URIs for data:image/...
             if (URI_ATTRS[lower])
                 value = _sanitizeUrl(value);
@@ -10513,7 +10546,10 @@ function initNgModule(data) {
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
-            providers[i] = _createProviderInstance$1(data, provDef);
+            // Make sure the provider has not been already initialized outside this loop.
+            if (providers[i] === undefined) {
+                providers[i] = _createProviderInstance$1(data, provDef);
+            }
         }
     }
 }
@@ -10608,6 +10644,14 @@ function _createProviderInstance$1(ngModule, providerDef) {
             injectable = providerDef.value;
             break;
     }
+    // The read of `ngOnDestroy` here is slightly expensive as it's megamorphic, so it should be
+    // avoided if possible. The sequence of checks here determines whether ngOnDestroy needs to be
+    // checked. It might not if the `injectable` isn't an object or if NodeFlags.OnDestroy is already
+    // set (ngOnDestroy was detected statically).
+    if (injectable !== UNDEFINED_VALUE && injectable != null && typeof injectable === 'object' &&
+        !(providerDef.flags & 131072 /* OnDestroy */) && typeof injectable.ngOnDestroy === 'function') {
+        providerDef.flags |= 131072 /* OnDestroy */;
+    }
     return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 /**
@@ -10667,12 +10711,17 @@ function _callFactory(ngModule, factory, deps) {
  */
 function callNgModuleLifecycle(ngModule, lifecycles) {
     const /** @type {?} */ def = ngModule._def;
+    const /** @type {?} */ destroyed = new Set();
     for (let /** @type {?} */ i = 0; i < def.providers.length; i++) {
         const /** @type {?} */ provDef = def.providers[i];
         if (provDef.flags & 131072 /* OnDestroy */) {
             const /** @type {?} */ instance = ngModule._providers[i];
             if (instance && instance !== UNDEFINED_VALUE) {
-                instance.ngOnDestroy();
+                const /** @type {?} */ onDestroy = instance.ngOnDestroy;
+                if (typeof onDestroy === 'function' && !destroyed.has(instance)) {
+                    onDestroy.apply(instance);
+                    destroyed.add(instance);
+                }
             }
         }
     }
@@ -15190,14 +15239,33 @@ function callHooks(data, arr) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-if (typeof ngDevMode == 'undefined') {
-    if (typeof window != 'undefined')
-        (/** @type {?} */ (window)).ngDevMode = true;
-    if (typeof self != 'undefined')
-        (/** @type {?} */ (self)).ngDevMode = true;
-    if (typeof global != 'undefined')
-        (/** @type {?} */ (global)).ngDevMode = true;
-}
+const ngDevModeResetPerfCounters = /** @type {?} */ ((typeof ngDevMode == 'undefined' && (function (global) {
+    /**
+     * @return {?}
+     */
+    function ngDevModeResetPerfCounters() {
+        global['ngDevMode'] = {
+            firstTemplatePass: 0,
+            tNode: 0,
+            tView: 0,
+            rendererCreateTextNode: 0,
+            rendererSetText: 0,
+            rendererCreateElement: 0,
+            rendererAddEventListener: 0,
+            rendererSetAttribute: 0,
+            rendererRemoveAttribute: 0,
+            rendererSetProperty: 0,
+            rendererSetClassName: 0,
+            rendererAddClass: 0,
+            rendererRemoveClass: 0,
+            rendererSetStyle: 0,
+            rendererRemoveStyle: 0,
+        };
+    }
+    ngDevModeResetPerfCounters();
+    return ngDevModeResetPerfCounters;
+})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
+    typeof global != 'undefined' && global)));
 
 /**
  * @fileoverview added by tsickle
@@ -15596,13 +15664,13 @@ function findNextRNodeSibling(node, stopNode) {
             currentNode = pNextOrParent;
         }
         else {
-            let /** @type {?} */ currentSibling = currentNode.next;
+            let /** @type {?} */ currentSibling = getNextLNode(currentNode);
             while (currentSibling) {
                 const /** @type {?} */ nativeNode = findFirstRNode(currentSibling);
                 if (nativeNode) {
                     return nativeNode;
                 }
-                currentSibling = currentSibling.next;
+                currentSibling = getNextLNode(currentSibling);
             }
             const /** @type {?} */ parentNode = currentNode.parent;
             currentNode = null;
@@ -15615,6 +15683,19 @@ function findNextRNodeSibling(node, stopNode) {
         }
     }
     return null;
+}
+/**
+ * Retrieves the sibling node for the given node.
+ * @param {?} node
+ * @return {?}
+ */
+function getNextLNode(node) {
+    // View nodes don't have TNodes, so their next must be retrieved through their LView.
+    if (node.type === 2 /* View */) {
+        const /** @type {?} */ lView = /** @type {?} */ (node.data);
+        return lView.next ? (/** @type {?} */ (lView.next)).node : null;
+    }
+    return /** @type {?} */ ((node.tNode)).next ? node.view.data[/** @type {?} */ ((/** @type {?} */ ((node.tNode)).next)).index] : null;
 }
 /**
  * Get the next node in the LNode tree, taking into account the place where a node is
@@ -15632,7 +15713,7 @@ function getNextLNodeWithProjection(node) {
         return isLastProjectedNode ? null : pNextOrParent;
     }
     // returns node.next because the the node is not projected
-    return node.next;
+    return getNextLNode(node);
 }
 /**
  * Find the next node in the LNode tree, taking into account the place where a node is
@@ -15728,7 +15809,7 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
                     isProceduralRenderer(renderer) ? renderer.removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
                         parent.removeChild(/** @type {?} */ ((node.native)));
                 }
-                nextNode = node.next;
+                nextNode = getNextLNode(node);
             }
             else if (node.type === 0 /* Container */) {
                 // if we get to a container, it must be a root node of a view because we are only
@@ -15810,29 +15891,30 @@ function destroyViewTree(rootView) {
  * the container's parent view is added later).
  *
  * @param {?} container The container into which the view should be inserted
- * @param {?} newView The view to insert
+ * @param {?} viewNode The view to insert
  * @param {?} index The index at which to insert the view
  * @return {?} The inserted view
  */
-function insertView(container, newView, index) {
+function insertView(container, viewNode, index) {
     const /** @type {?} */ state = container.data;
     const /** @type {?} */ views = state.views;
     if (index > 0) {
         // This is a new view, we need to add it to the children.
-        setViewNext(views[index - 1], newView);
+        views[index - 1].data.next = /** @type {?} */ (viewNode.data);
     }
     if (index < views.length) {
-        setViewNext(newView, views[index]);
-        views.splice(index, 0, newView);
+        viewNode.data.next = views[index].data;
+        views.splice(index, 0, viewNode);
     }
     else {
-        views.push(newView);
+        views.push(viewNode);
+        viewNode.data.next = null;
     }
     // If the container's renderParent is null, we know that it is a root node of its own parent view
     // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
     // nodes twice - once now and once when its parent inserts its views).
     if (container.data.renderParent !== null) {
-        let /** @type {?} */ beforeNode = findNextRNodeSibling(newView, container);
+        let /** @type {?} */ beforeNode = findNextRNodeSibling(viewNode, container);
         if (!beforeNode) {
             let /** @type {?} */ containerNextNativeNode = container.native;
             if (containerNextNativeNode === undefined) {
@@ -15840,9 +15922,9 @@ function insertView(container, newView, index) {
             }
             beforeNode = containerNextNativeNode;
         }
-        addRemoveViewFromContainer(container, newView, true, beforeNode);
+        addRemoveViewFromContainer(container, viewNode, true, beforeNode);
     }
-    return newView;
+    return viewNode;
 }
 /**
  * Removes a view from a container.
@@ -15859,28 +15941,14 @@ function removeView(container, removeIndex) {
     const /** @type {?} */ views = container.data.views;
     const /** @type {?} */ viewNode = views[removeIndex];
     if (removeIndex > 0) {
-        setViewNext(views[removeIndex - 1], viewNode.next);
+        views[removeIndex - 1].data.next = /** @type {?} */ (viewNode.data.next);
     }
     views.splice(removeIndex, 1);
-    viewNode.next = null;
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
     container.data.queries && container.data.queries.removeView(removeIndex);
     return viewNode;
-}
-/**
- * Sets a next on the view node, so views in for loops can easily jump from
- * one view to the next to add/remove elements. Also adds the LView (view.data)
- * to the view tree for easy traversal when cleaning up the view.
- *
- * @param {?} view The view to set up
- * @param {?} next The view's new next
- * @return {?}
- */
-function setViewNext(view, next) {
-    view.next = next;
-    view.data.next = next ? next.data : null;
 }
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
@@ -16065,7 +16133,8 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
     if (matchIndex === -1 // no match
         || (matchIndex > 0 && /** @type {?} */ ((nodeClassAttrVal))[matchIndex - 1] !== ' ') // no space before
         ||
-            (matchEndIdx < nodeClassesLen && /** @type {?} */ ((nodeClassAttrVal))[matchEndIdx] !== ' ')) {
+            (matchEndIdx < nodeClassesLen && /** @type {?} */ ((nodeClassAttrVal))[matchEndIdx] !== ' ')) // no space after
+     {
         return false;
     }
     return true;
@@ -16310,6 +16379,12 @@ function getRenderer() {
     return renderer;
 }
 /**
+ * @return {?}
+ */
+function getCurrentSanitizer() {
+    return currentView && currentView.sanitizer;
+}
+/**
  * Used to set the parent property when nodes are created.
  */
 let previousOrParentNode;
@@ -16438,26 +16513,41 @@ function enterView(newView, host) {
 /**
  * Used in lieu of enterView to make it clear when we are exiting a child view. This makes
  * the direction of traversal (up or down the view tree) a bit clearer.
- * @param {?} newView
+ *
+ * @param {?} newView New state to become active
+ * @param {?=} creationOnly An optional boolean to indicate that the view was processed in creation mode
+ * only, i.e. the first update will be done later. Only possible for dynamically created views.
  * @return {?}
  */
-function leaveView(newView) {
-    if (!checkNoChangesMode) {
-        executeHooks(/** @type {?} */ ((directives)), currentView.tView.viewHooks, currentView.tView.viewCheckHooks, creationMode);
+function leaveView(newView, creationOnly) {
+    if (!creationOnly) {
+        if (!checkNoChangesMode) {
+            executeHooks(/** @type {?} */ ((directives)), currentView.tView.viewHooks, currentView.tView.viewCheckHooks, creationMode);
+        }
+        // Views are clean and in update mode after being checked, so these bits are cleared
+        currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     }
-    // Views should be clean and in update mode after being checked, so these bits are cleared
-    currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     currentView.lifecycleStage = 1 /* Init */;
     currentView.bindingIndex = -1;
     enterView(newView, null);
 }
 /**
- * Refreshes directives in this view and triggers any init/content hooks.
+ * Refreshes the view, executing the following steps in that order:
+ * triggers init hooks, refreshes dynamic children, triggers content hooks, sets host bindings,
+ * refreshes child components.
+ * Note: view hooks are triggered later when leaving the view.
+ *
  * @return {?}
  */
-function refreshDirectives() {
-    executeInitAndContentHooks();
+function refreshView() {
     const /** @type {?} */ tView = currentView.tView;
+    if (!checkNoChangesMode) {
+        executeInitHooks(currentView, tView, creationMode);
+    }
+    refreshDynamicChildren();
+    if (!checkNoChangesMode) {
+        executeHooks(/** @type {?} */ ((directives)), tView.contentHooks, tView.contentCheckHooks, creationMode);
+    }
     // This needs to be set before children are processed to support recursive components
     tView.firstTemplatePass = firstTemplatePass = false;
     setHostBindings(tView.hostBindings);
@@ -16508,9 +16598,10 @@ function executeInitAndContentHooks() {
  * @param {?} template
  * @param {?} context
  * @param {?} flags
+ * @param {?=} sanitizer
  * @return {?}
  */
-function createLView(viewId, renderer, tView, template, context, flags) {
+function createLView(viewId, renderer, tView, template, context, flags, sanitizer) {
     const /** @type {?} */ newView = {
         parent: currentView,
         id: viewId,
@@ -16534,6 +16625,7 @@ function createLView(viewId, renderer, tView, template, context, flags) {
         lifecycleStage: 1 /* Init */,
         queries: null,
         injector: currentView && currentView.injector,
+        sanitizer: sanitizer || null
     };
     return newView;
 }
@@ -16556,7 +16648,6 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         view: currentView,
         parent: /** @type {?} */ (parent),
         child: null,
-        next: null,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
         queries: queries,
@@ -16569,10 +16660,12 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
  * @param {?} index
  * @param {?} type
  * @param {?} native
+ * @param {?} name
+ * @param {?} attrs
  * @param {?=} state
  * @return {?}
  */
-function createLNode(index, type, native, state) {
+function createLNode(index, type, native, name, attrs, state) {
     const /** @type {?} */ parent = isParent ? previousOrParentNode :
         previousOrParentNode && /** @type {?} */ (previousOrParentNode.parent);
     let /** @type {?} */ queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
@@ -16591,11 +16684,12 @@ function createLNode(index, type, native, state) {
         data[index] = node;
         // Every node adds a value to the static data array to avoid a sparse array
         if (index >= tData.length) {
-            tData[index] = null;
+            const /** @type {?} */ tNode = tData[index] = createTNode(index, name, attrs, null);
+            if (!isParent && previousOrParentNode) {
+                /** @type {?} */ ((previousOrParentNode.tNode)).next = tNode;
+            }
         }
-        else {
-            node.tNode = /** @type {?} */ (tData[index]);
-        }
+        node.tNode = /** @type {?} */ (tData[index]);
         // Now link ourselves into the tree.
         if (isParent) {
             currentQueries = null;
@@ -16607,13 +16701,6 @@ function createLNode(index, type, native, state) {
             }
             else {
                 // We are adding component view, so we don't link parent node child to this node.
-            }
-        }
-        else if (previousOrParentNode) {
-            ngDevMode && assertNull(previousOrParentNode.next, `previousOrParentNode's next property should not have been set ${index}.`);
-            previousOrParentNode.next = node;
-            if (previousOrParentNode.dynamicLContainerNode) {
-                previousOrParentNode.dynamicLContainerNode.next = node;
             }
         }
     }
@@ -16639,12 +16726,22 @@ function resetApplicationState() {
  * @param {?} host The host element node to use
  * @param {?=} directives Directive defs that should be used for matching
  * @param {?=} pipes Pipe defs that should be used for matching
+ * @param {?=} sanitizer
  * @return {?}
  */
 
 /**
+ * Used for rendering embedded views (e.g. dynamically created views)
+ *
+ * Dynamically created views must store/retrieve their TViews differently from component views
+ * because their template functions are nested in the template functions of their hosts, creating
+ * closures. If their host template happens to be an embedded template in a loop (e.g. ngFor inside
+ * an ngFor), the nesting would mean we'd have multiple instances of the template function, so we
+ * can't store TViews in the template function itself (as we do for comps). Instead, we store the
+ * TView for dynamically created views on their host TNode, which only has one instance.
  * @template T
  * @param {?} viewNode
+ * @param {?} tView
  * @param {?} template
  * @param {?} context
  * @param {?} renderer
@@ -16652,27 +16749,33 @@ function resetApplicationState() {
  * @param {?=} pipes
  * @return {?}
  */
-function renderEmbeddedTemplate(viewNode, template, context, renderer, directives, pipes) {
+function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, directives, pipes) {
     const /** @type {?} */ _isParent = isParent;
     const /** @type {?} */ _previousOrParentNode = previousOrParentNode;
     let /** @type {?} */ oldView;
+    let /** @type {?} */ rf = 2;
     try {
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
-        let /** @type {?} */ rf = 2;
         if (viewNode == null) {
-            const /** @type {?} */ tView = getOrCreateTView(template, directives || null, pipes || null);
-            const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */);
-            viewNode = createLNode(null, 2 /* View */, null, lView);
+            const /** @type {?} */ lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */, getCurrentSanitizer());
+            viewNode = createLNode(null, 2 /* View */, null, null, null, lView);
             rf = 1 /* Create */;
         }
         oldView = enterView(viewNode.data, viewNode);
         template(rf, context);
-        refreshDirectives();
-        refreshDynamicChildren();
+        if (rf & 2 /* Update */) {
+            refreshView();
+        }
+        else {
+            viewNode.data.tView.firstTemplatePass = firstTemplatePass = false;
+        }
     }
     finally {
-        leaveView(/** @type {?} */ ((oldView)));
+        // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
+        // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
+        const /** @type {?} */ isCreationOnly = (rf & 1 /* Create */) === 1;
+        leaveView(/** @type {?} */ ((oldView)), isCreationOnly);
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
     }
@@ -16694,8 +16797,7 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
         }
         if (template) {
             template(getRenderFlags(hostView), /** @type {?} */ ((componentOrContext)));
-            refreshDynamicChildren();
-            refreshDirectives();
+            refreshView();
         }
         else {
             executeInitAndContentHooks();
@@ -16743,28 +16845,31 @@ function getRenderFlags(view) {
 function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'elements should be created before any bindings');
+    ngDevMode && ngDevMode.rendererCreateElement++;
     const /** @type {?} */ native = renderer.createElement(name);
-    const /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), null);
+    ngDevMode && assertDataInRange(index - 1);
+    const /** @type {?} */ node = createLNode(index, 3 /* Element */, /** @type {?} */ ((native)), name, attrs || null, null);
     if (attrs)
         setUpAttributes(native, attrs);
     appendChild(/** @type {?} */ ((node.parent)), native, currentView);
-    createDirectivesAndLocals(index, name, attrs, localRefs, null);
+    createDirectivesAndLocals(index, name, attrs, localRefs, false);
     return native;
 }
 /**
- * @param {?} index
- * @param {?} name
- * @param {?} attrs
- * @param {?} localRefs
- * @param {?} containerData
+ * Creates directive instances and populates local refs.
+ *
+ * @param {?} index Index of the current node (to create TNode)
+ * @param {?} name Tag name of the current node
+ * @param {?} attrs Attrs of the current node
+ * @param {?} localRefs Local refs of the current node
+ * @param {?} inlineViews Whether or not this node will create inline views
  * @return {?}
  */
-function createDirectivesAndLocals(index, name, attrs, localRefs, containerData) {
+function createDirectivesAndLocals(index, name, attrs, localRefs, inlineViews) {
     const /** @type {?} */ node = previousOrParentNode;
     if (firstTemplatePass) {
-        ngDevMode && assertDataInRange(index - 1);
-        node.tNode = tData[index] = createTNode(name, attrs || null, containerData);
-        cacheMatchingDirectivesForNode(node.tNode, currentView.tView, localRefs || null);
+        ngDevMode && ngDevMode.firstTemplatePass++;
+        cacheMatchingDirectivesForNode(/** @type {?} */ ((node.tNode)), currentView.tView, localRefs || null);
     }
     else {
         instantiateDirectivesDirectly();
@@ -16958,6 +17063,12 @@ function saveResolvedLocalsInData() {
  * @return {?} TView
  */
 function getOrCreateTView(template, directives, pipes) {
+    // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
+    // 1. It is a megamorphic call on each invocation.
+    // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
+    //    outer template invocation, which means that no such property will exist
+    // Correct solution is to only put `ngPrivateData` on the Component template
+    // and not on embedded templates.
     return template.ngPrivateData ||
         (template.ngPrivateData = /** @type {?} */ (createTView(directives, pipes)));
 }
@@ -16968,6 +17079,7 @@ function getOrCreateTView(template, directives, pipes) {
  * @return {?}
  */
 function createTView(defs, pipes) {
+    ngDevMode && ngDevMode.tView++;
     return {
         data: [],
         directives: null,
@@ -16999,6 +17111,7 @@ function setUpAttributes(native, attrs) {
         const /** @type {?} */ attrName = attrs[i];
         if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
             const /** @type {?} */ attrVal = attrs[i + 1];
+            ngDevMode && ngDevMode.rendererSetAttribute++;
             isProc ? (/** @type {?} */ (renderer)).setAttribute(native, attrName, attrVal) :
                 native.setAttribute(attrName, attrVal);
         }
@@ -17045,14 +17158,14 @@ function locateHostElement(factory, elementOrSelector) {
  * @param {?} rNode Render host element.
  * @param {?} def ComponentDef
  *
+ * @param {?=} sanitizer
  * @return {?} LElementNode created
  */
-function hostElement(tag, rNode, def) {
+function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
-        node.tNode = createTNode(/** @type {?} */ (tag), null, null);
-        node.tNode.flags = 4096 /* isComponent */;
+        /** @type {?} */ ((node.tNode)).flags = 4096 /* isComponent */;
         if (def.diPublic)
             def.diPublic(def);
         currentView.tView.directives = [def];
@@ -17077,6 +17190,7 @@ function listener(eventName, listenerFn, useCapture = false) {
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
     const /** @type {?} */ cleanupFns = cleanup || (cleanup = currentView.cleanup = []);
+    ngDevMode && ngDevMode.rendererAddEventListener++;
     if (isProceduralRenderer(renderer)) {
         const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listenerFn);
         const /** @type {?} */ cleanupFn = renderer.listen(native, eventName, wrappedListener);
@@ -17144,10 +17258,12 @@ function elementAttribute(index, name, value, sanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ element = data[index];
         if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveAttribute++;
             isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, name) :
                 element.native.removeAttribute(name);
         }
         else {
+            ngDevMode && ngDevMode.rendererSetAttribute++;
             const /** @type {?} */ strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
             isProceduralRenderer(renderer) ? renderer.setAttribute(element.native, name, strValue) :
                 element.native.setAttribute(name, strValue);
@@ -17191,6 +17307,7 @@ function elementProperty(index, propName, value, sanitizer) {
         // is risky, so sanitization can be done without further checks.
         value = sanitizer != null ? (/** @type {?} */ (sanitizer(value))) : value;
         const /** @type {?} */ native = node.native;
+        ngDevMode && ngDevMode.rendererSetProperty++;
         isProceduralRenderer(renderer) ? renderer.setProperty(native, propName, value) :
             (native.setProperty ? native.setProperty(propName, value) :
                 (/** @type {?} */ (native))[propName] = value);
@@ -17199,13 +17316,16 @@ function elementProperty(index, propName, value, sanitizer) {
 /**
  * Constructs a TNode object from the arguments.
  *
- * @param {?} tagName
- * @param {?} attrs
- * @param {?} data
+ * @param {?} index The index of the TNode in TView.data
+ * @param {?} tagName The tag name of the node
+ * @param {?} attrs The attributes defined on this node
+ * @param {?} tViews Any TViews attached to this node
  * @return {?} the TNode object
  */
-function createTNode(tagName, attrs, data) {
+function createTNode(index, tagName, attrs, tViews) {
+    ngDevMode && ngDevMode.tNode++;
     return {
+        index: index,
         flags: 0,
         tagName: tagName,
         attrs: attrs,
@@ -17213,7 +17333,8 @@ function createTNode(tagName, attrs, data) {
         initialInputs: undefined,
         inputs: undefined,
         outputs: undefined,
-        data: data
+        tViews: tViews,
+        next: null
     };
 }
 /**
@@ -17276,10 +17397,12 @@ function elementClassNamed(index, className, value) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (value) {
+            ngDevMode && ngDevMode.rendererAddClass++;
             isProceduralRenderer(renderer) ? renderer.addClass(lElement.native, className) :
                 lElement.native.classList.add(className);
         }
         else {
+            ngDevMode && ngDevMode.rendererRemoveClass++;
             isProceduralRenderer(renderer) ? renderer.removeClass(lElement.native, className) :
                 lElement.native.classList.remove(className);
         }
@@ -17305,6 +17428,7 @@ function elementClass(index, value) {
         // future
         // we will add logic here which would work with the animation code.
         const /** @type {?} */ lElement = data[index];
+        ngDevMode && ngDevMode.rendererSetClassName++;
         isProceduralRenderer(renderer) ? renderer.setProperty(lElement.native, 'className', value) :
             lElement.native['className'] = stringify$1(value);
     }
@@ -17321,6 +17445,7 @@ function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
     if (value !== NO_CHANGE) {
         const /** @type {?} */ lElement = data[index];
         if (value == null) {
+            ngDevMode && ngDevMode.rendererRemoveStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
                 lElement.native['style'].removeProperty(styleName);
@@ -17329,6 +17454,7 @@ function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
             let /** @type {?} */ strValue = typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
             if (typeof suffixOrSanitizer == 'string')
                 strValue = strValue + suffixOrSanitizer;
+            ngDevMode && ngDevMode.rendererSetStyle++;
             isProceduralRenderer(renderer) ?
                 renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
                 lElement.native['style'].setProperty(styleName, strValue);
@@ -17356,6 +17482,7 @@ function elementStyle(index, value) {
         // we will add logic here which would work with the animation code.
         const /** @type {?} */ lElement = /** @type {?} */ (data[index]);
         if (isProceduralRenderer(renderer)) {
+            ngDevMode && ngDevMode.rendererSetStyle++;
             renderer.setProperty(lElement.native, 'style', value);
         }
         else {
@@ -17363,8 +17490,14 @@ function elementStyle(index, value) {
             for (let /** @type {?} */ i = 0, /** @type {?} */ keys = Object.keys(value); i < keys.length; i++) {
                 const /** @type {?} */ styleName = keys[i];
                 const /** @type {?} */ styleValue = (/** @type {?} */ (value))[styleName];
-                styleValue == null ? style.removeProperty(styleName) :
+                if (styleValue == null) {
+                    ngDevMode && ngDevMode.rendererRemoveStyle++;
+                    style.removeProperty(styleName);
+                }
+                else {
+                    ngDevMode && ngDevMode.rendererSetStyle++;
                     style.setProperty(styleName, styleValue);
+                }
             }
         }
     }
@@ -17379,8 +17512,9 @@ function elementStyle(index, value) {
 function text(index, value) {
     ngDevMode &&
         assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
+    ngDevMode && ngDevMode.rendererCreateTextNode++;
     const /** @type {?} */ textNode = createTextNode(value, renderer);
-    const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode);
+    const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode, null, null);
     // Text nodes are self closing.
     isParent = false;
     appendChild(/** @type {?} */ ((node.parent)), textNode, currentView);
@@ -17399,6 +17533,7 @@ function textBinding(index, value) {
     let /** @type {?} */ existingNode = /** @type {?} */ (data[index]);
     ngDevMode && assertNotNull(existingNode, 'LNode should exist');
     ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
+    ngDevMode && ngDevMode.rendererSetText++;
     value !== NO_CHANGE &&
         (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
             existingNode.native.textContent = stringify$1(value));
@@ -17446,7 +17581,7 @@ function addComponentLogic(index, instance, def) {
     const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */));
+    const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     (/** @type {?} */ (previousOrParentNode.data)) = hostView;
     (/** @type {?} */ (hostView.node)) = previousOrParentNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
@@ -17587,11 +17722,13 @@ function container(index, template, tagName, attrs, localRefs) {
     ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'container nodes should be created before any bindings');
     const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((previousOrParentNode.parent));
     const /** @type {?} */ lContainer = createLContainer(currentParent, currentView, template);
-    const /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, lContainer);
+    const /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, tagName || null, attrs || null, lContainer);
+    if (firstTemplatePass && template == null)
+        /** @type {?} */ ((node.tNode)).tViews = [];
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, node.data);
-    createDirectivesAndLocals(index, tagName || null, attrs, localRefs, []);
+    createDirectivesAndLocals(index, tagName || null, attrs, localRefs, template == null);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     const /** @type {?} */ queries = node.queries;
@@ -17654,9 +17791,11 @@ function refreshDynamicChildren() {
         if (current.dynamicViewCount !== 0 && (/** @type {?} */ (current)).views) {
             const /** @type {?} */ container = /** @type {?} */ (current);
             for (let /** @type {?} */ i = 0; i < container.views.length; i++) {
-                const /** @type {?} */ view = container.views[i];
+                const /** @type {?} */ lViewNode = container.views[i];
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
-                renderEmbeddedTemplate(view, /** @type {?} */ ((view.data.template)), /** @type {?} */ ((view.data.context)), renderer);
+                const /** @type {?} */ dynamicView = lViewNode.data;
+                ngDevMode && assertNotNull(dynamicView.tView, 'TView must be allocated');
+                renderEmbeddedTemplate(lViewNode, dynamicView.tView, /** @type {?} */ ((dynamicView.template)), /** @type {?} */ ((dynamicView.context)), renderer);
             }
         }
     }
@@ -17709,41 +17848,42 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        const /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */);
+        const /** @type {?} */ newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
-        enterView(newView, viewNode = createLNode(null, 2 /* View */, null, newView));
+        enterView(newView, viewNode = createLNode(null, 2 /* View */, null, null, null, newView));
     }
     return getRenderFlags(viewNode.data);
 }
 /**
  * Initialize the TView (e.g. static data) for the active embedded view.
  *
- * Each embedded view needs to set the global tData variable to the static data for
- * that view. Otherwise, the view's static data for a particular node would overwrite
- * the static data for a node in the view above it with the same index (since it's in the
- * same template).
+ * Each embedded view block must create or retrieve its own TView. Otherwise, the embedded view's
+ * static data for a particular node would overwrite the static data for a node in the view above
+ * it with the same index (since it's in the same template).
  *
- * @param {?} viewIndex The index of the TView in TContainer
+ * @param {?} viewIndex The index of the TView in TNode.tViews
  * @param {?} parent The parent container in which to look for the view's static data
  * @return {?} TView
  */
 function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertNodeType(parent, 0 /* Container */);
-    const /** @type {?} */ tContainer = (/** @type {?} */ (((parent)).tNode)).data;
-    if (viewIndex >= tContainer.length || tContainer[viewIndex] == null) {
+    const /** @type {?} */ containerTViews = /** @type {?} */ ((/** @type {?} */ (((parent)).tNode)).tViews);
+    ngDevMode && assertNotNull(containerTViews, 'TView expected');
+    ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
+    if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
         const /** @type {?} */ tView = currentView.tView;
-        tContainer[viewIndex] = createTView(tView.directiveRegistry, tView.pipeRegistry);
+        containerTViews[viewIndex] = createTView(tView.directiveRegistry, tView.pipeRegistry);
     }
-    return tContainer[viewIndex];
+    return containerTViews[viewIndex];
 }
 /**
  * Marks the end of an embedded view.
  * @return {?}
  */
 function embeddedViewEnd() {
-    refreshDirectives();
+    refreshView();
     isParent = false;
     const /** @type {?} */ viewNode = previousOrParentNode = /** @type {?} */ (currentView.node);
     const /** @type {?} */ containerNode = /** @type {?} */ (previousOrParentNode.parent);
@@ -17785,7 +17925,7 @@ function setRenderParentInProjectedNodes(renderParent, viewNode) {
                     nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
                 }
             }
-            node = node.next;
+            node = getNextLNode(node);
         }
     }
 }
@@ -17860,7 +18000,7 @@ function projectionDef(index, selectors, textSelectors) {
         else {
             distributedNodes[0].push(componentChild);
         }
-        componentChild = componentChild.next;
+        componentChild = getNextLNode(componentChild);
     }
     ngDevMode && assertDataNext(index);
     data[index] = distributedNodes;
@@ -17900,10 +18040,7 @@ function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
  * @return {?}
  */
 function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
-    const /** @type {?} */ node = createLNode(nodeIndex, 1 /* Projection */, null, { head: null, tail: null });
-    if (node.tNode == null) {
-        node.tNode = createTNode(null, attrs || null, null);
-    }
+    const /** @type {?} */ node = createLNode(nodeIndex, 1 /* Projection */, null, null, attrs || null, { head: null, tail: null });
     // `<ng-content>` has no content
     isParent = false;
     const /** @type {?} */ currentParent = node.parent;
@@ -18141,8 +18278,7 @@ function detectChangesInternal(hostView, hostNode, def, component) {
     const /** @type {?} */ template = def.template;
     try {
         template(getRenderFlags(hostView), component);
-        refreshDirectives();
-        refreshDynamicChildren();
+        refreshView();
     }
     finally {
         leaveView(oldView);
@@ -18878,6 +19014,7 @@ function addDestroyable(obj) {
 function renderComponent(componentType /* Type as workaround for: Microsoft/TypeScript/issues/4881 */, opts = {}) {
     ngDevMode && assertComponentType(componentType);
     const /** @type {?} */ rendererFactory = opts.rendererFactory || domRendererFactory3;
+    const /** @type {?} */ sanitizer = opts.sanitizer || null;
     const /** @type {?} */ componentDef = /** @type {?} */ ((/** @type {?} */ (componentType)).ngComponentDef);
     if (componentDef.type != componentType)
         componentDef.type = componentType;
@@ -18899,7 +19036,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         if (rendererFactory.begin)
             rendererFactory.begin();
         // Create element node at index 0 in data array
-        elementNode = hostElement(componentTag, hostNode, componentDef);
+        elementNode = hostElement(componentTag, hostNode, componentDef, sanitizer);
         // Create directive instance with factory() and store at index 0 in directives array
         component = rootContext.component = /** @type {?} */ (baseDirectiveCreate(0, componentDef.factory(), componentDef));
         initChangeDetectorIfExisting(elementNode.nodeInjector, component, /** @type {?} */ ((elementNode.data)));
@@ -19269,7 +19406,7 @@ function getClosestComponentAncestor(node) {
  * @param {?=} flags Injection flags (e.g. CheckParent)
  * @return {?} The instance found
  */
-function getOrCreateInjectable(di, token, flags) {
+function getOrCreateInjectable(di, token, flags = 0 /* Default */) {
     const /** @type {?} */ bloomHash = bloomHashBit(token);
     // If the token has a bloom hash, then it is a directive that is public to the injection system
     // (diPublic). If there is no hash, fall back to the module injector.
@@ -19288,7 +19425,7 @@ function getOrCreateInjectable(di, token, flags) {
         while (injector) {
             // Get the closest potential matching injector (upwards in the injector tree) that
             // *potentially* has the token.
-            injector = bloomFindPossibleInjector(injector, bloomHash);
+            injector = bloomFindPossibleInjector(injector, bloomHash, flags);
             // If no injector is found, we *know* that there is no ancestor injector that contains the
             // token, so we abort.
             if (!injector) {
@@ -19297,10 +19434,10 @@ function getOrCreateInjectable(di, token, flags) {
             // At this point, we have an injector which *may* contain the token, so we step through the
             // directives associated with the injector's corresponding node to get the directive instance.
             const /** @type {?} */ node = injector.node;
-            const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
-            const /** @type {?} */ count = flags & 4095;
+            const /** @type {?} */ nodeFlags = /** @type {?} */ ((node.tNode)).flags;
+            const /** @type {?} */ count = nodeFlags & 4095;
             if (count !== 0) {
-                const /** @type {?} */ start = flags >> 13;
+                const /** @type {?} */ start = nodeFlags >> 13;
                 const /** @type {?} */ end = start + count;
                 const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
                 for (let /** @type {?} */ i = start; i < end; i++) {
@@ -19318,14 +19455,20 @@ function getOrCreateInjectable(di, token, flags) {
             if (injector === di && (instance = searchMatchesQueuedForCreation(node, token))) {
                 return instance;
             }
-            // The def wasn't found anywhere on this node, so it might be a false positive.
-            // Traverse up the tree and continue searching.
-            injector = injector.parent;
+            // The def wasn't found anywhere on this node, so it was a false positive.
+            // If flags permit, traverse up the tree and continue searching.
+            if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
+                injector = null;
+            }
+            else {
+                injector = injector.parent;
+            }
         }
     }
     // No directive was found for the given token.
-    // TODO: implement optional, check-self, and check-parent.
-    throw new Error('Implement');
+    if (flags & 8 /* Optional */)
+        return null;
+    throw new Error(`Injector: NOT_FOUND [${stringify$1(token)}]`);
 }
 /**
  * @template T
@@ -19378,16 +19521,17 @@ function bloomHashBit(type) {
  *
  * @param {?} startInjector
  * @param {?} bloomBit The bit to check in each injector's bloom filter
+ * @param {?} flags The injection flags for this injection site (e.g. Optional or SkipSelf)
  * @return {?} An injector that might have the directive
  */
-function bloomFindPossibleInjector(startInjector, bloomBit) {
+function bloomFindPossibleInjector(startInjector, bloomBit, flags) {
     // Create a mask that targets the specific bit associated with the directive we're looking for.
     // JS bit operations are 32 bits, so this will be a number between 2^0 and 2^31, corresponding
     // to bit positions 0 - 31 in a 32 bit integer.
     const /** @type {?} */ mask = 1 << bloomBit;
     // Traverse up the injector tree until we find a potential match or until we know there *isn't* a
     // match.
-    let /** @type {?} */ injector = startInjector;
+    let /** @type {?} */ injector = flags & 4 /* SkipSelf */ ? /** @type {?} */ ((startInjector.parent)) : startInjector;
     while (injector) {
         // Our bloom filter size is 256 bits, which is eight 32-bit bloom filter buckets:
         // bf0 = [0 - 31], bf1 = [32 - 63], bf2 = [64 - 95], bf3 = [96 - 127], etc.
@@ -19406,6 +19550,9 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
         if ((value & mask) === mask) {
             return injector;
         }
+        else if (flags & 2 /* Self */ || flags & 1 /* Host */ && !sameHostView(injector)) {
+            return null;
+        }
         // If the current injector does not have the directive, check the bloom filters for the ancestor
         // injectors (cbf0 - cbf7). These filters capture *all* ancestor injectors.
         if (bloomBit < 128) {
@@ -19421,6 +19568,17 @@ function bloomFindPossibleInjector(startInjector, bloomBit) {
         injector = (value & mask) ? injector.parent : null;
     }
     return null;
+}
+/**
+ * Checks whether the current injector and its parent are in the same host view.
+ *
+ * This is necessary to support \@Host() decorators. If \@Host() is set, we should stop searching once
+ * the injector and its parent view don't match because it means we'd cross the view boundary.
+ * @param {?} injector
+ * @return {?}
+ */
+function sameHostView(injector) {
+    return !!injector.parent && injector.parent.node.view === injector.node.view;
 }
 /**
  * @template T
@@ -19469,6 +19627,8 @@ function getOrCreateContainerRef(di) {
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
         const /** @type {?} */ lContainer = createLContainer(/** @type {?} */ ((vcRefHost.parent)), vcRefHost.view);
         const /** @type {?} */ lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, /** @type {?} */ ((vcRefHost.parent)), undefined, lContainer, null);
+        // TODO(kara): Separate into own TNode when moving parent/child properties
+        lContainerNode.tNode = vcRefHost.tNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, lContainer);
         di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
@@ -19620,10 +19780,18 @@ class ViewContainerRef$1 {
  * @return {?} The TemplateRef instance to use
  */
 function getOrCreateTemplateRef(di) {
-    ngDevMode && assertNodeType(di.node, 0 /* Container */);
-    const /** @type {?} */ data = (/** @type {?} */ (di.node)).data;
-    const /** @type {?} */ tView = di.node.view.tView;
-    return di.templateRef || (di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ ((data.template)), getRenderer(), tView.directiveRegistry, tView.pipeRegistry));
+    if (!di.templateRef) {
+        ngDevMode && assertNodeType(di.node, 0 /* Container */);
+        const /** @type {?} */ hostNode = /** @type {?} */ (di.node);
+        const /** @type {?} */ hostTNode = /** @type {?} */ ((hostNode.tNode));
+        const /** @type {?} */ hostTView = hostNode.view.tView;
+        if (!hostTNode.tViews) {
+            hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
+        }
+        ngDevMode && assertNotNull(hostTNode.tViews, 'TView must be allocated');
+        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ (hostTNode.tViews), /** @type {?} */ ((hostNode.data.template)), getRenderer(), hostTView.directiveRegistry, hostTView.pipeRegistry);
+    }
+    return di.templateRef;
 }
 /**
  * @template T
@@ -19631,24 +19799,26 @@ function getOrCreateTemplateRef(di) {
 class TemplateRef$1 {
     /**
      * @param {?} elementRef
-     * @param {?} template
+     * @param {?} _tView
+     * @param {?} _template
      * @param {?} _renderer
      * @param {?} _directives
      * @param {?} _pipes
      */
-    constructor(elementRef, template, _renderer, _directives, _pipes) {
+    constructor(elementRef, _tView, _template, _renderer, _directives, _pipes) {
+        this._tView = _tView;
+        this._template = _template;
         this._renderer = _renderer;
         this._directives = _directives;
         this._pipes = _pipes;
         this.elementRef = elementRef;
-        this._template = template;
     }
     /**
      * @param {?} context
      * @return {?}
      */
     createEmbeddedView(context) {
-        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._template, context, this._renderer, this._directives, this._pipes);
+        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._directives, this._pipes);
         return addDestroyable(new EmbeddedViewRef$1(viewNode, this._template, context));
     }
 }
@@ -19898,7 +20068,7 @@ function definePipe(pipeDef) {
  *
  * @template T
  * @param {?} pureFn Function that returns a value
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} value
  */
 function pureFunction0(pureFn, thisArg) {
@@ -19911,7 +20081,7 @@ function pureFunction0(pureFn, thisArg) {
  *
  * @param {?} pureFn Function that returns an updated value
  * @param {?} exp Updated expression value
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction1(pureFn, exp, thisArg) {
@@ -19926,7 +20096,7 @@ function pureFunction1(pureFn, exp, thisArg) {
  * @param {?} pureFn
  * @param {?} exp1
  * @param {?} exp2
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction2(pureFn, exp1, exp2, thisArg) {
@@ -19942,7 +20112,7 @@ function pureFunction2(pureFn, exp1, exp2, thisArg) {
  * @param {?} exp1
  * @param {?} exp2
  * @param {?} exp3
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
@@ -19960,7 +20130,7 @@ function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
  * @param {?} exp2
  * @param {?} exp3
  * @param {?} exp4
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
@@ -19978,7 +20148,7 @@ function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @param {?} exp3
  * @param {?} exp4
  * @param {?} exp5
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
@@ -19999,7 +20169,7 @@ function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
  * @param {?} exp4
  * @param {?} exp5
  * @param {?} exp6
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
@@ -20021,7 +20191,7 @@ function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
  * @param {?} exp5
  * @param {?} exp6
  * @param {?} exp7
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
@@ -20045,7 +20215,7 @@ function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg
  * @param {?} exp6
  * @param {?} exp7
  * @param {?} exp8
- * @param {?=} thisArg
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
@@ -20063,8 +20233,8 @@ function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, t
  *
  * @param {?} pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
- * @param {?} exps
- * @param {?=} thisArg
+ * @param {?} exps An array of binding values
+ * @param {?=} thisArg Optional calling context of pureFn
  * @return {?} Updated value
  */
 function pureFunctionV(pureFn, exps, thisArg) {
@@ -20174,7 +20344,7 @@ function pipeBind2(index, v1, v2) {
  */
 function pipeBind3(index, v1, v2, v3) {
     const /** @type {?} */ pipeInstance = load(index);
-    return isPure(index) ? pureFunction3(pipeInstance.transform.bind(pipeInstance), v1, v2, v3) :
+    return isPure(index) ? pureFunction3(pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3);
 }
 /**
@@ -20848,6 +21018,10 @@ const BRAND = '__SANITIZER_TRUSTED_BRAND__';
  * and urls have been removed.
  */
 function sanitizeHtml(unsafeHtml) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.HTML, unsafeHtml) || '';
+    }
     if (unsafeHtml instanceof String && (/** @type {?} */ (unsafeHtml))[BRAND] === 'Html') {
         return unsafeHtml.toString();
     }
@@ -20867,6 +21041,10 @@ function sanitizeHtml(unsafeHtml) {
  * dangerous javascript and urls have been removed.
  */
 function sanitizeStyle(unsafeStyle) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.STYLE, unsafeStyle) || '';
+    }
     if (unsafeStyle instanceof String && (/** @type {?} */ (unsafeStyle))[BRAND] === 'Style') {
         return unsafeStyle.toString();
     }
@@ -20887,6 +21065,10 @@ function sanitizeStyle(unsafeStyle) {
  * all of the dangerous javascript has been removed.
  */
 function sanitizeUrl(unsafeUrl) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.URL, unsafeUrl) || '';
+    }
     if (unsafeUrl instanceof String && (/** @type {?} */ (unsafeUrl))[BRAND] === 'Url') {
         return unsafeUrl.toString();
     }
@@ -20902,6 +21084,10 @@ function sanitizeUrl(unsafeUrl) {
  * only trusted `url`s have been allowed to pass.
  */
 function sanitizeResourceUrl(unsafeResourceUrl) {
+    const /** @type {?} */ s = getCurrentSanitizer();
+    if (s) {
+        return s.sanitize(SecurityContext.RESOURCE_URL, unsafeResourceUrl) || '';
+    }
     if (unsafeResourceUrl instanceof String &&
         (/** @type {?} */ (unsafeResourceUrl))[BRAND] === 'ResourceUrl') {
         return unsafeResourceUrl.toString();
@@ -21071,5 +21257,5 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Generated bundle index. Do not edit.
  */
 
-export { _iterableDiffersFactory as ɵangular_packages_core_core_j, _keyValueDiffersFactory as ɵangular_packages_core_core_k, _localeFactory as ɵangular_packages_core_core_l, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, defaultKeyValueDiffers as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_h, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_i, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_y, bindingUpdated as ɵangular_packages_core_core_bb, bindingUpdated2 as ɵangular_packages_core_core_bd, bindingUpdated4 as ɵangular_packages_core_core_be, checkAndUpdateBinding$1 as ɵangular_packages_core_core_bc, consumeBinding as ɵangular_packages_core_core_ba, getCreationMode as ɵangular_packages_core_core_z, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { _iterableDiffersFactory as ɵangular_packages_core_core_j, _keyValueDiffersFactory as ɵangular_packages_core_core_k, _localeFactory as ɵangular_packages_core_core_l, _appIdRandomProviderFactory as ɵangular_packages_core_core_f, defaultKeyValueDiffers as ɵangular_packages_core_core_g, DefaultIterableDifferFactory as ɵangular_packages_core_core_h, DefaultKeyValueDifferFactory as ɵangular_packages_core_core_i, ReflectiveInjector_ as ɵangular_packages_core_core_c, ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflectiveProviders as ɵangular_packages_core_core_e, wtfEnabled as ɵangular_packages_core_core_m, createScope as ɵangular_packages_core_core_o, detectWTF as ɵangular_packages_core_core_n, endTimeRange as ɵangular_packages_core_core_r, leave as ɵangular_packages_core_core_p, startTimeRange as ɵangular_packages_core_core_q, getOrCreateChangeDetectorRef as ɵangular_packages_core_core_v, getOrCreateContainerRef as ɵangular_packages_core_core_x, getOrCreateInjectable as ɵangular_packages_core_core_w, getOrCreateNodeInjector as ɵangular_packages_core_core_u, getOrCreateTemplateRef as ɵangular_packages_core_core_y, bindingUpdated as ɵangular_packages_core_core_bb, bindingUpdated2 as ɵangular_packages_core_core_bd, bindingUpdated4 as ɵangular_packages_core_core_be, checkAndUpdateBinding$1 as ɵangular_packages_core_core_bc, consumeBinding as ɵangular_packages_core_core_ba, getCreationMode as ɵangular_packages_core_core_z, makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b, _def as ɵangular_packages_core_core_s, DebugContext as ɵangular_packages_core_core_t, createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef, ViewContainerRef, EmbeddedViewRef, ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map

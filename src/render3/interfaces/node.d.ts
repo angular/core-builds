@@ -5,12 +5,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { LContainer, TContainer } from './container';
+import { LContainer } from './container';
 import { LInjector } from './injector';
 import { LProjection } from './projection';
 import { LQueries } from './query';
 import { RElement, RText } from './renderer';
-import { LView } from './view';
+import { LView, TView } from './view';
 /**
  * LNodeType corresponds to the LNode.type property. It contains information
  * on how to map a particular set of bits in LNode.flags to the node type.
@@ -68,11 +68,6 @@ export interface LNode {
      */
     child: LNode | null;
     /**
-     * The next sibling node. Necessary so we can propagate through the root nodes of a view
-     * to insert them or remove them from the DOM.
-     */
-    next: LNode | null;
-    /**
      * If regular LElementNode, then `data` will be null.
      * If LElementNode with component, then `data` contains LView.
      * If LViewNode, then `data` contains the LView.
@@ -116,7 +111,6 @@ export interface LElementNode extends LNode {
     /** The DOM element associated with this node. */
     readonly native: RElement;
     child: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
-    next: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
     /** If Component then data has LView (light DOM) */
     readonly data: LView | null;
     /** LElementNodes can be inside other LElementNodes or inside LViewNodes. */
@@ -127,7 +121,6 @@ export interface LTextNode extends LNode {
     /** The text node associated with this node. */
     native: RText;
     child: null;
-    next: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
     /** LTextNodes can be inside LElementNodes or inside LViewNodes. */
     readonly parent: LElementNode | LViewNode;
     readonly data: null;
@@ -137,7 +130,6 @@ export interface LTextNode extends LNode {
 export interface LViewNode extends LNode {
     readonly native: null;
     child: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
-    next: LViewNode | null;
     /**  LViewNodes can only be added to LContainerNodes. */
     readonly parent: LContainerNode | null;
     readonly data: LView;
@@ -148,14 +140,12 @@ export interface LContainerNode extends LNode {
     native: RElement | RText | null | undefined;
     readonly data: LContainer;
     child: null;
-    next: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
     /** Containers can be added to elements or views. */
     readonly parent: LElementNode | LViewNode | null;
 }
 export interface LProjectionNode extends LNode {
     readonly native: null;
     child: null;
-    next: LContainerNode | LElementNode | LTextNode | LProjectionNode | null;
     readonly data: LProjection;
     /** Projections can be added to elements or views. */
     readonly parent: LElementNode | LViewNode;
@@ -173,6 +163,13 @@ export interface LProjectionNode extends LNode {
  * see: https://en.wikipedia.org/wiki/Flyweight_pattern for more on the Flyweight pattern
  */
 export interface TNode {
+    /**
+     * Index of the TNode in TView.data and corresponding LNode in LView.data.
+     *
+     * This is necessary to get from any TNode to its corresponding LNode when
+     * traversing the node tree.
+     */
+    index: number;
     /**
      * This number stores two values using its bits:
      *
@@ -233,22 +230,39 @@ export interface TNode {
      */
     outputs: PropertyAliases | null | undefined;
     /**
-     * The static data equivalent of LNode.data.
+     * The TView or TViews attached to this node.
      *
-     * If this TNode corresponds to an LContainerNode, the container will
-     * need to store separate static data for each of its views (TContainer).
+     * If this TNode corresponds to an LContainerNode with inline views, the container will
+     * need to store separate static data for each of its view blocks (TView[]). Otherwise,
+     * nodes in inline views with the same index as nodes in their parent views will overwrite
+     * each other, as they are in the same template.
      *
-     * If this TNode corresponds to an LElementNode, data will be null.
+     * Each index in this array corresponds to the static data for a certain
+     * view. So if you had V(0) and V(1) in a container, you might have:
+     *
+     * [
+     *   [{tagName: 'div', attrs: ...}, null],     // V(0) TView
+     *   [{tagName: 'button', attrs ...}, null]    // V(1) TView
+     *
+     * If this TNode corresponds to an LContainerNode with a template (e.g. structural
+     * directive), the template's TView will be stored here.
+     *
+     * If this TNode corresponds to an LElementNode, tViews will be null .
      */
-    data: TContainer | null;
+    tViews: TView | TView[] | null;
+    /**
+     * The next sibling node. Necessary so we can propagate through the root nodes of a view
+     * to insert them or remove them from the DOM.
+     */
+    next: TNode | null;
 }
 /** Static data for an LElementNode  */
 export interface TElementNode extends TNode {
-    data: null;
+    tViews: null;
 }
 /** Static data for an LContainerNode */
 export interface TContainerNode extends TNode {
-    data: TContainer;
+    tViews: TView | TView[] | null;
 }
 /**
  * This mapping is necessary so we can set input properties and output listeners

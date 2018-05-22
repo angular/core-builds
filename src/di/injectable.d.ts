@@ -52,7 +52,6 @@ export interface InjectableDecorator {
  */
 export interface Injectable {
     providedIn?: Type<any> | 'root' | null;
-    factory: () => any;
 }
 export declare function convertInjectableProviderToFactory(type: Type<any>, provider?: InjectableProvider): () => any;
 /**

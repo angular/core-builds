@@ -1,6 +1,20 @@
 import { Provider } from '../di/provider';
 import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
+export interface NgModuleDef<T> {
+    type: T;
+    bootstrap: Type<any>[];
+    declarations: Type<any>[];
+    imports: Type<any>[];
+    exports: Type<any>[];
+    transitiveCompileScope: {
+        directives: any[];
+        pipes: any[];
+    } | undefined;
+}
+export declare function defineNgModule<T>(def: {
+    type: T;
+} & Partial<NgModuleDef<T>>): never;
 /**
  * A wrapper around a module that also includes the providers.
  *

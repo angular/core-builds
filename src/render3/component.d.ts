@@ -8,12 +8,15 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { ComponentRef as viewEngine_ComponentRef } from '../linker/component_factory';
+import { Sanitizer } from '../sanitization/security';
 import { ComponentDef, ComponentType } from './interfaces/definition';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
 /** Options that control how the component should be bootstrapped. */
 export interface CreateComponentOptions {
     /** Which renderer factory to use. */
     rendererFactory?: RendererFactory3;
+    /** A custom sanitizer instance */
+    sanitizer?: Sanitizer;
     /**
      * Host element on which the component will be bootstrapped. If not specified,
      * the component definition's `tag` is used to query the existing DOM for the

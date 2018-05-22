@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+78.sha-e1c4930
+ * @license Angular v6.0.0-rc.5+215.sha-23a98b9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -764,8 +764,6 @@ class TestingCompiler extends Compiler {
 TestingCompiler.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-TestingCompiler.ctorParameters = () => [];
 /**
  * A factory for creating a Compiler
  *
@@ -1172,8 +1170,6 @@ class TestBed {
                             ],
                         },] },
             ];
-            /** @nocollapse */
-            RootScopeModule.ctorParameters = () => [];
             rootScopeImports.push(RootScopeModule);
         }
         providers.push({ provide: ɵAPP_ROOT, useValue: this._isRoot });
@@ -1184,8 +1180,6 @@ class TestBed {
         DynamicTestModule.decorators = [
             { type: NgModule, args: [{ providers, declarations, imports, schemas },] },
         ];
-        /** @nocollapse */
-        DynamicTestModule.ctorParameters = () => [];
         const /** @type {?} */ compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         for (const /** @type {?} */ summary of [this._testEnvAotSummaries, ...this._aotSummaries]) {
@@ -1347,8 +1341,6 @@ class TestBed {
         OverrideComponent.decorators = [
             { type: Component, args: [{ selector: 'empty', template },] },
         ];
-        /** @nocollapse */
-        OverrideComponent.ctorParameters = () => [];
         this._templateOverrides.push({ component, templateOf: OverrideComponent });
     }
     /**

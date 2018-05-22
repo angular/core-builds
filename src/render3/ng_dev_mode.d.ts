@@ -6,6 +6,23 @@
  * found in the LICENSE file at https://angular.io/license
  */
 declare global  {
-    const ngDevMode: boolean;
+    const ngDevMode: null | NgDevModePerfCounters;
+    interface NgDevModePerfCounters {
+        firstTemplatePass: number;
+        tNode: number;
+        tView: number;
+        rendererCreateTextNode: number;
+        rendererSetText: number;
+        rendererCreateElement: number;
+        rendererAddEventListener: number;
+        rendererSetAttribute: number;
+        rendererRemoveAttribute: number;
+        rendererSetProperty: number;
+        rendererSetClassName: number;
+        rendererAddClass: number;
+        rendererRemoveClass: number;
+        rendererSetStyle: number;
+        rendererRemoveStyle: number;
+    }
 }
-export declare const _ngDevMode: boolean;
+export declare const ngDevModeResetPerfCounters: () => void;

@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { Injector } from '../../di/injector';
+import { Sanitizer } from '../../sanitization/security';
 import { LContainer } from './container';
 import { ComponentTemplate, DirectiveDef, DirectiveDefList, PipeDef, PipeDefList } from './definition';
 import { LElementNode, LViewNode, TNode } from './node';
@@ -172,6 +173,10 @@ export interface LView {
      * An optional Module Injector to be used as fall back after Element Injectors are consulted.
      */
     injector: Injector | null;
+    /**
+     * An optional custom sanitizer
+     */
+    sanitizer: Sanitizer | null;
 }
 /** Flags associated with an LView (saved in LView.flags) */
 export declare const enum LViewFlags {

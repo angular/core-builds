@@ -8,7 +8,7 @@
 import { ComponentTemplate } from './definition';
 import { LElementNode, LViewNode } from './node';
 import { LQueries } from './query';
-import { LView, TView } from './view';
+import { LView } from './view';
 /** The state associated with an LContainer */
 export interface LContainer {
     /**
@@ -70,21 +70,4 @@ export interface LContainer {
      */
     queries: LQueries | null;
 }
-/**
- * The static equivalent of LContainer, used in TContainerNode.
- *
- * The container needs to store static data for each of its embedded views
- * (TViews). Otherwise, nodes in embedded views with the same index as nodes
- * in their parent views will overwrite each other, as they are in
- * the same template.
- *
- * Each index in this array corresponds to the static data for a certain
- * view. So if you had V(0) and V(1) in a container, you might have:
- *
- * [
- *   [{tagName: 'div', attrs: ...}, null],     // V(0) TView
- *   [{tagName: 'button', attrs ...}, null]    // V(1) TView
- * ]
- */
-export declare type TContainer = TView[];
 export declare const unusedValueExportToPlacateAjd = 1;
