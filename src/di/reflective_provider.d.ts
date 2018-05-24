@@ -48,8 +48,8 @@ export declare class ResolvedReflectiveProvider_ implements ResolvedReflectivePr
     key: ReflectiveKey;
     resolvedFactories: ResolvedReflectiveFactory[];
     multiProvider: boolean;
-    constructor(key: ReflectiveKey, resolvedFactories: ResolvedReflectiveFactory[], multiProvider: boolean);
     readonly resolvedFactory: ResolvedReflectiveFactory;
+    constructor(key: ReflectiveKey, resolvedFactories: ResolvedReflectiveFactory[], multiProvider: boolean);
 }
 /**
  * An internal resolved representation of a factory function created by resolving {@link

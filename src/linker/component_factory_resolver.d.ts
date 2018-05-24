@@ -11,9 +11,6 @@ import { ComponentFactory, ComponentRef } from './component_factory';
 import { NgModuleRef } from './ng_module_factory';
 export declare function noComponentFactoryError(component: Function): Error;
 export declare function getComponent(error: Error): Type<any>;
-/**
- * @stable
- */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
@@ -30,7 +27,6 @@ export declare class CodegenComponentFactoryResolver implements ComponentFactory
 export declare class ComponentFactoryBoundToModule<C> extends ComponentFactory<C> {
     private factory;
     private ngModule;
-    constructor(factory: ComponentFactory<C>, ngModule: NgModuleRef<any>);
     readonly selector: string;
     readonly componentType: Type<any>;
     readonly ngContentSelectors: string[];
@@ -42,5 +38,6 @@ export declare class ComponentFactoryBoundToModule<C> extends ComponentFactory<C
         propName: string;
         templateName: string;
     }[];
+    constructor(factory: ComponentFactory<C>, ngModule: NgModuleRef<any>);
     create(injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string | any, ngModule?: NgModuleRef<any>): ComponentRef<C>;
 }

@@ -19,7 +19,7 @@ import { EventEmitter } from '../event_emitter';
  * import {NgIf} from '@angular/common';
  *
  * @Component({
- *   selector: 'ng-zone-demo'.
+ *   selector: 'ng-zone-demo',
  *   template: `
  *     <h2>Demo: NgZone</h2>
  *
@@ -51,9 +51,10 @@ import { EventEmitter } from '../event_emitter';
  *     this.progress = 0;
  *     this._ngZone.runOutsideAngular(() => {
  *       this._increaseProgress(() => {
- *       // reenter the Angular zone and display done
- *       this._ngZone.run(() => {console.log('Outside Done!') });
- *     }}));
+ *         // reenter the Angular zone and display done
+ *         this._ngZone.run(() => { console.log('Outside Done!'); });
+ *       });
+ *     });
  *   }
  *
  *   _increaseProgress(doneCallback: () => void) {
@@ -61,7 +62,7 @@ import { EventEmitter } from '../event_emitter';
  *     console.log(`Current progress: ${this.progress}%`);
  *
  *     if (this.progress < 100) {
- *       window.setTimeout(() => this._increaseProgress(doneCallback)), 10)
+ *       window.setTimeout(() => this._increaseProgress(doneCallback), 10);
  *     } else {
  *       doneCallback();
  *     }
@@ -149,4 +150,21 @@ export declare class NgZone {
      * Use {@link #run} to reenter the Angular zone and do work that updates the application model.
      */
     runOutsideAngular<T>(fn: (...args: any[]) => T): T;
+}
+/**
+ * Provides a noop implementation of `NgZone` which does nothing. This zone requires explicit calls
+ * to framework to perform rendering.
+ */
+export declare class NoopNgZone implements NgZone {
+    readonly hasPendingMicrotasks: boolean;
+    readonly hasPendingMacrotasks: boolean;
+    readonly isStable: boolean;
+    readonly onUnstable: EventEmitter<any>;
+    readonly onMicrotaskEmpty: EventEmitter<any>;
+    readonly onStable: EventEmitter<any>;
+    readonly onError: EventEmitter<any>;
+    run(fn: () => any): any;
+    runGuarded(fn: () => any): any;
+    runOutsideAngular(fn: () => any): any;
+    runTask<T>(fn: () => any): any;
 }

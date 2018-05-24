@@ -11,6 +11,9 @@ export interface PlatformReflectionCapabilities {
     isReflectionEnabled(): boolean;
     factory(type: Type<any>): Function;
     hasLifecycleHook(type: any, lcProperty: string): boolean;
+    guards(type: any): {
+        [key: string]: any;
+    };
     /**
      * Return a list of annotations/types for constructor parameters
      */

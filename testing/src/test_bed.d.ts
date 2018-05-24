@@ -32,15 +32,16 @@ export declare type TestModuleMetadata = {
     declarations?: any[];
     imports?: any[];
     schemas?: Array<SchemaMetadata | any[]>;
+    aotSummaries?: () => any[];
 };
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 export declare class TestBed implements Injector {
     /**
@@ -89,15 +90,24 @@ export declare class TestBed implements Injector {
     static overridePipe(pipe: Type<any>, override: MetadataOverride<Pipe>): typeof TestBed;
     static overrideTemplate(component: Type<any>, template: string): typeof TestBed;
     /**
+     * Overrides the template of the given component, compiling the template
+     * in the context of the TestingModule.
+     *
+     * Note: This works for JIT and AOTed components as well.
+     */
+    static overrideTemplateUsingTestingModule(component: Type<any>, template: string): typeof TestBed;
+    /**
      * Overwrites all providers for the given token with the given provider definition.
+     *
+     * Note: This works for JIT and AOTed components as well.
      */
     static overrideProvider(token: any, provider: {
         useFactory: Function;
         deps: any[];
-    }): void;
+    }): typeof TestBed;
     static overrideProvider(token: any, provider: {
         useValue: any;
-    }): void;
+    }): typeof TestBed;
     /**
      * Overwrites all providers for the given token with the given provider definition.
      *
@@ -126,7 +136,11 @@ export declare class TestBed implements Injector {
     private _imports;
     private _schemas;
     private _activeFixtures;
+    private _testEnvAotSummaries;
     private _aotSummaries;
+    private _templateOverrides;
+    private _isRoot;
+    private _rootProviderOverrides;
     platform: PlatformRef;
     ngModule: Type<any> | Type<any>[];
     /**
@@ -188,6 +202,7 @@ export declare class TestBed implements Injector {
         useValue: any;
     }): void;
     private overrideProviderImpl(token, provider, deprecated?);
+    overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
 /**
@@ -216,7 +231,7 @@ export declare function getTestBed(): TestBed;
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 export declare function inject(tokens: any[], fn: Function): () => any;
 /**
