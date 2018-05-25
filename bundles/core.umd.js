@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+223.sha-3e39fef
+ * @license Angular v6.0.0-rc.5+228.sha-729c797
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1672,7 +1672,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+223.sha-3e39fef');
+var VERSION = new Version('6.0.0-rc.5+228.sha-729c797');
 
 /**
  * @license
@@ -15287,6 +15287,54 @@ function bind(value) {
     return changed ? value : NO_CHANGE;
 }
 /**
+ * Reserves slots for pure functions (`pureFunctionX` instructions)
+ *
+ * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ *
+ *  ----------------------------------------------------------------------------
+ *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
+ *  ----------------------------------------------------------------------------
+ *                                         ^
+ *                                         LView.bindingStartIndex
+ *
+ * Pure function instructions are given an offset from LView.bindingStartIndex.
+ * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * are stored.
+ *
+ * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
+ */
+function reserveSlots(numSlots) {
+    // Init the slots with a unique `NO_CHANGE` value so that the first change is always detected
+    // whether is happens or not during the first change detection pass - pure functions checks
+    // might be skipped when short-circuited.
+    data.length += numSlots;
+    data.fill(NO_CHANGE, -numSlots);
+    // We need to initialize the binding in case a `pureFunctionX` kind of binding instruction is
+    // called first in the update section.
+    initBindings();
+}
+/**
+ * Sets up the binding index before execute any `pureFunctionX` instructions.
+ *
+ * The index must be restored after the pure function is executed
+ *
+ * {@link reserveSlots}
+ */
+function moveBindingIndexToReservedSlot(offset) {
+    var currentSlot = currentView.bindingIndex;
+    currentView.bindingIndex = currentView.bindingStartIndex - offset;
+    return currentSlot;
+}
+/**
+ * Restores the binding index to the given value.
+ *
+ * This function is typically used to restore the index after a `pureFunctionX` has
+ * been executed.
+ */
+function restoreBindingIndex(index) {
+    currentView.bindingIndex = index;
+}
+/**
  * Create interpolation bindings with a variable number of expressions.
  *
  * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
@@ -15465,6 +15513,19 @@ function assertDataNext(index, arr) {
     if (arr == null)
         arr = data;
     assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
+}
+/**
+ * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ *
+ * If not they might not have been actually reserved.
+ */
+function assertReservedSlotInitialized(slotOffset, numSlots) {
+    if (firstTemplatePass) {
+        var startIndex = currentView.bindingStartIndex - slotOffset;
+        for (var i = 0; i < numSlots; i++) {
+            assertEqual(data[startIndex + i], NO_CHANGE, 'The reserved slots should be set to `NO_CHANGE` on first template pass');
+        }
+    }
 }
 function _getComponentHostLElementNode(component) {
     ngDevMode && assertNotNull(component, 'expecting component got null');
@@ -16980,80 +17041,107 @@ function definePipe(pipeDef) {
  * value. If it has been saved, returns the saved value.
  *
  * @param pureFn Function that returns a value
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param thisArg Optional calling context of pureFn
  * @returns value
  */
-function pureFunction0(pureFn, thisArg) {
-    return getCreationMode() ? checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg) : pureFn()) :
+function pureFunction0(slotOffset, pureFn, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 1);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = getCreationMode() ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg) : pureFn()) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn Function that returns an updated value
  * @param exp Updated expression value
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction1(pureFn, exp, thisArg) {
-    return bindingUpdated(exp) ?
+function pureFunction1(slotOffset, pureFn, exp, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 2);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated(exp) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction2(pureFn, exp1, exp2, thisArg) {
-    return bindingUpdated2(exp1, exp2) ?
+function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 3);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated2(exp1, exp2) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param exp3
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
+function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 4);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated2(exp1, exp2);
-    return bindingUpdated(exp3) || different ?
+    var value = bindingUpdated(exp3) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param exp3
  * @param exp4
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
-    return bindingUpdated4(exp1, exp2, exp3, exp4) ?
+function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 5);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated4(exp1, exp2, exp3, exp4) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17061,19 +17149,24 @@ function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @param exp4
  * @param exp5
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 6);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated(exp5) || different ?
+    var value = bindingUpdated(exp5) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
             pureFn(exp1, exp2, exp3, exp4, exp5)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17082,19 +17175,24 @@ function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
  * @param exp5
  * @param exp6
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 7);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated2(exp5, exp6) || different ?
+    var value = bindingUpdated2(exp5, exp6) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17104,20 +17202,25 @@ function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
  * @param exp6
  * @param exp7
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 8);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
     different = bindingUpdated2(exp5, exp6) || different;
-    return bindingUpdated(exp7) || different ?
+    var value = bindingUpdated(exp7) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17128,14 +17231,18 @@ function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg
  * @param exp7
  * @param exp8
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 9);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
+    var value = bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -17143,18 +17250,23 @@ function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, t
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param exps An array of binding values
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunctionV(pureFn, exps, thisArg) {
+function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, exps.length + 1);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = false;
     for (var i = 0; i < exps.length; i++) {
         bindingUpdated(exps[i]) && (different = true);
     }
-    return different ? checkAndUpdateBinding$1(pureFn.apply(thisArg, exps)) : consumeBinding();
+    var value = different ? checkAndUpdateBinding$1(pureFn.apply(thisArg, exps)) : consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 
 /**
@@ -17214,11 +17326,12 @@ function getPipeDef(name, registry) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  */
-function pipeBind1(index, v1) {
+function pipeBind1(index, slotOffset, v1) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction1(pipeInstance.transform, v1, pipeInstance) :
+    return isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1);
 }
 /**
@@ -17228,12 +17341,13 @@ function pipeBind1(index, v1) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  */
-function pipeBind2(index, v1, v2) {
+function pipeBind2(index, slotOffset, v1, v2) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction2(pipeInstance.transform, v1, v2, pipeInstance) :
+    return isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2);
 }
 /**
@@ -17243,13 +17357,15 @@ function pipeBind2(index, v1, v2) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 4rd argument to {@link PipeTransform#transform}.
  */
-function pipeBind3(index, v1, v2, v3) {
+function pipeBind3(index, slotOffset, v1, v2, v3) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction3(pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    return isPure(index) ?
+        pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3);
 }
 /**
@@ -17259,14 +17375,16 @@ function pipeBind3(index, v1, v2, v3) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 3rd argument to {@link PipeTransform#transform}.
  * @param v4 4th argument to {@link PipeTransform#transform}.
  */
-function pipeBind4(index, v1, v2, v3, v4) {
+function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction4(pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+    return isPure(index) ?
+        pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4);
 }
 /**
@@ -17276,11 +17394,12 @@ function pipeBind4(index, v1, v2, v3, v4) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
  */
-function pipeBindV(index, values) {
+function pipeBindV(index, slotOffset, values) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunctionV(pipeInstance.transform, values, pipeInstance) :
+    return isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values);
 }
 function isPure(index) {
@@ -17922,12 +18041,6 @@ exports.ɵangular_packages_core_core_x = getOrCreateContainerRef;
 exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
 exports.ɵangular_packages_core_core_u = getOrCreateNodeInjector;
 exports.ɵangular_packages_core_core_y = getOrCreateTemplateRef;
-exports.ɵangular_packages_core_core_bb = bindingUpdated;
-exports.ɵangular_packages_core_core_bd = bindingUpdated2;
-exports.ɵangular_packages_core_core_be = bindingUpdated4;
-exports.ɵangular_packages_core_core_bc = checkAndUpdateBinding$1;
-exports.ɵangular_packages_core_core_ba = consumeBinding;
-exports.ɵangular_packages_core_core_z = getCreationMode;
 exports.ɵangular_packages_core_core_a = makeParamDecorator;
 exports.ɵangular_packages_core_core_b = makePropDecorator;
 exports.ɵangular_packages_core_core_s = _def;
@@ -18118,6 +18231,7 @@ exports.ɵqR = queryRefresh;
 exports.ɵe = elementEnd;
 exports.ɵp = elementProperty;
 exports.ɵpD = projectionDef;
+exports.ɵrS = reserveSlots;
 exports.ɵa = elementAttribute;
 exports.ɵs = elementStyle;
 exports.ɵsn = elementStyleNamed;

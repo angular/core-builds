@@ -465,6 +465,39 @@ export declare const NO_CHANGE: NO_CHANGE;
  */
 export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
+ * Reserves slots for pure functions (`pureFunctionX` instructions)
+ *
+ * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ *
+ *  ----------------------------------------------------------------------------
+ *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
+ *  ----------------------------------------------------------------------------
+ *                                         ^
+ *                                         LView.bindingStartIndex
+ *
+ * Pure function instructions are given an offset from LView.bindingStartIndex.
+ * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * are stored.
+ *
+ * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
+ */
+export declare function reserveSlots(numSlots: number): void;
+/**
+ * Sets up the binding index before execute any `pureFunctionX` instructions.
+ *
+ * The index must be restored after the pure function is executed
+ *
+ * {@link reserveSlots}
+ */
+export declare function moveBindingIndexToReservedSlot(offset: number): number;
+/**
+ * Restores the binding index to the given value.
+ *
+ * This function is typically used to restore the index after a `pureFunctionX` has
+ * been executed.
+ */
+export declare function restoreBindingIndex(index: number): void;
+/**
  * Create interpolation bindings with a variable number of expressions.
  *
  * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
@@ -518,6 +551,12 @@ export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: a
 export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
+/**
+ * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ *
+ * If not they might not have been actually reserved.
+ */
+export declare function assertReservedSlotInitialized(slotOffset: number, numSlots: number): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare const ROOT_DIRECTIVE_INDICES: number[];
