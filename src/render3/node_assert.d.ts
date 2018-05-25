@@ -1,3 +1,3 @@
-import { LNode, LNodeType } from './interfaces/node';
-export declare function assertNodeType(node: LNode, type: LNodeType): void;
-export declare function assertNodeOfPossibleTypes(node: LNode, ...types: LNodeType[]): void;
+import { LNode, TNodeType } from './interfaces/node';
+export declare function assertNodeType(node: LNode, type: TNodeType): void;
+export declare function assertNodeOfPossibleTypes(node: LNode, ...types: TNodeType[]): void;

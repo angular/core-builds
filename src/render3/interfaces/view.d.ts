@@ -210,6 +210,16 @@ export interface LViewOrLContainer {
  * Stored on the template function as ngPrivateData.
  */
 export interface TView {
+    /**
+     * Pointer to the `TNode` that represents the root of the view.
+     *
+     * If this is a `TNode` for an `LViewNode`, this is an embedded view of a container.
+     * We need this pointer to be able to efficiently find this node when inserting the view
+     * into an anchor.
+     *
+     * If this is a `TNode` for an `LElementNode`, this is the TView of a component.
+     */
+    node: TNode;
     /** Whether or not this template has been processed. */
     firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */

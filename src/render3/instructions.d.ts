@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
@@ -76,7 +76,7 @@ export declare function createLView<T>(viewId: number, renderer: Renderer3, tVie
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: LNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -89,10 +89,10 @@ export declare function createLNodeObject(type: LNodeType, currentView: LView, p
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: null, type: LNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: LNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: number | null, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -188,6 +188,17 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param sanitizer An optional function used to sanitize the value.
  */
 export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
+/**
+ * Constructs a TNode object from the arguments.
+ *
+ * @param type The type of the node
+ * @param index The index of the TNode in TView.data
+ * @param tagName The tag name of the node
+ * @param attrs The attributes defined on this node
+ * @param tViews Any TViews attached to this node
+ * @returns the TNode object
+ */
+export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *

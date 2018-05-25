@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+216.sha-13cb75d
+ * @license Angular v6.0.0-rc.5+219.sha-609e6b9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2078,7 +2078,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+216.sha-13cb75d');
+const VERSION = new Version('6.0.0-rc.5+219.sha-609e6b9');
 
 /**
  * @fileoverview added by tsickle
@@ -15305,7 +15305,7 @@ const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
  */
 function assertNodeType(node, type) {
     assertNotNull(node, 'should be called with a node');
-    assertEqual(node.type, type, `should be a ${typeName(type)}`);
+    assertEqual(node.tNode.type, type, `should be a ${typeName(type)}`);
 }
 /**
  * @param {?} node
@@ -15314,7 +15314,7 @@ function assertNodeType(node, type) {
  */
 function assertNodeOfPossibleTypes(node, ...types) {
     assertNotNull(node, 'should be called with a node');
-    const /** @type {?} */ found = types.some(type => node.type === type);
+    const /** @type {?} */ found = types.some(type => node.tNode.type === type);
     assertEqual(found, true, `Should be one of ${types.map(typeName).join(', ')}`);
 }
 /**
@@ -15425,7 +15425,22 @@ function typeName(type) {
  */
 
 /**
+ * Static data for an LTextNode
+ * @record
+ */
+
+/**
  * Static data for an LContainerNode
+ * @record
+ */
+
+/**
+ * Static data for an LViewNode
+ * @record
+ */
+
+/**
+ * Static data for an LProjectionNode
  * @record
  */
 
@@ -15654,7 +15669,7 @@ function findNextRNodeSibling(node, stopNode) {
     while (currentNode && currentNode !== stopNode) {
         let /** @type {?} */ pNextOrParent = currentNode.pNextOrParent;
         if (pNextOrParent) {
-            while (pNextOrParent.type !== 1 /* Projection */) {
+            while (pNextOrParent.tNode.type !== 1 /* Projection */) {
                 const /** @type {?} */ nativeNode = findFirstRNode(pNextOrParent);
                 if (nativeNode) {
                     return nativeNode;
@@ -15675,7 +15690,7 @@ function findNextRNodeSibling(node, stopNode) {
             const /** @type {?} */ parentNode = currentNode.parent;
             currentNode = null;
             if (parentNode) {
-                const /** @type {?} */ parentType = parentNode.type;
+                const /** @type {?} */ parentType = parentNode.tNode.type;
                 if (parentType === 0 /* Container */ || parentType === 2 /* View */) {
                     currentNode = parentNode;
                 }
@@ -15691,11 +15706,23 @@ function findNextRNodeSibling(node, stopNode) {
  */
 function getNextLNode(node) {
     // View nodes don't have TNodes, so their next must be retrieved through their LView.
-    if (node.type === 2 /* View */) {
+    if (node.tNode.type === 2 /* View */) {
         const /** @type {?} */ lView = /** @type {?} */ (node.data);
         return lView.next ? (/** @type {?} */ (lView.next)).node : null;
     }
-    return /** @type {?} */ ((node.tNode)).next ? node.view.data[/** @type {?} */ ((/** @type {?} */ ((node.tNode)).next)).index] : null;
+    return node.tNode.next ? node.view.data[/** @type {?} */ (((node.tNode.next)).index)] : null;
+}
+/**
+ * Retrieves the first child of a given node
+ * @param {?} node
+ * @return {?}
+ */
+function getChildLNode(node) {
+    if (node.tNode.child) {
+        const /** @type {?} */ view = node.tNode.type === 2 /* View */ ? /** @type {?} */ (node.data) : node.view;
+        return view.data[/** @type {?} */ (node.tNode.child.index)];
+    }
+    return null;
 }
 /**
  * Get the next node in the LNode tree, taking into account the place where a node is
@@ -15708,7 +15735,7 @@ function getNextLNodeWithProjection(node) {
     const /** @type {?} */ pNextOrParent = node.pNextOrParent;
     if (pNextOrParent) {
         // The node is projected
-        const /** @type {?} */ isLastProjectedNode = pNextOrParent.type === 1;
+        const /** @type {?} */ isLastProjectedNode = pNextOrParent.tNode.type === 1;
         // returns pNextOrParent if we are not at the end of the list, null otherwise
         return isLastProjectedNode ? null : pNextOrParent;
     }
@@ -15750,24 +15777,25 @@ function findFirstRNode(rootNode) {
     let /** @type {?} */ node = rootNode;
     while (node) {
         let /** @type {?} */ nextNode = null;
-        if (node.type === 3 /* Element */) {
+        if (node.tNode.type === 3 /* Element */) {
             // A LElementNode has a matching RNode in LElementNode.native
             return (/** @type {?} */ (node)).native;
         }
-        else if (node.type === 0 /* Container */) {
+        else if (node.tNode.type === 0 /* Container */) {
             const /** @type {?} */ lContainerNode = (/** @type {?} */ (node));
             const /** @type {?} */ childContainerData = lContainerNode.dynamicLContainerNode ?
                 lContainerNode.dynamicLContainerNode.data :
                 lContainerNode.data;
-            nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
+            nextNode =
+                childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
         }
-        else if (node.type === 1 /* Projection */) {
+        else if (node.tNode.type === 1 /* Projection */) {
             // For Projection look at the first projected node
             nextNode = (/** @type {?} */ (node)).data.head;
         }
         else {
             // Otherwise look at the first child
-            nextNode = (/** @type {?} */ (node)).child;
+            nextNode = getChildLNode(/** @type {?} */ (node));
         }
         node = nextNode === null ? getNextOrParentSiblingNode(node, rootNode) : nextNode;
     }
@@ -15794,12 +15822,12 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
     ngDevMode && assertNodeType(rootNode, 2 /* View */);
     const /** @type {?} */ parentNode = container.data.renderParent;
     const /** @type {?} */ parent = parentNode ? parentNode.native : null;
-    let /** @type {?} */ node = rootNode.child;
+    let /** @type {?} */ node = getChildLNode(rootNode);
     if (parent) {
         while (node) {
             let /** @type {?} */ nextNode = null;
             const /** @type {?} */ renderer = container.view.renderer;
-            if (node.type === 3 /* Element */) {
+            if (node.tNode.type === 3 /* Element */) {
                 if (insertMode) {
                     isProceduralRenderer(renderer) ?
                         renderer.insertBefore(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
@@ -15811,18 +15839,19 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
                 }
                 nextNode = getNextLNode(node);
             }
-            else if (node.type === 0 /* Container */) {
+            else if (node.tNode.type === 0 /* Container */) {
                 // if we get to a container, it must be a root node of a view because we are only
                 // propagating down into child views / containers and not child elements
                 const /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
                 childContainerData.renderParent = parentNode;
-                nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
+                nextNode =
+                    childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
             }
-            else if (node.type === 1 /* Projection */) {
+            else if (node.tNode.type === 1 /* Projection */) {
                 nextNode = (/** @type {?} */ (node)).data.head;
             }
             else {
-                nextNode = (/** @type {?} */ (node)).child;
+                nextNode = getChildLNode(/** @type {?} */ (node));
             }
             if (nextNode === null) {
                 node = getNextOrParentSiblingNode(node, rootNode);
@@ -15964,7 +15993,7 @@ function removeView(container, removeIndex) {
  */
 function getParentState(state, rootView) {
     let /** @type {?} */ node;
-    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) && node.type === 2 /* View */) {
+    if ((node = /** @type {?} */ (((/** @type {?} */ (state)))).node) && node.tNode.type === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
         return /** @type {?} */ (((node.parent)).data);
@@ -16046,7 +16075,7 @@ function executePipeOnDestroys(view) {
  * @return {?} boolean Whether the child element should be inserted.
  */
 function canInsertNativeNode(parent, currentView) {
-    const /** @type {?} */ parentIsElement = parent.type === 3;
+    const /** @type {?} */ parentIsElement = parent.tNode.type === 3;
     return parentIsElement &&
         (parent.view !== currentView || parent.data === null /* Regular Element. */);
 }
@@ -16089,7 +16118,7 @@ function appendChild(parent, child, currentView) {
  * @return {?}
  */
 function appendProjectedNode(node, currentParent, currentView) {
-    if (node.type !== 0 /* Container */) {
+    if (node.tNode.type !== 0 /* Container */) {
         appendChild(currentParent, (/** @type {?} */ (node)).native, currentView);
     }
     else {
@@ -16643,15 +16672,13 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
  */
 function createLNodeObject(type, currentView, parent, native, state, queries) {
     return {
-        type: type,
         native: /** @type {?} */ (native),
         view: currentView,
         parent: /** @type {?} */ (parent),
-        child: null,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
         queries: queries,
-        tNode: null,
+        tNode: /** @type {?} */ ((null)),
         pNextOrParent: null,
         dynamicLContainerNode: null
     };
@@ -16672,37 +16699,44 @@ function createLNode(index, type, native, name, attrs, state) {
         parent && parent.queries && parent.queries.child();
     const /** @type {?} */ isState = state != null;
     const /** @type {?} */ node = createLNodeObject(type, currentView, parent, native, isState ? /** @type {?} */ (state) : null, queries);
-    if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
-        // Bit of a hack to bust through the readonly because there is a circular dep between
-        // LView and LNode.
-        ngDevMode && assertNull((/** @type {?} */ (state)).node, 'LView.node should not have been initialized');
-        (/** @type {?} */ ((state))).node = node;
+    if (index === null || type === 2 /* View */) {
+        // View nodes are not stored in data because they can be added / removed at runtime (which
+        // would cause indices to change). Their TNodes are instead stored in TView.node.
+        node.tNode = (/** @type {?} */ (state)).tView.node || createTNode(type, index, null, null, null);
     }
-    if (index != null) {
-        // We are Element or Container
+    else {
+        // This is an element or container or projection node
         ngDevMode && assertDataNext(index);
         data[index] = node;
         // Every node adds a value to the static data array to avoid a sparse array
         if (index >= tData.length) {
-            const /** @type {?} */ tNode = tData[index] = createTNode(index, name, attrs, null);
+            const /** @type {?} */ tNode = tData[index] = createTNode(type, index, name, attrs, null);
             if (!isParent && previousOrParentNode) {
-                /** @type {?} */ ((previousOrParentNode.tNode)).next = tNode;
+                const /** @type {?} */ previousTNode = previousOrParentNode.tNode;
+                previousTNode.next = tNode;
+                if (previousTNode.dynamicContainerNode)
+                    previousTNode.dynamicContainerNode.next = tNode;
             }
         }
         node.tNode = /** @type {?} */ (tData[index]);
         // Now link ourselves into the tree.
         if (isParent) {
             currentQueries = null;
-            if (previousOrParentNode.view === currentView ||
-                previousOrParentNode.type === 2 /* View */) {
+            if (previousOrParentNode.tNode.child == null && previousOrParentNode.view === currentView ||
+                previousOrParentNode.tNode.type === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
-                ngDevMode && assertNull(previousOrParentNode.child, `previousOrParentNode's child should not have been set.`);
-                previousOrParentNode.child = node;
-            }
-            else {
-                // We are adding component view, so we don't link parent node child to this node.
+                previousOrParentNode.tNode.child = node.tNode;
             }
         }
+    }
+    // View nodes and host elements need to set their host node (components set host nodes later)
+    if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
+        // Bit of a hack to bust through the readonly because there is a circular dep between
+        // LView and LNode.
+        ngDevMode && assertNull((/** @type {?} */ (state)).node, 'LView.node should not have been initialized');
+        (/** @type {?} */ (state)).node = node;
+        if (firstTemplatePass)
+            (/** @type {?} */ (state)).tView.node = node.tNode;
     }
     previousOrParentNode = node;
     isParent = true;
@@ -16869,7 +16903,7 @@ function createDirectivesAndLocals(index, name, attrs, localRefs, inlineViews) {
     const /** @type {?} */ node = previousOrParentNode;
     if (firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
-        cacheMatchingDirectivesForNode(/** @type {?} */ ((node.tNode)), currentView.tView, localRefs || null);
+        cacheMatchingDirectivesForNode(node.tNode, currentView.tView, localRefs || null);
     }
     else {
         instantiateDirectivesDirectly();
@@ -16989,7 +17023,7 @@ function isComponent(tNode) {
  * @return {?}
  */
 function instantiateDirectivesDirectly() {
-    const /** @type {?} */ tNode = /** @type {?} */ ((previousOrParentNode.tNode));
+    const /** @type {?} */ tNode = previousOrParentNode.tNode;
     const /** @type {?} */ count = tNode.flags & 4095;
     if (count > 0) {
         const /** @type {?} */ start = tNode.flags >> 13;
@@ -17044,7 +17078,7 @@ function saveNameToExportMap(index, def, exportsMap) {
  * @return {?}
  */
 function saveResolvedLocalsInData() {
-    const /** @type {?} */ localNames = /** @type {?} */ ((previousOrParentNode.tNode)).localNames;
+    const /** @type {?} */ localNames = previousOrParentNode.tNode.localNames;
     if (localNames) {
         for (let /** @type {?} */ i = 0; i < localNames.length; i += 2) {
             const /** @type {?} */ index = /** @type {?} */ (localNames[i + 1]);
@@ -17081,6 +17115,7 @@ function getOrCreateTView(template, directives, pipes) {
 function createTView(defs, pipes) {
     ngDevMode && ngDevMode.tView++;
     return {
+        node: /** @type {?} */ ((null)),
         data: [],
         directives: null,
         firstTemplatePass: true,
@@ -17165,7 +17200,7 @@ function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
     const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLView(-1, renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
-        /** @type {?} */ ((node.tNode)).flags = 4096 /* isComponent */;
+        node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
             def.diPublic(def);
         currentView.tView.directives = [def];
@@ -17201,11 +17236,11 @@ function listener(eventName, listenerFn, useCapture = false) {
         native.addEventListener(eventName, wrappedListener, useCapture);
         cleanupFns.push(eventName, native, wrappedListener, useCapture);
     }
-    let /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
+    let /** @type {?} */ tNode = node.tNode;
     if (tNode.outputs === undefined) {
         // if we create TNode here, inputs must be undefined so we know they still need to be
         // checked
-        tNode.outputs = generatePropertyAliases(/** @type {?} */ ((node.tNode)).flags, 1 /* Output */);
+        tNode.outputs = generatePropertyAliases(node.tNode.flags, 1 /* Output */);
     }
     const /** @type {?} */ outputs = tNode.outputs;
     let /** @type {?} */ outputData;
@@ -17242,7 +17277,7 @@ function elementEnd() {
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
     const /** @type {?} */ queries = previousOrParentNode.queries;
     queries && queries.addNode(previousOrParentNode);
-    queueLifecycleHooks(/** @type {?} */ ((previousOrParentNode.tNode)).flags, currentView);
+    queueLifecycleHooks(previousOrParentNode.tNode.flags, currentView);
 }
 /**
  * Updates the value of removes an attribute on an Element.
@@ -17289,12 +17324,12 @@ function elementProperty(index, propName, value, sanitizer) {
     if (value === NO_CHANGE)
         return;
     const /** @type {?} */ node = /** @type {?} */ (data[index]);
-    const /** @type {?} */ tNode = /** @type {?} */ ((node.tNode));
+    const /** @type {?} */ tNode = node.tNode;
     // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
     // yet been checked
     if (tNode && tNode.inputs === undefined) {
         // mark inputs as checked
-        tNode.inputs = generatePropertyAliases(/** @type {?} */ ((node.tNode)).flags, 0 /* Input */);
+        tNode.inputs = generatePropertyAliases(node.tNode.flags, 0 /* Input */);
     }
     const /** @type {?} */ inputData = tNode && tNode.inputs;
     let /** @type {?} */ dataValue;
@@ -17316,15 +17351,17 @@ function elementProperty(index, propName, value, sanitizer) {
 /**
  * Constructs a TNode object from the arguments.
  *
+ * @param {?} type The type of the node
  * @param {?} index The index of the TNode in TView.data
  * @param {?} tagName The tag name of the node
  * @param {?} attrs The attributes defined on this node
  * @param {?} tViews Any TViews attached to this node
  * @return {?} the TNode object
  */
-function createTNode(index, tagName, attrs, tViews) {
+function createTNode(type, index, tagName, attrs, tViews) {
     ngDevMode && ngDevMode.tNode++;
     return {
+        type: type,
         index: index,
         flags: 0,
         tagName: tagName,
@@ -17334,7 +17371,9 @@ function createTNode(index, tagName, attrs, tViews) {
         inputs: undefined,
         outputs: undefined,
         tViews: tViews,
-        next: null
+        next: null,
+        child: null,
+        dynamicContainerNode: null
     };
 }
 /**
@@ -17582,8 +17621,12 @@ function addComponentLogic(index, instance, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const /** @type {?} */ hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
-    (/** @type {?} */ (previousOrParentNode.data)) = hostView;
-    (/** @type {?} */ (hostView.node)) = previousOrParentNode;
+    // We need to set the host node/data here because when the component LNode was created,
+    // we didn't yet know it was a component (just an element).
+    (/** @type {?} */ (previousOrParentNode)).data = hostView;
+    (/** @type {?} */ (hostView)).node = previousOrParentNode;
+    if (firstTemplatePass)
+        tView.node = previousOrParentNode.tNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
     if (firstTemplatePass)
         queueComponentIndexForCheck(index);
@@ -17609,18 +17652,18 @@ function baseDirectiveCreate(index, directive, directiveDef) {
     ngDevMode && assertDataNext(index, directives);
     directives[index] = directive;
     if (firstTemplatePass) {
-        const /** @type {?} */ flags = /** @type {?} */ ((previousOrParentNode.tNode)).flags;
+        const /** @type {?} */ flags = previousOrParentNode.tNode.flags;
         if ((flags & 4095 /* DirectiveCountMask */) === 0) {
-            /** @type {?} */ ((
             // When the first directive is created:
             // - save the index,
             // - set the number of directives to 1
-            previousOrParentNode.tNode)).flags = index << 13 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
+            previousOrParentNode.tNode.flags =
+                index << 13 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
         }
         else {
             // Only need to bump the size when subsequent directives are created
-            ngDevMode && assertNotEqual(flags & 4095 /* DirectiveCountMask */, 4095 /* DirectiveCountMask */, 'Reached the max number of directives'); /** @type {?} */
-            ((previousOrParentNode.tNode)).flags++;
+            ngDevMode && assertNotEqual(flags & 4095 /* DirectiveCountMask */, 4095 /* DirectiveCountMask */, 'Reached the max number of directives');
+            previousOrParentNode.tNode.flags++;
         }
     }
     else {
@@ -17628,7 +17671,7 @@ function baseDirectiveCreate(index, directive, directiveDef) {
         if (diPublic)
             diPublic(/** @type {?} */ ((directiveDef)));
     }
-    if (/** @type {?} */ ((directiveDef)).attributes != null && previousOrParentNode.type == 3 /* Element */) {
+    if (/** @type {?} */ ((directiveDef)).attributes != null && previousOrParentNode.tNode.type == 3 /* Element */) {
         setUpAttributes((/** @type {?} */ (previousOrParentNode)).native, /** @type {?} */ (((directiveDef)).attributes));
     }
     return directive;
@@ -17724,7 +17767,7 @@ function container(index, template, tagName, attrs, localRefs) {
     const /** @type {?} */ lContainer = createLContainer(currentParent, currentView, template);
     const /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, tagName || null, attrs || null, lContainer);
     if (firstTemplatePass && template == null)
-        /** @type {?} */ ((node.tNode)).tViews = [];
+        node.tNode.tViews = [];
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, node.data);
@@ -17852,7 +17895,7 @@ function embeddedViewStart(viewBlockId) {
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
-        enterView(newView, viewNode = createLNode(null, 2 /* View */, null, null, null, newView));
+        enterView(newView, viewNode = createLNode(viewBlockId, 2 /* View */, null, null, null, newView));
     }
     return getRenderFlags(viewNode.data);
 }
@@ -17913,9 +17956,9 @@ function embeddedViewEnd() {
  */
 function setRenderParentInProjectedNodes(renderParent, viewNode) {
     if (renderParent != null) {
-        let /** @type {?} */ node = viewNode.child;
+        let /** @type {?} */ node = getChildLNode(viewNode);
         while (node) {
-            if (node.type === 1 /* Projection */) {
+            if (node.tNode.type === 1 /* Projection */) {
                 let /** @type {?} */ nodeToProject = (/** @type {?} */ (node)).data.head;
                 const /** @type {?} */ lastNodeToProject = (/** @type {?} */ (node)).data.tail;
                 while (nodeToProject) {
@@ -17988,7 +18031,7 @@ function projectionDef(index, selectors, textSelectors) {
         distributedNodes[i] = [];
     }
     const /** @type {?} */ componentNode = findComponentHost(currentView);
-    let /** @type {?} */ componentChild = componentNode.child;
+    let /** @type {?} */ componentChild = getChildLNode(componentNode);
     while (componentChild !== null) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
@@ -18051,7 +18094,7 @@ function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
     // build the linked list of projected nodes:
     for (let /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
         const /** @type {?} */ nodeToProject = nodesForSelector[i];
-        if (nodeToProject.type === 1 /* Projection */) {
+        if (nodeToProject.tNode.type === 1 /* Projection */) {
             // Reprojecting a projection -> append the list of previously projected nodes
             const /** @type {?} */ previouslyProjected = (/** @type {?} */ (nodeToProject)).data;
             appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
@@ -18080,7 +18123,7 @@ function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
  */
 function findComponentHost(lView) {
     let /** @type {?} */ viewRootLNode = lView.node;
-    while (viewRootLNode.type === 2 /* View */) {
+    while (viewRootLNode.tNode.type === 2 /* View */) {
         ngDevMode && assertNotNull(lView.parent, 'lView.parent');
         lView = /** @type {?} */ ((lView.parent));
         viewRootLNode = lView.node;
@@ -18242,7 +18285,7 @@ function getRootView(component) {
 function detectChanges(component) {
     const /** @type {?} */ hostNode = _getComponentHostLElementNode(component);
     ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
-    const /** @type {?} */ componentIndex = /** @type {?} */ ((hostNode.tNode)).flags >> 13;
+    const /** @type {?} */ componentIndex = hostNode.tNode.flags >> 13;
     const /** @type {?} */ def = /** @type {?} */ (((hostNode.view.tView.directives))[componentIndex]);
     detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, def, component);
 }
@@ -19329,7 +19372,7 @@ function injectAttribute(attrName) {
     ngDevMode && assertPreviousIsParent();
     const /** @type {?} */ lElement = /** @type {?} */ (getPreviousOrParentNode());
     ngDevMode && assertNodeType(lElement, 3 /* Element */);
-    const /** @type {?} */ tElement = /** @type {?} */ ((lElement.tNode));
+    const /** @type {?} */ tElement = lElement.tNode;
     ngDevMode && assertNotNull(tElement, 'expecting tNode');
     const /** @type {?} */ attrs = tElement.attrs;
     if (attrs) {
@@ -19353,10 +19396,10 @@ function getOrCreateChangeDetectorRef(di, context) {
     if (di.changeDetectorRef)
         return di.changeDetectorRef;
     const /** @type {?} */ currentNode = di.node;
-    if (isComponent(/** @type {?} */ ((currentNode.tNode)))) {
+    if (isComponent(currentNode.tNode)) {
         return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
     }
-    else if (currentNode.type === 3 /* Element */) {
+    else if (currentNode.tNode.type === 3 /* Element */) {
         return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
     }
     return /** @type {?} */ ((null));
@@ -19373,7 +19416,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     return existingRef ?
         existingRef :
         createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view
-            .directives))[/** @type {?} */ ((hostNode.tNode)).flags >> 13 /* DirectiveStartingIndexShift */]);
+            .directives))[hostNode.tNode.flags >> 13 /* DirectiveStartingIndexShift */]);
 }
 /**
  * If the node is an embedded view, traverses up the view tree to return the closest
@@ -19383,7 +19426,7 @@ function getOrCreateHostChangeDetector(currentNode) {
  * @return {?}
  */
 function getClosestComponentAncestor(node) {
-    while (node.type === 2 /* View */) {
+    while (node.tNode.type === 2 /* View */) {
         node = node.view.node;
     }
     return /** @type {?} */ (node);
@@ -19434,7 +19477,7 @@ function getOrCreateInjectable(di, token, flags = 0 /* Default */) {
             // At this point, we have an injector which *may* contain the token, so we step through the
             // directives associated with the injector's corresponding node to get the directive instance.
             const /** @type {?} */ node = injector.node;
-            const /** @type {?} */ nodeFlags = /** @type {?} */ ((node.tNode)).flags;
+            const /** @type {?} */ nodeFlags = node.tNode.flags;
             const /** @type {?} */ count = nodeFlags & 4095;
             if (count !== 0) {
                 const /** @type {?} */ start = nodeFlags >> 13;
@@ -19599,7 +19642,7 @@ class ReadFromInjectorFn {
  * @return {?} The ElementRef instance to use
  */
 function getOrCreateElementRef(di) {
-    return di.elementRef || (di.elementRef = new ElementRef$1(di.node.type === 0 /* Container */ ? null : di.node.native));
+    return di.elementRef || (di.elementRef = new ElementRef$1(di.node.tNode.type === 0 /* Container */ ? null : di.node.native));
 }
 
 
@@ -19627,8 +19670,12 @@ function getOrCreateContainerRef(di) {
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
         const /** @type {?} */ lContainer = createLContainer(/** @type {?} */ ((vcRefHost.parent)), vcRefHost.view);
         const /** @type {?} */ lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, /** @type {?} */ ((vcRefHost.parent)), undefined, lContainer, null);
-        // TODO(kara): Separate into own TNode when moving parent/child properties
-        lContainerNode.tNode = vcRefHost.tNode;
+        const /** @type {?} */ hostTNode = vcRefHost.tNode;
+        if (!hostTNode.dynamicContainerNode) {
+            hostTNode.dynamicContainerNode =
+                createTNode(0 /* Container */, hostTNode.index, null, null, null);
+        }
+        lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, lContainer);
         di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
@@ -19783,7 +19830,7 @@ function getOrCreateTemplateRef(di) {
     if (!di.templateRef) {
         ngDevMode && assertNodeType(di.node, 0 /* Container */);
         const /** @type {?} */ hostNode = /** @type {?} */ (di.node);
-        const /** @type {?} */ hostTNode = /** @type {?} */ ((hostNode.tNode));
+        const /** @type {?} */ hostTNode = hostNode.tNode;
         const /** @type {?} */ hostTView = hostNode.view.tView;
         if (!hostTNode.tViews) {
             hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
@@ -20668,7 +20715,7 @@ function getIdxOfMatchingSelector(tNode, selector) {
  */
 function getIdxOfMatchingDirective(node, type) {
     const /** @type {?} */ defs = /** @type {?} */ ((node.view.tView.directives));
-    const /** @type {?} */ flags = /** @type {?} */ ((node.tNode)).flags;
+    const /** @type {?} */ flags = node.tNode.flags;
     const /** @type {?} */ count = flags & 4095;
     const /** @type {?} */ start = flags >> 13;
     const /** @type {?} */ end = start + count;
@@ -20723,8 +20770,7 @@ function add(query, node) {
         else {
             const /** @type {?} */ selector = /** @type {?} */ ((predicate.selector));
             for (let /** @type {?} */ i = 0; i < selector.length; i++) {
-                ngDevMode && assertNotNull(node.tNode, 'node.tNode');
-                const /** @type {?} */ directiveIdx = getIdxOfMatchingSelector(/** @type {?} */ ((node.tNode)), selector[i]);
+                const /** @type {?} */ directiveIdx = getIdxOfMatchingSelector(node.tNode, selector[i]);
                 if (directiveIdx !== null) {
                     // a node is matching a predicate - determine what to read
                     // note that queries using name selector must specify read strategy
