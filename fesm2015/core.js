@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+249.sha-90bf5d8
+ * @license Angular v6.0.0-rc.5+252.sha-7c1bd71
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2078,7 +2078,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+249.sha-90bf5d8');
+const VERSION = new Version('6.0.0-rc.5+252.sha-7c1bd71');
 
 /**
  * @fileoverview added by tsickle
@@ -15260,6 +15260,8 @@ const ngDevModeResetPerfCounters = /** @type {?} */ ((typeof ngDevMode == 'undef
             rendererRemoveClass: 0,
             rendererSetStyle: 0,
             rendererRemoveStyle: 0,
+            rendererDestroy: 0,
+            rendererDestroyNode: 0,
         };
     }
     ngDevModeResetPerfCounters();
@@ -15844,8 +15846,16 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
                         parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true);
                 }
                 else {
-                    isProceduralRenderer(renderer) ? renderer.removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) :
+                    if (isProceduralRenderer(renderer)) {
+                        renderer.removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native)));
+                        if (renderer.destroyNode) {
+                            ngDevMode && ngDevMode.rendererDestroyNode++;
+                            renderer.destroyNode(/** @type {?} */ ((node.native)));
+                        }
+                    }
+                    else {
                         parent.removeChild(/** @type {?} */ ((node.native)));
+                    }
                 }
                 nextNode = getNextLNode(node);
             }
@@ -16023,6 +16033,11 @@ function cleanUpView(view) {
     removeListeners(view);
     executeOnDestroys(view);
     executePipeOnDestroys(view);
+    // For component views only, the local renderer is destroyed as clean up time.
+    if (view.id === -1 && isProceduralRenderer(view.renderer)) {
+        ngDevMode && ngDevMode.rendererDestroy++;
+        view.renderer.destroy();
+    }
 }
 /**
  * Removes listeners and unsubscribes from output subscriptions
