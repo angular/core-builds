@@ -126,6 +126,26 @@ export interface LProjectionNode extends LNode {
     dynamicLContainerNode: null;
 }
 /**
+ * A set of marker values to be used in the attributes arrays. Those markers indicate that some
+ * items are not regular attributes and the processing should be adapted accordingly.
+ */
+export declare const enum AttributeMarker {
+    NS = 0,
+    /**
+     * This marker indicates that the following attribute names were extracted from bindings (ex.:
+     * [foo]="exp") and / or event handlers (ex. (bar)="doSth()").
+     * Taking the above bindings and outputs as an example an attributes array could look as follows:
+     * ['class', 'fade in', AttributeMarker.SELECT_ONLY, 'foo', 'bar']
+     */
+    SELECT_ONLY = 1,
+}
+/**
+ * A combination of:
+ * - attribute names and values
+ * - special markers acting as flags to alter attributes processing.
+ */
+export declare type TAttributes = (string | AttributeMarker)[];
+/**
  * LNode binding data (flyweight) for a particular node that is shared between all templates
  * of a specific type.
  *
@@ -161,18 +181,20 @@ export interface TNode {
     /** The tag name associated with this node. */
     tagName: string | null;
     /**
-     * Static attributes associated with an element. We need to store
-     * static attributes to support content projection with selectors.
-     * Attributes are stored statically because reading them from the DOM
-     * would be way too slow for content projection and queries.
+     * Attributes associated with an element. We need to store attributes to support various use-cases
+     * (attribute injection, content projection with selectors, directives matching).
+     * Attributes are stored statically because reading them from the DOM would be way too slow for
+     * content projection and queries.
      *
-     * Since attrs will always be calculated first, they will never need
-     * to be marked undefined by other instructions.
+     * Since attrs will always be calculated first, they will never need to be marked undefined by
+     * other instructions.
      *
-     * The name of the attribute and its value alternate in the array.
+     * For regular attributes a name of an attribute and its value alternate in the array.
      * e.g. ['role', 'checkbox']
+     * This array can contain flags that will indicate "special attributes" (attributes with
+     * namespaces, attributes extracted from bindings and outputs).
      */
-    attrs: string[] | null;
+    attrs: TAttributes | null;
     /**
      * A set of local names under which a given element is exported in a template and
      * visible to queries. An entry in this array can be created for different reasons:
