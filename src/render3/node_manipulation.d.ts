@@ -1,10 +1,14 @@
-import { LContainerNode, LElementNode, LNode, LTextNode, LViewNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView, LViewOrLContainer } from './interfaces/view';
 /** Retrieves the sibling node for the given node. */
 export declare function getNextLNode(node: LNode): LNode | null;
 /** Retrieves the first child of a given node */
 export declare function getChildLNode(node: LNode): LNode | null;
+/** Retrieves the parent LNode of a given node. */
+export declare function getParentLNode(node: LElementNode | LTextNode | LProjectionNode): LElementNode | LViewNode;
+export declare function getParentLNode(node: LViewNode): LContainerNode | null;
+export declare function getParentLNode(node: LNode): LElementNode | LContainerNode | LViewNode | null;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
 /**
  * Adds or removes all DOM elements associated with a view.

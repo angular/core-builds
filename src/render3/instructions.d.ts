@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
@@ -76,7 +76,7 @@ export declare function createLView<T>(viewId: number, renderer: Renderer3, tVie
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode | null, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -195,10 +195,11 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param index The index of the TNode in TView.data
  * @param tagName The tag name of the node
  * @param attrs The attributes defined on this node
+ * @param parent The parent of this node
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, tViews: TView[] | null): TNode;
+export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *

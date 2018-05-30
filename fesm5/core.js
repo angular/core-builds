@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+246.sha-31795b6
+ * @license Angular v6.0.0-rc.5+247.sha-e53179e
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1588,7 +1588,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+246.sha-31795b6');
+var VERSION = new Version('6.0.0-rc.5+247.sha-e53179e');
 
 /**
  * @license
@@ -12855,7 +12855,7 @@ function findNextRNodeSibling(node, stopNode) {
                 }
                 currentSibling = getNextLNode(currentSibling);
             }
-            var parentNode = currentNode.parent;
+            var parentNode = getParentLNode(currentNode);
             currentNode = null;
             if (parentNode) {
                 var parentType = parentNode.tNode.type;
@@ -12883,6 +12883,12 @@ function getChildLNode(node) {
         return view.data[node.tNode.child.index];
     }
     return null;
+}
+function getParentLNode(node) {
+    if (node.tNode.index === null)
+        return null;
+    var parent = node.tNode.parent;
+    return parent ? node.view.data[parent.index] : node.view.node;
 }
 /**
  * Get the next node in the LNode tree, taking into account the place where a node is
@@ -12919,7 +12925,7 @@ function getNextOrParentSiblingNode(initialNode, rootNode) {
     while (node && !nextNode) {
         // if node.pNextOrParent is not null here, it is not the next node
         // (because, at this point, nextNode is null, so it is the parent)
-        node = node.pNextOrParent || node.parent;
+        node = node.pNextOrParent || getParentLNode(node);
         if (node === rootNode) {
             return null;
         }
@@ -13142,7 +13148,7 @@ function getParentState(state, rootView) {
     if ((node = state.node) && node.tNode.type === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
-        return node.parent.data;
+        return getParentLNode(node).data;
     }
     else {
         // otherwise, use parent view for containers or component views
@@ -13700,7 +13706,6 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
     return {
         native: native,
         view: currentView,
-        parent: parent,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
         queries: queries,
@@ -13711,7 +13716,10 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
 }
 function createLNode(index, type, native, name, attrs, state) {
     var parent = isParent ? previousOrParentNode :
-        previousOrParentNode && previousOrParentNode.parent;
+        previousOrParentNode && getParentLNode(previousOrParentNode);
+    // Parents cannot cross component boundaries because components will be used in multiple places,
+    // so it's only set if the view is the same.
+    var tParent = parent && parent.view === currentView ? parent.tNode : null;
     var queries = (isParent ? currentQueries : previousOrParentNode && previousOrParentNode.queries) ||
         parent && parent.queries && parent.queries.child();
     var isState = state != null;
@@ -13719,7 +13727,7 @@ function createLNode(index, type, native, name, attrs, state) {
     if (index === null || type === 2 /* View */) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in TView.node.
-        node.tNode = state.tView.node || createTNode(type, index, null, null, null);
+        node.tNode = state.tView.node || createTNode(type, index, null, null, tParent, null);
     }
     else {
         // This is an element or container or projection node
@@ -13727,7 +13735,7 @@ function createLNode(index, type, native, name, attrs, state) {
         data[index] = node;
         // Every node adds a value to the static data array to avoid a sparse array
         if (index >= tData.length) {
-            var tNode = tData[index] = createTNode(type, index, name, attrs, null);
+            var tNode = tData[index] = createTNode(type, index, name, attrs, tParent, null);
             if (!isParent && previousOrParentNode) {
                 var previousTNode = previousOrParentNode.tNode;
                 previousTNode.next = tNode;
@@ -13878,7 +13886,7 @@ function elementStart(index, name, attrs, localRefs) {
     var node = createLNode(index, 3 /* Element */, (native), name, attrs || null, null);
     if (attrs)
         setUpAttributes(native, attrs);
-    appendChild((node.parent), native, currentView);
+    appendChild(getParentLNode(node), native, currentView);
     createDirectivesAndLocals(index, name, attrs, localRefs, false);
     return native;
 }
@@ -14195,7 +14203,7 @@ function elementEnd() {
     }
     else {
         ngDevMode && assertHasParent();
-        previousOrParentNode = (previousOrParentNode.parent);
+        previousOrParentNode = getParentLNode(previousOrParentNode);
     }
     ngDevMode && assertNodeType(previousOrParentNode, 3 /* Element */);
     var queries = previousOrParentNode.queries;
@@ -14275,10 +14283,11 @@ function elementProperty(index, propName, value, sanitizer) {
  * @param index The index of the TNode in TView.data
  * @param tagName The tag name of the node
  * @param attrs The attributes defined on this node
+ * @param parent The parent of this node
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-function createTNode(type, index, tagName, attrs, tViews) {
+function createTNode(type, index, tagName, attrs, parent, tViews) {
     ngDevMode && ngDevMode.tNode++;
     return {
         type: type,
@@ -14293,6 +14302,7 @@ function createTNode(type, index, tagName, attrs, tViews) {
         tViews: tViews,
         next: null,
         child: null,
+        parent: parent,
         dynamicContainerNode: null
     };
 }
@@ -14458,7 +14468,7 @@ function text(index, value) {
     var node = createLNode(index, 3 /* Element */, textNode, null, null);
     // Text nodes are self closing.
     isParent = false;
-    appendChild((node.parent), textNode, currentView);
+    appendChild(getParentLNode(node), textNode, currentView);
 }
 /**
  * Create text node with binding
@@ -14640,7 +14650,7 @@ function createLContainer(parentLNode, currentView, template) {
  */
 function container(index, template, tagName, attrs, localRefs) {
     ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'container nodes should be created before any bindings');
-    var currentParent = isParent ? previousOrParentNode : previousOrParentNode.parent;
+    var currentParent = isParent ? previousOrParentNode : getParentLNode(previousOrParentNode);
     var lContainer = createLContainer(currentParent, currentView, template);
     var node = createLNode(index, 0 /* Container */, undefined, tagName || null, attrs || null, lContainer);
     if (firstTemplatePass && template == null)
@@ -14689,7 +14699,7 @@ function containerRefreshEnd() {
     else {
         ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
         ngDevMode && assertHasParent();
-        previousOrParentNode = (previousOrParentNode.parent);
+        previousOrParentNode = (getParentLNode(previousOrParentNode));
     }
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     var container = previousOrParentNode;
@@ -14751,7 +14761,7 @@ function scanForView(containerNode, startIdx, viewBlockId) {
  * @return boolean Whether or not this view is in creation mode
  */
 function embeddedViewStart(viewBlockId) {
-    var container = (isParent ? previousOrParentNode : previousOrParentNode.parent);
+    var container = (isParent ? previousOrParentNode : getParentLNode(previousOrParentNode));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     var lContainer = container.data;
     var viewNode = scanForView(container, lContainer.nextIndex, viewBlockId);
@@ -14798,7 +14808,7 @@ function embeddedViewEnd() {
     refreshView();
     isParent = false;
     var viewNode = previousOrParentNode = currentView.node;
-    var containerNode = previousOrParentNode.parent;
+    var containerNode = getParentLNode(previousOrParentNode);
     if (containerNode) {
         ngDevMode && assertNodeType(viewNode, 2 /* View */);
         ngDevMode && assertNodeType(containerNode, 0 /* Container */);
@@ -14946,7 +14956,6 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     var node = createLNode(nodeIndex, 1 /* Projection */, null, null, attrs || null, { head: null, tail: null });
     // `<ng-content>` has no content
     isParent = false;
-    var currentParent = node.parent;
     // re-distribution of projectable nodes is memorized on a component's view level
     var componentNode = findComponentHost(currentView);
     var componentLView = (componentNode.data);
@@ -14964,6 +14973,7 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
             appendToProjectionNode(node, nodeToProject, nodeToProject);
         }
     }
+    var currentParent = getParentLNode(node);
     if (canInsertNativeNode(currentParent, currentView)) {
         ngDevMode && assertNodeType(currentParent, 3 /* Element */);
         // process each node in the list of projected nodes:
@@ -15418,7 +15428,7 @@ function assertPreviousIsParent() {
     assertEqual(isParent, true, 'previousOrParentNode should be a parent');
 }
 function assertHasParent() {
-    assertNotNull(previousOrParentNode.parent, 'previousOrParentNode should have a parent');
+    assertNotNull(getParentLNode(previousOrParentNode), 'previousOrParentNode should have a parent');
 }
 function assertDataInRange(index, arr) {
     if (arr == null)
@@ -16219,7 +16229,8 @@ function getOrCreateNodeInjector() {
  */
 function getOrCreateNodeInjectorForNode(node) {
     var nodeInjector = node.nodeInjector;
-    var parentInjector = node.parent && node.parent.nodeInjector;
+    var parent = getParentLNode(node);
+    var parentInjector = parent && parent.nodeInjector;
     if (nodeInjector != parentInjector) {
         return nodeInjector;
     }
@@ -16605,12 +16616,13 @@ function getOrCreateContainerRef(di) {
     if (!di.viewContainerRef) {
         var vcRefHost = di.node;
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
-        var lContainer = createLContainer((vcRefHost.parent), vcRefHost.view);
-        var lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, (vcRefHost.parent), undefined, lContainer, null);
+        var hostParent = (getParentLNode(vcRefHost));
+        var lContainer = createLContainer(hostParent, vcRefHost.view);
+        var lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, undefined, lContainer, null);
         var hostTNode = vcRefHost.tNode;
         if (!hostTNode.dynamicContainerNode) {
             hostTNode.dynamicContainerNode =
-                createTNode(0 /* Container */, hostTNode.index, null, null, null);
+                createTNode(0 /* Container */, null, null, null, null, null);
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
@@ -16659,16 +16671,16 @@ var ViewContainerRef$1 = /** @class */ (function () {
         // instruction)
         this._lContainerNode.native = undefined;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
-        lViewNode.parent = this._lContainerNode;
         // If the view is dynamic (has a template), it needs to be counted both at the container
         // level and at the node above the container.
         if (lViewNode.data.template !== null) {
             // Increment the container view count.
             this._lContainerNode.data.dynamicViewCount++;
             // Look for the parent node and increment its dynamic view count.
-            if (this._lContainerNode.parent !== null && this._lContainerNode.parent.data !== null) {
-                ngDevMode && assertNodeOfPossibleTypes(this._lContainerNode.parent, 2 /* View */, 3 /* Element */);
-                this._lContainerNode.parent.data.dynamicViewCount++;
+            var containerParent = getParentLNode(this._lContainerNode);
+            if (containerParent !== null && containerParent.data !== null) {
+                ngDevMode && assertNodeOfPossibleTypes(containerParent, 2 /* View */, 3 /* Element */);
+                containerParent.data.dynamicViewCount++;
             }
         }
         return viewRef;
