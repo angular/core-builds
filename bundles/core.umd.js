@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+273.sha-27d811a
+ * @license Angular v6.0.0-rc.5+274.sha-b99ef2b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1675,7 +1675,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+273.sha-27d811a');
+var VERSION = new Version('6.0.0-rc.5+274.sha-b99ef2b');
 
 /**
  * @license
@@ -14591,7 +14591,7 @@ function text(index, value) {
 }
 /**
  * Create text node with binding
- * Bindings should be handled externally with the proper bind(1-8) method
+ * Bindings should be handled externally with the proper interpolation(1-8) method
  *
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
@@ -15336,17 +15336,7 @@ function initBindings() {
  * @param value Value to diff
  */
 function bind(value) {
-    if (currentView.bindingStartIndex < 0) {
-        initBindings();
-        return data[currentView.bindingIndex++] = value;
-    }
-    var changed = value !== NO_CHANGE && isDifferent(data[currentView.bindingIndex], value);
-    if (changed) {
-        throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[currentView.bindingIndex], value);
-        data[currentView.bindingIndex] = value;
-    }
-    currentView.bindingIndex++;
-    return changed ? value : NO_CHANGE;
+    return bindingUpdated(value) ? value : NO_CHANGE;
 }
 /**
  * Reserves slots for pure functions (`pureFunctionX` instructions)
@@ -18120,6 +18110,7 @@ exports.ɵangular_packages_core_core_x = getOrCreateContainerRef;
 exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
 exports.ɵangular_packages_core_core_u = getOrCreateNodeInjector;
 exports.ɵangular_packages_core_core_y = getOrCreateTemplateRef;
+exports.ɵangular_packages_core_core_z = bindingUpdated;
 exports.ɵangular_packages_core_core_a = makeParamDecorator;
 exports.ɵangular_packages_core_core_b = makePropDecorator;
 exports.ɵangular_packages_core_core_s = _def;

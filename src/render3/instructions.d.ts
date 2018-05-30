@@ -262,7 +262,7 @@ export declare function elementStyle<T>(index: number, value: {
 export declare function text(index: number, value?: any): void;
 /**
  * Create text node with binding
- * Bindings should be handled externally with the proper bind(1-8) method
+ * Bindings should be handled externally with the proper interpolation(1-8) method
  *
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
@@ -473,7 +473,7 @@ export declare const NO_CHANGE: NO_CHANGE;
  *
  * @param value Value to diff
  */
-export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
+export declare function bind<T>(value: T): T | NO_CHANGE;
 /**
  * Reserves slots for pure functions (`pureFunctionX` instructions)
  *
