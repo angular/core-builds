@@ -126,7 +126,7 @@ export declare function injectChangeDetectorRef(): viewEngine_ChangeDetectorRef;
  *
  * @experimental
  */
-export declare function injectAttribute(attrNameToInject: string): string | undefined;
+export declare function injectAttribute(attrName: string): string | undefined;
 /**
  * Creates a ViewRef and stores it on the injector as ChangeDetectorRef (public alias).
  * Or, if it already exists, retrieves the existing instance.

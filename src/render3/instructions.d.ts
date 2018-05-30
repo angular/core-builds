@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
@@ -89,10 +89,10 @@ export declare function createLNodeObject(type: TNodeType, currentView: LView, p
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
 export declare function createLNode(index: number | null, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -128,7 +128,7 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
+export declare function elementStart(index: number, name: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
 export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
@@ -199,7 +199,7 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: TAttributes | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
+export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -297,7 +297,7 @@ export declare function createLContainer(parentLNode: LNode, currentView: LView,
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: TAttributes, localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: string[], localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *

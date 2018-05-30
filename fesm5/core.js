@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+250.sha-f6f44ed
+ * @license Angular v6.0.0-rc.5+248.sha-b87d650
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1588,7 +1588,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+250.sha-f6f44ed');
+var VERSION = new Version('6.0.0-rc.5+248.sha-b87d650');
 
 /**
  * @license
@@ -13308,7 +13308,6 @@ function isNodeMatchingSelector(tNode, selector) {
     ngDevMode && assertNotNull(selector[0], 'Selector should have a tag name');
     var mode = 4;
     var nodeAttrs = (tNode.attrs);
-    var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SELECT_ONLY */) : -1;
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     var skipToNextSelector = false;
@@ -13348,9 +13347,7 @@ function isNodeMatchingSelector(tNode, selector) {
             }
             var selectorAttrValue = mode & 8 /* CLASS */ ? current : selector[++i];
             if (selectorAttrValue !== '') {
-                var nodeAttrValue = selectOnlyMarkerIdx > -1 && attrIndexInNode > selectOnlyMarkerIdx ?
-                    '' :
-                    nodeAttrs[attrIndexInNode + 1];
+                var nodeAttrValue = nodeAttrs[attrIndexInNode + 1];
                 if (mode & 8 /* CLASS */ &&
                     !isCssClassMatching(nodeAttrValue, selectorAttrValue) ||
                     mode & 2 /* ATTRIBUTE */ && selectorAttrValue !== nodeAttrValue) {
@@ -13367,16 +13364,11 @@ function isPositive(mode) {
     return (mode & 1 /* NOT */) === 0;
 }
 function findAttrIndexInNode(name, attrs) {
-    var step = 2;
     if (attrs === null)
         return -1;
-    for (var i = 0; i < attrs.length; i += step) {
-        var attrName = attrs[i];
-        if (attrName === name)
+    for (var i = 0; i < attrs.length; i += 2) {
+        if (attrs[i] === name)
             return i;
-        if (attrName === 1 /* SELECT_ONLY */) {
-            step = 1;
-        }
     }
     return -1;
 }
@@ -13895,15 +13887,19 @@ function elementStart(index, name, attrs, localRefs) {
     if (attrs)
         setUpAttributes(native, attrs);
     appendChild(getParentLNode(node), native, currentView);
-    createDirectivesAndLocals(localRefs);
+    createDirectivesAndLocals(index, name, attrs, localRefs, false);
     return native;
 }
 /**
  * Creates directive instances and populates local refs.
  *
+ * @param index Index of the current node (to create TNode)
+ * @param name Tag name of the current node
+ * @param attrs Attrs of the current node
  * @param localRefs Local refs of the current node
+ * @param inlineViews Whether or not this node will create inline views
  */
-function createDirectivesAndLocals(localRefs) {
+function createDirectivesAndLocals(index, name, attrs, localRefs, inlineViews) {
     var node = previousOrParentNode;
     if (firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
@@ -14090,17 +14086,14 @@ function createTView(defs, pipes) {
     };
 }
 function setUpAttributes(native, attrs) {
+    ngDevMode && assertEqual(attrs.length % 2, 0, 'each attribute should have a key and a value');
     var isProc = isProceduralRenderer(renderer);
     for (var i = 0; i < attrs.length; i += 2) {
         var attrName = attrs[i];
-        if (attrName === 1 /* SELECT_ONLY */)
-            break;
         if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
             var attrVal = attrs[i + 1];
             ngDevMode && ngDevMode.rendererSetAttribute++;
-            isProc ?
-                renderer
-                    .setAttribute(native, attrName, attrVal) :
+            isProc ? renderer.setAttribute(native, attrName, attrVal) :
                 native.setAttribute(attrName, attrVal);
         }
     }
@@ -14622,12 +14615,9 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
     for (var i = 0; i < attrs.length; i += 2) {
         var attrName = attrs[i];
         var minifiedInputName = inputs[attrName];
-        var attrValue = attrs[i + 1];
-        if (attrName === 1 /* SELECT_ONLY */)
-            break;
         if (minifiedInputName !== undefined) {
             var inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
-            inputsToStore.push(minifiedInputName, attrValue);
+            inputsToStore.push(minifiedInputName, attrs[i + 1]);
         }
     }
     return initialInputData;
@@ -14668,7 +14658,7 @@ function container(index, template, tagName, attrs, localRefs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, node.data);
-    createDirectivesAndLocals(localRefs);
+    createDirectivesAndLocals(index, tagName || null, attrs, localRefs, template == null);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
     var queries = node.queries;
@@ -16350,7 +16340,7 @@ function injectChangeDetectorRef() {
  *
  * @experimental
  */
-function injectAttribute(attrNameToInject) {
+function injectAttribute(attrName) {
     ngDevMode && assertPreviousIsParent();
     var lElement = getPreviousOrParentNode();
     ngDevMode && assertNodeType(lElement, 3 /* Element */);
@@ -16359,10 +16349,7 @@ function injectAttribute(attrNameToInject) {
     var attrs = tElement.attrs;
     if (attrs) {
         for (var i = 0; i < attrs.length; i = i + 2) {
-            var attrName = attrs[i];
-            if (attrName === 1 /* SELECT_ONLY */)
-                break;
-            if (attrName == attrNameToInject) {
+            if (attrs[i] == attrName) {
                 return attrs[i + 1];
             }
         }
