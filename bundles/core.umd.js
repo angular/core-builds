@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+255.sha-d6595eb
+ * @license Angular v6.0.0-rc.5+272.sha-accda00
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -538,6 +538,7 @@ function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
  */
 var ivyEnabled = false;
 var R3_COMPILE_COMPONENT = null;
+var R3_COMPILE_DIRECTIVE = null;
 var R3_COMPILE_INJECTABLE = null;
 var R3_COMPILE_NGMODULE = null;
 
@@ -557,7 +558,7 @@ var R3_COMPILE_NGMODULE = null;
 var Directive = makeDecorator('Directive', function (dir) {
     if (dir === void 0) { dir = {}; }
     return dir;
-});
+}, undefined, undefined, function (type, meta) { return (R3_COMPILE_DIRECTIVE || (function () { }))(type, meta); });
 /**
  * Component decorator and metadata.
  *
@@ -643,7 +644,9 @@ var __window = typeof window !== 'undefined' && window;
 var __self = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' &&
     self instanceof WorkerGlobalScope && self;
 var __global = typeof global !== 'undefined' && global;
-var _global = __window || __global || __self;
+// Check __global first, because in Node tests both __global and __window may be defined and _global
+// should be __global in that case.
+var _global = __global || __window || __self;
 var promise = Promise.resolve(0);
 var _symbolIterator = null;
 function getSymbolIterator() {
@@ -1672,7 +1675,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+255.sha-d6595eb');
+var VERSION = new Version('6.0.0-rc.5+272.sha-accda00');
 
 /**
  * @license
@@ -13185,6 +13188,11 @@ function insertView(container, viewNode, index) {
         views.push(viewNode);
         viewNode.data.next = null;
     }
+    // Notify query that a new view has been added
+    var lView = viewNode.data;
+    if (lView.queries) {
+        lView.queries.insertView(index);
+    }
     // If the container's renderParent is null, we know that it is a root node of its own parent view
     // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
     // nodes twice - once now and once when its parent inserts its views).
@@ -13222,7 +13230,10 @@ function removeView(container, removeIndex) {
     destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
-    container.data.queries && container.data.queries.removeView(removeIndex);
+    var removedLview = viewNode.data;
+    if (removedLview.queries) {
+        removedLview.queries.removeView(removeIndex);
+    }
     return viewNode;
 }
 /**
@@ -13796,7 +13807,6 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
         bindingIndex: -1,
         template: template,
         context: context,
-        dynamicViewCount: 0,
         lifecycleStage: 1 /* Init */,
         queries: null,
         injector: currentView && currentView.injector,
@@ -13902,7 +13912,7 @@ function resetApplicationState() {
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, directives, pipes) {
+function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, queries) {
     var _isParent = isParent;
     var _previousOrParentNode = previousOrParentNode;
     var oldView;
@@ -13912,6 +13922,9 @@ function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, di
         previousOrParentNode = (null);
         if (viewNode == null) {
             var lView = createLView(-1, renderer, tView, template, context, 2 /* CheckAlways */, getCurrentSanitizer());
+            if (queries) {
+                lView.queries = queries.createView();
+            }
             viewNode = createLNode(null, 2 /* View */, null, null, null, lView);
             rf = 1 /* Create */;
         }
@@ -14584,14 +14597,15 @@ function text(index, value) {
  * @param value Stringified value to write.
  */
 function textBinding(index, value) {
-    ngDevMode && assertDataInRange(index);
-    var existingNode = data[index];
-    ngDevMode && assertNotNull(existingNode, 'LNode should exist');
-    ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
-    ngDevMode && ngDevMode.rendererSetText++;
-    value !== NO_CHANGE &&
-        (isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
-            existingNode.native.textContent = stringify$1(value));
+    if (value !== NO_CHANGE) {
+        ngDevMode && assertDataInRange(index);
+        var existingNode = data[index];
+        ngDevMode && assertNotNull(existingNode, 'LNode should exist');
+        ngDevMode && assertNotNull(existingNode.native, 'native element should exist');
+        ngDevMode && ngDevMode.rendererSetText++;
+        isProceduralRenderer(renderer) ? renderer.setValue(existingNode.native, stringify$1(value)) :
+            existingNode.native.textContent = stringify$1(value);
+    }
 }
 /**
  * Create a directive.
@@ -14731,18 +14745,26 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
     }
     return initialInputData;
 }
-function createLContainer(parentLNode, currentView, template) {
+/**
+ * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
+ *
+ * @param parentLNode the LNode in which the container's content will be rendered
+ * @param currentView The parent view of the LContainer
+ * @param template Optional the inline template (ng-template instruction case)
+ * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
+ * @returns LContainer
+ */
+function createLContainer(parentLNode, currentView, template, isForViewContainerRef) {
     ngDevMode && assertNotNull(parentLNode, 'containers should have a parent');
     return {
         views: [],
-        nextIndex: 0,
+        nextIndex: isForViewContainerRef ? null : 0,
         // If the direct parent of the container is a view, its views will need to be added
         // through insertView() when its parent view is being inserted:
         renderParent: canInsertNativeNode(parentLNode, currentView) ? parentLNode : null,
         template: template == null ? null : template,
         next: null,
         parent: currentView,
-        dynamicViewCount: 0,
         queries: null
     };
 }
@@ -14814,7 +14836,7 @@ function containerRefreshEnd() {
     var container = previousOrParentNode;
     container.native = undefined;
     ngDevMode && assertNodeType(container, 0 /* Container */);
-    var nextIndex = container.data.nextIndex;
+    var nextIndex = (container.data.nextIndex);
     // remove extra views at the end of the container
     while (nextIndex < container.data.views.length) {
         removeView(container, nextIndex);
@@ -14822,7 +14844,9 @@ function containerRefreshEnd() {
 }
 function refreshDynamicChildren() {
     for (var current = currentView.child; current !== null; current = current.next) {
-        if (current.dynamicViewCount !== 0 && current.views) {
+        // Note: current can be a LView or a LContainer, but here we are only interested in LContainer.
+        // The distinction is made because nextIndex and views do not exist on LView.
+        if (isLContainer(current)) {
             var container_1 = current;
             for (var i = 0; i < container_1.views.length; i++) {
                 var lViewNode = container_1.views[i];
@@ -14833,6 +14857,9 @@ function refreshDynamicChildren() {
             }
         }
     }
+}
+function isLContainer(node) {
+    return node.nextIndex == null && node.views != null;
 }
 /**
  * Looks for a view with a given view block id inside a provided LContainer.
@@ -14873,7 +14900,7 @@ function embeddedViewStart(viewBlockId) {
     var container = (isParent ? previousOrParentNode : getParentLNode(previousOrParentNode));
     ngDevMode && assertNodeType(container, 0 /* Container */);
     var lContainer = container.data;
-    var viewNode = scanForView(container, lContainer.nextIndex, viewBlockId);
+    var viewNode = scanForView(container, (lContainer.nextIndex), viewBlockId);
     if (viewNode) {
         previousOrParentNode = viewNode;
         ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
@@ -14884,7 +14911,7 @@ function embeddedViewStart(viewBlockId) {
         // When we create a new LView, we always reset the state of the instructions.
         var newView = createLView(viewBlockId, renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer.queries) {
-            newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
+            newView.queries = lContainer.queries.createView();
         }
         enterView(newView, viewNode = createLNode(viewBlockId, 2 /* View */, null, null, null, newView));
     }
@@ -14927,7 +14954,7 @@ function embeddedViewEnd() {
             // used by the ViewContainerRef must be set.
             setRenderParentInProjectedNodes(lContainer.renderParent, viewNode);
             // it is a new view, insert it into collection of views for a given container
-            insertView(containerNode, viewNode, lContainer.nextIndex);
+            insertView(containerNode, viewNode, (lContainer.nextIndex));
         }
         lContainer.nextIndex++;
     }
@@ -16729,8 +16756,11 @@ function getOrCreateContainerRef(di) {
         var vcRefHost = di.node;
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
         var hostParent = (getParentLNode(vcRefHost));
-        var lContainer = createLContainer(hostParent, vcRefHost.view);
+        var lContainer = createLContainer(hostParent, vcRefHost.view, undefined, true);
         var lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, undefined, lContainer, null);
+        if (vcRefHost.queries) {
+            lContainerNode.queries = vcRefHost.queries.container();
+        }
         var hostTNode = vcRefHost.tNode;
         if (!hostTNode.dynamicContainerNode) {
             hostTNode.dynamicContainerNode =
@@ -16783,18 +16813,6 @@ var ViewContainerRef$1 = /** @class */ (function () {
         // instruction)
         this._lContainerNode.native = undefined;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
-        // If the view is dynamic (has a template), it needs to be counted both at the container
-        // level and at the node above the container.
-        if (lViewNode.data.template !== null) {
-            // Increment the container view count.
-            this._lContainerNode.data.dynamicViewCount++;
-            // Look for the parent node and increment its dynamic view count.
-            var containerParent = getParentLNode(this._lContainerNode);
-            if (containerParent !== null && containerParent.data !== null) {
-                ngDevMode && assertNodeOfPossibleTypes(containerParent, 2 /* View */, 3 /* Element */);
-                containerParent.data.dynamicViewCount++;
-            }
-        }
         return viewRef;
     };
     ViewContainerRef.prototype.move = function (viewRef, newIndex) {
@@ -16846,21 +16864,20 @@ function getOrCreateTemplateRef(di) {
             hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
         }
         ngDevMode && assertNotNull(hostTNode.tViews, 'TView must be allocated');
-        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, (hostNode.data.template), getRenderer(), hostTView.directiveRegistry, hostTView.pipeRegistry);
+        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, (hostNode.data.template), getRenderer(), hostNode.queries);
     }
     return di.templateRef;
 }
 var TemplateRef$1 = /** @class */ (function () {
-    function TemplateRef(elementRef, _tView, _template, _renderer, _directives, _pipes) {
+    function TemplateRef(elementRef, _tView, _template, _renderer, _queries) {
         this._tView = _tView;
         this._template = _template;
         this._renderer = _renderer;
-        this._directives = _directives;
-        this._pipes = _pipes;
+        this._queries = _queries;
         this.elementRef = elementRef;
     }
     TemplateRef.prototype.createEmbeddedView = function (context) {
-        var viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._directives, this._pipes);
+        var viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._queries);
         return addDestroyable(new EmbeddedViewRef$1(viewNode, this._template, context));
     };
     return TemplateRef;
@@ -17520,25 +17537,44 @@ var LQueries_ = /** @class */ (function () {
         while (query) {
             var containerValues = []; // prepare room for views
             query.values.push(containerValues);
-            var clonedQuery = { next: null, list: query.list, predicate: query.predicate, values: containerValues };
+            var clonedQuery = {
+                next: null,
+                list: query.list,
+                predicate: query.predicate,
+                values: containerValues,
+                containerValues: null
+            };
             clonedQuery.next = result;
             result = clonedQuery;
             query = query.next;
         }
         return result ? new LQueries_(result) : null;
     };
-    LQueries_.prototype.enterView = function (index) {
+    LQueries_.prototype.createView = function () {
         var result = null;
         var query = this.deep;
         while (query) {
-            var viewValues = []; // prepare room for view nodes
-            query.values.splice(index, 0, viewValues);
-            var clonedQuery = { next: null, list: query.list, predicate: query.predicate, values: viewValues };
+            var clonedQuery = {
+                next: null,
+                list: query.list,
+                predicate: query.predicate,
+                values: [],
+                containerValues: query.values
+            };
             clonedQuery.next = result;
             result = clonedQuery;
             query = query.next;
         }
         return result ? new LQueries_(result) : null;
+    };
+    LQueries_.prototype.insertView = function (index) {
+        var query = this.deep;
+        while (query) {
+            ngDevMode &&
+                assertNotNull(query.containerValues, 'View queries need to have a pointer to container values.');
+            query.containerValues.splice(index, 0, query.values);
+            query = query.next;
+        }
     };
     LQueries_.prototype.addNode = function (node) {
         add(this.shallow, node);
@@ -17547,7 +17583,9 @@ var LQueries_ = /** @class */ (function () {
     LQueries_.prototype.removeView = function (index) {
         var query = this.deep;
         while (query) {
-            var removed = query.values.splice(index, 1);
+            ngDevMode &&
+                assertNotNull(query.containerValues, 'View queries need to have a pointer to container values.');
+            var removed = query.containerValues.splice(index, 1);
             // mark a query as dirty only when removed view had matching modes
             ngDevMode && assertEqual(removed.length, 1, 'removed.length');
             if (removed[0].length) {
@@ -17661,7 +17699,8 @@ function createQuery$1(previous, queryList, predicate, read) {
         next: previous,
         list: queryList,
         predicate: createPredicate(predicate, read),
-        values: queryList._valuesTree
+        values: queryList._valuesTree,
+        containerValues: null
     };
 }
 var QueryList_ = /** @class */ (function () {

@@ -12,7 +12,7 @@ import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
 /**
@@ -114,7 +114,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -285,7 +285,16 @@ export declare function directiveCreate<T>(index: number, directive: T, directiv
  * current Angular. Example: local refs and inputs on root component.
  */
 export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
-export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>): LContainer;
+/**
+ * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
+ *
+ * @param parentLNode the LNode in which the container's content will be rendered
+ * @param currentView The parent view of the LContainer
+ * @param template Optional the inline template (ng-template instruction case)
+ * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
+ * @returns LContainer
+ */
+export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainerNode.
  *
