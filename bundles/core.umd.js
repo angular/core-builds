@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+215.sha-23a98b9
+ * @license Angular v6.0.0-rc.5+243.sha-1eafd04
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1672,7 +1672,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+215.sha-23a98b9');
+var VERSION = new Version('6.0.0-rc.5+243.sha-1eafd04');
 
 /**
  * @license
@@ -12761,7 +12761,7 @@ var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
  */
 function assertNodeType(node, type) {
     assertNotNull(node, 'should be called with a node');
-    assertEqual(node.type, type, "should be a " + typeName(type));
+    assertEqual(node.tNode.type, type, "should be a " + typeName(type));
 }
 function assertNodeOfPossibleTypes(node) {
     var types = [];
@@ -12769,7 +12769,7 @@ function assertNodeOfPossibleTypes(node) {
         types[_i - 1] = arguments[_i];
     }
     assertNotNull(node, 'should be called with a node');
-    var found = types.some(function (type) { return node.type === type; });
+    var found = types.some(function (type) { return node.tNode.type === type; });
     assertEqual(found, true, "Should be one of " + types.map(typeName).join(', '));
 }
 function typeName(type) {
@@ -12921,7 +12921,7 @@ function findNextRNodeSibling(node, stopNode) {
     while (currentNode && currentNode !== stopNode) {
         var pNextOrParent = currentNode.pNextOrParent;
         if (pNextOrParent) {
-            while (pNextOrParent.type !== 1 /* Projection */) {
+            while (pNextOrParent.tNode.type !== 1 /* Projection */) {
                 var nativeNode = findFirstRNode(pNextOrParent);
                 if (nativeNode) {
                     return nativeNode;
@@ -12942,7 +12942,7 @@ function findNextRNodeSibling(node, stopNode) {
             var parentNode = currentNode.parent;
             currentNode = null;
             if (parentNode) {
-                var parentType = parentNode.type;
+                var parentType = parentNode.tNode.type;
                 if (parentType === 0 /* Container */ || parentType === 2 /* View */) {
                     currentNode = parentNode;
                 }
@@ -12954,11 +12954,19 @@ function findNextRNodeSibling(node, stopNode) {
 /** Retrieves the sibling node for the given node. */
 function getNextLNode(node) {
     // View nodes don't have TNodes, so their next must be retrieved through their LView.
-    if (node.type === 2 /* View */) {
+    if (node.tNode.type === 2 /* View */) {
         var lView = node.data;
         return lView.next ? lView.next.node : null;
     }
     return node.tNode.next ? node.view.data[node.tNode.next.index] : null;
+}
+/** Retrieves the first child of a given node */
+function getChildLNode(node) {
+    if (node.tNode.child) {
+        var view = node.tNode.type === 2 /* View */ ? node.data : node.view;
+        return view.data[node.tNode.child.index];
+    }
+    return null;
 }
 /**
  * Get the next node in the LNode tree, taking into account the place where a node is
@@ -12971,7 +12979,7 @@ function getNextLNodeWithProjection(node) {
     var pNextOrParent = node.pNextOrParent;
     if (pNextOrParent) {
         // The node is projected
-        var isLastProjectedNode = pNextOrParent.type === 1;
+        var isLastProjectedNode = pNextOrParent.tNode.type === 1;
         // returns pNextOrParent if we are not at the end of the list, null otherwise
         return isLastProjectedNode ? null : pNextOrParent;
     }
@@ -13013,24 +13021,25 @@ function findFirstRNode(rootNode) {
     var node = rootNode;
     while (node) {
         var nextNode = null;
-        if (node.type === 3 /* Element */) {
+        if (node.tNode.type === 3 /* Element */) {
             // A LElementNode has a matching RNode in LElementNode.native
             return node.native;
         }
-        else if (node.type === 0 /* Container */) {
+        else if (node.tNode.type === 0 /* Container */) {
             var lContainerNode = node;
             var childContainerData = lContainerNode.dynamicLContainerNode ?
                 lContainerNode.dynamicLContainerNode.data :
                 lContainerNode.data;
-            nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
+            nextNode =
+                childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
         }
-        else if (node.type === 1 /* Projection */) {
+        else if (node.tNode.type === 1 /* Projection */) {
             // For Projection look at the first projected node
             nextNode = node.data.head;
         }
         else {
             // Otherwise look at the first child
-            nextNode = node.child;
+            nextNode = getChildLNode(node);
         }
         node = nextNode === null ? getNextOrParentSiblingNode(node, rootNode) : nextNode;
     }
@@ -13045,12 +13054,12 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
     ngDevMode && assertNodeType(rootNode, 2 /* View */);
     var parentNode = container.data.renderParent;
     var parent = parentNode ? parentNode.native : null;
-    var node = rootNode.child;
+    var node = getChildLNode(rootNode);
     if (parent) {
         while (node) {
             var nextNode = null;
             var renderer = container.view.renderer;
-            if (node.type === 3 /* Element */) {
+            if (node.tNode.type === 3 /* Element */) {
                 if (insertMode) {
                     isProceduralRenderer(renderer) ?
                         renderer.insertBefore(parent, (node.native), beforeNode) :
@@ -13062,18 +13071,19 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
                 }
                 nextNode = getNextLNode(node);
             }
-            else if (node.type === 0 /* Container */) {
+            else if (node.tNode.type === 0 /* Container */) {
                 // if we get to a container, it must be a root node of a view because we are only
                 // propagating down into child views / containers and not child elements
                 var childContainerData = node.data;
                 childContainerData.renderParent = parentNode;
-                nextNode = childContainerData.views.length ? childContainerData.views[0].child : null;
+                nextNode =
+                    childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
             }
-            else if (node.type === 1 /* Projection */) {
+            else if (node.tNode.type === 1 /* Projection */) {
                 nextNode = node.data.head;
             }
             else {
-                nextNode = node.child;
+                nextNode = getChildLNode(node);
             }
             if (nextNode === null) {
                 node = getNextOrParentSiblingNode(node, rootNode);
@@ -13213,7 +13223,7 @@ function removeView(container, removeIndex) {
  */
 function getParentState(state, rootView) {
     var node;
-    if ((node = state.node) && node.type === 2 /* View */) {
+    if ((node = state.node) && node.tNode.type === 2 /* View */) {
         // if it's an embedded view, the state needs to go up to the container, in case the
         // container has a next
         return node.parent.data;
@@ -13282,7 +13292,7 @@ function executePipeOnDestroys(view) {
  * @return boolean Whether the child element should be inserted.
  */
 function canInsertNativeNode(parent, currentView) {
-    var parentIsElement = parent.type === 3;
+    var parentIsElement = parent.tNode.type === 3;
     return parentIsElement &&
         (parent.view !== currentView || parent.data === null /* Regular Element. */);
 }
@@ -13324,7 +13334,7 @@ function appendChild(parent, child, currentView) {
  * @param currentView Current LView
  */
 function appendProjectedNode(node, currentParent, currentView) {
-    if (node.type !== 0 /* Container */) {
+    if (node.tNode.type !== 0 /* Container */) {
         appendChild(currentParent, node.native, currentView);
     }
     else {
@@ -13772,15 +13782,13 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
  */
 function createLNodeObject(type, currentView, parent, native, state, queries) {
     return {
-        type: type,
         native: native,
         view: currentView,
         parent: parent,
-        child: null,
         nodeInjector: parent ? parent.nodeInjector : null,
         data: state,
         queries: queries,
-        tNode: null,
+        tNode: (null),
         pNextOrParent: null,
         dynamicLContainerNode: null
     };
@@ -13792,37 +13800,44 @@ function createLNode(index, type, native, name, attrs, state) {
         parent && parent.queries && parent.queries.child();
     var isState = state != null;
     var node = createLNodeObject(type, currentView, parent, native, isState ? state : null, queries);
-    if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
-        // Bit of a hack to bust through the readonly because there is a circular dep between
-        // LView and LNode.
-        ngDevMode && assertNull(state.node, 'LView.node should not have been initialized');
-        state.node = node;
+    if (index === null || type === 2 /* View */) {
+        // View nodes are not stored in data because they can be added / removed at runtime (which
+        // would cause indices to change). Their TNodes are instead stored in TView.node.
+        node.tNode = state.tView.node || createTNode(type, index, null, null, null);
     }
-    if (index != null) {
-        // We are Element or Container
+    else {
+        // This is an element or container or projection node
         ngDevMode && assertDataNext(index);
         data[index] = node;
         // Every node adds a value to the static data array to avoid a sparse array
         if (index >= tData.length) {
-            var tNode = tData[index] = createTNode(index, name, attrs, null);
+            var tNode = tData[index] = createTNode(type, index, name, attrs, null);
             if (!isParent && previousOrParentNode) {
-                previousOrParentNode.tNode.next = tNode;
+                var previousTNode = previousOrParentNode.tNode;
+                previousTNode.next = tNode;
+                if (previousTNode.dynamicContainerNode)
+                    previousTNode.dynamicContainerNode.next = tNode;
             }
         }
         node.tNode = tData[index];
         // Now link ourselves into the tree.
         if (isParent) {
             currentQueries = null;
-            if (previousOrParentNode.view === currentView ||
-                previousOrParentNode.type === 2 /* View */) {
+            if (previousOrParentNode.tNode.child == null && previousOrParentNode.view === currentView ||
+                previousOrParentNode.tNode.type === 2 /* View */) {
                 // We are in the same view, which means we are adding content node to the parent View.
-                ngDevMode && assertNull(previousOrParentNode.child, "previousOrParentNode's child should not have been set.");
-                previousOrParentNode.child = node;
-            }
-            else {
-                // We are adding component view, so we don't link parent node child to this node.
+                previousOrParentNode.tNode.child = node.tNode;
             }
         }
+    }
+    // View nodes and host elements need to set their host node (components set host nodes later)
+    if ((type & 2 /* ViewOrElement */) === 2 /* ViewOrElement */ && isState) {
+        // Bit of a hack to bust through the readonly because there is a circular dep between
+        // LView and LNode.
+        ngDevMode && assertNull(state.node, 'LView.node should not have been initialized');
+        state.node = node;
+        if (firstTemplatePass)
+            state.tView.node = node.tNode;
     }
     previousOrParentNode = node;
     isParent = true;
@@ -13964,7 +13979,7 @@ function createDirectivesAndLocals(index, name, attrs, localRefs, inlineViews) {
     var node = previousOrParentNode;
     if (firstTemplatePass) {
         ngDevMode && ngDevMode.firstTemplatePass++;
-        cacheMatchingDirectivesForNode((node.tNode), currentView.tView, localRefs || null);
+        cacheMatchingDirectivesForNode(node.tNode, currentView.tView, localRefs || null);
     }
     else {
         instantiateDirectivesDirectly();
@@ -14051,7 +14066,7 @@ function isComponent(tNode) {
  * This function instantiates the given directives.
  */
 function instantiateDirectivesDirectly() {
-    var tNode = (previousOrParentNode.tNode);
+    var tNode = previousOrParentNode.tNode;
     var count = tNode.flags & 4095;
     if (count > 0) {
         var start = tNode.flags >> 13;
@@ -14127,6 +14142,7 @@ function getOrCreateTView(template, directives, pipes) {
 function createTView(defs, pipes) {
     ngDevMode && ngDevMode.tView++;
     return {
+        node: (null),
         data: [],
         directives: null,
         firstTemplatePass: true,
@@ -14233,7 +14249,7 @@ function listener(eventName, listenerFn, useCapture) {
         native.addEventListener(eventName, wrappedListener, useCapture);
         cleanupFns.push(eventName, native, wrappedListener, useCapture);
     }
-    var tNode = (node.tNode);
+    var tNode = node.tNode;
     if (tNode.outputs === undefined) {
         // if we create TNode here, inputs must be undefined so we know they still need to be
         // checked
@@ -14312,7 +14328,7 @@ function elementProperty(index, propName, value, sanitizer) {
     if (value === NO_CHANGE)
         return;
     var node = data[index];
-    var tNode = (node.tNode);
+    var tNode = node.tNode;
     // if tNode.inputs is undefined, a listener has created outputs, but inputs haven't
     // yet been checked
     if (tNode && tNode.inputs === undefined) {
@@ -14339,15 +14355,17 @@ function elementProperty(index, propName, value, sanitizer) {
 /**
  * Constructs a TNode object from the arguments.
  *
+ * @param type The type of the node
  * @param index The index of the TNode in TView.data
  * @param tagName The tag name of the node
  * @param attrs The attributes defined on this node
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-function createTNode(index, tagName, attrs, tViews) {
+function createTNode(type, index, tagName, attrs, tViews) {
     ngDevMode && ngDevMode.tNode++;
     return {
+        type: type,
         index: index,
         flags: 0,
         tagName: tagName,
@@ -14357,7 +14375,9 @@ function createTNode(index, tagName, attrs, tViews) {
         inputs: undefined,
         outputs: undefined,
         tViews: tViews,
-        next: null
+        next: null,
+        child: null,
+        dynamicContainerNode: null
     };
 }
 /**
@@ -14575,8 +14595,14 @@ function addComponentLogic(index, instance, def) {
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     var hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    // We need to set the host node/data here because when the component LNode was created,
+    // we didn't yet know it was a component (just an element).
+    // We need to set the host node/data here because when the component LNode was created,
+    // we didn't yet know it was a component (just an element).
     previousOrParentNode.data = hostView;
     hostView.node = previousOrParentNode;
+    if (firstTemplatePass)
+        tView.node = previousOrParentNode.tNode;
     initChangeDetectorIfExisting(previousOrParentNode.nodeInjector, instance, hostView);
     if (firstTemplatePass)
         queueComponentIndexForCheck(index);
@@ -14602,9 +14628,6 @@ function baseDirectiveCreate(index, directive, directiveDef) {
             // When the first directive is created:
             // - save the index,
             // - set the number of directives to 1
-            // When the first directive is created:
-            // - save the index,
-            // - set the number of directives to 1
             previousOrParentNode.tNode.flags =
                 index << 13 /* DirectiveStartingIndexShift */ | flags & 4096 /* isComponent */ | 1;
         }
@@ -14619,7 +14642,7 @@ function baseDirectiveCreate(index, directive, directiveDef) {
         if (diPublic)
             diPublic((directiveDef));
     }
-    if (directiveDef.attributes != null && previousOrParentNode.type == 3 /* Element */) {
+    if (directiveDef.attributes != null && previousOrParentNode.tNode.type == 3 /* Element */) {
         setUpAttributes(previousOrParentNode.native, directiveDef.attributes);
     }
     return directive;
@@ -14828,7 +14851,7 @@ function embeddedViewStart(viewBlockId) {
         if (lContainer.queries) {
             newView.queries = lContainer.queries.enterView(lContainer.nextIndex);
         }
-        enterView(newView, viewNode = createLNode(null, 2 /* View */, null, null, null, newView));
+        enterView(newView, viewNode = createLNode(viewBlockId, 2 /* View */, null, null, null, newView));
     }
     return getRenderFlags(viewNode.data);
 }
@@ -14885,9 +14908,9 @@ function embeddedViewEnd() {
  */
 function setRenderParentInProjectedNodes(renderParent, viewNode) {
     if (renderParent != null) {
-        var node = viewNode.child;
+        var node = getChildLNode(viewNode);
         while (node) {
-            if (node.type === 1 /* Projection */) {
+            if (node.tNode.type === 1 /* Projection */) {
                 var nodeToProject = node.data.head;
                 var lastNodeToProject = node.data.tail;
                 while (nodeToProject) {
@@ -14952,7 +14975,7 @@ function projectionDef(index, selectors, textSelectors) {
         distributedNodes[i] = [];
     }
     var componentNode = findComponentHost(currentView);
-    var componentChild = componentNode.child;
+    var componentChild = getChildLNode(componentNode);
     while (componentChild !== null) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
@@ -15015,7 +15038,7 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     // build the linked list of projected nodes:
     for (var i = 0; i < nodesForSelector.length; i++) {
         var nodeToProject = nodesForSelector[i];
-        if (nodeToProject.type === 1 /* Projection */) {
+        if (nodeToProject.tNode.type === 1 /* Projection */) {
             // Reprojecting a projection -> append the list of previously projected nodes
             var previouslyProjected = nodeToProject.data;
             appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
@@ -15044,7 +15067,7 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
  */
 function findComponentHost(lView) {
     var viewRootLNode = lView.node;
-    while (viewRootLNode.type === 2 /* View */) {
+    while (viewRootLNode.tNode.type === 2 /* View */) {
         ngDevMode && assertNotNull(lView.parent, 'lView.parent');
         lView = (lView.parent);
         viewRootLNode = lView.node;
@@ -15264,6 +15287,54 @@ function bind(value) {
     return changed ? value : NO_CHANGE;
 }
 /**
+ * Reserves slots for pure functions (`pureFunctionX` instructions)
+ *
+ * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ *
+ *  ----------------------------------------------------------------------------
+ *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
+ *  ----------------------------------------------------------------------------
+ *                                         ^
+ *                                         LView.bindingStartIndex
+ *
+ * Pure function instructions are given an offset from LView.bindingStartIndex.
+ * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * are stored.
+ *
+ * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
+ */
+function reserveSlots(numSlots) {
+    // Init the slots with a unique `NO_CHANGE` value so that the first change is always detected
+    // whether is happens or not during the first change detection pass - pure functions checks
+    // might be skipped when short-circuited.
+    data.length += numSlots;
+    data.fill(NO_CHANGE, -numSlots);
+    // We need to initialize the binding in case a `pureFunctionX` kind of binding instruction is
+    // called first in the update section.
+    initBindings();
+}
+/**
+ * Sets up the binding index before execute any `pureFunctionX` instructions.
+ *
+ * The index must be restored after the pure function is executed
+ *
+ * {@link reserveSlots}
+ */
+function moveBindingIndexToReservedSlot(offset) {
+    var currentSlot = currentView.bindingIndex;
+    currentView.bindingIndex = currentView.bindingStartIndex - offset;
+    return currentSlot;
+}
+/**
+ * Restores the binding index to the given value.
+ *
+ * This function is typically used to restore the index after a `pureFunctionX` has
+ * been executed.
+ */
+function restoreBindingIndex(index) {
+    currentView.bindingIndex = index;
+}
+/**
  * Create interpolation bindings with a variable number of expressions.
  *
  * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
@@ -15442,6 +15513,19 @@ function assertDataNext(index, arr) {
     if (arr == null)
         arr = data;
     assertEqual(arr.length, index, "index " + index + " expected to be at the end of arr (length " + arr.length + ")");
+}
+/**
+ * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ *
+ * If not they might not have been actually reserved.
+ */
+function assertReservedSlotInitialized(slotOffset, numSlots) {
+    if (firstTemplatePass) {
+        var startIndex = currentView.bindingStartIndex - slotOffset;
+        for (var i = 0; i < numSlots; i++) {
+            assertEqual(data[startIndex + i], NO_CHANGE, 'The reserved slots should be set to `NO_CHANGE` on first template pass');
+        }
+    }
 }
 function _getComponentHostLElementNode(component) {
     ngDevMode && assertNotNull(component, 'expecting component got null');
@@ -16333,7 +16417,7 @@ function injectAttribute(attrName) {
     ngDevMode && assertPreviousIsParent();
     var lElement = getPreviousOrParentNode();
     ngDevMode && assertNodeType(lElement, 3 /* Element */);
-    var tElement = (lElement.tNode);
+    var tElement = lElement.tNode;
     ngDevMode && assertNotNull(tElement, 'expecting tNode');
     var attrs = tElement.attrs;
     if (attrs) {
@@ -16355,10 +16439,10 @@ function getOrCreateChangeDetectorRef(di, context) {
     if (di.changeDetectorRef)
         return di.changeDetectorRef;
     var currentNode = di.node;
-    if (isComponent((currentNode.tNode))) {
+    if (isComponent(currentNode.tNode)) {
         return di.changeDetectorRef = createViewRef(currentNode.data, context);
     }
-    else if (currentNode.type === 3 /* Element */) {
+    else if (currentNode.tNode.type === 3 /* Element */) {
         return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
     }
     return null;
@@ -16379,7 +16463,7 @@ function getOrCreateHostChangeDetector(currentNode) {
  * returns itself.
  */
 function getClosestComponentAncestor(node) {
-    while (node.type === 2 /* View */) {
+    while (node.tNode.type === 2 /* View */) {
         node = node.view.node;
     }
     return node;
@@ -16582,7 +16666,7 @@ var ReadFromInjectorFn = /** @class */ (function () {
  * @returns The ElementRef instance to use
  */
 function getOrCreateElementRef(di) {
-    return di.elementRef || (di.elementRef = new ElementRef$1(di.node.type === 0 /* Container */ ? null : di.node.native));
+    return di.elementRef || (di.elementRef = new ElementRef$1(di.node.tNode.type === 0 /* Container */ ? null : di.node.native));
 }
 
 
@@ -16607,8 +16691,12 @@ function getOrCreateContainerRef(di) {
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
         var lContainer = createLContainer((vcRefHost.parent), vcRefHost.view);
         var lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, (vcRefHost.parent), undefined, lContainer, null);
-        // TODO(kara): Separate into own TNode when moving parent/child properties
-        lContainerNode.tNode = vcRefHost.tNode;
+        var hostTNode = vcRefHost.tNode;
+        if (!hostTNode.dynamicContainerNode) {
+            hostTNode.dynamicContainerNode =
+                createTNode(0 /* Container */, hostTNode.index, null, null, null);
+        }
+        lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
         addToViewTree(vcRefHost.view, lContainer);
         di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
@@ -16712,7 +16800,7 @@ function getOrCreateTemplateRef(di) {
     if (!di.templateRef) {
         ngDevMode && assertNodeType(di.node, 0 /* Container */);
         var hostNode = di.node;
-        var hostTNode = (hostNode.tNode);
+        var hostTNode = hostNode.tNode;
         var hostTView = hostNode.view.tView;
         if (!hostTNode.tViews) {
             hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
@@ -16953,80 +17041,107 @@ function definePipe(pipeDef) {
  * value. If it has been saved, returns the saved value.
  *
  * @param pureFn Function that returns a value
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param thisArg Optional calling context of pureFn
  * @returns value
  */
-function pureFunction0(pureFn, thisArg) {
-    return getCreationMode() ? checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg) : pureFn()) :
+function pureFunction0(slotOffset, pureFn, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 1);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = getCreationMode() ?
+        checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg) : pureFn()) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of the provided exp has changed, calls the pure function to return
  * an updated value. Or if the value has not changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn Function that returns an updated value
  * @param exp Updated expression value
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction1(pureFn, exp, thisArg) {
-    return bindingUpdated(exp) ?
+function pureFunction1(slotOffset, pureFn, exp, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 2);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated(exp) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp) : pureFn(exp)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction2(pureFn, exp1, exp2, thisArg) {
-    return bindingUpdated2(exp1, exp2) ?
+function pureFunction2(slotOffset, pureFn, exp1, exp2, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 3);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated2(exp1, exp2) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2) : pureFn(exp1, exp2)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param exp3
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction3(pureFn, exp1, exp2, exp3, thisArg) {
+function pureFunction3(slotOffset, pureFn, exp1, exp2, exp3, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 4);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated2(exp1, exp2);
-    return bindingUpdated(exp3) || different ?
+    var value = bindingUpdated(exp3) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3) : pureFn(exp1, exp2, exp3)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
  * @param exp3
  * @param exp4
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
-    return bindingUpdated4(exp1, exp2, exp3, exp4) ?
+function pureFunction4(slotOffset, pureFn, exp1, exp2, exp3, exp4, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 5);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
+    var value = bindingUpdated4(exp1, exp2, exp3, exp4) ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4) : pureFn(exp1, exp2, exp3, exp4)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17034,19 +17149,24 @@ function pureFunction4(pureFn, exp1, exp2, exp3, exp4, thisArg) {
  * @param exp4
  * @param exp5
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+function pureFunction5(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 6);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated(exp5) || different ?
+    var value = bindingUpdated(exp5) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5) :
             pureFn(exp1, exp2, exp3, exp4, exp5)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17055,19 +17175,24 @@ function pureFunction5(pureFn, exp1, exp2, exp3, exp4, exp5, thisArg) {
  * @param exp5
  * @param exp6
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+function pureFunction6(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 7);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated2(exp5, exp6) || different ?
+    var value = bindingUpdated2(exp5, exp6) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17077,20 +17202,25 @@ function pureFunction6(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, thisArg) {
  * @param exp6
  * @param exp7
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+function pureFunction7(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 8);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
     different = bindingUpdated2(exp5, exp6) || different;
-    return bindingUpdated(exp7) || different ?
+    var value = bindingUpdated(exp7) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn
  * @param exp1
  * @param exp2
@@ -17101,14 +17231,18 @@ function pureFunction7(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, thisArg
  * @param exp7
  * @param exp8
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+function pureFunction8(slotOffset, pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, 9);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = bindingUpdated4(exp1, exp2, exp3, exp4);
-    return bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
+    var value = bindingUpdated4(exp5, exp6, exp7, exp8) || different ?
         checkAndUpdateBinding$1(thisArg ? pureFn.call(thisArg, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8) :
             pureFn(exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8)) :
         consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 /**
  * pureFunction instruction that can support any number of bindings.
@@ -17116,18 +17250,23 @@ function pureFunction8(pureFn, exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, t
  * If the value of any provided exp has changed, calls the pure function to return
  * an updated value. Or if no values have changed, returns cached value.
  *
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param pureFn A pure function that takes binding values and builds an object or array
  * containing those values.
  * @param exps An array of binding values
  * @param thisArg Optional calling context of pureFn
- * @returns Updated value
+ * @returns Updated or cached value
  */
-function pureFunctionV(pureFn, exps, thisArg) {
+function pureFunctionV(slotOffset, pureFn, exps, thisArg) {
+    ngDevMode && assertReservedSlotInitialized(slotOffset, exps.length + 1);
+    var index = moveBindingIndexToReservedSlot(slotOffset);
     var different = false;
     for (var i = 0; i < exps.length; i++) {
         bindingUpdated(exps[i]) && (different = true);
     }
-    return different ? checkAndUpdateBinding$1(pureFn.apply(thisArg, exps)) : consumeBinding();
+    var value = different ? checkAndUpdateBinding$1(pureFn.apply(thisArg, exps)) : consumeBinding();
+    restoreBindingIndex(index);
+    return value;
 }
 
 /**
@@ -17187,11 +17326,12 @@ function getPipeDef(name, registry) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  */
-function pipeBind1(index, v1) {
+function pipeBind1(index, slotOffset, v1) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction1(pipeInstance.transform, v1, pipeInstance) :
+    return isPure(index) ? pureFunction1(slotOffset, pipeInstance.transform, v1, pipeInstance) :
         pipeInstance.transform(v1);
 }
 /**
@@ -17201,12 +17341,13 @@ function pipeBind1(index, v1) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  */
-function pipeBind2(index, v1, v2) {
+function pipeBind2(index, slotOffset, v1, v2) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction2(pipeInstance.transform, v1, v2, pipeInstance) :
+    return isPure(index) ? pureFunction2(slotOffset, pipeInstance.transform, v1, v2, pipeInstance) :
         pipeInstance.transform(v1, v2);
 }
 /**
@@ -17216,13 +17357,15 @@ function pipeBind2(index, v1, v2) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 4rd argument to {@link PipeTransform#transform}.
  */
-function pipeBind3(index, v1, v2, v3) {
+function pipeBind3(index, slotOffset, v1, v2, v3) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction3(pipeInstance.transform, v1, v2, v3, pipeInstance) :
+    return isPure(index) ?
+        pureFunction3(slotOffset, pipeInstance.transform, v1, v2, v3, pipeInstance) :
         pipeInstance.transform(v1, v2, v3);
 }
 /**
@@ -17232,14 +17375,16 @@ function pipeBind3(index, v1, v2, v3) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param v1 1st argument to {@link PipeTransform#transform}.
  * @param v2 2nd argument to {@link PipeTransform#transform}.
  * @param v3 3rd argument to {@link PipeTransform#transform}.
  * @param v4 4th argument to {@link PipeTransform#transform}.
  */
-function pipeBind4(index, v1, v2, v3, v4) {
+function pipeBind4(index, slotOffset, v1, v2, v3, v4) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunction4(pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
+    return isPure(index) ?
+        pureFunction4(slotOffset, pipeInstance.transform, v1, v2, v3, v4, pipeInstance) :
         pipeInstance.transform(v1, v2, v3, v4);
 }
 /**
@@ -17249,11 +17394,12 @@ function pipeBind4(index, v1, v2, v3, v4) {
  * the pipe only when an input to the pipe changes.
  *
  * @param index Pipe index where the pipe was stored on creation.
+ * @param slotOffset the offset in the reserved slot space {@link reserveSlots}
  * @param values Array of arguments to pass to {@link PipeTransform#transform} method.
  */
-function pipeBindV(index, values) {
+function pipeBindV(index, slotOffset, values) {
     var pipeInstance = load(index);
-    return isPure(index) ? pureFunctionV(pipeInstance.transform, values, pipeInstance) :
+    return isPure(index) ? pureFunctionV(slotOffset, pipeInstance.transform, values, pipeInstance) :
         pipeInstance.transform.apply(pipeInstance, values);
 }
 function isPure(index) {
@@ -17443,8 +17589,7 @@ function add(query, node) {
         else {
             var selector = (predicate.selector);
             for (var i = 0; i < selector.length; i++) {
-                ngDevMode && assertNotNull(node.tNode, 'node.tNode');
-                var directiveIdx = getIdxOfMatchingSelector((node.tNode), selector[i]);
+                var directiveIdx = getIdxOfMatchingSelector(node.tNode, selector[i]);
                 if (directiveIdx !== null) {
                     // a node is matching a predicate - determine what to read
                     // note that queries using name selector must specify read strategy
@@ -17896,12 +18041,6 @@ exports.ɵangular_packages_core_core_x = getOrCreateContainerRef;
 exports.ɵangular_packages_core_core_w = getOrCreateInjectable;
 exports.ɵangular_packages_core_core_u = getOrCreateNodeInjector;
 exports.ɵangular_packages_core_core_y = getOrCreateTemplateRef;
-exports.ɵangular_packages_core_core_bb = bindingUpdated;
-exports.ɵangular_packages_core_core_bd = bindingUpdated2;
-exports.ɵangular_packages_core_core_be = bindingUpdated4;
-exports.ɵangular_packages_core_core_bc = checkAndUpdateBinding$1;
-exports.ɵangular_packages_core_core_ba = consumeBinding;
-exports.ɵangular_packages_core_core_z = getCreationMode;
 exports.ɵangular_packages_core_core_a = makeParamDecorator;
 exports.ɵangular_packages_core_core_b = makePropDecorator;
 exports.ɵangular_packages_core_core_s = _def;
@@ -18092,6 +18231,7 @@ exports.ɵqR = queryRefresh;
 exports.ɵe = elementEnd;
 exports.ɵp = elementProperty;
 exports.ɵpD = projectionDef;
+exports.ɵrS = reserveSlots;
 exports.ɵa = elementAttribute;
 exports.ɵs = elementStyle;
 exports.ɵsn = elementStyleNamed;

@@ -11,7 +11,7 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, LNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
+import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
@@ -76,7 +76,7 @@ export declare function createLView<T>(viewId: number, renderer: Renderer3, tVie
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: LNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -89,10 +89,10 @@ export declare function createLNodeObject(type: LNodeType, currentView: LView, p
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: LNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: null, type: LNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: LNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: LNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: number | null, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -188,6 +188,17 @@ export declare function elementAttribute(index: number, name: string, value: any
  * @param sanitizer An optional function used to sanitize the value.
  */
 export declare function elementProperty<T>(index: number, propName: string, value: T | NO_CHANGE, sanitizer?: SanitizerFn): void;
+/**
+ * Constructs a TNode object from the arguments.
+ *
+ * @param type The type of the node
+ * @param index The index of the TNode in TView.data
+ * @param tagName The tag name of the node
+ * @param attrs The attributes defined on this node
+ * @param tViews Any TViews attached to this node
+ * @returns the TNode object
+ */
+export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -454,6 +465,39 @@ export declare const NO_CHANGE: NO_CHANGE;
  */
 export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
 /**
+ * Reserves slots for pure functions (`pureFunctionX` instructions)
+ *
+ * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ *
+ *  ----------------------------------------------------------------------------
+ *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
+ *  ----------------------------------------------------------------------------
+ *                                         ^
+ *                                         LView.bindingStartIndex
+ *
+ * Pure function instructions are given an offset from LView.bindingStartIndex.
+ * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * are stored.
+ *
+ * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
+ */
+export declare function reserveSlots(numSlots: number): void;
+/**
+ * Sets up the binding index before execute any `pureFunctionX` instructions.
+ *
+ * The index must be restored after the pure function is executed
+ *
+ * {@link reserveSlots}
+ */
+export declare function moveBindingIndexToReservedSlot(offset: number): number;
+/**
+ * Restores the binding index to the given value.
+ *
+ * This function is typically used to restore the index after a `pureFunctionX` has
+ * been executed.
+ */
+export declare function restoreBindingIndex(index: number): void;
+/**
  * Create interpolation bindings with a variable number of expressions.
  *
  * If there are 1 to 8 expressions `interpolation1()` to `interpolation8()` should be used instead.
@@ -507,6 +551,12 @@ export declare function bindingUpdated4(exp1: any, exp2: any, exp3: any, exp4: a
 export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
+/**
+ * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ *
+ * If not they might not have been actually reserved.
+ */
+export declare function assertReservedSlotInitialized(slotOffset: number, numSlots: number): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;
 export declare const CLEAN_PROMISE: Promise<null>;
 export declare const ROOT_DIRECTIVE_INDICES: number[];
