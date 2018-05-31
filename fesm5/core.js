@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+281.sha-b86d4de
+ * @license Angular v6.0.0-rc.5+288.sha-7e3f8f7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1591,7 +1591,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+281.sha-b86d4de');
+var VERSION = new Version('6.0.0-rc.5+288.sha-7e3f8f7');
 
 /**
  * @license
@@ -13043,18 +13043,18 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
  *  @param rootView The view to destroy
  */
 function destroyViewTree(rootView) {
-    // A view to cleanup doesn't have children so we should not try to descend down the view tree.
-    if (!rootView.child) {
+    // If the view has no children, we can clean it up and return early.
+    if (rootView.tView.childIndex === -1) {
         return cleanUpView(rootView);
     }
-    var viewOrContainer = rootView.child;
+    var viewOrContainer = getLViewChild(rootView);
     while (viewOrContainer) {
         var next = null;
         if (viewOrContainer.views && viewOrContainer.views.length) {
             next = viewOrContainer.views[0].data;
         }
-        else if (viewOrContainer.child) {
-            next = viewOrContainer.child;
+        else if (viewOrContainer.tView && viewOrContainer.tView.childIndex > -1) {
+            next = getLViewChild(viewOrContainer);
         }
         else if (viewOrContainer.next) {
             // Only move to the side and clean if operating below rootView -
@@ -13151,6 +13151,13 @@ function removeView(container, removeIndex) {
         removedLview.queries.removeView(removeIndex);
     }
     return viewNode;
+}
+/** Gets the child of the given LView */
+function getLViewChild(view) {
+    if (view.tView.childIndex === -1)
+        return null;
+    var hostNode = view.data[view.tView.childIndex];
+    return hostNode.data ? hostNode.data : hostNode.dynamicLContainerNode.data;
 }
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
@@ -13716,7 +13723,6 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
         tView: tView,
         cleanup: null,
         renderer: renderer,
-        child: null,
         tail: null,
         next: null,
         bindingStartIndex: -1,
@@ -14100,6 +14106,8 @@ function createTView(defs, pipes) {
     return {
         node: (null),
         data: [],
+        childIndex: -1,
+        // Children set in addToViewTree(), if any
         directives: null,
         firstTemplatePass: true,
         initHooks: null,
@@ -14556,7 +14564,7 @@ function addComponentLogic(index, instance, def) {
     var tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    var hostView = addToViewTree(currentView, createLView(-1, rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    var hostView = addToViewTree(currentView, previousOrParentNode.tNode.index, createLView(-1, rendererFactory.createRenderer(previousOrParentNode.native, def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
     // we didn't yet know it was a component (just an element).
     // We need to set the host node/data here because when the component LNode was created,
@@ -14704,7 +14712,7 @@ function container(index, template, tagName, attrs, localRefs) {
         node.tNode.tViews = [];
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
-    addToViewTree(currentView, node.data);
+    addToViewTree(currentView, index, node.data);
     createDirectivesAndLocals(localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
@@ -14759,7 +14767,7 @@ function containerRefreshEnd() {
     }
 }
 function refreshDynamicChildren() {
-    for (var current = currentView.child; current !== null; current = current.next) {
+    for (var current = getLViewChild(currentView); current !== null; current = current.next) {
         // Note: current can be a LView or a LContainer, but here we are only interested in LContainer.
         // The distinction is made because nextIndex and views do not exist on LView.
         if (isLContainer(current)) {
@@ -15061,11 +15069,18 @@ function findComponentHost(lView) {
  * and call onDestroy callbacks.
  *
  * @param currentView The view where LView or LContainer should be added
+ * @param hostIndex Index of the view's host node in data[]
  * @param state The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-function addToViewTree(currentView, state) {
-    currentView.tail ? (currentView.tail.next = state) : (currentView.child = state);
+function addToViewTree(currentView, hostIndex, state) {
+    // TODO(kara): move next and tail properties off of LView
+    if (currentView.tail) {
+        currentView.tail.next = state;
+    }
+    else if (firstTemplatePass) {
+        currentView.tView.childIndex = hostIndex;
+    }
     currentView.tail = state;
     return state;
 }
@@ -16674,7 +16689,7 @@ function getOrCreateContainerRef(di) {
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
-        addToViewTree(vcRefHost.view, lContainer);
+        addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
         di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
     }
     return di.viewContainerRef;

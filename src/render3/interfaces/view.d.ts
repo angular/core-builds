@@ -98,16 +98,6 @@ export interface LView {
      */
     lifecycleStage: LifecycleStage;
     /**
-     * The first LView or LContainer beneath this LView in the hierarchy.
-     *
-     * Necessary to store this so views can traverse through their nested views
-     * to remove listeners and call onDestroy callbacks.
-     *
-     * For embedded views, we store the LContainer rather than the first ViewState
-     * to avoid managing splicing when views are added/removed.
-     */
-    child: LView | LContainer | null;
-    /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
      * The tail allows us to quickly add a new state to the end of the view list
@@ -192,8 +182,8 @@ export declare const enum LViewFlags {
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {
     next: LView | LContainer | null;
-    child?: LView | LContainer | null;
     views?: LViewNode[];
+    tView?: TView;
     parent: LView | null;
 }
 /**
@@ -217,6 +207,17 @@ export interface TView {
     firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
+    /**
+     * Index of the host node of the first LView or LContainer beneath this LView in
+     * the hierarchy.
+     *
+     * Necessary to store this so views can traverse through their nested views
+     * to remove listeners and call onDestroy callbacks.
+     *
+     * For embedded views, we store the index of an LContainer's host rather than the first
+     * LView to avoid managing splicing when views are added/removed.
+     */
+    childIndex: number;
     /**
      * Selector matches for a node are temporarily cached on the TView so the
      * DI system can eagerly instantiate directives on the same node if they are

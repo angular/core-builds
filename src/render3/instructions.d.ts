@@ -375,10 +375,11 @@ export declare function projection(nodeIndex: number, localIndex: number, select
  * and call onDestroy callbacks.
  *
  * @param currentView The view where LView or LContainer should be added
+ * @param hostIndex Index of the view's host node in data[]
  * @param state The LView or LContainer to add to the view tree
  * @returns The state passed in
  */
-export declare function addToViewTree<T extends LView | LContainer>(currentView: LView, state: T): T;
+export declare function addToViewTree<T extends LView | LContainer>(currentView: LView, hostIndex: number, state: T): T;
 /** If node is an OnPush component, marks its LView dirty. */
 export declare function markDirtyIfOnPush(node: LElementNode): void;
 /**
