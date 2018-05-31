@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+288.sha-7e3f8f7
+ * @license Angular v6.0.0-rc.5+290.sha-2d9111b
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1591,7 +1591,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+288.sha-7e3f8f7');
+var VERSION = new Version('6.0.0-rc.5+290.sha-2d9111b');
 
 /**
  * @license
@@ -16906,30 +16906,40 @@ function NgOnChangesFeature(inputPropertyNames) {
     return function (definition) {
         var inputs = definition.inputs;
         var proto = definition.type.prototype;
-        // Place where we will store SimpleChanges if there is a change
-        Object.defineProperty(proto, PRIVATE_PREFIX, { value: undefined, writable: true });
         var _loop_1 = function (pubKey) {
             var minKey = inputs[pubKey];
             var propertyName = inputPropertyNames && inputPropertyNames[minKey] || pubKey;
             var privateMinKey = PRIVATE_PREFIX + minKey;
-            // Create a place where the actual value will be stored and make it non-enumerable
-            Object.defineProperty(proto, privateMinKey, { value: undefined, writable: true });
-            var existingDesc = Object.getOwnPropertyDescriptor(proto, minKey);
+            var originalProperty = Object.getOwnPropertyDescriptor(proto, minKey);
+            var getter = originalProperty && originalProperty.get;
+            var setter = originalProperty && originalProperty.set;
             // create a getter and setter for property
             Object.defineProperty(proto, minKey, {
-                get: function () {
-                    return (existingDesc && existingDesc.get) ? existingDesc.get.call(this) :
-                        this[privateMinKey];
-                },
+                get: getter ||
+                    (setter ? undefined : function () { return this[privateMinKey]; }),
                 set: function (value) {
                     var simpleChanges = this[PRIVATE_PREFIX];
-                    var isFirstChange = simpleChanges === undefined;
-                    if (simpleChanges == null) {
-                        simpleChanges = this[PRIVATE_PREFIX] = {};
+                    if (!simpleChanges) {
+                        // Place where we will store SimpleChanges if there is a change
+                        Object.defineProperty(this, PRIVATE_PREFIX, { value: simpleChanges = {}, writable: true });
                     }
-                    simpleChanges[propertyName] = new SimpleChange(this[privateMinKey], value, isFirstChange);
-                    (existingDesc && existingDesc.set) ? existingDesc.set.call(this, value) :
+                    var isFirstChange = !this.hasOwnProperty(privateMinKey);
+                    var currentChange = simpleChanges[propertyName];
+                    if (currentChange) {
+                        currentChange.currentValue = value;
+                    }
+                    else {
+                        simpleChanges[propertyName] =
+                            new SimpleChange(this[privateMinKey], value, isFirstChange);
+                    }
+                    if (isFirstChange) {
+                        // Create a place where the actual value will be stored and make it non-enumerable
+                        Object.defineProperty(this, privateMinKey, { value: value, writable: true });
+                    }
+                    else {
                         this[privateMinKey] = value;
+                    }
+                    setter && setter.call(this, value);
                 }
             });
         };
