@@ -17,7 +17,7 @@ import { Type } from '../type';
  * @ng.Component({...})
  * class MyClass {...}
  * ```
- * @stable
+ *
  */
 export interface TypeDecorator {
     /**
@@ -27,12 +27,12 @@ export interface TypeDecorator {
     (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
 }
 export declare const ANNOTATIONS = "__annotations__";
-export declare const PARAMETERS = "__paramaters__";
+export declare const PARAMETERS = "__parameters__";
 export declare const PROP_METADATA = "__prop__metadata__";
 /**
  * @suppress {globalThis}
  */
-export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void): {
+export declare function makeDecorator(name: string, props?: (...args: any[]) => any, parentClass?: any, chainFn?: (fn: Function) => void, typeFn?: (type: Type<any>, ...args: any[]) => void): {
     new (...args: any[]): any;
     (...args: any[]): any;
     (...args: any[]): (cls: any) => any;

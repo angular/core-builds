@@ -1,45 +1,15 @@
 /**
- * @license Angular v5.1.0-b20e271
- * (c) 2010-2017 Google, Inc. https://angular.io/
+ * @license Angular v6.0.0-rc.5+285.sha-438547c
+ * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
+
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core')) :
 	typeof define === 'function' && define.amd ? define('@angular/core/testing', ['exports', '@angular/core'], factory) :
 	(factory((global.ng = global.ng || {}, global.ng.core = global.ng.core || {}, global.ng.core.testing = {}),global.ng.core));
-}(this, (function (exports,_angular_core) { 'use strict';
+}(this, (function (exports,core) { 'use strict';
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-/**
- * @license Angular v5.1.0-b20e271
- * (c) 2010-2017 Google, Inc. https://angular.io/
- * License: MIT
- */
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -63,9 +33,9 @@ var _global = (typeof window === 'undefined' ? global : window);
  * });
  * ```
  *
- * @stable
+ *
  */
-function async(fn) {
+function asyncFallback(fn) {
     // If we're running using the Jasmine test framework, adapt to call the 'done'
     // function when asynchronous activity is finished.
     if (_global.jasmine) {
@@ -149,9 +119,51 @@ function runInTestZone(fn, context, finishCallback, failCallback) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Wraps a test function in an asynchronous test zone. The test will automatically
+ * complete when all asynchronous calls within this zone are done. Can be used
+ * to wrap an {@link inject} call.
+ *
+ * Example:
+ *
+ * ```
+ * it('...', async(inject([AClass], (object) => {
+ *   object.doSomething.then(() => {
+ *     expect(...);
+ *   })
+ * });
+ * ```
+ *
+ *
+ */
+function async(fn) {
+    var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+    if (!_Zone) {
+        return function () {
+            return Promise.reject('Zone is needed for the async() test helper but could not be found. ' +
+                'Please make sure that your environment includes zone.js/dist/zone.js');
+        };
+    }
+    var asyncTest = _Zone && _Zone[_Zone.__symbol__('asyncTest')];
+    if (typeof asyncTest === 'function') {
+        return asyncTest(fn);
+    }
+    // not using new version of zone.js
+    // TODO @JiaLiPassion, remove this after all library updated to
+    // newest version of zone.js(0.8.25)
+    return asyncFallback(fn);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Fixture for debugging and testing a component.
  *
- * @stable
+ *
  */
 var ComponentFixture = /** @class */ (function () {
     function ComponentFixture(componentRef, ngZone, _autoDetect) {
@@ -169,7 +181,7 @@ var ComponentFixture = /** @class */ (function () {
         this._onErrorSubscription = null;
         this.changeDetectorRef = componentRef.changeDetectorRef;
         this.elementRef = componentRef.location;
-        this.debugElement = _angular_core.getDebugNode(this.elementRef.nativeElement);
+        this.debugElement = core.getDebugNode(this.elementRef.nativeElement);
         this.componentInstance = componentRef.instance;
         this.nativeElement = this.elementRef.nativeElement;
         this.componentRef = componentRef;
@@ -323,7 +335,7 @@ var ComponentFixture = /** @class */ (function () {
     };
     ComponentFixture.prototype._getRenderer = function () {
         if (this._renderer === undefined) {
-            this._renderer = this.componentRef.injector.get(_angular_core.RendererFactory2, null);
+            this._renderer = this.componentRef.injector.get(core.RendererFactory2, null);
         }
         return this._renderer;
     };
@@ -387,8 +399,13 @@ function scheduleMicroTask(fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var FakeAsyncTestZoneSpec = Zone['FakeAsyncTestZoneSpec'];
-var ProxyZoneSpec = Zone['ProxyZoneSpec'];
+/**
+ * fakeAsync has been moved to zone.js
+ * this file is for fallback in case old version of zone.js is used
+ */
+var _Zone$1 = typeof Zone !== 'undefined' ? Zone : null;
+var FakeAsyncTestZoneSpec = _Zone$1 && _Zone$1['FakeAsyncTestZoneSpec'];
+var ProxyZoneSpec = _Zone$1 && _Zone$1['ProxyZoneSpec'];
 var _fakeAsyncTestZoneSpec = null;
 /**
  * Clears out the shared fake async zone for a test.
@@ -396,9 +413,10 @@ var _fakeAsyncTestZoneSpec = null;
  *
  * @experimental
  */
-function resetFakeAsyncZone() {
+function resetFakeAsyncZoneFallback() {
     _fakeAsyncTestZoneSpec = null;
-    ProxyZoneSpec.assertPresent().resetDelegate();
+    // in node.js testing we may not have ProxyZoneSpec in which case there is nothing to reset.
+    ProxyZoneSpec && ProxyZoneSpec.assertPresent().resetDelegate();
 }
 var _inFakeAsyncCall = false;
 /**
@@ -412,14 +430,14 @@ var _inFakeAsyncCall = false;
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @param fn
  * @returns The function wrapped to be executed in the fakeAsync zone
  *
  * @experimental
  */
-function fakeAsync(fn) {
+function fakeAsyncFallback(fn) {
     // Not using an arrow function to preserve context passed from call site
     return function () {
         var args = [];
@@ -443,7 +461,7 @@ function fakeAsync(fn) {
             proxyZoneSpec.setDelegate(_fakeAsyncTestZoneSpec);
             try {
                 res = fn.apply(this, args);
-                flushMicrotasks();
+                flushMicrotasksFallback();
             }
             finally {
                 proxyZoneSpec.setDelegate(lastProxyZoneSpec);
@@ -459,7 +477,7 @@ function fakeAsync(fn) {
         }
         finally {
             _inFakeAsyncCall = false;
-            resetFakeAsyncZone();
+            resetFakeAsyncZoneFallback();
         }
     };
 }
@@ -477,11 +495,11 @@ function _getFakeAsyncZoneSpec() {
  *
  * ## Example
  *
- * {@example testing/ts/fake_async.ts region='basic'}
+ * {@example core/testing/ts/fake_async.ts region='basic'}
  *
  * @experimental
  */
-function tick(millis) {
+function tickFallback(millis) {
     if (millis === void 0) { millis = 0; }
     _getFakeAsyncZoneSpec().tick(millis);
 }
@@ -495,7 +513,7 @@ function tick(millis) {
  *
  * @experimental
  */
-function flush(maxTurns) {
+function flushFallback(maxTurns) {
     return _getFakeAsyncZoneSpec().flush(maxTurns);
 }
 /**
@@ -503,7 +521,7 @@ function flush(maxTurns) {
  *
  * @experimental
  */
-function discardPeriodicTasks() {
+function discardPeriodicTasksFallback() {
     var zoneSpec = _getFakeAsyncZoneSpec();
     var pendingTimers = zoneSpec.pendingPeriodicTimers;
     zoneSpec.pendingPeriodicTimers.length = 0;
@@ -513,8 +531,192 @@ function discardPeriodicTasks() {
  *
  * @experimental
  */
-function flushMicrotasks() {
+function flushMicrotasksFallback() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
+}
+
+var _Zone = typeof Zone !== 'undefined' ? Zone : null;
+var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
+/**
+ * Clears out the shared fake async zone for a test.
+ * To be called in a global `beforeEach`.
+ *
+ * @experimental
+ */
+function resetFakeAsyncZone() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.resetFakeAsyncZone();
+    }
+    else {
+        return resetFakeAsyncZoneFallback();
+    }
+}
+/**
+ * Wraps a function to be executed in the fakeAsync zone:
+ * - microtasks are manually executed by calling `flushMicrotasks()`,
+ * - timers are synchronous, `tick()` simulates the asynchronous passage of time.
+ *
+ * If there are any pending timers at the end of the function, an exception will be thrown.
+ *
+ * Can be used to wrap inject() calls.
+ *
+ * ## Example
+ *
+ * {@example core/testing/ts/fake_async.ts region='basic'}
+ *
+ * @param fn
+ * @returns The function wrapped to be executed in the fakeAsync zone
+ *
+ * @experimental
+ */
+function fakeAsync(fn) {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.fakeAsync(fn);
+    }
+    else {
+        return fakeAsyncFallback(fn);
+    }
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone.
+ *
+ * The microtasks queue is drained at the very start of this function and after any timer callback
+ * has been executed.
+ *
+ * ## Example
+ *
+ * {@example core/testing/ts/fake_async.ts region='basic'}
+ *
+ * @experimental
+ */
+function tick(millis) {
+    if (millis === void 0) { millis = 0; }
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.tick(millis);
+    }
+    else {
+        return tickFallback(millis);
+    }
+}
+/**
+ * Simulates the asynchronous passage of time for the timers in the fakeAsync zone by
+ * draining the macrotask queue until it is empty. The returned value is the milliseconds
+ * of time that would have been elapsed.
+ *
+ * @param maxTurns
+ * @returns The simulated time elapsed, in millis.
+ *
+ * @experimental
+ */
+function flush(maxTurns) {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flush(maxTurns);
+    }
+    else {
+        return flushFallback(maxTurns);
+    }
+}
+/**
+ * Discard all remaining periodic tasks.
+ *
+ * @experimental
+ */
+function discardPeriodicTasks() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.discardPeriodicTasks();
+    }
+    else {
+        discardPeriodicTasksFallback();
+    }
+}
+/**
+ * Flush any pending microtasks.
+ *
+ * @experimental
+ */
+function flushMicrotasks() {
+    if (fakeAsyncTestModule) {
+        return fakeAsyncTestModule.flushMicrotasks();
+    }
+    else {
+        return flushMicrotasksFallback();
+    }
+}
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
 }
 
 /**
@@ -624,8 +826,11 @@ var TestingCompiler = /** @class */ (function (_super) {
        * This can be used for errors created by compileModule...
        */
     function (error) { throw unimplemented(); };
+    TestingCompiler.decorators = [
+        { type: core.Injectable }
+    ];
     return TestingCompiler;
-}(_angular_core.Compiler));
+}(core.Compiler));
 /**
  * A factory for creating a Compiler
  *
@@ -660,19 +865,19 @@ var _nextRootElementId = 0;
 /**
  * @experimental
  */
-var ComponentFixtureAutoDetect = new _angular_core.InjectionToken('ComponentFixtureAutoDetect');
+var ComponentFixtureAutoDetect = new core.InjectionToken('ComponentFixtureAutoDetect');
 /**
  * @experimental
  */
-var ComponentFixtureNoNgZone = new _angular_core.InjectionToken('ComponentFixtureNoNgZone');
+var ComponentFixtureNoNgZone = new core.InjectionToken('ComponentFixtureNoNgZone');
 /**
- * @whatItDoes Configures and initializes environment for unit testing and provides methods for
- * creating components and services in unit tests.
  * @description
+ * Configures and initializes environment for unit testing and provides methods for
+ * creating components and services in unit tests.
  *
  * TestBed is the primary api for writing unit tests for Angular applications and libraries.
  *
- * @stable
+ *
  */
 var TestBed = /** @class */ (function () {
     function TestBed() {
@@ -693,6 +898,8 @@ var TestBed = /** @class */ (function () {
         this._testEnvAotSummaries = function () { return []; };
         this._aotSummaries = [];
         this._templateOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this.platform = null;
         this.ngModule = null;
     }
@@ -859,7 +1066,7 @@ var TestBed = /** @class */ (function () {
         return TestBed;
     };
     TestBed.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = _angular_core.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
         return getTestBed().get(token, notFoundValue);
     };
     TestBed.createComponent = function (component) {
@@ -936,7 +1143,7 @@ var TestBed = /** @class */ (function () {
         this._testEnvAotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
-        _angular_core.ɵclearOverrides();
+        core.ɵclearOverrides();
         this._aotSummaries = [];
         this._templateOverrides = [];
         this._compiler = (null);
@@ -944,6 +1151,8 @@ var TestBed = /** @class */ (function () {
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
+        this._isRoot = true;
+        this._rootProviderOverrides = [];
         this._moduleRef = (null);
         this._moduleFactory = (null);
         this._compilerOptions = [];
@@ -957,7 +1166,10 @@ var TestBed = /** @class */ (function () {
                 fixture.destroy();
             }
             catch (e) {
-                console.error('Error during cleanup of component', fixture.componentInstance);
+                console.error('Error during cleanup of component', {
+                    component: fixture.componentInstance,
+                    stacktrace: e,
+                });
             }
         });
         this._activeFixtures = [];
@@ -969,16 +1181,16 @@ var TestBed = /** @class */ (function () {
     TestBed.prototype.configureTestingModule = function (moduleDef) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
-            (_a = this._providers).push.apply(_a, moduleDef.providers);
+            (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
         }
         if (moduleDef.declarations) {
-            (_b = this._declarations).push.apply(_b, moduleDef.declarations);
+            (_b = this._declarations).push.apply(_b, __spread(moduleDef.declarations));
         }
         if (moduleDef.imports) {
-            (_c = this._imports).push.apply(_c, moduleDef.imports);
+            (_c = this._imports).push.apply(_c, __spread(moduleDef.imports));
         }
         if (moduleDef.schemas) {
-            (_d = this._schemas).push.apply(_d, moduleDef.schemas);
+            (_d = this._schemas).push.apply(_d, __spread(moduleDef.schemas));
         }
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
@@ -1009,7 +1221,7 @@ var TestBed = /** @class */ (function () {
             catch (e) {
                 var errorCompType = this._compiler.getComponentFromError(e);
                 if (errorCompType) {
-                    throw new Error("This test module uses the component " + _angular_core.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
+                    throw new Error("This test module uses the component " + core.ɵstringify(errorCompType) + " which is using a \"templateUrl\" or \"styleUrls\", but they were never compiled. " +
                         "Please call \"TestBed.compileComponents\" before your test.");
                 }
                 else {
@@ -1017,48 +1229,87 @@ var TestBed = /** @class */ (function () {
                 }
             }
         }
-        for (var _i = 0, _a = this._templateOverrides; _i < _a.length; _i++) {
-            var _b = _a[_i], component = _b.component, templateOf = _b.templateOf;
-            var compFactory = this._compiler.getComponentFactory(templateOf);
-            _angular_core.ɵoverrideComponentView(component, compFactory);
+        try {
+            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+                var compFactory = this._compiler.getComponentFactory(templateOf);
+                core.ɵoverrideComponentView(component, compFactory);
+            }
         }
-        var ngZone = new _angular_core.NgZone({ enableLongStackTrace: true });
-        var ngZoneInjector = _angular_core.Injector.create([{ provide: _angular_core.NgZone, useValue: ngZone }], this.platform.injector);
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        var ngZone = new core.NgZone({ enableLongStackTrace: true });
+        var providers = [{ provide: core.NgZone, useValue: ngZone }];
+        var ngZoneInjector = core.Injector.create({
+            providers: providers,
+            parent: this.platform.injector,
+            name: this._moduleFactory.moduleType.name
+        });
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
-        this._moduleRef.injector.get(_angular_core.ApplicationInitStatus).runInitializers();
+        this._moduleRef.injector.get(core.ApplicationInitStatus).runInitializers();
         this._instantiated = true;
+        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
-        var declarations = this._declarations.concat(this._templateOverrides.map(function (entry) { return entry.templateOf; }));
-        var imports = [this.ngModule, this._imports];
+        var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
+        var rootScopeImports = [];
+        var rootProviderOverrides = this._rootProviderOverrides;
+        if (this._isRoot) {
+            var RootScopeModule = /** @class */ (function () {
+                function RootScopeModule() {
+                }
+                RootScopeModule.decorators = [
+                    { type: core.NgModule, args: [{
+                                providers: __spread(rootProviderOverrides),
+                            },] },
+                ];
+                return RootScopeModule;
+            }());
+            rootScopeImports.push(RootScopeModule);
+        }
+        providers.push({ provide: core.ɵAPP_ROOT, useValue: this._isRoot });
+        var imports = [rootScopeImports, this.ngModule, this._imports];
         var schemas = this._schemas;
         var DynamicTestModule = /** @class */ (function () {
             function DynamicTestModule() {
             }
             DynamicTestModule.decorators = [
-                { type: _angular_core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+                { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
             ];
-            /** @nocollapse */
-            DynamicTestModule.ctorParameters = function () { return []; };
             return DynamicTestModule;
         }());
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
-        for (var _i = 0, _a = [this._testEnvAotSummaries].concat(this._aotSummaries); _i < _a.length; _i++) {
-            var summary = _a[_i];
-            this._compiler.loadAotSummaries(summary);
+        try {
+            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
+                var summary = _b.value;
+                this._compiler.loadAotSummaries(summary);
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            }
+            finally { if (e_2) throw e_2.error; }
         }
         this._moduleOverrides.forEach(function (entry) { return _this._compiler.overrideModule(entry[0], entry[1]); });
         this._componentOverrides.forEach(function (entry) { return _this._compiler.overrideComponent(entry[0], entry[1]); });
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
+        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {
@@ -1067,7 +1318,7 @@ var TestBed = /** @class */ (function () {
         }
     };
     TestBed.prototype.get = function (token, notFoundValue) {
-        if (notFoundValue === void 0) { notFoundValue = _angular_core.Injector.THROW_IF_NOT_FOUND; }
+        if (notFoundValue === void 0) { notFoundValue = core.Injector.THROW_IF_NOT_FOUND; }
         this._initIfNeeded();
         if (token === TestBed) {
             return this;
@@ -1107,6 +1358,15 @@ var TestBed = /** @class */ (function () {
     };
     TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
+        if (typeof token !== 'string' && token.ngInjectableDef &&
+            token.ngInjectableDef.providedIn === 'root') {
+            if (provider.useFactory) {
+                this._rootProviderOverrides.push({ provide: token, useFactory: provider.useFactory, deps: provider.deps || [] });
+            }
+            else {
+                this._rootProviderOverrides.push({ provide: token, useValue: provider.useValue });
+            }
+        }
         var flags = 0;
         var value;
         if (provider.useFactory) {
@@ -1122,10 +1382,10 @@ var TestBed = /** @class */ (function () {
             var depToken;
             if (Array.isArray(dep)) {
                 dep.forEach(function (entry) {
-                    if (entry instanceof _angular_core.Optional) {
+                    if (entry instanceof core.Optional) {
                         depFlags |= 2 /* Optional */;
                     }
-                    else if (entry instanceof _angular_core.SkipSelf) {
+                    else if (entry instanceof core.SkipSelf) {
                         depFlags |= 1 /* SkipSelf */;
                     }
                     else {
@@ -1138,7 +1398,7 @@ var TestBed = /** @class */ (function () {
             }
             return [depFlags, depToken];
         });
-        _angular_core.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
+        core.ɵoverrideProvider({ token: token, flags: flags, deps: deps, value: value, deprecatedBehavior: deprecated });
     };
     TestBed.prototype.overrideTemplateUsingTestingModule = function (component, template) {
         this._assertNotInstantiated('overrideTemplateUsingTestingModule', 'override template');
@@ -1146,10 +1406,8 @@ var TestBed = /** @class */ (function () {
             function OverrideComponent() {
             }
             OverrideComponent.decorators = [
-                { type: _angular_core.Component, args: [{ selector: 'empty', template: template },] },
+                { type: core.Component, args: [{ selector: 'empty', template: template },] },
             ];
-            /** @nocollapse */
-            OverrideComponent.ctorParameters = function () { return []; };
             return OverrideComponent;
         }());
         this._templateOverrides.push({ component: component, templateOf: OverrideComponent });
@@ -1159,16 +1417,16 @@ var TestBed = /** @class */ (function () {
         this._initIfNeeded();
         var componentFactory = this._compiler.getComponentFactory(component);
         if (!componentFactory) {
-            throw new Error("Cannot create the component " + _angular_core.ɵstringify(component) + " as it was not imported into the testing module!");
+            throw new Error("Cannot create the component " + core.ɵstringify(component) + " as it was not imported into the testing module!");
         }
         var noNgZone = this.get(ComponentFixtureNoNgZone, false);
         var autoDetect = this.get(ComponentFixtureAutoDetect, false);
-        var ngZone = noNgZone ? null : this.get(_angular_core.NgZone, null);
+        var ngZone = noNgZone ? null : this.get(core.NgZone, null);
         var testComponentRenderer = this.get(TestComponentRenderer);
         var rootElId = "root" + _nextRootElementId++;
         testComponentRenderer.insertRootElement(rootElId);
         var initComponent = function () {
-            var componentRef = componentFactory.create(_angular_core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
+            var componentRef = componentFactory.create(core.Injector.NULL, [], "#" + rootElId, _this._moduleRef);
             return new ComponentFixture(componentRef, ngZone, autoDetect);
         };
         var fixture = !ngZone ? initComponent() : ngZone.run(initComponent);
@@ -1206,7 +1464,7 @@ function getTestBed() {
  * eventually
  *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
  *
- * @stable
+ *
  */
 function inject(tokens, fn) {
     var testBed = getTestBed();
@@ -1272,11 +1530,6 @@ function withModule(moduleDef, fn) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * Public Test Library for unit testing Angular applications. Assumes that you are running
- * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
- * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
- */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
 if (_global$1.beforeEach) {
@@ -1288,6 +1541,173 @@ if (_global$1.beforeEach) {
 // TODO(juliemr): remove this, only used because we need to export something to have compilation
 // work.
 var __core_private_testing_placeholder__ = '';
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+* Wraps a function in a new function which sets up document and HTML for running a test.
+*
+* This function is intended to wrap an existing testing function. The wrapper
+* adds HTML to the `body` element of the `document` and subsequently tears it down.
+*
+* This function is intended to be used with `async await` and `Promise`s. If the wrapped
+* function returns a promise (or is `async`) then the teardown is delayed until that `Promise`
+* is resolved.
+*
+* On `node` this function detects if `document` is present and if not it will create one by
+* loading `domino` and installing it.
+*
+* Example:
+*
+* ```
+* describe('something', () => {
+*   it('should do something', withBody('<my-app></my-app>', async () => {
+*     const myApp = renderComponent(MyApp);
+*     await whenRendered(myApp);
+*     expect(getRenderedText(myApp)).toEqual('Hello World!');
+*   }));
+* });
+* ```
+*
+* @param html HTML which should be inserted into `body` of the `document`.
+* @param blockFn function to wrap. The function can return promise or be `async`.
+* @experimental
+*/
+function withBody(html, blockFn) {
+    return function (done) {
+        ensureDocument();
+        if (typeof blockFn === 'function') {
+            document.body.innerHTML = html;
+            // TODO(i): I'm not sure why a cast is required here but otherwise I get
+            //   TS2349: Cannot invoke an expression whose type lacks a call signature. Type 'never' has
+            //   no compatible call signatures.
+            var blockReturn = blockFn();
+            if (blockReturn instanceof Promise) {
+                blockReturn = blockReturn.then(done, done.fail);
+            }
+            else {
+                done();
+            }
+        }
+    };
+}
+var savedDocument = undefined;
+var savedRequestAnimationFrame = undefined;
+var savedNode = undefined;
+var requestAnimationFrameCount = 0;
+var ɵ0 = function (domino) {
+    if (typeof global == 'object' && global.process && typeof require == 'function') {
+        try {
+            return require(domino);
+        }
+        catch (e) {
+            // It is possible that we don't have domino available in which case just give up.
+        }
+    }
+    // Seems like we don't have domino, give up.
+    return null;
+};
+/**
+ * System.js uses regexp to look for `require` statements. `domino` has to be
+ * extracted into a constant so that the regexp in the System.js does not match
+ * and does not try to load domino in the browser.
+ */
+var domino = (ɵ0)('domino');
+/**
+ * Ensure that global has `Document` if we are in node.js
+ * @experimental
+ */
+function ensureDocument() {
+    if (domino) {
+        // we are in node.js.
+        var window_1 = domino.createWindow('', 'http://localhost');
+        savedDocument = global.document;
+        global.window = window_1;
+        global.document = window_1.document;
+        // Trick to avoid Event patching from
+        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
+        // It fails with Domino with TypeError: Cannot assign to read only property
+        // 'stopImmediatePropagation' of object '#<Event>'
+        // Trick to avoid Event patching from
+        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
+        // It fails with Domino with TypeError: Cannot assign to read only property
+        // 'stopImmediatePropagation' of object '#<Event>'
+        global.Event = null;
+        savedNode = global.Node;
+        global.Node = domino.impl.Node;
+        savedRequestAnimationFrame = global.requestAnimationFrame;
+        global.requestAnimationFrame = function (cb) {
+            setImmediate(cb);
+            return requestAnimationFrameCount++;
+        };
+    }
+}
+/**
+ * Restore the state of `Document` between tests.
+ * @experimental
+ */
+function cleanupDocument() {
+    if (savedDocument) {
+        global.document = savedDocument;
+        global.window = undefined;
+        savedDocument = undefined;
+    }
+    if (savedNode) {
+        global.Node = savedNode;
+        savedNode = undefined;
+    }
+    if (savedRequestAnimationFrame) {
+        global.requestAnimationFrame = savedRequestAnimationFrame;
+        savedRequestAnimationFrame = undefined;
+    }
+}
+if (typeof beforeEach == 'function')
+    beforeEach(ensureDocument);
+if (typeof afterEach == 'function')
+    beforeEach(cleanupDocument);
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+// This file only reexports content of the `src` folder. Keep it that way.
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
 
 exports.async = async;
 exports.ComponentFixture = ComponentFixture;
@@ -1308,6 +1728,10 @@ exports.withModule = withModule;
 exports.__core_private_testing_placeholder__ = __core_private_testing_placeholder__;
 exports.ɵTestingCompiler = TestingCompiler;
 exports.ɵTestingCompilerFactory = TestingCompilerFactory;
+exports.withBody = withBody;
+exports.ensureDocument = ensureDocument;
+exports.cleanupDocument = cleanupDocument;
+exports.ɵ0 = ɵ0;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

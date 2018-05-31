@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * @whatItDoes Represents a type that a Component or other object is instances of.
- *
  * @description
+ *
+ * Represents a type that a Component or other object is instances of.
  *
  * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
  * the `MyCustomComponent` constructor function.
  *
- * @stable
+ *
  */
 export declare const Type: FunctionConstructor;
 export declare function isType(v: any): v is Type<any>;

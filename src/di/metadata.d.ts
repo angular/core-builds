@@ -1,12 +1,11 @@
 /**
  * Type of the Inject decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface InjectDecorator {
     /**
-     * @whatItDoes A parameter decorator that specifies a dependency.
-     * @howToUse
+     * @usageNotes
      * ```
      * @Injectable()
      * class Car {
@@ -15,6 +14,8 @@ export interface InjectDecorator {
      * ```
      *
      * @description
+     * A parameter decorator that specifies a dependency.
+     *
      * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
      *
      * ### Example
@@ -28,7 +29,7 @@ export interface InjectDecorator {
      *
      * {@example core/di/ts/metadata_spec.ts region='InjectWithoutDecorator'}
      *
-     * @stable
+     *
      */
     (token: any): any;
     new (token: any): Inject;
@@ -36,7 +37,7 @@ export interface InjectDecorator {
 /**
  * Type of the Inject metadata.
  *
- * @stable
+ *
  */
 export interface Inject {
     token: any;
@@ -44,20 +45,18 @@ export interface Inject {
 /**
  * Inject decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Inject: InjectDecorator;
 /**
  * Type of the Optional decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface OptionalDecorator {
     /**
-     * @whatItDoes A parameter metadata that marks a dependency as optional.
-     * {@link Injector} provides `null` if the dependency is not found.
-     * @howToUse
+     * @usageNotes
      * ```
      * @Injectable()
      * class Car {
@@ -66,13 +65,16 @@ export interface OptionalDecorator {
      * ```
      *
      * @description
+     * A parameter metadata that marks a dependency as optional.
+     * {@link Injector} provides `null` if the dependency is not found.
+     *
      * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
      *
      * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Optional'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Optional;
@@ -80,71 +82,25 @@ export interface OptionalDecorator {
 /**
  * Type of the Optional metadata.
  *
- * @stable
+ *
  */
 export interface Optional {
 }
 /**
  * Optional decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Optional: OptionalDecorator;
 /**
- * Type of the Injectable decorator / constructor function.
- *
- * @stable
- */
-export interface InjectableDecorator {
-    /**
-     * @whatItDoes A marker metadata that marks a class as available to {@link Injector} for creation.
-     * @howToUse
-     * ```
-     * @Injectable()
-     * class Car {}
-     * ```
-     *
-     * @description
-     * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
-     *
-     * ### Example
-     *
-     * {@example core/di/ts/metadata_spec.ts region='Injectable'}
-     *
-     * {@link Injector} will throw an error when trying to instantiate a class that
-     * does not have `@Injectable` marker, as shown in the example below.
-     *
-     * {@example core/di/ts/metadata_spec.ts region='InjectableThrows'}
-     *
-     * @stable
-     */
-    (): any;
-    new (): Injectable;
-}
-/**
- * Type of the Injectable metadata.
- *
- * @stable
- */
-export interface Injectable {
-}
-/**
- * Injectable decorator and metadata.
- *
- * @stable
- * @Annotation
- */
-export declare const Injectable: InjectableDecorator;
-/**
  * Type of the Self decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface SelfDecorator {
     /**
-     * @whatItDoes Specifies that an {@link Injector} should retrieve a dependency only from itself.
-     * @howToUse
+     * @usageNotes
      * ```
      * @Injectable()
      * class Car {
@@ -153,13 +109,15 @@ export interface SelfDecorator {
      * ```
      *
      * @description
+     * Specifies that an {@link Injector} should retrieve a dependency only from itself.
+     *
      * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
      *
      * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Self'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Self;
@@ -167,26 +125,25 @@ export interface SelfDecorator {
 /**
  * Type of the Self metadata.
  *
- * @stable
+ *
  */
 export interface Self {
 }
 /**
  * Self decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Self: SelfDecorator;
 /**
  * Type of the SkipSelf decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface SkipSelfDecorator {
     /**
-     * @whatItDoes Specifies that the dependency resolution should start from the parent injector.
-     * @howToUse
+     * @usageNotes
      * ```
      * @Injectable()
      * class Car {
@@ -195,13 +152,15 @@ export interface SkipSelfDecorator {
      * ```
      *
      * @description
+     * Specifies that the dependency resolution should start from the parent injector.
+     *
      * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
      *
      * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='SkipSelf'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): SkipSelf;
@@ -209,27 +168,25 @@ export interface SkipSelfDecorator {
 /**
  * Type of the SkipSelf metadata.
  *
- * @stable
+ *
  */
 export interface SkipSelf {
 }
 /**
  * SkipSelf decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const SkipSelf: SkipSelfDecorator;
 /**
  * Type of the Host decorator / constructor function.
  *
- * @stable
+ *
  */
 export interface HostDecorator {
     /**
-     * @whatItDoes Specifies that an injector should retrieve a dependency from any injector until
-     * reaching the host element of the current component.
-     * @howToUse
+     * @usageNotes
      * ```
      * @Injectable()
      * class Car {
@@ -238,13 +195,16 @@ export interface HostDecorator {
      * ```
      *
      * @description
+     * Specifies that an injector should retrieve a dependency from any injector until
+     * reaching the host element of the current component.
+     *
      * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
      *
      * ### Example
      *
      * {@example core/di/ts/metadata_spec.ts region='Host'}
      *
-     * @stable
+     *
      */
     (): any;
     new (): Host;
@@ -252,14 +212,14 @@ export interface HostDecorator {
 /**
  * Type of the Host metadata.
  *
- * @stable
+ *
  */
 export interface Host {
 }
 /**
  * Host decorator and metadata.
  *
- * @stable
+ *
  * @Annotation
  */
 export declare const Host: HostDecorator;

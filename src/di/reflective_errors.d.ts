@@ -104,7 +104,7 @@ export declare function invalidProviderError(provider: any): Error;
  *
  * expect(() => Injector.resolveAndCreate([A,B])).toThrowError();
  * ```
- * @stable
+ *
  */
 export declare function noAnnotationError(typeOrFunc: Type<any> | Function, params: any[][]): Error;
 /**
@@ -119,7 +119,7 @@ export declare function noAnnotationError(typeOrFunc: Type<any> | Function, para
  *
  * expect(() => injector.getAt(100)).toThrowError();
  * ```
- * @stable
+ *
  */
 export declare function outOfBoundsError(index: number): Error;
 /**

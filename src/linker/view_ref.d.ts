@@ -7,9 +7,6 @@
  */
 import { ApplicationRef } from '../application_ref';
 import { ChangeDetectorRef } from '../change_detection/change_detector_ref';
-/**
- * @stable
- */
 export declare abstract class ViewRef extends ChangeDetectorRef {
     /**
      * Destroys the view and all of the data structures associated with it.

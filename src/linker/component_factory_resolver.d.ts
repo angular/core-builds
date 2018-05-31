@@ -11,9 +11,6 @@ import { ComponentFactory, ComponentRef } from './component_factory';
 import { NgModuleRef } from './ng_module_factory';
 export declare function noComponentFactoryError(component: Function): Error;
 export declare function getComponent(error: Error): Type<any>;
-/**
- * @stable
- */
 export declare abstract class ComponentFactoryResolver {
     static NULL: ComponentFactoryResolver;
     abstract resolveComponentFactory<T>(component: Type<T>): ComponentFactory<T>;
