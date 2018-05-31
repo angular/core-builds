@@ -46,6 +46,11 @@ export interface LQuery<T> {
      * This is what builds up the `QueryList._valuesTree`.
      */
     values: any[];
+    /**
+     * A pointer to an array that stores collected values from views. This is necessary so we know a
+     * container into which to insert nodes collected from views.
+     */
+    containerValues: any[] | null;
 }
 export declare class LQueries_ implements LQueries {
     shallow: LQuery<any> | null;
@@ -54,7 +59,8 @@ export declare class LQueries_ implements LQueries {
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
     child(): LQueries | null;
     container(): LQueries | null;
-    enterView(index: number): LQueries | null;
+    createView(): LQueries | null;
+    insertView(index: number): void;
     addNode(node: LNode): void;
     removeView(index: number): void;
 }

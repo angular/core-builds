@@ -11,8 +11,8 @@ import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
-import { LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefList, DirectiveDefListOrFactory, PipeDefList, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { Sanitizer } from '../sanitization/security';
 /**
@@ -76,7 +76,7 @@ export declare function createLView<T>(viewId: number, renderer: Renderer3, tVie
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LView, parent: LNode | null, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -89,10 +89,10 @@ export declare function createLNodeObject(type: TNodeType, currentView: LView, p
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: string[] | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lView?: LView | null): LElementNode;
 export declare function createLNode(index: number | null, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
-export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: string[] | null, lContainer: LContainer): LContainerNode;
-export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: string[] | null, lProjection: LProjection): LProjectionNode;
+export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
 /**
  *
  * @param hostNode Existing node to render into.
@@ -114,7 +114,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, directives?: DirectiveDefList | null, pipes?: PipeDefList | null): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -128,7 +128,7 @@ export declare function renderComponentOrTemplate<T>(node: LElementNode, hostVie
  * hold an attribute name and elements with an odd index hold an attribute value, ex.:
  * ['id', 'warning5', 'class', 'alert']
  */
-export declare function elementStart(index: number, name: string, attrs?: string[] | null, localRefs?: string[] | null): RElement;
+export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
 export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
@@ -195,10 +195,11 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param index The index of the TNode in TView.data
  * @param tagName The tag name of the node
  * @param attrs The attributes defined on this node
+ * @param parent The parent of this node
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: string[] | null, tViews: TView[] | null): TNode;
+export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: TAttributes | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -261,7 +262,7 @@ export declare function elementStyle<T>(index: number, value: {
 export declare function text(index: number, value?: any): void;
 /**
  * Create text node with binding
- * Bindings should be handled externally with the proper bind(1-8) method
+ * Bindings should be handled externally with the proper interpolation(1-8) method
  *
  * @param index Index of the node in the data array.
  * @param value Stringified value to write.
@@ -284,7 +285,16 @@ export declare function directiveCreate<T>(index: number, directive: T, directiv
  * current Angular. Example: local refs and inputs on root component.
  */
 export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
-export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>): LContainer;
+/**
+ * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
+ *
+ * @param parentLNode the LNode in which the container's content will be rendered
+ * @param currentView The parent view of the LContainer
+ * @param template Optional the inline template (ng-template instruction case)
+ * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
+ * @returns LContainer
+ */
+export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainerNode.
  *
@@ -296,7 +306,7 @@ export declare function createLContainer(parentLNode: LNode, currentView: LView,
  * @param attrs The attrs attached to the container, if applicable
  * @param localRefs A set of local reference bindings on the element.
  */
-export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: string[], localRefs?: string[] | null): void;
+export declare function container(index: number, template?: ComponentTemplate<any>, tagName?: string | null, attrs?: TAttributes, localRefs?: string[] | null): void;
 /**
  * Sets a container up to receive views.
  *
@@ -463,7 +473,7 @@ export declare const NO_CHANGE: NO_CHANGE;
  *
  * @param value Value to diff
  */
-export declare function bind<T>(value: T | NO_CHANGE): T | NO_CHANGE;
+export declare function bind<T>(value: T): T | NO_CHANGE;
 /**
  * Reserves slots for pure functions (`pureFunctionX` instructions)
  *

@@ -72,3 +72,7 @@ NgDevModePerfCounters.prototype.rendererRemoveClass;
 NgDevModePerfCounters.prototype.rendererSetStyle;
  /** @type {?} */
 NgDevModePerfCounters.prototype.rendererRemoveStyle;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererDestroy;
+ /** @type {?} */
+NgDevModePerfCounters.prototype.rendererDestroyNode;
