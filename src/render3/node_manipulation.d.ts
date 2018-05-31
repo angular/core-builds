@@ -1,3 +1,4 @@
+import { LContainer } from './interfaces/container';
 import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode } from './interfaces/node';
 import { RNode, RText, Renderer3 } from './interfaces/renderer';
 import { LView, LViewOrLContainer } from './interfaces/view';
@@ -64,6 +65,8 @@ export declare function insertView(container: LContainerNode, viewNode: LViewNod
  * @returns The removed view
  */
 export declare function removeView(container: LContainerNode, removeIndex: number): LViewNode;
+/** Gets the child of the given LView */
+export declare function getLViewChild(view: LView): LView | LContainer | null;
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
