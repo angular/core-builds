@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.3+49.sha-2991b1b
+ * @license Angular v6.0.3+50.sha-d69ba73
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -465,7 +465,7 @@ class Query {
  * ContentChildren decorator and metadata.
  *
  *
- *  \@Annotation
+ * \@Annotation
  */
 const ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
 /**
@@ -2032,7 +2032,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.3+49.sha-2991b1b');
+const VERSION = new Version('6.0.3+50.sha-d69ba73');
 
 /**
  * @fileoverview added by tsickle
@@ -3856,7 +3856,7 @@ ApplicationInitStatus.decorators = [
 ];
 /** @nocollapse */
 ApplicationInitStatus.ctorParameters = () => [
-    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional },] },
+    { type: Array, decorators: [{ type: Inject, args: [APP_INITIALIZER,] }, { type: Optional }] }
 ];
 
 /**
@@ -3959,8 +3959,6 @@ class Console {
 Console.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Console.ctorParameters = () => [];
 
 /**
  * @fileoverview added by tsickle
@@ -4054,8 +4052,6 @@ class Compiler {
 Compiler.decorators = [
     { type: Injectable }
 ];
-/** @nocollapse */
-Compiler.ctorParameters = () => [];
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -4433,8 +4429,8 @@ const wtfEndTimeRange = wtfEnabled ? endTimeRange : (r) => null;
  *  </div>`})
  * export class Zippy {
  *   visible: boolean = true;
- *   \@Output() open: EventEmitter<any> = new EventEmitter();
- *   \@Output() close: EventEmitter<any> = new EventEmitter();
+ * \@Output() open: EventEmitter<any> = new EventEmitter();
+ * \@Output() close: EventEmitter<any> = new EventEmitter();
  *
  *   toggle() {
  *     this.visible = !this.visible;
@@ -5087,7 +5083,7 @@ Testability.decorators = [
 ];
 /** @nocollapse */
 Testability.ctorParameters = () => [
-    { type: NgZone, },
+    { type: NgZone }
 ];
 /**
  * A global registry of {\@link Testability} instances for specific elements.
@@ -5493,7 +5489,7 @@ PlatformRef.decorators = [
 ];
 /** @nocollapse */
 PlatformRef.ctorParameters = () => [
-    { type: Injector, },
+    { type: Injector }
 ];
 /**
  * @param {?=} ngZoneOption
@@ -5775,12 +5771,12 @@ ApplicationRef.decorators = [
 ];
 /** @nocollapse */
 ApplicationRef.ctorParameters = () => [
-    { type: NgZone, },
-    { type: Console, },
-    { type: Injector, },
-    { type: ErrorHandler, },
-    { type: ComponentFactoryResolver, },
-    { type: ApplicationInitStatus, },
+    { type: NgZone },
+    { type: Console },
+    { type: Injector },
+    { type: ErrorHandler },
+    { type: ComponentFactoryResolver },
+    { type: ApplicationInitStatus }
 ];
 /**
  * @template T
@@ -6024,7 +6020,7 @@ function getModuleFactory(id) {
  * ```typescript
  * \@Component({...})
  * class Container {
- *   \@ViewChildren(Item) items:QueryList<Item>;
+ * \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
  *
@@ -6225,8 +6221,8 @@ SystemJsNgModuleLoader.decorators = [
 ];
 /** @nocollapse */
 SystemJsNgModuleLoader.ctorParameters = () => [
-    { type: Compiler, },
-    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional },] },
+    { type: Compiler },
+    { type: SystemJsNgModuleLoaderConfig, decorators: [{ type: Optional }] }
 ];
 /**
  * @param {?} value
@@ -8469,7 +8465,7 @@ ApplicationModule.decorators = [
 ];
 /** @nocollapse */
 ApplicationModule.ctorParameters = () => [
-    { type: ApplicationRef, },
+    { type: ApplicationRef }
 ];
 
 /**
@@ -15776,8 +15772,7 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
  *  - Using a while loop because it's faster than recursion
  *  - Destroy only called on movement to sibling or movement to parent (laterally or up)
  *
- *  \@param rootView The view to destroy
- * @param {?} rootView
+ * @param {?} rootView The view to destroy
  * @return {?}
  */
 function destroyViewTree(rootView) {
