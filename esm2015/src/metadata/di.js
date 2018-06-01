@@ -100,7 +100,7 @@ function ContentChildrenDecorator_tsickle_Closure_declarations() {
  * ContentChildren decorator and metadata.
  *
  *
- *  \@Annotation
+ * \@Annotation
  */
 export const /** @type {?} */ ContentChildren = makePropDecorator('ContentChildren', (selector, data = {}) => (Object.assign({ selector, first: false, isViewQuery: false, descendants: false }, data)), Query);
 /**

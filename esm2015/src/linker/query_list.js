@@ -30,7 +30,7 @@ import { getSymbolIterator } from '../util';
  * ```typescript
  * \@Component({...})
  * class Container {
- *   \@ViewChildren(Item) items:QueryList<Item>;
+ * \@ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
  *
