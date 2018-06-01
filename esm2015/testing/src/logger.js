@@ -41,13 +41,6 @@ Log.decorators = [
 /** @nocollapse */
 Log.ctorParameters = () => [];
 function Log_tsickle_Closure_declarations() {
-    /** @type {!Array<{type: !Function, args: (undefined|!Array<?>)}>} */
-    Log.decorators;
-    /**
-     * @nocollapse
-     * @type {function(): !Array<(null|{type: ?, decorators: (undefined|!Array<{type: !Function, args: (undefined|!Array<?>)}>)})>}
-     */
-    Log.ctorParameters;
     /** @type {?} */
     Log.prototype.logItems;
 }

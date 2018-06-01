@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+288.sha-7e3f8f7
+ * @license Angular v6.0.0-rc.5+297.sha-6948ef1
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -197,8 +197,6 @@ var ComponentFixture = /** @class */ (function () {
                         if (_this._autoDetect) {
                             // Do a change detection run with checkNoChanges set to true to check
                             // there are no changes on the second run.
-                            // Do a change detection run with checkNoChanges set to true to check
-                            // there are no changes on the second run.
                             _this.detectChanges(true);
                         }
                     }
@@ -237,13 +235,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Trigger a change detection cycle for the component.
      */
-    /**
-       * Trigger a change detection cycle for the component.
-       */
-    ComponentFixture.prototype.detectChanges = /**
-       * Trigger a change detection cycle for the component.
-       */
-    function (checkNoChanges) {
+    ComponentFixture.prototype.detectChanges = function (checkNoChanges) {
         var _this = this;
         if (checkNoChanges === void 0) { checkNoChanges = true; }
         if (this.ngZone != null) {
@@ -259,29 +251,13 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Do a change detection run to make sure there were no changes.
      */
-    /**
-       * Do a change detection run to make sure there were no changes.
-       */
-    ComponentFixture.prototype.checkNoChanges = /**
-       * Do a change detection run to make sure there were no changes.
-       */
-    function () { this.changeDetectorRef.checkNoChanges(); };
+    ComponentFixture.prototype.checkNoChanges = function () { this.changeDetectorRef.checkNoChanges(); };
     /**
      * Set whether the fixture should autodetect changes.
      *
      * Also runs detectChanges once so that any existing change is detected.
      */
-    /**
-       * Set whether the fixture should autodetect changes.
-       *
-       * Also runs detectChanges once so that any existing change is detected.
-       */
-    ComponentFixture.prototype.autoDetectChanges = /**
-       * Set whether the fixture should autodetect changes.
-       *
-       * Also runs detectChanges once so that any existing change is detected.
-       */
-    function (autoDetect) {
+    ComponentFixture.prototype.autoDetectChanges = function (autoDetect) {
         if (autoDetect === void 0) { autoDetect = true; }
         if (this.ngZone == null) {
             throw new Error('Cannot call autoDetectChanges when ComponentFixtureNoNgZone is set');
@@ -293,34 +269,14 @@ var ComponentFixture = /** @class */ (function () {
      * Return whether the fixture is currently stable or has async tasks that have not been completed
      * yet.
      */
-    /**
-       * Return whether the fixture is currently stable or has async tasks that have not been completed
-       * yet.
-       */
-    ComponentFixture.prototype.isStable = /**
-       * Return whether the fixture is currently stable or has async tasks that have not been completed
-       * yet.
-       */
-    function () { return this._isStable && !this.ngZone.hasPendingMacrotasks; };
+    ComponentFixture.prototype.isStable = function () { return this._isStable && !this.ngZone.hasPendingMacrotasks; };
     /**
      * Get a promise that resolves when the fixture is stable.
      *
      * This can be used to resume testing after events have triggered asynchronous activity or
      * asynchronous change detection.
      */
-    /**
-       * Get a promise that resolves when the fixture is stable.
-       *
-       * This can be used to resume testing after events have triggered asynchronous activity or
-       * asynchronous change detection.
-       */
-    ComponentFixture.prototype.whenStable = /**
-       * Get a promise that resolves when the fixture is stable.
-       *
-       * This can be used to resume testing after events have triggered asynchronous activity or
-       * asynchronous change detection.
-       */
-    function () {
+    ComponentFixture.prototype.whenStable = function () {
         var _this = this;
         if (this.isStable()) {
             return Promise.resolve(false);
@@ -342,13 +298,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
       * Get a promise that resolves when the ui state is stable following animations.
       */
-    /**
-        * Get a promise that resolves when the ui state is stable following animations.
-        */
-    ComponentFixture.prototype.whenRenderingDone = /**
-        * Get a promise that resolves when the ui state is stable following animations.
-        */
-    function () {
+    ComponentFixture.prototype.whenRenderingDone = function () {
         var renderer = this._getRenderer();
         if (renderer && renderer.whenRenderingDone) {
             return renderer.whenRenderingDone();
@@ -358,13 +308,7 @@ var ComponentFixture = /** @class */ (function () {
     /**
      * Trigger component destruction.
      */
-    /**
-       * Trigger component destruction.
-       */
-    ComponentFixture.prototype.destroy = /**
-       * Trigger component destruction.
-       */
-    function () {
+    ComponentFixture.prototype.destroy = function () {
         if (!this._isDestroyed) {
             this.componentRef.destroy();
             if (this._onUnstableSubscription != null) {
@@ -535,6 +479,13 @@ function flushMicrotasksFallback() {
     _getFakeAsyncZoneSpec().flushMicrotasks();
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var _Zone = typeof Zone !== 'undefined' ? Zone : null;
 var fakeAsyncTestModule = _Zone && _Zone[_Zone.__symbol__('fakeAsyncTest')];
 /**
@@ -788,44 +739,18 @@ var TestingCompiler = /** @class */ (function (_super) {
      * Allows to pass the compile summary from AOT compilation to the JIT compiler,
      * so that it can use the code generated by AOT.
      */
-    /**
-       * Allows to pass the compile summary from AOT compilation to the JIT compiler,
-       * so that it can use the code generated by AOT.
-       */
-    TestingCompiler.prototype.loadAotSummaries = /**
-       * Allows to pass the compile summary from AOT compilation to the JIT compiler,
-       * so that it can use the code generated by AOT.
-       */
-    function (summaries) { throw unimplemented(); };
+    TestingCompiler.prototype.loadAotSummaries = function (summaries) { throw unimplemented(); };
     /**
      * Gets the component factory for the given component.
      * This assumes that the component has been compiled before calling this call using
      * `compileModuleAndAllComponents*`.
      */
-    /**
-       * Gets the component factory for the given component.
-       * This assumes that the component has been compiled before calling this call using
-       * `compileModuleAndAllComponents*`.
-       */
-    TestingCompiler.prototype.getComponentFactory = /**
-       * Gets the component factory for the given component.
-       * This assumes that the component has been compiled before calling this call using
-       * `compileModuleAndAllComponents*`.
-       */
-    function (component) { throw unimplemented(); };
+    TestingCompiler.prototype.getComponentFactory = function (component) { throw unimplemented(); };
     /**
      * Returns the component type that is stored in the given error.
      * This can be used for errors created by compileModule...
      */
-    /**
-       * Returns the component type that is stored in the given error.
-       * This can be used for errors created by compileModule...
-       */
-    TestingCompiler.prototype.getComponentFromError = /**
-       * Returns the component type that is stored in the given error.
-       * This can be used for errors created by compileModule...
-       */
-    function (error) { throw unimplemented(); };
+    TestingCompiler.prototype.getComponentFromError = function (error) { throw unimplemented(); };
     TestingCompiler.decorators = [
         { type: core.Injectable }
     ];
@@ -916,33 +841,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    TestBed.initTestEnvironment = /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    function (ngModule, platform, aotSummaries) {
+    TestBed.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         var testBed = getTestBed();
         testBed.initTestEnvironment(ngModule, platform, aotSummaries);
         return testBed;
@@ -952,17 +851,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    TestBed.resetTestEnvironment = /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    function () { getTestBed().resetTestEnvironment(); };
+    TestBed.resetTestEnvironment = function () { getTestBed().resetTestEnvironment(); };
     TestBed.resetTestingModule = function () {
         getTestBed().resetTestingModule();
         return TestBed;
@@ -971,15 +860,7 @@ var TestBed = /** @class */ (function () {
      * Allows overriding default compiler providers and settings
      * which are defined in test_injector.js
      */
-    /**
-       * Allows overriding default compiler providers and settings
-       * which are defined in test_injector.js
-       */
-    TestBed.configureCompiler = /**
-       * Allows overriding default compiler providers and settings
-       * which are defined in test_injector.js
-       */
-    function (config) {
+    TestBed.configureCompiler = function (config) {
         getTestBed().configureCompiler(config);
         return TestBed;
     };
@@ -987,15 +868,7 @@ var TestBed = /** @class */ (function () {
      * Allows overriding default providers, directives, pipes, modules of the test injector,
      * which are defined in test_injector.js
      */
-    /**
-       * Allows overriding default providers, directives, pipes, modules of the test injector,
-       * which are defined in test_injector.js
-       */
-    TestBed.configureTestingModule = /**
-       * Allows overriding default providers, directives, pipes, modules of the test injector,
-       * which are defined in test_injector.js
-       */
-    function (moduleDef) {
+    TestBed.configureTestingModule = function (moduleDef) {
         getTestBed().configureTestingModule(moduleDef);
         return TestBed;
     };
@@ -1004,17 +877,7 @@ var TestBed = /** @class */ (function () {
      * It is necessary to call this function
      * as fetching urls is asynchronous.
      */
-    /**
-       * Compile components with a `templateUrl` for the test's NgModule.
-       * It is necessary to call this function
-       * as fetching urls is asynchronous.
-       */
-    TestBed.compileComponents = /**
-       * Compile components with a `templateUrl` for the test's NgModule.
-       * It is necessary to call this function
-       * as fetching urls is asynchronous.
-       */
-    function () { return getTestBed().compileComponents(); };
+    TestBed.compileComponents = function () { return getTestBed().compileComponents(); };
     TestBed.overrideModule = function (ngModule, override) {
         getTestBed().overrideModule(ngModule, override);
         return TestBed;
@@ -1032,7 +895,7 @@ var TestBed = /** @class */ (function () {
         return TestBed;
     };
     TestBed.overrideTemplate = function (component, template) {
-        getTestBed().overrideComponent(component, { set: { template: template, templateUrl: (null) } });
+        getTestBed().overrideComponent(component, { set: { template: template, templateUrl: null } });
         return TestBed;
     };
     /**
@@ -1041,19 +904,7 @@ var TestBed = /** @class */ (function () {
      *
      * Note: This works for JIT and AOTed components as well.
      */
-    /**
-       * Overrides the template of the given component, compiling the template
-       * in the context of the TestingModule.
-       *
-       * Note: This works for JIT and AOTed components as well.
-       */
-    TestBed.overrideTemplateUsingTestingModule = /**
-       * Overrides the template of the given component, compiling the template
-       * in the context of the TestingModule.
-       *
-       * Note: This works for JIT and AOTed components as well.
-       */
-    function (component, template) {
+    TestBed.overrideTemplateUsingTestingModule = function (component, template) {
         getTestBed().overrideTemplateUsingTestingModule(component, template);
         return TestBed;
     };
@@ -1085,33 +936,7 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    TestBed.prototype.initTestEnvironment = /**
-       * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
-       * angular module. These are common to every test in the suite.
-       *
-       * This may only be called once, to set up the common providers for the current test
-       * suite on the current platform. If you absolutely need to change the providers,
-       * first use `resetTestEnvironment`.
-       *
-       * Test modules and platforms for individual platforms are available from
-       * '@angular/<platform_name>/testing'.
-       *
-       * @experimental
-       */
-    function (ngModule, platform, aotSummaries) {
+    TestBed.prototype.initTestEnvironment = function (ngModule, platform, aotSummaries) {
         if (this.platform || this.ngModule) {
             throw new Error('Cannot set base providers because it has already been called');
         }
@@ -1126,35 +951,25 @@ var TestBed = /** @class */ (function () {
      *
      * @experimental
      */
-    /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    TestBed.prototype.resetTestEnvironment = /**
-       * Reset the providers for the test injector.
-       *
-       * @experimental
-       */
-    function () {
+    TestBed.prototype.resetTestEnvironment = function () {
         this.resetTestingModule();
-        this.platform = (null);
-        this.ngModule = (null);
+        this.platform = null;
+        this.ngModule = null;
         this._testEnvAotSummaries = function () { return []; };
     };
     TestBed.prototype.resetTestingModule = function () {
         core.ɵclearOverrides();
         this._aotSummaries = [];
         this._templateOverrides = [];
-        this._compiler = (null);
+        this._compiler = null;
         this._moduleOverrides = [];
         this._componentOverrides = [];
         this._directiveOverrides = [];
         this._pipeOverrides = [];
         this._isRoot = true;
         this._rootProviderOverrides = [];
-        this._moduleRef = (null);
-        this._moduleFactory = (null);
+        this._moduleRef = null;
+        this._moduleFactory = null;
         this._compilerOptions = [];
         this._providers = [];
         this._declarations = [];
@@ -1251,8 +1066,6 @@ var TestBed = /** @class */ (function () {
             name: this._moduleFactory.moduleType.name
         });
         this._moduleRef = this._moduleFactory.create(ngZoneInjector);
-        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
-        // before accessing it.
         // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
         // before accessing it.
         this._moduleRef.injector.get(core.ApplicationInitStatus).runInitializers();
@@ -1354,7 +1167,7 @@ var TestBed = /** @class */ (function () {
         this.overrideProviderImpl(token, provider);
     };
     TestBed.prototype.deprecatedOverrideProvider = function (token, provider) {
-        this.overrideProviderImpl(token, provider, /* deprecated */ /* deprecated */ true);
+        this.overrideProviderImpl(token, provider, /* deprecated */ true);
     };
     TestBed.prototype.overrideProviderImpl = function (token, provider, deprecated) {
         if (deprecated === void 0) { deprecated = false; }
@@ -1435,7 +1248,7 @@ var TestBed = /** @class */ (function () {
     };
     return TestBed;
 }());
-var _testBed = (null);
+var _testBed = null;
 /**
  * @experimental
  */
@@ -1529,6 +1342,11 @@ function withModule(moduleDef, fn) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Public Test Library for unit testing Angular applications. Assumes that you are running
+ * with Jasmine, Mocha, or a similar framework which exports a beforeEach function and
+ * allows tests to be asynchronous by either returning a promise or using a 'done' parameter.
  */
 var _global$1 = (typeof window === 'undefined' ? global : window);
 // Reset the test providers and the fake async zone before each test.
@@ -1641,10 +1459,6 @@ function ensureDocument() {
         // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
         // It fails with Domino with TypeError: Cannot assign to read only property
         // 'stopImmediatePropagation' of object '#<Event>'
-        // Trick to avoid Event patching from
-        // https://github.com/angular/angular/blob/7cf5e95ac9f0f2648beebf0d5bd9056b79946970/packages/platform-browser/src/dom/events/dom_events.ts#L112-L132
-        // It fails with Domino with TypeError: Cannot assign to read only property
-        // 'stopImmediatePropagation' of object '#<Event>'
         global.Event = null;
         savedNode = global.Node;
         global.Node = domino.impl.Node;
@@ -1686,6 +1500,11 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of the core/testing package.
+ */
 
 /**
  * @license
@@ -1693,6 +1512,11 @@ if (typeof afterEach == 'function')
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of this package.
  */
 
 // This file only reexports content of the `src` folder. Keep it that way.
@@ -1704,6 +1528,10 @@ if (typeof afterEach == 'function')
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+// This file is not used to build this module. It is only used during editing
+// by the TypeScript language service and during build for verification. `ngc`
+// replaces this file with production index.ts when it rewrites private symbol
+// names.
 
 /**
  * Generated bundle index. Do not edit.

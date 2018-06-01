@@ -39,13 +39,6 @@ MockNgZone.decorators = [
 /** @nocollapse */
 MockNgZone.ctorParameters = () => [];
 function MockNgZone_tsickle_Closure_declarations() {
-    /** @type {!Array<{type: !Function, args: (undefined|!Array<?>)}>} */
-    MockNgZone.decorators;
-    /**
-     * @nocollapse
-     * @type {function(): !Array<(null|{type: ?, decorators: (undefined|!Array<{type: !Function, args: (undefined|!Array<?>)}>)})>}
-     */
-    MockNgZone.ctorParameters;
     /** @type {?} */
     MockNgZone.prototype.onStable;
 }
