@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+298.sha-5cbcb56
+ * @license Angular v6.0.0-rc.5+299.sha-0561b66
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1619,7 +1619,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.0-rc.5+298.sha-5cbcb56');
+var VERSION = new Version('6.0.0-rc.5+299.sha-0561b66');
 
 /**
  * @license
@@ -13651,15 +13651,17 @@ function container(index, template, tagName, attrs, localRefs) {
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, index, node.data);
+    var queries = node.queries;
+    if (queries) {
+        // prepare place for matching nodes from views inserted into a given container
+        lContainer.queries = queries.container();
+    }
     createDirectivesAndLocals(localRefs);
     isParent = false;
     ngDevMode && assertNodeType(previousOrParentNode, 0 /* Container */);
-    var queries = node.queries;
     if (queries) {
         // check if a given container node matches
         queries.addNode(node);
-        // prepare place for matching nodes from views inserted into a given container
-        lContainer.queries = queries.container();
     }
 }
 /**
@@ -15394,7 +15396,7 @@ function getOrCreateTemplateRef(di) {
             hostTNode.tViews = createTView(hostTView.directiveRegistry, hostTView.pipeRegistry);
         }
         ngDevMode && assertNotNull(hostTNode.tViews, 'TView must be allocated');
-        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, hostNode.data.template, getRenderer(), hostNode.queries);
+        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, hostNode.data.template, getRenderer(), hostNode.data.queries);
     }
     return di.templateRef;
 }
