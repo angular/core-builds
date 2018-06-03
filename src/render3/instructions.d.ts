@@ -484,10 +484,10 @@ export declare function bind<T>(value: T): T | NO_CHANGE;
  *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
  *  ----------------------------------------------------------------------------
  *                                         ^
- *                                         TView.bindingStartIndex
+ *                                         LView.bindingStartIndex
  *
- * Pure function instructions are given an offset from TView.bindingStartIndex.
- * Subtracting the offset from TView.bindingStartIndex gives the first index where the bindings
+ * Pure function instructions are given an offset from LView.bindingStartIndex.
+ * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
  * are stored.
  *
  * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block

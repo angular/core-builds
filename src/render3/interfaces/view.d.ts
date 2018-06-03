@@ -49,6 +49,13 @@ export interface LView {
     /** Renderer to be used for this view. */
     readonly renderer: Renderer3;
     /**
+     * The binding start index is the index at which the nodes array
+     * starts to store bindings only. Saving this value ensures that we
+     * will begin reading bindings at the correct point in the array when
+     * we are in update mode.
+     */
+    bindingStartIndex: number;
+    /**
      * The binding index we should access next.
      *
      * This is stored so that bindings can continue where they left off
@@ -74,6 +81,22 @@ export interface LView {
      * 2nd index is: context for function
      */
     cleanup: any[] | null;
+    /**
+     * This number tracks the next lifecycle hook that needs to be run.
+     *
+     * If lifecycleStage === LifecycleStage.ON_INIT, the init hooks haven't yet been run
+     * and should be executed by the first r() instruction that runs OR the first
+     * cR() instruction that runs (so inits are run for the top level view before any
+     * embedded views).
+     *
+     * If lifecycleStage === LifecycleStage.CONTENT_INIT, the init hooks have been run, but
+     * the content hooks have not yet been run. They should be executed on the first
+     * r() instruction that runs.
+     *
+     * If lifecycleStage === LifecycleStage.VIEW_INIT, both the init hooks and content hooks
+     * have already been run.
+     */
+    lifecycleStage: LifecycleStage;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
@@ -155,14 +178,6 @@ export declare const enum LViewFlags {
     Dirty = 4,
     /** Whether or not this view is currently attached to change detection tree. */
     Attached = 8,
-    /**
-     *  Whether or not the init hooks have run.
-     *
-     * If on, the init hooks haven't yet been run and should be executed by the first component that
-     * runs OR the first cR() instruction that runs (so inits are run for the top level view before
-     * any embedded views).
-     */
-    RunInit = 16,
 }
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {
@@ -192,13 +207,6 @@ export interface TView {
     firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
-    /**
-     * The binding start index is the index at which the data array
-     * starts to store bindings only. Saving this value ensures that we
-     * will begin reading bindings at the correct point in the array when
-     * we are in update mode.
-     */
-    bindingStartIndex: number;
     /**
      * Index of the host node of the first LView or LContainer beneath this LView in
      * the hierarchy.
@@ -361,6 +369,11 @@ export interface RootContext {
  * Odd indices: Hook function
  */
 export declare type HookData = (number | (() => void))[];
+/** Possible values of LView.lifecycleStage, used to determine which hooks to run.  */
+export declare const enum LifecycleStage {
+    Init = 1,
+    AfterInit = 2,
+}
 /**
  * Static data that corresponds to the instance-specific data array on an LView.
  *
