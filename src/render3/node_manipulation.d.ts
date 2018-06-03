@@ -110,15 +110,6 @@ export declare function canInsertNativeNode(parent: LNode, currentView: LView): 
  */
 export declare function appendChild(parent: LNode, child: RNode | null, currentView: LView): boolean;
 /**
- * Inserts the provided node before the correct element in the DOM.
- *
- * The element insertion might be delayed {@link canInsertNativeNode}
- *
- * @param node Node to insert
- * @param currentView Current LView
- */
-export declare function insertChild(node: LNode, currentView: LView): void;
-/**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
  *

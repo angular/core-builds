@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+299.sha-0561b66
+ * @license Angular v6.0.0-rc.5+302.sha-cb65724
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2081,7 +2081,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+299.sha-0561b66');
+const VERSION = new Version('6.0.0-rc.5+302.sha-cb65724');
 
 /**
  * @fileoverview added by tsickle
@@ -15197,9 +15197,9 @@ function queueDestroyHooks(def, tView, i) {
  * @return {?}
  */
 function executeInitHooks(currentView, tView, creationMode) {
-    if (currentView.lifecycleStage === 1 /* Init */) {
+    if (currentView.flags & 16 /* RunInit */) {
         executeHooks(/** @type {?} */ ((currentView.directives)), tView.initHooks, tView.checkHooks, creationMode);
-        currentView.lifecycleStage = 2 /* AfterInit */;
+        currentView.flags &= ~16 /* RunInit */;
     }
 }
 /**
@@ -15715,7 +15715,7 @@ function getNextLNode(node) {
         const /** @type {?} */ lView = /** @type {?} */ (node.data);
         return lView.next ? (/** @type {?} */ (lView.next)).node : null;
     }
-    return node.tNode.next ? node.view.data[/** @type {?} */ (((node.tNode.next)).index)] : null;
+    return node.tNode.next ? node.view.data[/** @type {?} */ ((node.tNode.next)).index] : null;
 }
 /**
  * Retrieves the first child of a given node
@@ -15725,7 +15725,7 @@ function getNextLNode(node) {
 function getChildLNode(node) {
     if (node.tNode.child) {
         const /** @type {?} */ view = node.tNode.type === 2 /* View */ ? /** @type {?} */ (node.data) : node.view;
-        return view.data[/** @type {?} */ (node.tNode.child.index)];
+        return view.data[node.tNode.child.index];
     }
     return null;
 }
@@ -15734,10 +15734,10 @@ function getChildLNode(node) {
  * @return {?}
  */
 function getParentLNode(node) {
-    if (node.tNode.index === null)
+    if (node.tNode.index === -1)
         return null;
     const /** @type {?} */ parent = node.tNode.parent;
-    return parent ? node.view.data[/** @type {?} */ (parent.index)] : node.view.node;
+    return parent ? node.view.data[parent.index] : node.view.node;
 }
 /**
  * Get the next node in the LNode tree, taking into account the place where a node is
@@ -16144,16 +16144,6 @@ function appendChild(parent, child, currentView) {
     }
     return false;
 }
-/**
- * Inserts the provided node before the correct element in the DOM.
- *
- * The element insertion might be delayed {\@link canInsertNativeNode}
- *
- * @param {?} node Node to insert
- * @param {?} currentView Current LView
- * @return {?}
- */
-
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.
@@ -16582,9 +16572,6 @@ function enterView(newView, host) {
     firstTemplatePass = newView && newView.tView.firstTemplatePass;
     cleanup = newView && newView.cleanup;
     renderer = newView && newView.renderer;
-    if (newView && newView.bindingIndex < 0) {
-        newView.bindingIndex = newView.bindingStartIndex;
-    }
     if (host != null) {
         previousOrParentNode = host;
         isParent = true;
@@ -16610,7 +16597,7 @@ function leaveView(newView, creationOnly) {
         // Views are clean and in update mode after being checked, so these bits are cleared
         currentView.flags &= ~(1 /* CreationMode */ | 4 /* Dirty */);
     }
-    currentView.lifecycleStage = 1 /* Init */;
+    currentView.flags |= 16 /* RunInit */;
     currentView.bindingIndex = -1;
     enterView(newView, null);
 }
@@ -16689,7 +16676,7 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
         parent: currentView,
         id: viewId,
         // -1 for component views
-        flags: flags | 1 /* CreationMode */ | 8 /* Attached */,
+        flags: flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */,
         node: /** @type {?} */ ((null)),
         // until we initialize it in createNode.
         data: [],
@@ -16699,11 +16686,9 @@ function createLView(viewId, renderer, tView, template, context, flags, sanitize
         renderer: renderer,
         tail: null,
         next: null,
-        bindingStartIndex: -1,
         bindingIndex: -1,
         template: template,
         context: context,
-        lifecycleStage: 1 /* Init */,
         queries: null,
         injector: currentView && currentView.injector,
         sanitizer: sanitizer || null
@@ -16753,7 +16738,7 @@ function createLNode(index, type, native, name, attrs, state) {
         parent && parent.queries && parent.queries.child();
     const /** @type {?} */ isState = state != null;
     const /** @type {?} */ node = createLNodeObject(type, currentView, parent, native, isState ? /** @type {?} */ (state) : null, queries);
-    if (index === null || type === 2 /* View */) {
+    if (index === -1 || type === 2 /* View */) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in TView.node.
         node.tNode = (/** @type {?} */ (state)).tView.node || createTNode(type, index, null, null, tParent, null);
@@ -16849,7 +16834,7 @@ function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, qu
             if (queries) {
                 lView.queries = queries.createView();
             }
-            viewNode = createLNode(null, 2 /* View */, null, null, null, lView);
+            viewNode = createLNode(-1, 2 /* View */, null, null, null, lView);
             rf = 1 /* Create */;
         }
         oldView = enterView(viewNode.data, viewNode);
@@ -16934,7 +16919,7 @@ function getRenderFlags(view) {
  */
 function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
-        assertEqual(currentView.bindingStartIndex, -1, 'elements should be created before any bindings');
+        assertEqual(currentView.bindingIndex, -1, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
     const /** @type {?} */ native = renderer.createElement(name);
     ngDevMode && assertDataInRange(index - 1);
@@ -17171,6 +17156,8 @@ function createTView(defs, pipes) {
         data: [],
         childIndex: -1,
         // Children set in addToViewTree(), if any
+        bindingStartIndex: -1,
+        // Set in initBindings()
         directives: null,
         firstTemplatePass: true,
         initHooks: null,
@@ -17569,7 +17556,7 @@ function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
  * @param {?} index The index of the element to update in the data array
  * @param {?} value A value indicating if a given style should be added or removed.
  *   The expected shape of `value` is an object where keys are style names and the values
- *   are their corresponding values to set. If value is falsy than the style is remove. An absence
+ *   are their corresponding values to set. If value is falsy, then the style is removed. An absence
  *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
  *   performed.
  * @return {?}
@@ -17609,7 +17596,7 @@ function elementStyle(index, value) {
  */
 function text(index, value) {
     ngDevMode &&
-        assertEqual(currentView.bindingStartIndex, -1, 'text nodes should be created before bindings');
+        assertEqual(currentView.bindingIndex, -1, 'text nodes should be created before bindings');
     ngDevMode && ngDevMode.rendererCreateTextNode++;
     const /** @type {?} */ textNode = createTextNode(value, renderer);
     const /** @type {?} */ node = createLNode(index, 3 /* Element */, textNode, null, null);
@@ -17704,7 +17691,7 @@ function addComponentLogic(index, instance, def) {
  */
 function baseDirectiveCreate(index, directive, directiveDef) {
     ngDevMode &&
-        assertEqual(currentView.bindingStartIndex, -1, 'directives should be created before any bindings');
+        assertEqual(currentView.bindingIndex, -1, 'directives should be created before any bindings');
     ngDevMode && assertPreviousIsParent();
     Object.defineProperty(directive, NG_HOST_SYMBOL, { enumerable: false, value: previousOrParentNode });
     if (directives == null)
@@ -17827,7 +17814,8 @@ function createLContainer(parentLNode, currentView, template, isForViewContainer
  * @return {?}
  */
 function container(index, template, tagName, attrs, localRefs) {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'container nodes should be created before any bindings');
+    ngDevMode &&
+        assertEqual(currentView.bindingIndex, -1, 'container nodes should be created before any bindings');
     const /** @type {?} */ currentParent = isParent ? previousOrParentNode : /** @type {?} */ ((getParentLNode(previousOrParentNode)));
     const /** @type {?} */ lContainer = createLContainer(currentParent, currentView, template);
     const /** @type {?} */ node = createLNode(index, 0 /* Container */, undefined, tagName || null, attrs || null, lContainer);
@@ -17940,7 +17928,7 @@ function scanForView(containerNode, startIdx, viewBlockId) {
             removeView(containerNode, i);
         }
         else {
-            // found a view with id grater than the one we are searching for
+            // found a view with id greater than the one we are searching for
             // which means that required view doesn't exist and can't be found at
             // later positions in the views array - stop the search here
             break;
@@ -18443,9 +18431,11 @@ const NO_CHANGE = /** @type {?} */ ({});
  * @return {?}
  */
 function initBindings() {
-    ngDevMode && assertEqual(currentView.bindingStartIndex, -1, 'Binding start index should only be set once, when null');
     ngDevMode && assertEqual(currentView.bindingIndex, -1, 'Binding index should not yet be set ' + currentView.bindingIndex);
-    currentView.bindingIndex = currentView.bindingStartIndex = data.length;
+    if (currentView.tView.bindingStartIndex === -1) {
+        currentView.tView.bindingStartIndex = data.length;
+    }
+    currentView.bindingIndex = currentView.tView.bindingStartIndex;
 }
 /**
  * Creates a single value binding.
@@ -18460,16 +18450,16 @@ function bind(value) {
 /**
  * Reserves slots for pure functions (`pureFunctionX` instructions)
  *
- * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ * Bindings for pure functions are stored after the LNodes in the data array but before the binding.
  *
  *  ----------------------------------------------------------------------------
  *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
  *  ----------------------------------------------------------------------------
  *                                         ^
- *                                         LView.bindingStartIndex
+ *                                         TView.bindingStartIndex
  *
- * Pure function instructions are given an offset from LView.bindingStartIndex.
- * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * Pure function instructions are given an offset from TView.bindingStartIndex.
+ * Subtracting the offset from TView.bindingStartIndex gives the first index where the bindings
  * are stored.
  *
  * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
@@ -18478,7 +18468,7 @@ function bind(value) {
  */
 function reserveSlots(numSlots) {
     // Init the slots with a unique `NO_CHANGE` value so that the first change is always detected
-    // whether is happens or not during the first change detection pass - pure functions checks
+    // whether it happens or not during the first change detection pass - pure functions checks
     // might be skipped when short-circuited.
     data.length += numSlots;
     data.fill(NO_CHANGE, -numSlots);
@@ -18487,7 +18477,7 @@ function reserveSlots(numSlots) {
     initBindings();
 }
 /**
- * Sets up the binding index before execute any `pureFunctionX` instructions.
+ * Sets up the binding index before executing any `pureFunctionX` instructions.
  *
  * The index must be restored after the pure function is executed
  *
@@ -18497,7 +18487,7 @@ function reserveSlots(numSlots) {
  */
 function moveBindingIndexToReservedSlot(offset) {
     const /** @type {?} */ currentSlot = currentView.bindingIndex;
-    currentView.bindingIndex = currentView.bindingStartIndex - offset;
+    currentView.bindingIndex = currentView.tView.bindingStartIndex - offset;
     return currentSlot;
 }
 /**
@@ -18763,17 +18753,19 @@ function consumeBinding() {
  */
 function bindingUpdated(value) {
     ngDevMode && assertNotEqual(value, NO_CHANGE, 'Incoming value should never be NO_CHANGE.');
-    if (currentView.bindingStartIndex < 0) {
+    if (currentView.bindingIndex === -1)
         initBindings();
+    if (currentView.bindingIndex >= data.length) {
+        data[currentView.bindingIndex++] = value;
     }
     else if (isDifferent(data[currentView.bindingIndex], value)) {
         throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, data[currentView.bindingIndex], value);
+        data[currentView.bindingIndex++] = value;
     }
     else {
         currentView.bindingIndex++;
         return false;
     }
-    data[currentView.bindingIndex++] = value;
     return true;
 }
 /**
@@ -18856,16 +18848,16 @@ function assertDataNext(index, arr) {
     assertEqual(arr.length, index, `index ${index} expected to be at the end of arr (length ${arr.length})`);
 }
 /**
- * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ * On the first template pass, the reserved slots should be set `NO_CHANGE`.
  *
- * If not they might not have been actually reserved.
+ * If not, they might not have been actually reserved.
  * @param {?} slotOffset
  * @param {?} numSlots
  * @return {?}
  */
 function assertReservedSlotInitialized(slotOffset, numSlots) {
     if (firstTemplatePass) {
-        const /** @type {?} */ startIndex = currentView.bindingStartIndex - slotOffset;
+        const /** @type {?} */ startIndex = currentView.tView.bindingStartIndex - slotOffset;
         for (let /** @type {?} */ i = 0; i < numSlots; i++) {
             assertEqual(data[startIndex + i], NO_CHANGE, 'The reserved slots should be set to `NO_CHANGE` on first template pass');
         }
@@ -19823,8 +19815,7 @@ function getOrCreateContainerRef(di) {
         }
         const /** @type {?} */ hostTNode = vcRefHost.tNode;
         if (!hostTNode.dynamicContainerNode) {
-            hostTNode.dynamicContainerNode =
-                createTNode(0 /* Container */, null, null, null, null, null);
+            hostTNode.dynamicContainerNode = createTNode(0 /* Container */, -1, null, null, null, null);
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
