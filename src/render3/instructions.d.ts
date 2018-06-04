@@ -70,7 +70,7 @@ export declare function leaveView(newView: LView, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
+export declare function createLView<T>(renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -133,8 +133,14 @@ export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: num
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
-/** Creates a TView instance */
-export declare function createTView(defs: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
+/**
+ * Creates a TView instance
+ *
+ * @param viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
+ * @param directives Registry of directives for this view
+ * @param pipes Registry of pipes for this view
+ */
+export declare function createTView(viewIndex: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -484,10 +490,10 @@ export declare function bind<T>(value: T): T | NO_CHANGE;
  *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
  *  ----------------------------------------------------------------------------
  *                                         ^
- *                                         LView.bindingStartIndex
+ *                                         TView.bindingStartIndex
  *
- * Pure function instructions are given an offset from LView.bindingStartIndex.
- * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * Pure function instructions are given an offset from TView.bindingStartIndex.
+ * Subtracting the offset from TView.bindingStartIndex gives the first index where the bindings
  * are stored.
  *
  * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
