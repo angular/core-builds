@@ -70,7 +70,7 @@ export declare function leaveView(newView: LView, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView<T>(viewId: number, renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
+export declare function createLView<T>(renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -89,8 +89,8 @@ export declare function createLNodeObject(type: TNodeType, currentView: LView, p
  * @param attrs Any attrs for the native element, if applicable
  * @param data Any data that should be saved on the LNode
  */
-export declare function createLNode(index: number | null, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lView?: LView | null): LElementNode;
-export declare function createLNode(index: number | null, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
+export declare function createLNode(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lView?: LView | null): LElementNode;
+export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lView: LView): LViewNode;
 export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
 /**
@@ -133,8 +133,14 @@ export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: num
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LView): void;
 export declare function isComponent(tNode: TNode): boolean;
-/** Creates a TView instance */
-export declare function createTView(defs: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
+/**
+ * Creates a TView instance
+ *
+ * @param viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
+ * @param directives Registry of directives for this view
+ * @param pipes Registry of pipes for this view
+ */
+export declare function createTView(viewIndex: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -199,7 +205,7 @@ export declare function elementProperty<T>(index: number, propName: string, valu
  * @param tViews Any TViews attached to this node
  * @returns the TNode object
  */
-export declare function createTNode(type: TNodeType, index: number | null, tagName: string | null, attrs: TAttributes | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
+export declare function createTNode(type: TNodeType, index: number, tagName: string | null, attrs: TAttributes | null, parent: TElementNode | TContainerNode | null, tViews: TView[] | null): TNode;
 /**
  * Add or remove a class in a `classList` on a DOM element.
  *
@@ -246,7 +252,7 @@ export declare function elementStyleNamed<T>(index: number, styleName: string, v
  * @param index The index of the element to update in the data array
  * @param value A value indicating if a given style should be added or removed.
  *   The expected shape of `value` is an object where keys are style names and the values
- *   are their corresponding values to set. If value is falsy than the style is remove. An absence
+ *   are their corresponding values to set. If value is falsy, then the style is removed. An absence
  *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
  *   performed.
  */
@@ -478,23 +484,23 @@ export declare function bind<T>(value: T): T | NO_CHANGE;
 /**
  * Reserves slots for pure functions (`pureFunctionX` instructions)
  *
- * Binding for pure functions are store after the LNodes in the data array but before the binding.
+ * Bindings for pure functions are stored after the LNodes in the data array but before the binding.
  *
  *  ----------------------------------------------------------------------------
  *  |  LNodes ... | pure function bindings | regular bindings / interpolations |
  *  ----------------------------------------------------------------------------
  *                                         ^
- *                                         LView.bindingStartIndex
+ *                                         TView.bindingStartIndex
  *
- * Pure function instructions are given an offset from LView.bindingStartIndex.
- * Subtracting the offset from LView.bindingStartIndex gives the first index where the bindings
+ * Pure function instructions are given an offset from TView.bindingStartIndex.
+ * Subtracting the offset from TView.bindingStartIndex gives the first index where the bindings
  * are stored.
  *
  * NOTE: reserveSlots instructions are only ever allowed at the very end of the creation block
  */
 export declare function reserveSlots(numSlots: number): void;
 /**
- * Sets up the binding index before execute any `pureFunctionX` instructions.
+ * Sets up the binding index before executing any `pureFunctionX` instructions.
  *
  * The index must be restored after the pure function is executed
  *
@@ -563,9 +569,9 @@ export declare function getTView(): TView;
 export declare function getDirectiveInstance<T>(instanceOrArray: T | [T]): T;
 export declare function assertPreviousIsParent(): void;
 /**
- * On the first template pass the reserved slots should be set `NO_CHANGE`.
+ * On the first template pass, the reserved slots should be set `NO_CHANGE`.
  *
- * If not they might not have been actually reserved.
+ * If not, they might not have been actually reserved.
  */
 export declare function assertReservedSlotInitialized(slotOffset: number, numSlots: number): void;
 export declare function _getComponentHostLElementNode<T>(component: T): LElementNode;

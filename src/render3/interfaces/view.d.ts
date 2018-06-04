@@ -40,21 +40,8 @@ export interface LView {
      * If `LElementNode`, this is the LView of a component.
      */
     readonly node: LViewNode | LElementNode;
-    /**
-     * ID to determine whether this view is the same as the previous view
-     * in this position. If it's not, we know this view needs to be inserted
-     * and the one that exists needs to be removed (e.g. if/else statements)
-     */
-    readonly id: number;
     /** Renderer to be used for this view. */
     readonly renderer: Renderer3;
-    /**
-     * The binding start index is the index at which the nodes array
-     * starts to store bindings only. Saving this value ensures that we
-     * will begin reading bindings at the correct point in the array when
-     * we are in update mode.
-     */
-    bindingStartIndex: number;
     /**
      * The binding index we should access next.
      *
@@ -81,22 +68,6 @@ export interface LView {
      * 2nd index is: context for function
      */
     cleanup: any[] | null;
-    /**
-     * This number tracks the next lifecycle hook that needs to be run.
-     *
-     * If lifecycleStage === LifecycleStage.ON_INIT, the init hooks haven't yet been run
-     * and should be executed by the first r() instruction that runs OR the first
-     * cR() instruction that runs (so inits are run for the top level view before any
-     * embedded views).
-     *
-     * If lifecycleStage === LifecycleStage.CONTENT_INIT, the init hooks have been run, but
-     * the content hooks have not yet been run. They should be executed on the first
-     * r() instruction that runs.
-     *
-     * If lifecycleStage === LifecycleStage.VIEW_INIT, both the init hooks and content hooks
-     * have already been run.
-     */
-    lifecycleStage: LifecycleStage;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
@@ -178,6 +149,14 @@ export declare const enum LViewFlags {
     Dirty = 4,
     /** Whether or not this view is currently attached to change detection tree. */
     Attached = 8,
+    /**
+     *  Whether or not the init hooks have run.
+     *
+     * If on, the init hooks haven't yet been run and should be executed by the first component that
+     * runs OR the first cR() instruction that runs (so inits are run for the top level view before
+     * any embedded views).
+     */
+    RunInit = 16,
 }
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {
@@ -194,6 +173,14 @@ export interface LViewOrLContainer {
  */
 export interface TView {
     /**
+     * ID for inline views to determine whether a view is the same as the previous view
+     * in a certain position. If it's not, we know the new view needs to be inserted
+     * and the one that exists needs to be removed (e.g. if/else statements)
+     *
+     * If this is -1, then this is a component view or a dynamically created view.
+     */
+    readonly id: number;
+    /**
      * Pointer to the `TNode` that represents the root of the view.
      *
      * If this is a `TNode` for an `LViewNode`, this is an embedded view of a container.
@@ -207,6 +194,13 @@ export interface TView {
     firstTemplatePass: boolean;
     /** Static data equivalent of LView.data[]. Contains TNodes. */
     data: TData;
+    /**
+     * The binding start index is the index at which the data array
+     * starts to store bindings only. Saving this value ensures that we
+     * will begin reading bindings at the correct point in the array when
+     * we are in update mode.
+     */
+    bindingStartIndex: number;
     /**
      * Index of the host node of the first LView or LContainer beneath this LView in
      * the hierarchy.
@@ -369,11 +363,6 @@ export interface RootContext {
  * Odd indices: Hook function
  */
 export declare type HookData = (number | (() => void))[];
-/** Possible values of LView.lifecycleStage, used to determine which hooks to run.  */
-export declare const enum LifecycleStage {
-    Init = 1,
-    AfterInit = 2,
-}
 /**
  * Static data that corresponds to the instance-specific data array on an LView.
  *
