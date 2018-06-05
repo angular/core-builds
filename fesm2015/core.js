@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+316.sha-d814eaa
+ * @license Angular v6.0.0-rc.5+317.sha-57eacf4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2081,7 +2081,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+316.sha-d814eaa');
+const VERSION = new Version('6.0.0-rc.5+317.sha-57eacf4');
 
 /**
  * @fileoverview added by tsickle
@@ -16699,13 +16699,12 @@ function executeInitAndContentHooks() {
  * @template T
  * @param {?} renderer
  * @param {?} tView
- * @param {?} template
  * @param {?} context
  * @param {?} flags
  * @param {?=} sanitizer
  * @return {?}
  */
-function createLView(renderer, tView, template, context, flags, sanitizer) {
+function createLView(renderer, tView, context, flags, sanitizer) {
     const /** @type {?} */ newView = {
         parent: currentView,
         flags: flags | 1 /* CreationMode */ | 8 /* Attached */ | 16 /* RunInit */,
@@ -16719,7 +16718,6 @@ function createLView(renderer, tView, template, context, flags, sanitizer) {
         tail: null,
         next: null,
         bindingIndex: -1,
-        template: template,
         context: context,
         queries: null,
         injector: currentView && currentView.injector,
@@ -16847,13 +16845,12 @@ function resetApplicationState() {
  * @template T
  * @param {?} viewNode
  * @param {?} tView
- * @param {?} template
  * @param {?} context
  * @param {?} renderer
  * @param {?=} queries
  * @return {?}
  */
-function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, queries) {
+function renderEmbeddedTemplate(viewNode, tView, context, renderer, queries) {
     const /** @type {?} */ _isParent = isParent;
     const /** @type {?} */ _previousOrParentNode = previousOrParentNode;
     let /** @type {?} */ oldView;
@@ -16862,15 +16859,15 @@ function renderEmbeddedTemplate(viewNode, tView, template, context, renderer, qu
         isParent = true;
         previousOrParentNode = /** @type {?} */ ((null));
         if (viewNode == null) {
-            const /** @type {?} */ lView = createLView(renderer, tView, template, context, 2 /* CheckAlways */, getCurrentSanitizer());
+            const /** @type {?} */ lView = createLView(renderer, tView, context, 2 /* CheckAlways */, getCurrentSanitizer());
             if (queries) {
                 lView.queries = queries.createView();
             }
             viewNode = createLNode(-1, 2 /* View */, null, null, null, lView);
             rf = 1 /* Create */;
         }
-        oldView = enterView(viewNode.data, viewNode);
-        template(rf, context);
+        oldView = enterView(viewNode.data, viewNode); /** @type {?} */
+        ((tView.template))(rf, context);
         if (rf & 2 /* Update */) {
             refreshView();
         }
@@ -17173,20 +17170,22 @@ function getOrCreateTView(template, directives, pipes) {
     // Correct solution is to only put `ngPrivateData` on the Component template
     // and not on embedded templates.
     return template.ngPrivateData ||
-        (template.ngPrivateData = /** @type {?} */ (createTView(-1, directives, pipes)));
+        (template.ngPrivateData = /** @type {?} */ (createTView(-1, template, directives, pipes)));
 }
 /**
  * Creates a TView instance
  *
  * @param {?} viewIndex The viewBlockId for inline views, or -1 if it's a component/dynamic
+ * @param {?} template
  * @param {?} directives Registry of directives for this view
  * @param {?} pipes Registry of pipes for this view
  * @return {?}
  */
-function createTView(viewIndex, directives, pipes) {
+function createTView(viewIndex, template, directives, pipes) {
     ngDevMode && ngDevMode.tView++;
     return {
         id: viewIndex,
+        template: template,
         node: /** @type {?} */ ((null)),
         data: [],
         childIndex: -1,
@@ -17277,7 +17276,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLView(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
+    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLView(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
@@ -17702,7 +17701,7 @@ function addComponentLogic(index, instance, def) {
     const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
-    const /** @type {?} */ hostView = addToViewTree(currentView, /** @type {?} */ (previousOrParentNode.tNode.index), createLView(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
+    const /** @type {?} */ hostView = addToViewTree(currentView, /** @type {?} */ (previousOrParentNode.tNode.index), createLView(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
     // We need to set the host node/data here because when the component LNode was created,
     // we didn't yet know it was a component (just an element).
     (/** @type {?} */ (previousOrParentNode)).data = hostView;
@@ -17930,7 +17929,7 @@ function refreshDynamicChildren() {
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
                 const /** @type {?} */ dynamicView = lViewNode.data;
                 ngDevMode && assertNotNull(dynamicView.tView, 'TView must be allocated');
-                renderEmbeddedTemplate(lViewNode, dynamicView.tView, /** @type {?} */ ((dynamicView.template)), /** @type {?} */ ((dynamicView.context)), renderer);
+                renderEmbeddedTemplate(lViewNode, dynamicView.tView, /** @type {?} */ ((dynamicView.context)), renderer);
             }
         }
     }
@@ -17990,7 +17989,7 @@ function embeddedViewStart(viewBlockId) {
     }
     else {
         // When we create a new LView, we always reset the state of the instructions.
-        const /** @type {?} */ newView = createLView(renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, null, 2 /* CheckAlways */, getCurrentSanitizer());
+        const /** @type {?} */ newView = createLView(renderer, getOrCreateEmbeddedTView(viewBlockId, container), null, 2 /* CheckAlways */, getCurrentSanitizer());
         if (lContainer.queries) {
             newView.queries = lContainer.queries.createView();
         }
@@ -18017,7 +18016,7 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
         const /** @type {?} */ tView = currentView.tView;
         containerTViews[viewIndex] =
-            createTView(viewIndex, tView.directiveRegistry, tView.pipeRegistry);
+            createTView(viewIndex, null, tView.directiveRegistry, tView.pipeRegistry);
     }
     return containerTViews[viewIndex];
 }
@@ -18089,8 +18088,7 @@ function componentRefresh(directiveIndex, elementIndex) {
     // Only attached CheckAlways components or attached, dirty OnPush components should be checked
     if (viewAttached(hostView) && hostView.flags & (2 /* CheckAlways */ | 4 /* Dirty */)) {
         ngDevMode && assertDataInRange(directiveIndex, /** @type {?} */ ((directives)));
-        const /** @type {?} */ def = /** @type {?} */ (((currentView.tView.directives))[directiveIndex]);
-        detectChangesInternal(hostView, element, def, getDirectiveInstance(/** @type {?} */ ((directives))[directiveIndex]));
+        detectChangesInternal(hostView, element, getDirectiveInstance(/** @type {?} */ ((directives))[directiveIndex]));
     }
 }
 /**
@@ -18392,9 +18390,7 @@ function getRootView(component) {
 function detectChanges(component) {
     const /** @type {?} */ hostNode = _getComponentHostLElementNode(component);
     ngDevMode && assertNotNull(hostNode.data, 'Component host node should be attached to an LView');
-    const /** @type {?} */ componentIndex = hostNode.tNode.flags >> 13;
-    const /** @type {?} */ def = /** @type {?} */ (((hostNode.view.tView.directives))[componentIndex]);
-    detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, def, component);
+    detectChangesInternal(/** @type {?} */ (hostNode.data), hostNode, component);
 }
 /**
  * Checks the change detector and its children, and throws if any changes are detected.
@@ -18419,13 +18415,12 @@ function checkNoChanges(component) {
  * @template T
  * @param {?} hostView
  * @param {?} hostNode
- * @param {?} def
  * @param {?} component
  * @return {?}
  */
-function detectChangesInternal(hostView, hostNode, def, component) {
+function detectChangesInternal(hostView, hostNode, component) {
     const /** @type {?} */ oldView = enterView(hostView, hostNode);
-    const /** @type {?} */ template = def.template;
+    const /** @type {?} */ template = /** @type {?} */ ((hostView.tView.template));
     try {
         template(getRenderFlags(hostView), component);
         refreshView();
@@ -19231,7 +19226,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         scheduler: opts.scheduler || requestAnimationFrame.bind(window),
         clean: CLEAN_PROMISE,
     };
-    const /** @type {?} */ rootView = createLView(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null), null, rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    const /** @type {?} */ rootView = createLView(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView.injector = opts.injector || null;
     const /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
     let /** @type {?} */ elementNode;
@@ -19246,7 +19241,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
         opts.hostFeatures && opts.hostFeatures.forEach((feature) => feature(component, componentDef));
         executeInitAndContentHooks();
         setHostBindings(ROOT_DIRECTIVE_INDICES);
-        detectChangesInternal(/** @type {?} */ (elementNode.data), elementNode, componentDef, component);
+        detectChangesInternal(/** @type {?} */ (elementNode.data), elementNode, component);
     }
     finally {
         leaveView(oldView);
@@ -19991,10 +19986,10 @@ function getOrCreateTemplateRef(di) {
         const /** @type {?} */ hostTNode = hostNode.tNode;
         const /** @type {?} */ hostTView = hostNode.view.tView;
         if (!hostTNode.tViews) {
-            hostTNode.tViews = createTView(-1, hostTView.directiveRegistry, hostTView.pipeRegistry);
+            hostTNode.tViews = createTView(-1, /** @type {?} */ ((hostNode.data.template)), hostTView.directiveRegistry, hostTView.pipeRegistry);
         }
         ngDevMode && assertNotNull(hostTNode.tViews, 'TView must be allocated');
-        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ (hostTNode.tViews), /** @type {?} */ ((hostNode.data.template)), getRenderer(), hostNode.data.queries);
+        di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), /** @type {?} */ (hostTNode.tViews), getRenderer(), hostNode.data.queries);
     }
     return di.templateRef;
 }
@@ -20005,13 +20000,11 @@ class TemplateRef$1 {
     /**
      * @param {?} elementRef
      * @param {?} _tView
-     * @param {?} _template
      * @param {?} _renderer
      * @param {?} _queries
      */
-    constructor(elementRef, _tView, _template, _renderer, _queries) {
+    constructor(elementRef, _tView, _renderer, _queries) {
         this._tView = _tView;
-        this._template = _template;
         this._renderer = _renderer;
         this._queries = _queries;
         this.elementRef = elementRef;
@@ -20021,8 +20014,8 @@ class TemplateRef$1 {
      * @return {?}
      */
     createEmbeddedView(context) {
-        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._queries);
-        return new EmbeddedViewRef$1(viewNode, this._template, context);
+        const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._tView, context, this._renderer, this._queries);
+        return new EmbeddedViewRef$1(viewNode, /** @type {?} */ (((this._tView.template))), context);
     }
 }
 
