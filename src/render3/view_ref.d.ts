@@ -5,17 +5,18 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
 import { EmbeddedViewRef as viewEngine_EmbeddedViewRef } from '../linker/view_ref';
 import { ComponentTemplate } from './interfaces/definition';
 import { LViewNode } from './interfaces/node';
 import { LView } from './interfaces/view';
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
-    private _view;
+    protected _view: LView;
     context: T;
     rootNodes: any[];
     constructor(_view: LView, context: T | null);
+    readonly destroyed: boolean;
     destroy(): void;
-    destroyed: boolean;
     onDestroy(callback: Function): void;
     /**
      * Marks a view and all of its ancestors dirty.
@@ -190,29 +191,8 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
     checkNoChanges(): void;
 }
 export declare class EmbeddedViewRef<T> extends ViewRef<T> {
+    private _viewContainerRef;
     constructor(viewNode: LViewNode, template: ComponentTemplate<T>, context: T);
-}
-/**
- * Creates a ViewRef bundled with destroy functionality.
- *
- * @param context The context for this view
- * @returns The ViewRef
- */
-export declare function createViewRef<T>(view: LView | null, context: T): ViewRef<T>;
-/** Interface for destroy logic. Implemented by addDestroyable. */
-export interface DestroyRef<T> {
-    /** Whether or not this object has been destroyed */
-    destroyed: boolean;
-    /** Destroy the instance and call all onDestroy callbacks. */
     destroy(): void;
-    /** Register callbacks that should be called onDestroy */
-    onDestroy(cb: Function): void;
+    attachToViewContainerRef(vcRef: viewEngine_ViewContainerRef): void;
 }
-/**
- * Decorates an object with destroy logic (implementing the DestroyRef interface)
- * and returns the enhanced object.
- *
- * @param obj The object to decorate
- * @returns The object with destroy logic
- */
-export declare function addDestroyable<T, C>(obj: any): T & DestroyRef<C>;

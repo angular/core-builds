@@ -157,6 +157,8 @@ export declare const enum LViewFlags {
      * any embedded views).
      */
     RunInit = 16,
+    /** Whether or not this view is destroyed. */
+    Destroyed = 32,
 }
 /** Interface necessary to work with view tree traversal */
 export interface LViewOrLContainer {

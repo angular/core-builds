@@ -45,6 +45,7 @@ export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;
 export declare function getCreationMode(): boolean;
+export declare function getCleanup(): any[];
 /**
  * Swap the current state with a new state.
  *

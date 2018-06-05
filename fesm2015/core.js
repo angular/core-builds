@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+311.sha-9c40375
+ * @license Angular v6.0.0-rc.5+312.sha-b750919
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2081,7 +2081,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+311.sha-9c40375');
+const VERSION = new Version('6.0.0-rc.5+312.sha-b750919');
 
 /**
  * @fileoverview added by tsickle
@@ -15789,18 +15789,58 @@ function getNextOrParentSiblingNode(initialNode, rootNode) {
  * @return {?} RNode The first RNode of the given LNode or null if there is none.
  */
 function findFirstRNode(rootNode) {
-    let /** @type {?} */ node = rootNode;
+    return walkLNodeTree(rootNode, rootNode, 0 /* Find */) || null;
+}
+/**
+ * Walks a tree of LNodes, applying a transformation on the LElement nodes, either only on the first
+ * one found, or on all of them.
+ * NOTE: for performance reasons, the possible actions are inlined within the function instead of
+ * being passed as an argument.
+ *
+ * @param {?} startingNode the node from which the walk is started.
+ * @param {?} rootNode the root node considered.
+ * @param {?} action Identifies the action to be performed on the LElement nodes.
+ * @param {?=} renderer Optional the current renderer, required for action modes 1, 2 and 3.
+ * @param {?=} renderParentNode Optionnal the render parent node to be set in all LContainerNodes found,
+ * required for action modes 1 and 2.
+ * @param {?=} beforeNode Optionnal the node before which elements should be added, required for action
+ * modes 1.
+ * @return {?}
+ */
+function walkLNodeTree(startingNode, rootNode, action, renderer, renderParentNode, beforeNode) {
+    let /** @type {?} */ node = startingNode;
     while (node) {
         let /** @type {?} */ nextNode = null;
         if (node.tNode.type === 3 /* Element */) {
-            // A LElementNode has a matching RNode in LElementNode.native
-            return (/** @type {?} */ (node)).native;
+            // Execute the action
+            if (action === 0 /* Find */) {
+                return node.native;
+            }
+            else if (action === 1 /* Insert */) {
+                const /** @type {?} */ parent = /** @type {?} */ ((renderParentNode)).native;
+                isProceduralRenderer(/** @type {?} */ ((renderer))) ?
+                    (/** @type {?} */ (renderer))
+                        .insertBefore(/** @type {?} */ ((parent)), /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) : /** @type {?} */ ((parent)).insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true);
+            }
+            else if (action === 2 /* Detach */) {
+                const /** @type {?} */ parent = /** @type {?} */ ((renderParentNode)).native;
+                isProceduralRenderer(/** @type {?} */ ((renderer))) ?
+                    (/** @type {?} */ (renderer)).removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native))) : /** @type {?} */ ((parent)).removeChild(/** @type {?} */ ((node.native)));
+            }
+            else if (action === 3 /* Destroy */) {
+                ngDevMode && ngDevMode.rendererDestroyNode++; /** @type {?} */
+                (((/** @type {?} */ (renderer)).destroyNode))(/** @type {?} */ ((node.native)));
+            }
+            nextNode = getNextLNode(node);
         }
         else if (node.tNode.type === 0 /* Container */) {
             const /** @type {?} */ lContainerNode = (/** @type {?} */ (node));
             const /** @type {?} */ childContainerData = lContainerNode.dynamicLContainerNode ?
                 lContainerNode.dynamicLContainerNode.data :
                 lContainerNode.data;
+            if (renderParentNode) {
+                childContainerData.renderParent = renderParentNode;
+            }
             nextNode =
                 childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
         }
@@ -15814,7 +15854,6 @@ function findFirstRNode(rootNode) {
         }
         node = nextNode === null ? getNextOrParentSiblingNode(node, rootNode) : nextNode;
     }
-    return null;
 }
 /**
  * @param {?} value
@@ -15837,52 +15876,10 @@ function addRemoveViewFromContainer(container, rootNode, insertMode, beforeNode)
     ngDevMode && assertNodeType(rootNode, 2 /* View */);
     const /** @type {?} */ parentNode = container.data.renderParent;
     const /** @type {?} */ parent = parentNode ? parentNode.native : null;
-    let /** @type {?} */ node = getChildLNode(rootNode);
     if (parent) {
-        while (node) {
-            let /** @type {?} */ nextNode = null;
-            const /** @type {?} */ renderer = container.view.renderer;
-            if (node.tNode.type === 3 /* Element */) {
-                if (insertMode) {
-                    isProceduralRenderer(renderer) ?
-                        renderer.insertBefore(parent, /** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode)) :
-                        parent.insertBefore(/** @type {?} */ ((node.native)), /** @type {?} */ (beforeNode), true);
-                }
-                else {
-                    if (isProceduralRenderer(renderer)) {
-                        renderer.removeChild(/** @type {?} */ (parent), /** @type {?} */ ((node.native)));
-                        if (renderer.destroyNode) {
-                            ngDevMode && ngDevMode.rendererDestroyNode++;
-                            renderer.destroyNode(/** @type {?} */ ((node.native)));
-                        }
-                    }
-                    else {
-                        parent.removeChild(/** @type {?} */ ((node.native)));
-                    }
-                }
-                nextNode = getNextLNode(node);
-            }
-            else if (node.tNode.type === 0 /* Container */) {
-                // if we get to a container, it must be a root node of a view because we are only
-                // propagating down into child views / containers and not child elements
-                const /** @type {?} */ childContainerData = (/** @type {?} */ (node)).data;
-                childContainerData.renderParent = parentNode;
-                nextNode =
-                    childContainerData.views.length ? getChildLNode(childContainerData.views[0]) : null;
-            }
-            else if (node.tNode.type === 1 /* Projection */) {
-                nextNode = (/** @type {?} */ (node)).data.head;
-            }
-            else {
-                nextNode = getChildLNode(/** @type {?} */ (node));
-            }
-            if (nextNode === null) {
-                node = getNextOrParentSiblingNode(node, rootNode);
-            }
-            else {
-                node = nextNode;
-            }
-        }
+        let /** @type {?} */ node = getChildLNode(rootNode);
+        const /** @type {?} */ renderer = container.view.renderer;
+        walkLNodeTree(node, rootNode, insertMode ? 1 /* Insert */ : 2 /* Detach */, renderer, parentNode, beforeNode);
     }
 }
 /**
@@ -15980,33 +15977,48 @@ function insertView(container, viewNode, index) {
         }
         addRemoveViewFromContainer(container, viewNode, true, beforeNode);
     }
+    // Sets the attached flag
+    viewNode.data.flags |= 8 /* Attached */;
     return viewNode;
 }
 /**
- * Removes a view from a container.
+ * Detaches a view from a container.
  *
  * This method splices the view from the container's array of active views. It also
- * removes the view's elements from the DOM and conducts cleanup (e.g. removing
- * listeners, calling onDestroys).
+ * removes the view's elements from the DOM.
  *
- * @param {?} container The container from which to remove a view
- * @param {?} removeIndex The index of the view to remove
- * @return {?} The removed view
+ * @param {?} container The container from which to detach a view
+ * @param {?} removeIndex The index of the view to detach
+ * @return {?} The detached view
  */
-function removeView(container, removeIndex) {
+function detachView(container, removeIndex) {
     const /** @type {?} */ views = container.data.views;
     const /** @type {?} */ viewNode = views[removeIndex];
     if (removeIndex > 0) {
         views[removeIndex - 1].data.next = /** @type {?} */ (viewNode.data.next);
     }
     views.splice(removeIndex, 1);
-    destroyViewTree(viewNode.data);
     addRemoveViewFromContainer(container, viewNode, false);
     // Notify query that view has been removed
     const /** @type {?} */ removedLview = viewNode.data;
     if (removedLview.queries) {
         removedLview.queries.removeView(removeIndex);
     }
+    // Unsets the attached flag
+    viewNode.data.flags &= ~8 /* Attached */;
+    return viewNode;
+}
+/**
+ * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
+ *
+ * @param {?} container The container from which to remove a view
+ * @param {?} removeIndex The index of the view to remove
+ * @return {?} The removed view
+ */
+function removeView(container, removeIndex) {
+    const /** @type {?} */ viewNode = container.data.views[removeIndex];
+    detachView(container, removeIndex);
+    destroyLView(viewNode.data);
     return viewNode;
 }
 /**
@@ -16019,6 +16031,22 @@ function getLViewChild(view) {
         return null;
     const /** @type {?} */ hostNode = view.data[view.tView.childIndex];
     return hostNode.data ? hostNode.data : (/** @type {?} */ (hostNode.dynamicLContainerNode)).data;
+}
+/**
+ * A standalone function which destroys an LView,
+ * conducting cleanup (e.g. removing listeners, calling onDestroys).
+ *
+ * @param {?} view The view to be destroyed.
+ * @return {?}
+ */
+function destroyLView(view) {
+    const /** @type {?} */ renderer = view.renderer;
+    if (isProceduralRenderer(renderer) && renderer.destroyNode) {
+        walkLNodeTree(view.node, view.node, 3 /* Destroy */, renderer);
+    }
+    destroyViewTree(view);
+    // Sets the destroyed flag
+    view.flags |= 32 /* Destroyed */;
 }
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
@@ -16448,7 +16476,7 @@ let rendererFactory;
  * @return {?}
  */
 function getRenderer() {
-    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return renderer;
 }
 /**
@@ -16465,7 +16493,7 @@ let previousOrParentNode;
  * @return {?}
  */
 function getPreviousOrParentNode() {
-    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return previousOrParentNode;
 }
 /**
@@ -16497,7 +16525,7 @@ let currentQueries;
  * @return {?}
  */
 function getCurrentQueries(QueryType) {
-    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return currentQueries || (currentQueries = new QueryType());
 }
 /**
@@ -16508,7 +16536,7 @@ let creationMode;
  * @return {?}
  */
 function getCreationMode() {
-    // top level variables should not be exported for performance reason (PERF_NOTES.md)
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
     return creationMode;
 }
 /**
@@ -16541,6 +16569,13 @@ let directives;
  * 2nd index is: context for function
  */
 let cleanup;
+/**
+ * @return {?}
+ */
+function getCleanup() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return cleanup || (cleanup = currentView.cleanup = []);
+}
 /**
  * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
  *
@@ -17268,7 +17303,7 @@ function listener(eventName, listenerFn, useCapture = false) {
     const /** @type {?} */ native = /** @type {?} */ (node.native);
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
-    const /** @type {?} */ cleanupFns = cleanup || (cleanup = currentView.cleanup = []);
+    const /** @type {?} */ cleanupFns = getCleanup();
     ngDevMode && ngDevMode.rendererAddEventListener++;
     if (isProceduralRenderer(renderer)) {
         const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listenerFn);
@@ -17302,8 +17337,8 @@ function listener(eventName, listenerFn, useCapture = false) {
 function createOutput(outputs, listener) {
     for (let /** @type {?} */ i = 0; i < outputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (outputs[i]), /** @type {?} */ ((directives)));
-        const /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i + 1]].subscribe(listener); /** @type {?} */
-        ((cleanup)).push(subscription.unsubscribe, subscription);
+        const /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i + 1]].subscribe(listener);
+        getCleanup().push(subscription.unsubscribe, subscription);
     }
 }
 /**
@@ -18914,12 +18949,20 @@ class ViewRef$1 {
     /**
      * @return {?}
      */
-    destroy() {  }
+    get destroyed() {
+        return (this._view.flags & 32 /* Destroyed */) === 32 /* Destroyed */;
+    }
+    /**
+     * @return {?}
+     */
+    destroy() { destroyLView(this._view); }
     /**
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) {  }
+    onDestroy(callback) {
+        (this._view.cleanup || (this._view.cleanup = [])).push(callback, null);
+    }
     /**
      * Marks a view and all of its ancestors dirty.
      *
@@ -19108,44 +19151,25 @@ class EmbeddedViewRef$1 extends ViewRef$1 {
      */
     constructor(viewNode, template, context) {
         super(viewNode.data, context);
+        this._viewContainerRef = null;
         this._lViewNode = viewNode;
     }
-}
-/**
- * Creates a ViewRef bundled with destroy functionality.
- *
- * @template T
- * @param {?} view
- * @param {?} context The context for this view
- * @return {?} The ViewRef
- */
-function createViewRef(view, context) {
-    // TODO: add detectChanges back in when implementing ChangeDetectorRef.detectChanges
-    return addDestroyable(new ViewRef$1(/** @type {?} */ ((view)), context));
-}
-/**
- * Interface for destroy logic. Implemented by addDestroyable.
- * @record
- * @template T
- */
-
-/**
- * Decorates an object with destroy logic (implementing the DestroyRef interface)
- * and returns the enhanced object.
- *
- * @template T, C
- * @param {?} obj The object to decorate
- * @return {?} The object with destroy logic
- */
-function addDestroyable(obj) {
-    let /** @type {?} */ destroyFn = null;
-    obj.destroyed = false;
-    obj.destroy = function () {
-        destroyFn && destroyFn.forEach((fn) => fn());
-        this.destroyed = true;
-    };
-    obj.onDestroy = (fn) => (destroyFn || (destroyFn = [])).push(fn);
-    return obj;
+    /**
+     * @return {?}
+     */
+    destroy() {
+        if (this._viewContainerRef &&
+            (this._view.flags & 8 /* Attached */) === 8 /* Attached */) {
+            this._viewContainerRef.detach(this._viewContainerRef.indexOf(this));
+            this._viewContainerRef = null;
+        }
+        super.destroy();
+    }
+    /**
+     * @param {?} vcRef
+     * @return {?}
+     */
+    attachToViewContainerRef(vcRef) { this._viewContainerRef = vcRef; }
 }
 
 /**
@@ -19537,7 +19561,7 @@ function getOrCreateChangeDetectorRef(di, context) {
         return di.changeDetectorRef;
     const /** @type {?} */ currentNode = di.node;
     if (isComponent(currentNode.tNode)) {
-        return di.changeDetectorRef = createViewRef(/** @type {?} */ (currentNode.data), context);
+        return di.changeDetectorRef = new ViewRef$1(/** @type {?} */ (currentNode.data), context);
     }
     else if (currentNode.tNode.type === 3 /* Element */) {
         return di.changeDetectorRef = getOrCreateHostChangeDetector(currentNode.view.node);
@@ -19555,7 +19579,7 @@ function getOrCreateHostChangeDetector(currentNode) {
     const /** @type {?} */ existingRef = hostInjector && hostInjector.changeDetectorRef;
     return existingRef ?
         existingRef :
-        createViewRef(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view
+        new ViewRef$1(/** @type {?} */ (hostNode.data), /** @type {?} */ ((hostNode.view
             .directives))[hostNode.tNode.flags >> 13 /* DirectiveStartingIndexShift */]);
 }
 /**
@@ -19888,8 +19912,12 @@ class ViewContainerRef$1 {
      * @return {?}
      */
     insert(viewRef, index) {
+        if (viewRef.destroyed) {
+            throw new Error('Cannot insert a destroyed View in a ViewContainer!');
+        }
         const /** @type {?} */ lViewNode = (/** @type {?} */ (viewRef))._lViewNode;
         const /** @type {?} */ adjustedIdx = this._adjustIndex(index);
+        (/** @type {?} */ (viewRef)).attachToViewContainerRef(this);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
         // invalidate cache of next sibling RNode (we do similar operation in the containerRefreshEnd
         // instruction)
@@ -19918,10 +19946,9 @@ class ViewContainerRef$1 {
      * @return {?}
      */
     remove(index) {
-        this.detach(index);
-        // TODO(ml): proper destroy of the ViewRef, i.e. recursively destroy the LviewNode and its
-        // children, delete DOM nodes and QueryList, trigger hooks (onDestroy), destroy the renderer,
-        // detach projected nodes
+        const /** @type {?} */ adjustedIdx = this._adjustIndex(index, -1);
+        removeView(this._lContainerNode, adjustedIdx);
+        this._viewRefs.splice(adjustedIdx, 1);
     }
     /**
      * @param {?=} index
@@ -19929,7 +19956,7 @@ class ViewContainerRef$1 {
      */
     detach(index) {
         const /** @type {?} */ adjustedIdx = this._adjustIndex(index, -1);
-        removeView(this._lContainerNode, adjustedIdx);
+        detachView(this._lContainerNode, adjustedIdx);
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     }
     /**
@@ -19995,7 +20022,7 @@ class TemplateRef$1 {
      */
     createEmbeddedView(context) {
         const /** @type {?} */ viewNode = renderEmbeddedTemplate(null, this._tView, this._template, context, this._renderer, this._queries);
-        return addDestroyable(new EmbeddedViewRef$1(viewNode, this._template, context));
+        return new EmbeddedViewRef$1(viewNode, this._template, context);
     }
 }
 
@@ -21183,6 +21210,7 @@ function query(memoryIndex, predicate, descend, read) {
     const /** @type {?} */ queryList = new QueryList$1();
     const /** @type {?} */ queries = getCurrentQueries(LQueries_);
     queries.track(queryList, predicate, descend, read);
+    getCleanup().push(queryList.destroy, queryList);
     if (memoryIndex != null) {
         store(memoryIndex, queryList);
     }
