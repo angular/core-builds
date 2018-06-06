@@ -45,6 +45,7 @@ export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;
 export declare function getCreationMode(): boolean;
+export declare function getCleanup(): any[];
 /**
  * Swap the current state with a new state.
  *
@@ -70,7 +71,7 @@ export declare function leaveView(newView: LView, creationOnly?: boolean): void;
 /** Sets the host bindings for the current view. */
 export declare function setHostBindings(bindings: number[] | null): void;
 export declare function executeInitAndContentHooks(): void;
-export declare function createLView<T>(renderer: Renderer3, tView: TView, template: ComponentTemplate<T> | null, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
+export declare function createLView<T>(renderer: Renderer3, tView: TView, context: T | null, flags: LViewFlags, sanitizer?: Sanitizer | null): LView;
 /**
  * Creation of LNode object is extracted to a separate function so we always create LNode object
  * with the same shape
@@ -114,7 +115,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, template: ComponentTemplate<T>, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
@@ -140,7 +141,7 @@ export declare function isComponent(tNode: TNode): boolean;
  * @param directives Registry of directives for this view
  * @param pipes Registry of pipes for this view
  */
-export declare function createTView(viewIndex: number, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
+export declare function createTView(viewIndex: number, template: ComponentTemplate<any> | null, directives: DirectiveDefListOrFactory | null, pipes: PipeDefListOrFactory | null): TView;
 export declare function createError(text: string, token: any): Error;
 /**
  * Locates the host native element, used for bootstrapping existing nodes into rendering pipeline.
@@ -454,7 +455,7 @@ export declare function detectChanges<T>(component: T): void;
  */
 export declare function checkNoChanges<T>(component: T): void;
 /** Checks the view of the component provided. Does not gate on dirty checks or execute doCheck. */
-export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, def: ComponentDef<T>, component: T): void;
+export declare function detectChangesInternal<T>(hostView: LView, hostNode: LElementNode, component: T): void;
 /**
  * Mark the component as dirty (needing change detection).
  *

@@ -54,11 +54,18 @@ export declare function destroyViewTree(rootView: LView): void;
  */
 export declare function insertView(container: LContainerNode, viewNode: LViewNode, index: number): LViewNode;
 /**
- * Removes a view from a container.
+ * Detaches a view from a container.
  *
  * This method splices the view from the container's array of active views. It also
- * removes the view's elements from the DOM and conducts cleanup (e.g. removing
- * listeners, calling onDestroys).
+ * removes the view's elements from the DOM.
+ *
+ * @param container The container from which to detach a view
+ * @param removeIndex The index of the view to detach
+ * @returns The detached view
+ */
+export declare function detachView(container: LContainerNode, removeIndex: number): LViewNode;
+/**
+ * Removes a view from a container, i.e. detaches it and then destroys the underlying LView.
  *
  * @param container The container from which to remove a view
  * @param removeIndex The index of the view to remove
@@ -67,6 +74,13 @@ export declare function insertView(container: LContainerNode, viewNode: LViewNod
 export declare function removeView(container: LContainerNode, removeIndex: number): LViewNode;
 /** Gets the child of the given LView */
 export declare function getLViewChild(view: LView): LView | LContainer | null;
+/**
+ * A standalone function which destroys an LView,
+ * conducting cleanup (e.g. removing listeners, calling onDestroys).
+ *
+ * @param view The view to be destroyed.
+ */
+export declare function destroyLView(view: LView): void;
 /**
  * Determines which LViewOrLContainer to jump to when traversing back up the
  * tree in destroyViewTree.
