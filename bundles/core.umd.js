@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0
+ * @license Angular v6.1.0-beta.0+11.sha-7de2ba0
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1619,7 +1619,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.0');
+var VERSION = new Version('6.1.0-beta.0+11.sha-7de2ba0');
 
 /**
  * @license
@@ -11592,28 +11592,6 @@ var ngDevModeResetPerfCounters = (typeof ngDevMode == 'undefined' && (function (
 })(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
     typeof global != 'undefined' && global));
 
-/** Called when directives inject each other (creating a circular dependency) */
-function throwCyclicDependencyError(token) {
-    throw new Error("Cannot instantiate cyclic dependency! " + token);
-}
-/** Called when there are multiple component selectors that match a given node */
-function throwMultipleComponentError(tNode) {
-    throw new Error("Multiple components match node with tagname " + tNode.tagName);
-}
-/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
-function throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, oldValue, currValue) {
-    if (checkNoChangesMode) {
-        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
-        if (creationMode) {
-            msg +=
-                " It seems like the view has been created after its parent and its children have been dirty checked." +
-                    " Has it been created in a change detection hook ?";
-        }
-        // TODO: include debug context
-        throw new Error(msg);
-    }
-}
-
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -11622,29 +11600,6 @@ function throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, oldValue, c
  * found in the LICENSE file at https://angular.io/license
  */
 var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-// TODO: cleanup once the code is merged in angular/angular
-var RendererStyleFlags3;
-(function (RendererStyleFlags3) {
-    RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
-    RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
-})(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
-/** Returns whether the `renderer` is a `ProceduralRenderer3` */
-function isProceduralRenderer(renderer) {
-    return !!(renderer.listen);
-}
-var domRendererFactory3 = {
-    createRenderer: function (hostElement, rendererType) { return document; }
-};
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 
@@ -11690,6 +11645,36 @@ function typeName(type) {
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// Note: This hack is necessary so we don't erroneously get a circular dependency
+// failure based on types.
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// TODO: cleanup once the code is merged in angular/angular
+var RendererStyleFlags3;
+(function (RendererStyleFlags3) {
+    RendererStyleFlags3[RendererStyleFlags3["Important"] = 1] = "Important";
+    RendererStyleFlags3[RendererStyleFlags3["DashCase"] = 2] = "DashCase";
+})(RendererStyleFlags3 || (RendererStyleFlags3 = {}));
+/** Returns whether the `renderer` is a `ProceduralRenderer3` */
+function isProceduralRenderer(renderer) {
+    return !!(renderer.listen);
+}
+var domRendererFactory3 = {
+    createRenderer: function (hostElement, rendererType) { return document; }
+};
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 
@@ -12316,7 +12301,7 @@ function isNodeMatchingSelector(tNode, selector) {
     ngDevMode && assertNotNull(selector[0], 'Selector should have a tag name');
     var mode = 4;
     var nodeAttrs = tNode.attrs;
-    var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SelectOnly */) : -1;
+    var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SELECT_ONLY */) : -1;
     // When processing ":not" selectors, we skip to the next ":not" if the
     // current one doesn't match
     var skipToNextSelector = false;
@@ -12380,13 +12365,9 @@ function findAttrIndexInNode(name, attrs) {
         return -1;
     for (var i = 0; i < attrs.length; i += step) {
         var attrName = attrs[i];
-        if (attrName === 0 /* NamespaceUri */) {
-            step = 2;
-        }
-        else if (attrName === name) {
+        if (attrName === name)
             return i;
-        }
-        else if (attrName === 1 /* SelectOnly */) {
+        if (attrName === 1 /* SELECT_ONLY */) {
             step = 1;
         }
     }
@@ -12430,6 +12411,28 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
         }
     }
     return 0;
+}
+
+/** Called when directives inject each other (creating a circular dependency) */
+function throwCyclicDependencyError(token) {
+    throw new Error("Cannot instantiate cyclic dependency! " + token);
+}
+/** Called when there are multiple component selectors that match a given node */
+function throwMultipleComponentError(tNode) {
+    throw new Error("Multiple components match node with tagname " + tNode.tagName);
+}
+/** Throws an ExpressionChangedAfterChecked error if checkNoChanges mode is on. */
+function throwErrorIfNoChangesMode(creationMode, checkNoChangesMode, oldValue, currValue) {
+    if (checkNoChangesMode) {
+        var msg = "ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: '" + oldValue + "'. Current value: '" + currValue + "'.";
+        if (creationMode) {
+            msg +=
+                " It seems like the view has been created after its parent and its children have been dirty checked." +
+                    " Has it been created in a change detection hook ?";
+        }
+        // TODO: include debug context
+        throw new Error(msg);
+    }
 }
 
 /**
@@ -12790,7 +12793,6 @@ function renderEmbeddedTemplate(viewNode, tView, context, renderer, queries) {
             rf = 1 /* Create */;
         }
         oldView = enterView(viewNode.data, viewNode);
-        namespaceHTML();
         tView.template(rf, context);
         if (rf & 2 /* Update */) {
             refreshView();
@@ -12816,7 +12818,6 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
             rendererFactory.begin();
         }
         if (template) {
-            namespaceHTML();
             template(getRenderFlags(hostView), componentOrContext);
             refreshView();
         }
@@ -12849,31 +12850,6 @@ function getRenderFlags(view) {
         2 /* Update */;
 }
 //////////////////////////
-//// Namespace
-//////////////////////////
-var _currentNamespace = null;
-/**
- * Sets the current namespace URI to null, meaning createElement (not createElementNS)
- * will be used to create elements in {@link element} and {@link elementStart}
- */
-function namespaceHTML() {
-    _currentNamespace = null;
-}
-/**
- * Sets the current namespace URI to http://www.w3.org/2000/svg, which will be
- * used in conjunction with createElementNS in {@link element} and {@link elementStart}
- */
-function namespaceSVG() {
-    _currentNamespace = 'http://www.w3.org/2000/svg';
-}
-/**
- * Sets the current namespace URI to http://www.w3.org/1998/Math/MathML, which will be
- * used in conjunction with createElementNS in {@link element} and {@link elementStart}
- */
-function namespaceMathML() {
-    _currentNamespace = 'http://www.w3.org/1998/Math/MathML';
-}
-//////////////////////////
 //// Element
 //////////////////////////
 /**
@@ -12892,18 +12868,7 @@ function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
         assertEqual(currentView.bindingIndex, -1, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
-    var native;
-    if (isProceduralRenderer(renderer)) {
-        native = renderer.createElement(name, _currentNamespace);
-    }
-    else {
-        if (_currentNamespace === null) {
-            native = renderer.createElement(name);
-        }
-        else {
-            native = renderer.createElementNS(_currentNamespace, name);
-        }
-    }
+    var native = renderer.createElement(name);
     ngDevMode && assertDataInRange(index - 1);
     var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
     if (attrs)
@@ -13118,29 +13083,15 @@ function setUpAttributes(native, attrs) {
     var isProc = isProceduralRenderer(renderer);
     for (var i = 0; i < attrs.length; i += 2) {
         var attrName = attrs[i];
-        if (attrName === 0 /* NamespaceUri */) {
-            var attrNS = attrs[i + 1];
-            attrName = attrs[i + 2];
-            var attrVal = attrs[i + 3];
-            i += 2;
-            if (isProc) {
-                renderer.setAttribute(native, attrName, attrVal, attrNS);
-            }
-            else {
-                native.setAttributeNS(attrNS, attrName, attrVal);
-            }
-        }
-        else {
-            if (attrName === 1 /* SelectOnly */)
-                break;
-            if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
-                var attrVal = attrs[i + 1];
-                ngDevMode && ngDevMode.rendererSetAttribute++;
-                isProc ?
-                    renderer
-                        .setAttribute(native, attrName, attrVal) :
-                    native.setAttribute(attrName, attrVal);
-            }
+        if (attrName === 1 /* SELECT_ONLY */)
+            break;
+        if (attrName !== NG_PROJECT_AS_ATTR_NAME) {
+            var attrVal = attrs[i + 1];
+            ngDevMode && ngDevMode.rendererSetAttribute++;
+            isProc ?
+                renderer
+                    .setAttribute(native, attrName, attrVal) :
+                native.setAttribute(attrName, attrVal);
         }
     }
 }
@@ -13288,12 +13239,6 @@ function elementEnd() {
     queries && queries.addNode(previousOrParentNode);
     queueLifecycleHooks(previousOrParentNode.tNode.flags, currentView);
 }
-/** Marks the beginning and end of an element in one call. */
-function element(index, name, attrs, localRefs) {
-    var relement = elementStart(index, name, attrs, localRefs);
-    elementEnd();
-    return relement;
-}
 /**
  * Updates the value of removes an attribute on an Element.
  *
@@ -13305,17 +13250,17 @@ function element(index, name, attrs, localRefs) {
  */
 function elementAttribute(index, name, value, sanitizer) {
     if (value !== NO_CHANGE) {
-        var element_1 = data[index];
+        var element = data[index];
         if (value == null) {
             ngDevMode && ngDevMode.rendererRemoveAttribute++;
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1.native, name) :
-                element_1.native.removeAttribute(name);
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, name) :
+                element.native.removeAttribute(name);
         }
         else {
             ngDevMode && ngDevMode.rendererSetAttribute++;
             var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
-            isProceduralRenderer(renderer) ? renderer.setAttribute(element_1.native, name, strValue) :
-                element_1.native.setAttribute(name, strValue);
+            isProceduralRenderer(renderer) ? renderer.setAttribute(element.native, name, strValue) :
+                element.native.setAttribute(name, strValue);
         }
     }
 }
@@ -13702,11 +13647,10 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
     initialInputData[directiveIndex] = null;
     var attrs = tNode.attrs;
     for (var i = 0; i < attrs.length; i += 2) {
-        var first = attrs[i];
-        var attrName = first === 0 /* NamespaceUri */ ? attrs[i += 2] : first;
+        var attrName = attrs[i];
         var minifiedInputName = inputs[attrName];
         var attrValue = attrs[i + 1];
-        if (attrName === 1 /* SelectOnly */)
+        if (attrName === 1 /* SELECT_ONLY */)
             break;
         if (minifiedInputName !== undefined) {
             var inputsToStore = initialInputData[directiveIndex] || (initialInputData[directiveIndex] = []);
@@ -14276,7 +14220,6 @@ function detectChangesInternal(hostView, hostNode, component) {
     var oldView = enterView(hostView, hostNode);
     var template = hostView.tView.template;
     try {
-        namespaceHTML();
         template(getRenderFlags(hostView), component);
         refreshView();
     }
@@ -15123,11 +15066,8 @@ function injectAttribute(attrNameToInject) {
     if (attrs) {
         for (var i = 0; i < attrs.length; i = i + 2) {
             var attrName = attrs[i];
-            if (attrName === 1 /* SelectOnly */)
+            if (attrName === 1 /* SELECT_ONLY */)
                 break;
-            if (attrName === 0 /* NamespaceUri */) {
-                attrName = attrs[i += 2];
-            }
             if (attrName == attrNameToInject) {
                 return attrs[i + 1];
             }
@@ -16891,7 +16831,6 @@ exports.ɵmarkDirty = markDirty;
 exports.ɵNC = NO_CHANGE;
 exports.ɵC = container;
 exports.ɵE = elementStart;
-exports.ɵEe = element;
 exports.ɵL = listener;
 exports.ɵT = text;
 exports.ɵV = embeddedViewStart;
@@ -16908,9 +16847,6 @@ exports.ɵi6 = interpolation6;
 exports.ɵi7 = interpolation7;
 exports.ɵi8 = interpolation8;
 exports.ɵiV = interpolationV;
-exports.ɵNH = namespaceHTML;
-exports.ɵNM = namespaceMathML;
-exports.ɵNS = namespaceSVG;
 exports.ɵpb1 = pipeBind1;
 exports.ɵpb2 = pipeBind2;
 exports.ɵpb3 = pipeBind3;
