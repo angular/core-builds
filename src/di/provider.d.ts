@@ -142,6 +142,10 @@ export interface StaticClassProvider extends StaticClassSansProvider {
  *
  * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
  *
+ * ### Example
+ *
+ * {@example core/di/ts/provider_spec.ts region='ConstructorSansProvider'}
+ *
  * @experimental
  */
 export interface ConstructorSansProvider {
@@ -424,4 +428,4 @@ export interface ClassProvider extends ClassSansProvider {
  *
  *
  */
-export declare type Provider = TypeProvider | ValueProvider | ClassProvider | ConstructorProvider | ExistingProvider | FactoryProvider | any[];
+export declare type Provider = TypeProvider | ValueProvider | ClassProvider | ExistingProvider | FactoryProvider | any[];
