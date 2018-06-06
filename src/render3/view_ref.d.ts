@@ -5,13 +5,16 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import { ApplicationRef } from '../application_ref';
+import { ChangeDetectorRef as viewEngine_ChangeDetectorRef } from '../change_detection/change_detector_ref';
 import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_container_ref';
-import { EmbeddedViewRef as viewEngine_EmbeddedViewRef } from '../linker/view_ref';
+import { EmbeddedViewRef as viewEngine_EmbeddedViewRef, InternalViewRef as viewEngine_InternalViewRef } from '../linker/view_ref';
 import { ComponentTemplate } from './interfaces/definition';
 import { LViewNode } from './interfaces/node';
 import { LView } from './interfaces/view';
-export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
+export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef {
     protected _view: LView;
+    private _appRef;
     context: T;
     rootNodes: any[];
     constructor(_view: LView, context: T | null);
@@ -189,6 +192,8 @@ export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T> {
      * introduce other changes.
      */
     checkNoChanges(): void;
+    detachFromAppRef(): void;
+    attachToAppRef(appRef: ApplicationRef): void;
 }
 export declare class EmbeddedViewRef<T> extends ViewRef<T> {
     private _viewContainerRef;
