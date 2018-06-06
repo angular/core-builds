@@ -52,22 +52,13 @@ export interface LView {
     bindingIndex: number;
     /**
      * When a view is destroyed, listeners need to be released and outputs need to be
-     * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
-     * and output data (in chunks of 2) for a particular view. Combining the arrays
-     * saves on memory (70 bytes per array) and on a few bytes of code size (for two
-     * separate for loops).
+     * unsubscribed. This context array stores both listener functions wrapped with
+     * their context and output subscription instances for a particular view.
      *
-     * If it's a listener being stored:
-     * 1st index is: event name to remove
-     * 2nd index is: native element
-     * 3rd index is: listener function
-     * 4th index is: useCapture boolean
-     *
-     * If it's an output subscription:
-     * 1st index is: unsubscribe function
-     * 2nd index is: context for function
+     * These change per LView instance, so they cannot be stored on TView. Instead,
+     * TView.cleanup saves an index to the necessary context in this array.
      */
-    cleanup: any[] | null;
+    cleanupInstances: any[] | null;
     /**
      * The last LView or LContainer beneath this LView in the hierarchy.
      *
@@ -322,6 +313,28 @@ export interface TView {
      */
     pipeDestroyHooks: HookData | null;
     /**
+     * When a view is destroyed, listeners need to be released and outputs need to be
+     * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
+     * and output data (in chunks of 2) for a particular view. Combining the arrays
+     * saves on memory (70 bytes per array) and on a few bytes of code size (for two
+     * separate for loops).
+     *
+     * If it's a native DOM listener being stored:
+     * 1st index is: event name to remove
+     * 2nd index is: index of native element in LView.data[]
+     * 3rd index is: index of wrapped listener function in LView.cleanupInstances[]
+     * 4th index is: useCapture boolean
+     *
+     * If it's a renderer2 style listener or ViewRef destroy hook being stored:
+     * 1st index is: index of the cleanup function in LView.cleanupInstances[]
+     * 2nd index is: null
+     *
+     * If it's an output subscription or query list destroy hook:
+     * 1st index is: output unsubscribe function / query list destroy function
+     * 2nd index is: index of function context in LView.cleanupInstances[]
+     */
+    cleanup: any[] | null;
+    /**
      * A list of directive and element indices for child components that will need to be
      * refreshed when the current view has finished its check.
      *
@@ -354,10 +367,10 @@ export interface RootContext {
      */
     clean: Promise<null>;
     /**
-     * RootComponent - The component which was instantiated by the call to
+     * RootComponents - The components that were instantiated by the call to
      * {@link renderComponent}.
      */
-    component: {};
+    components: {}[];
 }
 /**
  * Array of hooks that should be executed for a view and their directive indices.
