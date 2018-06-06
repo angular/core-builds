@@ -45,7 +45,6 @@ export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;
 export declare function getCreationMode(): boolean;
-export declare function getCleanup(): any[];
 /**
  * Swap the current state with a new state.
  *
@@ -169,6 +168,23 @@ export declare function hostElement(tag: string, rNode: RElement | null, def: Co
  * @param useCapture Whether or not to use capture in event listener.
  */
 export declare function listener(eventName: string, listenerFn: (e?: any) => any, useCapture?: boolean): void;
+/**
+ * Saves context for this cleanup function in LView.cleanupInstances.
+ *
+ * On the first template pass, saves in TView:
+ * - Cleanup function
+ * - Index of context we just saved in LView.cleanupInstances
+ */
+export declare function storeCleanupWithContext(view: LView | undefined, context: any, cleanupFn: Function): void;
+/**
+ * Saves the cleanup function itself in LView.cleanupInstances.
+ *
+ * This is necessary for functions that are wrapped with their contexts, like in renderer2
+ * listeners.
+ *
+ * On the first template pass, the index of the cleanup function is saved in TView.
+ */
+export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
 /**
