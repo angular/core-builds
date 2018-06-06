@@ -6,15 +6,15 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
+import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
+import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
+import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './interfaces/view';
 import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
-import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { Sanitizer } from '../sanitization/security';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -117,6 +117,21 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
 /**
+ * Sets the current namespace URI to null, meaning createElement (not createElementNS)
+ * will be used to create elements in {@link element} and {@link elementStart}
+ */
+export declare function namespaceHTML(): void;
+/**
+ * Sets the current namespace URI to http://www.w3.org/2000/svg, which will be
+ * used in conjunction with createElementNS in {@link element} and {@link elementStart}
+ */
+export declare function namespaceSVG(): void;
+/**
+ * Sets the current namespace URI to http://www.w3.org/1998/Math/MathML, which will be
+ * used in conjunction with createElementNS in {@link element} and {@link elementStart}
+ */
+export declare function namespaceMathML(): void;
+/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the data array
@@ -187,6 +202,8 @@ export declare function storeCleanupWithContext(view: LView | undefined, context
 export declare function storeCleanupFn(view: LView, cleanupFn: Function): void;
 /** Mark the end of the element. */
 export declare function elementEnd(): void;
+/** Marks the beginning and end of an element in one call. */
+export declare function element(index: number, name: string, attrs?: TAttributes | null | undefined, localRefs?: string[] | null | undefined): RElement;
 /**
  * Updates the value of removes an attribute on an Element.
  *
@@ -390,7 +407,7 @@ export declare function projectionDef(index: number, selectors?: CssSelectorList
  *        - 0 when the selector is `*` (or unspecified as this is the default value),
  *        - 1 based index of the selector from the {@link projectionDef}
  */
-export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number, attrs?: string[]): void;
+export declare function projection(nodeIndex: number, localIndex: number, selectorIndex?: number, attrs?: TAttributes): void;
 /**
  * Adds a LView or a LContainer to the end of the current view tree.
  *
