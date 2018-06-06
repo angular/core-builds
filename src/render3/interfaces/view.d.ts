@@ -367,10 +367,10 @@ export interface RootContext {
      */
     clean: Promise<null>;
     /**
-     * RootComponents - The components that were instantiated by the call to
+     * RootComponent - The component which was instantiated by the call to
      * {@link renderComponent}.
      */
-    components: {}[];
+    component: {};
 }
 /**
  * Array of hooks that should be executed for a view and their directive indices.

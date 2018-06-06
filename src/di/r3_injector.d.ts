@@ -2,13 +2,12 @@ import { Type } from '../type';
 import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
 import { InjectFlags, Injector } from './injector';
-import { StaticProvider } from './provider';
 /**
- * Create a new `Injector` which is configured using a `defType` of `InjectorType<any>`s.
+ * Create a new `Injector` which is configured using `InjectorType`s.
  *
  * @experimental
  */
-export declare function createInjector(defType: any, parent?: Injector | null, additionalProviders?: StaticProvider[] | null): Injector;
+export declare function createInjector(defType: any, parent?: Injector | null): Injector;
 export declare class R3Injector {
     readonly parent: Injector;
     /**
@@ -32,7 +31,7 @@ export declare class R3Injector {
      * Flag indicating that this injector was previously destroyed.
      */
     private destroyed;
-    constructor(def: InjectorType<any>, additionalProviders: StaticProvider[] | null, parent: Injector);
+    constructor(def: InjectorType<any>, parent: Injector);
     /**
      * Destroy the injector and release references to every instance or provider associated with it.
      *
