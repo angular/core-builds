@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.0-rc.5+322.sha-86b13cc
+ * @license Angular v6.0.0-rc.5+321.sha-8db928d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2081,7 +2081,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.0-rc.5+322.sha-86b13cc');
+const VERSION = new Version('6.0.0-rc.5+321.sha-8db928d');
 
 /**
  * @fileoverview added by tsickle
@@ -15913,7 +15913,7 @@ function destroyViewTree(rootView) {
         else if (viewOrContainer.next) {
             // Only move to the side and clean if operating below rootView -
             // otherwise we would start cleaning up sibling views of the rootView.
-            cleanUpView(viewOrContainer);
+            cleanUpView(/** @type {?} */ (viewOrContainer));
             next = viewOrContainer.next;
         }
         if (next == null) {
@@ -15921,10 +15921,10 @@ function destroyViewTree(rootView) {
             // with a root view that doesn't have children. We didn't descend into child views
             // so no need to go back up the views tree.
             while (viewOrContainer && !/** @type {?} */ ((viewOrContainer)).next && viewOrContainer !== rootView) {
-                cleanUpView(viewOrContainer);
+                cleanUpView(/** @type {?} */ (viewOrContainer));
                 viewOrContainer = getParentState(viewOrContainer, rootView);
             }
-            cleanUpView(viewOrContainer || rootView);
+            cleanUpView(/** @type {?} */ (viewOrContainer) || rootView);
             next = viewOrContainer && viewOrContainer.next;
         }
         viewOrContainer = next;
@@ -16075,20 +16075,17 @@ function getParentState(state, rootView) {
 /**
  * Removes all listeners and call all onDestroys in a given view.
  *
- * @param {?} viewOrContainer
+ * @param {?} view The LView to clean up
  * @return {?}
  */
-function cleanUpView(viewOrContainer) {
-    if ((/** @type {?} */ (viewOrContainer)).tView) {
-        const /** @type {?} */ view = /** @type {?} */ (viewOrContainer);
-        removeListeners(view);
-        executeOnDestroys(view);
-        executePipeOnDestroys(view);
-        // For component views only, the local renderer is destroyed as clean up time.
-        if (view.tView.id === -1 && isProceduralRenderer(view.renderer)) {
-            ngDevMode && ngDevMode.rendererDestroy++;
-            view.renderer.destroy();
-        }
+function cleanUpView(view) {
+    removeListeners(view);
+    executeOnDestroys(view);
+    executePipeOnDestroys(view);
+    // For component views only, the local renderer is destroyed as clean up time.
+    if (view.tView && view.tView.id === -1 && isProceduralRenderer(view.renderer)) {
+        ngDevMode && ngDevMode.rendererDestroy++;
+        view.renderer.destroy();
     }
 }
 /**
@@ -16097,28 +16094,18 @@ function cleanUpView(viewOrContainer) {
  * @return {?}
  */
 function removeListeners(view) {
-    const /** @type {?} */ cleanup = /** @type {?} */ ((view.tView.cleanup));
+    const /** @type {?} */ cleanup = /** @type {?} */ ((view.cleanup));
     if (cleanup != null) {
         for (let /** @type {?} */ i = 0; i < cleanup.length - 1; i += 2) {
             if (typeof cleanup[i] === 'string') {
-                // This is a listener with the native renderer
-                const /** @type {?} */ native = view.data[cleanup[i + 1]].native;
-                const /** @type {?} */ listener = /** @type {?} */ ((view.cleanupInstances))[cleanup[i + 2]];
-                native.removeEventListener(cleanup[i], listener, cleanup[i + 3]);
+                /** @type {?} */ ((cleanup))[i + 1].removeEventListener(cleanup[i], cleanup[i + 2], cleanup[i + 3]);
                 i += 2;
             }
-            else if (typeof cleanup[i] === 'number') {
-                // This is a listener with renderer2 (cleanup fn can be found by index)
-                const /** @type {?} */ cleanupFn = /** @type {?} */ ((view.cleanupInstances))[cleanup[i]];
-                cleanupFn();
-            }
             else {
-                // This is a cleanup function that is grouped with the index of its context
-                const /** @type {?} */ context = /** @type {?} */ ((view.cleanupInstances))[cleanup[i + 1]];
-                cleanup[i].call(context);
+                cleanup[i].call(cleanup[i + 1]);
             }
         }
-        view.cleanupInstances = null;
+        view.cleanup = null;
     }
 }
 /**
@@ -16565,19 +16552,29 @@ let data;
  */
 let directives;
 /**
- * @param {?} view
- * @return {?}
+ * When a view is destroyed, listeners need to be released and outputs need to be
+ * unsubscribed. This cleanup array stores both listener data (in chunks of 4)
+ * and output data (in chunks of 2) for a particular view. Combining the arrays
+ * saves on memory (70 bytes per array) and on a few bytes of code size (for two
+ * separate for loops).
+ *
+ * If it's a listener being stored:
+ * 1st index is: event name to remove
+ * 2nd index is: native element
+ * 3rd index is: listener function
+ * 4th index is: useCapture boolean
+ *
+ * If it's an output subscription:
+ * 1st index is: unsubscribe function
+ * 2nd index is: context for function
  */
-function getCleanup(view) {
-    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return view.cleanupInstances || (view.cleanupInstances = []);
-}
+let cleanup;
 /**
- * @param {?} view
  * @return {?}
  */
-function getTViewCleanup(view) {
-    return view.tView.cleanup || (view.tView.cleanup = []);
+function getCleanup() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return cleanup || (cleanup = currentView.cleanup = []);
 }
 /**
  * In this mode, any changes in bindings will throw an ExpressionChangedAfterChecked error.
@@ -16608,6 +16605,7 @@ function enterView(newView, host) {
     tData = newView && newView.tView.data;
     creationMode = newView && (newView.flags & 1 /* CreationMode */) === 1 /* CreationMode */;
     firstTemplatePass = newView && newView.tView.firstTemplatePass;
+    cleanup = newView && newView.cleanup;
     renderer = newView && newView.renderer;
     if (host != null) {
         previousOrParentNode = host;
@@ -16715,7 +16713,7 @@ function createLView(renderer, tView, context, flags, sanitizer) {
         data: [],
         directives: null,
         tView: tView,
-        cleanupInstances: null,
+        cleanup: null,
         renderer: renderer,
         tail: null,
         next: null,
@@ -17204,7 +17202,6 @@ function createTView(viewIndex, template, directives, pipes) {
         viewCheckHooks: null,
         destroyHooks: null,
         pipeDestroyHooks: null,
-        cleanup: null,
         hostBindings: null,
         components: null,
         directiveRegistry: typeof directives === 'function' ? directives() : directives,
@@ -17303,23 +17300,19 @@ function listener(eventName, listenerFn, useCapture = false) {
     ngDevMode && assertPreviousIsParent();
     const /** @type {?} */ node = previousOrParentNode;
     const /** @type {?} */ native = /** @type {?} */ (node.native);
-    ngDevMode && ngDevMode.rendererAddEventListener++;
     // In order to match current behavior, native DOM event listeners must be added for all
     // events (including outputs).
+    const /** @type {?} */ cleanupFns = getCleanup();
+    ngDevMode && ngDevMode.rendererAddEventListener++;
     if (isProceduralRenderer(renderer)) {
         const /** @type {?} */ wrappedListener = wrapListenerWithDirtyLogic(currentView, listenerFn);
         const /** @type {?} */ cleanupFn = renderer.listen(native, eventName, wrappedListener);
-        storeCleanupFn(currentView, cleanupFn);
+        cleanupFns.push(cleanupFn, null);
     }
     else {
         const /** @type {?} */ wrappedListener = wrapListenerWithDirtyAndDefault(currentView, listenerFn);
         native.addEventListener(eventName, wrappedListener, useCapture);
-        const /** @type {?} */ cleanupInstances = getCleanup(currentView);
-        cleanupInstances.push(wrappedListener);
-        if (firstTemplatePass) {
-            getTViewCleanup(currentView)
-                .push(eventName, node.tNode.index, /** @type {?} */ ((cleanupInstances)).length - 1, useCapture);
-        }
+        cleanupFns.push(eventName, native, wrappedListener, useCapture);
     }
     let /** @type {?} */ tNode = node.tNode;
     if (tNode.outputs === undefined) {
@@ -17344,41 +17337,7 @@ function createOutput(outputs, listener) {
     for (let /** @type {?} */ i = 0; i < outputs.length; i += 2) {
         ngDevMode && assertDataInRange(/** @type {?} */ (outputs[i]), /** @type {?} */ ((directives)));
         const /** @type {?} */ subscription = /** @type {?} */ ((directives))[/** @type {?} */ (outputs[i])][outputs[i + 1]].subscribe(listener);
-        storeCleanupWithContext(currentView, subscription, subscription.unsubscribe);
-    }
-}
-/**
- * Saves context for this cleanup function in LView.cleanupInstances.
- *
- * On the first template pass, saves in TView:
- * - Cleanup function
- * - Index of context we just saved in LView.cleanupInstances
- * @param {?=} view
- * @param {?=} context
- * @param {?=} cleanupFn
- * @return {?}
- */
-function storeCleanupWithContext(view = currentView, context, cleanupFn) {
-    getCleanup(view).push(context);
-    if (view.tView.firstTemplatePass) {
-        getTViewCleanup(view).push(cleanupFn, /** @type {?} */ ((view.cleanupInstances)).length - 1);
-    }
-}
-/**
- * Saves the cleanup function itself in LView.cleanupInstances.
- *
- * This is necessary for functions that are wrapped with their contexts, like in renderer2
- * listeners.
- *
- * On the first template pass, the index of the cleanup function is saved in TView.
- * @param {?} view
- * @param {?} cleanupFn
- * @return {?}
- */
-function storeCleanupFn(view, cleanupFn) {
-    getCleanup(view).push(cleanupFn);
-    if (view.tView.firstTemplatePass) {
-        getTViewCleanup(view).push(/** @type {?} */ ((view.cleanupInstances)).length - 1, null);
+        getCleanup().push(subscription.unsubscribe, subscription);
     }
 }
 /**
@@ -18996,7 +18955,9 @@ class ViewRef$1 {
      * @param {?} callback
      * @return {?}
      */
-    onDestroy(callback) { storeCleanupFn(this._view, callback); }
+    onDestroy(callback) {
+        (this._view.cleanup || (this._view.cleanup = [])).push(callback, null);
+    }
     /**
      * Marks a view and all of its ancestors dirty.
      *
@@ -21242,7 +21203,7 @@ function query(memoryIndex, predicate, descend, read) {
     const /** @type {?} */ queryList = new QueryList$1();
     const /** @type {?} */ queries = getCurrentQueries(LQueries_);
     queries.track(queryList, predicate, descend, read);
-    storeCleanupWithContext(undefined, queryList, queryList.destroy);
+    getCleanup().push(queryList.destroy, queryList);
     if (memoryIndex != null) {
         store(memoryIndex, queryList);
     }
