@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0+12.sha-e3759f7
+ * @license Angular v6.1.0-beta.0+13.sha-bd02b27
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2084,7 +2084,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.0+12.sha-e3759f7');
+const VERSION = new Version('6.1.0-beta.0+13.sha-bd02b27');
 
 /**
  * @fileoverview added by tsickle
@@ -4105,6 +4105,12 @@ class Compiler {
      * @return {?}
      */
     clearCacheFor(type) { }
+    /**
+     * Returns the id for a given NgModule, if one is defined and known to the compiler.
+     * @param {?} moduleType
+     * @return {?}
+     */
+    getModuleId(moduleType) { return undefined; }
 }
 Compiler.decorators = [
     { type: Injectable }
