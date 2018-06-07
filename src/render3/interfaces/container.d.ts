@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ComponentTemplate } from './definition';
 import { LElementNode, LViewNode } from './node';
 import { LQueries } from './query';
 import { LView } from './view';
@@ -58,10 +57,6 @@ export interface LContainer {
      *   `LViewNode`s into.
      */
     renderParent: LElementNode | null;
-    /**
-     * The template extracted from the location of the Container.
-     */
-    readonly template: ComponentTemplate<any> | null;
     /**
      * Queries active for this container - all the views inserted to / removed from
      * this container are reported to queries referenced here.
