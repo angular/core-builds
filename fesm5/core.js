@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0+13.sha-bd02b27
+ * @license Angular v6.1.0-beta.0+14.sha-f781f74
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1538,7 +1538,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.0+13.sha-bd02b27');
+var VERSION = new Version('6.1.0-beta.0+14.sha-f781f74');
 
 /**
  * @license
@@ -13606,7 +13606,7 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-function createLContainer(parentLNode, currentView, template, isForViewContainerRef) {
+function createLContainer(parentLNode, currentView, isForViewContainerRef) {
     ngDevMode && assertDefined(parentLNode, 'containers should have a parent');
     return {
         views: [],
@@ -13614,7 +13614,6 @@ function createLContainer(parentLNode, currentView, template, isForViewContainer
         // If the direct parent of the container is a view, its views will need to be added
         // through insertView() when its parent view is being inserted:
         renderParent: canInsertNativeNode(parentLNode, currentView) ? parentLNode : null,
-        template: template == null ? null : template,
         next: null,
         parent: currentView,
         queries: null
@@ -13635,10 +13634,13 @@ function container(index, template, tagName, attrs, localRefs) {
     ngDevMode &&
         assertEqual(currentView.bindingIndex, -1, 'container nodes should be created before any bindings');
     var currentParent = isParent ? previousOrParentNode : getParentLNode(previousOrParentNode);
-    var lContainer = createLContainer(currentParent, currentView, template);
+    var lContainer = createLContainer(currentParent, currentView);
     var node = createLNode(index, 0 /* Container */, undefined, tagName || null, attrs || null, lContainer);
-    if (firstTemplatePass && template == null)
-        node.tNode.tViews = [];
+    if (firstTemplatePass) {
+        var tView = currentView.tView;
+        node.tNode.tViews =
+            template ? createTView(-1, template, tView.directiveRegistry, tView.pipeRegistry) : [];
+    }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
     addToViewTree(currentView, index, node.data);
@@ -15269,7 +15271,7 @@ function getOrCreateContainerRef(di) {
         var vcRefHost = di.node;
         ngDevMode && assertNodeOfPossibleTypes(vcRefHost, 0 /* Container */, 3 /* Element */);
         var hostParent = getParentLNode(vcRefHost);
-        var lContainer = createLContainer(hostParent, vcRefHost.view, undefined, true);
+        var lContainer = createLContainer(hostParent, vcRefHost.view, true);
         var lContainerNode = createLNodeObject(0 /* Container */, vcRefHost.view, hostParent, undefined, lContainer, null);
         if (vcRefHost.queries) {
             lContainerNode.queries = vcRefHost.queries.container();
@@ -15374,10 +15376,6 @@ function getOrCreateTemplateRef(di) {
         ngDevMode && assertNodeType(di.node, 0 /* Container */);
         var hostNode = di.node;
         var hostTNode = hostNode.tNode;
-        var hostTView = hostNode.view.tView;
-        if (!hostTNode.tViews) {
-            hostTNode.tViews = createTView(-1, hostNode.data.template, hostTView.directiveRegistry, hostTView.pipeRegistry);
-        }
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
         di.templateRef = new TemplateRef$1(getOrCreateElementRef(di), hostTNode.tViews, getRenderer(), hostNode.data.queries);
     }

@@ -317,7 +317,7 @@ export declare function baseDirectiveCreate<T>(index: number, directive: T, dire
  * @param isForViewContainerRef Optional a flag indicating the ViewContainerRef case
  * @returns LContainer
  */
-export declare function createLContainer(parentLNode: LNode, currentView: LView, template?: ComponentTemplate<any>, isForViewContainerRef?: boolean): LContainer;
+export declare function createLContainer(parentLNode: LNode, currentView: LView, isForViewContainerRef?: boolean): LContainer;
 /**
  * Creates an LContainerNode.
  *
