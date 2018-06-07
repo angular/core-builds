@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import './ng_dev_mode';
+import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
 import { CssSelectorList, LProjection } from './interfaces/projection';
@@ -14,7 +15,6 @@ import { CurrentMatchesList, LView, LViewFlags, RootContext, TView } from './int
 import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
-import { Sanitizer } from '../sanitization/security';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
