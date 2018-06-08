@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0+21.sha-8be6892
+ * @license Angular v6.1.0-beta.0+23.sha-1135563
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1933,6 +1933,17 @@ const Injectable = makeDecorator('Injectable', undefined, undefined, undefined, 
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Represents the expansion of an `NgModule` into its scopes.
+ *
+ * A scope is a set of directives and pipes that are visible in a particular context. Each
+ * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
+ * be recognized in the templates of components declared by the module. The `exported` scope is the
+ * set of directives and pipes exported by a module (that is, module B's exported scope gets added
+ * to module A's compilation scope when module A imports B).
+ * @record
+ */
+
+/**
  * @record
  * @template T
  */
@@ -2084,7 +2095,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.0+21.sha-8be6892');
+const VERSION = new Version('6.1.0-beta.0+23.sha-1135563');
 
 /**
  * @fileoverview added by tsickle
