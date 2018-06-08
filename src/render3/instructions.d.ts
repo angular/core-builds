@@ -116,6 +116,9 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  */
 export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LView, componentOrContext: T, template?: ComponentTemplate<T>): void;
+export declare function namespaceSVG(): void;
+export declare function namespaceMathML(): void;
+export declare function namespaceHTML(): void;
 /**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
