@@ -1,16 +1,37 @@
 import { Provider } from '../di/provider';
 import { Type } from '../type';
 import { TypeDecorator } from '../util/decorators';
+/**
+ * Represents the expansion of an `NgModule` into its scopes.
+ *
+ * A scope is a set of directives and pipes that are visible in a particular context. Each
+ * `NgModule` has two scopes. The `compilation` scope is the set of directives and pipes that will
+ * be recognized in the templates of components declared by the module. The `exported` scope is the
+ * set of directives and pipes exported by a module (that is, module B's exported scope gets added
+ * to module A's compilation scope when module A imports B).
+ */
+export interface NgModuleTransitiveScopes {
+    compilation: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+    exported: {
+        directives: Set<any>;
+        pipes: Set<any>;
+    };
+}
 export interface NgModuleDef<T> {
     type: T;
     bootstrap: Type<any>[];
     declarations: Type<any>[];
     imports: Type<any>[];
     exports: Type<any>[];
-    transitiveCompileScope: {
-        directives: any[];
-        pipes: any[];
-    } | undefined;
+    /**
+     * Cached value of computed `transitiveCompileScopes` for this module.
+     *
+     * This should never be read directly, but accessed via `transitiveScopesFor`.
+     */
+    transitiveCompileScopes: NgModuleTransitiveScopes | null;
 }
 export declare function defineNgModule<T>(def: {
     type: T;
