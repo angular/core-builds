@@ -15,7 +15,7 @@ import { NgModuleRef as viewEngine_NgModuleRef } from '../linker/ng_module_facto
 import { Type } from '../type';
 import { ComponentDef } from './interfaces/definition';
 import { RElement } from './interfaces/renderer';
-import { LView, RootContext } from './interfaces/view';
+import { LViewData, RootContext } from './interfaces/view';
 import { ViewRef } from './view_ref';
 export declare class ComponentFactoryResolver extends viewEngine_ComponentFactoryResolver {
     resolveComponentFactory<T>(component: Type<T>): viewEngine_ComponentFactory<T>;
@@ -64,7 +64,7 @@ export declare class ComponentRef<T> extends viewEngine_ComponentRef<T> {
     hostView: ViewRef<T>;
     changeDetectorRef: ChangeDetectorRef;
     componentType: Type<T>;
-    constructor(componentType: Type<T>, instance: T, rootView: LView, injector: Injector, hostNode: RElement);
+    constructor(componentType: Type<T>, instance: T, rootView: LViewData, injector: Injector, hostNode: RElement);
     destroy(): void;
     onDestroy(callback: () => void): void;
 }

@@ -10,7 +10,7 @@ import { LInjector } from './injector';
 import { LProjection } from './projection';
 import { LQueries } from './query';
 import { RElement, RText } from './renderer';
-import { LView, TView } from './view';
+import { LViewData, TView } from './view';
 /**
  * TNodeType corresponds to the TNode.type property. It contains information
  * on how to map a particular set of bits in LNode.flags to the node type.
@@ -63,13 +63,13 @@ export interface LNode {
      * If LContainerNode, then `data` contains LContainer.
      * If LProjectionNode, then `data` contains LProjection.
      */
-    readonly data: LView | LContainer | LProjection | null;
+    readonly data: LViewData | LContainer | LProjection | null;
     /**
      * Each node belongs to a view.
      *
      * When the injector is walking up a tree, it needs access to the `directives` (part of view).
      */
-    readonly view: LView;
+    readonly view: LViewData;
     /** The injector associated with this node. Necessary for DI. */
     nodeInjector: LInjector | null;
     /**
@@ -100,7 +100,7 @@ export interface LElementNode extends LNode {
     /** The DOM element associated with this node. */
     readonly native: RElement;
     /** If Component then data has LView (light DOM) */
-    readonly data: LView | null;
+    readonly data: LViewData | null;
 }
 /** LNode representing a #text node. */
 export interface LTextNode extends LNode {
@@ -112,7 +112,7 @@ export interface LTextNode extends LNode {
 /** Abstract node which contains root nodes of a view. */
 export interface LViewNode extends LNode {
     readonly native: null;
-    readonly data: LView;
+    readonly data: LViewData;
     dynamicLContainerNode: null;
 }
 /** Abstract node container which contains other views. */
