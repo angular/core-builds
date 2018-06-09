@@ -12,7 +12,7 @@ export { ReflectiveDependency as ɵangular_packages_core_core_d, resolveReflecti
 export { wtfEnabled as ɵangular_packages_core_core_n } from './src/profile/profile';
 export { createScope as ɵangular_packages_core_core_p, detectWTF as ɵangular_packages_core_core_o, endTimeRange as ɵangular_packages_core_core_s, leave as ɵangular_packages_core_core_q, startTimeRange as ɵangular_packages_core_core_r } from './src/profile/wtf_impl';
 export { getOrCreateChangeDetectorRef as ɵangular_packages_core_core_w, getOrCreateContainerRef as ɵangular_packages_core_core_y, getOrCreateInjectable as ɵangular_packages_core_core_x, getOrCreateNodeInjector as ɵangular_packages_core_core_v, getOrCreateTemplateRef as ɵangular_packages_core_core_z } from './src/render3/di';
-export { bindingUpdated as ɵangular_packages_core_core_ba } from './src/render3/instructions';
+export { bindingUpdated as ɵangular_packages_core_core_bb, loadInternal as ɵangular_packages_core_core_ba } from './src/render3/instructions';
 export { makeParamDecorator as ɵangular_packages_core_core_a, makePropDecorator as ɵangular_packages_core_core_b } from './src/util/decorators';
 export { _def as ɵangular_packages_core_core_t } from './src/view/provider';
 export { DebugContext as ɵangular_packages_core_core_u } from './src/view/types';
