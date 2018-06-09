@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0+23.sha-1135563
+ * @license Angular v6.1.0-beta.0+27.sha-49c5234
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1622,7 +1622,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.0+23.sha-1135563');
+var VERSION = new Version('6.1.0-beta.0+27.sha-49c5234');
 
 /**
  * @license
@@ -12812,6 +12812,7 @@ function renderEmbeddedTemplate(viewNode, tView, context, renderer, queries) {
             rf = 1 /* Create */;
         }
         oldView = enterView(viewNode.data, viewNode);
+        namespaceHTML();
         tView.template(rf, context);
         if (rf & 2 /* Update */) {
             refreshView();
@@ -12837,6 +12838,7 @@ function renderComponentOrTemplate(node, hostView, componentOrContext, template)
             rendererFactory.begin();
         }
         if (template) {
+            namespaceHTML();
             template(getRenderFlags(hostView), componentOrContext);
             refreshView();
         }
@@ -12869,6 +12871,19 @@ function getRenderFlags(view) {
         2 /* Update */;
 }
 //////////////////////////
+//// Namespace
+//////////////////////////
+var _currentNamespace = null;
+function namespaceSVG() {
+    _currentNamespace = 'http://www.w3.org/2000/svg/';
+}
+function namespaceMathML() {
+    _currentNamespace = 'http://www.w3.org/1998/MathML/';
+}
+function namespaceHTML() {
+    _currentNamespace = null;
+}
+//////////////////////////
 //// Element
 //////////////////////////
 /**
@@ -12887,7 +12902,18 @@ function elementStart(index, name, attrs, localRefs) {
     ngDevMode &&
         assertEqual(currentView.bindingIndex, -1, 'elements should be created before any bindings');
     ngDevMode && ngDevMode.rendererCreateElement++;
-    var native = renderer.createElement(name);
+    var native;
+    if (isProceduralRenderer(renderer)) {
+        native = renderer.createElement(name, _currentNamespace);
+    }
+    else {
+        if (_currentNamespace === null) {
+            native = renderer.createElement(name);
+        }
+        else {
+            native = renderer.createElementNS(_currentNamespace, name);
+        }
+    }
     ngDevMode && assertDataInRange(index - 1);
     var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
     if (attrs)
@@ -14243,6 +14269,7 @@ function detectChangesInternal(hostView, hostNode, component) {
     var oldView = enterView(hostView, hostNode);
     var template = hostView.tView.template;
     try {
+        namespaceHTML();
         template(getRenderFlags(hostView), component);
         refreshView();
     }
@@ -17043,6 +17070,9 @@ exports.ɵmarkDirty = markDirty;
 exports.ɵNC = NO_CHANGE;
 exports.ɵC = container;
 exports.ɵE = elementStart;
+exports.ɵNH = namespaceHTML;
+exports.ɵNM = namespaceMathML;
+exports.ɵNS = namespaceSVG;
 exports.ɵL = listener;
 exports.ɵT = text;
 exports.ɵV = embeddedViewStart;
