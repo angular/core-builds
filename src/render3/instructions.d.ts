@@ -114,6 +114,15 @@ export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
 export declare function namespaceHTML(): void;
 /**
+ * Creates an empty element using {@link elementStart} and {@link elementEnd}
+ *
+ * @param index Index of the element in the data array
+ * @param name Name of the DOM Node
+ * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
+ * @param localRefs A set of local reference bindings on the element.
+ */
+export declare function element(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): void;
+/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the LViewData array
