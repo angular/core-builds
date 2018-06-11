@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.0+32.sha-5e8bf2f
+ * @license Angular v6.1.0-beta.0+34.sha-8dd99ac
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2226,7 +2226,7 @@ function detachView(container, removeIndex) {
     // Notify query that view has been removed
     var removedLview = viewNode.data;
     if (removedLview[QUERIES]) {
-        removedLview[QUERIES].removeView(removeIndex);
+        removedLview[QUERIES].removeView();
     }
     // Unsets the attached flag
     viewNode.data[FLAGS] &= ~8 /* Attached */;
@@ -2994,6 +2994,18 @@ function namespaceHTML() {
 //// Element
 //////////////////////////
 /**
+ * Creates an empty element using {@link elementStart} and {@link elementEnd}
+ *
+ * @param index Index of the element in the data array
+ * @param name Name of the DOM Node
+ * @param attrs Statically bound set of attributes to be written into the DOM element on creation.
+ * @param localRefs A set of local reference bindings on the element.
+ */
+function element(index, name, attrs, localRefs) {
+    elementStart(index, name, attrs, localRefs);
+    elementEnd();
+}
+/**
  * Create DOM element. The instruction must later be followed by `elementEnd()` call.
  *
  * @param index Index of the element in the LViewData array
@@ -3404,17 +3416,17 @@ function elementEnd() {
  */
 function elementAttribute(index, name, value, sanitizer) {
     if (value !== NO_CHANGE) {
-        var element = load(index);
+        var element_1 = load(index);
         if (value == null) {
             ngDevMode && ngDevMode.rendererRemoveAttribute++;
-            isProceduralRenderer(renderer) ? renderer.removeAttribute(element.native, name) :
-                element.native.removeAttribute(name);
+            isProceduralRenderer(renderer) ? renderer.removeAttribute(element_1.native, name) :
+                element_1.native.removeAttribute(name);
         }
         else {
             ngDevMode && ngDevMode.rendererSetAttribute++;
             var strValue = sanitizer == null ? stringify$1(value) : sanitizer(value);
-            isProceduralRenderer(renderer) ? renderer.setAttribute(element.native, name, strValue) :
-                element.native.setAttribute(name, strValue);
+            isProceduralRenderer(renderer) ? renderer.setAttribute(element_1.native, name, strValue) :
+                element_1.native.setAttribute(name, strValue);
         }
     }
 }
@@ -9940,12 +9952,14 @@ var LQueries_ = /** @class */ (function () {
         add(this.shallow, node);
         add(this.deep, node);
     };
-    LQueries_.prototype.removeView = function (index) {
+    LQueries_.prototype.removeView = function () {
         var query = this.deep;
         while (query) {
             ngDevMode &&
                 assertDefined(query.containerValues, 'View queries need to have a pointer to container values.');
-            var removed = query.containerValues.splice(index, 1);
+            var containerValues = query.containerValues;
+            var viewValuesIdx = containerValues.indexOf(query.values);
+            var removed = containerValues.splice(viewValuesIdx, 1);
             // mark a query as dirty only when removed view had matching modes
             ngDevMode && assertEqual(removed.length, 1, 'removed.length');
             if (removed[0].length) {
@@ -10226,6 +10240,7 @@ var angularCoreEnv = {
     'ɵNS': namespaceSVG,
     'ɵE': elementStart,
     'ɵe': elementEnd,
+    'ɵEe': element,
     'ɵf0': pureFunction0,
     'ɵf1': pureFunction1,
     'ɵf2': pureFunction2,
@@ -10940,7 +10955,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.0+32.sha-5e8bf2f');
+var VERSION = new Version('6.1.0-beta.0+34.sha-8dd99ac');
 
 /**
  * @license
@@ -17645,6 +17660,7 @@ exports.ɵE = elementStart;
 exports.ɵNH = namespaceHTML;
 exports.ɵNM = namespaceMathML;
 exports.ɵNS = namespaceSVG;
+exports.ɵEe = element;
 exports.ɵL = listener;
 exports.ɵT = text;
 exports.ɵV = embeddedViewStart;
