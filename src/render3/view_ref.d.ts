@@ -11,15 +11,15 @@ import { ViewContainerRef as viewEngine_ViewContainerRef } from '../linker/view_
 import { EmbeddedViewRef as viewEngine_EmbeddedViewRef, InternalViewRef as viewEngine_InternalViewRef } from '../linker/view_ref';
 import { ComponentTemplate } from './interfaces/definition';
 import { LViewNode } from './interfaces/node';
-import { LView } from './interfaces/view';
+import { LViewData } from './interfaces/view';
 export interface viewEngine_ChangeDetectorRef_interface extends viewEngine_ChangeDetectorRef {
 }
 export declare class ViewRef<T> implements viewEngine_EmbeddedViewRef<T>, viewEngine_InternalViewRef, viewEngine_ChangeDetectorRef_interface {
-    protected _view: LView;
+    protected _view: LViewData;
     private _appRef;
     context: T;
     rootNodes: any[];
-    constructor(_view: LView, context: T | null);
+    constructor(_view: LViewData, context: T | null);
     readonly destroyed: boolean;
     destroy(): void;
     onDestroy(callback: Function): void;
