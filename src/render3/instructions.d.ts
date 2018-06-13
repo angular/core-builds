@@ -14,7 +14,7 @@ import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
 import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
 import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
-import { RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
+import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
@@ -70,7 +70,7 @@ export declare function createLViewData<T>(renderer: Renderer3, tView: TView, co
  * with the same shape
  * (same properties assigned in the same order).
  */
-export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | null | undefined, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
+export declare function createLNodeObject(type: TNodeType, currentView: LViewData, parent: LNode | null, native: RText | RElement | RComment | null, state: any, queries: LQueries | null): LElementNode & LTextNode & LViewNode & LContainerNode & LProjectionNode;
 /**
  * A common way of creating the LNode to make sure that all of them have same shape to
  * keep the execution code monomorphic and fast.
@@ -85,7 +85,7 @@ export declare function createLNodeObject(type: TNodeType, currentView: LViewDat
  */
 export declare function createLNode(index: number, type: TNodeType.Element, native: RElement | RText | null, name: string | null, attrs: TAttributes | null, lViewData?: LViewData | null): LElementNode;
 export declare function createLNode(index: number, type: TNodeType.View, native: null, name: null, attrs: null, lViewData: LViewData): LViewNode;
-export declare function createLNode(index: number, type: TNodeType.Container, native: undefined, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
+export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
 /**
  *

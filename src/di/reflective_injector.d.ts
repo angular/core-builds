@@ -18,7 +18,7 @@ import { ResolvedReflectiveProvider } from './reflective_provider';
  * In typical use, application code asks for the dependencies in the constructor and they are
  * resolved by the `Injector`.
  *
- * ### Example ([live demo](http://plnkr.co/edit/jzjec0?p=preview))
+ * ### Example
  *
  * The following example creates an `Injector` configured to create `Engine` and `Car`.
  *
@@ -50,7 +50,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * A resolution is a process of flattening multiple nested arrays and converting individual
      * providers into an array of {@link ResolvedReflectiveProvider}s.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/AiXTHi?p=preview))
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -84,7 +84,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * The passed-in providers can be an array of `Type`, {@link Provider},
      * or a recursive array of more providers.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -111,7 +111,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This API is the recommended way to construct injectors in performance-sensitive parts.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/KrSMci?p=preview))
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -136,7 +136,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * <!-- TODO: Add a link to the section of the user guide talking about hierarchical injection.
      * -->
      *
-     * ### Example ([live demo](http://plnkr.co/edit/eosMGo?p=preview))
+     * ### Example
      *
      * ```typescript
      * var parent = ReflectiveInjector.resolveAndCreate([]);
@@ -154,7 +154,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * The passed-in providers can be an array of `Type`, {@link Provider},
      * or a recursive array of more providers.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/opB3T4?p=preview))
+     * ### Example
      *
      * ```typescript
      * class ParentProvider {}
@@ -182,7 +182,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * This API is the recommended way to construct injectors in performance-sensitive parts.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/VhyfjN?p=preview))
+     * ### Example
      *
      * ```typescript
      * class ParentProvider {}
@@ -205,7 +205,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * The created object does not get cached by the injector.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/yvVXoB?p=preview))
+     * ### Example
      *
      * ```typescript
      * @Injectable()
@@ -230,7 +230,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      *
      * The created object does not get cached by the injector.
      *
-     * ### Example ([live demo](http://plnkr.co/edit/ptCImQ?p=preview))
+     * ### Example
      *
      * ```typescript
      * @Injectable()
