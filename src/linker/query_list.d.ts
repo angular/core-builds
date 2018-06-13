@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
  *
  * NOTE: In the future this class will implement an `Observable` interface.
  *
- * ### Example ([live demo](http://plnkr.co/edit/RX8sJnQYl9FWuSCWme5z?p=preview))
+ * ### Example
  * ```typescript
  * @Component({...})
  * class Container {
