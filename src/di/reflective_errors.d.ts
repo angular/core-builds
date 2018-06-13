@@ -11,7 +11,7 @@ export interface InjectionError extends Error {
  * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
  * {@link Injector} does not have a {@link Provider} for the given key.
  *
- * ### Example ([live demo](http://plnkr.co/edit/vq8D3FRB9aGbnWJqtEPE?p=preview))
+ * ### Example
  *
  * ```typescript
  * class A {
@@ -25,7 +25,7 @@ export declare function noProviderError(injector: ReflectiveInjector, key: Refle
 /**
  * Thrown when dependencies form a cycle.
  *
- * ### Example ([live demo](http://plnkr.co/edit/wYQdNos0Tzql3ei1EV9j?p=info))
+ * ### Example
  *
  * ```typescript
  * var injector = Injector.resolveAndCreate([
@@ -45,7 +45,7 @@ export declare function cyclicDependencyError(injector: ReflectiveInjector, key:
  * The `InstantiationError` class contains the original error plus the dependency graph which caused
  * this object to be instantiated.
  *
- * ### Example ([live demo](http://plnkr.co/edit/7aWYdcqTQsP0eNqEdUAf?p=preview))
+ * ### Example
  *
  * ```typescript
  * class A {
@@ -70,7 +70,7 @@ export declare function instantiationError(injector: ReflectiveInjector, origina
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}
  * creation.
  *
- * ### Example ([live demo](http://plnkr.co/edit/YatCFbPAMCL0JSSQ4mvH?p=preview))
+ * ### Example
  *
  * ```typescript
  * expect(() => Injector.resolveAndCreate(["not a type"])).toThrowError();
@@ -83,7 +83,7 @@ export declare function invalidProviderError(provider: any): Error;
  * Lack of annotation information prevents the {@link Injector} from determining which dependencies
  * need to be injected into the constructor.
  *
- * ### Example ([live demo](http://plnkr.co/edit/rHnZtlNS7vJOPQ6pcVkm?p=preview))
+ * ### Example
  *
  * ```typescript
  * class A {
@@ -110,7 +110,7 @@ export declare function noAnnotationError(typeOrFunc: Type<any> | Function, para
 /**
  * Thrown when getting an object by index.
  *
- * ### Example ([live demo](http://plnkr.co/edit/bRs0SX2OTQiJzqvjgl8P?p=preview))
+ * ### Example
  *
  * ```typescript
  * class A {}
