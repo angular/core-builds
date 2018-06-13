@@ -19,7 +19,7 @@ export interface KeyValueDiffer<K, V> {
      * @returns an object describing the difference. The return value is only valid until the next
      * `diff()` invocation.
      */
-    diff(object: Map<K, V>): KeyValueChanges<K, V>;
+    diff(object: Map<K, V>): KeyValueChanges<K, V> | null;
     /**
      * Compute a difference between the previous state and the new `object` state.
      *
@@ -29,7 +29,7 @@ export interface KeyValueDiffer<K, V> {
      */
     diff(object: {
         [key: string]: V;
-    }): KeyValueChanges<string, V>;
+    }): KeyValueChanges<string, V> | null;
 }
 /**
  * An object describing the changes in the `Map` or `{[k:string]: string}` since last time
