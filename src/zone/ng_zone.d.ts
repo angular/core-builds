@@ -12,6 +12,7 @@ import { EventEmitter } from '../event_emitter';
  *   - link to runOutsideAngular/run (throughout this file!)
  *   -->
  *
+ * @usageNotes
  * ### Example
  *
  * ```

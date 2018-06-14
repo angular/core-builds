@@ -62,7 +62,7 @@ export declare class LQueries_ implements LQueries {
     createView(): LQueries | null;
     insertView(index: number): void;
     addNode(node: LNode): void;
-    removeView(index: number): void;
+    removeView(): void;
 }
 export declare type QueryList<T> = viewEngine_QueryList<T>;
 export declare const QueryList: typeof viewEngine_QueryList;

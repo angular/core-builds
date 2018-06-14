@@ -7,7 +7,7 @@ export declare function getNextLNode(node: LNode): LNode | null;
 /** Retrieves the first child of a given node */
 export declare function getChildLNode(node: LNode): LNode | null;
 /** Retrieves the parent LNode of a given node. */
-export declare function getParentLNode(node: LElementNode | LTextNode | LProjectionNode): LElementNode | LViewNode;
+export declare function getParentLNode(node: LContainerNode | LElementNode | LTextNode | LProjectionNode): LElementNode | LViewNode;
 export declare function getParentLNode(node: LViewNode): LContainerNode | null;
 export declare function getParentLNode(node: LNode): LElementNode | LContainerNode | LViewNode | null;
 export declare function createTextNode(value: any, renderer: Renderer3): RText;
