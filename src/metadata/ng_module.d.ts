@@ -20,11 +20,34 @@ export interface NgModuleTransitiveScopes {
         pipes: Set<any>;
     };
 }
-export interface NgModuleDef<T> {
+/**
+ * A version of {@link NgModuleDef} that represents the runtime type shape only, and excludes
+ * metadata parameters.
+ */
+export declare type NgModuleDefInternal<T> = NgModuleDef<T, any, any, any>;
+/**
+ * Runtime link information for NgModules.
+ *
+ * This is the internal data structure used by the runtime to assemble components, directives,
+ * pipes, and injectors.
+ *
+ * NOTE: Always use `defineNgModule` function to create this object,
+ * never create the object directly since the shape of this object
+ * can change between versions.
+ */
+export interface NgModuleDef<T, Declarations, Imports, Exports> {
+    /** Token representing the module. Used by DI. */
     type: T;
+    /** List of components to bootstrap. */
     bootstrap: Type<any>[];
+    /** List of components, directives, and pipes declared by this module. */
     declarations: Type<any>[];
+    /** List of modules or `ModuleWithProviders` imported by this module. */
     imports: Type<any>[];
+    /**
+     * List of modules, `ModuleWithProviders`, components, directives, or pipes exported by this
+     * module.
+     */
     exports: Type<any>[];
     /**
      * Cached value of computed `transitiveCompileScopes` for this module.
@@ -33,9 +56,6 @@ export interface NgModuleDef<T> {
      */
     transitiveCompileScopes: NgModuleTransitiveScopes | null;
 }
-export declare function defineNgModule<T>(def: {
-    type: T;
-} & Partial<NgModuleDef<T>>): never;
 /**
  * A wrapper around a module that also includes the providers.
  *
@@ -193,6 +213,13 @@ export interface NgModule {
      * `getModuleFactory`.
      */
     id?: string;
+    /**
+     * If true, this module will be skipped by the AOT compiler and so will always be compiled
+     * using JIT.
+     *
+     * This exists to support future Ivy work and has no effect currently.
+     */
+    jit?: true;
 }
 /**
  * NgModule decorator and metadata.

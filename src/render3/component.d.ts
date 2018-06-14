@@ -8,7 +8,7 @@
 import { Type } from '../core';
 import { Injector } from '../di/injector';
 import { Sanitizer } from '../sanitization/security';
-import { ComponentDef, ComponentType } from './interfaces/definition';
+import { ComponentDef, ComponentDefInternal, ComponentType } from './interfaces/definition';
 import { RElement, RendererFactory3 } from './interfaces/renderer';
 import { RootContext } from './interfaces/view';
 /** Options that control how the component should be bootstrapped. */
@@ -37,7 +37,7 @@ export interface CreateComponentOptions {
      * features list because there's no way of knowing when the component will be used as
      * a root component.
      */
-    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T>) => void)[];
+    hostFeatures?: (<T>(component: T, componentDef: ComponentDef<T, string>) => void)[];
     /**
      * A function which is used to schedule change detection work in the future.
      *
@@ -80,7 +80,7 @@ export declare function createRootContext(scheduler: (workFn: () => void) => voi
  * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
  * ```
  */
-export declare function LifecycleHooksFeature(component: any, def: ComponentDef<any>): void;
+export declare function LifecycleHooksFeature(component: any, def: ComponentDefInternal<any>): void;
 /**
  * Retrieve the host element of the component.
  *

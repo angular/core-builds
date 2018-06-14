@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.1+29.sha-0f7e4fa
+ * @license Angular v6.1.0-beta.1+30.sha-27bc7dc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1089,6 +1089,7 @@ var TestBed = /** @class */ (function () {
                 RootScopeModule.decorators = [
                     { type: core.NgModule, args: [{
                                 providers: __spread(rootProviderOverrides),
+                                jit: true,
                             },] },
                 ];
                 return RootScopeModule;
@@ -1102,7 +1103,7 @@ var TestBed = /** @class */ (function () {
             function DynamicTestModule() {
             }
             DynamicTestModule.decorators = [
-                { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas },] },
+                { type: core.NgModule, args: [{ providers: providers, declarations: declarations, imports: imports, schemas: schemas, jit: true },] },
             ];
             return DynamicTestModule;
         }());
@@ -1223,7 +1224,7 @@ var TestBed = /** @class */ (function () {
             function OverrideComponent() {
             }
             OverrideComponent.decorators = [
-                { type: core.Component, args: [{ selector: 'empty', template: template },] },
+                { type: core.Component, args: [{ selector: 'empty', template: template, jit: true },] },
             ];
             return OverrideComponent;
         }());
