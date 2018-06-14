@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.0-beta.1+26.sha-6d246d6
+ * @license Angular v6.1.0-beta.1+29.sha-0f7e4fa
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { __assign, __decorate, __extends, __metadata, __param, __read, __spread, __values } from 'tslib';
-import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileNgModule, jitExpression, makeBindingParser, parseTemplate } from '@angular/compiler';
+import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileNgModule, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
 import { Observable, Subject, Subscription, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -10120,7 +10120,9 @@ var angularCoreEnv = {
     'ɵdefineComponent': defineComponent,
     'ɵdefineDirective': defineDirective,
     'defineInjectable': defineInjectable,
+    'defineInjector': defineInjector,
     'ɵdefineNgModule': defineNgModule,
+    'ɵdefinePipe': definePipe,
     'ɵdirectiveInject': directiveInject,
     'inject': inject,
     'ɵinjectAttribute': injectAttribute,
@@ -10159,18 +10161,23 @@ var angularCoreEnv = {
     'ɵi6': interpolation6,
     'ɵi7': interpolation7,
     'ɵi8': interpolation8,
+    'ɵiV': interpolationV,
     'ɵk': elementClass,
     'ɵkn': elementClassNamed,
     'ɵL': listener,
     'ɵld': load,
+    'ɵP': projection,
     'ɵp': elementProperty,
     'ɵpb1': pipeBind1,
     'ɵpb2': pipeBind2,
     'ɵpb3': pipeBind3,
     'ɵpb4': pipeBind4,
     'ɵpbV': pipeBindV,
+    'ɵpD': projectionDef,
+    'ɵPp': pipe,
     'ɵQ': query,
     'ɵqR': queryRefresh,
+    'ɵrS': reserveSlots,
     'ɵs': elementStyle,
     'ɵsn': elementStyleNamed,
     'ɵst': store,
@@ -10589,11 +10596,12 @@ function compileComponentDecorator(type, metadata) {
  */
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
-    var props = getReflect().propMetadata(type);
+    var propMetadata = getReflect().propMetadata(type);
     var inputs = {};
     var outputs = {};
+    var host = extractHostBindings(metadata, propMetadata);
     var _loop_1 = function (field) {
-        props[field].forEach(function (ann) {
+        propMetadata[field].forEach(function (ann) {
             if (isInput(ann)) {
                 inputs[field] = ann.bindingPropertyName || field;
             }
@@ -10602,21 +10610,14 @@ function directiveMetadata(type, metadata) {
             }
         });
     };
-    for (var field in props) {
+    for (var field in propMetadata) {
         _loop_1(field);
     }
     return {
         name: type.name,
         type: new WrappedNodeExpr(type),
         selector: metadata.selector,
-        deps: reflectDependencies(type),
-        host: {
-            attributes: {},
-            listeners: {},
-            properties: {},
-        },
-        inputs: inputs,
-        outputs: outputs,
+        deps: reflectDependencies(type), host: host, inputs: inputs, outputs: outputs,
         queries: [],
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
@@ -10624,11 +10625,39 @@ function directiveMetadata(type, metadata) {
         typeSourceSpan: null,
     };
 }
+function extractHostBindings(metadata, propMetadata) {
+    // First parse the declarations from the metadata.
+    var _a = parseHostBindings(metadata.host || {}), attributes = _a.attributes, listeners = _a.listeners, properties = _a.properties, animations = _a.animations;
+    if (Object.keys(animations).length > 0) {
+        throw new Error("Animation bindings are as-of-yet unsupported in Ivy");
+    }
+    var _loop_2 = function (field) {
+        propMetadata[field].forEach(function (ann) {
+            if (isHostBinding(ann)) {
+                properties[ann.hostPropertyName || field] = field;
+            }
+            else if (isHostListener(ann)) {
+                listeners[ann.eventName || field] = field + "(" + (ann.args || []).join(',') + ")";
+            }
+        });
+    };
+    // Next, loop over the properties of the object, looking for @HostBinding and @HostListener.
+    for (var field in propMetadata) {
+        _loop_2(field);
+    }
+    return { attributes: attributes, listeners: listeners, properties: properties };
+}
 function isInput(value) {
     return value.ngMetadataName === 'Input';
 }
 function isOutput(value) {
     return value.ngMetadataName === 'Output';
+}
+function isHostBinding(value) {
+    return value.ngMetadataName === 'HostBinding';
+}
+function isHostListener(value) {
+    return value.ngMetadataName === 'HostListener';
 }
 
 /**
@@ -10848,7 +10877,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.1+26.sha-6d246d6');
+var VERSION = new Version('6.1.0-beta.1+29.sha-0f7e4fa');
 
 /**
  * @license
