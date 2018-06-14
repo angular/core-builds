@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.5
+ * @license Angular v6.0.5+21.sha-fbe6871
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -415,7 +415,8 @@ let _inFakeAsyncCall = false;
  *
  * Can be used to wrap inject() calls.
  *
- * ## Example
+ * \@usageNotes
+ * ### Example
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -479,7 +480,8 @@ function _getFakeAsyncZoneSpec() {
  * The microtasks queue is drained at the very start of this function and after any timer callback
  * has been executed.
  *
- * ## Example
+ * \@usageNotes
+ * ### Example
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -554,7 +556,8 @@ function resetFakeAsyncZone() {
  *
  * Can be used to wrap inject() calls.
  *
- * ## Example
+ * \@usageNotes
+ * ### Example
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *
@@ -577,7 +580,8 @@ function fakeAsync(fn) {
  * The microtasks queue is drained at the very start of this function and after any timer callback
  * has been executed.
  *
- * ## Example
+ * \@usageNotes
+ * ### Example
  *
  * {\@example core/testing/ts/fake_async.ts region='basic'}
  *

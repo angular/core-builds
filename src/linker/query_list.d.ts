@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
  *
  * NOTE: In the future this class will implement an `Observable` interface.
  *
+ * @usageNotes
  * ### Example
  * ```typescript
  * @Component({...})
@@ -28,7 +29,6 @@ import { Observable } from 'rxjs';
  *   @ViewChildren(Item) items:QueryList<Item>;
  * }
  * ```
- *
  */
 export declare class QueryList<T> {
     readonly dirty: boolean;
