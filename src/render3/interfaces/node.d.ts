@@ -9,7 +9,7 @@ import { LContainer } from './container';
 import { LInjector } from './injector';
 import { LProjection } from './projection';
 import { LQueries } from './query';
-import { RElement, RText } from './renderer';
+import { RComment, RElement, RText } from './renderer';
 import { LViewData, TView } from './view';
 /**
  * TNodeType corresponds to the TNode.type property. It contains information
@@ -55,7 +55,7 @@ export interface LNode {
      *  - append children to their element parents in the DOM (e.g. `parent.native.appendChild(...)`)
      *  - retrieve the sibling elements of text nodes whose creation / insertion has been delayed
      */
-    readonly native: RElement | RText | null | undefined;
+    readonly native: RComment | RElement | RText | null;
     /**
      * If regular LElementNode, then `data` will be null.
      * If LElementNode with component, then `data` contains LView.
@@ -117,7 +117,7 @@ export interface LViewNode extends LNode {
 }
 /** Abstract node container which contains other views. */
 export interface LContainerNode extends LNode {
-    native: RElement | RText | null | undefined;
+    native: RComment;
     readonly data: LContainer;
 }
 export interface LProjectionNode extends LNode {
@@ -130,14 +130,19 @@ export interface LProjectionNode extends LNode {
  * items are not regular attributes and the processing should be adapted accordingly.
  */
 export declare const enum AttributeMarker {
-    NS = 0,
+    /**
+     * Marker indicates that the following 3 values in the attributes array are:
+     * namespaceUri, attributeName, attributeValue
+     * in that order.
+     */
+    NamespaceURI = 0,
     /**
      * This marker indicates that the following attribute names were extracted from bindings (ex.:
      * [foo]="exp") and / or event handlers (ex. (bar)="doSth()").
      * Taking the above bindings and outputs as an example an attributes array could look as follows:
-     * ['class', 'fade in', AttributeMarker.SELECT_ONLY, 'foo', 'bar']
+     * ['class', 'fade in', AttributeMarker.SelectOnly, 'foo', 'bar']
      */
-    SELECT_ONLY = 1,
+    SelectOnly = 1,
 }
 /**
  * A combination of:
