@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.1+29.sha-0f7e4fa
+ * @license Angular v6.1.0-beta.1+30.sha-27bc7dc
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -962,6 +962,7 @@ class TestBed {
                     providers: [
                         ...rootProviderOverrides,
                     ],
+                    jit: true,
                 })
             ], RootScopeModule);
             rootScopeImports.push(RootScopeModule);
@@ -972,7 +973,7 @@ class TestBed {
         let DynamicTestModule = class DynamicTestModule {
         };
         DynamicTestModule = __decorate([
-            NgModule({ providers, declarations, imports, schemas })
+            NgModule({ providers, declarations, imports, schemas, jit: true })
         ], DynamicTestModule);
         const compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
@@ -1076,7 +1077,7 @@ class TestBed {
         let OverrideComponent = class OverrideComponent {
         };
         OverrideComponent = __decorate([
-            Component({ selector: 'empty', template })
+            Component({ selector: 'empty', template, jit: true })
         ], OverrideComponent);
         this._templateOverrides.push({ component, templateOf: OverrideComponent });
     }
