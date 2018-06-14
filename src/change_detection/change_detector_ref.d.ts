@@ -15,6 +15,7 @@ export declare abstract class ChangeDetectorRef {
      *
      * <!-- TODO: Add a link to a chapter on OnPush components -->
      *
+     * @usageNotes
      * ### Example
      *
      * ```typescript
@@ -48,6 +49,7 @@ export declare abstract class ChangeDetectorRef {
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
+     * @usageNotes
      * ### Example
      *
      * The following example defines a component with a large list of readonly data.
@@ -99,9 +101,8 @@ export declare abstract class ChangeDetectorRef {
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      * <!-- TODO: Add a live demo once ref.detectChanges is merged into master -->
      *
-     * ### Example
+     * @usageNotes
      *
-     * The following example defines a component with a large list of readonly data.
      * Imagine, the data changes constantly, many times per second. For performance reasons,
      * we want to check and update the list every five seconds.
      *
@@ -126,6 +127,7 @@ export declare abstract class ChangeDetectorRef {
      *
      * <!-- TODO: Add a link to a chapter on detach/reattach/local digest -->
      *
+     * @usageNotes
      * ### Example
      *
      * The following example creates a component displaying `live` data. The component will detach

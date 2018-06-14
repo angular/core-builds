@@ -11,6 +11,7 @@ export interface InjectionError extends Error {
  * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
  * {@link Injector} does not have a {@link Provider} for the given key.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -25,6 +26,7 @@ export declare function noProviderError(injector: ReflectiveInjector, key: Refle
 /**
  * Thrown when dependencies form a cycle.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -45,6 +47,7 @@ export declare function cyclicDependencyError(injector: ReflectiveInjector, key:
  * The `InstantiationError` class contains the original error plus the dependency graph which caused
  * this object to be instantiated.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -70,6 +73,7 @@ export declare function instantiationError(injector: ReflectiveInjector, origina
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}
  * creation.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -83,6 +87,7 @@ export declare function invalidProviderError(provider: any): Error;
  * Lack of annotation information prevents the {@link Injector} from determining which dependencies
  * need to be injected into the constructor.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -110,6 +115,7 @@ export declare function noAnnotationError(typeOrFunc: Type<any> | Function, para
 /**
  * Thrown when getting an object by index.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
@@ -125,6 +131,7 @@ export declare function outOfBoundsError(index: number): Error;
 /**
  * Thrown when a multi provider and a regular provider are bound to the same token.
  *
+ * @usageNotes
  * ### Example
  *
  * ```typescript
