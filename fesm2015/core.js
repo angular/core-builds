@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.1+15.sha-e6516b0
+ * @license Angular v6.1.0-beta.1+28.sha-a45fad3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2048,7 +2048,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.1+15.sha-e6516b0');
+const VERSION = new Version('6.1.0-beta.1+28.sha-a45fad3');
 
 /**
  * @fileoverview added by tsickle
@@ -16538,7 +16538,7 @@ let currentQueries;
  */
 function getCurrentQueries(QueryType) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueries || (currentQueries = new QueryType());
+    return currentQueries || (currentQueries = (previousOrParentNode.queries || new QueryType()));
 }
 /**
  * This property gets set before entering a template.

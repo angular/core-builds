@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.1+15.sha-e6516b0
+ * @license Angular v6.1.0-beta.1+28.sha-a45fad3
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1602,7 +1602,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.1+15.sha-e6516b0');
+var VERSION = new Version('6.1.0-beta.1+28.sha-a45fad3');
 
 /**
  * @license
@@ -12528,7 +12528,7 @@ var tView;
 var currentQueries;
 function getCurrentQueries(QueryType) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueries || (currentQueries = new QueryType());
+    return currentQueries || (currentQueries = (previousOrParentNode.queries || new QueryType()));
 }
 /**
  * This property gets set before entering a template.
