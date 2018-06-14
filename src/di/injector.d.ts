@@ -23,23 +23,17 @@ export declare class NullInjector implements Injector {
     get(token: any, notFoundValue?: any): any;
 }
 /**
- * @usageNotes
- * ```
- * const injector: Injector = ...;
- * injector.get(...);
- * ```
- *
- * @description
- *
  * Concrete injectors implement this interface.
  *
- * For more details, see the {@linkDocs guide/dependency-injection "Dependency Injection Guide"}.
+ * For more details, see the ["Dependency Injection Guide"](guide/dependency-injection).
  *
+ * @usageNotes
  * ### Example
  *
  * {@example core/di/ts/injector_spec.ts region='Injector'}
  *
  * `Injector` returns itself when given `Injector` as a token:
+ *
  * {@example core/di/ts/injector_spec.ts region='injectInjector'}
  *
  *
@@ -103,7 +97,10 @@ export declare function setCurrentInjector(injector: Injector | null | undefined
  * Injects a token from the currently active injector.
  *
  * This function must be used in the context of a factory function such as one defined for an
- * `InjectionToken`, and will throw an error if not called from such a context. For example:
+ * `InjectionToken`, and will throw an error if not called from such a context.
+ *
+ * @usageNotes
+ * ### Example
  *
  * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
  *
