@@ -1,12 +1,12 @@
 import { NgModule, NgModuleTransitiveScopes } from '../../metadata/ng_module';
 import { Type } from '../../type';
-import { ComponentDef } from '../interfaces/definition';
+import { ComponentDefInternal } from '../interfaces/definition';
 export declare function compileNgModule(type: Type<any>, ngModule: NgModule): void;
 /**
  * Patch the definition of a component with directives and pipes from the compilation scope of
  * a given module.
  */
-export declare function patchComponentDefWithScope<C, M>(componentDef: ComponentDef<C>, module: Type<M>): void;
+export declare function patchComponentDefWithScope<C, M>(componentDef: ComponentDefInternal<C>, module: Type<M>): void;
 /**
  * Compute the pair of transitive scopes (compilation scope and exported scope) for a given module.
  *
