@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.1+28.sha-a45fad3
+ * @license Angular v6.1.0-beta.1+31.sha-ccbda9d
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1497,7 +1497,6 @@ var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, fu
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
 /**
  * Defines a schema that will allow:
  * - any non-Angular elements with a `-` in their name,
@@ -1602,7 +1601,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.1+28.sha-a45fad3');
+var VERSION = new Version('6.1.0-beta.1+31.sha-ccbda9d');
 
 /**
  * @license
@@ -8185,6 +8184,9 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
                 _createProviderInstance$1(data, data._def.providersByKey[depDef.tokenKey]));
+        }
+        else if (depDef.flags & 4 /* Self */) {
+            return notFoundValue;
         }
         return data._parent.get(depDef.token, notFoundValue);
     }
@@ -15568,7 +15570,7 @@ function defineComponent(componentDefinition) {
         inputs: invertObject(componentDefinition.inputs),
         outputs: invertObject(componentDefinition.outputs),
         rendererType: resolveRendererType2(componentDefinition.rendererType) || null,
-        exportAs: componentDefinition.exportAs,
+        exportAs: componentDefinition.exportAs || null,
         onInit: type.prototype.ngOnInit || null,
         doCheck: type.prototype.ngDoCheck || null,
         afterContentInit: type.prototype.ngAfterContentInit || null,
@@ -15603,6 +15605,17 @@ function extractPipeDef(type) {
         throw new Error("'" + type.name + "' is not a 'PipeType'.");
     }
     return def;
+}
+function defineNgModule(def) {
+    var res = {
+        type: def.type,
+        bootstrap: def.bootstrap || [],
+        declarations: def.declarations || [],
+        imports: def.imports || [],
+        exports: def.exports || [],
+        transitiveCompileScopes: null,
+    };
+    return res;
 }
 var PRIVATE_PREFIX = '__ngOnChanges_';
 /**
@@ -17087,6 +17100,7 @@ exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_I
 exports.ɵdefineComponent = defineComponent;
 exports.ɵdefineDirective = defineDirective;
 exports.ɵdefinePipe = definePipe;
+exports.ɵdefineNgModule = defineNgModule;
 exports.ɵdetectChanges = detectChanges;
 exports.ɵrenderComponent = renderComponent;
 exports.ɵdirectiveInject = directiveInject;

@@ -13,7 +13,7 @@ import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
 import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
-import { ComponentDef, ComponentTemplate, DirectiveDef, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
+import { ComponentDefInternal, ComponentTemplate, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
  * Directive (D) sets a property on all component instances using this constant as a key and the
@@ -135,7 +135,7 @@ export declare function element(index: number, name: string, attrs?: TAttributes
  * ['id', 'warning5', 'class', 'alert']
  */
 export declare function elementStart(index: number, name: string, attrs?: TAttributes | null, localRefs?: string[] | null): RElement;
-export declare function resolveDirective(def: DirectiveDef<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
+export declare function resolveDirective(def: DirectiveDefInternal<any>, valueIndex: number, matches: CurrentMatchesList, tView: TView): any;
 /** Sets the context for a ChangeDetectorRef to the given instance. */
 export declare function initChangeDetectorIfExisting(injector: LInjector | null, instance: any, view: LViewData): void;
 export declare function isComponent(tNode: TNode): boolean;
@@ -162,7 +162,7 @@ export declare function locateHostElement(factory: RendererFactory3, elementOrSe
  *
  * @returns LElementNode created
  */
-export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDef<any>, sanitizer?: Sanitizer | null): LElementNode;
+export declare function hostElement(tag: string, rNode: RElement | null, def: ComponentDefInternal<any>, sanitizer?: Sanitizer | null): LElementNode;
 /**
  * Adds an event listener to the current node.
  *
@@ -306,14 +306,14 @@ export declare function textBinding<T>(index: number, value: T | NO_CHANGE): voi
  * @param directive The directive instance.
  * @param directiveDef DirectiveDef object which contains information about the template.
  */
-export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function directiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
 /**
  * A lighter version of directiveCreate() that is used for the root component
  *
  * This version does not contain features that we don't already support at root in
  * current Angular. Example: local refs and inputs on root component.
  */
-export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDef<T> | ComponentDef<T>): T;
+export declare function baseDirectiveCreate<T>(index: number, directive: T, directiveDef: DirectiveDefInternal<T> | ComponentDefInternal<T>): T;
 /**
  * Creates a LContainer, either from a container instruction, or for a ViewContainerRef.
  *
