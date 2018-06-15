@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
+import { NgModuleDef } from '../metadata/ng_module';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDef, ComponentDefFeature, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFeature, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { ComponentDefFeature, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -137,8 +138,11 @@ export declare function defineComponent<T>(componentDefinition: {
      */
     pipes?: PipeTypesOrFactory | null;
 }): never;
-export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDef<any> | ComponentDef<any>;
+export declare function extractDirectiveDef(type: DirectiveType<any> & ComponentType<any>): DirectiveDefInternal<any> | ComponentDefInternal<any>;
 export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
+export declare function defineNgModule<T>(def: {
+    type: T;
+} & Partial<NgModuleDef<T, any, any, any>>): never;
 /**
  * Creates an NgOnChangesFeature function for a component's features list.
  *
@@ -165,7 +169,7 @@ export declare function extractPipeDef(type: PipeType<any>): PipeDef<any>;
 export declare function NgOnChangesFeature(inputPropertyNames?: {
     [key: string]: string;
 }): DirectiveDefFeature;
-export declare function PublicFeature<T>(definition: DirectiveDef<T>): void;
+export declare function PublicFeature<T>(definition: DirectiveDefInternal<T>): void;
 /**
  * Create a directive definition object.
  *

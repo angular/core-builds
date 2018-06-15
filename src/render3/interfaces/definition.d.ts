@@ -53,6 +53,11 @@ export interface PipeType<T> extends Type<T> {
     ngPipeDef: never;
 }
 /**
+ * A version of {@link DirectiveDef} that represents the runtime type shape only, and excludes
+ * metadata parameters.
+ */
+export declare type DirectiveDefInternal<T> = DirectiveDef<T, string>;
+/**
  * Runtime link information for Directives.
  *
  * This is internal data structure used by the render to link
@@ -62,13 +67,15 @@ export interface PipeType<T> extends Type<T> {
  * never create the object directly since the shape of this object
  * can change between versions.
  *
+ * @param Selector type metadata specifying the selector of the directive or component
+ *
  * See: {@link defineDirective}
  */
-export interface DirectiveDef<T> {
+export interface DirectiveDef<T, Selector extends string> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that makes a directive public to the DI system. */
-    diPublic: ((def: DirectiveDef<any>) => void) | null;
+    diPublic: ((def: DirectiveDef<any, string>) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     selectors: CssSelectorList;
     /**
@@ -116,6 +123,11 @@ export interface DirectiveDef<T> {
     onDestroy: (() => void) | null;
 }
 /**
+ * A version of {@link ComponentDef} that represents the runtime type shape only, and excludes
+ * metadata parameters.
+ */
+export declare type ComponentDefInternal<T> = ComponentDef<T, string>;
+/**
  * Runtime link information for Components.
  *
  * This is internal data structure used by the render to link
@@ -127,7 +139,7 @@ export interface DirectiveDef<T> {
  *
  * See: {@link defineComponent}
  */
-export interface ComponentDef<T> extends DirectiveDef<T> {
+export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T, Selector> {
     /**
      * The View template of the component.
      *
@@ -199,17 +211,17 @@ export interface PipeDef<T> {
     pure: boolean;
     onDestroy: (() => void) | null;
 }
-export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T>) => void;
-export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T>) => void;
+export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T, string>) => void;
+export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T, string>) => void;
 /**
  * Type used for directiveDefs on component definition.
  *
  * The function is necessary to be able to support forward declarations.
  */
 export declare type DirectiveDefListOrFactory = (() => DirectiveDefList) | DirectiveDefList;
-export declare type DirectiveDefList = (DirectiveDef<any> | ComponentDef<any>)[];
+export declare type DirectiveDefList = (DirectiveDef<any, string> | ComponentDef<any, string>)[];
 export declare type DirectiveTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type DirectiveTypeList = (DirectiveDef<any> | ComponentDef<any> | Type<any>)[];
+export declare type DirectiveTypeList = (DirectiveDef<any, string> | ComponentDef<any, string> | Type<any>)[];
 /**
  * Type used for PipeDefs on component definition.
  *
