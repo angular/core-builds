@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.5+24.sha-3147a92
+ * @license Angular v6.0.5+25.sha-f5b3661
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1984,7 +1984,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.5+24.sha-3147a92');
+const VERSION = new Version('6.0.5+25.sha-f5b3661');
 
 /**
  * @fileoverview added by tsickle
@@ -10517,6 +10517,9 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
                 _createProviderInstance$1(data, data._def.providersByKey[depDef.tokenKey]));
+        }
+        else if (depDef.flags & 4 /* Self */) {
+            return notFoundValue;
         }
         return data._parent.get(depDef.token, notFoundValue);
     }
