@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2
+ * @license Angular v6.1.0-beta.2+3.sha-b91254f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1417,8 +1417,10 @@ function getChildLNode(node) {
     return null;
 }
 function getParentLNode(node) {
-    if (node.tNode.index === -1)
-        return null;
+    if (node.tNode.index === -1) {
+        // This is a dynamic container or an embedded view inside a dynamic container.
+        return node.dynamicParent;
+    }
     var parent = node.tNode.parent;
     return parent ? node.view[parent.index] : node.view[HOST_NODE];
 }
@@ -2280,7 +2282,8 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         queries: queries,
         tNode: null,
         pNextOrParent: null,
-        dynamicLContainerNode: null
+        dynamicLContainerNode: null,
+        dynamicParent: null
     };
 }
 function createLNode(index, type, native, name, attrs, state) {
@@ -8438,6 +8441,7 @@ function getOrCreateContainerRef(di) {
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
+        lContainerNode.dynamicParent = vcRefHost;
         addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
         di.viewContainerRef = new ViewContainerRef(lContainerNode);
     }
@@ -8483,6 +8487,7 @@ var ViewContainerRef = /** @class */ (function () {
         var adjustedIdx = this._adjustIndex(index);
         viewRef.attachToViewContainerRef(this);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        lViewNode.dynamicParent = this._lContainerNode;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     };
@@ -8500,7 +8505,8 @@ var ViewContainerRef = /** @class */ (function () {
     };
     ViewContainerRef.prototype.detach = function (index) {
         var adjustedIdx = this._adjustIndex(index, -1);
-        detachView(this._lContainerNode, adjustedIdx);
+        var lViewNode = detachView(this._lContainerNode, adjustedIdx);
+        lViewNode.dynamicParent = null;
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     };
     ViewContainerRef.prototype._adjustIndex = function (index, shift) {
@@ -10879,7 +10885,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2');
+var VERSION = new Version('6.1.0-beta.2+3.sha-b91254f');
 
 /**
  * @license
