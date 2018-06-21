@@ -3,7 +3,7 @@ import { Provider } from '../core';
 import { NgModuleDef } from '../metadata/ng_module';
 import { RendererType2 } from '../render/api';
 import { Type } from '../type';
-import { ComponentDefFeature, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
+import { ComponentDefFeature, ComponentDefInternal, ComponentQuery, ComponentTemplate, ComponentType, DirectiveDefFeature, DirectiveDefInternal, DirectiveType, DirectiveTypesOrFactory, PipeDef, PipeType, PipeTypesOrFactory } from './interfaces/definition';
 import { CssSelectorList, SelectorFlags } from './interfaces/projection';
 /**
  * Create a component definition object.
@@ -106,6 +106,15 @@ export declare function defineComponent<T>(componentDefinition: {
      *
      */
     template: ComponentTemplate<T>;
+    /**
+     * Additional set of instructions specific to view query processing. This could be seen as a
+     * set of instruction to be inserted into the template function.
+     *
+     * Query-related instructions need to be pulled out to a specific function as a timing of
+     * execution is different as compared to all other instructions (after change detection hooks but
+     * before view hooks).
+     */
+    viewQuery?: ComponentQuery<T> | null;
     /**
      * A list of optional features to apply.
      *
