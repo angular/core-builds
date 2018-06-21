@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2
+ * @license Angular v6.1.0-beta.2+3.sha-b91254f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1364,8 +1364,10 @@ function getChildLNode(node) {
     return null;
 }
 function getParentLNode(node) {
-    if (node.tNode.index === -1)
-        return null;
+    if (node.tNode.index === -1) {
+        // This is a dynamic container or an embedded view inside a dynamic container.
+        return node.dynamicParent;
+    }
     const parent = node.tNode.parent;
     return parent ? node.view[parent.index] : node.view[HOST_NODE];
 }
@@ -2227,7 +2229,8 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         queries: queries,
         tNode: null,
         pNextOrParent: null,
-        dynamicLContainerNode: null
+        dynamicLContainerNode: null,
+        dynamicParent: null
     };
 }
 function createLNode(index, type, native, name, attrs, state) {
@@ -8289,6 +8292,7 @@ function getOrCreateContainerRef(di) {
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
+        lContainerNode.dynamicParent = vcRefHost;
         addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
         di.viewContainerRef = new ViewContainerRef(lContainerNode);
     }
@@ -8330,6 +8334,7 @@ class ViewContainerRef {
         const adjustedIdx = this._adjustIndex(index);
         viewRef.attachToViewContainerRef(this);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        lViewNode.dynamicParent = this._lContainerNode;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     }
@@ -8347,7 +8352,8 @@ class ViewContainerRef {
     }
     detach(index) {
         const adjustedIdx = this._adjustIndex(index, -1);
-        detachView(this._lContainerNode, adjustedIdx);
+        const lViewNode = detachView(this._lContainerNode, adjustedIdx);
+        lViewNode.dynamicParent = null;
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     }
     _adjustIndex(index, shift = 0) {
@@ -10483,7 +10489,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2');
+const VERSION = new Version('6.1.0-beta.2+3.sha-b91254f');
 
 /**
  * @license
