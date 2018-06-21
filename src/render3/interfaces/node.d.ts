@@ -94,6 +94,11 @@ export interface LNode {
      * A pointer to an LContainerNode created by directives requesting ViewContainerRef
      */
     dynamicLContainerNode: LContainerNode | null;
+    /**
+     * A pointer to a parent LNode created dynamically and virtually by directives requesting
+     * ViewContainerRef. Applicable only to LContainerNode and LViewNode.
+     */
+    dynamicParent: LElementNode | LContainerNode | LViewNode | null;
 }
 /** LNode representing an element. */
 export interface LElementNode extends LNode {
@@ -108,6 +113,7 @@ export interface LTextNode extends LNode {
     native: RText;
     readonly data: null;
     dynamicLContainerNode: null;
+    dynamicParent: null;
 }
 /** Abstract node which contains root nodes of a view. */
 export interface LViewNode extends LNode {
