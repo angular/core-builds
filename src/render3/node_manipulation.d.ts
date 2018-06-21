@@ -115,7 +115,7 @@ export declare function canInsertNativeNode(parent: LNode, currentView: LViewDat
 /**
  * Appends the `child` element to the `parent`.
  *
- * The element insertion might be delayed {@link canInsertNativeNode}
+ * The element insertion might be delayed {@link canInsertNativeNode}.
  *
  * @param parent The parent to which to append the child
  * @param child The child that should be appended
@@ -123,6 +123,15 @@ export declare function canInsertNativeNode(parent: LNode, currentView: LViewDat
  * @returns Whether or not the child was appended
  */
 export declare function appendChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
+/**
+ * Removes the `child` element of the `parent` from the DOM.
+ *
+ * @param parent The parent from which to remove the child
+ * @param child The child that should be removed
+ * @param currentView The current LView
+ * @returns Whether or not the child was removed
+ */
+export declare function removeChild(parent: LNode, child: RNode | null, currentView: LViewData): boolean;
 /**
  * Appends a projected node to the DOM, or in the case of a projected container,
  * appends the nodes from all of the container's active views to the DOM.

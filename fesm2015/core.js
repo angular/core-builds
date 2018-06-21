@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+5.sha-3e1a3b2
+ * @license Angular v6.1.0-beta.2+10.sha-7b2b1af
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1133,40 +1133,6 @@ function callHooks(data, arr) {
     }
 }
 
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-const ngDevModeResetPerfCounters = (typeof ngDevMode == 'undefined' && (function (global) {
-    function ngDevModeResetPerfCounters() {
-        global['ngDevMode'] = {
-            firstTemplatePass: 0,
-            tNode: 0,
-            tView: 0,
-            rendererCreateTextNode: 0,
-            rendererSetText: 0,
-            rendererCreateElement: 0,
-            rendererAddEventListener: 0,
-            rendererSetAttribute: 0,
-            rendererRemoveAttribute: 0,
-            rendererSetProperty: 0,
-            rendererSetClassName: 0,
-            rendererAddClass: 0,
-            rendererRemoveClass: 0,
-            rendererSetStyle: 0,
-            rendererRemoveStyle: 0,
-            rendererDestroy: 0,
-            rendererDestroyNode: 0,
-        };
-    }
-    ngDevModeResetPerfCounters();
-    return ngDevModeResetPerfCounters;
-})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
-    typeof global != 'undefined' && global));
-
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token) {
     throw new Error(`Cannot instantiate cyclic dependency! ${token}`);
@@ -1219,6 +1185,42 @@ const RENDER_PARENT = 5;
 const NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const ngDevModeResetPerfCounters = (typeof ngDevMode == 'undefined' && (function (global) {
+    function ngDevModeResetPerfCounters() {
+        global['ngDevMode'] = {
+            firstTemplatePass: 0,
+            tNode: 0,
+            tView: 0,
+            rendererCreateTextNode: 0,
+            rendererSetText: 0,
+            rendererCreateElement: 0,
+            rendererAddEventListener: 0,
+            rendererSetAttribute: 0,
+            rendererRemoveAttribute: 0,
+            rendererSetProperty: 0,
+            rendererSetClassName: 0,
+            rendererAddClass: 0,
+            rendererRemoveClass: 0,
+            rendererSetStyle: 0,
+            rendererRemoveStyle: 0,
+            rendererDestroy: 0,
+            rendererDestroyNode: 0,
+            rendererMoveNode: 0,
+            rendererRemoveNode: 0,
+        };
+    }
+    ngDevModeResetPerfCounters();
+    return ngDevModeResetPerfCounters;
+})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
+    typeof global != 'undefined' && global));
 
 /**
  * @license
@@ -1357,6 +1359,9 @@ function getNextLNode(node) {
 }
 /** Retrieves the first child of a given node */
 function getChildLNode(node) {
+    if (node.pChild) {
+        return node.pChild;
+    }
     if (node.tNode.child) {
         const viewData = node.tNode.type === 2 /* View */ ? node.data : node.view;
         return viewData[node.tNode.child.index];
@@ -1590,7 +1595,7 @@ function insertView(container, viewNode, index) {
     // If the container's renderParent is null, we know that it is a root node of its own parent view
     // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
     // nodes twice - once now and once when its parent inserts its views).
-    if (container.data[RENDER_PARENT] !== null) {
+    if (container.data[RENDER_PARENT] !== null && !container.tNode.detached) {
         // Find the node to insert in front of
         const beforeNode = index + 1 < views.length ? (getChildLNode(views[index + 1])).native : container.native;
         addRemoveViewFromContainer(container, viewNode, true, beforeNode);
@@ -1616,7 +1621,9 @@ function detachView(container, removeIndex) {
         views[removeIndex - 1].data[NEXT] = viewNode.data[NEXT];
     }
     views.splice(removeIndex, 1);
-    addRemoveViewFromContainer(container, viewNode, false);
+    if (!container.tNode.detached) {
+        addRemoveViewFromContainer(container, viewNode, false);
+    }
     // Notify query that view has been removed
     const removedLview = viewNode.data;
     if (removedLview[QUERIES]) {
@@ -1769,7 +1776,7 @@ function canInsertNativeNode(parent, currentView) {
 /**
  * Appends the `child` element to the `parent`.
  *
- * The element insertion might be delayed {@link canInsertNativeNode}
+ * The element insertion might be delayed {@link canInsertNativeNode}.
  *
  * @param parent The parent to which to append the child
  * @param child The child that should be appended
@@ -1778,10 +1785,28 @@ function canInsertNativeNode(parent, currentView) {
  */
 function appendChild(parent, child, currentView) {
     if (child !== null && canInsertNativeNode(parent, currentView)) {
-        // We only add element if not in View or not projected.
+        // We only add the element if not in View or not projected.
         const renderer = currentView[RENDERER];
         isProceduralRenderer(renderer) ? renderer.appendChild(parent.native, child) :
             parent.native.appendChild(child);
+        return true;
+    }
+    return false;
+}
+/**
+ * Removes the `child` element of the `parent` from the DOM.
+ *
+ * @param parent The parent from which to remove the child
+ * @param child The child that should be removed
+ * @param currentView The current LView
+ * @returns Whether or not the child was removed
+ */
+function removeChild(parent, child, currentView) {
+    if (child !== null && canInsertNativeNode(parent, currentView)) {
+        // We only remove the element if not in View or not projected.
+        const renderer = currentView[RENDERER];
+        isProceduralRenderer(renderer) ? renderer.removeChild(parent.native, child) :
+            parent.native.removeChild(child);
         return true;
     }
     return false;
@@ -2051,6 +2076,10 @@ function getRenderer() {
 function getCurrentSanitizer() {
     return viewData && viewData[SANITIZER];
 }
+function getViewData() {
+    // top level variables should not be exported for performance reasons (PERF_NOTES.md)
+    return viewData;
+}
 /** Used to set the parent property when nodes are created. */
 let previousOrParentNode;
 function getPreviousOrParentNode() {
@@ -2230,7 +2259,8 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         tNode: null,
         pNextOrParent: null,
         dynamicLContainerNode: null,
-        dynamicParent: null
+        dynamicParent: null,
+        pChild: null,
     };
 }
 function createLNode(index, type, native, name, attrs, state) {
@@ -2246,8 +2276,8 @@ function createLNode(index, type, native, name, attrs, state) {
     if (index === -1 || type === 2 /* View */) {
         // View nodes are not stored in data because they can be added / removed at runtime (which
         // would cause indices to change). Their TNodes are instead stored in TView.node.
-        node.tNode =
-            state[TVIEW].node || createTNode(type, index, null, null, tParent, null);
+        node.tNode = (state ? state[TVIEW].node : null) ||
+            createTNode(type, index, null, null, tParent, null);
     }
     else {
         const adjustedIndex = index + HEADER_OFFSET;
@@ -2935,7 +2965,8 @@ function createTNode(type, adjustedIndex, tagName, attrs, parent, tViews) {
         next: null,
         child: null,
         parent: parent,
-        dynamicContainerNode: null
+        dynamicContainerNode: null,
+        detached: null
     };
 }
 /**
@@ -3563,7 +3594,17 @@ function projectionDef(index, selectors, textSelectors) {
         distributedNodes[i] = [];
     }
     const componentNode = findComponentHost(viewData);
-    let componentChild = getChildLNode(componentNode);
+    let isProjectingI18nNodes = false;
+    let componentChild;
+    // for i18n translations we use pChild to point to the next child
+    // TODO(kara): Remove when removing LNodes
+    if (componentNode.pChild) {
+        isProjectingI18nNodes = true;
+        componentChild = componentNode.pChild;
+    }
+    else {
+        componentChild = getChildLNode(componentNode);
+    }
     while (componentChild !== null) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
@@ -3575,7 +3616,12 @@ function projectionDef(index, selectors, textSelectors) {
         else {
             distributedNodes[0].push(componentChild);
         }
-        componentChild = getNextLNode(componentChild);
+        if (isProjectingI18nNodes) {
+            componentChild = componentChild.pNextOrParent;
+        }
+        else {
+            componentChild = getNextLNode(componentChild);
+        }
     }
     ngDevMode && assertDataNext(index + HEADER_OFFSET);
     store(index, distributedNodes);
@@ -8842,6 +8888,365 @@ const SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', fa
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+const i18nTagRegex = /\{\$([^}]+)\}/g;
+/**
+ * Takes a translation string, the initial list of placeholders (elements and expressions) and the
+ * indexes of their corresponding expression nodes to return a list of instructions for each
+ * template function.
+ *
+ * Because embedded templates have different indexes for each placeholder, each parameter (except
+ * the translation) is an array, where each value corresponds to a different template, by order of
+ * appearance.
+ *
+ * @param translation A translation string where placeholders are represented by `{$name}`
+ * @param elements An array containing, for each template, the maps of element placeholders and
+ * their indexes.
+ * @param expressions An array containing, for each template, the maps of expression placeholders
+ * and their indexes.
+ * @param tmplContainers An array of template container placeholders whose content should be ignored
+ * when generating the instructions for their parent template.
+ * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
+ * an ng-container.
+ *
+ * @returns A list of instructions used to translate each template.
+ */
+function i18nMapping(translation, elements, expressions, tmplContainers, lastChildIndex) {
+    const translationParts = translation.split(i18nTagRegex);
+    const instructions = [];
+    generateMappingInstructions(0, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+    return instructions;
+}
+/**
+ * Internal function that reads the translation parts and generates a set of instructions for each
+ * template.
+ *
+ * See `i18nMapping()` for more details.
+ *
+ * @param index The current index in `translationParts`.
+ * @param translationParts The translation string split into an array of placeholders and text
+ * elements.
+ * @param instructions The current list of instructions to update.
+ * @param elements An array containing, for each template, the maps of element placeholders and
+ * their indexes.
+ * @param expressions An array containing, for each template, the maps of expression placeholders
+ * and their indexes.
+ * @param tmplContainers An array of template container placeholders whose content should be ignored
+ * when generating the instructions for their parent template.
+ * @param lastChildIndex The index of the last child of the i18n node. Used when the i18n block is
+ * an ng-container.
+ * @returns the current index in `translationParts`
+ */
+function generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex) {
+    const tmplIndex = instructions.length;
+    const tmplInstructions = [];
+    const phVisited = [];
+    let openedTagCount = 0;
+    let maxIndex = 0;
+    instructions.push(tmplInstructions);
+    for (; index < translationParts.length; index++) {
+        const value = translationParts[index];
+        // Odd indexes are placeholders
+        if (index & 1) {
+            let phIndex;
+            if (elements && elements[tmplIndex] &&
+                typeof (phIndex = elements[tmplIndex][value]) !== 'undefined') {
+                // The placeholder represents a DOM element
+                // Add an instruction to move the element
+                tmplInstructions.push(phIndex | 1073741824 /* Element */);
+                phVisited.push(value);
+                openedTagCount++;
+            }
+            else if (expressions && expressions[tmplIndex] &&
+                typeof (phIndex = expressions[tmplIndex][value]) !== 'undefined') {
+                // The placeholder represents an expression
+                // Add an instruction to move the expression
+                tmplInstructions.push(phIndex | 1610612736 /* Expression */);
+                phVisited.push(value);
+            }
+            else { // It is a closing tag
+                tmplInstructions.push(-2147483648 /* CloseNode */);
+                if (tmplIndex > 0) {
+                    openedTagCount--;
+                    // If we have reached the closing tag for this template, exit the loop
+                    if (openedTagCount === 0) {
+                        break;
+                    }
+                }
+            }
+            if (typeof phIndex !== 'undefined' && phIndex > maxIndex) {
+                maxIndex = phIndex;
+            }
+            if (tmplContainers && tmplContainers.indexOf(value) !== -1 &&
+                tmplContainers.indexOf(value) >= tmplIndex) {
+                index = generateMappingInstructions(index, translationParts, instructions, elements, expressions, tmplContainers, lastChildIndex);
+            }
+        }
+        else if (value) {
+            // It's a non-empty string, create a text node
+            tmplInstructions.push(536870912 /* Text */, value);
+        }
+    }
+    // Check if some elements from the template are missing from the translation
+    if (elements) {
+        const tmplElements = elements[tmplIndex];
+        if (tmplElements) {
+            const phKeys = Object.keys(tmplElements);
+            for (let i = 0; i < phKeys.length; i++) {
+                const ph = phKeys[i];
+                if (phVisited.indexOf(ph) === -1) {
+                    let index = tmplElements[ph];
+                    // Add an instruction to remove the element
+                    tmplInstructions.push(index | -1610612736 /* RemoveNode */);
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            }
+        }
+    }
+    // Check if some expressions from the template are missing from the translation
+    if (expressions) {
+        const tmplExpressions = expressions[tmplIndex];
+        if (tmplExpressions) {
+            const phKeys = Object.keys(tmplExpressions);
+            for (let i = 0; i < phKeys.length; i++) {
+                const ph = phKeys[i];
+                if (phVisited.indexOf(ph) === -1) {
+                    let index = tmplExpressions[ph];
+                    if (ngDevMode) {
+                        assertLessThan(index.toString(2).length, 28, `Index ${index} is too big and will overflow`);
+                    }
+                    // Add an instruction to remove the expression
+                    tmplInstructions.push(index | -1610612736 /* RemoveNode */);
+                    if (index > maxIndex) {
+                        maxIndex = index;
+                    }
+                }
+            }
+        }
+    }
+    if (tmplIndex === 0 && typeof lastChildIndex === 'number') {
+        // The current parent is an ng-container and it has more children after the translation that we
+        // need to append to keep the order of the DOM nodes correct
+        for (let i = maxIndex + 1; i <= lastChildIndex; i++) {
+            if (ngDevMode) {
+                assertLessThan(i.toString(2).length, 28, `Index ${i} is too big and will overflow`);
+            }
+            // We consider those additional placeholders as expressions because we don't care about
+            // their children, all we need to do is to append them
+            tmplInstructions.push(i | 1610612736 /* Expression */);
+        }
+    }
+    return index;
+}
+function appendI18nNode(node, parentNode, previousNode) {
+    if (ngDevMode) {
+        ngDevMode.rendererMoveNode++;
+    }
+    const viewData = getViewData();
+    appendChild(parentNode, node.native || null, viewData);
+    if (previousNode === parentNode && parentNode.pChild === null) {
+        parentNode.pChild = node;
+    }
+    else {
+        previousNode.pNextOrParent = node;
+    }
+    // Template containers also have a comment node for the `ViewContainerRef` that should be moved
+    if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
+        // (node.native as RComment).textContent = 'test';
+        // console.log(node.native);
+        appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
+        node.pNextOrParent = node.dynamicLContainerNode;
+        return node.dynamicLContainerNode;
+    }
+    return node;
+}
+/**
+ * Takes a list of instructions generated by `i18nMapping()` to transform the template accordingly.
+ *
+ * @param startIndex Index of the first element to translate (for instance the first child of the
+ * element with the i18n attribute).
+ * @param instructions The list of instructions to apply on the current view.
+ */
+function i18nApply(startIndex, instructions) {
+    const viewData = getViewData();
+    if (ngDevMode) {
+        assertEqual(viewData[BINDING_INDEX], -1, 'i18nApply should be called before any binding');
+    }
+    if (!instructions) {
+        return;
+    }
+    const renderer = getRenderer();
+    let localParentNode = getParentLNode(load(startIndex)) || getPreviousOrParentNode();
+    let localPreviousNode = localParentNode;
+    for (let i = 0; i < instructions.length; i++) {
+        const instruction = instructions[i];
+        switch (instruction & -536870912 /* InstructionMask */) {
+            case 1073741824 /* Element */:
+                const element$$1 = load(instruction & 536870911 /* IndexMask */);
+                localPreviousNode = appendI18nNode(element$$1, localParentNode, localPreviousNode);
+                localParentNode = element$$1;
+                break;
+            case 1610612736 /* Expression */:
+                const expr = load(instruction & 536870911 /* IndexMask */);
+                localPreviousNode = appendI18nNode(expr, localParentNode, localPreviousNode);
+                break;
+            case 536870912 /* Text */:
+                if (ngDevMode) {
+                    ngDevMode.rendererCreateTextNode++;
+                }
+                const value = instructions[++i];
+                const textRNode = createTextNode(value, renderer);
+                // If we were to only create a `RNode` then projections won't move the text.
+                // But since this text doesn't have an index in `LViewData`, we need to create an
+                // `LElementNode` with the index -1 so that it isn't saved in `LViewData`
+                const textLNode = createLNode(-1, 3 /* Element */, textRNode, null, null);
+                textLNode.dynamicParent = localParentNode;
+                localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
+                break;
+            case -2147483648 /* CloseNode */:
+                localPreviousNode = localParentNode;
+                localParentNode = getParentLNode(localParentNode);
+                break;
+            case -1610612736 /* RemoveNode */:
+                if (ngDevMode) {
+                    ngDevMode.rendererRemoveNode++;
+                }
+                const index = instruction & 536870911;
+                const removedNode = load(index);
+                const parentNode = getParentLNode(removedNode);
+                removeChild(parentNode, removedNode.native || null, viewData);
+                // For template containers we also need to remove their `ViewContainerRef` from the DOM
+                if (removedNode.tNode.type === 0 /* Container */ && removedNode.dynamicLContainerNode) {
+                    removeChild(parentNode, removedNode.dynamicLContainerNode.native || null, viewData);
+                    removedNode.dynamicLContainerNode.tNode.detached = true;
+                }
+                break;
+        }
+    }
+}
+/**
+ * Takes a translation string and the initial list of expressions and returns a list of instructions
+ * that will be used to translate an attribute.
+ * Even indexes contain static strings, while odd indexes contain the index of the expression whose
+ * value will be concatenated into the final translation.
+ */
+function i18nExpMapping(translation, placeholders) {
+    const staticText = translation.split(i18nTagRegex);
+    // odd indexes are placeholders
+    for (let i = 1; i < staticText.length; i += 2) {
+        staticText[i] = placeholders[staticText[i]];
+    }
+    return staticText;
+}
+/**
+ * Checks if the value of up to 8 expressions have changed and replaces them by their values in a
+ * translation, or returns NO_CHANGE.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolation(instructions, numberOfExp, v0, v1, v2, v3, v4, v5, v6, v7) {
+    let different = bindingUpdated(v0);
+    if (numberOfExp > 1) {
+        different = bindingUpdated(v1) || different;
+        if (numberOfExp > 2) {
+            different = bindingUpdated(v2) || different;
+            if (numberOfExp > 3) {
+                different = bindingUpdated(v3) || different;
+                if (numberOfExp > 4) {
+                    different = bindingUpdated(v4) || different;
+                    if (numberOfExp > 5) {
+                        different = bindingUpdated(v5) || different;
+                        if (numberOfExp > 6) {
+                            different = bindingUpdated(v6) || different;
+                            if (numberOfExp > 7) {
+                                different = bindingUpdated(v7) || different;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        let value;
+        // Odd indexes are placeholders
+        if (i & 1) {
+            switch (instructions[i]) {
+                case 0:
+                    value = v0;
+                    break;
+                case 1:
+                    value = v1;
+                    break;
+                case 2:
+                    value = v2;
+                    break;
+                case 3:
+                    value = v3;
+                    break;
+                case 4:
+                    value = v4;
+                    break;
+                case 5:
+                    value = v5;
+                    break;
+                case 6:
+                    value = v6;
+                    break;
+                case 7:
+                    value = v7;
+                    break;
+            }
+            res += stringify$1(value);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+/**
+ * Create a translated interpolation binding with a variable number of expressions.
+ *
+ * If there are 1 to 8 expressions then `i18nInterpolation()` should be used instead. It is faster
+ * because there is no need to create an array of expressions and iterate over it.
+ *
+ * @returns The concatenated string when any of the arguments changes, `NO_CHANGE` otherwise.
+ */
+function i18nInterpolationV(instructions, values) {
+    let different = false;
+    for (let i = 0; i < values.length; i++) {
+        // Check if bindings have changed
+        bindingUpdated(values[i]) && (different = true);
+    }
+    if (!different) {
+        return NO_CHANGE;
+    }
+    let res = '';
+    for (let i = 0; i < instructions.length; i++) {
+        // Odd indexes are placeholders
+        if (i & 1) {
+            res += stringify$1(values[instructions[i]]);
+        }
+        else {
+            res += instructions[i];
+        }
+    }
+    return res;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 /**
  * Represents an instance of an NgModule created via a {@link NgModuleFactory}.
  *
@@ -10194,16 +10599,18 @@ function compileComponentDecorator(type, metadata) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     const propMetadata = getReflect().propMetadata(type);
-    const inputs = {};
-    const outputs = {};
     const host = extractHostBindings(metadata, propMetadata);
+    const inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
+    const outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
+    const inputsFromType = {};
+    const outputsFromType = {};
     for (let field in propMetadata) {
         propMetadata[field].forEach(ann => {
             if (isInput(ann)) {
-                inputs[field] = ann.bindingPropertyName || field;
+                inputsFromType[field] = ann.bindingPropertyName || field;
             }
             else if (isOutput(ann)) {
-                outputs[field] = ann.bindingPropertyName || field;
+                outputsFromType[field] = ann.bindingPropertyName || field;
             }
         });
     }
@@ -10211,7 +10618,9 @@ function directiveMetadata(type, metadata) {
         name: type.name,
         type: new WrappedNodeExpr(type),
         selector: metadata.selector,
-        deps: reflectDependencies(type), host, inputs, outputs,
+        deps: reflectDependencies(type), host,
+        inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
+        outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
         queries: [],
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
@@ -10249,6 +10658,13 @@ function isHostBinding(value) {
 }
 function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
+}
+function parseInputOutputs(values) {
+    return values.reduce((map, value) => {
+        const [field, property] = value.split(',').map(piece => piece.trim());
+        map[field] = property || field;
+        return map;
+    }, {});
 }
 
 /**
@@ -10506,7 +10922,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+5.sha-3e1a3b2');
+const VERSION = new Version('6.1.0-beta.2+10.sha-7b2b1af');
 
 /**
  * @license
@@ -16789,5 +17205,5 @@ function bypassSanitizationTrustString(trustedString, mode) {
 // replaces this file with production index.ts when it rewrites private symbol
 // names.
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory$1 as ComponentFactory, ComponentRef$1 as ComponentRef, ComponentFactoryResolver$1 as ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory$1 as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory$1 as ComponentFactory, ComponentRef$1 as ComponentRef, ComponentFactoryResolver$1 as ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory$1 as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
