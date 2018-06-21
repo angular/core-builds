@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+8.sha-10da6a4
+ * @license Angular v6.1.0-beta.2+10.sha-7b2b1af
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10982,16 +10982,18 @@ function compileComponentDecorator(type, metadata) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     var propMetadata = getReflect().propMetadata(type);
-    var inputs = {};
-    var outputs = {};
     var host = extractHostBindings(metadata, propMetadata);
+    var inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
+    var outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
+    var inputsFromType = {};
+    var outputsFromType = {};
     var _loop_1 = function (field) {
         propMetadata[field].forEach(function (ann) {
             if (isInput(ann)) {
-                inputs[field] = ann.bindingPropertyName || field;
+                inputsFromType[field] = ann.bindingPropertyName || field;
             }
             else if (isOutput(ann)) {
-                outputs[field] = ann.bindingPropertyName || field;
+                outputsFromType[field] = ann.bindingPropertyName || field;
             }
         });
     };
@@ -11002,7 +11004,9 @@ function directiveMetadata(type, metadata) {
         name: type.name,
         type: new WrappedNodeExpr(type),
         selector: metadata.selector,
-        deps: reflectDependencies(type), host: host, inputs: inputs, outputs: outputs,
+        deps: reflectDependencies(type), host: host,
+        inputs: __assign({}, inputsFromMetadata, inputsFromType),
+        outputs: __assign({}, outputsFromMetadata, outputsFromType),
         queries: [],
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
@@ -11043,6 +11047,13 @@ function isHostBinding(value) {
 }
 function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
+}
+function parseInputOutputs(values) {
+    return values.reduce(function (map, value) {
+        var _a = __read(value.split(',').map(function (piece) { return piece.trim(); }), 2), field = _a[0], property = _a[1];
+        map[field] = property || field;
+        return map;
+    }, {});
 }
 
 /**
@@ -11307,7 +11318,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+8.sha-10da6a4');
+var VERSION = new Version('6.1.0-beta.2+10.sha-7b2b1af');
 
 /**
  * @license
