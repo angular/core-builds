@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+8.sha-10da6a4
+ * @license Angular v6.1.0-beta.2+10.sha-7b2b1af
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10599,16 +10599,18 @@ function compileComponentDecorator(type, metadata) {
 function directiveMetadata(type, metadata) {
     // Reflect inputs and outputs.
     const propMetadata = getReflect().propMetadata(type);
-    const inputs = {};
-    const outputs = {};
     const host = extractHostBindings(metadata, propMetadata);
+    const inputsFromMetadata = parseInputOutputs(metadata.inputs || []);
+    const outputsFromMetadata = parseInputOutputs(metadata.outputs || []);
+    const inputsFromType = {};
+    const outputsFromType = {};
     for (let field in propMetadata) {
         propMetadata[field].forEach(ann => {
             if (isInput(ann)) {
-                inputs[field] = ann.bindingPropertyName || field;
+                inputsFromType[field] = ann.bindingPropertyName || field;
             }
             else if (isOutput(ann)) {
-                outputs[field] = ann.bindingPropertyName || field;
+                outputsFromType[field] = ann.bindingPropertyName || field;
             }
         });
     }
@@ -10616,7 +10618,9 @@ function directiveMetadata(type, metadata) {
         name: type.name,
         type: new WrappedNodeExpr(type),
         selector: metadata.selector,
-        deps: reflectDependencies(type), host, inputs, outputs,
+        deps: reflectDependencies(type), host,
+        inputs: Object.assign({}, inputsFromMetadata, inputsFromType),
+        outputs: Object.assign({}, outputsFromMetadata, outputsFromType),
         queries: [],
         lifecycle: {
             usesOnChanges: type.prototype.ngOnChanges !== undefined,
@@ -10654,6 +10658,13 @@ function isHostBinding(value) {
 }
 function isHostListener(value) {
     return value.ngMetadataName === 'HostListener';
+}
+function parseInputOutputs(values) {
+    return values.reduce((map, value) => {
+        const [field, property] = value.split(',').map(piece => piece.trim());
+        map[field] = property || field;
+        return map;
+    }, {});
 }
 
 /**
@@ -10911,7 +10922,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+8.sha-10da6a4');
+const VERSION = new Version('6.1.0-beta.2+10.sha-7b2b1af');
 
 /**
  * @license
