@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+1.sha-a269658
+ * @license Angular v6.1.0-beta.2+5.sha-3e1a3b2
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2050,7 +2050,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+1.sha-a269658');
+const VERSION = new Version('6.1.0-beta.2+5.sha-3e1a3b2');
 
 /**
  * @fileoverview added by tsickle
@@ -15760,8 +15760,10 @@ function getChildLNode(node) {
  * @return {?}
  */
 function getParentLNode(node) {
-    if (node.tNode.index === -1)
-        return null;
+    if (node.tNode.index === -1) {
+        // This is a dynamic container or an embedded view inside a dynamic container.
+        return node.dynamicParent;
+    }
     const /** @type {?} */ parent = node.tNode.parent;
     return parent ? node.view[parent.index] : node.view[HOST_NODE];
 }
@@ -16752,7 +16754,8 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         queries: queries,
         tNode: /** @type {?} */ ((null)),
         pNextOrParent: null,
-        dynamicLContainerNode: null
+        dynamicLContainerNode: null,
+        dynamicParent: null
     };
 }
 /**
@@ -17216,9 +17219,10 @@ function saveResolvedLocalsInData() {
  * @param {?} template The template from which to get static data
  * @param {?} directives Directive defs that should be saved on TView
  * @param {?} pipes Pipe defs that should be saved on TView
+ * @param {?} viewQuery
  * @return {?} TView
  */
-function getOrCreateTView(template, directives, pipes) {
+function getOrCreateTView(template, directives, pipes, viewQuery) {
     // TODO(misko): reading `ngPrivateData` here is problematic for two reasons
     // 1. It is a megamorphic call on each invocation.
     // 2. For nested embedded views (ngFor inside ngFor) the template instance is per
@@ -17226,7 +17230,7 @@ function getOrCreateTView(template, directives, pipes) {
     // Correct solution is to only put `ngPrivateData` on the Component template
     // and not on embedded templates.
     return template.ngPrivateData ||
-        (template.ngPrivateData = /** @type {?} */ (createTView(-1, template, directives, pipes)));
+        (template.ngPrivateData = /** @type {?} */ (createTView(-1, template, directives, pipes, viewQuery)));
 }
 /**
  * Creates a TView instance
@@ -17235,13 +17239,15 @@ function getOrCreateTView(template, directives, pipes) {
  * @param {?} template
  * @param {?} directives Registry of directives for this view
  * @param {?} pipes Registry of pipes for this view
+ * @param {?} viewQuery
  * @return {?}
  */
-function createTView(viewIndex, template, directives, pipes) {
+function createTView(viewIndex, template, directives, pipes, viewQuery) {
     ngDevMode && ngDevMode.tView++;
     return {
         id: viewIndex,
         template: template,
+        viewQuery: viewQuery,
         node: /** @type {?} */ ((null)),
         data: HEADER_FILLER.slice(),
         // Fill in to match HEADER_OFFSET in LViewData
@@ -17353,7 +17359,7 @@ function locateHostElement(factory, elementOrSelector) {
  */
 function hostElement(tag, rNode, def, sanitizer) {
     resetApplicationState();
-    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
+    const /** @type {?} */ node = createLNode(0, 3 /* Element */, rNode, null, null, createLViewData(renderer, getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery), null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, sanitizer));
     if (firstTemplatePass) {
         node.tNode.flags = 4096 /* isComponent */;
         if (def.diPublic)
@@ -17814,7 +17820,7 @@ function directiveCreate(index, directive, directiveDef) {
  * @return {?}
  */
 function addComponentLogic(directiveIndex, instance, def) {
-    const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs);
+    const /** @type {?} */ tView = getOrCreateTView(def.template, def.directiveDefs, def.pipeDefs, def.viewQuery);
     // Only component views should be added to the view tree directly. Embedded views are
     // accessed through their containers because they may be removed / re-added later.
     const /** @type {?} */ componentView = addToViewTree(viewData, /** @type {?} */ (previousOrParentNode.tNode.index), createLViewData(rendererFactory.createRenderer(/** @type {?} */ (previousOrParentNode.native), def.rendererType), tView, null, def.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */, getCurrentSanitizer()));
@@ -17976,8 +17982,9 @@ function container(index, template, tagName, attrs, localRefs) {
     const /** @type {?} */ node = createLNode(index, 0 /* Container */, comment, tagName || null, attrs || null, lContainer);
     appendChild(getParentLNode(node), comment, viewData);
     if (firstTemplatePass) {
-        node.tNode.tViews =
-            template ? createTView(-1, template, tView.directiveRegistry, tView.pipeRegistry) : [];
+        node.tNode.tViews = template ?
+            createTView(-1, template, tView.directiveRegistry, tView.pipeRegistry, null) :
+            [];
     }
     // Containers are added to the current view tree instead of their embedded views
     // because views can be removed and re-inserted.
@@ -18130,7 +18137,7 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
     ngDevMode && assertEqual(Array.isArray(containerTViews), true, 'TViews should be in an array');
     if (viewIndex >= containerTViews.length || containerTViews[viewIndex] == null) {
         containerTViews[viewIndex] =
-            createTView(viewIndex, null, tView.directiveRegistry, tView.pipeRegistry);
+            createTView(viewIndex, null, tView.directiveRegistry, tView.pipeRegistry, null);
     }
     return containerTViews[viewIndex];
 }
@@ -18542,14 +18549,41 @@ function checkNoChanges(component) {
  */
 function detectChangesInternal(hostView, hostNode, component) {
     const /** @type {?} */ oldView = enterView(hostView, hostNode);
-    const /** @type {?} */ template = /** @type {?} */ ((hostView[TVIEW].template));
+    const /** @type {?} */ hostTView = hostView[TVIEW];
+    const /** @type {?} */ template = /** @type {?} */ ((hostTView.template));
+    const /** @type {?} */ viewQuery = hostTView.viewQuery;
     try {
         namespaceHTML();
+        createViewQuery(viewQuery, hostView[FLAGS], component);
         template(getRenderFlags(hostView), component);
         refreshView();
+        updateViewQuery(viewQuery, component);
     }
     finally {
         leaveView(oldView);
+    }
+}
+/**
+ * @template T
+ * @param {?} viewQuery
+ * @param {?} flags
+ * @param {?} component
+ * @return {?}
+ */
+function createViewQuery(viewQuery, flags, component) {
+    if (viewQuery && (flags & 1 /* CreationMode */)) {
+        viewQuery(1 /* Create */, component);
+    }
+}
+/**
+ * @template T
+ * @param {?} viewQuery
+ * @param {?} component
+ * @return {?}
+ */
+function updateViewQuery(viewQuery, component) {
+    if (viewQuery) {
+        viewQuery(2 /* Update */, component);
     }
 }
 /**
@@ -19088,7 +19122,7 @@ function renderComponent(componentType /* Type as workaround for: Microsoft/Type
     const /** @type {?} */ componentTag = /** @type {?} */ (((/** @type {?} */ ((componentDef.selectors))[0]))[0]);
     const /** @type {?} */ hostNode = locateHostElement(rendererFactory, opts.host || componentTag);
     const /** @type {?} */ rootContext = createRootContext(opts.scheduler || requestAnimationFrame.bind(window));
-    const /** @type {?} */ rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
+    const /** @type {?} */ rootView = createLViewData(rendererFactory.createRenderer(hostNode, componentDef.rendererType), createTView(-1, null, null, null, null), rootContext, componentDef.onPush ? 4 /* Dirty */ : 2 /* CheckAlways */);
     rootView[INJECTOR$1] = opts.injector || null;
     const /** @type {?} */ oldView = enterView(rootView, /** @type {?} */ ((null)));
     let /** @type {?} */ elementNode;
@@ -19987,6 +20021,7 @@ function getOrCreateContainerRef(di) {
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
+        lContainerNode.dynamicParent = vcRefHost;
         addToViewTree(vcRefHost.view, /** @type {?} */ (hostTNode.index), lContainer);
         di.viewContainerRef = new ViewContainerRef$1(lContainerNode);
     }
@@ -20062,6 +20097,7 @@ class ViewContainerRef$1 {
         const /** @type {?} */ adjustedIdx = this._adjustIndex(index);
         (/** @type {?} */ (viewRef)).attachToViewContainerRef(this);
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        lViewNode.dynamicParent = this._lContainerNode;
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     }
@@ -20096,7 +20132,8 @@ class ViewContainerRef$1 {
      */
     detach(index) {
         const /** @type {?} */ adjustedIdx = this._adjustIndex(index, -1);
-        detachView(this._lContainerNode, adjustedIdx);
+        const /** @type {?} */ lViewNode = detachView(this._lContainerNode, adjustedIdx);
+        lViewNode.dynamicParent = null;
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     }
     /**
@@ -20219,7 +20256,8 @@ function defineComponent(componentDefinition) {
         pipeDefs: pipeTypes ?
             () => (typeof pipeTypes === 'function' ? pipeTypes() : pipeTypes).map(extractPipeDef) :
             null,
-        selectors: componentDefinition.selectors
+        selectors: componentDefinition.selectors,
+        viewQuery: componentDefinition.viewQuery || null,
     };
     const /** @type {?} */ feature = componentDefinition.features;
     feature && feature.forEach((fn) => fn(def));
