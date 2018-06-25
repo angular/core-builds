@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+27.sha-2a68ba4
+ * @license Angular v6.1.0-beta.2+28.sha-7d31874
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -10886,49 +10886,147 @@ const R3_COMPILE_NGMODULE = compileNgModule$1;
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Directive decorator and metadata.
- *
- * @Annotation
+ * Type of the Component metadata.
  */
 const Directive = makeDecorator('Directive', (dir = {}) => dir, undefined, undefined, (type, meta) => (R3_COMPILE_DIRECTIVE || (() => { }))(type, meta));
 /**
  * Component decorator and metadata.
  *
+ * @usageNotes
+ *
+ * ### Using animations
+ *
+ * The following snippet shows an animation trigger in a component's
+ * metadata. The trigger is attached to an element in the component's
+ * template, using "@_trigger_name_", and a state expression that is evaluated
+ * at run time to determine whether the animation should start.
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'animation-cmp',
+ *   templateUrl: 'animation-cmp.html',
+ *   animations: [
+ *     trigger('myTriggerName', [
+ *       state('on', style({ opacity: 1 }),
+ *       state('off', style({ opacity: 0 }),
+ *       transition('on => off', [
+ *         animate("1s")
+ *       ])
+ *     ])
+ *   ]
+ * })
+ * ```
+ *
+ * ```html
+ * <!-- animation-cmp.html -->
+ * <div @myTriggerName="expression">...</div>
+ * ```
+ *
+ * ### Preserving whitespace
+ *
+ * Removing whitespace can greatly reduce AOT-generated code size, and speed up view creation.
+ * As of Angular 6, default for `preserveWhitespaces` is false (whitespace is removed).
+ * To change the default setting for all components in your application, set
+ * the `preserveWhitespaces` option of the AOT compiler.
+ *
+ * Current implementation removes whitespace characters as follows:
+ * - Trims all whitespaces at the beginning and the end of a template.
+ * - Removes whitespace-only text nodes. For example,
+ * `<button>Action 1</button>  <button>Action 2</button>` becomes
+ * `<button>Action 1</button><button>Action 2</button>`.
+ * - Replaces a series of whitespace characters in text nodes with a single space.
+ * For example, `<span>\n some text\n</span>` becomes `<span> some text </span>`.
+ * - Does NOT alter text nodes inside HTML tags such as `<pre>` or `<textarea>`,
+ * where whitespace characters are significant.
+ *
+ * Note that these transformations can influence DOM nodes layout, although impact
+ * should be minimal.
+ *
+ * You can override the default behavior to preserve whitespace characters
+ * in certain fragments of a template. For example, you can exclude an entire
+ * DOM sub-tree by using the `ngPreserveWhitespaces` attribute:
+ *
+ * ```html
+ * <div ngPreserveWhitespaces>
+ *     whitespaces are preserved here
+ *     <span>    and here </span>
+ * </div>
+ * ```
+ *
+ * You can force a single space to be preserved in a text node by using `&ngsp;`,
+ * which is replaced with a space character by Angular's template
+ * compiler:
+ *
+ * ```html
+ * <a>Spaces</a>&ngsp;<a>between</a>&ngsp;<a>links.</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * Note that sequences of `&ngsp;` are still collapsed to just one space character when
+ * the `preserveWhitespaces` option is set to `false`.
+ *
+ * ```html
+ * <a>before</a>&ngsp;&ngsp;&ngsp;<a>after</a>
+ * <!-->compiled to be equivalent to:</>
+ *  <a>Spaces</a> <a>between</a> <a>links.</a>
+ * ```
+ *
+ * To preserve sequences of whitespace characters, use the
+ * `ngPreserveWhitespaces` attribute.
+ *
  * @Annotation
  */
 const Component = makeDecorator('Component', (c = {}) => (Object.assign({ changeDetection: ChangeDetectionStrategy.Default }, c)), Directive, undefined, (type, meta) => (R3_COMPILE_COMPONENT || (() => { }))(type, meta));
 /**
- * Pipe decorator and metadata.
  *
- * Use the `@Pipe` annotation to declare that a given class is a pipe. A pipe
- * class must also implement `PipeTransform` interface.
- *
- * To use the pipe include a reference to the pipe class in
- * `NgModule.declarations`.
  *
  * @Annotation
  */
 const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)));
 /**
- * Input decorator and metadata.
  *
  * @Annotation
  */
 const Input = makePropDecorator('Input', (bindingPropertyName) => ({ bindingPropertyName }));
 /**
- * Output decorator and metadata.
  *
  * @Annotation
  */
 const Output = makePropDecorator('Output', (bindingPropertyName) => ({ bindingPropertyName }));
 /**
- * HostBinding decorator and metadata.
  *
  * @Annotation
  */
 const HostBinding = makePropDecorator('HostBinding', (hostPropertyName) => ({ hostPropertyName }));
 /**
- * HostListener decorator and metadata.
+ * Binds a CSS event to a host listener and supplies configuration metadata.
+ * Angular invokes the supplied handler method when the host element emits the specified event,
+ * and updates the bound element with the result.
+ * If the handler method returns false, applies `preventDefault` on the bound element.
+ *
+ * @usageNotes
+ *
+ * The following example declares a directive
+ * that attaches a click listener to a button and counts clicks.
+ *
+ * ```
+ * @Directive({selector: 'button[counting]'})
+ * class CountClicks {
+ *   numberOfClicks = 0;
+ *
+ *   @HostListener('click', ['$event.target'])
+ *   onClick(btn) {
+ *     console.log('button', btn, 'number of clicks:', this.numberOfClicks++);
+ *  }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: '<button counting>Increment</button>',
+ * })
+ * class App {}
+ * ```
  *
  * @Annotation
  */
@@ -10942,10 +11040,10 @@ const HostListener = makePropDecorator('HostListener', (eventName, args) => ({ e
  * found in the LICENSE file at https://angular.io/license
  */
 /**
- * Defines a schema that will allow:
- * - any non-Angular elements with a `-` in their name,
- * - any properties on elements with a `-` in their name which is the common rule for custom
- * elements.
+ * Defines a schema that allows an NgModule to contain the following:
+ * - Non-Angular elements named with dash case (`-`).
+ * - Element properties named with dash case (`-`).
+ * Dash case is the naming convention for custom elements.
  *
  *
  */
@@ -10953,7 +11051,7 @@ const CUSTOM_ELEMENTS_SCHEMA = {
     name: 'custom-elements'
 };
 /**
- * Defines a schema that will allow any property on any element.
+ * Defines a schema that allows any property on any element.
  *
  * @experimental
  */
@@ -10972,12 +11070,14 @@ function preR3NgModuleCompile(moduleType, metadata) {
     });
 }
 /**
- * NgModule decorator and metadata.
- *
- *
  * @Annotation
  */
-const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, (type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
+const NgModule = makeDecorator('NgModule', (ngModule) => ngModule, undefined, undefined, 
+/**
+ * Decorator that marks the following class as an NgModule, and supplies
+ * configuration metadata for it.
+ */
+(type, meta) => (R3_COMPILE_NGMODULE || preR3NgModuleCompile)(type, meta));
 
 /**
  * @license
@@ -11007,7 +11107,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+27.sha-2a68ba4');
+const VERSION = new Version('6.1.0-beta.2+28.sha-7d31874');
 
 /**
  * @license
