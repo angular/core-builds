@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+21.sha-6e20e0a
+ * @license Angular v6.1.0-beta.2+22.sha-f229449
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1517,7 +1517,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+21.sha-6e20e0a');
+var VERSION = new Version('6.1.0-beta.2+22.sha-f229449');
 
 /**
  * @license
@@ -11510,6 +11510,42 @@ function callHooks(data, arr) {
     }
 }
 
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+var ngDevModeResetPerfCounters = (typeof ngDevMode == 'undefined' && (function (global) {
+    function ngDevModeResetPerfCounters() {
+        global['ngDevMode'] = {
+            firstTemplatePass: 0,
+            tNode: 0,
+            tView: 0,
+            rendererCreateTextNode: 0,
+            rendererSetText: 0,
+            rendererCreateElement: 0,
+            rendererAddEventListener: 0,
+            rendererSetAttribute: 0,
+            rendererRemoveAttribute: 0,
+            rendererSetProperty: 0,
+            rendererSetClassName: 0,
+            rendererAddClass: 0,
+            rendererRemoveClass: 0,
+            rendererSetStyle: 0,
+            rendererRemoveStyle: 0,
+            rendererDestroy: 0,
+            rendererDestroyNode: 0,
+            rendererMoveNode: 0,
+            rendererRemoveNode: 0,
+        };
+    }
+    ngDevModeResetPerfCounters();
+    return ngDevModeResetPerfCounters;
+})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
+    typeof global != 'undefined' && global));
+
 /** Called when directives inject each other (creating a circular dependency) */
 function throwCyclicDependencyError(token) {
     throw new Error("Cannot instantiate cyclic dependency! " + token);
@@ -11562,42 +11598,6 @@ var RENDER_PARENT = 5;
 var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
-
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-var ngDevModeResetPerfCounters = (typeof ngDevMode == 'undefined' && (function (global) {
-    function ngDevModeResetPerfCounters() {
-        global['ngDevMode'] = {
-            firstTemplatePass: 0,
-            tNode: 0,
-            tView: 0,
-            rendererCreateTextNode: 0,
-            rendererSetText: 0,
-            rendererCreateElement: 0,
-            rendererAddEventListener: 0,
-            rendererSetAttribute: 0,
-            rendererRemoveAttribute: 0,
-            rendererSetProperty: 0,
-            rendererSetClassName: 0,
-            rendererAddClass: 0,
-            rendererRemoveClass: 0,
-            rendererSetStyle: 0,
-            rendererRemoveStyle: 0,
-            rendererDestroy: 0,
-            rendererDestroyNode: 0,
-            rendererMoveNode: 0,
-            rendererRemoveNode: 0,
-        };
-    }
-    ngDevModeResetPerfCounters();
-    return ngDevModeResetPerfCounters;
-})(typeof window != 'undefined' && window || typeof self != 'undefined' && self ||
-    typeof global != 'undefined' && global));
 
 /**
  * @license
@@ -11973,14 +11973,6 @@ function insertView(container, viewNode, index) {
     if (lView[QUERIES]) {
         lView[QUERIES].insertView(index);
     }
-    // If the container's renderParent is null, we know that it is a root node of its own parent view
-    // and we should wait until that parent processes its nodes (otherwise, we will insert this view's
-    // nodes twice - once now and once when its parent inserts its views).
-    if (container.data[RENDER_PARENT] !== null && !container.tNode.detached) {
-        // Find the node to insert in front of
-        var beforeNode = index + 1 < views.length ? (getChildLNode(views[index + 1])).native : container.native;
-        addRemoveViewFromContainer(container, viewNode, true, beforeNode);
-    }
     // Sets the attached flag
     viewNode.data[FLAGS] |= 8 /* Attached */;
     return viewNode;
@@ -12133,26 +12125,67 @@ function executePipeOnDestroys(viewData) {
     }
 }
 /**
- * Returns whether a native element should be inserted in the given parent.
+ * Returns whether a native element can be inserted into the given parent.
  *
- * The native node can be inserted when its parent is:
- * - A regular element => Yes
- * - A component host element =>
- *    - if the `currentView` === the parent `view`: The element is in the content (vs the
- *      template)
- *      => don't add as the parent component will project if needed.
- *    - `currentView` !== the parent `view` => The element is in the template (vs the content),
- *      add it
- * - View element => delay insertion, will be done on `viewEnd()`
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is mare for projection but has not been inserted
+ *   into destination.
  *
- * @param parent The parent in which to insert the child
- * @param currentView The LView being processed
- * @return boolean Whether the child element should be inserted.
+
+ *
+ * @param parent The parent where the child will be inserted into.
+ * @param currentView Current LView being processed.
+ * @return boolean Whether the child should be inserted now (or delayed until later).
  */
 function canInsertNativeNode(parent, currentView) {
-    var parentIsElement = parent.tNode.type === 3;
-    return parentIsElement &&
-        (parent.view !== currentView || parent.data === null /* Regular Element. */);
+    // We can only insert into a Component or View. Any other type should be an Error.
+    ngDevMode && assertNodeOfPossibleTypes(parent, 3 /* Element */, 2 /* View */);
+    if (parent.tNode.type === 3 /* Element */) {
+        // Parent is an element.
+        if (parent.view !== currentView) {
+            // If the Parent view is not the same as current view than we are inserting across
+            // Views. This happens when we insert a root element of the component view into
+            // the component host element and it should always be eager.
+            return true;
+        }
+        // Parent elements can be a component which may have projection.
+        if (parent.data === null) {
+            // Parent is a regular non-component element. We should eagerly insert into it
+            // since we know that this relationship will never be broken.
+            return true;
+        }
+        else {
+            // Parent is a Component. Component's content nodes are not inserted immediately
+            // because they will be projected, and so doing insert at this point would be wasteful.
+            // Since the projection would than move it to its final destination.
+            return false;
+        }
+    }
+    else {
+        // Parent is a View.
+        ngDevMode && assertNodeType(parent, 2 /* View */);
+        // Because we are inserting into a `View` the `View` may be disconnected.
+        var grandParentContainer = getParentLNode(parent);
+        if (grandParentContainer == null) {
+            // The `View` is not inserted into a `Container` we have to delay insertion.
+            return false;
+        }
+        ngDevMode && assertNodeType(grandParentContainer, 0 /* Container */);
+        if (grandParentContainer.data[RENDER_PARENT] == null) {
+            // The parent `Container` itself is disconnected. So we have to delay.
+            return false;
+        }
+        else {
+            // The parent `Container` is in inserted state, so we can eagerly insert into
+            // this location.
+            return true;
+        }
+    }
 }
 /**
  * Appends the `child` element to the `parent`.
@@ -12166,10 +12199,21 @@ function canInsertNativeNode(parent, currentView) {
  */
 function appendChild(parent, child, currentView) {
     if (child !== null && canInsertNativeNode(parent, currentView)) {
-        // We only add the element if not in View or not projected.
         var renderer = currentView[RENDERER];
-        isProceduralRenderer(renderer) ? renderer.appendChild(parent.native, child) :
-            parent.native.appendChild(child);
+        if (parent.tNode.type === 2 /* View */) {
+            var container = getParentLNode(parent);
+            var renderParent = container.data[RENDER_PARENT];
+            var views = container.data[VIEWS];
+            var index = views.indexOf(parent);
+            var beforeNode = index + 1 < views.length ? (getChildLNode(views[index + 1])).native : container.native;
+            isProceduralRenderer(renderer) ?
+                renderer.insertBefore(renderParent.native, child, beforeNode) :
+                renderParent.native.insertBefore(child, beforeNode, true);
+        }
+        else {
+            isProceduralRenderer(renderer) ? renderer.appendChild(parent.native, child) :
+                parent.native.appendChild(child);
+        }
         return true;
     }
     return false;
@@ -12723,6 +12767,25 @@ function resetApplicationState() {
  */
 
 /**
+ * Used for creating the LViewNode of a dynamic embedded view,
+ * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
+ * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
+ */
+function createEmbeddedViewNode(tView, context, renderer, queries) {
+    var _isParent = isParent;
+    var _previousOrParentNode = previousOrParentNode;
+    isParent = true;
+    previousOrParentNode = null;
+    var lView = createLViewData(renderer, tView, context, 2 /* CheckAlways */, getCurrentSanitizer());
+    if (queries) {
+        lView[QUERIES] = queries.createView();
+    }
+    var viewNode = createLNode(-1, 2 /* View */, null, null, null, lView);
+    isParent = _isParent;
+    previousOrParentNode = _previousOrParentNode;
+    return viewNode;
+}
+/**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
@@ -12732,22 +12795,13 @@ function resetApplicationState() {
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-function renderEmbeddedTemplate(viewNode, tView, context, renderer, queries) {
+function renderEmbeddedTemplate(viewNode, tView, context, rf) {
     var _isParent = isParent;
     var _previousOrParentNode = previousOrParentNode;
     var oldView;
-    var rf = 2;
     try {
         isParent = true;
         previousOrParentNode = null;
-        if (viewNode == null) {
-            var lView = createLViewData(renderer, tView, context, 2 /* CheckAlways */, getCurrentSanitizer());
-            if (queries) {
-                lView[QUERIES] = queries.createView();
-            }
-            viewNode = createLNode(-1, 2 /* View */, null, null, null, lView);
-            rf = 1 /* Create */;
-        }
         oldView = enterView(viewNode.data, viewNode);
         namespaceHTML();
         tView.template(rf, context);
@@ -13694,14 +13748,19 @@ function generateInitialInputs(directiveIndex, inputs, tNode) {
  */
 function createLContainer(parentLNode, currentView, isForViewContainerRef) {
     ngDevMode && assertDefined(parentLNode, 'containers should have a parent');
+    var renderParent = canInsertNativeNode(parentLNode, currentView) ?
+        parentLNode :
+        null;
+    if (renderParent && renderParent.tNode.type === 2 /* View */) {
+        renderParent = getParentLNode(renderParent).data[RENDER_PARENT];
+    }
     return [
         isForViewContainerRef ? null : 0,
         currentView,
         null,
         null,
         [],
-        canInsertNativeNode(parentLNode, currentView) ? parentLNode :
-            null // renderParent
+        renderParent
     ];
 }
 /**
@@ -13799,7 +13858,7 @@ function refreshDynamicEmbeddedViews(lViewData) {
                 // The directives and pipes are not needed here as an existing view is only being refreshed.
                 var dynamicViewData = lViewNode.data;
                 ngDevMode && assertDefined(dynamicViewData[TVIEW], 'TView must be allocated');
-                renderEmbeddedTemplate(lViewNode, dynamicViewData[TVIEW], dynamicViewData[CONTEXT], renderer);
+                renderEmbeddedTemplate(lViewNode, dynamicViewData[TVIEW], dynamicViewData[CONTEXT], 2 /* Update */);
             }
         }
     }
@@ -13858,6 +13917,17 @@ function embeddedViewStart(viewBlockId) {
         }
         enterView(newView, viewNode = createLNode(viewBlockId, 2 /* View */, null, null, null, newView));
     }
+    var containerNode = getParentLNode(viewNode);
+    if (containerNode) {
+        ngDevMode && assertNodeType(viewNode, 2 /* View */);
+        ngDevMode && assertNodeType(containerNode, 0 /* Container */);
+        var lContainer_1 = containerNode.data;
+        if (creationMode) {
+            // it is a new view, insert it into collection of views for a given container
+            insertView(containerNode, viewNode, lContainer_1[ACTIVE_INDEX]);
+        }
+        lContainer_1[ACTIVE_INDEX]++;
+    }
     return getRenderFlags(viewNode.data);
 }
 /**
@@ -13886,20 +13956,16 @@ function getOrCreateEmbeddedTView(viewIndex, parent) {
 function embeddedViewEnd() {
     refreshView();
     isParent = false;
-    var viewNode = previousOrParentNode = viewData[HOST_NODE];
-    var containerNode = getParentLNode(previousOrParentNode);
-    if (containerNode) {
-        ngDevMode && assertNodeType(viewNode, 2 /* View */);
-        ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-        var lContainer = containerNode.data;
-        if (creationMode) {
+    previousOrParentNode = viewData[HOST_NODE];
+    if (creationMode) {
+        var containerNode = getParentLNode(previousOrParentNode);
+        if (containerNode) {
+            ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
+            ngDevMode && assertNodeType(containerNode, 0 /* Container */);
             // When projected nodes are going to be inserted, the renderParent of the dynamic container
             // used by the ViewContainerRef must be set.
-            setRenderParentInProjectedNodes(lContainer[RENDER_PARENT], viewNode);
-            // it is a new view, insert it into collection of views for a given container
-            insertView(containerNode, viewNode, lContainer[ACTIVE_INDEX]);
+            setRenderParentInProjectedNodes(containerNode.data[RENDER_PARENT], previousOrParentNode);
         }
-        lContainer[ACTIVE_INDEX]++;
     }
     leaveView(viewData[PARENT]);
     ngDevMode && assertEqual(isParent, false, 'isParent');
@@ -14071,7 +14137,7 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
     }
     var currentParent = getParentLNode(node);
     if (canInsertNativeNode(currentParent, viewData)) {
-        ngDevMode && assertNodeType(currentParent, 3 /* Element */);
+        ngDevMode && assertNodeOfPossibleTypes(currentParent, 3 /* Element */, 2 /* View */);
         // process each node in the list of projected nodes:
         var nodeToProject = node.data.head;
         var lastNodeToProject = node.data.tail;
@@ -15441,8 +15507,11 @@ var ViewContainerRef$1 = /** @class */ (function () {
         configurable: true
     });
     ViewContainerRef.prototype.createEmbeddedView = function (templateRef, context, index) {
-        var viewRef = templateRef.createEmbeddedView(context || {});
-        this.insert(viewRef, index);
+        var adjustedIdx = this._adjustIndex(index);
+        var viewRef = templateRef
+            .createEmbeddedView(context || {}, this._lContainerNode, adjustedIdx);
+        viewRef.attachToViewContainerRef(this);
+        this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     };
     ViewContainerRef.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModule) {
@@ -15454,9 +15523,14 @@ var ViewContainerRef$1 = /** @class */ (function () {
         }
         var lViewNode = viewRef._lViewNode;
         var adjustedIdx = this._adjustIndex(index);
-        viewRef.attachToViewContainerRef(this);
-        insertView(this._lContainerNode, lViewNode, adjustedIdx);
         lViewNode.dynamicParent = this._lContainerNode;
+        insertView(this._lContainerNode, lViewNode, adjustedIdx);
+        var views = this._lContainerNode.data[VIEWS];
+        var beforeNode = adjustedIdx + 1 < views.length ?
+            (getChildLNode(views[adjustedIdx + 1])).native :
+            this._lContainerNode.native;
+        addRemoveViewFromContainer(this._lContainerNode, lViewNode, true, beforeNode);
+        viewRef.attachToViewContainerRef(this);
         this._viewRefs.splice(adjustedIdx, 0, viewRef);
         return viewRef;
     };
@@ -15516,8 +15590,13 @@ var TemplateRef$1 = /** @class */ (function () {
         this._queries = _queries;
         this.elementRef = elementRef;
     }
-    TemplateRef.prototype.createEmbeddedView = function (context) {
-        var viewNode = renderEmbeddedTemplate(null, this._tView, context, this._renderer, this._queries);
+    TemplateRef.prototype.createEmbeddedView = function (context, containerNode, index) {
+        var viewNode = createEmbeddedViewNode(this._tView, context, this._renderer, this._queries);
+        if (containerNode) {
+            viewNode.dynamicParent = containerNode;
+            insertView(containerNode, viewNode, index);
+        }
+        renderEmbeddedTemplate(viewNode, this._tView, context, 1 /* Create */);
         return new EmbeddedViewRef$1(viewNode, this._tView.template, context);
     };
     return TemplateRef;
@@ -16124,6 +16203,7 @@ function i18nApply(startIndex, instructions) {
                 if (removedNode.tNode.type === 0 /* Container */ && removedNode.dynamicLContainerNode) {
                     removeChild(parentNode, removedNode.dynamicLContainerNode.native || null, viewData);
                     removedNode.dynamicLContainerNode.tNode.detached = true;
+                    removedNode.dynamicLContainerNode.data[RENDER_PARENT] = null;
                 }
                 break;
         }

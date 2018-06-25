@@ -5,14 +5,14 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+import './ng_dev_mode';
 import { Sanitizer } from '../sanitization/security';
 import { LContainer } from './interfaces/container';
 import { LInjector } from './interfaces/injector';
-import { LContainerNode, LElementNode, LNode, LProjectionNode, LTextNode, LViewNode, TAttributes, TContainerNode, TElementNode, TNode, TNodeType } from './interfaces/node';
 import { CssSelectorList, LProjection } from './interfaces/projection';
 import { LQueries } from './interfaces/query';
 import { CurrentMatchesList, LViewData, LViewFlags, RootContext, TView } from './interfaces/view';
-import './ng_dev_mode';
+import { TAttributes, LContainerNode, LElementNode, LNode, TNodeType, LProjectionNode, LTextNode, LViewNode, TNode, TContainerNode, TElementNode } from './interfaces/node';
 import { ComponentDefInternal, ComponentTemplate, ComponentQuery, DirectiveDefInternal, DirectiveDefListOrFactory, PipeDefListOrFactory, RenderFlags } from './interfaces/definition';
 import { RComment, RElement, RText, Renderer3, RendererFactory3 } from './interfaces/renderer';
 /**
@@ -100,6 +100,12 @@ export declare function createLNode(index: number, type: TNodeType.Projection, n
  */
 export declare function renderTemplate<T>(hostNode: RElement, template: ComponentTemplate<T>, context: T, providedRendererFactory: RendererFactory3, host: LElementNode | null, directives?: DirectiveDefListOrFactory | null, pipes?: PipeDefListOrFactory | null, sanitizer?: Sanitizer | null): LElementNode;
 /**
+ * Used for creating the LViewNode of a dynamic embedded view,
+ * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
+ * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
+ */
+export declare function createEmbeddedViewNode<T>(tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+/**
  * Used for rendering embedded views (e.g. dynamically created views)
  *
  * Dynamically created views must store/retrieve their TViews differently from component views
@@ -109,7 +115,7 @@ export declare function renderTemplate<T>(hostNode: RElement, template: Componen
  * can't store TViews in the template function itself (as we do for comps). Instead, we store the
  * TView for dynamically created views on their host TNode, which only has one instance.
  */
-export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode | null, tView: TView, context: T, renderer: Renderer3, queries?: LQueries | null): LViewNode;
+export declare function renderEmbeddedTemplate<T>(viewNode: LViewNode, tView: TView, context: T, rf: RenderFlags): LViewNode;
 export declare function renderComponentOrTemplate<T>(node: LElementNode, hostView: LViewData, componentOrContext: T, template?: ComponentTemplate<T>): void;
 export declare function namespaceSVG(): void;
 export declare function namespaceMathML(): void;
