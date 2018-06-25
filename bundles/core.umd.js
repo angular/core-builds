@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+19.sha-fba3f10
+ * @license Angular v6.1.0-beta.2+20.sha-1e139d4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1601,7 +1601,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+19.sha-fba3f10');
+var VERSION = new Version('6.1.0-beta.2+20.sha-1e139d4');
 
 /**
  * @license
@@ -12649,15 +12649,16 @@ function leaveView(newView, creationOnly) {
 }
 /**
  * Refreshes the view, executing the following steps in that order:
- * triggers init hooks, refreshes dynamic children, triggers content hooks, sets host bindings,
+ * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
+ * bindings,
  * refreshes child components.
  * Note: view hooks are triggered later when leaving the view.
- * */
+ */
 function refreshView() {
     if (!checkNoChangesMode) {
         executeInitHooks(viewData, tView, creationMode);
     }
-    refreshDynamicChildren();
+    refreshDynamicEmbeddedViews(viewData);
     if (!checkNoChangesMode) {
         executeHooks(directives, tView.contentHooks, tView.contentCheckHooks, creationMode);
     }
@@ -13866,8 +13867,12 @@ function containerRefreshEnd() {
         removeView(container, nextIndex);
     }
 }
-function refreshDynamicChildren() {
-    for (var current = getLViewChild(viewData); current !== null; current = current[NEXT]) {
+/**
+ * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes them
+ * by executing an associated template function.
+ */
+function refreshDynamicEmbeddedViews(lViewData) {
+    for (var current = getLViewChild(lViewData); current !== null; current = current[NEXT]) {
         // Note: current can be an LViewData or an LContainer instance, but here we are only interested
         // in LContainer. We can tell it's an LContainer because its length is less than the LViewData
         // header.

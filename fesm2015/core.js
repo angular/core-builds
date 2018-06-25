@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+19.sha-fba3f10
+ * @license Angular v6.1.0-beta.2+20.sha-1e139d4
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2050,7 +2050,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+19.sha-fba3f10');
+const VERSION = new Version('6.1.0-beta.2+20.sha-1e139d4');
 
 /**
  * @fileoverview added by tsickle
@@ -16678,17 +16678,17 @@ function leaveView(newView, creationOnly) {
 }
 /**
  * Refreshes the view, executing the following steps in that order:
- * triggers init hooks, refreshes dynamic children, triggers content hooks, sets host bindings,
+ * triggers init hooks, refreshes dynamic embedded views, triggers content hooks, sets host
+ * bindings,
  * refreshes child components.
  * Note: view hooks are triggered later when leaving the view.
- *
  * @return {?}
  */
 function refreshView() {
     if (!checkNoChangesMode) {
         executeInitHooks(viewData, tView, creationMode);
     }
-    refreshDynamicChildren();
+    refreshDynamicEmbeddedViews(viewData);
     if (!checkNoChangesMode) {
         executeHooks(/** @type {?} */ ((directives)), tView.contentHooks, tView.contentCheckHooks, creationMode);
     }
@@ -18077,10 +18077,13 @@ function containerRefreshEnd() {
     }
 }
 /**
+ * Goes over dynamic embedded views (ones created through ViewContainerRef APIs) and refreshes them
+ * by executing an associated template function.
+ * @param {?} lViewData
  * @return {?}
  */
-function refreshDynamicChildren() {
-    for (let /** @type {?} */ current = getLViewChild(viewData); current !== null; current = current[NEXT]) {
+function refreshDynamicEmbeddedViews(lViewData) {
+    for (let /** @type {?} */ current = getLViewChild(lViewData); current !== null; current = current[NEXT]) {
         // Note: current can be an LViewData or an LContainer instance, but here we are only interested
         // in LContainer. We can tell it's an LContainer because its length is less than the LViewData
         // header.
