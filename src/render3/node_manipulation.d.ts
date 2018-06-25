@@ -95,21 +95,22 @@ export declare function destroyLView(view: LViewData): void;
  */
 export declare function getParentState(state: LViewData | LContainer, rootView: LViewData): LViewData | LContainer | null;
 /**
- * Returns whether a native element should be inserted in the given parent.
+ * Returns whether a native element can be inserted into the given parent.
  *
- * The native node can be inserted when its parent is:
- * - A regular element => Yes
- * - A component host element =>
- *    - if the `currentView` === the parent `view`: The element is in the content (vs the
- *      template)
- *      => don't add as the parent component will project if needed.
- *    - `currentView` !== the parent `view` => The element is in the template (vs the content),
- *      add it
- * - View element => delay insertion, will be done on `viewEnd()`
+ * There are two reasons why we may not be able to insert a element immediately.
+ * - Projection: When creating a child content element of a component, we have to skip the
+ *   insertion because the content of a component will be projected.
+ *   `<component><content>delayed due to projection</content></component>`
+ * - Parent container is disconnected: This can happen when we are inserting a view into
+ *   parent container, which itself is disconnected. For example the parent container is part
+ *   of a View which has not be inserted or is mare for projection but has not been inserted
+ *   into destination.
  *
- * @param parent The parent in which to insert the child
- * @param currentView The LView being processed
- * @return boolean Whether the child element should be inserted.
+
+ *
+ * @param parent The parent where the child will be inserted into.
+ * @param currentView Current LView being processed.
+ * @return boolean Whether the child should be inserted now (or delayed until later).
  */
 export declare function canInsertNativeNode(parent: LNode, currentView: LViewData): boolean;
 /**
