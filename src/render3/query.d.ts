@@ -57,6 +57,7 @@ export declare class LQueries_ implements LQueries {
     deep: LQuery<any> | null;
     constructor(deep?: LQuery<any>);
     track<T>(queryList: viewEngine_QueryList<T>, predicate: Type<T> | string[], descend?: boolean, read?: QueryReadType<T> | Type<T>): void;
+    clone(): LQueries | null;
     child(): LQueries | null;
     container(): LQueries | null;
     createView(): LQueries | null;
