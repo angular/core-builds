@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+38.sha-5c0e681
+ * @license Angular v6.1.0-beta.2+39.sha-fe8fcc8
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1050,7 +1050,7 @@ function throwError(msg) {
  * found in the LICENSE file at https://angular.io/license
  */
 /** Size of LViewData's header. Necessary to adjust for it when setting slots.  */
-var HEADER_OFFSET = 14;
+var HEADER_OFFSET = 15;
 // Below are constants for LViewData indices to help us look up LViewData members
 // without having to remember the specific indices.
 // Uglify will inline these when minifying so there shouldn't be a cost.
@@ -1068,6 +1068,7 @@ var INJECTOR$1 = 10;
 var RENDERER = 11;
 var SANITIZER = 12;
 var TAIL = 13;
+var CONTAINER_INDEX = 14;
 // Note: This hack is necessary so we don't erroneously get a circular dependency
 // failure based on types.
 
@@ -1422,9 +1423,11 @@ function getChildLNode(node) {
     return null;
 }
 function getParentLNode(node) {
-    if (node.tNode.index === -1) {
-        // This is a dynamic container or an embedded view inside a dynamic container.
-        return node.dynamicParent;
+    if (node.tNode.index === -1 && node.tNode.type === 2 /* View */) {
+        // This is a dynamically created view inside a dynamic container.
+        // If the host index is -1, the view has not yet been inserted, so it has no parent.
+        var containerHostIndex = node.data[CONTAINER_INDEX];
+        return containerHostIndex === -1 ? null : node.view[containerHostIndex].dynamicLContainerNode;
     }
     var parent = node.tNode.parent;
     return parent ? node.view[parent.index] : node.view[HOST_NODE];
@@ -1628,25 +1631,31 @@ function destroyViewTree(rootView) {
 function insertView(container, viewNode, index) {
     var state = container.data;
     var views = state[VIEWS];
+    var lView = viewNode.data;
     if (index > 0) {
         // This is a new view, we need to add it to the children.
-        views[index - 1].data[NEXT] = viewNode.data;
+        views[index - 1].data[NEXT] = lView;
     }
     if (index < views.length) {
-        viewNode.data[NEXT] = views[index].data;
+        lView[NEXT] = views[index].data;
         views.splice(index, 0, viewNode);
     }
     else {
         views.push(viewNode);
-        viewNode.data[NEXT] = null;
+        lView[NEXT] = null;
+    }
+    // Dynamically inserted views need a reference to their parent container'S host so it's
+    // possible to jump from a view to its container's next when walking the node tree.
+    if (viewNode.tNode.index === -1) {
+        lView[CONTAINER_INDEX] = container.tNode.parent.index;
+        viewNode.view = container.view;
     }
     // Notify query that a new view has been added
-    var lView = viewNode.data;
     if (lView[QUERIES]) {
         lView[QUERIES].insertView(index);
     }
     // Sets the attached flag
-    viewNode.data[FLAGS] |= 8 /* Attached */;
+    lView[FLAGS] |= 8 /* Attached */;
     return viewNode;
 }
 /**
@@ -1670,10 +1679,12 @@ function detachView(container, removeIndex) {
         addRemoveViewFromContainer(container, viewNode, false);
     }
     // Notify query that view has been removed
-    var removedLview = viewNode.data;
-    if (removedLview[QUERIES]) {
-        removedLview[QUERIES].removeView();
+    var removedLView = viewNode.data;
+    if (removedLView[QUERIES]) {
+        removedLView[QUERIES].removeView();
     }
+    removedLView[CONTAINER_INDEX] = -1;
+    viewNode.view = null;
     // Unsets the attached flag
     viewNode.data[FLAGS] &= ~8 /* Attached */;
     return viewNode;
@@ -2339,7 +2350,8 @@ function createLViewData(renderer, tView, context, flags, sanitizer) {
         viewData && viewData[INJECTOR$1],
         renderer,
         sanitizer || null,
-        null // tail
+        null,
+        -1 // containerIndex
     ];
 }
 /**
@@ -2357,7 +2369,6 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         tNode: null,
         pNextOrParent: null,
         dynamicLContainerNode: null,
-        dynamicParent: null,
         pChild: null,
     };
 }
@@ -3589,16 +3600,12 @@ function embeddedViewStart(viewBlockId) {
         }
         enterView(newView, viewNode = createLNode(viewBlockId, 2 /* View */, null, null, null, newView));
     }
-    var containerNode = getParentLNode(viewNode);
-    if (containerNode) {
-        ngDevMode && assertNodeType(viewNode, 2 /* View */);
-        ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-        var lContainer_1 = containerNode.data;
+    if (container) {
         if (creationMode) {
             // it is a new view, insert it into collection of views for a given container
-            insertView(containerNode, viewNode, lContainer_1[ACTIVE_INDEX]);
+            insertView(container, viewNode, lContainer[ACTIVE_INDEX]);
         }
-        lContainer_1[ACTIVE_INDEX]++;
+        lContainer[ACTIVE_INDEX]++;
     }
     return getRenderFlags(viewNode.data);
 }
@@ -8570,11 +8577,11 @@ function getOrCreateContainerRef(di) {
         }
         var hostTNode = vcRefHost.tNode;
         if (!hostTNode.dynamicContainerNode) {
-            hostTNode.dynamicContainerNode = createTNode(0 /* Container */, -1, null, null, null, null);
+            hostTNode.dynamicContainerNode =
+                createTNode(0 /* Container */, -1, null, null, hostTNode, null);
         }
         lContainerNode.tNode = hostTNode.dynamicContainerNode;
         vcRefHost.dynamicLContainerNode = lContainerNode;
-        lContainerNode.dynamicParent = vcRefHost;
         addToViewTree(vcRefHost.view, hostTNode.index, lContainer);
         di.viewContainerRef = new ViewContainerRef(lContainerNode);
     }
@@ -8621,7 +8628,6 @@ var ViewContainerRef = /** @class */ (function () {
         }
         var lViewNode = viewRef._lViewNode;
         var adjustedIdx = this._adjustIndex(index);
-        lViewNode.dynamicParent = this._lContainerNode;
         insertView(this._lContainerNode, lViewNode, adjustedIdx);
         var views = this._lContainerNode.data[VIEWS];
         var beforeNode = adjustedIdx + 1 < views.length ?
@@ -8647,7 +8653,6 @@ var ViewContainerRef = /** @class */ (function () {
     ViewContainerRef.prototype.detach = function (index) {
         var adjustedIdx = this._adjustIndex(index, -1);
         var lViewNode = detachView(this._lContainerNode, adjustedIdx);
-        lViewNode.dynamicParent = null;
         return this._viewRefs.splice(adjustedIdx, 1)[0] || null;
     };
     ViewContainerRef.prototype._adjustIndex = function (index, shift) {
@@ -8691,7 +8696,6 @@ var TemplateRef = /** @class */ (function () {
     TemplateRef.prototype.createEmbeddedView = function (context, containerNode, index) {
         var viewNode = createEmbeddedViewNode(this._tView, context, this._renderer, this._queries);
         if (containerNode) {
-            viewNode.dynamicParent = containerNode;
             insertView(containerNode, viewNode, index);
         }
         renderEmbeddedTemplate(viewNode, this._tView, context, 1 /* Create */);
@@ -9488,7 +9492,6 @@ function i18nApply(startIndex, instructions) {
                 // But since this text doesn't have an index in `LViewData`, we need to create an
                 // `LElementNode` with the index -1 so that it isn't saved in `LViewData`
                 var textLNode = createLNode(-1, 3 /* Element */, textRNode, null, null);
-                textLNode.dynamicParent = localParentNode;
                 localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
                 break;
             case -2147483648 /* CloseNode */:
@@ -11527,7 +11530,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+38.sha-5c0e681');
+var VERSION = new Version('6.1.0-beta.2+39.sha-fe8fcc8');
 
 /**
  * @license
