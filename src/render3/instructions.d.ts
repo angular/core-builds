@@ -36,6 +36,13 @@ export declare function getRenderer(): Renderer3;
 export declare function getCurrentSanitizer(): Sanitizer | null;
 export declare function getViewData(): LViewData;
 export declare function getPreviousOrParentNode(): LNode;
+/**
+ * Query instructions can ask for "current queries" in 2 different cases:
+ * - when creating view queries (at the root of a component view, before any node is created - in
+ * this case currentQueries points to view queries)
+ * - when creating content queries (inb this previousOrParentNode points to a node on which we
+ * create content queries).
+ */
 export declare function getCurrentQueries(QueryType: {
     new (): LQueries;
 }): LQueries;

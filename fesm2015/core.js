@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+39.sha-fe8fcc8
+ * @license Angular v6.1.0-beta.2+40.sha-50fb13f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2149,9 +2149,19 @@ function getPreviousOrParentNode() {
 let isParent;
 let tView;
 let currentQueries;
+/**
+ * Query instructions can ask for "current queries" in 2 different cases:
+ * - when creating view queries (at the root of a component view, before any node is created - in
+ * this case currentQueries points to view queries)
+ * - when creating content queries (inb this previousOrParentNode points to a node on which we
+ * create content queries).
+ */
 function getCurrentQueries(QueryType) {
     // top level variables should not be exported for performance reasons (PERF_NOTES.md)
-    return currentQueries || (currentQueries = (previousOrParentNode.queries || new QueryType()));
+    return currentQueries ||
+        (currentQueries =
+            (previousOrParentNode.queries && previousOrParentNode.queries.clone() ||
+                new QueryType()));
 }
 /**
  * This property gets set before entering a template.
@@ -9889,8 +9899,6 @@ class LQueries_ {
         this.deep = deep == null ? null : deep;
     }
     track(queryList, predicate, descend, read) {
-        // TODO(misko): This is not right. In case of inherited state, a calling track will incorrectly
-        // mutate parent.
         if (descend) {
             this.deep = createQuery(this.deep, queryList, predicate, read != null ? read : null);
         }
@@ -9898,6 +9906,7 @@ class LQueries_ {
             this.shallow = createQuery(this.shallow, queryList, predicate, read != null ? read : null);
         }
     }
+    clone() { return this.deep ? new LQueries_(this.deep) : null; }
     child() {
         if (this.deep === null) {
             // if we don't have any deep queries then no need to track anything more.
@@ -11134,7 +11143,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+39.sha-fe8fcc8');
+const VERSION = new Version('6.1.0-beta.2+40.sha-50fb13f');
 
 /**
  * @license
