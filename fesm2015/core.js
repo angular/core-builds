@@ -1,12 +1,11 @@
 /**
- * @license Angular v6.1.0-beta.2+56.sha-c57b491
+ * @license Angular v6.1.0-beta.3+8.sha-01e7ff6
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
 import { Observable, Subject, Subscription, merge } from 'rxjs';
-import { __decorate, __metadata, __param } from 'tslib';
 import { share } from 'rxjs/operators';
 
 /**
@@ -11143,7 +11142,31 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.2+56.sha-c57b491');
+const VERSION = new Version('6.1.0-beta.3+8.sha-01e7ff6');
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/*
+ * This file exists to support compilation of @angular/core in Ivy mode.
+ *
+ * When the Angular compiler processes a compilation unit, it normally writes imports to
+ * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
+ * compiler writes imports to this file.
+ *
+ * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
+ * A check in ngtsc's translator.ts validates this condition.
+ *
+ * The below symbols are used for @Injectable and @NgModule compilation.
+ */
+/**
+ * The existence of this constant (in this particular file) informs the Angular compiler that the
+ * current program is actually @angular/core, which needs to be compiled specially.
+ */
 
 /**
  * @license
@@ -11185,7 +11208,7 @@ const APP_INITIALIZER = new InjectionToken('Application Initializer');
  *
  * @experimental
  */
-let ApplicationInitStatus = class ApplicationInitStatus {
+class ApplicationInitStatus {
     constructor(appInits) {
         this.appInits = appInits;
         this.initialized = false;
@@ -11219,12 +11242,8 @@ let ApplicationInitStatus = class ApplicationInitStatus {
         }
         this.initialized = true;
     }
-};
-ApplicationInitStatus = __decorate([
-    Injectable(),
-    __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
-    __metadata("design:paramtypes", [Array])
-], ApplicationInitStatus);
+}
+ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory() { return new ApplicationInitStatus(inject(APP_INITIALIZER, 8)); }, providedIn: null });
 
 /**
  * @license
@@ -11291,7 +11310,7 @@ const PACKAGE_ROOT_URL = new InjectionToken('Application Packages Root URL');
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-let Console = class Console {
+class Console {
     log(message) {
         // tslint:disable-next-line:no-console
         console.log(message);
@@ -11301,10 +11320,8 @@ let Console = class Console {
         // tslint:disable-next-line:no-console
         console.warn(message);
     }
-};
-Console = __decorate([
-    Injectable()
-], Console);
+}
+Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory() { return new Console(); }, providedIn: null });
 
 /**
  * @license
@@ -11337,7 +11354,7 @@ function _throwError() {
  * of components.
  *
  */
-let Compiler = class Compiler {
+class Compiler {
     /**
      * Compiles the given NgModule and all of its components. All templates of the components listed
      * in `entryComponents` have to be inlined.
@@ -11371,10 +11388,8 @@ let Compiler = class Compiler {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     getModuleId(moduleType) { return undefined; }
-};
-Compiler = __decorate([
-    Injectable()
-], Compiler);
+}
+Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
 /**
  * Token to provide CompilerOptions in the platform injector.
  *
@@ -11807,7 +11822,7 @@ class NoopNgZone {
  * application on the page will have an instance of Testability.
  * @experimental
  */
-let Testability = class Testability {
+class Testability {
     constructor(_ngZone) {
         this._ngZone = _ngZone;
         this._pendingCount = 0;
@@ -11958,16 +11973,13 @@ let Testability = class Testability {
         // TODO(juliemr): implement.
         return [];
     }
-};
-Testability = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [NgZone])
-], Testability);
+}
+Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(inject(NgZone)); }, providedIn: null });
 /**
  * A global registry of {@link Testability} instances for specific elements.
  * @experimental
  */
-let TestabilityRegistry = class TestabilityRegistry {
+class TestabilityRegistry {
     constructor() {
         /** @internal */
         this._applications = new Map();
@@ -12012,11 +12024,8 @@ let TestabilityRegistry = class TestabilityRegistry {
     findTestabilityInTree(elem, findInAncestors = true) {
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     }
-};
-TestabilityRegistry = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [])
-], TestabilityRegistry);
+}
+TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
 class _NoopGetTestability {
     addToWindow(registry) { }
     findTestabilityInTree(registry, elem, findInAncestors) {
@@ -12162,7 +12171,7 @@ function getPlatform() {
  * A page's platform is initialized implicitly when a platform is created via a platform factory
  * (e.g. {@link platformBrowser}), or explicitly by calling the {@link createPlatform} function.
  */
-let PlatformRef = class PlatformRef {
+class PlatformRef {
     /** @internal */
     constructor(_injector) {
         this._injector = _injector;
@@ -12281,11 +12290,8 @@ let PlatformRef = class PlatformRef {
         this._destroyed = true;
     }
     get destroyed() { return this._destroyed; }
-};
-PlatformRef = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [Injector])
-], PlatformRef);
+}
+PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory() { return new PlatformRef(inject(Injector)); }, providedIn: null });
 function getNgZone(ngZoneOption) {
     let ngZone;
     if (ngZoneOption === 'noop') {
@@ -12327,7 +12333,7 @@ function optionsReducer(dst, objs) {
 /**
  * A reference to an Angular application running on a page.
  */
-let ApplicationRef = ApplicationRef_1 = class ApplicationRef {
+class ApplicationRef {
     /** @internal */
     constructor(_zone, _console, _injector, _exceptionHandler, _componentFactoryResolver, _initStatus) {
         this._zone = _zone;
@@ -12454,7 +12460,7 @@ let ApplicationRef = ApplicationRef_1 = class ApplicationRef {
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
         }
-        const scope = ApplicationRef_1._tickScope();
+        const scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
             this._views.forEach((view) => view.detectChanges());
@@ -12510,23 +12516,16 @@ let ApplicationRef = ApplicationRef_1 = class ApplicationRef {
      * Returns the number of attached views.
      */
     get viewCount() { return this._views.length; }
-};
+}
 /** @internal */
 ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-ApplicationRef = ApplicationRef_1 = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [NgZone, Console, Injector,
-        ErrorHandler,
-        ComponentFactoryResolver$1,
-        ApplicationInitStatus])
-], ApplicationRef);
+ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory() { return new ApplicationRef(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver$1), inject(ApplicationInitStatus)); }, providedIn: null });
 function remove(list, el) {
     const index = list.indexOf(el);
     if (index > -1) {
         list.splice(index, 1);
     }
 }
-var ApplicationRef_1;
 
 /**
  * @license
@@ -12712,7 +12711,7 @@ const DEFAULT_CONFIG = {
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
  * @experimental
  */
-let SystemJsNgModuleLoader = class SystemJsNgModuleLoader {
+class SystemJsNgModuleLoader {
     constructor(_compiler, config) {
         this._compiler = _compiler;
         this._config = config || DEFAULT_CONFIG;
@@ -12742,12 +12741,8 @@ let SystemJsNgModuleLoader = class SystemJsNgModuleLoader {
             .then((module) => module[exportName + factoryClassSuffix])
             .then((factory) => checkNotEmpty(factory, module, exportName));
     }
-};
-SystemJsNgModuleLoader = __decorate([
-    Injectable(),
-    __param(1, Optional()),
-    __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
-], SystemJsNgModuleLoader);
+}
+SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
 function checkNotEmpty(value, modulePath, exportName) {
     if (!value) {
         throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);
@@ -13171,14 +13166,12 @@ const APPLICATION_MODULE_PROVIDERS = [
  *
  * @experimental
  */
-let ApplicationModule = class ApplicationModule {
+class ApplicationModule {
     // Inject ApplicationRef to make it eager...
     constructor(appRef) { }
-};
-ApplicationModule = __decorate([
-    NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
-    __metadata("design:paramtypes", [ApplicationRef])
-], ApplicationModule);
+}
+ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory() { return new ApplicationModule(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
 
 /**
  * @license
