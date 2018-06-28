@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+13.sha-3db9d57
+ * @license Angular v6.1.0-beta.3+14.sha-99bdd25
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2152,7 +2152,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.3+13.sha-3db9d57');
+const VERSION = new Version('6.1.0-beta.3+14.sha-99bdd25');
 
 /**
  * @fileoverview added by tsickle
@@ -16512,25 +16512,26 @@ function removeChild(parent, child, currentView) {
  * @param {?} node The node to process
  * @param {?} currentParent The last parent element to be processed
  * @param {?} currentView Current LView
+ * @param {?} renderParent
  * @return {?}
  */
-function appendProjectedNode(node, currentParent, currentView) {
+function appendProjectedNode(node, currentParent, currentView, renderParent) {
     appendChild(currentParent, node.native, currentView);
     if (node.tNode.type === 0 /* Container */) {
-        // The node we are adding is a Container and we are adding it to Element which
+        // The node we are adding is a container and we are adding it to an element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
-        // Assignee the final projection location in those cases.
+        // Assign the final projection location in those cases.
         const /** @type {?} */ lContainer = (/** @type {?} */ (node)).data;
-        lContainer[RENDER_PARENT] = currentParent;
+        lContainer[RENDER_PARENT] = renderParent;
         const /** @type {?} */ views = lContainer[VIEWS];
         for (let /** @type {?} */ i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data[RENDER_PARENT] = currentParent;
+        node.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
         appendChild(currentParent, node.dynamicLContainerNode.native, currentView);
     }
 }
@@ -18483,44 +18484,9 @@ function embeddedViewEnd() {
     refreshView();
     isParent = false;
     previousOrParentNode = /** @type {?} */ (viewData[HOST_NODE]);
-    if (creationMode) {
-        const /** @type {?} */ containerNode = /** @type {?} */ (getParentLNode(previousOrParentNode));
-        if (containerNode) {
-            ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-            ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-            // When projected nodes are going to be inserted, the renderParent of the dynamic container
-            // used by the ViewContainerRef must be set.
-            setRenderParentInProjectedNodes(containerNode.data[RENDER_PARENT], /** @type {?} */ (previousOrParentNode));
-        }
-    }
     leaveView(/** @type {?} */ ((viewData[PARENT])));
     ngDevMode && assertEqual(isParent, false, 'isParent');
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-}
-/**
- * For nodes which are projected inside an embedded view, this function sets the renderParent
- * of their dynamic LContainerNode.
- * @param {?} renderParent the renderParent of the LContainer which contains the embedded view.
- * @param {?} viewNode the embedded view.
- * @return {?}
- */
-function setRenderParentInProjectedNodes(renderParent, viewNode) {
-    if (renderParent != null) {
-        let /** @type {?} */ node = getChildLNode(viewNode);
-        while (node) {
-            if (node.tNode.type === 1 /* Projection */) {
-                let /** @type {?} */ nodeToProject = (/** @type {?} */ (node)).data.head;
-                const /** @type {?} */ lastNodeToProject = (/** @type {?} */ (node)).data.tail;
-                while (nodeToProject) {
-                    if (nodeToProject.dynamicLContainerNode) {
-                        nodeToProject.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
-                    }
-                    nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
-                }
-            }
-            node = getNextLNode(node);
-        }
-    }
 }
 /**
  * Refreshes components by entering the component view and processing its bindings, queries, etc.
@@ -18596,7 +18562,7 @@ function projectionDef(index, selectors, textSelectors) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
         // - a node has a tag name / attributes that can be matched
-        if (selectors && componentChild.tNode) {
+        if (selectors) {
             const /** @type {?} */ matchedIdx = matchingSelectorIndex(componentChild.tNode, selectors, /** @type {?} */ ((textSelectors)));
             distributedNodes[matchedIdx].push(componentChild);
         }
@@ -18675,8 +18641,10 @@ function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
         // process each node in the list of projected nodes:
         let /** @type {?} */ nodeToProject = node.data.head;
         const /** @type {?} */ lastNodeToProject = node.data.tail;
+        const /** @type {?} */ renderParent = currentParent.tNode.type === 2 /* View */ ? /** @type {?} */
+            (((/** @type {?} */ (getParentLNode(currentParent))).data[RENDER_PARENT])) : /** @type {?} */ (currentParent);
         while (nodeToProject) {
-            appendProjectedNode(/** @type {?} */ (nodeToProject), /** @type {?} */ (currentParent), viewData);
+            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, viewData, renderParent);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
