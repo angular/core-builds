@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+8.sha-01e7ff6
+ * @license Angular v6.1.0-beta.3+11.sha-0ede987
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -500,6 +500,97 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
 function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === exports.ChangeDetectionStrategy.Default;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * @Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
+ * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ */
+function resolveComponentResources(resourceResolver) {
+    // Store all promises which are fetching the resources.
+    var urlFetches = [];
+    // Cache so that we don't fetch the same resource more than once.
+    var urlMap = new Map();
+    function cachedResourceResolve(url) {
+        var promise = urlMap.get(url);
+        if (!promise) {
+            var resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach(function (component) {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then(function (template) {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        var styleUrls = component.styleUrls;
+        var styles = component.styles || (component.styles = []);
+        var styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach(function (styleUrl, index) {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then(function (style) {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    componentResourceResolutionQueue.clear();
+    return Promise.all(urlFetches).then(function () { return null; });
+}
+var componentResourceResolutionQueue = new Set();
+function maybeQueueResolutionOfComponentResources(metadata) {
+    if (componentNeedsResolution(metadata)) {
+        componentResourceResolutionQueue.add(metadata);
+    }
+}
+function componentNeedsResolution(component) {
+    return component.templateUrl || component.styleUrls && component.styleUrls.length;
+}
+
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
 }
 
 /**
@@ -11090,35 +11181,42 @@ function isNgModule(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var _pendingPromises = [];
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
  * ngComponentDef onto the component type.
  *
  * Compilation may be asynchronous (due to the need to resolve URLs for the component template or
  * other resources, for example). In the event that compilation is not immediate, `compileComponent`
- * will return a `Promise` which will resolve when compilation completes and the component becomes
- * usable.
+ * will enqueue resource resolution into a global queue and will fail to return the `ngComponentDef`
+ * until the global queue has been resolved with a call to `resolveComponentResources`.
  */
 function compileComponent(type, metadata) {
-    // TODO(alxhub): implement ResourceLoader support for template compilation.
-    if (!metadata.template) {
-        throw new Error('templateUrl not yet supported');
-    }
-    var templateStr = metadata.template;
     var def = null;
+    // Metadata may have resources which need to be resolved.
+    maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: function () {
             if (def === null) {
+                if (componentNeedsResolution(metadata)) {
+                    var error = ["Component '" + stringify(type) + "' is not resolved:"];
+                    if (metadata.templateUrl) {
+                        error.push(" - templateUrl: " + stringify(metadata.templateUrl));
+                    }
+                    if (metadata.styleUrls && metadata.styleUrls.length) {
+                        error.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
+                    }
+                    error.push("Did you run and wait for 'resolveComponentResources()'?");
+                    throw new Error(error.join('\n'));
+                }
                 // The ConstantPool is a requirement of the JIT'er.
                 var constantPool = new compiler.ConstantPool();
                 // Parse the template and check for errors.
-                var template = compiler.parseTemplate(templateStr, "ng://" + type.name + "/template.html", {
+                var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
                     preserveWhitespaces: metadata.preserveWhitespaces || false,
                 });
                 if (template.errors !== undefined) {
                     var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
-                    throw new Error("Errors during JIT compilation of template for " + type.name + ": " + errors);
+                    throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
                 }
                 // Compile the component metadata, including template, into an expression.
                 // TODO(alxhub): implement inputs, outputs, queries, etc.
@@ -11135,7 +11233,6 @@ function compileComponent(type, metadata) {
             return def;
         },
     });
-    return null;
 }
 function hasSelectorScope(component) {
     return component.ngSelectorScope !== undefined;
@@ -11160,25 +11257,7 @@ function compileDirective(type, directive) {
             return def;
         },
     });
-    return null;
 }
-/**
- * A wrapper around `compileComponent` which is intended to be used for the `@Component` decorator.
- *
- * This wrapper keeps track of the `Promise` returned by `compileComponent` and will cause
- * `awaitCurrentlyCompilingComponents` to wait on the compilation to be finished.
- */
-function compileComponentDecorator(type, metadata) {
-    var res = compileComponent(type, metadata);
-    if (res !== null) {
-        _pendingPromises.push(res);
-    }
-}
-/**
- * Returns a promise which will await the compilation of any `@Component`s which have been defined
- * since the last time `awaitCurrentlyCompilingComponents` was called.
- */
-
 /**
  * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a
  * `Component`).
@@ -11373,7 +11452,7 @@ function isUseExistingProvider(meta) {
  * found in the LICENSE file at https://angular.io/license
  */
 var ivyEnabled = true;
-var R3_COMPILE_COMPONENT = compileComponentDecorator;
+var R3_COMPILE_COMPONENT = compileComponent;
 var R3_COMPILE_DIRECTIVE = compileDirective;
 var R3_COMPILE_INJECTABLE = compileInjectable$1;
 var R3_COMPILE_NGMODULE = compileNgModule$1;
@@ -11622,7 +11701,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+8.sha-01e7ff6');
+var VERSION = new Version('6.1.0-beta.3+11.sha-0ede987');
 
 /**
  * @license
@@ -18297,6 +18376,7 @@ exports.ɵAPP_ROOT = APP_ROOT;
 exports.ɵivyEnabled = ivyEnabled;
 exports.ɵComponentFactory = ComponentFactory$1;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
+exports.ɵresolveComponentResources = resolveComponentResources;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
 exports.ɵRenderDebugInfo = RenderDebugInfo;
 exports.ɵ_sanitizeHtml = _sanitizeHtml;

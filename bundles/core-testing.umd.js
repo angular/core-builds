@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+8.sha-01e7ff6
+ * @license Angular v6.1.0-beta.3+11.sha-0ede987
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -151,6 +151,39 @@ function async(fn) {
     // TODO @JiaLiPassion, remove this after all library updated to
     // newest version of zone.js(0.8.25)
     return asyncFallback(fn);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Converts an `async` function, with `await`, into a function which is compatible with Jasmine test
+ * framework.
+ *
+ * For asynchronous function blocks, Jasmine expects `it` (and friends) to take a function which
+ * takes a `done` callback. (Jasmine does not understand functions which return `Promise`.) The
+ * `jasmineAwait()` wrapper converts the test function returning `Promise` into a function which
+ * Jasmine understands.
+ *
+ *
+ * Example:
+ * ```
+ * it('...', jasmineAwait(async() => {
+ *   doSomething();
+ *   await asyncFn();
+ *   doSomethingAfter();
+ * }));
+ * ```
+ *
+ */
+function jasmineAwait(fn) {
+    return function (done) {
+        fn().then(done, done.fail);
+    };
 }
 
 /**
@@ -1541,6 +1574,7 @@ if (typeof afterEach == 'function')
 // names.
 
 exports.async = async;
+exports.jasmineAwait = jasmineAwait;
 exports.ComponentFixture = ComponentFixture;
 exports.resetFakeAsyncZone = resetFakeAsyncZone;
 exports.fakeAsync = fakeAsync;
