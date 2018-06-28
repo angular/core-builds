@@ -1,3 +1,4 @@
+import * as i0 from './r3_symbols';
 import { InjectionToken } from './di';
 /**
  * A function that will be executed when an application is initialized.
@@ -17,4 +18,5 @@ export declare class ApplicationInitStatus {
     readonly donePromise: Promise<any>;
     readonly done: boolean;
     constructor(appInits: (() => any)[]);
+    static ngInjectableDef: i0.InjectableDef<ApplicationInitStatus>;
 }

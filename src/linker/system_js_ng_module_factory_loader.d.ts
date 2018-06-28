@@ -1,3 +1,4 @@
+import * as i0 from '../r3_symbols';
 import { Compiler } from './compiler';
 import { NgModuleFactory } from './ng_module_factory';
 import { NgModuleFactoryLoader } from './ng_module_factory_loader';
@@ -28,4 +29,5 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     load(path: string): Promise<NgModuleFactory<any>>;
     private loadAndCompile(path);
     private loadFactory(path);
+    static ngInjectableDef: i0.InjectableDef<SystemJsNgModuleLoader>;
 }

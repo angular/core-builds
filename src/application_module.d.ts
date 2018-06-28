@@ -1,3 +1,4 @@
+import * as i0 from './r3_symbols';
 import { ApplicationRef } from './application_ref';
 import { IterableDiffers, KeyValueDiffers } from './change_detection/change_detection';
 import { StaticProvider } from './di';
@@ -13,4 +14,6 @@ export declare const APPLICATION_MODULE_PROVIDERS: StaticProvider[];
  */
 export declare class ApplicationModule {
     constructor(appRef: ApplicationRef);
+    static ngModuleDef: i0.NgModuleDef<ApplicationModule, [], [], []>;
+    static ngInjectorDef: i0.InjectorDef;
 }

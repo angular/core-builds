@@ -1,3 +1,4 @@
+import * as i0 from './r3_symbols';
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -160,6 +161,7 @@ export declare class PlatformRef {
      */
     destroy(): void;
     readonly destroyed: boolean;
+    static ngInjectableDef: i0.InjectableDef<PlatformRef>;
 }
 /**
  * A reference to an Angular application running on a page.
@@ -233,4 +235,5 @@ export declare class ApplicationRef {
      * Returns the number of attached views.
      */
     readonly viewCount: number;
+    static ngInjectableDef: i0.InjectableDef<ApplicationRef>;
 }
