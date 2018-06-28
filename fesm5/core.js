@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+13.sha-3db9d57
+ * @license Angular v6.1.0-beta.3+14.sha-99bdd25
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2018,23 +2018,23 @@ function removeChild(parent, child, currentView) {
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-function appendProjectedNode(node, currentParent, currentView) {
+function appendProjectedNode(node, currentParent, currentView, renderParent) {
     appendChild(currentParent, node.native, currentView);
     if (node.tNode.type === 0 /* Container */) {
-        // The node we are adding is a Container and we are adding it to Element which
+        // The node we are adding is a container and we are adding it to an element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
-        // Assignee the final projection location in those cases.
+        // Assign the final projection location in those cases.
         var lContainer = node.data;
-        lContainer[RENDER_PARENT] = currentParent;
+        lContainer[RENDER_PARENT] = renderParent;
         var views = lContainer[VIEWS];
         for (var i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(node, views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data[RENDER_PARENT] = currentParent;
+        node.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
         appendChild(currentParent, node.dynamicLContainerNode.native, currentView);
     }
 }
@@ -3737,43 +3737,9 @@ function embeddedViewEnd() {
     refreshView();
     isParent = false;
     previousOrParentNode = viewData[HOST_NODE];
-    if (creationMode) {
-        var containerNode = getParentLNode(previousOrParentNode);
-        if (containerNode) {
-            ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-            ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-            // When projected nodes are going to be inserted, the renderParent of the dynamic container
-            // used by the ViewContainerRef must be set.
-            setRenderParentInProjectedNodes(containerNode.data[RENDER_PARENT], previousOrParentNode);
-        }
-    }
     leaveView(viewData[PARENT]);
     ngDevMode && assertEqual(isParent, false, 'isParent');
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-}
-/**
- * For nodes which are projected inside an embedded view, this function sets the renderParent
- * of their dynamic LContainerNode.
- * @param renderParent the renderParent of the LContainer which contains the embedded view.
- * @param viewNode the embedded view.
- */
-function setRenderParentInProjectedNodes(renderParent, viewNode) {
-    if (renderParent != null) {
-        var node = getChildLNode(viewNode);
-        while (node) {
-            if (node.tNode.type === 1 /* Projection */) {
-                var nodeToProject = node.data.head;
-                var lastNodeToProject = node.data.tail;
-                while (nodeToProject) {
-                    if (nodeToProject.dynamicLContainerNode) {
-                        nodeToProject.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
-                    }
-                    nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
-                }
-            }
-            node = getNextLNode(node);
-        }
-    }
 }
 /////////////
 /**
@@ -3842,7 +3808,7 @@ function projectionDef(index, selectors, textSelectors) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
         // - a node has a tag name / attributes that can be matched
-        if (selectors && componentChild.tNode) {
+        if (selectors) {
             var matchedIdx = matchingSelectorIndex(componentChild.tNode, selectors, textSelectors);
             distributedNodes[matchedIdx].push(componentChild);
         }
@@ -3921,8 +3887,11 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
         // process each node in the list of projected nodes:
         var nodeToProject = node.data.head;
         var lastNodeToProject = node.data.tail;
+        var renderParent = currentParent.tNode.type === 2 /* View */ ?
+            getParentLNode(currentParent).data[RENDER_PARENT] :
+            currentParent;
         while (nodeToProject) {
-            appendProjectedNode(nodeToProject, currentParent, viewData);
+            appendProjectedNode(nodeToProject, currentParent, viewData, renderParent);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
@@ -11618,7 +11587,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+13.sha-3db9d57');
+var VERSION = new Version('6.1.0-beta.3+14.sha-99bdd25');
 
 /**
  * @license
