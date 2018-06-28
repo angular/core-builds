@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+54.sha-39c8bae
+ * @license Angular v6.1.0-beta.3+16.sha-13d60ea
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -148,6 +148,39 @@ function async(fn) {
     // TODO @JiaLiPassion, remove this after all library updated to
     // newest version of zone.js(0.8.25)
     return asyncFallback(fn);
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Converts an `async` function, with `await`, into a function which is compatible with Jasmine test
+ * framework.
+ *
+ * For asynchronous function blocks, Jasmine expects `it` (and friends) to take a function which
+ * takes a `done` callback. (Jasmine does not understand functions which return `Promise`.) The
+ * `jasmineAwait()` wrapper converts the test function returning `Promise` into a function which
+ * Jasmine understands.
+ *
+ *
+ * Example:
+ * ```
+ * it('...', jasmineAwait(async() => {
+ *   doSomething();
+ *   await asyncFn();
+ *   doSomethingAfter();
+ * }));
+ * ```
+ *
+ */
+function jasmineAwait(fn) {
+    return function (done) {
+        fn().then(done, done.fail);
+    };
 }
 
 /**
@@ -1463,5 +1496,5 @@ if (typeof afterEach == 'function')
  * Generated bundle index. Do not edit.
  */
 
-export { async, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument, ɵ0 };
+export { async, jasmineAwait, ComponentFixture, resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule, __core_private_testing_placeholder__, TestingCompiler as ɵTestingCompiler, TestingCompilerFactory as ɵTestingCompilerFactory, withBody, ensureDocument, cleanupDocument, ɵ0 };
 //# sourceMappingURL=testing.js.map

@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+54.sha-39c8bae
+ * @license Angular v6.1.0-beta.3+16.sha-13d60ea
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1701,7 +1701,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+54.sha-39c8bae');
+var VERSION = new Version('6.1.0-beta.3+16.sha-13d60ea');
 
 /**
  * @license
@@ -6800,6 +6800,91 @@ var ApplicationModule = /** @class */ (function () {
     ]; };
     return ApplicationModule;
 }());
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * @Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
+ * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ */
+function resolveComponentResources(resourceResolver) {
+    // Store all promises which are fetching the resources.
+    var urlFetches = [];
+    // Cache so that we don't fetch the same resource more than once.
+    var urlMap = new Map();
+    function cachedResourceResolve(url) {
+        var promise = urlMap.get(url);
+        if (!promise) {
+            var resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach(function (component) {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then(function (template) {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        var styleUrls = component.styleUrls;
+        var styles = component.styles || (component.styles = []);
+        var styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach(function (styleUrl, index) {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then(function (style) {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    componentResourceResolutionQueue.clear();
+    return Promise.all(urlFetches).then(function () { return null; });
+}
+var componentResourceResolutionQueue = new Set();
+
+
+
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
+}
 
 /**
  * @license
@@ -12439,23 +12524,23 @@ function removeChild(parent, child, currentView) {
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-function appendProjectedNode(node, currentParent, currentView) {
+function appendProjectedNode(node, currentParent, currentView, renderParent) {
     appendChild(currentParent, node.native, currentView);
     if (node.tNode.type === 0 /* Container */) {
-        // The node we are adding is a Container and we are adding it to Element which
+        // The node we are adding is a container and we are adding it to an element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
-        // Assignee the final projection location in those cases.
+        // Assign the final projection location in those cases.
         var lContainer = node.data;
-        lContainer[RENDER_PARENT] = currentParent;
+        lContainer[RENDER_PARENT] = renderParent;
         var views = lContainer[VIEWS];
         for (var i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(node, views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data[RENDER_PARENT] = currentParent;
+        node.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
         appendChild(currentParent, node.dynamicLContainerNode.native, currentView);
     }
 }
@@ -14158,43 +14243,9 @@ function embeddedViewEnd() {
     refreshView();
     isParent = false;
     previousOrParentNode = viewData[HOST_NODE];
-    if (creationMode) {
-        var containerNode = getParentLNode(previousOrParentNode);
-        if (containerNode) {
-            ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-            ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-            // When projected nodes are going to be inserted, the renderParent of the dynamic container
-            // used by the ViewContainerRef must be set.
-            setRenderParentInProjectedNodes(containerNode.data[RENDER_PARENT], previousOrParentNode);
-        }
-    }
     leaveView(viewData[PARENT]);
     ngDevMode && assertEqual(isParent, false, 'isParent');
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-}
-/**
- * For nodes which are projected inside an embedded view, this function sets the renderParent
- * of their dynamic LContainerNode.
- * @param renderParent the renderParent of the LContainer which contains the embedded view.
- * @param viewNode the embedded view.
- */
-function setRenderParentInProjectedNodes(renderParent, viewNode) {
-    if (renderParent != null) {
-        var node = getChildLNode(viewNode);
-        while (node) {
-            if (node.tNode.type === 1 /* Projection */) {
-                var nodeToProject = node.data.head;
-                var lastNodeToProject = node.data.tail;
-                while (nodeToProject) {
-                    if (nodeToProject.dynamicLContainerNode) {
-                        nodeToProject.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
-                    }
-                    nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
-                }
-            }
-            node = getNextLNode(node);
-        }
-    }
 }
 /////////////
 /**
@@ -14263,7 +14314,7 @@ function projectionDef(index, selectors, textSelectors) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
         // - a node has a tag name / attributes that can be matched
-        if (selectors && componentChild.tNode) {
+        if (selectors) {
             var matchedIdx = matchingSelectorIndex(componentChild.tNode, selectors, textSelectors);
             distributedNodes[matchedIdx].push(componentChild);
         }
@@ -14342,8 +14393,11 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
         // process each node in the list of projected nodes:
         var nodeToProject = node.data.head;
         var lastNodeToProject = node.data.tail;
+        var renderParent = currentParent.tNode.type === 2 /* View */ ?
+            getParentLNode(currentParent).data[RENDER_PARENT] :
+            currentParent;
         while (nodeToProject) {
-            appendProjectedNode(nodeToProject, currentParent, viewData);
+            appendProjectedNode(nodeToProject, currentParent, viewData, renderParent);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
@@ -17707,6 +17761,7 @@ exports.ɵAPP_ROOT = APP_ROOT;
 exports.ɵivyEnabled = ivyEnabled;
 exports.ɵComponentFactory = ComponentFactory;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
+exports.ɵresolveComponentResources = resolveComponentResources;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
 exports.ɵRenderDebugInfo = RenderDebugInfo;
 exports.ɵ_sanitizeHtml = _sanitizeHtml;
