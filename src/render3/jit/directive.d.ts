@@ -6,10 +6,10 @@ import { Type } from '../../type';
  *
  * Compilation may be asynchronous (due to the need to resolve URLs for the component template or
  * other resources, for example). In the event that compilation is not immediate, `compileComponent`
- * will return a `Promise` which will resolve when compilation completes and the component becomes
- * usable.
+ * will enqueue resource resolution into a global queue and will fail to return the `ngComponentDef`
+ * until the global queue has been resolved with a call to `resolveComponentResources`.
  */
-export declare function compileComponent(type: Type<any>, metadata: Component): Promise<void> | null;
+export declare function compileComponent(type: Type<any>, metadata: Component): void;
 /**
  * Compile an Angular directive according to its decorator metadata, and patch the resulting
  * ngDirectiveDef onto the component type.
@@ -17,16 +17,4 @@ export declare function compileComponent(type: Type<any>, metadata: Component): 
  * In the event that compilation is not immediate, `compileDirective` will return a `Promise` which
  * will resolve when compilation completes and the directive becomes usable.
  */
-export declare function compileDirective(type: Type<any>, directive: Directive): Promise<void> | null;
-/**
- * A wrapper around `compileComponent` which is intended to be used for the `@Component` decorator.
- *
- * This wrapper keeps track of the `Promise` returned by `compileComponent` and will cause
- * `awaitCurrentlyCompilingComponents` to wait on the compilation to be finished.
- */
-export declare function compileComponentDecorator(type: Type<any>, metadata: Component): void;
-/**
- * Returns a promise which will await the compilation of any `@Component`s which have been defined
- * since the last time `awaitCurrentlyCompilingComponents` was called.
- */
-export declare function awaitCurrentlyCompilingComponents(): Promise<void>;
+export declare function compileDirective(type: Type<any>, directive: Directive): void;

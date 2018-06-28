@@ -11,6 +11,7 @@
  * Entry point for all public APIs of the core/testing package.
  */
 export * from './async';
+export * from './jasmine_await';
 export * from './component_fixture';
 export * from './fake_async';
 export * from './test_bed';
