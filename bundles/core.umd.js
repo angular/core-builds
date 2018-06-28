@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.2+54.sha-39c8bae
+ * @license Angular v6.1.0-beta.3+16.sha-13d60ea
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -46,20 +46,11 @@ var __assign = Object.assign || function __assign(t) {
 
 
 
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
 
-function __param(paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-}
 
-function __metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-}
+
+
+
 
 
 
@@ -509,6 +500,97 @@ var ViewChild = makePropDecorator('ViewChild', function (selector, data) {
 function isDefaultChangeDetectionStrategy(changeDetectionStrategy) {
     return changeDetectionStrategy == null ||
         changeDetectionStrategy === exports.ChangeDetectionStrategy.Default;
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Used to resolve resource URLs on `@Component` when used with JIT compilation.
+ *
+ * Example:
+ * ```
+ * @Component({
+ *   selector: 'my-comp',
+ *   templateUrl: 'my-comp.html', // This requires asynchronous resolution
+ * })
+ * class MyComponnent{
+ * }
+ *
+ * // Calling `renderComponent` will fail because `MyComponent`'s `@Compenent.templateUrl`
+ * // needs to be resolved because `renderComponent` is synchronous process.
+ * // renderComponent(MyComponent);
+ *
+ * // Calling `resolveComponentResources` will resolve `@Compenent.templateUrl` into
+ * // `@Compenent.template`, which would allow `renderComponent` to proceed in synchronous manner.
+ * // Use browser's `fetch` function as the default resource resolution strategy.
+ * resolveComponentResources(fetch).then(() => {
+ *   // After resolution all URLs have been converted into strings.
+ *   renderComponent(MyComponent);
+ * });
+ *
+ * ```
+ *
+ * NOTE: In AOT the resolution happens during compilation, and so there should be no need
+ * to call this method outside JIT mode.
+ *
+ * @param resourceResolver a function which is responsible to returning a `Promise` of the resolved
+ * URL. Browser's `fetch` method is a good default implementation.
+ */
+function resolveComponentResources(resourceResolver) {
+    // Store all promises which are fetching the resources.
+    var urlFetches = [];
+    // Cache so that we don't fetch the same resource more than once.
+    var urlMap = new Map();
+    function cachedResourceResolve(url) {
+        var promise = urlMap.get(url);
+        if (!promise) {
+            var resp = resourceResolver(url);
+            urlMap.set(url, promise = resp.then(unwrapResponse));
+            urlFetches.push(promise);
+        }
+        return promise;
+    }
+    componentResourceResolutionQueue.forEach(function (component) {
+        if (component.templateUrl) {
+            cachedResourceResolve(component.templateUrl).then(function (template) {
+                component.template = template;
+                component.templateUrl = undefined;
+            });
+        }
+        var styleUrls = component.styleUrls;
+        var styles = component.styles || (component.styles = []);
+        var styleOffset = component.styles.length;
+        styleUrls && styleUrls.forEach(function (styleUrl, index) {
+            styles.push(''); // pre-allocate array.
+            cachedResourceResolve(styleUrl).then(function (style) {
+                styles[styleOffset + index] = style;
+                styleUrls.splice(styleUrls.indexOf(styleUrl), 1);
+                if (styleUrls.length == 0) {
+                    component.styleUrls = undefined;
+                }
+            });
+        });
+    });
+    componentResourceResolutionQueue.clear();
+    return Promise.all(urlFetches).then(function () { return null; });
+}
+var componentResourceResolutionQueue = new Set();
+function maybeQueueResolutionOfComponentResources(metadata) {
+    if (componentNeedsResolution(metadata)) {
+        componentResourceResolutionQueue.add(metadata);
+    }
+}
+function componentNeedsResolution(component) {
+    return component.templateUrl || component.styleUrls && component.styleUrls.length;
+}
+
+function unwrapResponse(response) {
+    return typeof response == 'string' ? response : response.text();
 }
 
 /**
@@ -2019,23 +2101,23 @@ function removeChild(parent, child, currentView) {
  * @param currentParent The last parent element to be processed
  * @param currentView Current LView
  */
-function appendProjectedNode(node, currentParent, currentView) {
+function appendProjectedNode(node, currentParent, currentView, renderParent) {
     appendChild(currentParent, node.native, currentView);
     if (node.tNode.type === 0 /* Container */) {
-        // The node we are adding is a Container and we are adding it to Element which
+        // The node we are adding is a container and we are adding it to an element which
         // is not a component (no more re-projection).
         // Alternatively a container is projected at the root of a component's template
         // and can't be re-projected (as not content of any component).
-        // Assignee the final projection location in those cases.
+        // Assign the final projection location in those cases.
         var lContainer = node.data;
-        lContainer[RENDER_PARENT] = currentParent;
+        lContainer[RENDER_PARENT] = renderParent;
         var views = lContainer[VIEWS];
         for (var i = 0; i < views.length; i++) {
             addRemoveViewFromContainer(node, views[i], true, null);
         }
     }
     if (node.dynamicLContainerNode) {
-        node.dynamicLContainerNode.data[RENDER_PARENT] = currentParent;
+        node.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
         appendChild(currentParent, node.dynamicLContainerNode.native, currentView);
     }
 }
@@ -3738,43 +3820,9 @@ function embeddedViewEnd() {
     refreshView();
     isParent = false;
     previousOrParentNode = viewData[HOST_NODE];
-    if (creationMode) {
-        var containerNode = getParentLNode(previousOrParentNode);
-        if (containerNode) {
-            ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-            ngDevMode && assertNodeType(containerNode, 0 /* Container */);
-            // When projected nodes are going to be inserted, the renderParent of the dynamic container
-            // used by the ViewContainerRef must be set.
-            setRenderParentInProjectedNodes(containerNode.data[RENDER_PARENT], previousOrParentNode);
-        }
-    }
     leaveView(viewData[PARENT]);
     ngDevMode && assertEqual(isParent, false, 'isParent');
     ngDevMode && assertNodeType(previousOrParentNode, 2 /* View */);
-}
-/**
- * For nodes which are projected inside an embedded view, this function sets the renderParent
- * of their dynamic LContainerNode.
- * @param renderParent the renderParent of the LContainer which contains the embedded view.
- * @param viewNode the embedded view.
- */
-function setRenderParentInProjectedNodes(renderParent, viewNode) {
-    if (renderParent != null) {
-        var node = getChildLNode(viewNode);
-        while (node) {
-            if (node.tNode.type === 1 /* Projection */) {
-                var nodeToProject = node.data.head;
-                var lastNodeToProject = node.data.tail;
-                while (nodeToProject) {
-                    if (nodeToProject.dynamicLContainerNode) {
-                        nodeToProject.dynamicLContainerNode.data[RENDER_PARENT] = renderParent;
-                    }
-                    nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
-                }
-            }
-            node = getNextLNode(node);
-        }
-    }
 }
 /////////////
 /**
@@ -3843,7 +3891,7 @@ function projectionDef(index, selectors, textSelectors) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
         // - a node has a tag name / attributes that can be matched
-        if (selectors && componentChild.tNode) {
+        if (selectors) {
             var matchedIdx = matchingSelectorIndex(componentChild.tNode, selectors, textSelectors);
             distributedNodes[matchedIdx].push(componentChild);
         }
@@ -3922,8 +3970,11 @@ function projection(nodeIndex, localIndex, selectorIndex, attrs) {
         // process each node in the list of projected nodes:
         var nodeToProject = node.data.head;
         var lastNodeToProject = node.data.tail;
+        var renderParent = currentParent.tNode.type === 2 /* View */ ?
+            getParentLNode(currentParent).data[RENDER_PARENT] :
+            currentParent;
         while (nodeToProject) {
-            appendProjectedNode(nodeToProject, currentParent, viewData);
+            appendProjectedNode(nodeToProject, currentParent, viewData, renderParent);
             nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
         }
     }
@@ -11099,35 +11150,42 @@ function isNgModule(value) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var _pendingPromises = [];
 /**
  * Compile an Angular component according to its decorator metadata, and patch the resulting
  * ngComponentDef onto the component type.
  *
  * Compilation may be asynchronous (due to the need to resolve URLs for the component template or
  * other resources, for example). In the event that compilation is not immediate, `compileComponent`
- * will return a `Promise` which will resolve when compilation completes and the component becomes
- * usable.
+ * will enqueue resource resolution into a global queue and will fail to return the `ngComponentDef`
+ * until the global queue has been resolved with a call to `resolveComponentResources`.
  */
 function compileComponent(type, metadata) {
-    // TODO(alxhub): implement ResourceLoader support for template compilation.
-    if (!metadata.template) {
-        throw new Error('templateUrl not yet supported');
-    }
-    var templateStr = metadata.template;
     var def = null;
+    // Metadata may have resources which need to be resolved.
+    maybeQueueResolutionOfComponentResources(metadata);
     Object.defineProperty(type, NG_COMPONENT_DEF, {
         get: function () {
             if (def === null) {
+                if (componentNeedsResolution(metadata)) {
+                    var error = ["Component '" + stringify(type) + "' is not resolved:"];
+                    if (metadata.templateUrl) {
+                        error.push(" - templateUrl: " + stringify(metadata.templateUrl));
+                    }
+                    if (metadata.styleUrls && metadata.styleUrls.length) {
+                        error.push(" - styleUrls: " + JSON.stringify(metadata.styleUrls));
+                    }
+                    error.push("Did you run and wait for 'resolveComponentResources()'?");
+                    throw new Error(error.join('\n'));
+                }
                 // The ConstantPool is a requirement of the JIT'er.
                 var constantPool = new compiler.ConstantPool();
                 // Parse the template and check for errors.
-                var template = compiler.parseTemplate(templateStr, "ng://" + type.name + "/template.html", {
+                var template = compiler.parseTemplate(metadata.template, "ng://" + stringify(type) + "/template.html", {
                     preserveWhitespaces: metadata.preserveWhitespaces || false,
                 });
                 if (template.errors !== undefined) {
                     var errors = template.errors.map(function (err) { return err.toString(); }).join(', ');
-                    throw new Error("Errors during JIT compilation of template for " + type.name + ": " + errors);
+                    throw new Error("Errors during JIT compilation of template for " + stringify(type) + ": " + errors);
                 }
                 // Compile the component metadata, including template, into an expression.
                 // TODO(alxhub): implement inputs, outputs, queries, etc.
@@ -11144,7 +11202,6 @@ function compileComponent(type, metadata) {
             return def;
         },
     });
-    return null;
 }
 function hasSelectorScope(component) {
     return component.ngSelectorScope !== undefined;
@@ -11169,25 +11226,7 @@ function compileDirective(type, directive) {
             return def;
         },
     });
-    return null;
 }
-/**
- * A wrapper around `compileComponent` which is intended to be used for the `@Component` decorator.
- *
- * This wrapper keeps track of the `Promise` returned by `compileComponent` and will cause
- * `awaitCurrentlyCompilingComponents` to wait on the compilation to be finished.
- */
-function compileComponentDecorator(type, metadata) {
-    var res = compileComponent(type, metadata);
-    if (res !== null) {
-        _pendingPromises.push(res);
-    }
-}
-/**
- * Returns a promise which will await the compilation of any `@Component`s which have been defined
- * since the last time `awaitCurrentlyCompilingComponents` was called.
- */
-
 /**
  * Extract the `R3DirectiveMetadata` for a particular directive (either a `Directive` or a
  * `Component`).
@@ -11382,7 +11421,7 @@ function isUseExistingProvider(meta) {
  * found in the LICENSE file at https://angular.io/license
  */
 var ivyEnabled = true;
-var R3_COMPILE_COMPONENT = compileComponentDecorator;
+var R3_COMPILE_COMPONENT = compileComponent;
 var R3_COMPILE_DIRECTIVE = compileDirective;
 var R3_COMPILE_INJECTABLE = compileInjectable$1;
 var R3_COMPILE_NGMODULE = compileNgModule$1;
@@ -11631,7 +11670,31 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.2+54.sha-39c8bae');
+var VERSION = new Version('6.1.0-beta.3+16.sha-13d60ea');
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/*
+ * This file exists to support compilation of @angular/core in Ivy mode.
+ *
+ * When the Angular compiler processes a compilation unit, it normally writes imports to
+ * @angular/core. When compiling the core package itself this strategy isn't usable. Instead, the
+ * compiler writes imports to this file.
+ *
+ * Only a subset of such imports are supported - core is not allowed to declare components or pipes.
+ * A check in ngtsc's translator.ts validates this condition.
+ *
+ * The below symbols are used for @Injectable and @NgModule compilation.
+ */
+/**
+ * The existence of this constant (in this particular file) informs the Angular compiler that the
+ * current program is actually @angular/core, which needs to be compiled specially.
+ */
 
 /**
  * @license
@@ -11709,11 +11772,7 @@ var ApplicationInitStatus = /** @class */ (function () {
         }
         this.initialized = true;
     };
-    ApplicationInitStatus = __decorate([
-        Injectable(),
-        __param(0, Inject(APP_INITIALIZER)), __param(0, Optional()),
-        __metadata("design:paramtypes", [Array])
-    ], ApplicationInitStatus);
+    ApplicationInitStatus.ngInjectableDef = defineInjectable({ token: ApplicationInitStatus, factory: function ApplicationInitStatus_Factory() { return new ApplicationInitStatus(inject(APP_INITIALIZER, 8)); }, providedIn: null });
     return ApplicationInitStatus;
 }());
 
@@ -11794,9 +11853,7 @@ var Console = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         console.warn(message);
     };
-    Console = __decorate([
-        Injectable()
-    ], Console);
+    Console.ngInjectableDef = defineInjectable({ token: Console, factory: function Console_Factory() { return new Console(); }, providedIn: null });
     return Console;
 }());
 
@@ -11868,9 +11925,7 @@ var Compiler = /** @class */ (function () {
      * Returns the id for a given NgModule, if one is defined and known to the compiler.
      */
     Compiler.prototype.getModuleId = function (moduleType) { return undefined; };
-    Compiler = __decorate([
-        Injectable()
-    ], Compiler);
+    Compiler.ngInjectableDef = defineInjectable({ token: Compiler, factory: function Compiler_Factory() { return new Compiler(); }, providedIn: null });
     return Compiler;
 }());
 /**
@@ -12467,10 +12522,7 @@ var Testability = /** @class */ (function () {
         // TODO(juliemr): implement.
         return [];
     };
-    Testability = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [NgZone])
-    ], Testability);
+    Testability.ngInjectableDef = defineInjectable({ token: Testability, factory: function Testability_Factory() { return new Testability(inject(NgZone)); }, providedIn: null });
     return Testability;
 }());
 /**
@@ -12523,10 +12575,7 @@ var TestabilityRegistry = /** @class */ (function () {
         if (findInAncestors === void 0) { findInAncestors = true; }
         return _testabilityGetter.findTestabilityInTree(this, elem, findInAncestors);
     };
-    TestabilityRegistry = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [])
-    ], TestabilityRegistry);
+    TestabilityRegistry.ngInjectableDef = defineInjectable({ token: TestabilityRegistry, factory: function TestabilityRegistry_Factory() { return new TestabilityRegistry(); }, providedIn: null });
     return TestabilityRegistry;
 }());
 var _NoopGetTestability = /** @class */ (function () {
@@ -12810,10 +12859,7 @@ var PlatformRef = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
-    PlatformRef = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [Injector])
-    ], PlatformRef);
+    PlatformRef.ngInjectableDef = defineInjectable({ token: PlatformRef, factory: function PlatformRef_Factory() { return new PlatformRef(inject(Injector)); }, providedIn: null });
     return PlatformRef;
 }());
 function getNgZone(ngZoneOption) {
@@ -12924,7 +12970,6 @@ var ApplicationRef = /** @class */ (function () {
         this.isStable =
             rxjs.merge(isCurrentlyStable, isStable.pipe(operators.share()));
     }
-    ApplicationRef_1 = ApplicationRef;
     /**
      * Bootstrap a new component at the root level of the application.
      *
@@ -12988,7 +13033,7 @@ var ApplicationRef = /** @class */ (function () {
         if (this._runningTick) {
             throw new Error('ApplicationRef.tick is called recursively');
         }
-        var scope = ApplicationRef_1._tickScope();
+        var scope = ApplicationRef._tickScope();
         try {
             this._runningTick = true;
             this._views.forEach(function (view) { return view.detectChanges(); });
@@ -13050,15 +13095,8 @@ var ApplicationRef = /** @class */ (function () {
     });
     /** @internal */
     ApplicationRef._tickScope = wtfCreateScope('ApplicationRef#tick()');
-    ApplicationRef = ApplicationRef_1 = __decorate([
-        Injectable(),
-        __metadata("design:paramtypes", [NgZone, Console, Injector,
-            ErrorHandler,
-            ComponentFactoryResolver$1,
-            ApplicationInitStatus])
-    ], ApplicationRef);
+    ApplicationRef.ngInjectableDef = defineInjectable({ token: ApplicationRef, factory: function ApplicationRef_Factory() { return new ApplicationRef(inject(NgZone), inject(Console), inject(Injector), inject(ErrorHandler), inject(ComponentFactoryResolver$1), inject(ApplicationInitStatus)); }, providedIn: null });
     return ApplicationRef;
-    var ApplicationRef_1;
 }());
 function remove(list, el) {
     var index = list.indexOf(el);
@@ -13289,11 +13327,7 @@ var SystemJsNgModuleLoader = /** @class */ (function () {
             .then(function (module) { return module[exportName + factoryClassSuffix]; })
             .then(function (factory) { return checkNotEmpty(factory, module, exportName); });
     };
-    SystemJsNgModuleLoader = __decorate([
-        Injectable(),
-        __param(1, Optional()),
-        __metadata("design:paramtypes", [Compiler, SystemJsNgModuleLoaderConfig])
-    ], SystemJsNgModuleLoader);
+    SystemJsNgModuleLoader.ngInjectableDef = defineInjectable({ token: SystemJsNgModuleLoader, factory: function SystemJsNgModuleLoader_Factory() { return new SystemJsNgModuleLoader(inject(Compiler), inject(SystemJsNgModuleLoaderConfig, 8)); }, providedIn: null });
     return SystemJsNgModuleLoader;
 }());
 function checkNotEmpty(value, modulePath, exportName) {
@@ -13764,10 +13798,8 @@ var ApplicationModule = /** @class */ (function () {
     // Inject ApplicationRef to make it eager...
     function ApplicationModule(appRef) {
     }
-    ApplicationModule = __decorate([
-        NgModule({ providers: APPLICATION_MODULE_PROVIDERS }),
-        __metadata("design:paramtypes", [ApplicationRef])
-    ], ApplicationModule);
+    ApplicationModule.ngModuleDef = defineNgModule({ type: ApplicationModule, bootstrap: [], declarations: [], imports: [], exports: [] });
+    ApplicationModule.ngInjectorDef = defineInjector({ factory: function ApplicationModule_Factory() { return new ApplicationModule(inject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS, imports: [] });
     return ApplicationModule;
 }());
 
@@ -18313,6 +18345,7 @@ exports.ɵAPP_ROOT = APP_ROOT;
 exports.ɵivyEnabled = ivyEnabled;
 exports.ɵComponentFactory = ComponentFactory$1;
 exports.ɵCodegenComponentFactoryResolver = CodegenComponentFactoryResolver;
+exports.ɵresolveComponentResources = resolveComponentResources;
 exports.ɵReflectionCapabilities = ReflectionCapabilities;
 exports.ɵRenderDebugInfo = RenderDebugInfo;
 exports.ɵ_sanitizeHtml = _sanitizeHtml;
