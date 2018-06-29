@@ -96,6 +96,10 @@ export declare function createLNode(index: number, type: TNodeType.View, native:
 export declare function createLNode(index: number, type: TNodeType.Container, native: RComment, name: string | null, attrs: TAttributes | null, lContainer: LContainer): LContainerNode;
 export declare function createLNode(index: number, type: TNodeType.Projection, native: null, name: null, attrs: TAttributes | null, lProjection: LProjection): LProjectionNode;
 /**
+ * Resets the application state.
+ */
+export declare function resetApplicationState(): void;
+/**
  *
  * @param hostNode Existing node to render into.
  * @param template Template function with the instructions.

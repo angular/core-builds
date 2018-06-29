@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+19.sha-ff84c5c
+ * @license Angular v6.1.0-beta.3+20.sha-d243baf
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1504,9 +1504,6 @@ function getNextLNode(node) {
 }
 /** Retrieves the first child of a given node */
 function getChildLNode(node) {
-    if (node.pChild) {
-        return node.pChild;
-    }
     if (node.tNode.child) {
         var viewData = node.tNode.type === 2 /* View */ ? node.data : node.view;
         return viewData[node.tNode.child.index];
@@ -2469,8 +2466,7 @@ function createLNodeObject(type, currentView, parent, native, state, queries) {
         queries: queries,
         tNode: null,
         pNextOrParent: null,
-        dynamicLContainerNode: null,
-        pChild: null,
+        dynamicLContainerNode: null
     };
 }
 function createLNode(index, type, native, name, attrs, state) {
@@ -3793,17 +3789,7 @@ function projectionDef(index, selectors, textSelectors) {
         distributedNodes[i] = [];
     }
     var componentNode = findComponentHost(viewData);
-    var isProjectingI18nNodes = false;
-    var componentChild;
-    // for i18n translations we use pChild to point to the next child
-    // TODO(kara): Remove when removing LNodes
-    if (componentNode.pChild) {
-        isProjectingI18nNodes = true;
-        componentChild = componentNode.pChild;
-    }
-    else {
-        componentChild = getChildLNode(componentNode);
-    }
+    var componentChild = getChildLNode(componentNode);
     while (componentChild !== null) {
         // execute selector matching logic if and only if:
         // - there are selectors defined
@@ -3815,12 +3801,7 @@ function projectionDef(index, selectors, textSelectors) {
         else {
             distributedNodes[0].push(componentChild);
         }
-        if (isProjectingI18nNodes) {
-            componentChild = componentChild.pNextOrParent;
-        }
-        else {
-            componentChild = getNextLNode(componentChild);
-        }
+        componentChild = getNextLNode(componentChild);
     }
     ngDevMode && assertDataNext(index + HEADER_OFFSET);
     store(index, distributedNodes);
@@ -9715,11 +9696,17 @@ function appendI18nNode(node, parentNode, previousNode) {
     }
     var viewData = getViewData();
     appendChild(parentNode, node.native || null, viewData);
-    if (previousNode === parentNode && parentNode.pChild === null) {
-        parentNode.pChild = node;
-    }
-    else {
-        previousNode.pNextOrParent = node;
+    // On first pass, re-organize node tree to put this node in the correct position.
+    if (node.view[TVIEW].firstTemplatePass) {
+        node.tNode.next = null;
+        if (previousNode === parentNode && node.tNode !== parentNode.tNode.child) {
+            node.tNode.next = parentNode.tNode.child;
+            parentNode.tNode.child = node.tNode;
+        }
+        else if (previousNode !== parentNode && node.tNode !== previousNode.tNode.next) {
+            node.tNode.next = previousNode.tNode.next;
+            previousNode.tNode.next = node.tNode;
+        }
     }
     // Template containers also have a comment node for the `ViewContainerRef` that should be moved
     if (node.tNode.type === 0 /* Container */ && node.dynamicLContainerNode) {
@@ -9749,6 +9736,7 @@ function i18nApply(startIndex, instructions) {
     var renderer = getRenderer();
     var localParentNode = getParentLNode(load(startIndex)) || getPreviousOrParentNode();
     var localPreviousNode = localParentNode;
+    resetApplicationState(); // We don't want to add to the tree with the wrong previous node
     for (var i = 0; i < instructions.length; i++) {
         var instruction = instructions[i];
         switch (instruction & -536870912 /* InstructionMask */) {
@@ -9768,10 +9756,11 @@ function i18nApply(startIndex, instructions) {
                 var value = instructions[++i];
                 var textRNode = createTextNode(value, renderer);
                 // If we were to only create a `RNode` then projections won't move the text.
-                // But since this text doesn't have an index in `LViewData`, we need to create an
-                // `LElementNode` with the index -1 so that it isn't saved in `LViewData`
-                var textLNode = createLNode(-1, 3 /* Element */, textRNode, null, null);
+                // Create text node at the current end of viewData. Must subtract header offset because
+                // createLNode takes a raw index (not adjusted by header offset).
+                var textLNode = createLNode(viewData.length - HEADER_OFFSET, 3 /* Element */, textRNode, null, null);
                 localPreviousNode = appendI18nNode(textLNode, localParentNode, localPreviousNode);
+                resetApplicationState();
                 break;
             case -2147483648 /* CloseNode */:
                 localPreviousNode = localParentNode;
@@ -11805,7 +11794,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+19.sha-ff84c5c');
+var VERSION = new Version('6.1.0-beta.3+20.sha-d243baf');
 
 /**
  * @license
