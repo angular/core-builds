@@ -43,15 +43,48 @@ export declare function defineComponent<T>(componentDefinition: {
     /**
      * A map of input names.
      *
-     * The format is in: `{[actualPropertyName: string]:string}`.
+     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
      *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
+     * Given:
+     * ```
+     * class MyComponent {
+     *   @Input()
+     *   publicInput1: string;
      *
-     * This allows the render to re-construct the minified and non-minified names
+     *   @Input('publicInput2')
+     *   declaredInput2: string;
+     * }
+     * ```
+     *
+     * is described as:
+     * ```
+     * {
+     *   publicInput1: 'publicInput1',
+     *   declaredInput2: ['declaredInput2', 'publicInput2'],
+     * }
+     * ```
+     *
+     * Which the minifier may translate to:
+     * ```
+     * {
+     *   minifiedPublicInput1: 'publicInput1',
+     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
+     * }
+     * ```
+     *
+     * This allows the render to re-construct the minified, public, and declared names
      * of properties.
+     *
+     * NOTE:
+     *  - Because declared and public name are usually same we only generate the array
+     *    `['declared', 'public']` format when they differ.
+     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
+     *    inconsistent behavior in that it uses declared names rather than minified or public. For
+     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
+     *    API will be simplified to be consistent with `output`.
      */
     inputs?: {
-        [P in keyof T]?: string;
+        [P in keyof T]?: string | [string, string];
     };
     /**
      * A map of output names.
@@ -153,33 +186,6 @@ export declare function defineNgModule<T>(def: {
     type: T;
 } & Partial<NgModuleDef<T, any, any, any>>): never;
 /**
- * Creates an NgOnChangesFeature function for a component's features list.
- *
- * It accepts an optional map of minified input property names to original property names,
- * if any input properties have a public alias.
- *
- * The NgOnChangesFeature function that is returned decorates a component with support for
- * the ngOnChanges lifecycle hook, so it should be included in any component that implements
- * that hook.
- *
- * Example usage:
- *
- * ```
- * static ngComponentDef = defineComponent({
- *   ...
- *   inputs: {name: 'publicName'},
- *   features: [NgOnChangesFeature({name: 'name'})]
- * });
- * ```
- *
- * @param inputPropertyNames Map of input property names, if they are aliased
- * @returns DirectiveDefFeature
- */
-export declare function NgOnChangesFeature(inputPropertyNames?: {
-    [key: string]: string;
-}): DirectiveDefFeature;
-export declare function PublicFeature<T>(definition: DirectiveDefInternal<T>): void;
-/**
  * Create a directive definition object.
  *
  * # Example
@@ -200,7 +206,7 @@ export declare const defineDirective: <T>(directiveDefinition: {
         0: T;
     } & any[]);
     attributes?: string[] | undefined;
-    inputs?: { [P in keyof T]?: string | undefined; } | undefined;
+    inputs?: { [P in keyof T]?: string | [string, string] | undefined; } | undefined;
     outputs?: { [P in keyof T]?: string | undefined; } | undefined;
     features?: DirectiveDefFeature[] | undefined;
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
