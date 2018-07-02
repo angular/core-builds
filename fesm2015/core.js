@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+24.sha-3553977
+ * @license Angular v6.1.0-beta.3+26.sha-948e223
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2166,7 +2166,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.3+24.sha-3553977');
+const VERSION = new Version('6.1.0-beta.3+26.sha-948e223');
 
 /**
  * @fileoverview added by tsickle
@@ -16538,7 +16538,7 @@ function appendProjectedNode(node, currentParent, currentView, renderParent) {
         lContainer[RENDER_PARENT] = renderParent;
         const /** @type {?} */ views = lContainer[VIEWS];
         for (let /** @type {?} */ i = 0; i < views.length; i++) {
-            addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, null);
+            addRemoveViewFromContainer(/** @type {?} */ (node), views[i], true, node.native);
         }
     }
     if (node.dynamicLContainerNode) {
@@ -18582,7 +18582,7 @@ function projectionDef(index, selectors, textSelectors) {
  * @param {?} appendedLast Last node of the linked list to append.
  * @return {?}
  */
-function appendToProjectionNode(projectionNode, appendedFirst, appendedLast) {
+function addToProjectionList(projectionNode, appendedFirst, appendedLast) {
     ngDevMode && assertEqual(!!appendedFirst, !!appendedLast, 'appendedFirst can be null if and only if appendedLast is also null');
     if (!appendedLast) {
         // nothing to append
@@ -18617,30 +18617,26 @@ function projection(nodeIndex, localIndex, selectorIndex = 0, attrs) {
     const /** @type {?} */ componentLView = /** @type {?} */ (componentNode.data);
     const /** @type {?} */ distributedNodes = /** @type {?} */ (loadInternal(localIndex, componentLView));
     const /** @type {?} */ nodesForSelector = distributedNodes[selectorIndex];
-    // build the linked list of projected nodes:
+    const /** @type {?} */ currentParent = getParentLNode(node);
+    const /** @type {?} */ canInsert = canInsertNativeNode(currentParent, viewData);
+    const /** @type {?} */ renderParent = currentParent.tNode.type === 2 /* View */ ? /** @type {?} */
+        (((/** @type {?} */ (getParentLNode(currentParent))).data[RENDER_PARENT])) : /** @type {?} */ (currentParent);
     for (let /** @type {?} */ i = 0; i < nodesForSelector.length; i++) {
         const /** @type {?} */ nodeToProject = nodesForSelector[i];
+        let /** @type {?} */ head = /** @type {?} */ (nodeToProject);
+        let /** @type {?} */ tail = /** @type {?} */ (nodeToProject);
         if (nodeToProject.tNode.type === 1 /* Projection */) {
-            // Reprojecting a projection -> append the list of previously projected nodes
             const /** @type {?} */ previouslyProjected = (/** @type {?} */ (nodeToProject)).data;
-            appendToProjectionNode(node, previouslyProjected.head, previouslyProjected.tail);
+            head = previouslyProjected.head;
+            tail = previouslyProjected.tail;
         }
-        else {
-            // Projecting a single node
-            appendToProjectionNode(node, /** @type {?} */ (nodeToProject), /** @type {?} */ (nodeToProject));
-        }
-    }
-    const /** @type {?} */ currentParent = getParentLNode(node);
-    if (canInsertNativeNode(currentParent, viewData)) {
-        ngDevMode && assertNodeOfPossibleTypes(currentParent, 3 /* Element */, 2 /* View */);
-        // process each node in the list of projected nodes:
-        let /** @type {?} */ nodeToProject = node.data.head;
-        const /** @type {?} */ lastNodeToProject = node.data.tail;
-        const /** @type {?} */ renderParent = currentParent.tNode.type === 2 /* View */ ? /** @type {?} */
-            (((/** @type {?} */ (getParentLNode(currentParent))).data[RENDER_PARENT])) : /** @type {?} */ (currentParent);
-        while (nodeToProject) {
-            appendProjectedNode(/** @type {?} */ (nodeToProject), currentParent, viewData, renderParent);
-            nodeToProject = nodeToProject === lastNodeToProject ? null : nodeToProject.pNextOrParent;
+        addToProjectionList(node, head, tail);
+        if (canInsert) {
+            let /** @type {?} */ currentNode = head;
+            while (currentNode) {
+                appendProjectedNode(/** @type {?} */ (currentNode), currentParent, viewData, renderParent);
+                currentNode = currentNode === tail ? null : currentNode.pNextOrParent;
+            }
         }
     }
 }
@@ -21101,7 +21097,8 @@ function appendI18nNode(node, parentNode, previousNode) {
     const /** @type {?} */ viewData = getViewData();
     appendChild(parentNode, node.native || null, viewData);
     // On first pass, re-organize node tree to put this node in the correct position.
-    if (node.view[TVIEW].firstTemplatePass) {
+    const /** @type {?} */ firstTemplatePass = node.view[TVIEW].firstTemplatePass;
+    if (firstTemplatePass) {
         node.tNode.next = null;
         if (previousNode === parentNode && node.tNode !== parentNode.tNode.child) {
             node.tNode.next = parentNode.tNode.child;
@@ -21117,7 +21114,10 @@ function appendI18nNode(node, parentNode, previousNode) {
         // (node.native as RComment).textContent = 'test';
         // console.log(node.native);
         appendChild(parentNode, node.dynamicLContainerNode.native || null, viewData);
-        node.pNextOrParent = node.dynamicLContainerNode;
+        if (firstTemplatePass) {
+            node.tNode.dynamicContainerNode = node.dynamicLContainerNode.tNode;
+            node.dynamicLContainerNode.tNode.parent = /** @type {?} */ (node.tNode);
+        }
         return node.dynamicLContainerNode;
     }
     return node;
