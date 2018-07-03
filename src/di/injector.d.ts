@@ -88,7 +88,7 @@ export declare const enum InjectFlags {
     /** Skip the node that is requesting injection. */
     SkipSelf = 4,
     /** Inject `defaultValue` instead if token not found. */
-    Optional = 8,
+    Optional = 8
 }
 export declare function setCurrentInjector(injector: Injector | null | undefined): Injector | undefined | null;
 /**
