@@ -154,7 +154,7 @@ export declare const enum LViewFlags {
      */
     RunInit = 16,
     /** Whether or not this view is destroyed. */
-    Destroyed = 32,
+    Destroyed = 32
 }
 /**
  * The static data for an LView (shared between all templates of a
