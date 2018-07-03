@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.7+5.sha-0f1de35
+ * @license Angular v6.0.7+13.sha-dd931c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1552,9 +1552,11 @@ var ViewEncapsulation;
      */
     ViewEncapsulation[ViewEncapsulation["Emulated"] = 0] = "Emulated";
     /**
+     * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
      * Use the native encapsulation mechanism of the renderer.
      *
-     * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * For the DOM this means using the deprecated [Shadow DOM
+     * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
      * creating a ShadowRoot for Component's Host Element.
      */
     ViewEncapsulation[ViewEncapsulation["Native"] = 1] = "Native";
@@ -1562,6 +1564,17 @@ var ViewEncapsulation;
      * Don't provide any template or style encapsulation.
      */
     ViewEncapsulation[ViewEncapsulation["None"] = 2] = "None";
+    /**
+     * Use Shadow DOM to encapsulate styles.
+     *
+     * For the DOM this means using modern [Shadow
+     * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+     * creating a ShadowRoot for Component's Host Element.
+     *
+     * ### Example
+     * {@example core/ts/metadata/encapsulation.ts region='longform'}
+     */
+    ViewEncapsulation[ViewEncapsulation["ShadowDom"] = 3] = "ShadowDom";
 })(ViewEncapsulation || (ViewEncapsulation = {}));
 
 /**
@@ -1593,7 +1606,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.0.7+5.sha-0f1de35');
+var VERSION = new Version('6.0.7+13.sha-dd931c7');
 
 /**
  * @license

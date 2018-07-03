@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.0.7+5.sha-0f1de35
+ * @license Angular v6.0.7+13.sha-dd931c7
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2035,9 +2035,11 @@ const ViewEncapsulation = {
        */
     Emulated: 0,
     /**
+       * @deprecated v6.1.0 - use {ViewEncapsulation.ShadowDom} instead.
        * Use the native encapsulation mechanism of the renderer.
        *
-       * For the DOM this means using [Shadow DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * For the DOM this means using the deprecated [Shadow DOM
+       * v0](https://w3c.github.io/webcomponents/spec/shadow/) and
        * creating a ShadowRoot for Component's Host Element.
        */
     Native: 1,
@@ -2045,10 +2047,22 @@ const ViewEncapsulation = {
        * Don't provide any template or style encapsulation.
        */
     None: 2,
+    /**
+       * Use Shadow DOM to encapsulate styles.
+       *
+       * For the DOM this means using modern [Shadow
+       * DOM](https://w3c.github.io/webcomponents/spec/shadow/) and
+       * creating a ShadowRoot for Component's Host Element.
+       *
+       * ### Example
+       * {@example core/ts/metadata/encapsulation.ts region='longform'}
+       */
+    ShadowDom: 3,
 };
 ViewEncapsulation[ViewEncapsulation.Emulated] = "Emulated";
 ViewEncapsulation[ViewEncapsulation.Native] = "Native";
 ViewEncapsulation[ViewEncapsulation.None] = "None";
+ViewEncapsulation[ViewEncapsulation.ShadowDom] = "ShadowDom";
 
 /**
  * @fileoverview added by tsickle
@@ -2089,7 +2103,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.0.7+5.sha-0f1de35');
+const VERSION = new Version('6.0.7+13.sha-dd931c7');
 
 /**
  * @fileoverview added by tsickle
