@@ -143,7 +143,7 @@ export declare abstract class ReflectiveInjector implements Injector {
      * expect(child.parent).toBe(parent);
      * ```
      */
-    abstract readonly parent: Injector | null;
+    readonly abstract parent: Injector | null;
     /**
      * Resolves an array of providers and creates a child injector from those providers.
      *
@@ -265,12 +265,12 @@ export declare class ReflectiveInjector_ implements ReflectiveInjector {
     resolveAndInstantiate(provider: Provider): any;
     instantiateResolved(provider: ResolvedReflectiveProvider): any;
     getProviderAtIndex(index: number): ResolvedReflectiveProvider;
-    private _getMaxNumberOfObjects;
-    private _instantiateProvider;
-    private _instantiate;
-    private _getByReflectiveDependency;
-    private _getByKey;
-    private _getObjByKeyId;
+    private _getMaxNumberOfObjects();
+    private _instantiateProvider(provider);
+    private _instantiate(provider, ResolvedReflectiveFactory);
+    private _getByReflectiveDependency(dep);
+    private _getByKey(key, visibility, notFoundValue);
+    private _getObjByKeyId(keyId);
     readonly displayName: string;
     toString(): string;
 }

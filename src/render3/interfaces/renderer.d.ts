@@ -1,14 +1,7 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { RendererStyleFlags2, RendererType2 } from '../../render/api';
 export declare enum RendererStyleFlags3 {
     Important = 1,
-    DashCase = 2
+    DashCase = 2,
 }
 export declare type Renderer3 = ObjectOrientedRenderer3 | ProceduralRenderer3;
 /**
