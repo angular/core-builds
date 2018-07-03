@@ -146,7 +146,7 @@ export declare class PlatformRef {
      *
      */
     bootstrapModule<M>(moduleType: Type<M>, compilerOptions?: (CompilerOptions & BootstrapOptions) | Array<CompilerOptions & BootstrapOptions>): Promise<NgModuleRef<M>>;
-    private _moduleDoBootstrap;
+    private _moduleDoBootstrap(moduleRef);
     /**
      * Register a listener to be called when the platform is disposed.
      */
@@ -229,8 +229,8 @@ export declare class ApplicationRef {
      * Detaches a view from dirty checking again.
      */
     detachView(viewRef: ViewRef): void;
-    private _loadComponent;
-    private _unloadComponent;
+    private _loadComponent(componentRef);
+    private _unloadComponent(componentRef);
     /**
      * Returns the number of attached views.
      */

@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 import { Provider } from '../core';
 import { NgModuleDef } from '../metadata/ng_module';
@@ -207,95 +200,16 @@ export declare function defineNgModule<T>(def: {
  * ```
  */
 export declare const defineDirective: <T>(directiveDefinition: {
-    /**
-     * Directive type, needed to configure the injector.
-     */
     type: Type<T>;
-    /** The selectors that will be used to match nodes to this directive. */
     selectors: (string | SelectorFlags)[][];
-    /**
-     * Factory method used to create an instance of directive.
-     */
     factory: () => T | ({
         0: T;
     } & any[]);
-    /**
-     * Static attributes to set on host element.
-     *
-     * Even indices: attribute name
-     * Odd indices: attribute value
-     */
     attributes?: string[] | undefined;
-    /**
-     * A map of input names.
-     *
-     * The format is in: `{[actualPropertyName: string]:(string|[string, string])}`.
-     *
-     * Given:
-     * ```
-     * class MyComponent {
-     *   @Input()
-     *   publicInput1: string;
-     *
-     *   @Input('publicInput2')
-     *   declaredInput2: string;
-     * }
-     * ```
-     *
-     * is described as:
-     * ```
-     * {
-     *   publicInput1: 'publicInput1',
-     *   declaredInput2: ['declaredInput2', 'publicInput2'],
-     * }
-     * ```
-     *
-     * Which the minifier may translate to:
-     * ```
-     * {
-     *   minifiedPublicInput1: 'publicInput1',
-     *   minifiedDeclaredInput2: [ 'publicInput2', 'declaredInput2'],
-     * }
-     * ```
-     *
-     * This allows the render to re-construct the minified, public, and declared names
-     * of properties.
-     *
-     * NOTE:
-     *  - Because declared and public name are usually same we only generate the array
-     *    `['declared', 'public']` format when they differ.
-     *  - The reason why this API and `outputs` API is not the same is that `NgOnChanges` has
-     *    inconsistent behavior in that it uses declared names rather than minified or public. For
-     *    this reason `NgOnChanges` will be deprecated and removed in future version and this
-     *    API will be simplified to be consistent with `output`.
-     */
     inputs?: { [P in keyof T]?: string | [string, string] | undefined; } | undefined;
-    /**
-     * A map of output names.
-     *
-     * The format is in: `{[actualPropertyName: string]:string}`.
-     *
-     * Which the minifier may translate to: `{[minifiedPropertyName: string]:string}`.
-     *
-     * This allows the render to re-construct the minified and non-minified names
-     * of properties.
-     */
     outputs?: { [P in keyof T]?: string | undefined; } | undefined;
-    /**
-     * A list of optional features to apply.
-     *
-     * See: {@link NgOnChangesFeature}, {@link PublicFeature}, {@link InheritDefinitionFeature}
-     */
     features?: DirectiveDefFeature[] | undefined;
-    /**
-     * Function executed by the parent template to allow child directive to apply host bindings.
-     */
     hostBindings?: ((directiveIndex: number, elementIndex: number) => void) | undefined;
-    /**
-     * Defines the name that can be used in the template to assign this directive to a variable.
-     *
-     * See: {@link Directive.exportAs}
-     */
     exportAs?: string | undefined;
 }) => never;
 /**

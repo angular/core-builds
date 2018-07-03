@@ -19,11 +19,11 @@ export declare class ReflectionCapabilities implements PlatformReflectionCapabil
     constructor(reflect?: any);
     isReflectionEnabled(): boolean;
     factory<T>(t: Type<T>): (args: any[]) => T;
-    private _ownParameters;
+    private _ownParameters(type, parentCtor);
     parameters(type: Type<any>): any[][];
-    private _ownAnnotations;
+    private _ownAnnotations(typeOrFunc, parentCtor);
     annotations(typeOrFunc: Type<any>): any[];
-    private _ownPropMetadata;
+    private _ownPropMetadata(typeOrFunc, parentCtor);
     propMetadata(typeOrFunc: any): {
         [key: string]: any[];
     };

@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { NO_CHANGE } from './instructions';
 /**
  * A list of flags to encode the i18n instructions used to translate the template.
@@ -19,7 +12,7 @@ export declare const enum I18nInstructions {
     /** Used to decode the number encoded with the instruction. */
     IndexMask = 536870911,
     /** Used to test the type of instruction. */
-    InstructionMask = -536870912
+    InstructionMask = -536870912,
 }
 /**
  * Represents the instructions used to translate the template.

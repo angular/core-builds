@@ -23,27 +23,27 @@ export declare abstract class ComponentRef<C> {
     /**
      * Location of the Host Element of this Component Instance.
      */
-    abstract readonly location: ElementRef;
+    readonly abstract location: ElementRef;
     /**
      * The injector on which the component instance exists.
      */
-    abstract readonly injector: Injector;
+    readonly abstract injector: Injector;
     /**
      * The instance of the Component.
      */
-    abstract readonly instance: C;
+    readonly abstract instance: C;
     /**
      * The {@link ViewRef} of the Host View of this Component instance.
      */
-    abstract readonly hostView: ViewRef;
+    readonly abstract hostView: ViewRef;
     /**
      * The {@link ChangeDetectorRef} of the Component instance.
      */
-    abstract readonly changeDetectorRef: ChangeDetectorRef;
+    readonly abstract changeDetectorRef: ChangeDetectorRef;
     /**
      * The component type.
      */
-    abstract readonly componentType: Type<any>;
+    readonly abstract componentType: Type<any>;
     /**
      * Destroys the component instance and all of the data structures associated with it.
      */
@@ -54,23 +54,23 @@ export declare abstract class ComponentRef<C> {
     abstract onDestroy(callback: Function): void;
 }
 export declare abstract class ComponentFactory<C> {
-    abstract readonly selector: string;
-    abstract readonly componentType: Type<any>;
+    readonly abstract selector: string;
+    readonly abstract componentType: Type<any>;
     /**
      * selector for all <ng-content> elements in the component.
      */
-    abstract readonly ngContentSelectors: string[];
+    readonly abstract ngContentSelectors: string[];
     /**
      * the inputs of the component.
      */
-    abstract readonly inputs: {
+    readonly abstract inputs: {
         propName: string;
         templateName: string;
     }[];
     /**
      * the outputs of the component.
      */
-    abstract readonly outputs: {
+    readonly abstract outputs: {
         propName: string;
         templateName: string;
     }[];
