@@ -20,7 +20,7 @@ export declare const enum TNodeType {
     Projection = 1,
     View = 2,
     Element = 3,
-    ViewOrElement = 2
+    ViewOrElement = 2,
 }
 /**
  * Corresponds to the TNode.flags property.
@@ -31,7 +31,7 @@ export declare const enum TNodeFlags {
     /** Then this bit is set when the node is a component */
     isComponent = 4096,
     /** The index of the first directive on this node is encoded on the most significant bits  */
-    DirectiveStartingIndexShift = 13
+    DirectiveStartingIndexShift = 13,
 }
 /**
  * LNode is an internal data structure which is used for the incremental DOM algorithm.
@@ -142,7 +142,7 @@ export declare const enum AttributeMarker {
      * Taking the above bindings and outputs as an example an attributes array could look as follows:
      * ['class', 'fade in', AttributeMarker.SelectOnly, 'foo', 'bar']
      */
-    SelectOnly = 1
+    SelectOnly = 1,
 }
 /**
  * A combination of:

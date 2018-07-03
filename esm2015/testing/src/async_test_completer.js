@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -35,7 +35,7 @@ export class AsyncTestCompleter {
      */
     get promise() { return this._promise; }
 }
-if (false) {
+function AsyncTestCompleter_tsickle_Closure_declarations() {
     /** @type {?} */
     AsyncTestCompleter.prototype._resolve;
     /** @type {?} */

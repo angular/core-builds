@@ -23,14 +23,14 @@ export declare class RenderComponentType {
  * @deprecated Debug info is handeled internally in the view engine now.
  */
 export declare abstract class RenderDebugInfo {
-    abstract readonly injector: Injector;
-    abstract readonly component: any;
-    abstract readonly providerTokens: any[];
-    abstract readonly references: {
+    readonly abstract injector: Injector;
+    readonly abstract component: any;
+    readonly abstract providerTokens: any[];
+    readonly abstract references: {
         [key: string]: any;
     };
-    abstract readonly context: any;
-    abstract readonly source: string;
+    readonly abstract context: any;
+    readonly abstract source: string;
 }
 /**
  * @deprecated Use the `Renderer2` instead.
@@ -112,7 +112,7 @@ export declare abstract class RendererFactory2 {
  */
 export declare enum RendererStyleFlags2 {
     Important = 1,
-    DashCase = 2
+    DashCase = 2,
 }
 /**
  * @experimental
@@ -122,7 +122,7 @@ export declare abstract class Renderer2 {
      * This field can be used to store arbitrary data on this renderer instance.
      * This is useful for renderers that delegate to other renderers.
      */
-    abstract readonly data: {
+    readonly abstract data: {
         [key: string]: any;
     };
     abstract destroy(): void;

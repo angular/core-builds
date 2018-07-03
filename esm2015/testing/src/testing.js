@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -18,7 +18,7 @@ export { async } from './async';
 export { jasmineAwait } from './jasmine_await';
 export { ComponentFixture } from './component_fixture';
 export { resetFakeAsyncZone, fakeAsync, tick, flush, discardPeriodicTasks, flushMicrotasks } from './fake_async';
-export { getTestBed, inject, withModule, TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, InjectSetupWrapper } from './test_bed';
+export { TestComponentRenderer, ComponentFixtureAutoDetect, ComponentFixtureNoNgZone, TestBed, getTestBed, inject, InjectSetupWrapper, withModule } from './test_bed';
 export { __core_private_testing_placeholder__ } from './before_each';
 export { ɵTestingCompiler, ɵTestingCompilerFactory } from './private_export_testing';
 export { withBody, ensureDocument, cleanupDocument } from './render3';

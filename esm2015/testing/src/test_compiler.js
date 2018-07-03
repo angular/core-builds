@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -93,7 +93,7 @@ TestingCompiler.decorators = [
  */
 export class TestingCompilerFactory {
 }
-if (false) {
+function TestingCompilerFactory_tsickle_Closure_declarations() {
     /**
      * @abstract
      * @param {?=} options

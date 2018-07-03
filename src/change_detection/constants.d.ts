@@ -18,7 +18,7 @@ export declare enum ChangeDetectionStrategy {
     /**
      * `Default` means that the change detector's mode will be initially set to `CheckAlways`.
      */
-    Default = 1
+    Default = 1,
 }
 /**
  * Describes the status of the detector.
@@ -53,6 +53,6 @@ export declare enum ChangeDetectorStatus {
     /**
      * `Destroyed` means that the change detector is destroyed.
      */
-    Destroyed = 5
+    Destroyed = 5,
 }
 export declare function isDefaultChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean;

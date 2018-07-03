@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -28,7 +28,7 @@ export class ElementRef {
      */
     constructor(nativeElement) { this.nativeElement = nativeElement; }
 }
-if (false) {
+function ElementRef_tsickle_Closure_declarations() {
     /**
      * The underlying native element or `null` if direct access to native elements is not supported
      * (e.g. when the application runs in a web worker).

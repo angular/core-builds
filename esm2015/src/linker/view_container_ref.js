@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -30,7 +30,7 @@
  */
 export class ViewContainerRef {
 }
-if (false) {
+function ViewContainerRef_tsickle_Closure_declarations() {
     /**
      * Anchor element that specifies the location of this container in the containing View.
      * <!-- TODO: rename to anchorElement -->

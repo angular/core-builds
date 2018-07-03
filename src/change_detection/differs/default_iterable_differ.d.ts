@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { IterableChangeRecord, IterableChanges, IterableDiffer, IterableDifferFactory, NgIterable, TrackByFunction } from './iterable_differs';
 export declare class DefaultIterableDifferFactory implements IterableDifferFactory {
     constructor();
@@ -43,7 +36,7 @@ export declare class DefaultIterableDiffer<V> implements IterableDiffer<V>, Iter
     onDestroy(): void;
     check(collection: NgIterable<V>): boolean;
     readonly isDirty: boolean;
-    private _addToRemovals;
+    private _addToRemovals(record);
 }
 export declare class IterableChangeRecord_<V> implements IterableChangeRecord<V> {
     item: V;

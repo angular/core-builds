@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
+ * @suppress {checkTypes} checked by tsc
  */
 /**
  * @license
@@ -14,7 +14,7 @@
  */
 export class ChangeDetectorRef {
 }
-if (false) {
+function ChangeDetectorRef_tsickle_Closure_declarations() {
     /**
      * Marks a view and all of its ancestors dirty.
      *

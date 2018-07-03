@@ -30,7 +30,7 @@ export declare type ComponentQuery<T> = ComponentTemplate<T>;
  */
 export declare const enum RenderFlags {
     Create = 1,
-    Update = 2
+    Update = 2,
 }
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
@@ -47,7 +47,7 @@ export interface DirectiveType<T> extends Type<T> {
     ngDirectiveDef: never;
 }
 export declare const enum DirectiveDefFlags {
-    ContentQuery = 2
+    ContentQuery = 2,
 }
 /**
  * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
@@ -79,7 +79,7 @@ export interface DirectiveDef<T, Selector extends string> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that makes a directive public to the DI system. */
-    diPublic: ((def: DirectiveDef<T, string>) => void) | null;
+    diPublic: ((def: DirectiveDef<any, string>) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     selectors: CssSelectorList;
     /**
@@ -88,7 +88,7 @@ export interface DirectiveDef<T, Selector extends string> {
      * (as in `@Input('alias') propertyName: any;`).
      */
     readonly inputs: {
-        [P in keyof T]: string;
+        [P in keyof T]: P;
     };
     /**
      * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of

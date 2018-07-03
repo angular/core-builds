@@ -1,10 +1,3 @@
-/**
- * @license
- * Copyright Google Inc. All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
 import { QueryList as viewEngine_QueryList } from '../linker/query_list';
 import { Type } from '../type';
 import { LNode } from './interfaces/node';
