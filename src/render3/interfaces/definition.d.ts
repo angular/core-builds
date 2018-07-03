@@ -206,13 +206,13 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
  *
  * See: {@link definePipe}
  */
-export interface PipeDef<T, S extends string> {
+export interface PipeDef<T> {
     /**
      * Pipe name.
      *
      * Used to resolve pipe in templates.
      */
-    name: S;
+    name: string;
     /**
      * Factory function used to create a new pipe instance.
      */
@@ -226,7 +226,6 @@ export interface PipeDef<T, S extends string> {
     pure: boolean;
     onDestroy: (() => void) | null;
 }
-export declare type PipeDefInternal<T> = PipeDef<T, string>;
 export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T, string>) => void;
 export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T, string>) => void;
 /**
@@ -244,7 +243,7 @@ export declare type DirectiveTypeList = (DirectiveDef<any, string> | ComponentDe
  * The function is necessary to be able to support forward declarations.
  */
 export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
-export declare type PipeDefList = PipeDefInternal<any>[];
+export declare type PipeDefList = PipeDef<any>[];
 export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type PipeTypeList = (PipeDefInternal<any> | Type<any>)[];
+export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;

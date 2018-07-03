@@ -10,7 +10,7 @@ import { defineComponent, defineDirective, defineNgModule, definePipe } from './
 import { InheritDefinitionFeature } from './features/inherit_definition_feature';
 import { NgOnChangesFeature } from './features/ng_onchanges_feature';
 import { PublicFeature } from './features/public_feature';
-import { ComponentDef, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, PipeDef } from './interfaces/definition';
+import { ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, PipeDef } from './interfaces/definition';
 export { ComponentFactory, ComponentFactoryResolver, ComponentRef } from './component_ref';
 export { QUERY_READ_CONTAINER_REF, QUERY_READ_ELEMENT_REF, QUERY_READ_FROM_NODE, QUERY_READ_TEMPLATE_REF, directiveInject, injectAttribute, injectChangeDetectorRef, injectElementRef, injectTemplateRef, injectViewContainerRef } from './di';
 export { RenderFlags } from './interfaces/definition';
@@ -22,4 +22,4 @@ export { AttributeMarker } from './interfaces/node';
 export { pipe as Pp, pipeBind1 as pb1, pipeBind2 as pb2, pipeBind3 as pb3, pipeBind4 as pb4, pipeBindV as pbV, } from './pipe';
 export { QueryList, query as Q, queryRefresh as qR, } from './query';
 export { pureFunction0 as f0, pureFunction1 as f1, pureFunction2 as f2, pureFunction3 as f3, pureFunction4 as f4, pureFunction5 as f5, pureFunction6 as f6, pureFunction7 as f7, pureFunction8 as f8, pureFunctionV as fV, } from './pure_function';
-export { ComponentDef, ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDef, DirectiveDefFlags, DirectiveDefInternal, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
+export { ComponentDefInternal, ComponentTemplate, ComponentType, DirectiveDefInternal, DirectiveDefFlags, DirectiveType, NgOnChangesFeature, InheritDefinitionFeature, PublicFeature, PipeDef, LifecycleHooksFeature, defineComponent, defineDirective, defineNgModule, definePipe, getHostElement, getRenderedText, renderComponent, whenRendered, };
