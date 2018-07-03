@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+28.sha-0922228
+ * @license Angular v6.1.0-beta.3+30.sha-e3064d5
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -1031,6 +1031,7 @@ var TestBed = /** @class */ (function () {
         this._compilerOptions.push(config);
     };
     TestBed.prototype.configureTestingModule = function (moduleDef) {
+        var _a, _b, _c, _d;
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
         if (moduleDef.providers) {
             (_a = this._providers).push.apply(_a, __spread(moduleDef.providers));
@@ -1047,7 +1048,6 @@ var TestBed = /** @class */ (function () {
         if (moduleDef.aotSummaries) {
             this._aotSummaries.push(moduleDef.aotSummaries);
         }
-        var _a, _b, _c, _d;
     };
     TestBed.prototype.compileComponents = function () {
         var _this = this;
@@ -1061,6 +1061,7 @@ var TestBed = /** @class */ (function () {
         });
     };
     TestBed.prototype._initIfNeeded = function () {
+        var e_1, _a;
         if (this._instantiated) {
             return;
         }
@@ -1082,8 +1083,8 @@ var TestBed = /** @class */ (function () {
             }
         }
         try {
-            for (var _a = __values(this._templateOverrides), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var _c = _b.value, component = _c.component, templateOf = _c.templateOf;
+            for (var _b = __values(this._templateOverrides), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = _c.value, component = _d.component, templateOf = _d.templateOf;
                 var compFactory = this._compiler.getComponentFactory(templateOf);
                 core.ɵoverrideComponentView(component, compFactory);
             }
@@ -1091,7 +1092,7 @@ var TestBed = /** @class */ (function () {
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_1) throw e_1.error; }
         }
@@ -1107,10 +1108,10 @@ var TestBed = /** @class */ (function () {
         // before accessing it.
         this._moduleRef.injector.get(core.ApplicationInitStatus).runInitializers();
         this._instantiated = true;
-        var e_1, _d;
     };
     TestBed.prototype._createCompilerAndModule = function () {
         var _this = this;
+        var e_2, _a;
         var providers = this._providers.concat([{ provide: TestBed, useValue: this }]);
         var declarations = __spread(this._declarations, this._templateOverrides.map(function (entry) { return entry.templateOf; }));
         var rootScopeImports = [];
@@ -1143,15 +1144,15 @@ var TestBed = /** @class */ (function () {
         var compilerFactory = this.platform.injector.get(TestingCompilerFactory);
         this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
         try {
-            for (var _a = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var summary = _b.value;
+            for (var _b = __values(__spread([this._testEnvAotSummaries], this._aotSummaries)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var summary = _c.value;
                 this._compiler.loadAotSummaries(summary);
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }
         finally {
             try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
             }
             finally { if (e_2) throw e_2.error; }
         }
@@ -1160,7 +1161,6 @@ var TestBed = /** @class */ (function () {
         this._directiveOverrides.forEach(function (entry) { return _this._compiler.overrideDirective(entry[0], entry[1]); });
         this._pipeOverrides.forEach(function (entry) { return _this._compiler.overridePipe(entry[0], entry[1]); });
         return DynamicTestModule;
-        var e_2, _c;
     };
     TestBed.prototype._assertNotInstantiated = function (methodName, methodDescription) {
         if (this._instantiated) {

@@ -12,8 +12,8 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
      * Destroys the view and all of the data structures associated with it.
      */
     abstract destroy(): void;
-    readonly abstract destroyed: boolean;
-    abstract onDestroy(callback: Function): any;
+    abstract readonly destroyed: boolean;
+    abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
 /**
  * Represents an Angular View.
@@ -73,8 +73,8 @@ export declare abstract class ViewRef extends ChangeDetectorRef {
  * @experimental
  */
 export declare abstract class EmbeddedViewRef<C> extends ViewRef {
-    readonly abstract context: C;
-    readonly abstract rootNodes: any[];
+    abstract readonly context: C;
+    abstract readonly rootNodes: any[];
 }
 export interface InternalViewRef extends ViewRef {
     detachFromAppRef(): void;

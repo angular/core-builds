@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Type } from '../type';
 import { InjectorType } from './defs';
 import { InjectionToken } from './injection_token';
@@ -41,16 +48,16 @@ export declare class R3Injector {
      */
     destroy(): void;
     get<T>(token: Type<T> | InjectionToken<T>, notFoundValue?: any, flags?: InjectFlags): T;
-    private assertNotDestroyed();
+    private assertNotDestroyed;
     /**
      * Add an `InjectorType` or `InjectorDefTypeWithProviders` and all of its transitive providers
      * to this injector.
      */
-    private processInjectorType(defOrWrappedDef, parents);
+    private processInjectorType;
     /**
      * Process a `SingleProvider` and add it.
      */
-    private processProvider(provider);
-    private hydrate<T>(token, record);
-    private injectableDefInScope(def);
+    private processProvider;
+    private hydrate;
+    private injectableDefInScope;
 }

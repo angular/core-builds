@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 export { ivyEnabled, R3_COMPILE_COMPONENT, R3_COMPILE_DIRECTIVE, R3_COMPILE_INJECTABLE, R3_COMPILE_NGMODULE } from './ivy_switch_legacy';
 
