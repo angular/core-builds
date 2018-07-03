@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -14,75 +14,72 @@
  * @record
  */
 export function LQueries() { }
-function LQueries_tsickle_Closure_declarations() {
-    /**
-     * Ask queries to prepare copy of itself. This assures that tracking new queries on child nodes
-     * doesn't mutate list of queries tracked on a parent node. We will clone LQueries before
-     * constructing content queries.
-     * @type {?}
-     */
-    LQueries.prototype.clone;
-    /**
-     * Used to ask queries if those should be cloned to the child element.
-     *
-     * For example in the case of deep queries the `child()` returns
-     * queries for the child node. In case of shallow queries it returns
-     * `null`.
-     * @type {?}
-     */
-    LQueries.prototype.child;
-    /**
-     * Notify `LQueries` that a new `LNode` has been created and needs to be added to query results
-     * if matching query predicate.
-     * @type {?}
-     */
-    LQueries.prototype.addNode;
-    /**
-     * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
-     * to prepare room for views that might be inserted into this container.
-     * @type {?}
-     */
-    LQueries.prototype.container;
-    /**
-     * Notify `LQueries` that a new `LView` has been created. As a result we need to prepare room
-     * and collect nodes that match query predicate.
-     * @type {?}
-     */
-    LQueries.prototype.createView;
-    /**
-     * Notify `LQueries` that a new `LView` has been added to `LContainer`. As a result all
-     * the matching nodes from this view should be added to container's queries.
-     * @type {?}
-     */
-    LQueries.prototype.insertView;
-    /**
-     * Notify `LQueries` that an `LView` has been removed from `LContainer`. As a result all
-     * the matching nodes from this view should be removed from container's queries.
-     * @type {?}
-     */
-    LQueries.prototype.removeView;
-    /**
-     * Add additional `QueryList` to track.
-     *
-     * \@param queryList `QueryList` to update with changes.
-     * \@param predicate Either `Type` or selector array of [key, value] predicates.
-     * \@param descend If true the query will recursively apply to the children.
-     * \@param read Indicates which token should be read from DI for this query.
-     * @type {?}
-     */
-    LQueries.prototype.track;
-}
+/**
+ * Ask queries to prepare copy of itself. This assures that tracking new queries on child nodes
+ * doesn't mutate list of queries tracked on a parent node. We will clone LQueries before
+ * constructing content queries.
+ * @type {?}
+ */
+LQueries.prototype.clone;
+/**
+ * Used to ask queries if those should be cloned to the child element.
+ *
+ * For example in the case of deep queries the `child()` returns
+ * queries for the child node. In case of shallow queries it returns
+ * `null`.
+ * @type {?}
+ */
+LQueries.prototype.child;
+/**
+ * Notify `LQueries` that a new `LNode` has been created and needs to be added to query results
+ * if matching query predicate.
+ * @type {?}
+ */
+LQueries.prototype.addNode;
+/**
+ * Notify `LQueries` that a new LContainer was added to ivy data structures. As a result we need
+ * to prepare room for views that might be inserted into this container.
+ * @type {?}
+ */
+LQueries.prototype.container;
+/**
+ * Notify `LQueries` that a new `LView` has been created. As a result we need to prepare room
+ * and collect nodes that match query predicate.
+ * @type {?}
+ */
+LQueries.prototype.createView;
+/**
+ * Notify `LQueries` that a new `LView` has been added to `LContainer`. As a result all
+ * the matching nodes from this view should be added to container's queries.
+ * @type {?}
+ */
+LQueries.prototype.insertView;
+/**
+ * Notify `LQueries` that an `LView` has been removed from `LContainer`. As a result all
+ * the matching nodes from this view should be removed from container's queries.
+ * @type {?}
+ */
+LQueries.prototype.removeView;
+/**
+ * Add additional `QueryList` to track.
+ *
+ * \@param queryList `QueryList` to update with changes.
+ * \@param predicate Either `Type` or selector array of [key, value] predicates.
+ * \@param descend If true the query will recursively apply to the children.
+ * \@param read Indicates which token should be read from DI for this query.
+ * @type {?}
+ */
+LQueries.prototype.track;
 /**
  * @template T
  */
 export class QueryReadType {
 }
-function QueryReadType_tsickle_Closure_declarations() {
+if (false) {
     /** @type {?} */
     QueryReadType.prototype.defeatStructuralTyping;
 }
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
-export const /** @type {?} */ unusedValueExportToPlacateAjd = 1;
+/** @type {?} */
+export const unusedValueExportToPlacateAjd = 1;
 
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicXVlcnkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvcXVlcnkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUF5RUEsTUFBTTtDQUFnRTs7Ozs7OztBQUl0RSxNQUFNLENBQUMsdUJBQU0sNkJBQTZCLEdBQUcsQ0FBQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBAbGljZW5zZVxuICogQ29weXJpZ2h0IEdvb2dsZSBJbmMuIEFsbCBSaWdodHMgUmVzZXJ2ZWQuXG4gKlxuICogVXNlIG9mIHRoaXMgc291cmNlIGNvZGUgaXMgZ292ZXJuZWQgYnkgYW4gTUlULXN0eWxlIGxpY2Vuc2UgdGhhdCBjYW4gYmVcbiAqIGZvdW5kIGluIHRoZSBMSUNFTlNFIGZpbGUgYXQgaHR0cHM6Ly9hbmd1bGFyLmlvL2xpY2Vuc2VcbiAqL1xuXG5pbXBvcnQge1F1ZXJ5TGlzdH0gZnJvbSAnLi4vLi4vbGlua2VyJztcbmltcG9ydCB7VHlwZX0gZnJvbSAnLi4vLi4vdHlwZSc7XG5pbXBvcnQge0xOb2RlfSBmcm9tICcuL25vZGUnO1xuXG4vKiogVXNlZCBmb3IgdHJhY2tpbmcgcXVlcmllcyAoZS5nLiBWaWV3Q2hpbGQsIENvbnRlbnRDaGlsZCkuICovXG5leHBvcnQgaW50ZXJmYWNlIExRdWVyaWVzIHtcbiAgLyoqXG4gICAqIEFzayBxdWVyaWVzIHRvIHByZXBhcmUgY29weSBvZiBpdHNlbGYuIFRoaXMgYXNzdXJlcyB0aGF0IHRyYWNraW5nIG5ldyBxdWVyaWVzIG9uIGNoaWxkIG5vZGVzXG4gICAqIGRvZXNuJ3QgbXV0YXRlIGxpc3Qgb2YgcXVlcmllcyB0cmFja2VkIG9uIGEgcGFyZW50IG5vZGUuIFdlIHdpbGwgY2xvbmUgTFF1ZXJpZXMgYmVmb3JlXG4gICAqIGNvbnN0cnVjdGluZyBjb250ZW50IHF1ZXJpZXMuXG4gICAqL1xuICBjbG9uZSgpOiBMUXVlcmllc3xudWxsO1xuXG4gIC8qKlxuICAgKiBVc2VkIHRvIGFzayBxdWVyaWVzIGlmIHRob3NlIHNob3VsZCBiZSBjbG9uZWQgdG8gdGhlIGNoaWxkIGVsZW1lbnQuXG4gICAqXG4gICAqIEZvciBleGFtcGxlIGluIHRoZSBjYXNlIG9mIGRlZXAgcXVlcmllcyB0aGUgYGNoaWxkKClgIHJldHVybnNcbiAgICogcXVlcmllcyBmb3IgdGhlIGNoaWxkIG5vZGUuIEluIGNhc2Ugb2Ygc2hhbGxvdyBxdWVyaWVzIGl0IHJldHVybnNcbiAgICogYG51bGxgLlxuICAgKi9cbiAgY2hpbGQoKTogTFF1ZXJpZXN8bnVsbDtcblxuICAvKipcbiAgICogTm90aWZ5IGBMUXVlcmllc2AgdGhhdCBhIG5ldyBgTE5vZGVgIGhhcyBiZWVuIGNyZWF0ZWQgYW5kIG5lZWRzIHRvIGJlIGFkZGVkIHRvIHF1ZXJ5IHJlc3VsdHNcbiAgICogaWYgbWF0Y2hpbmcgcXVlcnkgcHJlZGljYXRlLlxuICAgKi9cbiAgYWRkTm9kZShub2RlOiBMTm9kZSk6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIE5vdGlmeSBgTFF1ZXJpZXNgIHRoYXQgYSBuZXcgTENvbnRhaW5lciB3YXMgYWRkZWQgdG8gaXZ5IGRhdGEgc3RydWN0dXJlcy4gQXMgYSByZXN1bHQgd2UgbmVlZFxuICAgKiB0byBwcmVwYXJlIHJvb20gZm9yIHZpZXdzIHRoYXQgbWlnaHQgYmUgaW5zZXJ0ZWQgaW50byB0aGlzIGNvbnRhaW5lci5cbiAgICovXG4gIGNvbnRhaW5lcigpOiBMUXVlcmllc3xudWxsO1xuXG4gIC8qKlxuICAgKiBOb3RpZnkgYExRdWVyaWVzYCB0aGF0IGEgbmV3IGBMVmlld2AgaGFzIGJlZW4gY3JlYXRlZC4gQXMgYSByZXN1bHQgd2UgbmVlZCB0byBwcmVwYXJlIHJvb21cbiAgICogYW5kIGNvbGxlY3Qgbm9kZXMgdGhhdCBtYXRjaCBxdWVyeSBwcmVkaWNhdGUuXG4gICAqL1xuICBjcmVhdGVWaWV3KCk6IExRdWVyaWVzfG51bGw7XG5cbiAgLyoqXG4gICAqIE5vdGlmeSBgTFF1ZXJpZXNgIHRoYXQgYSBuZXcgYExWaWV3YCBoYXMgYmVlbiBhZGRlZCB0byBgTENvbnRhaW5lcmAuIEFzIGEgcmVzdWx0IGFsbFxuICAgKiB0aGUgbWF0Y2hpbmcgbm9kZXMgZnJvbSB0aGlzIHZpZXcgc2hvdWxkIGJlIGFkZGVkIHRvIGNvbnRhaW5lcidzIHF1ZXJpZXMuXG4gICAqL1xuICBpbnNlcnRWaWV3KG5ld1ZpZXdJbmRleDogbnVtYmVyKTogdm9pZDtcblxuICAvKipcbiAgICogTm90aWZ5IGBMUXVlcmllc2AgdGhhdCBhbiBgTFZpZXdgIGhhcyBiZWVuIHJlbW92ZWQgZnJvbSBgTENvbnRhaW5lcmAuIEFzIGEgcmVzdWx0IGFsbFxuICAgKiB0aGUgbWF0Y2hpbmcgbm9kZXMgZnJvbSB0aGlzIHZpZXcgc2hvdWxkIGJlIHJlbW92ZWQgZnJvbSBjb250YWluZXIncyBxdWVyaWVzLlxuICAgKi9cbiAgcmVtb3ZlVmlldygpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBBZGQgYWRkaXRpb25hbCBgUXVlcnlMaXN0YCB0byB0cmFjay5cbiAgICpcbiAgICogQHBhcmFtIHF1ZXJ5TGlzdCBgUXVlcnlMaXN0YCB0byB1cGRhdGUgd2l0aCBjaGFuZ2VzLlxuICAgKiBAcGFyYW0gcHJlZGljYXRlIEVpdGhlciBgVHlwZWAgb3Igc2VsZWN0b3IgYXJyYXkgb2YgW2tleSwgdmFsdWVdIHByZWRpY2F0ZXMuXG4gICAqIEBwYXJhbSBkZXNjZW5kIElmIHRydWUgdGhlIHF1ZXJ5IHdpbGwgcmVjdXJzaXZlbHkgYXBwbHkgdG8gdGhlIGNoaWxkcmVuLlxuICAgKiBAcGFyYW0gcmVhZCBJbmRpY2F0ZXMgd2hpY2ggdG9rZW4gc2hvdWxkIGJlIHJlYWQgZnJvbSBESSBmb3IgdGhpcyBxdWVyeS5cbiAgICovXG4gIHRyYWNrPFQ+KFxuICAgICAgcXVlcnlMaXN0OiBRdWVyeUxpc3Q8VD4sIHByZWRpY2F0ZTogVHlwZTxhbnk+fHN0cmluZ1tdLCBkZXNjZW5kPzogYm9vbGVhbixcbiAgICAgIHJlYWQ/OiBRdWVyeVJlYWRUeXBlPFQ+fFR5cGU8VD4pOiB2b2lkO1xufVxuXG5leHBvcnQgY2xhc3MgUXVlcnlSZWFkVHlwZTxUPiB7IHByaXZhdGUgZGVmZWF0U3RydWN0dXJhbFR5cGluZzogYW55OyB9XG5cbi8vIE5vdGU6IFRoaXMgaGFjayBpcyBuZWNlc3Nhcnkgc28gd2UgZG9uJ3QgZXJyb25lb3VzbHkgZ2V0IGEgY2lyY3VsYXIgZGVwZW5kZW5jeVxuLy8gZmFpbHVyZSBiYXNlZCBvbiB0eXBlcy5cbmV4cG9ydCBjb25zdCB1bnVzZWRWYWx1ZUV4cG9ydFRvUGxhY2F0ZUFqZCA9IDE7XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicXVlcnkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi8uLi8uLi8uLi9wYWNrYWdlcy9jb3JlL3NyYy9yZW5kZXIzL2ludGVyZmFjZXMvcXVlcnkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBeUVBLE1BQU07Q0FBZ0U7Ozs7OztBQUl0RSxhQUFhLDZCQUE2QixHQUFHLENBQUMsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQGxpY2Vuc2VcbiAqIENvcHlyaWdodCBHb29nbGUgSW5jLiBBbGwgUmlnaHRzIFJlc2VydmVkLlxuICpcbiAqIFVzZSBvZiB0aGlzIHNvdXJjZSBjb2RlIGlzIGdvdmVybmVkIGJ5IGFuIE1JVC1zdHlsZSBsaWNlbnNlIHRoYXQgY2FuIGJlXG4gKiBmb3VuZCBpbiB0aGUgTElDRU5TRSBmaWxlIGF0IGh0dHBzOi8vYW5ndWxhci5pby9saWNlbnNlXG4gKi9cblxuaW1wb3J0IHtRdWVyeUxpc3R9IGZyb20gJy4uLy4uL2xpbmtlcic7XG5pbXBvcnQge1R5cGV9IGZyb20gJy4uLy4uL3R5cGUnO1xuaW1wb3J0IHtMTm9kZX0gZnJvbSAnLi9ub2RlJztcblxuLyoqIFVzZWQgZm9yIHRyYWNraW5nIHF1ZXJpZXMgKGUuZy4gVmlld0NoaWxkLCBDb250ZW50Q2hpbGQpLiAqL1xuZXhwb3J0IGludGVyZmFjZSBMUXVlcmllcyB7XG4gIC8qKlxuICAgKiBBc2sgcXVlcmllcyB0byBwcmVwYXJlIGNvcHkgb2YgaXRzZWxmLiBUaGlzIGFzc3VyZXMgdGhhdCB0cmFja2luZyBuZXcgcXVlcmllcyBvbiBjaGlsZCBub2Rlc1xuICAgKiBkb2Vzbid0IG11dGF0ZSBsaXN0IG9mIHF1ZXJpZXMgdHJhY2tlZCBvbiBhIHBhcmVudCBub2RlLiBXZSB3aWxsIGNsb25lIExRdWVyaWVzIGJlZm9yZVxuICAgKiBjb25zdHJ1Y3RpbmcgY29udGVudCBxdWVyaWVzLlxuICAgKi9cbiAgY2xvbmUoKTogTFF1ZXJpZXN8bnVsbDtcblxuICAvKipcbiAgICogVXNlZCB0byBhc2sgcXVlcmllcyBpZiB0aG9zZSBzaG91bGQgYmUgY2xvbmVkIHRvIHRoZSBjaGlsZCBlbGVtZW50LlxuICAgKlxuICAgKiBGb3IgZXhhbXBsZSBpbiB0aGUgY2FzZSBvZiBkZWVwIHF1ZXJpZXMgdGhlIGBjaGlsZCgpYCByZXR1cm5zXG4gICAqIHF1ZXJpZXMgZm9yIHRoZSBjaGlsZCBub2RlLiBJbiBjYXNlIG9mIHNoYWxsb3cgcXVlcmllcyBpdCByZXR1cm5zXG4gICAqIGBudWxsYC5cbiAgICovXG4gIGNoaWxkKCk6IExRdWVyaWVzfG51bGw7XG5cbiAgLyoqXG4gICAqIE5vdGlmeSBgTFF1ZXJpZXNgIHRoYXQgYSBuZXcgYExOb2RlYCBoYXMgYmVlbiBjcmVhdGVkIGFuZCBuZWVkcyB0byBiZSBhZGRlZCB0byBxdWVyeSByZXN1bHRzXG4gICAqIGlmIG1hdGNoaW5nIHF1ZXJ5IHByZWRpY2F0ZS5cbiAgICovXG4gIGFkZE5vZGUobm9kZTogTE5vZGUpOiB2b2lkO1xuXG4gIC8qKlxuICAgKiBOb3RpZnkgYExRdWVyaWVzYCB0aGF0IGEgbmV3IExDb250YWluZXIgd2FzIGFkZGVkIHRvIGl2eSBkYXRhIHN0cnVjdHVyZXMuIEFzIGEgcmVzdWx0IHdlIG5lZWRcbiAgICogdG8gcHJlcGFyZSByb29tIGZvciB2aWV3cyB0aGF0IG1pZ2h0IGJlIGluc2VydGVkIGludG8gdGhpcyBjb250YWluZXIuXG4gICAqL1xuICBjb250YWluZXIoKTogTFF1ZXJpZXN8bnVsbDtcblxuICAvKipcbiAgICogTm90aWZ5IGBMUXVlcmllc2AgdGhhdCBhIG5ldyBgTFZpZXdgIGhhcyBiZWVuIGNyZWF0ZWQuIEFzIGEgcmVzdWx0IHdlIG5lZWQgdG8gcHJlcGFyZSByb29tXG4gICAqIGFuZCBjb2xsZWN0IG5vZGVzIHRoYXQgbWF0Y2ggcXVlcnkgcHJlZGljYXRlLlxuICAgKi9cbiAgY3JlYXRlVmlldygpOiBMUXVlcmllc3xudWxsO1xuXG4gIC8qKlxuICAgKiBOb3RpZnkgYExRdWVyaWVzYCB0aGF0IGEgbmV3IGBMVmlld2AgaGFzIGJlZW4gYWRkZWQgdG8gYExDb250YWluZXJgLiBBcyBhIHJlc3VsdCBhbGxcbiAgICogdGhlIG1hdGNoaW5nIG5vZGVzIGZyb20gdGhpcyB2aWV3IHNob3VsZCBiZSBhZGRlZCB0byBjb250YWluZXIncyBxdWVyaWVzLlxuICAgKi9cbiAgaW5zZXJ0VmlldyhuZXdWaWV3SW5kZXg6IG51bWJlcik6IHZvaWQ7XG5cbiAgLyoqXG4gICAqIE5vdGlmeSBgTFF1ZXJpZXNgIHRoYXQgYW4gYExWaWV3YCBoYXMgYmVlbiByZW1vdmVkIGZyb20gYExDb250YWluZXJgLiBBcyBhIHJlc3VsdCBhbGxcbiAgICogdGhlIG1hdGNoaW5nIG5vZGVzIGZyb20gdGhpcyB2aWV3IHNob3VsZCBiZSByZW1vdmVkIGZyb20gY29udGFpbmVyJ3MgcXVlcmllcy5cbiAgICovXG4gIHJlbW92ZVZpZXcoKTogdm9pZDtcblxuICAvKipcbiAgICogQWRkIGFkZGl0aW9uYWwgYFF1ZXJ5TGlzdGAgdG8gdHJhY2suXG4gICAqXG4gICAqIEBwYXJhbSBxdWVyeUxpc3QgYFF1ZXJ5TGlzdGAgdG8gdXBkYXRlIHdpdGggY2hhbmdlcy5cbiAgICogQHBhcmFtIHByZWRpY2F0ZSBFaXRoZXIgYFR5cGVgIG9yIHNlbGVjdG9yIGFycmF5IG9mIFtrZXksIHZhbHVlXSBwcmVkaWNhdGVzLlxuICAgKiBAcGFyYW0gZGVzY2VuZCBJZiB0cnVlIHRoZSBxdWVyeSB3aWxsIHJlY3Vyc2l2ZWx5IGFwcGx5IHRvIHRoZSBjaGlsZHJlbi5cbiAgICogQHBhcmFtIHJlYWQgSW5kaWNhdGVzIHdoaWNoIHRva2VuIHNob3VsZCBiZSByZWFkIGZyb20gREkgZm9yIHRoaXMgcXVlcnkuXG4gICAqL1xuICB0cmFjazxUPihcbiAgICAgIHF1ZXJ5TGlzdDogUXVlcnlMaXN0PFQ+LCBwcmVkaWNhdGU6IFR5cGU8YW55PnxzdHJpbmdbXSwgZGVzY2VuZD86IGJvb2xlYW4sXG4gICAgICByZWFkPzogUXVlcnlSZWFkVHlwZTxUPnxUeXBlPFQ+KTogdm9pZDtcbn1cblxuZXhwb3J0IGNsYXNzIFF1ZXJ5UmVhZFR5cGU8VD4geyBwcml2YXRlIGRlZmVhdFN0cnVjdHVyYWxUeXBpbmc6IGFueTsgfVxuXG4vLyBOb3RlOiBUaGlzIGhhY2sgaXMgbmVjZXNzYXJ5IHNvIHdlIGRvbid0IGVycm9uZW91c2x5IGdldCBhIGNpcmN1bGFyIGRlcGVuZGVuY3lcbi8vIGZhaWx1cmUgYmFzZWQgb24gdHlwZXMuXG5leHBvcnQgY29uc3QgdW51c2VkVmFsdWVFeHBvcnRUb1BsYWNhdGVBamQgPSAxO1xuIl19

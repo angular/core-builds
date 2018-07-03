@@ -1,6 +1,6 @@
 /**
  * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
+ * @suppress {checkTypes,extraRequire,uselessCode} checked by tsc
  */
 /**
  * @license
@@ -25,7 +25,7 @@
  */
 export class TemplateRef {
 }
-function TemplateRef_tsickle_Closure_declarations() {
+if (false) {
     /**
      * The location in the View where the Embedded View logically belongs to.
      *
