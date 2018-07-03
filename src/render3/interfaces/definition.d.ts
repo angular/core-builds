@@ -30,7 +30,7 @@ export declare type ComponentQuery<T> = ComponentTemplate<T>;
  */
 export declare const enum RenderFlags {
     Create = 1,
-    Update = 2,
+    Update = 2
 }
 /**
  * A subclass of `Type` which has a static `ngComponentDef`:`ComponentDef` field making it
@@ -47,7 +47,7 @@ export interface DirectiveType<T> extends Type<T> {
     ngDirectiveDef: never;
 }
 export declare const enum DirectiveDefFlags {
-    ContentQuery = 2,
+    ContentQuery = 2
 }
 /**
  * A subclass of `Type` which has a static `ngPipeDef`:`PipeDef` field making it
@@ -79,7 +79,7 @@ export interface DirectiveDef<T, Selector extends string> {
     /** Token representing the directive. Used by DI. */
     type: Type<T>;
     /** Function that makes a directive public to the DI system. */
-    diPublic: ((def: DirectiveDef<any, string>) => void) | null;
+    diPublic: ((def: DirectiveDef<T, string>) => void) | null;
     /** The selectors that will be used to match nodes to this directive. */
     selectors: CssSelectorList;
     /**
@@ -88,7 +88,7 @@ export interface DirectiveDef<T, Selector extends string> {
      * (as in `@Input('alias') propertyName: any;`).
      */
     readonly inputs: {
-        [P in keyof T]: P;
+        [P in keyof T]: string;
     };
     /**
      * @deprecated This is only here because `NgOnChanges` incorrectly uses declared name instead of
@@ -206,13 +206,13 @@ export interface ComponentDef<T, Selector extends string> extends DirectiveDef<T
  *
  * See: {@link definePipe}
  */
-export interface PipeDef<T> {
+export interface PipeDef<T, S extends string> {
     /**
      * Pipe name.
      *
      * Used to resolve pipe in templates.
      */
-    name: string;
+    name: S;
     /**
      * Factory function used to create a new pipe instance.
      */
@@ -226,6 +226,7 @@ export interface PipeDef<T> {
     pure: boolean;
     onDestroy: (() => void) | null;
 }
+export declare type PipeDefInternal<T> = PipeDef<T, string>;
 export declare type DirectiveDefFeature = <T>(directiveDef: DirectiveDef<T, string>) => void;
 export declare type ComponentDefFeature = <T>(componentDef: ComponentDef<T, string>) => void;
 /**
@@ -243,7 +244,7 @@ export declare type DirectiveTypeList = (DirectiveDef<any, string> | ComponentDe
  * The function is necessary to be able to support forward declarations.
  */
 export declare type PipeDefListOrFactory = (() => PipeDefList) | PipeDefList;
-export declare type PipeDefList = PipeDef<any>[];
+export declare type PipeDefList = PipeDefInternal<any>[];
 export declare type PipeTypesOrFactory = (() => DirectiveTypeList) | DirectiveTypeList;
-export declare type PipeTypeList = (PipeDef<any> | Type<any>)[];
+export declare type PipeTypeList = (PipeDefInternal<any> | Type<any>)[];
 export declare const unusedValueExportToPlacateAjd = 1;

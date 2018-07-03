@@ -79,7 +79,7 @@ export interface NodeCheckFn {
 }
 export declare const enum ArgumentType {
     Inline = 0,
-    Dynamic = 1,
+    Dynamic = 1
 }
 export interface ViewHandleEventFn {
     (view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
@@ -89,7 +89,7 @@ export interface ViewHandleEventFn {
  */
 export declare const enum ViewFlags {
     None = 0,
-    OnPush = 2,
+    OnPush = 2
 }
 /**
  * A node definition in the view.
@@ -186,7 +186,7 @@ export declare const enum NodeFlags {
     DynamicQuery = 536870912,
     TypeNgModule = 1073741824,
     CatQuery = 201326592,
-    Types = 201347067,
+    Types = 201347067
 }
 export interface BindingDef {
     flags: BindingFlags;
@@ -204,7 +204,7 @@ export declare const enum BindingFlags {
     SyntheticProperty = 16,
     SyntheticHostProperty = 32,
     CatSyntheticProperty = 48,
-    Types = 15,
+    Types = 15
 }
 export interface OutputDef {
     type: OutputType;
@@ -214,14 +214,14 @@ export interface OutputDef {
 }
 export declare const enum OutputType {
     ElementOutput = 0,
-    DirectiveOutput = 1,
+    DirectiveOutput = 1
 }
 export declare const enum QueryValueType {
     ElementRef = 0,
     RenderElement = 1,
     TemplateRef = 2,
     ViewContainerRef = 3,
-    Provider = 4,
+    Provider = 4
 }
 export interface ElementDef {
     name: string | null;
@@ -276,7 +276,7 @@ export declare const enum DepFlags {
     SkipSelf = 1,
     Optional = 2,
     Self = 4,
-    Value = 8,
+    Value = 8
 }
 export interface TextDef {
     prefix: string;
@@ -292,7 +292,7 @@ export interface QueryBindingDef {
 }
 export declare const enum QueryBindingType {
     First = 0,
-    All = 1,
+    All = 1
 }
 export interface NgContentDef {
     /**
@@ -348,7 +348,7 @@ export declare const enum ViewState {
     InitState_CallingAfterViewInit = 768,
     InitState_AfterInit = 1024,
     CatDetectChanges = 12,
-    CatInit = 13,
+    CatInit = 13
 }
 export declare function shiftInitState(view: ViewData, priorInitState: ViewState, newInitState: ViewState): boolean;
 export declare function shouldCallLifecycleInitHook(view: ViewData, initState: ViewState, index: number): boolean;
@@ -441,22 +441,22 @@ export interface RootData {
     sanitizer: Sanitizer;
 }
 export declare abstract class DebugContext {
-    readonly abstract view: ViewData;
-    readonly abstract nodeIndex: number | null;
-    readonly abstract injector: Injector;
-    readonly abstract component: any;
-    readonly abstract providerTokens: any[];
-    readonly abstract references: {
+    abstract readonly view: ViewData;
+    abstract readonly nodeIndex: number | null;
+    abstract readonly injector: Injector;
+    abstract readonly component: any;
+    abstract readonly providerTokens: any[];
+    abstract readonly references: {
         [key: string]: any;
     };
-    readonly abstract context: any;
-    readonly abstract componentRenderElement: any;
-    readonly abstract renderNode: any;
+    abstract readonly context: any;
+    abstract readonly componentRenderElement: any;
+    abstract readonly renderNode: any;
     abstract logError(console: Console, ...values: any[]): void;
 }
 export declare const enum CheckType {
     CheckAndUpdate = 0,
-    CheckNoChanges = 1,
+    CheckNoChanges = 1
 }
 export interface ProviderOverride {
     token: any;
