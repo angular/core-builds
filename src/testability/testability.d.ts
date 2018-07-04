@@ -1,4 +1,11 @@
 import * as i0 from '../r3_symbols';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { NgZone } from '../zone/ng_zone';
 /**
  * Testability API.
@@ -6,7 +13,7 @@ import { NgZone } from '../zone/ng_zone';
  * not renamed by Closure Compiler.
  * @experimental
  */
-export interface PublicTestability {
+export declare interface PublicTestability {
     isStable(): boolean;
     whenStable(callback: Function, timeout?: number, updateCallback?: Function): void;
     findProviders(using: any, provider: string, exactMatch: boolean): any[];
@@ -33,7 +40,7 @@ export declare class Testability implements PublicTestability {
     private _callbacks;
     private taskTrackingZone;
     constructor(_ngZone: NgZone);
-    private _watchAngularEvents();
+    private _watchAngularEvents;
     /**
      * Increases the number of pending request
      * @deprecated pending requests are now tracked with zones.
@@ -48,9 +55,9 @@ export declare class Testability implements PublicTestability {
      * Whether an associated application is stable
      */
     isStable(): boolean;
-    private _runCallbacksIfReady();
-    private getPendingTasks();
-    private addCallback(cb, timeout?, updateCb?);
+    private _runCallbacksIfReady;
+    private getPendingTasks;
+    private addCallback;
     /**
      * Wait for the application to be stable with a timeout. If the timeout is reached before that
      * happens, the callback receives a list of the macro tasks that were pending, otherwise null.

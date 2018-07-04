@@ -102,5 +102,5 @@ export declare const TRANSLATIONS_FORMAT: InjectionToken<string>;
 export declare enum MissingTranslationStrategy {
     Error = 0,
     Warning = 1,
-    Ignore = 2,
+    Ignore = 2
 }

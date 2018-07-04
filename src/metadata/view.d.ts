@@ -44,5 +44,5 @@ export declare enum ViewEncapsulation {
      * ### Example
      * {@example core/ts/metadata/encapsulation.ts region='longform'}
      */
-    ShadowDom = 3,
+    ShadowDom = 3
 }

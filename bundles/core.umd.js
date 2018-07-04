@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+28.sha-0922228
+ * @license Angular v6.1.0-beta.3+35.sha-b6af870
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -228,6 +228,7 @@ function makeDecorator(name, props, parentClass, chainFn, typeFn) {
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        var _a;
         if (this instanceof DecoratorFactory) {
             metaCtor.call.apply(metaCtor, __spread([this], args));
             return this;
@@ -246,7 +247,6 @@ function makeDecorator(name, props, parentClass, chainFn, typeFn) {
         if (chainFn)
             chainFn(TypeDecorator);
         return TypeDecorator;
-        var _a;
     }
     if (parentClass) {
         DecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -276,6 +276,7 @@ function makeParamDecorator(name, props, parentClass) {
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        var _a;
         if (this instanceof ParamDecoratorFactory) {
             metaCtor.apply(this, args);
             return this;
@@ -297,7 +298,6 @@ function makeParamDecorator(name, props, parentClass) {
             (parameters[index] = parameters[index] || []).push(annotationInstance);
             return cls;
         }
-        var _a;
     }
     if (parentClass) {
         ParamDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -313,6 +313,7 @@ function makePropDecorator(name, props, parentClass) {
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        var _a;
         if (this instanceof PropDecoratorFactory) {
             metaCtor.apply(this, args);
             return this;
@@ -328,7 +329,6 @@ function makePropDecorator(name, props, parentClass) {
             meta[name] = meta.hasOwnProperty(name) && meta[name] || [];
             meta[name].unshift(decoratorInstance);
         };
-        var _a;
     }
     if (parentClass) {
         PropDecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -981,6 +981,7 @@ function tryResolveToken(token, record, records, parent, notFoundValue, flags) {
     }
 }
 function resolveToken(token, record, records, parent, notFoundValue, flags) {
+    var _a;
     var value;
     if (record && !(flags & 4 /* SkipSelf */)) {
         // If we don't have a record, this implies that we don't own the provider hence don't know how
@@ -1022,7 +1023,6 @@ function resolveToken(token, record, records, parent, notFoundValue, flags) {
         value = parent.get(token, notFoundValue, 0 /* Default */);
     }
     return value;
-    var _a;
 }
 function computeDeps(provider) {
     var deps = EMPTY;
@@ -6017,8 +6017,8 @@ function convertInjectableProviderToFactory(type, provider) {
             deps_2 = reflectionCapabilities.parameters(type);
         }
         return function () {
-            return new ((_a = classProvider_1.useClass).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
             var _a;
+            return new ((_a = classProvider_1.useClass).bind.apply(_a, __spread([void 0], injectArgs(deps_2))))();
         };
     }
     else {
@@ -7824,6 +7824,7 @@ function splitMatchedQueriesDsl(matchedQueriesDsl) {
 }
 function splitDepsDsl(deps, sourceName) {
     return deps.map(function (value) {
+        var _a;
         var token;
         var flags;
         if (Array.isArray(value)) {
@@ -7837,7 +7838,6 @@ function splitDepsDsl(deps, sourceName) {
             Object.defineProperty(token, SOURCE, { value: sourceName, configurable: true });
         }
         return { flags: flags, token: token, tokenKey: tokenKey(token) };
-        var _a;
     });
 }
 function getParentRenderElement(view, renderHost, def) {
@@ -8257,6 +8257,7 @@ function InheritDefinitionFeature(definition) {
     var superType = getSuperType(definition.type);
     var superDef = undefined;
     var _loop_1 = function () {
+        var e_1, _a;
         if (isComponentDef(definition)) {
             superDef = superType.ngComponentDef || superType.ngDirectiveDef;
         }
@@ -8332,7 +8333,6 @@ function InheritDefinitionFeature(definition) {
             }
         }
         superType = Object.getPrototypeOf(superType);
-        var e_1, _a;
     };
     while (superType && !superDef) {
         _loop_1();
@@ -11640,11 +11640,40 @@ function isUseExistingProvider(meta) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function compilePipe(type, meta) {
+    var def = null;
+    Object.defineProperty(type, NG_PIPE_DEF, {
+        get: function () {
+            if (def === null) {
+                var sourceMapUrl = "ng://" + stringify$1(type) + "/ngPipeDef.js";
+                var name_1 = type.name;
+                var res = compiler.compilePipeFromMetadata({
+                    name: name_1,
+                    type: new compiler.WrappedNodeExpr(type),
+                    deps: reflectDependencies(type),
+                    pipeName: meta.name,
+                    pure: meta.pure !== undefined ? meta.pure : true,
+                });
+                def = compiler.jitExpression(res.expression, angularCoreEnv, sourceMapUrl);
+            }
+            return def;
+        }
+    });
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var ivyEnabled = true;
 var R3_COMPILE_COMPONENT = compileComponent;
 var R3_COMPILE_DIRECTIVE = compileDirective;
 var R3_COMPILE_INJECTABLE = compileInjectable$1;
 var R3_COMPILE_NGMODULE = compileNgModule$1;
+var R3_COMPILE_PIPE = compilePipe;
 
 /**
  * @license
@@ -11765,7 +11794,7 @@ var Component = makeDecorator('Component', function (c) {
  *
  * @Annotation
  */
-var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); });
+var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return (R3_COMPILE_PIPE || (function () { }))(type, meta); });
 /**
  *
  * @Annotation
@@ -11890,7 +11919,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+28.sha-0922228');
+var VERSION = new Version('6.1.0-beta.3+35.sha-b6af870');
 
 /**
  * @license
@@ -13731,6 +13760,7 @@ var DebugElement = /** @class */ (function (_super) {
     };
     DebugElement.prototype.insertChildrenAfter = function (child, newChildren) {
         var _this = this;
+        var _a;
         var siblingIndex = this.childNodes.indexOf(child);
         if (siblingIndex !== -1) {
             (_a = this.childNodes).splice.apply(_a, __spread([siblingIndex + 1, 0], newChildren));
@@ -13741,7 +13771,6 @@ var DebugElement = /** @class */ (function (_super) {
                 c.parent = _this;
             });
         }
-        var _a;
     };
     DebugElement.prototype.insertBefore = function (refChild, newChild) {
         var refIndex = this.childNodes.indexOf(refChild);
@@ -14241,28 +14270,29 @@ function sanitizeSrcset(srcset) {
  * found in the LICENSE file at https://angular.io/license
  */
 function tagSet(tags) {
+    var e_1, _a;
     var res = {};
     try {
-        for (var _a = __values(tags.split(',')), _b = _a.next(); !_b.done; _b = _a.next()) {
-            var t = _b.value;
+        for (var _b = __values(tags.split(',')), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var t = _c.value;
             res[t] = true;
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
         }
         finally { if (e_1) throw e_1.error; }
     }
     return res;
-    var e_1, _c;
 }
 function merge$1() {
     var sets = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         sets[_i] = arguments[_i];
     }
+    var e_2, _a;
     var res = {};
     try {
         for (var sets_1 = __values(sets), sets_1_1 = sets_1.next(); !sets_1_1.done; sets_1_1 = sets_1.next()) {
@@ -14281,7 +14311,6 @@ function merge$1() {
         finally { if (e_2) throw e_2.error; }
     }
     return res;
-    var e_2, _a;
 }
 // Good source of info about elements and attributes
 // http://dev.w3.org/html5/spec/Overview.html#semantics
@@ -14657,14 +14686,15 @@ function anchorDef(flags, matchedQueriesDsl, ngContentIndex, childCount, handleE
 }
 function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childCount, namespaceAndName, fixedAttrs, bindings, outputs, handleEvent, componentView, componentRendererType) {
     if (fixedAttrs === void 0) { fixedAttrs = []; }
+    var _a;
     if (!handleEvent) {
         handleEvent = NOOP;
     }
-    var _a = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _a.matchedQueries, references = _a.references, matchedQueryIds = _a.matchedQueryIds;
+    var _b = splitMatchedQueriesDsl(matchedQueriesDsl), matchedQueries = _b.matchedQueries, references = _b.references, matchedQueryIds = _b.matchedQueryIds;
     var ns = null;
     var name = null;
     if (namespaceAndName) {
-        _b = __read(splitNamespace(namespaceAndName), 2), ns = _b[0], name = _b[1];
+        _a = __read(splitNamespace(namespaceAndName), 2), ns = _a[0], name = _a[1];
     }
     bindings = bindings || [];
     var bindingDefs = new Array(bindings.length);
@@ -14740,7 +14770,6 @@ function elementDef(checkIndex, flags, matchedQueriesDsl, ngContentIndex, childC
         query: null,
         ngContent: null
     };
-    var _b;
 }
 function createElement(view, renderHost, def) {
     var elDef = def.element;
@@ -17928,6 +17957,7 @@ var DebugContext_ = /** @class */ (function () {
         var renderNodeIndex = getRenderNodeIndex(logViewDef, logNodeIndex);
         var currRenderNodeIndex = -1;
         var nodeLogger = function () {
+            var _a;
             currRenderNodeIndex++;
             if (currRenderNodeIndex === renderNodeIndex) {
                 return (_a = console.error).bind.apply(_a, __spread([console], values));
@@ -17935,7 +17965,6 @@ var DebugContext_ = /** @class */ (function () {
             else {
                 return NOOP;
             }
-            var _a;
         };
         logViewDef.factory(nodeLogger);
         if (currRenderNodeIndex < renderNodeIndex) {
@@ -18578,6 +18607,7 @@ exports.ɵmakeDecorator = makeDecorator;
 exports.ɵisObservable = isObservable;
 exports.ɵisPromise = isPromise;
 exports.ɵclearOverrides = clearOverrides;
+exports.ɵinitServicesIfNeeded = initServicesIfNeeded;
 exports.ɵoverrideComponentView = overrideComponentView;
 exports.ɵoverrideProvider = overrideProvider;
 exports.ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR;

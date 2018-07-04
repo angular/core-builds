@@ -1,4 +1,11 @@
 import * as i0 from '../r3_symbols';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import { Compiler } from './compiler';
 import { NgModuleFactory } from './ng_module_factory';
 import { NgModuleFactoryLoader } from './ng_module_factory_loader';
@@ -27,7 +34,7 @@ export declare class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
     private _config;
     constructor(_compiler: Compiler, config?: SystemJsNgModuleLoaderConfig);
     load(path: string): Promise<NgModuleFactory<any>>;
-    private loadAndCompile(path);
-    private loadFactory(path);
+    private loadAndCompile;
+    private loadFactory;
     static ngInjectableDef: i0.InjectableDef<SystemJsNgModuleLoader>;
 }
