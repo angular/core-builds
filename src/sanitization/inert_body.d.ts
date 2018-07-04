@@ -28,20 +28,20 @@ export declare class InertBodyHelper {
      * See
      * https://github.com/cure53/DOMPurify/blob/a992d3a75031cb8bb032e5ea8399ba972bdf9a65/src/purify.js#L439-L449
      */
-    private getInertBodyElement_XHR(html);
+    private getInertBodyElement_XHR;
     /**
      * Use DOMParser to create and fill an inert body element (on Firefox)
      * See https://github.com/cure53/DOMPurify/releases/tag/0.6.7
      *
      */
-    private getInertBodyElement_DOMParser(html);
+    private getInertBodyElement_DOMParser;
     /**
      * Use an HTML5 `template` element, if supported, or an inert body element created via
      * `createHtmlDocument` to create and fill an inert DOM element.
      * This is the default sane strategy to use if the browser does not require one of the specialised
      * strategies above.
      */
-    private getInertBodyElement_InertDocument(html);
+    private getInertBodyElement_InertDocument;
     /**
      * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1'
      * attribute to declare ns1 namespace and prefixes the attribute with 'ns1' (e.g.
@@ -50,5 +50,5 @@ export declare class InertBodyHelper {
      * This is undesirable since we don't want to allow any of these custom attributes. This method
      * strips them all.
      */
-    private stripCustomNsAttrs(el);
+    private stripCustomNsAttrs;
 }
