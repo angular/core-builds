@@ -170,9 +170,9 @@ export declare class TestBed implements Injector {
     }): void;
     configureTestingModule(moduleDef: TestModuleMetadata): void;
     compileComponents(): Promise<any>;
-    private _initIfNeeded();
-    private _createCompilerAndModule();
-    private _assertNotInstantiated(methodName, methodDescription);
+    private _initIfNeeded;
+    private _createCompilerAndModule;
+    private _assertNotInstantiated;
     get(token: any, notFoundValue?: any): any;
     execute(tokens: any[], fn: Function, context?: any): any;
     overrideModule(ngModule: Type<any>, override: MetadataOverride<NgModule>): void;
@@ -201,7 +201,7 @@ export declare class TestBed implements Injector {
     deprecatedOverrideProvider(token: any, provider: {
         useValue: any;
     }): void;
-    private overrideProviderImpl(token, provider, deprecated?);
+    private overrideProviderImpl;
     overrideTemplateUsingTestingModule(component: Type<any>, template: string): void;
     createComponent<T>(component: Type<T>): ComponentFixture<T>;
 }
@@ -240,7 +240,7 @@ export declare function inject(tokens: any[], fn: Function): () => any;
 export declare class InjectSetupWrapper {
     private _moduleDef;
     constructor(_moduleDef: () => TestModuleMetadata);
-    private _addModule();
+    private _addModule;
     inject(tokens: any[], fn: Function): () => any;
 }
 /**
