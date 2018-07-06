@@ -1,12 +1,12 @@
 /**
- * @license Angular v6.1.0-beta.3+45.sha-fddd2af
+ * @license Angular v6.1.0-beta.3+47.sha-1e74ea9
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { __assign, __decorate, __extends, __metadata, __param, __read, __spread, __values } from 'tslib';
-import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, compilePipeFromMetadata, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
-import { Observable, Subject, Subscription, merge } from 'rxjs';
+import { __decorate, __param, __metadata, __assign, __extends, __spread, __read, __values } from 'tslib';
+import { Subject, Subscription, Observable, merge } from 'rxjs';
+import { LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileInjector, compileNgModule, jitExpression, ConstantPool, compileComponentFromMetadata, compileDirectiveFromMetadata, makeBindingParser, parseHostBindings, parseTemplate, compileInjectable, compilePipeFromMetadata } from '@angular/compiler';
 import { share } from 'rxjs/operators';
 
 /**
@@ -505,7 +505,6 @@ function maybeQueueResolutionOfComponentResources(metadata) {
 function componentNeedsResolution(component) {
     return component.templateUrl || component.styleUrls && component.styleUrls.length;
 }
-
 function unwrapResponse(response) {
     return typeof response == 'string' ? response : response.text();
 }
@@ -809,9 +808,7 @@ function resolveProvider(provider) {
     else if (provider.useFactory) {
         fn = provider.useFactory;
     }
-    else if (provider.useExisting) {
-        // Just use IDENT
-    }
+    else if (provider.useExisting) ;
     else if (provider.useClass) {
         useNew = true;
         fn = resolveForwardRef(provider.useClass);
@@ -947,7 +944,7 @@ function computeDeps(provider) {
     if (providerDeps && providerDeps.length) {
         deps = [];
         for (var i = 0; i < providerDeps.length; i++) {
-            var options = 6;
+            var options = 6 /* Default */;
             var token = resolveForwardRef(providerDeps[i]);
             if (token instanceof Array) {
                 for (var j = 0, annotations = token; j < annotations.length; j++) {
@@ -1052,7 +1049,7 @@ function injectArgs(types) {
                 throw new Error('Arguments array must have arguments.');
             }
             var type = undefined;
-            var flags = 0;
+            var flags = 0 /* Default */;
             for (var j = 0; j < arg.length; j++) {
                 var meta = arg[j];
                 if (meta instanceof Optional || meta.ngMetadataName === 'Optional') {
@@ -1087,10 +1084,6 @@ function injectArgs(types) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// The functions in this file verify that the assumptions we are making
-// about state in an instruction are correct before implementing any logic.
-// They are meant only to be called in dev mode as sanity checks.
-
 function assertEqual(actual, expected, msg) {
     if (actual != expected) {
         throwError(msg);
@@ -1101,7 +1094,6 @@ function assertNotEqual(actual, expected, msg) {
         throwError(msg);
     }
 }
-
 function assertLessThan(actual, expected, msg) {
     if (actual >= expected) {
         throwError(msg);
@@ -1160,8 +1152,6 @@ var RENDERER = 11;
 var SANITIZER = 12;
 var TAIL = 13;
 var CONTAINER_INDEX = 14;
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -1199,8 +1189,8 @@ function queueInitHooks(index, onInit, doCheck, tView) {
  */
 function queueLifecycleHooks(flags, tView) {
     if (tView.firstTemplatePass) {
-        var start = flags >> 13;
-        var count = flags & 4095;
+        var start = flags >> 13 /* DirectiveStartingIndexShift */;
+        var count = flags & 4095 /* DirectiveCountMask */;
         var end = start + count;
         // It's necessary to loop through the directives at elementEnd() (rather than processing in
         // directiveCreate) so we can preserve the current hook order. Content, view, and destroy
@@ -1349,8 +1339,6 @@ var ACTIVE_INDEX = 0;
 // As we already have these constants in LViewData, we don't need to re-create them.
 var VIEWS = 4;
 var RENDER_PARENT = 5;
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -1360,8 +1348,6 @@ var RENDER_PARENT = 5;
  * found in the LICENSE file at https://angular.io/license
  */
 var NG_PROJECT_AS_ATTR_NAME = 'ngProjectAs';
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -1402,8 +1388,6 @@ function typeName(type) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -1425,8 +1409,6 @@ function isProceduralRenderer(renderer) {
 var domRendererFactory3 = {
     createRenderer: function (hostElement, rendererType) { return document; }
 };
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -1531,7 +1513,7 @@ function getNextLNodeWithProjection(node) {
     var pNextOrParent = node.pNextOrParent;
     if (pNextOrParent) {
         // The node is projected
-        var isLastProjectedNode = pNextOrParent.tNode.type === 1;
+        var isLastProjectedNode = pNextOrParent.tNode.type === 1 /* Projection */;
         // returns pNextOrParent if we are not at the end of the list, null otherwise
         return isLastProjectedNode ? null : pNextOrParent;
     }
@@ -2065,7 +2047,7 @@ function isCssClassMatching(nodeClassAttrVal, cssClassToMatch) {
  */
 function isNodeMatchingSelector(tNode, selector) {
     ngDevMode && assertDefined(selector[0], 'Selector should have a tag name');
-    var mode = 4;
+    var mode = 4 /* ELEMENT */;
     var nodeAttrs = tNode.attrs;
     var selectOnlyMarkerIdx = nodeAttrs ? nodeAttrs.indexOf(1 /* SelectOnly */) : -1;
     // When processing ":not" selectors, we skip to the next ":not" if the
@@ -2536,17 +2518,6 @@ function resetApplicationState() {
     previousOrParentNode = null;
 }
 /**
- *
- * @param hostNode Existing node to render into.
- * @param template Template function with the instructions.
- * @param context to pass into the template.
- * @param providedRendererFactory renderer factory to use
- * @param host The host element node to use
- * @param directives Directive defs that should be used for matching
- * @param pipes Pipe defs that should be used for matching
- */
-
-/**
  * Used for creating the LViewNode of a dynamic embedded view,
  * either through ViewContainerRef.createEmbeddedView() or TemplateRef.createEmbeddedView().
  * Such lViewNode will then be renderer with renderEmbeddedTemplate() (see below).
@@ -2595,7 +2566,7 @@ function renderEmbeddedTemplate(viewNode, tView, context, rf) {
     finally {
         // renderEmbeddedTemplate() is called twice in fact, once for creation only and then once for
         // update. When for creation only, leaveView() must not trigger view hooks, nor clean flags.
-        var isCreationOnly = (rf & 1 /* Create */) === 1;
+        var isCreationOnly = (rf & 1 /* Create */) === 1 /* Create */;
         leaveView(oldView, isCreationOnly);
         isParent = _isParent;
         previousOrParentNode = _previousOrParentNode;
@@ -2804,9 +2775,9 @@ function isComponent(tNode) {
  */
 function instantiateDirectivesDirectly() {
     var tNode = previousOrParentNode.tNode;
-    var count = tNode.flags & 4095;
+    var count = tNode.flags & 4095 /* DirectiveCountMask */;
     if (count > 0) {
-        var start = tNode.flags >> 13;
+        var start = tNode.flags >> 13 /* DirectiveStartingIndexShift */;
         var end = start + count;
         var tDirectives = tView.directives;
         for (var i = start; i < end; i++) {
@@ -3204,12 +3175,12 @@ function setInputsForProperty(inputs, value) {
  * @returns PropertyAliases|null aggregate of all properties if any, `null` otherwise
  */
 function generatePropertyAliases(tNodeFlags, direction) {
-    var count = tNodeFlags & 4095;
+    var count = tNodeFlags & 4095 /* DirectiveCountMask */;
     var propStore = null;
     if (count > 0) {
-        var start = tNodeFlags >> 13;
+        var start = tNodeFlags >> 13 /* DirectiveStartingIndexShift */;
         var end = start + count;
-        var isInput = direction === 0;
+        var isInput = direction === 0 /* Input */;
         var defs = tView.directives;
         for (var i = start; i < end; i++) {
             var directiveDef = defs[i];
@@ -3978,19 +3949,6 @@ function scheduleTick(rootContext) {
         });
     }
 }
-/**
- * Used to perform change detection on the whole application.
- *
- * This is equivalent to `detectChanges`, but invoked on root component. Additionally, `tick`
- * executes lifecycle hooks and conditionally checks components based on their
- * `ChangeDetectionStrategy` and dirtiness.
- *
- * The preferred way to trigger change detection is to call `markDirty`. `markDirty` internally
- * schedules `tick` using a scheduler in order to coalesce multiple `markDirty` calls into a
- * single change detection run. By default, the scheduler is `requestAnimationFrame`, but can
- * be changed when calling `renderComponent` and providing the `scheduler` option.
- */
-
 function tickRootContext(rootContext) {
     for (var i = 0; i < rootContext.components.length; i++) {
         var rootComponent = rootContext.components[i];
@@ -4382,8 +4340,6 @@ var ROOT_DIRECTIVE_INDICES = _ROOT_DIRECTIVE_INDICES;
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// TODO: A hack to not pull in the NullInjector from @angular/core.
-
 /**
  * Bootstraps a Component into an existing host element and returns an instance
  * of the component.
@@ -4442,20 +4398,6 @@ function createRootContext(scheduler) {
     };
 }
 /**
- * Used to enable lifecycle hooks on the root component.
- *
- * Include this feature when calling `renderComponent` if the root component
- * you are rendering has lifecycle hooks defined. Otherwise, the hooks won't
- * be called properly.
- *
- * Example:
- *
- * ```
- * renderComponent(AppComponent, {features: [RootLifecycleHooks]});
- * ```
- */
-
-/**
  * Retrieve the root context for any component by walking the parent `LView` until
  * reaching the root `LView`.
  *
@@ -4466,26 +4408,6 @@ function getRootContext(component) {
     ngDevMode && assertDefined(rootContext, 'rootContext');
     return rootContext;
 }
-/**
- * Retrieve the host element of the component.
- *
- * Use this function to retrieve the host element of the component. The host
- * element is the element which the component is associated with.
- *
- * @param component Component for which the host element should be retrieved.
- */
-
-/**
- * Retrieves the rendered text for a given component.
- *
- * This function retrieves the host element of a component and
- * and then returns the `textContent` for that element. This implies
- * that the text returned will include re-projected content of
- * the component as well.
- *
- * @param component The component to return the content text for.
- */
-
 /**
  * Wait on component until it is rendered.
  *
@@ -5906,7 +5828,7 @@ function getClosureSafeProperty$1(objWithPropertyToExtract, target) {
  */
 var GET_PROPERTY_NAME$1 = {};
 var USE_VALUE$1 = getClosureSafeProperty$1({ provide: String, useValue: GET_PROPERTY_NAME$1 }, GET_PROPERTY_NAME$1);
-var EMPTY_ARRAY$1 = [];
+var EMPTY_ARRAY = [];
 function convertInjectableProviderToFactory(type, provider) {
     if (!provider) {
         var reflectionCapabilities = new ReflectionCapabilities();
@@ -5924,7 +5846,7 @@ function convertInjectableProviderToFactory(type, provider) {
     }
     else if (provider.useFactory) {
         var factoryProvider_1 = provider;
-        return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY$1))); };
+        return function () { return factoryProvider_1.useFactory.apply(factoryProvider_1, __spread(injectArgs(factoryProvider_1.deps || EMPTY_ARRAY))); };
     }
     else if (provider.useClass) {
         var classProvider_1 = provider;
@@ -5974,11 +5896,9 @@ var Injectable = makeDecorator('Injectable', undefined, undefined, undefined, fu
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
 var ERROR_DEBUG_CONTEXT = 'ngDebugContext';
 var ERROR_ORIGINAL_ERROR = 'ngOriginalError';
 var ERROR_LOGGER = 'ngErrorLogger';
-
 function getDebugContext(error) {
     return error[ERROR_DEBUG_CONTEXT];
 }
@@ -6963,7 +6883,7 @@ var NOT_YET = {};
  * a circular dependency among the providers.
  */
 var CIRCULAR$2 = {};
-var EMPTY_ARRAY$2 = [];
+var EMPTY_ARRAY$1 = [];
 /**
  * A lazily initialized NullInjector.
  */
@@ -7104,7 +7024,7 @@ var R3Injector = /** @class */ (function () {
         // If defOrWrappedType was an InjectorDefTypeWithProviders, then .providers may hold some
         // extra providers.
         var providers = (ngModule !== undefined) && defOrWrappedDef.providers ||
-            EMPTY_ARRAY$2;
+            EMPTY_ARRAY$1;
         // Finally, if defOrWrappedType was an `InjectorDefTypeWithProviders`, then the actual
         // `InjectorDef` is on its `ngModule`.
         if (ngModule !== undefined) {
@@ -7283,11 +7203,6 @@ function couldBeInjectableType(value) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * The `di` module provides dependency injection container services.
  */
 
 /**
@@ -7501,7 +7416,7 @@ function shiftInitState(view, priorInitState, newInitState) {
     // terminating in the AfterInit state, which ensures the Init methods are called
     // at least once and only once.
     var state = view.state;
-    var initState = state & 1792;
+    var initState = state & 1792 /* InitState_Mask */;
     if (initState === priorInitState) {
         view.state = (state & ~1792 /* InitState_Mask */) | newInitState;
         view.initIndex = -1;
@@ -7940,7 +7855,7 @@ function inlineInterpolate(valueCount, c0, a1, c1, a2, c2, a3, c3, a4, c4, a5, c
 function _toStringWithNull(v) {
     return v != null ? v.toString() : '';
 }
-var EMPTY_ARRAY = [];
+var EMPTY_ARRAY$2 = [];
 var EMPTY_MAP = {};
 
 /**
@@ -8868,9 +8783,9 @@ function getOrCreateInjectable(di, token, flags) {
             // directives associated with the injector's corresponding node to get the directive instance.
             var node = injector.node;
             var nodeFlags = node.tNode.flags;
-            var count = nodeFlags & 4095;
+            var count = nodeFlags & 4095 /* DirectiveCountMask */;
             if (count !== 0) {
-                var start = nodeFlags >> 13;
+                var start = nodeFlags >> 13 /* DirectiveStartingIndexShift */;
                 var end = start + count;
                 var defs = node.view[TVIEW].directives;
                 for (var i = start; i < end; i++) {
@@ -9021,10 +8936,6 @@ var ReadFromInjectorFn = /** @class */ (function () {
 function getOrCreateElementRef(di) {
     return di.elementRef || (di.elementRef = new ElementRef(di.node.native));
 }
-
-
-
-
 /** A ref to a node's native element. */
 var ElementRef = /** @class */ (function () {
     function ElementRef(nativeElement) {
@@ -9211,12 +9122,12 @@ function PublicFeature(definition) {
  * method.
  *
  */
-var ComponentRef$1 = /** @class */ (function () {
+var ComponentRef = /** @class */ (function () {
     function ComponentRef() {
     }
     return ComponentRef;
 }());
-var ComponentFactory$1 = /** @class */ (function () {
+var ComponentFactory = /** @class */ (function () {
     function ComponentFactory() {
     }
     return ComponentFactory;
@@ -9235,7 +9146,6 @@ function noComponentFactoryError(component) {
     return error;
 }
 var ERROR_COMPONENT = 'ngComponent';
-
 var _NullComponentFactoryResolver = /** @class */ (function () {
     function _NullComponentFactoryResolver() {
     }
@@ -9244,7 +9154,7 @@ var _NullComponentFactoryResolver = /** @class */ (function () {
     };
     return _NullComponentFactoryResolver;
 }());
-var ComponentFactoryResolver$1 = /** @class */ (function () {
+var ComponentFactoryResolver = /** @class */ (function () {
     function ComponentFactoryResolver() {
     }
     ComponentFactoryResolver.NULL = new _NullComponentFactoryResolver();
@@ -9289,7 +9199,7 @@ var ComponentFactoryBoundToModule = /** @class */ (function (_super) {
         return this.factory.create(injector, projectableNodes, rootSelectorOrNode, ngModule || this.ngModule);
     };
     return ComponentFactoryBoundToModule;
-}(ComponentFactory$1));
+}(ComponentFactory));
 
 /**
  * @license
@@ -9409,7 +9319,7 @@ var Renderer2 = /** @class */ (function () {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-var ComponentFactoryResolver$$1 = /** @class */ (function (_super) {
+var ComponentFactoryResolver$1 = /** @class */ (function (_super) {
     __extends(ComponentFactoryResolver$$1, _super);
     function ComponentFactoryResolver$$1() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -9417,10 +9327,10 @@ var ComponentFactoryResolver$$1 = /** @class */ (function (_super) {
     ComponentFactoryResolver$$1.prototype.resolveComponentFactory = function (component) {
         ngDevMode && assertComponentType(component);
         var componentDef = component.ngComponentDef;
-        return new ComponentFactory$$1(componentDef);
+        return new ComponentFactory$1(componentDef);
     };
     return ComponentFactoryResolver$$1;
-}(ComponentFactoryResolver$1));
+}(ComponentFactoryResolver));
 function toRefArray(map) {
     var array = [];
     for (var nonMinified in map) {
@@ -9443,7 +9353,7 @@ var SCHEDULER = new InjectionToken('SCHEDULER_TOKEN', { providedIn: 'root', fact
 /**
  * Render3 implementation of {@link viewEngine_ComponentFactory}.
  */
-var ComponentFactory$$1 = /** @class */ (function (_super) {
+var ComponentFactory$1 = /** @class */ (function (_super) {
     __extends(ComponentFactory$$1, _super);
     function ComponentFactory$$1(componentDef) {
         var _this = _super.call(this) || this;
@@ -9496,10 +9406,10 @@ var ComponentFactory$$1 = /** @class */ (function (_super) {
                 rendererFactory.end();
         }
         // TODO(misko): this is the wrong injector here.
-        return new ComponentRef$$1(this.componentType, component, rootView, ngModule.injector, hostNode);
+        return new ComponentRef$1(this.componentType, component, rootView, ngModule.injector, hostNode);
     };
     return ComponentFactory$$1;
-}(ComponentFactory$1));
+}(ComponentFactory));
 /**
  * Represents an instance of a Component created via a {@link ComponentFactory}.
  *
@@ -9508,7 +9418,7 @@ var ComponentFactory$$1 = /** @class */ (function (_super) {
  * method.
  *
  */
-var ComponentRef$$1 = /** @class */ (function (_super) {
+var ComponentRef$1 = /** @class */ (function (_super) {
     __extends(ComponentRef$$1, _super);
     function ComponentRef$$1(componentType, instance, rootView, injector, hostNode) {
         var _this = _super.call(this) || this;
@@ -9539,7 +9449,7 @@ var ComponentRef$$1 = /** @class */ (function (_super) {
         this.destroyCbs.push(callback);
     };
     return ComponentRef$$1;
-}(ComponentRef$1));
+}(ComponentRef));
 
 /**
  * @license
@@ -9783,7 +9693,7 @@ function i18nApply(startIndex, instructions) {
                 if (ngDevMode) {
                     ngDevMode.rendererRemoveNode++;
                 }
-                var index = instruction & 536870911;
+                var index = instruction & 536870911 /* IndexMask */;
                 var removedNode = load(index);
                 var parentNode = getParentLNode(removedNode);
                 removeChild(parentNode, removedNode.native || null, viewData);
@@ -9927,7 +9837,7 @@ function i18nInterpolationV(instructions, values) {
  *
  *
  */
-var NgModuleRef$1 = /** @class */ (function () {
+var NgModuleRef = /** @class */ (function () {
     function NgModuleRef() {
     }
     return NgModuleRef;
@@ -9935,7 +9845,7 @@ var NgModuleRef$1 = /** @class */ (function () {
 /**
  * @experimental
  */
-var NgModuleFactory$1 = /** @class */ (function () {
+var NgModuleFactory = /** @class */ (function () {
     function NgModuleFactory() {
     }
     return NgModuleFactory;
@@ -9949,11 +9859,11 @@ var NgModuleFactory$1 = /** @class */ (function () {
  * found in the LICENSE file at https://angular.io/license
  */
 var COMPONENT_FACTORY_RESOLVER = {
-    provide: ComponentFactoryResolver$1,
-    useFactory: function () { return new ComponentFactoryResolver$$1(); },
+    provide: ComponentFactoryResolver,
+    useFactory: function () { return new ComponentFactoryResolver$1(); },
     deps: [],
 };
-var NgModuleRef$$1 = /** @class */ (function (_super) {
+var NgModuleRef$1 = /** @class */ (function (_super) {
     __extends(NgModuleRef$$1, _super);
     function NgModuleRef$$1(ngModuleType, parentInjector) {
         var _this = _super.call(this) || this;
@@ -9965,13 +9875,13 @@ var NgModuleRef$$1 = /** @class */ (function (_super) {
         _this._bootstrapComponents = ngModuleDef.bootstrap;
         var additionalProviders = [
             COMPONENT_FACTORY_RESOLVER, {
-                provide: NgModuleRef$1,
+                provide: NgModuleRef,
                 useValue: _this,
             }
         ];
         _this.injector = createInjector(ngModuleType, parentInjector, additionalProviders);
         _this.instance = _this.injector.get(ngModuleType);
-        _this.componentFactoryResolver = new ComponentFactoryResolver$$1();
+        _this.componentFactoryResolver = new ComponentFactoryResolver$1();
         return _this;
     }
     NgModuleRef$$1.prototype.destroy = function () {
@@ -9984,8 +9894,8 @@ var NgModuleRef$$1 = /** @class */ (function (_super) {
         this.destroyCbs.push(callback);
     };
     return NgModuleRef$$1;
-}(NgModuleRef$1));
-var NgModuleFactory$$1 = /** @class */ (function (_super) {
+}(NgModuleRef));
+var NgModuleFactory$1 = /** @class */ (function (_super) {
     __extends(NgModuleFactory$$1, _super);
     function NgModuleFactory$$1(moduleType) {
         var _this = _super.call(this) || this;
@@ -9993,10 +9903,10 @@ var NgModuleFactory$$1 = /** @class */ (function (_super) {
         return _this;
     }
     NgModuleFactory$$1.prototype.create = function (parentInjector) {
-        return new NgModuleRef$$1(this.moduleType, parentInjector);
+        return new NgModuleRef$1(this.moduleType, parentInjector);
     };
     return NgModuleFactory$$1;
-}(NgModuleFactory$1));
+}(NgModuleFactory));
 
 /**
  * @license
@@ -10494,8 +10404,6 @@ var EventEmitter = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -10504,8 +10412,6 @@ var EventEmitter = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -10514,8 +10420,6 @@ var EventEmitter = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Note: This hack is necessary so we don't erroneously get a circular dependency
-// failure based on types.
 
 /**
  * @license
@@ -10650,8 +10554,8 @@ function getIdxOfMatchingSelector(tNode, selector) {
 function getIdxOfMatchingDirective(node, type) {
     var defs = node.view[TVIEW].directives;
     var flags = node.tNode.flags;
-    var count = flags & 4095;
-    var start = flags >> 13;
+    var count = flags & 4095 /* DirectiveCountMask */;
+    var start = flags >> 13 /* DirectiveStartingIndexShift */;
     var end = start + count;
     for (var i = start; i < end; i++) {
         var def = defs[i];
@@ -11836,7 +11740,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+45.sha-fddd2af');
+var VERSION = new Version('6.1.0-beta.3+47.sha-1e74ea9');
 
 /**
  * @license
@@ -12968,8 +12872,8 @@ var PlatformRef = /** @class */ (function () {
         if (compilerOptions === void 0) { compilerOptions = []; }
         var compilerFactory = this.injector.get(CompilerFactory);
         var options = optionsReducer({}, compilerOptions);
-        var compiler$$1 = compilerFactory.createCompiler([options]);
-        return compiler$$1.compileModuleAsync(moduleType)
+        var compiler = compilerFactory.createCompiler([options]);
+        return compiler.compileModuleAsync(moduleType)
             .then(function (moduleFactory) { return _this.bootstrapModuleFactory(moduleFactory, options); });
     };
     PlatformRef.prototype._moduleDoBootstrap = function (moduleRef) {
@@ -13152,7 +13056,7 @@ var ApplicationRef = /** @class */ (function () {
             throw new Error('Cannot bootstrap as there are still asynchronous initializers running. Bootstrap components in the `ngDoBootstrap` method of the root module.');
         }
         var componentFactory;
-        if (componentOrFactory instanceof ComponentFactory$1) {
+        if (componentOrFactory instanceof ComponentFactory) {
             componentFactory = componentOrFactory;
         }
         else {
@@ -13163,7 +13067,7 @@ var ApplicationRef = /** @class */ (function () {
         // Create a factory associated with the current module if it's not bound to some other
         var ngModule = componentFactory instanceof ComponentFactoryBoundToModule ?
             null :
-            this._injector.get(NgModuleRef$1);
+            this._injector.get(NgModuleRef);
         var selectorOrNode = rootSelectorOrNode || componentFactory.selector;
         var compRef = componentFactory.create(Injector.NULL, [], selectorOrNode, ngModule);
         compRef.onDestroy(function () { _this._unloadComponent(compRef); });
@@ -13260,7 +13164,7 @@ var ApplicationRef = /** @class */ (function () {
         Injectable(),
         __metadata("design:paramtypes", [NgZone, Console, Injector,
             ErrorHandler,
-            ComponentFactoryResolver$1,
+            ComponentFactoryResolver,
             ApplicationInitStatus])
     ], ApplicationRef);
     return ApplicationRef;
@@ -13279,7 +13183,6 @@ function remove(list, el) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for Zone
 
 /**
  * @license
@@ -13288,7 +13191,6 @@ function remove(list, el) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for render
 
 /**
  * @license
@@ -13318,7 +13220,6 @@ function registerModuleFactory(id, factory) {
     }
     moduleFactories.set(id, factory);
 }
-
 /**
  * Returns the NgModuleFactory with the given id, if it exists and has been loaded.
  * Factories for modules that do not specify an `id` cannot be retrieved. Throws if the module
@@ -13594,7 +13495,6 @@ var EmbeddedViewRef$1 = /** @class */ (function (_super) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// Public API for compiler
 
 /**
  * @license
@@ -13773,7 +13673,6 @@ var _nativeNodeToDebugNode = new Map();
 function getDebugNode(nativeNode) {
     return _nativeNodeToDebugNode.get(nativeNode) || null;
 }
-
 function indexDebugNode(node) {
     _nativeNodeToDebugNode.set(node.nativeNode, node);
 }
@@ -13787,11 +13686,6 @@ function removeDebugNodeFromIndex(node) {
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
- */
-/**
- * @module
- * @description
- * Change detection enables data binding in Angular.
  */
 
 /**
@@ -13942,7 +13836,7 @@ var APPLICATION_MODULE_PROVIDERS = [
     {
         provide: ApplicationRef,
         useClass: ApplicationRef,
-        deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver$1, ApplicationInitStatus]
+        deps: [NgZone, Console, Injector, ErrorHandler, ComponentFactoryResolver, ApplicationInitStatus]
     },
     {
         provide: ApplicationInitStatus,
@@ -14856,9 +14750,9 @@ function setElementProperty(view, binding, renderNode$$1, name, value) {
  * found in the LICENSE file at https://angular.io/license
  */
 var UNDEFINED_VALUE = new Object();
-var InjectorRefTokenKey$1 = tokenKey(Injector);
-var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
-var NgModuleRefTokenKey = tokenKey(NgModuleRef$1);
+var InjectorRefTokenKey = tokenKey(Injector);
+var INJECTORRefTokenKey = tokenKey(INJECTOR);
+var NgModuleRefTokenKey = tokenKey(NgModuleRef);
 function moduleProvideDef(flags, token, value, deps) {
     // Need to resolve forwardRefs as e.g. for `useValue` we
     // lowered the expression and then stopped evaluating it,
@@ -14903,7 +14797,7 @@ function initNgModule(data) {
         if (!(provDef.flags & 4096 /* LazyProvider */)) {
             // Make sure the provider has not been already initialized outside this loop.
             if (providers[i] === undefined) {
-                providers[i] = _createProviderInstance$1(data, provDef);
+                providers[i] = _createProviderInstance(data, provDef);
             }
         }
     }
@@ -14923,8 +14817,8 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
         }
         var tokenKey_1 = depDef.tokenKey;
         switch (tokenKey_1) {
-            case InjectorRefTokenKey$1:
-            case INJECTORRefTokenKey$1:
+            case InjectorRefTokenKey:
+            case INJECTORRefTokenKey:
             case NgModuleRefTokenKey:
                 return data;
         }
@@ -14933,7 +14827,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
             var providerInstance = data._providers[providerDef.index];
             if (providerInstance === undefined) {
                 providerInstance = data._providers[providerDef.index] =
-                    _createProviderInstance$1(data, providerDef);
+                    _createProviderInstance(data, providerDef);
             }
             return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
         }
@@ -14948,7 +14842,7 @@ function resolveNgModuleDep(data, depDef, notFoundValue) {
             };
             data._providers[index] = UNDEFINED_VALUE;
             return (data._providers[index] =
-                _createProviderInstance$1(data, data._def.providersByKey[depDef.tokenKey]));
+                _createProviderInstance(data, data._def.providersByKey[depDef.tokenKey]));
         }
         else if (depDef.flags & 4 /* Self */) {
             return notFoundValue;
@@ -14966,7 +14860,7 @@ function targetsModule(ngModule, def) {
     return def.providedIn != null && (moduleTransitivelyPresent(ngModule, def.providedIn) ||
         def.providedIn === 'root' && ngModule._def.isRoot);
 }
-function _createProviderInstance$1(ngModule, providerDef) {
+function _createProviderInstance(ngModule, providerDef) {
     var injectable;
     switch (providerDef.flags & 201347067 /* Types */) {
         case 512 /* TypeClassProvider */:
@@ -15251,7 +15145,7 @@ var ComponentFactory_ = /** @class */ (function (_super) {
         return new ComponentRef_(view, new ViewRef_(view), component);
     };
     return ComponentFactory_;
-}(ComponentFactory$1));
+}(ComponentFactory));
 var ComponentRef_ = /** @class */ (function (_super) {
     __extends(ComponentRef_, _super);
     function ComponentRef_(_view, _viewRef, _component) {
@@ -15285,7 +15179,7 @@ var ComponentRef_ = /** @class */ (function (_super) {
     ComponentRef_.prototype.destroy = function () { this._viewRef.destroy(); };
     ComponentRef_.prototype.onDestroy = function (callback) { this._viewRef.onDestroy(callback); };
     return ComponentRef_;
-}(ComponentRef$1));
+}(ComponentRef));
 function createViewContainerData(view, elDef, elData) {
     return new ViewContainerRef_(view, elDef, elData);
 }
@@ -15351,7 +15245,7 @@ var ViewContainerRef_ = /** @class */ (function () {
     ViewContainerRef_.prototype.createComponent = function (componentFactory, index, injector, projectableNodes, ngModuleRef) {
         var contextInjector = injector || this.parentInjector;
         if (!ngModuleRef && !(componentFactory instanceof ComponentFactoryBoundToModule)) {
-            ngModuleRef = contextInjector.get(NgModuleRef$1);
+            ngModuleRef = contextInjector.get(NgModuleRef);
         }
         var componentRef = componentFactory.create(contextInjector, projectableNodes, undefined, ngModuleRef);
         this.insert(componentRef.hostView, index);
@@ -15634,7 +15528,7 @@ var NgModuleRef_ = /** @class */ (function () {
     NgModuleRef_.prototype.get = function (token, notFoundValue, injectFlags) {
         if (notFoundValue === void 0) { notFoundValue = Injector.THROW_IF_NOT_FOUND; }
         if (injectFlags === void 0) { injectFlags = 0 /* Default */; }
-        var flags = 0;
+        var flags = 0 /* None */;
         if (injectFlags & 4 /* SkipSelf */) {
             flags |= 1 /* SkipSelf */;
         }
@@ -15649,7 +15543,7 @@ var NgModuleRef_ = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(NgModuleRef_.prototype, "componentFactoryResolver", {
-        get: function () { return this.get(ComponentFactoryResolver$1); },
+        get: function () { return this.get(ComponentFactoryResolver); },
         enumerable: true,
         configurable: true
     });
@@ -15678,8 +15572,8 @@ var ElementRefTokenKey = tokenKey(ElementRef$1);
 var ViewContainerRefTokenKey = tokenKey(ViewContainerRef$1);
 var TemplateRefTokenKey = tokenKey(TemplateRef$1);
 var ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
-var InjectorRefTokenKey = tokenKey(Injector);
-var INJECTORRefTokenKey = tokenKey(INJECTOR);
+var InjectorRefTokenKey$1 = tokenKey(Injector);
+var INJECTORRefTokenKey$1 = tokenKey(INJECTOR);
 function directiveDef(checkIndex, flags, matchedQueries, childCount, ctor, deps, props, outputs) {
     var bindings = [];
     if (props) {
@@ -15746,7 +15640,7 @@ function _def(checkIndex, flags, matchedQueriesDsl, childCount, token, value, de
     };
 }
 function createProviderInstance(view, def) {
-    return _createProviderInstance(view, def);
+    return _createProviderInstance$1(view, def);
 }
 function createPipeInstance(view, def) {
     // deps are looked up from component.
@@ -15857,7 +15751,7 @@ function checkAndUpdateDirectiveDynamic(view, def, values) {
     }
     return changed;
 }
-function _createProviderInstance(view, def) {
+function _createProviderInstance$1(view, def) {
     // private services can see other private services
     var allowPrivateServices = (def.flags & 8192 /* PrivateProvider */) > 0;
     var providerDef = def.provider;
@@ -15973,8 +15867,8 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                     var cdView = findCompView(searchView, elDef, allowPrivateServices);
                     return createChangeDetectorRef(cdView);
                 }
-                case InjectorRefTokenKey:
-                case INJECTORRefTokenKey:
+                case InjectorRefTokenKey$1:
+                case INJECTORRefTokenKey$1:
                     return createInjector$1(searchView, elDef);
                 default:
                     var providerDef_1 = (allowPrivateServices ? elDef.element.allProviders :
@@ -15982,7 +15876,7 @@ function resolveDep(view, elDef, allowPrivateServices, depDef, notFoundValue) {
                     if (providerDef_1) {
                         var providerData = asProviderData(searchView, providerDef_1.nodeIndex);
                         if (!providerData) {
-                            providerData = { instance: _createProviderInstance(searchView, providerDef_1) };
+                            providerData = { instance: _createProviderInstance$1(searchView, providerDef_1) };
                             searchView.nodes[providerDef_1.nodeIndex] = providerData;
                         }
                         return providerData.instance;
@@ -18148,7 +18042,7 @@ var NgModuleFactory_ = /** @class */ (function (_super) {
         return Services.createNgModuleRef(this.moduleType, parentInjector || Injector.NULL, this._bootstrapComponents, def);
     };
     return NgModuleFactory_;
-}(NgModuleFactory$1));
+}(NgModuleFactory));
 
 /**
  * @license
@@ -18265,16 +18159,6 @@ function sanitizeResourceUrl(unsafeResourceUrl) {
     throw new Error('unsafe value used in a resource URL context (see http://g.co/ng/security#xss)');
 }
 /**
- * A `script` sanitizer which only lets trusted javascript through.
- *
- * This passes only `script`s marked trusted by calling {@link bypassSanitizationTrustScript}.
- *
- * @param unsafeScript untrusted `script`, typically from the user.
- * @returns `url` string which is safe to bind to the `<script>` element such as `<img src>`,
- * because only trusted `scripts`s have been allowed to pass.
- */
-
-/**
  * Mark `html` string as trusted.
  *
  * This function wraps the trusted string in `String` and brands it in a way which makes it
@@ -18347,8 +18231,6 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// clang-format off
-
 // clang-format on
 
 /**
@@ -18366,11 +18248,6 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point from which you should import all public core APIs.
- */
 
 /**
  * @license
@@ -18379,12 +18256,6 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-/**
- * @module
- * @description
- * Entry point for all public APIs of this package.
- */
-
 // This file only reexports content of the `src` folder. Keep it that way.
 
 /**
@@ -18394,10 +18265,6 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-// This file is not used to build this module. It is only used during editing
-// by the TypeScript language service and during build for verification. `ngc`
-// replaces this file with production index.ts when it rewrites private symbol
-// names.
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory$1 as ComponentFactory, ComponentRef$1 as ComponentRef, ComponentFactoryResolver$1 as ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory$1 as NgModuleFactory, NgModuleRef$1 as NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory$1 as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
