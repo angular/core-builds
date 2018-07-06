@@ -1,10 +1,10 @@
 /**
- * @license Angular v6.1.0-beta.3+31.sha-7f3242a
+ * @license Angular v6.1.0-beta.3+36.sha-8fe8b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
-import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
+import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, compilePipeFromMetadata, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
 import { Observable, Subject, Subscription, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -11153,11 +11153,40 @@ function isUseExistingProvider(meta) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function compilePipe(type, meta) {
+    let def = null;
+    Object.defineProperty(type, NG_PIPE_DEF, {
+        get: () => {
+            if (def === null) {
+                const sourceMapUrl = `ng://${stringify$1(type)}/ngPipeDef.js`;
+                const name = type.name;
+                const res = compilePipeFromMetadata({
+                    name,
+                    type: new WrappedNodeExpr(type),
+                    deps: reflectDependencies(type),
+                    pipeName: meta.name,
+                    pure: meta.pure !== undefined ? meta.pure : true,
+                });
+                def = jitExpression(res.expression, angularCoreEnv, sourceMapUrl);
+            }
+            return def;
+        }
+    });
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const ivyEnabled = true;
 const R3_COMPILE_COMPONENT = compileComponent;
 const R3_COMPILE_DIRECTIVE = compileDirective;
 const R3_COMPILE_INJECTABLE = compileInjectable$1;
 const R3_COMPILE_NGMODULE = compileNgModule$1;
+const R3_COMPILE_PIPE = compilePipe;
 
 /**
  * @license
@@ -11272,7 +11301,7 @@ const Component = makeDecorator('Component', (c = {}) => (Object.assign({ change
  *
  * @Annotation
  */
-const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)));
+const Pipe = makeDecorator('Pipe', (p) => (Object.assign({ pure: true }, p)), undefined, undefined, (type, meta) => (R3_COMPILE_PIPE || (() => { }))(type, meta));
 /**
  *
  * @Annotation
@@ -11396,7 +11425,7 @@ class Version {
         this.patch = full.split('.').slice(2).join('.');
     }
 }
-const VERSION = new Version('6.1.0-beta.3+31.sha-7f3242a');
+const VERSION = new Version('6.1.0-beta.3+36.sha-8fe8b8f');
 
 /**
  * @license

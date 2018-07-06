@@ -1,11 +1,11 @@
 /**
- * @license Angular v6.1.0-beta.3+31.sha-7f3242a
+ * @license Angular v6.1.0-beta.3+36.sha-8fe8b8f
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
 
 import { __assign, __extends, __read, __spread, __values } from 'tslib';
-import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
+import { ConstantPool, LiteralExpr, R3ResolvedDependencyType, WrappedNodeExpr, compileComponentFromMetadata, compileDirectiveFromMetadata, compileInjectable, compileInjector, compileNgModule, compilePipeFromMetadata, jitExpression, makeBindingParser, parseHostBindings, parseTemplate } from '@angular/compiler';
 import { Observable, Subject, Subscription, merge } from 'rxjs';
 import { share } from 'rxjs/operators';
 
@@ -11557,11 +11557,40 @@ function isUseExistingProvider(meta) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+function compilePipe(type, meta) {
+    var def = null;
+    Object.defineProperty(type, NG_PIPE_DEF, {
+        get: function () {
+            if (def === null) {
+                var sourceMapUrl = "ng://" + stringify$1(type) + "/ngPipeDef.js";
+                var name_1 = type.name;
+                var res = compilePipeFromMetadata({
+                    name: name_1,
+                    type: new WrappedNodeExpr(type),
+                    deps: reflectDependencies(type),
+                    pipeName: meta.name,
+                    pure: meta.pure !== undefined ? meta.pure : true,
+                });
+                def = jitExpression(res.expression, angularCoreEnv, sourceMapUrl);
+            }
+            return def;
+        }
+    });
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 var ivyEnabled = true;
 var R3_COMPILE_COMPONENT = compileComponent;
 var R3_COMPILE_DIRECTIVE = compileDirective;
 var R3_COMPILE_INJECTABLE = compileInjectable$1;
 var R3_COMPILE_NGMODULE = compileNgModule$1;
+var R3_COMPILE_PIPE = compilePipe;
 
 /**
  * @license
@@ -11682,7 +11711,7 @@ var Component = makeDecorator('Component', function (c) {
  *
  * @Annotation
  */
-var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); });
+var Pipe = makeDecorator('Pipe', function (p) { return (__assign({ pure: true }, p)); }, undefined, undefined, function (type, meta) { return (R3_COMPILE_PIPE || (function () { }))(type, meta); });
 /**
  *
  * @Annotation
@@ -11807,7 +11836,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+31.sha-7f3242a');
+var VERSION = new Version('6.1.0-beta.3+36.sha-8fe8b8f');
 
 /**
  * @license
