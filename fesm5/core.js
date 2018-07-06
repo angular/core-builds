@@ -1,5 +1,5 @@
 /**
- * @license Angular v6.1.0-beta.3+60.sha-52d43a9
+ * @license Angular v6.1.0-beta.3+61.sha-3980640
  * (c) 2010-2018 Google, Inc. https://angular.io/
  * License: MIT
  */
@@ -2193,6 +2193,412 @@ function matchingSelectorIndex(tNode, selectors, textSelectors) {
  * found in the LICENSE file at https://angular.io/license
  */
 /**
+ * Used clone a copy of a pre-computed template of a styling context.
+ *
+ * A pre-computed template is designed to be computed once for a given element
+ * (instructions.ts has logic for caching this).
+ */
+function allocStylingContext(templateStyleContext) {
+    // each instance gets a copy
+    return templateStyleContext.slice();
+}
+/**
+ * Creates a styling context template where styling information is stored.
+ * Any styles that are later referenced using `updateStyleProp` must be
+ * passed in within this function. Initial values for those styles are to
+ * be declared after all initial style properties are declared (this change in
+ * mode between declarations and initial styles is made possible using a special
+ * enum value found in `definition.ts`).
+ *
+ * @param initialStyleDeclarations a list of style declarations and initial style values
+ *    that are used later within the styling context.
+ *
+ *    -> ['width', 'height', SPECIAL_ENUM_VAL, 'width', '100px']
+ *       This implies that `width` and `height` will be later styled and that the `width`
+ *       property has an initial value of `100px`.
+ */
+function createStylingContextTemplate(initialStyleDeclarations) {
+    var initialStyles = [null];
+    var context = [initialStyles, 0];
+    var indexLookup = {};
+    if (initialStyleDeclarations) {
+        var hasPassedDeclarations = false;
+        for (var i = 0; i < initialStyleDeclarations.length; i++) {
+            var v = initialStyleDeclarations[i];
+            // this flag value marks where the declarations end the initial values begin
+            if (v === 0 /* INITIAL_STYLES */) {
+                hasPassedDeclarations = true;
+            }
+            else {
+                var prop = v;
+                if (hasPassedDeclarations) {
+                    var value = initialStyleDeclarations[++i];
+                    initialStyles.push(value);
+                    indexLookup[prop] = initialStyles.length - 1;
+                }
+                else {
+                    // it's safe to use `0` since the default initial value for
+                    // each property will always be null (which is at position 0)
+                    indexLookup[prop] = 0;
+                }
+            }
+        }
+    }
+    var allProps = Object.keys(indexLookup);
+    var totalProps = allProps.length;
+    // *2 because we are filling for both single and multi style spaces
+    var maxLength = totalProps * 3 /* Size */ * 2 + 2 /* SingleStylesStartPosition */;
+    // we need to fill the array from the start so that we can access
+    // both the multi and the single array positions in the same loop block
+    for (var i = 2 /* SingleStylesStartPosition */; i < maxLength; i++) {
+        context.push(null);
+    }
+    var singleStart = 2 /* SingleStylesStartPosition */;
+    var multiStart = totalProps * 3 /* Size */ + 2 /* SingleStylesStartPosition */;
+    // fill single and multi-level styles
+    for (var i = 0; i < allProps.length; i++) {
+        var prop = allProps[i];
+        var indexForInitial = indexLookup[prop];
+        var indexForMulti = i * 3 /* Size */ + multiStart;
+        var indexForSingle = i * 3 /* Size */ + singleStart;
+        setFlag(context, indexForSingle, pointers(0 /* None */, indexForInitial, indexForMulti));
+        setProp(context, indexForSingle, prop);
+        setValue(context, indexForSingle, null);
+        setFlag(context, indexForMulti, pointers(1 /* Dirty */, indexForInitial, indexForSingle));
+        setProp(context, indexForMulti, prop);
+        setValue(context, indexForMulti, null);
+    }
+    // there is no initial value flag for the master index since it doesn't reference an initial style
+    // value
+    setFlag(context, 1 /* MasterFlagPosition */, pointers(0, 0, multiStart));
+    setContextDirty(context, initialStyles.length > 1);
+    return context;
+}
+var EMPTY_ARR = [];
+/**
+ * Sets and resolves all `multi` styles on an `StylingContext` so that they can be
+ * applied to the element once `renderStyles` is called.
+ *
+ * All missing styles (any values that are not provided in the new `styles` param)
+ * will resolve to `null` within their respective positions in the context.
+ *
+ * @param context The styling context that will be updated with the
+ *    newly provided style values.
+ * @param styles The key/value map of CSS styles that will be used for the update.
+ */
+function updateStyleMap(context, styles) {
+    var propsToApply = styles ? Object.keys(styles) : EMPTY_ARR;
+    var multiStartIndex = getMultiStartIndex(context);
+    var dirty = false;
+    var ctxIndex = multiStartIndex;
+    var propIndex = 0;
+    // the main loop here will try and figure out how the shape of the provided
+    // styles differ with respect to the context. Later if the context/styles are
+    // off-balance then they will be dealt in another loop after this one
+    while (ctxIndex < context.length && propIndex < propsToApply.length) {
+        var flag = getPointers(context, ctxIndex);
+        var prop = getProp(context, ctxIndex);
+        var value = getValue(context, ctxIndex);
+        var newProp = propsToApply[propIndex];
+        var newValue = styles[newProp];
+        if (prop === newProp) {
+            if (value !== newValue) {
+                setValue(context, ctxIndex, newValue);
+                var initialValue = getInitialValue(context, flag);
+                // there is no point in setting this to dirty if the previously
+                // rendered value was being referenced by the initial style (or null)
+                if (initialValue !== newValue) {
+                    setDirty(context, ctxIndex, true);
+                    dirty = true;
+                }
+            }
+        }
+        else {
+            var indexOfEntry = findEntryPositionByProp(context, newProp, ctxIndex);
+            if (indexOfEntry > 0) {
+                // it was found at a later point ... just swap the values
+                swapMultiContextEntries(context, ctxIndex, indexOfEntry);
+                if (value !== newValue) {
+                    setValue(context, ctxIndex, newValue);
+                    dirty = true;
+                }
+            }
+            else {
+                // we only care to do this if the insertion is in the middle
+                var doShift = ctxIndex < context.length;
+                insertNewMultiProperty(context, ctxIndex, newProp, newValue);
+                dirty = true;
+            }
+        }
+        ctxIndex += 3 /* Size */;
+        propIndex++;
+    }
+    // this means that there are left-over values in the context that
+    // were not included in the provided styles and in this case the
+    // goal is to "remove" them from the context (by nullifying)
+    while (ctxIndex < context.length) {
+        var value = context[ctxIndex + 2 /* ValueOffset */];
+        if (value !== null) {
+            setDirty(context, ctxIndex, true);
+            setValue(context, ctxIndex, null);
+            dirty = true;
+        }
+        ctxIndex += 3 /* Size */;
+    }
+    // this means that there are left-over property in the context that
+    // were not detected in the context during the loop above. In that
+    // case we want to add the new entries into the list
+    while (propIndex < propsToApply.length) {
+        var prop = propsToApply[propIndex];
+        var value = styles[prop];
+        context.push(1 /* Dirty */, prop, value);
+        propIndex++;
+        dirty = true;
+    }
+    if (dirty) {
+        setContextDirty(context, true);
+    }
+}
+/**
+ * Sets and resolves a single CSS style on a property on an `StylingContext` so that they
+ * can be applied to the element once `renderElementStyles` is called.
+ *
+ * Note that prop-level styles are considered higher priority than styles that are applied
+ * using `updateStyleMap`, therefore, when styles are rendered then any styles that
+ * have been applied using this function will be considered first (then multi values second
+ * and then initial values as a backup).
+ *
+ * @param context The styling context that will be updated with the
+ *    newly provided style value.
+ * @param index The index of the property which is being updated.
+ * @param value The CSS style value that will be assigned
+ */
+function updateStyleProp(context, index, value) {
+    var singleIndex = 2 /* SingleStylesStartPosition */ + index * 3 /* Size */;
+    var currValue = getValue(context, singleIndex);
+    var currFlag = getPointers(context, singleIndex);
+    // didn't change ... nothing to make a note of
+    if (currValue !== value) {
+        // the value will always get updated (even if the dirty flag is skipped)
+        setValue(context, singleIndex, value);
+        var indexForMulti = getMultiOrSingleIndex(currFlag);
+        // if the value is the same in the multi-area then there's no point in re-assembling
+        var valueForMulti = getValue(context, indexForMulti);
+        if (!valueForMulti || valueForMulti !== value) {
+            var multiDirty = false;
+            var singleDirty = true;
+            // only when the value is set to `null` should the multi-value get flagged
+            if (value == null && valueForMulti) {
+                multiDirty = true;
+                singleDirty = false;
+            }
+            setDirty(context, indexForMulti, multiDirty);
+            setDirty(context, singleIndex, singleDirty);
+            setContextDirty(context, true);
+        }
+    }
+}
+/**
+ * Renders all queued styles using a renderer onto the given element.
+ *
+ * This function works by rendering any styles (that have been applied
+ * using `updateStyleMap` and `updateStyleProp`) onto the
+ * provided element using the provided renderer. Just before the styles
+ * are rendered a final key/value style map will be assembled.
+ *
+ * @param lElement the element that the styles will be rendered on
+ * @param context The styling context that will be used to determine
+ *      what styles will be rendered
+ * @param renderer the renderer that will be used to apply the styling
+ * @param styleStore if provided, the updated style values will be applied
+ *    to this key/value map instead of being renderered via the renderer.
+ * @returns an object literal. `{ color: 'red', height: 'auto'}`.
+ */
+function renderStyles(lElement, context, renderer, styleStore) {
+    if (isContextDirty(context)) {
+        var native = lElement.native;
+        var multiStartIndex = getMultiStartIndex(context);
+        for (var i = 2 /* SingleStylesStartPosition */; i < context.length; i += 3 /* Size */) {
+            // there is no point in rendering styles that have not changed on screen
+            if (isDirty(context, i)) {
+                var prop = getProp(context, i);
+                var value = getValue(context, i);
+                var flag = getPointers(context, i);
+                var isInSingleRegion = i < multiStartIndex;
+                var styleToApply = value;
+                // STYLE DEFER CASE 1: Use a multi value instead of a null single value
+                // this check implies that a single value was removed and we
+                // should now defer to a multi value and use that (if set).
+                if (isInSingleRegion && styleToApply == null) {
+                    // single values ALWAYS have a reference to a multi index
+                    var multiIndex = getMultiOrSingleIndex(flag);
+                    styleToApply = getValue(context, multiIndex);
+                }
+                // STYLE DEFER CASE 2: Use the initial value if all else fails (is null)
+                // the initial value will always be a string or null,
+                // therefore we can safely adopt it incase there's nothing else
+                if (styleToApply == null) {
+                    styleToApply = getInitialValue(context, flag);
+                }
+                setStyle(native, prop, styleToApply, renderer, styleStore);
+                setDirty(context, i, false);
+            }
+        }
+        setContextDirty(context, false);
+    }
+}
+/**
+ * This function renders a given CSS prop/value entry using the
+ * provided renderer. If a `styleStore` value is provided then
+ * that will be used a render context instead of the provided
+ * renderer.
+ *
+ * @param native the DOM Element
+ * @param prop the CSS style property that will be rendered
+ * @param value the CSS style value that will be rendered
+ * @param renderer
+ * @param styleStore an optional key/value map that will be used as a context to render styles on
+ */
+function setStyle(native, prop, value, renderer, styleStore) {
+    if (styleStore) {
+        styleStore[prop] = value;
+    }
+    else if (value == null) {
+        ngDevMode && ngDevMode.rendererRemoveStyle++;
+        isProceduralRenderer(renderer) ?
+            renderer.removeStyle(native, prop, RendererStyleFlags3.DashCase) :
+            native['style'].removeProperty(prop);
+    }
+    else {
+        ngDevMode && ngDevMode.rendererSetStyle++;
+        isProceduralRenderer(renderer) ?
+            renderer.setStyle(native, prop, value, RendererStyleFlags3.DashCase) :
+            native['style'].setProperty(prop, value);
+    }
+}
+function setDirty(context, index, isDirtyYes) {
+    var adjustedIndex = index >= 2 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    if (isDirtyYes) {
+        context[adjustedIndex] |= 1 /* Dirty */;
+    }
+    else {
+        context[adjustedIndex] &= ~1 /* Dirty */;
+    }
+}
+function isDirty(context, index) {
+    var adjustedIndex = index >= 2 /* SingleStylesStartPosition */ ? (index + 0 /* FlagsOffset */) : index;
+    return (context[adjustedIndex] & 1 /* Dirty */) == 1 /* Dirty */;
+}
+function pointers(configFlag, staticIndex, dynamicIndex) {
+    return (configFlag & 1 /* Dirty */) | (staticIndex << 1 /* BitCountSize */) |
+        (dynamicIndex << (15 /* BitCountSize */ + 1 /* BitCountSize */));
+}
+function getInitialValue(context, flag) {
+    var index = getInitialIndex(flag);
+    return context[0 /* InitialStylesPosition */][index];
+}
+function getInitialIndex(flag) {
+    return (flag >> 1 /* BitCountSize */) & 32767 /* BitMask */;
+}
+function getMultiOrSingleIndex(flag) {
+    var index = (flag >> (15 /* BitCountSize */ + 1 /* BitCountSize */)) & 32767 /* BitMask */;
+    return index >= 2 /* SingleStylesStartPosition */ ? index : -1;
+}
+function getMultiStartIndex(context) {
+    return getMultiOrSingleIndex(context[1 /* MasterFlagPosition */]);
+}
+function setProp(context, index, prop) {
+    context[index + 1 /* PropertyOffset */] = prop;
+}
+function setValue(context, index, value) {
+    context[index + 2 /* ValueOffset */] = value;
+}
+function setFlag(context, index, flag) {
+    var adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    context[adjustedIndex] = flag;
+}
+function getPointers(context, index) {
+    var adjustedIndex = index === 1 /* MasterFlagPosition */ ? index : (index + 0 /* FlagsOffset */);
+    return context[adjustedIndex];
+}
+function getValue(context, index) {
+    return context[index + 2 /* ValueOffset */];
+}
+function getProp(context, index) {
+    return context[index + 1 /* PropertyOffset */];
+}
+function isContextDirty(context) {
+    return isDirty(context, 1 /* MasterFlagPosition */);
+}
+function setContextDirty(context, isDirtyYes) {
+    setDirty(context, 1 /* MasterFlagPosition */, isDirtyYes);
+}
+function findEntryPositionByProp(context, prop, startIndex) {
+    for (var i = (startIndex || 0) + 1 /* PropertyOffset */; i < context.length; i += 3 /* Size */) {
+        var thisProp = context[i];
+        if (thisProp == prop) {
+            return i - 1 /* PropertyOffset */;
+        }
+    }
+    return -1;
+}
+function swapMultiContextEntries(context, indexA, indexB) {
+    var tmpValue = getValue(context, indexA);
+    var tmpProp = getProp(context, indexA);
+    var tmpFlag = getPointers(context, indexA);
+    var flagA = tmpFlag;
+    var flagB = getPointers(context, indexB);
+    var singleIndexA = getMultiOrSingleIndex(flagA);
+    if (singleIndexA >= 0) {
+        var _flag = getPointers(context, singleIndexA);
+        var _initial = getInitialIndex(_flag);
+        setFlag(context, singleIndexA, pointers(_flag, _initial, indexB));
+    }
+    var singleIndexB = getMultiOrSingleIndex(flagB);
+    if (singleIndexB >= 0) {
+        var _flag = getPointers(context, singleIndexB);
+        var _initial = getInitialIndex(_flag);
+        setFlag(context, singleIndexB, pointers(_flag, _initial, indexA));
+    }
+    setValue(context, indexA, getValue(context, indexB));
+    setProp(context, indexA, getProp(context, indexB));
+    setFlag(context, indexA, getPointers(context, indexB));
+    setValue(context, indexB, tmpValue);
+    setProp(context, indexB, tmpProp);
+    setFlag(context, indexB, tmpFlag);
+}
+function updateSinglePointerValues(context, indexStartPosition) {
+    for (var i = indexStartPosition; i < context.length; i += 3 /* Size */) {
+        var multiFlag = getPointers(context, i);
+        var singleIndex = getMultiOrSingleIndex(multiFlag);
+        if (singleIndex > 0) {
+            var singleFlag = getPointers(context, singleIndex);
+            var initialIndexForSingle = getInitialIndex(singleFlag);
+            var updatedFlag = pointers(isDirty(context, singleIndex) ? 1 /* Dirty */ : 0 /* None */, initialIndexForSingle, i);
+            setFlag(context, singleIndex, updatedFlag);
+        }
+    }
+}
+function insertNewMultiProperty(context, index, name, value) {
+    var doShift = index < context.length;
+    // prop does not exist in the list, add it in
+    context.splice(index, 0, 1 /* Dirty */, name, value);
+    if (doShift) {
+        // because the value was inserted midway into the array then we
+        // need to update all the shifted multi values' single value
+        // pointers to point to the newly shifted location
+        updateSinglePointerValues(context, index + 3 /* Size */);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
  * Directive (D) sets a property on all component instances using this constant as a key and the
  * component's host node (LElement) as the value. This is used in methods like detectChanges to
  * facilitate jumping from an instance to the host node.
@@ -2670,8 +3076,9 @@ function elementStart(index, name, attrs, localRefs) {
     }
     ngDevMode && assertDataInRange(index - 1);
     var node = createLNode(index, 3 /* Element */, native, name, attrs || null, null);
-    if (attrs)
+    if (attrs) {
         setUpAttributes(native, attrs);
+    }
     appendChild(getParentLNode(node), native, viewData);
     createDirectivesAndLocals(localRefs);
     return native;
@@ -3154,7 +3561,8 @@ function createTNode(type, adjustedIndex, tagName, attrs, parent, tViews) {
         child: null,
         parent: parent,
         dynamicContainerNode: null,
-        detached: null
+        detached: null,
+        stylingTemplate: null
     };
 }
 /**
@@ -3246,64 +3654,108 @@ function elementClass(index, value) {
             lElement.native['className'] = stringify$1(value);
     }
 }
-function elementStyleNamed(index, styleName, value, suffixOrSanitizer) {
-    if (value !== NO_CHANGE) {
-        var lElement = load(index);
-        if (value == null) {
-            ngDevMode && ngDevMode.rendererRemoveStyle++;
-            isProceduralRenderer(renderer) ?
-                renderer.removeStyle(lElement.native, styleName, RendererStyleFlags3.DashCase) :
-                lElement.native['style'].removeProperty(styleName);
-        }
-        else {
-            var strValue = typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
-            if (typeof suffixOrSanitizer == 'string')
-                strValue = strValue + suffixOrSanitizer;
-            ngDevMode && ngDevMode.rendererSetStyle++;
-            isProceduralRenderer(renderer) ?
-                renderer.setStyle(lElement.native, styleName, strValue, RendererStyleFlags3.DashCase) :
-                lElement.native['style'].setProperty(styleName, strValue);
-        }
+/**
+ * Assign any inline style values to the element during creation mode.
+ *
+ * This instruction is meant to be called during creation mode to apply all styling
+ * (e.g. `style="..."`) values to the element. This is also where the provided index
+ * value is allocated for the styling details for its corresponding element (the element
+ * index is the previous index value from this one).
+ *
+ * (Note this function calls `elementStylingApply` immediately when called.)
+ *
+ *
+ * @param index Index value which will be allocated to store styling data for the element.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ * @param styles A key/value map of CSS styles that will be registered on the element.
+ *   Each individual style will be used on the element as long as it is not overridden
+ *   by any styles placed on the element by multiple (`[style]`) or singular (`[style.prop]`)
+ *   bindings. If a style binding changes its value to null then the initial styling
+ *   values that are passed in here will be applied to the element (if matched).
+ */
+function elementStyling(index, styles) {
+    var tNode = load(index - 1).tNode;
+    if (!tNode.stylingTemplate) {
+        // initialize the styling template.
+        tNode.stylingTemplate = createStylingContextTemplate(styles);
+    }
+    // Allocate space but leave null for lazy creation.
+    viewData[index + HEADER_OFFSET] = null;
+    if (styles && styles.length) {
+        elementStylingApply(index);
     }
 }
 /**
- * Set the `style` property on a DOM element.
+ * Retrieve the `StylingContext` at a given index.
  *
- * This instruction is meant to handle the `[style]="exp"` usage.
+ * This method lazily creates the `StylingContext`. This is because in most cases
+ * we have styling without any bindings. Creating `StylingContext` eagerly would mean that
+ * every style declaration such as `<div style="color: 'red' ">` would result `StyleContext`
+ * which would create unnecessary memory pressure.
  *
- *
- * @param index The index of the element to update in the LViewData array
- * @param value A value indicating if a given style should be added or removed.
- *   The expected shape of `value` is an object where keys are style names and the values
- *   are their corresponding values to set. If value is falsy, then the style is removed. An absence
- *   of style does not cause that style to be removed. `NO_CHANGE` implies that no update should be
- *   performed.
+ * @param index Index of the style allocation. See: `elementStyling`.
  */
-function elementStyle(index, value) {
-    if (value !== NO_CHANGE) {
-        // TODO: This is a naive implementation which simply writes value to the `style`. In the future
-        // we will add logic here which would work with the animation code.
-        var lElement = load(index);
-        if (isProceduralRenderer(renderer)) {
-            ngDevMode && ngDevMode.rendererSetStyle++;
-            renderer.setProperty(lElement.native, 'style', value);
-        }
-        else {
-            var style = lElement.native['style'];
-            for (var i = 0, keys = Object.keys(value); i < keys.length; i++) {
-                var styleName = keys[i];
-                var styleValue = value[styleName];
-                if (styleValue == null) {
-                    ngDevMode && ngDevMode.rendererRemoveStyle++;
-                    style.removeProperty(styleName);
-                }
-                else {
-                    ngDevMode && ngDevMode.rendererSetStyle++;
-                    style.setProperty(styleName, styleValue);
-                }
-            }
+function getStylingContext(index) {
+    var stylingContext = load(index);
+    if (!stylingContext) {
+        var lElement = load(index - 1);
+        var tNode = lElement.tNode;
+        ngDevMode &&
+            assertDefined(tNode.stylingTemplate, 'getStylingContext() called before elementStyling()');
+        stylingContext = viewData[index + HEADER_OFFSET] = allocStylingContext(tNode.stylingTemplate);
+    }
+    return stylingContext;
+}
+/**
+ * Apply all styling values to the element which have been queued by any styling instructions.
+ *
+ * This instruction is meant to be run once one or more `elementStyle` and/or `elementStyleProp`
+ * have been issued against the element. This function will also determine if any styles have
+ * changed and will then skip the operation if there is nothing new to render.
+ *
+ * Once called then all queued styles will be flushed.
+ *
+ * @param index Index of the element's styling storage that will be rendered.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ */
+function elementStylingApply(index) {
+    renderStyles(load(index - 1), getStylingContext(index), renderer);
+}
+function elementStyleProp(index, styleIndex, value, suffixOrSanitizer) {
+    var valueToAdd = null;
+    if (value) {
+        valueToAdd =
+            typeof suffixOrSanitizer == 'function' ? suffixOrSanitizer(value) : stringify$1(value);
+        if (typeof suffixOrSanitizer == 'string') {
+            valueToAdd = valueToAdd + suffixOrSanitizer;
         }
     }
+    updateStyleProp(getStylingContext(index), styleIndex, valueToAdd);
+}
+/**
+ * Queue a key/value map of styles to be rendered on an Element.
+ *
+ * This instruction is meant to handle the `[style]="exp"` usage. When styles are applied to
+ * the Element they will then be placed with respect to any styles set with `elementStyleProp`.
+ * If any styles are set to `null` then they will be removed from the element (unless the same
+ * style properties have been assigned to the element during creation using `elementStyling`).
+ *
+ * (Note that the styling instruction will not be applied until `elementStylingApply` is called.)
+ *
+ * @param index Index of the element's styling storage to change in the data array.
+ *        (Note that this is not the element index, but rather an index value allocated
+ *        specifically for element styling--the index must be the next index after the element
+ *        index.)
+ * @param value A value indicating if a given style should be added or removed.
+ *   The expected shape of `value` is an object where keys are style names and the values
+ *   are their corresponding values to set. If value is null, then the style is removed.
+ */
+function elementStyle(index, value) {
+    updateStyleMap(getStylingContext(index), value);
 }
 //////////////////////////
 //// Text
@@ -10834,9 +11286,10 @@ var angularCoreEnv = {
     'ɵQ': query,
     'ɵqR': queryRefresh,
     'ɵrS': reserveSlots,
-    'ɵs': elementStyle,
-    'ɵsn': elementStyleNamed,
-    'ɵst': store,
+    'ɵs': elementStyling,
+    'ɵsm': elementStyle,
+    'ɵsp': elementStyleProp,
+    'ɵsa': elementStylingApply,
     'ɵT': text,
     'ɵt': textBinding,
     'ɵV': embeddedViewStart,
@@ -11740,7 +12193,7 @@ var Version = /** @class */ (function () {
     }
     return Version;
 }());
-var VERSION = new Version('6.1.0-beta.3+60.sha-52d43a9');
+var VERSION = new Version('6.1.0-beta.3+61.sha-3980640');
 
 /**
  * @license
@@ -18194,5 +18647,5 @@ function bypassSanitizationTrustString(trustedString, mode) {
  * found in the LICENSE file at https://angular.io/license
  */
 
-export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyle as ɵs, elementStyleNamed as ɵsn, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
+export { createPlatform, assertPlatform, destroyPlatform, getPlatform, PlatformRef, ApplicationRef, enableProdMode, isDevMode, createPlatformFactory, NgProbeToken, APP_ID, PACKAGE_ROOT_URL, PLATFORM_INITIALIZER, PLATFORM_ID, APP_BOOTSTRAP_LISTENER, APP_INITIALIZER, ApplicationInitStatus, DebugElement, DebugNode, asNativeElements, getDebugNode, Testability, TestabilityRegistry, setTestabilityGetter, TRANSLATIONS, TRANSLATIONS_FORMAT, LOCALE_ID, MissingTranslationStrategy, ApplicationModule, wtfCreateScope, wtfLeave, wtfStartTimeRange, wtfEndTimeRange, Type, EventEmitter, ErrorHandler, Sanitizer, SecurityContext, ANALYZE_FOR_ENTRY_COMPONENTS, Attribute, ContentChild, ContentChildren, Query, ViewChild, ViewChildren, Component, Directive, HostBinding, HostListener, Input, Output, Pipe, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA, NgModule, ViewEncapsulation, Version, VERSION, defineInjectable, defineInjector, forwardRef, resolveForwardRef, Injectable, inject, INJECTOR, Injector, ReflectiveInjector, createInjector, ResolvedReflectiveFactory, ReflectiveKey, InjectionToken, Inject, Optional, Self, SkipSelf, Host, NgZone, RenderComponentType, Renderer, Renderer2, RendererFactory2, RendererStyleFlags2, RootRenderer, COMPILER_OPTIONS, Compiler, CompilerFactory, ModuleWithComponentFactories, ComponentFactory, ComponentRef, ComponentFactoryResolver, ElementRef$1 as ElementRef, NgModuleFactory, NgModuleRef, NgModuleFactoryLoader, getModuleFactory, QueryList$1 as QueryList, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TemplateRef$1 as TemplateRef, ViewContainerRef$1 as ViewContainerRef, EmbeddedViewRef$1 as EmbeddedViewRef, ViewRef$1 as ViewRef, ChangeDetectionStrategy, ChangeDetectorRef, DefaultIterableDiffer, IterableDiffers, KeyValueDiffers, SimpleChange, WrappedValue, platformCore, ALLOW_MULTIPLE_PLATFORMS as ɵALLOW_MULTIPLE_PLATFORMS, APP_ID_RANDOM_PROVIDER as ɵAPP_ID_RANDOM_PROVIDER, defaultIterableDiffers as ɵdefaultIterableDiffers, defaultKeyValueDiffers as ɵdefaultKeyValueDiffers, devModeEqual as ɵdevModeEqual, isListLikeIterable as ɵisListLikeIterable, ChangeDetectorStatus as ɵChangeDetectorStatus, isDefaultChangeDetectionStrategy as ɵisDefaultChangeDetectionStrategy, Console as ɵConsole, inject as ɵinject, setCurrentInjector as ɵsetCurrentInjector, APP_ROOT as ɵAPP_ROOT, ivyEnabled as ɵivyEnabled, ComponentFactory as ɵComponentFactory, CodegenComponentFactoryResolver as ɵCodegenComponentFactoryResolver, resolveComponentResources as ɵresolveComponentResources, ReflectionCapabilities as ɵReflectionCapabilities, RenderDebugInfo as ɵRenderDebugInfo, _sanitizeHtml as ɵ_sanitizeHtml, _sanitizeStyle as ɵ_sanitizeStyle, _sanitizeUrl as ɵ_sanitizeUrl, _global as ɵglobal, looseIdentical as ɵlooseIdentical, stringify as ɵstringify, makeDecorator as ɵmakeDecorator, isObservable as ɵisObservable, isPromise as ɵisPromise, clearOverrides as ɵclearOverrides, initServicesIfNeeded as ɵinitServicesIfNeeded, overrideComponentView as ɵoverrideComponentView, overrideProvider as ɵoverrideProvider, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR as ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, defineComponent as ɵdefineComponent, defineDirective as ɵdefineDirective, definePipe as ɵdefinePipe, defineNgModule as ɵdefineNgModule, detectChanges as ɵdetectChanges, renderComponent as ɵrenderComponent, directiveInject as ɵdirectiveInject, injectTemplateRef as ɵinjectTemplateRef, injectViewContainerRef as ɵinjectViewContainerRef, injectChangeDetectorRef as ɵinjectChangeDetectorRef, injectAttribute as ɵinjectAttribute, PublicFeature as ɵPublicFeature, NgOnChangesFeature as ɵNgOnChangesFeature, markDirty as ɵmarkDirty, NO_CHANGE as ɵNC, container as ɵC, elementStart as ɵE, namespaceHTML as ɵNH, namespaceMathML as ɵNM, namespaceSVG as ɵNS, element as ɵEe, listener as ɵL, text as ɵT, embeddedViewStart as ɵV, query as ɵQ, loadDirective as ɵd, projection as ɵP, bind as ɵb, interpolation1 as ɵi1, interpolation2 as ɵi2, interpolation3 as ɵi3, interpolation4 as ɵi4, interpolation5 as ɵi5, interpolation6 as ɵi6, interpolation7 as ɵi7, interpolation8 as ɵi8, interpolationV as ɵiV, pipeBind1 as ɵpb1, pipeBind2 as ɵpb2, pipeBind3 as ɵpb3, pipeBind4 as ɵpb4, pipeBindV as ɵpbV, pureFunction0 as ɵf0, pureFunction1 as ɵf1, pureFunction2 as ɵf2, pureFunction3 as ɵf3, pureFunction4 as ɵf4, pureFunction5 as ɵf5, pureFunction6 as ɵf6, pureFunction7 as ɵf7, pureFunction8 as ɵf8, pureFunctionV as ɵfV, containerRefreshStart as ɵcR, containerRefreshEnd as ɵcr, queryRefresh as ɵqR, elementEnd as ɵe, elementProperty as ɵp, projectionDef as ɵpD, reserveSlots as ɵrS, elementAttribute as ɵa, elementStyling as ɵs, elementStyle as ɵsm, elementStyleProp as ɵsp, elementStylingApply as ɵsa, elementClass as ɵk, elementClassNamed as ɵkn, textBinding as ɵt, embeddedViewEnd as ɵv, store as ɵst, load as ɵld, pipe as ɵPp, whenRendered as ɵwhenRendered, i18nApply as ɵiA, i18nExpMapping as ɵiEM, i18nInterpolation as ɵiI, i18nInterpolationV as ɵIV, i18nMapping as ɵiM, bypassSanitizationTrustHtml as ɵbypassSanitizationTrustHtml, bypassSanitizationTrustStyle as ɵbypassSanitizationTrustStyle, bypassSanitizationTrustScript as ɵbypassSanitizationTrustScript, bypassSanitizationTrustUrl as ɵbypassSanitizationTrustUrl, bypassSanitizationTrustResourceUrl as ɵbypassSanitizationTrustResourceUrl, sanitizeHtml as ɵsanitizeHtml, sanitizeStyle as ɵsanitizeStyle, sanitizeUrl as ɵsanitizeUrl, sanitizeResourceUrl as ɵsanitizeResourceUrl, registerModuleFactory as ɵregisterModuleFactory, EMPTY_ARRAY$2 as ɵEMPTY_ARRAY, EMPTY_MAP as ɵEMPTY_MAP, anchorDef as ɵand, createComponentFactory as ɵccf, createNgModuleFactory as ɵcmf, createRendererType2 as ɵcrt, directiveDef as ɵdid, elementDef as ɵeld, elementEventFullName as ɵelementEventFullName, getComponentViewDefinitionFactory as ɵgetComponentViewDefinitionFactory, inlineInterpolate as ɵinlineInterpolate, interpolate as ɵinterpolate, moduleDef as ɵmod, moduleProvideDef as ɵmpd, ngContentDef as ɵncd, nodeValue as ɵnov, pipeDef as ɵpid, providerDef as ɵprd, pureArrayDef as ɵpad, pureObjectDef as ɵpod, purePipeDef as ɵppd, queryDef as ɵqud, textDef as ɵted, unwrapValue as ɵunv, viewDef as ɵvid };
 //# sourceMappingURL=core.js.map
